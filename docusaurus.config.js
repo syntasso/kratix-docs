@@ -9,11 +9,11 @@ const config = {
   title: 'Kratix',
   tagline: 'A framework for building platforms',
   url: 'https://syntasso.github.io',
-  baseUrl: '/',
+  baseUrl: '/kratix-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  trailingSlash: true,
+  trailingSlash: false,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
