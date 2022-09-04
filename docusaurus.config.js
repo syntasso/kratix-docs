@@ -61,7 +61,7 @@ const config = {
         title: 'Kratix',
         logo: {
           alt: 'Kratix Logo',
-          src: 'img/kratix_k_logo.png',
+          src: '/img/kratix_k_logo.png',
         },
         items: [
           {
