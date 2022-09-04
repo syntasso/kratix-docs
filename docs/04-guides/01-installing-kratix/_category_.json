@@ -1,0 +1,8 @@
+{
+  "label": "Installing Kratix",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "Installing Kratix on Kubernetes Clusters"
+  }
+}

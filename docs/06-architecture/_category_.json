@@ -1,0 +1,8 @@
+{
+  "label": "Architecture",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "description": "Details on how Kratix works"
+  }
+}
