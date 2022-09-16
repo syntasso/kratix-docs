@@ -28,17 +28,11 @@ Now you will create and enhance a Promise as a response to user and business nee
 
 ## From off-the-shelf to ready for the paved path
 
-### Prerequisites
+### Pre-requisites {#prerequisites}
 
-You need a fresh installation of Kratix for this section. The simplest way
-to do so is by running the quick-start script from within the Kratix
-directory:
+import PartialPreRequisites from './_guides_prereqs.md';
 
-```bash
-/path/to/kratix/scripts/quick-start.sh --recreate
-```
-
-Alternatively, you can go back to the first step on this series: [Install Kratix across two KinD clusters](installing-kratix/multi-cluster-with-kind).
+<PartialPreRequisites />
 
 ### The scenario
 

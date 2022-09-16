@@ -349,13 +349,9 @@ This created your finished Promise definition, `jenkins-promise.yaml`.
 
 ### Prepare your environment {#prepare-your-environment}
 
-You need a fresh installation of Kratix for this section. The simplest way to do so is by running the quick-start script found in the Kratix repository as seen here:
+import PartialPreRequisites from './_guides_prereqs.md';
 
-```bash
-/path/to/kratix/scripts/quick-start.sh --recreate
-```
-
-Alternatively, you can go back to [Install Kratix across two KinD clusters](installing-kratix/multi-cluster-with-kind).
+<PartialPreRequisites />
 
 ### Install your Promise {#install-promise}
 

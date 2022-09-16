@@ -22,21 +22,11 @@ Conceptually, Promises are the building blocks of Kratix that allow you to devel
 
 Now that you know more about Kratix Promises, follow the steps below to install a Promise.
 
+## Pre-requisites {#prerequisites}
 
-## Prerequisites
-You need a fresh installation of Kratix for this section. The simplest way to do so is by running the quick-start script from within the Kratix directory.
+import PartialPreRequisites from './_guides_prereqs.md';
 
-```bash
-./scripts/quick-start.sh --recreate
-```
-
-Alternatively, you can go back to [Installing Kratix](../category/installing-kratix) and follow the appropriate guide.
-
-:::note
-
-The remaining of this guide will assume you have a [multi-cluster setup with KinD](installing-kratix/multi-cluster-with-kind). If you are using a different setup, you will need to adapt the commands accordingly.
-
-:::
+<PartialPreRequisites />
 
 ## Install the Kratix sample Jenkins Promise
 

@@ -3,6 +3,13 @@
 ## What is Kratix?
 Kratix is a framework used by platform teams to build the custom platforms tailored to their organisation.
 
+### Want to see Kratix in action?
+
+Check out a video overview of our product:
+<div style={{"text-align":"center"}}>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
 ### Using Kratix to build your platform you can:
 
 * use GitOps workflow with Flux and familiar Kubernetes-native constructs.
@@ -16,14 +23,6 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 * discover available services that are already fit-for-purpose.
 * consume services on demand using standard Kubernetes APIs.
 * move focus away from infrastructure toward adding product value.
-
-### Want to see Kratix in action?
-
-Check out a video overview of our product:
-<div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-
 ## Guides: Jump right in
 
 Follow our handy guides to get started on the basics as quickly as possible:

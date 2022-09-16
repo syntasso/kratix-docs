@@ -37,16 +37,9 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 
 ### Pre-requisites {#prerequisites}
 
-You need a fresh installation of Kratix for this section. The simplest way
-to do so is by running the quick-start script from within the Kratix
-directory:
+import PartialPreRequisites from './_guides_prereqs.md';
 
-```bash
-cd /path/to/kratix
-./scripts/quick-start.sh --recreate
-```
-
-Alternatively, you can go back to the first step on this series: [Install Kratix across two KinD clusters](../category/installing-kratix/).
+<PartialPreRequisites />
 
 ### Install all required Promises {#install-all-promises}
 
