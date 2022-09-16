@@ -1,3 +1,5 @@
+import PartialPreRequisites from '../../_partials/_prereqs.md';
+
 # Writing a Promise
 
 **In this tutorial, you will**
@@ -348,8 +350,6 @@ This created your finished Promise definition, `jenkins-promise.yaml`.
 
 
 ### Prepare your environment {#prepare-your-environment}
-
-import PartialPreRequisites from './_guides_prereqs.md';
 
 <PartialPreRequisites />
 

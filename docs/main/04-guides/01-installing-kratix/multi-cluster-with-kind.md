@@ -1,5 +1,6 @@
 ---
 description: Run Kratix locally using KinD
+slug: /installing-kratix
 ---
 
 # Multi-cluster with KinD

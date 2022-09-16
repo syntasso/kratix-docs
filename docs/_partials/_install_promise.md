@@ -1,8 +1,7 @@
 ---
 description: Install a use a Kratix Promise
 ---
-
-# Installing and using a Promise
+import PartialPreRequisites from './_prereqs.md';
 
 **In this guide, you will**
 1. [learn more about Kratix Promises](#what-is-a-kratix-promise)
@@ -23,8 +22,6 @@ Conceptually, Promises are the building blocks of Kratix that allow you to devel
 Now that you know more about Kratix Promises, follow the steps below to install a Promise.
 
 ## Pre-requisites {#prerequisites}
-
-import PartialPreRequisites from './_guides_prereqs.md';
 
 <PartialPreRequisites />
 

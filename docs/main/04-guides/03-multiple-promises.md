@@ -1,6 +1,7 @@
 ---
 description: using multiple promises together
 ---
+import PartialPreRequisites from '../../_partials/_prereqs.md';
 
 # Using Multiple Promises
 
@@ -36,8 +37,6 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 1. [Tear down your environment](#teardown)
 
 ### Pre-requisites {#prerequisites}
-
-import PartialPreRequisites from './_guides_prereqs.md';
 
 <PartialPreRequisites />
 

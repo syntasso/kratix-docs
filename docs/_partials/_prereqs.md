@@ -8,6 +8,6 @@ Alternatively, you can go back to [Installing Kratix](../category/installing-kra
 
 :::note
 
-The remaining of this guide will assume you have a [multi-cluster setup with KinD](installing-kratix/multi-cluster-with-kind). If you are using a different setup, you will need to adapt the commands accordingly.
+The remaining of this guide will assume you have a [multi-cluster setup with KinD](installing-kratix). If you are using a different setup, you will need to adapt the commands accordingly.
 
 :::

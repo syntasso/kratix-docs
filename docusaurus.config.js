@@ -66,11 +66,17 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'intro',
+            docId: 'main/intro',
             position: 'left',
             label: 'Docs',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          {
+            to: '/workshop',
+            type: 'doc',
+            docId: 'workshop/intro',
+            label: 'Workshop',
+            position: 'left'
+          },
           {
             href: 'https://github.com/syntasso/kratix',
             label: 'GitHub',
@@ -86,7 +92,7 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                to: '/docs/intro',
+                to: '/docs/main/intro',
               },
             ],
           },

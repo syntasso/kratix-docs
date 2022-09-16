@@ -1,6 +1,8 @@
 ---
 description: learn how to extend an existing promise
 ---
+import PartialPreRequisites from '../../_partials/_prereqs.md';
+
 # Enhancing a Promise
 
 **In this tutorial, you will**
@@ -29,8 +31,6 @@ Now you will create and enhance a Promise as a response to user and business nee
 ## From off-the-shelf to ready for the paved path
 
 ### Pre-requisites {#prerequisites}
-
-import PartialPreRequisites from './_guides_prereqs.md';
 
 <PartialPreRequisites />
 
