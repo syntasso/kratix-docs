@@ -1,7 +1,7 @@
 ---
 description: Install a use a Kratix Promise
 ---
-import GuideInstallPromise, {toc as GuideInstallTOC} from '../../_partials/_install_promise.md';
+import GuideInstallPromise, {toc as GuideInstallTOC} from '../../_partials/_install-promise.md';
 
 # Installing and using a Promise
 

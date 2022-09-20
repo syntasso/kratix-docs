@@ -3,11 +3,11 @@ description: Learn how to install a promise
 title: Installing a Promise
 id: installing-a-promise
 ---
-import GuideInstallPromise, {toc as GuideInstallTOC} from '../_partials/_install_promise.md';
+import GuideInstallPromise, {toc as GuideInstallTOC} from '../_partials/_install-promise.md';
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install Kratix](installing-kratix) <br />
-👉🏾&nbsp;&nbsp; Next: [Using multiple Kratix Promises](using-multiple-promises)
+👉🏾&nbsp;&nbsp; Next: [Using multiple Kratix Promises](multiple-promises)
 
 <hr />
 
