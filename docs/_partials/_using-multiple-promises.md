@@ -1,7 +1,3 @@
----
-description: using multiple promises together
----
-
 import PartialPreRequisites from './_prereqs.md';
 
 **In this tutorial, you will**

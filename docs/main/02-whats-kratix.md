@@ -27,7 +27,7 @@ Check out a video overview of our product:
 
 Follow our handy guides to get started on the basics as quickly as possible:
 
-* [Installing Kratix](./category/installing-kratix)
+* [Installing Kratix](../category/installing-kratix)
 * [Installing and using a Promise](./guides/installing-a-promise)
 * [Writing a Promise](./guides/writing-a-promise)
 

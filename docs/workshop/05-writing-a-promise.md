@@ -4,9 +4,9 @@ title: Writing a Kratix Promise
 ---
 import WritingPromise, {toc as WritingPromiseTOC} from '../_partials/_writing-a-promise.md';
 
-This is Part 4 of [a series](../README.md) illustrating how Kratix works. <br />
-👈🏾&nbsp;&nbsp; Previous: [Using multiple Kratix Promises](/using-multiple-promises/) <br />
-👉🏾&nbsp;&nbsp; Next: [Enhancing a Kratix Promise](/enhancing-a-promise/)
+This is Part 4 of [a series](intro) illustrating how Kratix works. <br />
+👈🏾&nbsp;&nbsp; Previous: [Using multiple Kratix Promises](multiple-promises) <br />
+👉🏾&nbsp;&nbsp; Next: [Enhancing a Kratix Promise](enhancing-a-promise)
 
 <hr />
 

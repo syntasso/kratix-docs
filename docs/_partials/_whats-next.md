@@ -1,6 +1,3 @@
----
-description: what to do next
----
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
 Our last hands-on session went through how to [enhance a Postgres Promise](enhancing-a-promise).

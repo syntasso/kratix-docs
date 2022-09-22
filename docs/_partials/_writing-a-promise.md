@@ -49,12 +49,6 @@ Now you'll write a Jenkins Promise and install it on your platform so that your 
 
 ## Writing your own Kratix Promise
 
-:::note
-
-The remaining of this guide will assume you have a [multi-cluster setup with KinD](installing-kratix/multi-cluster-with-kind). If you are using a different setup, you will need to adapt the commands accordingly.
-
-:::
-
 This guide will follow the steps below:
 
 1. [Create a directory structure](#create-a-directory-structure)

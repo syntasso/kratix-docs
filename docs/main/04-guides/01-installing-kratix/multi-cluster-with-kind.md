@@ -1,6 +1,6 @@
 ---
 description: Run Kratix locally using KinD
-slug: /installing-kratix
+slug: /main/guides/installing-kratix
 ---
 
 # Multi-cluster with KinD
@@ -64,4 +64,4 @@ kratix-worker-system   Active   1m
 ...
 ```
 
-🎉   **Congratulations!** Kratix is now ready to receive workloads. Jump to [Installing and using a Promise](../installing-a-promise) to spin up your first as-a-service workload.
+🎉   **Congratulations!** Kratix is now ready to receive workloads. Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service workload.

@@ -242,4 +242,4 @@ Next you will install your first Kratix Promise.
 
 
 **🎉 &nbsp; Congratulations!** Kratix is now installed. <br />
-👉🏾&nbsp;&nbsp; Next you will [install an sample Kratix Promise](/installing-a-promise).
+👉🏾&nbsp;&nbsp; Next you will [install an sample Kratix Promise](installing-a-promise).

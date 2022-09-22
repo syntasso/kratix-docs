@@ -1,6 +1,3 @@
----
-description: Install a use a Kratix Promise
----
 import PartialPreRequisites from './_prereqs.md';
 
 **In this guide, you will**
@@ -31,7 +28,7 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 
 1. [Install the Jenkins Promise](#install-the-jenkins-promise)
 1. [Request a new Jenkins instance](#request-instance)
-1. [Use the instance](#use-instance)
+1. [Use the instance](#use-your-jenkins-instance)
 1. [Tear down your environment](#teardown)
 
 :::tip
@@ -92,7 +89,7 @@ jenkins-operator-7886c47f9c-zschr   1/1     Running   0          1m
 
 🎉  Congratulations! You have installed your first Kratix Promise, which means your application teams can now get on-demand instances of Jenkins from your platform.
 
-### <a name="request-instance"></a>Request a Jenkins Instance
+### Request a Jenkins Instance {#request-instance}
 
 Application developers using your platform will be issued a Jenkins instance after applying a Kratix Resource Request.
 
@@ -172,7 +169,7 @@ To recap the steps you took:
 
 This is only the beginning of working with Promises. Next you will deploy three different Promises to provide a complete solution for an application team.
 
-## <a name="teardown"></a>Tearing it all down
+## Tearing it all down {#teardown}
 To clean up your environment, run the following command:
 
 ```bash

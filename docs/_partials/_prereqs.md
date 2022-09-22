@@ -4,10 +4,4 @@ You need a fresh installation of Kratix for this section. The simplest way to do
 ./scripts/quick-start.sh --recreate
 ```
 
-Alternatively, you can go back to [Installing Kratix](../category/installing-kratix) and follow the appropriate guide.
-
-:::note
-
-The remaining of this guide will assume you have a [multi-cluster setup with KinD](installing-kratix). If you are using a different setup, you will need to adapt the commands accordingly.
-
-:::
+Alternatively, you can go back to [Installing Kratix](./installing-kratix) and follow the appropriate guide.
