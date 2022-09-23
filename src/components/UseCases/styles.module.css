@@ -1,0 +1,17 @@
+.useCaseSvg {
+  width: 50px;
+  height: 50px;
+}
+
+.useCaseWrap {
+  background-color: white;
+  /* width: 100px; */
+  /* height: 100px; */
+  /* width: 80px;
+  height: 80px; */
+  min-height: 80px;
+  margin: auto auto;
+  vertical-align: middle;
+  border-radius: 50%;
+  text-align: center;
+}

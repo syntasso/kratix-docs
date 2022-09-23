@@ -5,7 +5,17 @@
   width: 100%;
 }
 
+.feature {
+  min-height: 330px;
+}
+
+.featureContent {
+  background-color: #ffffff;
+  height: 90%;
+  font-size: 0.9rem;
+}
+
 .featureSvg {
-  height: 200px;
-  width: 200px;
+  height: 50px;
+  width: 50px;
 }

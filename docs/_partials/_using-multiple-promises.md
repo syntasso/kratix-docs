@@ -58,6 +58,26 @@ jenkins-promise           1m
 knative-serving-promise   1m
 ```
 
+Verify the CRDs are all installed on your platform cluster
+
+```console
+kubectl --context kind-platform get crds
+```
+
+The above command will give an output similar to
+```console
+NAME                                          CREATED AT
+clusters.platform.kratix.io                   2022-09-23T14:37:20Z
+//highlight-start
+jenkins.example.promise.syntasso.io           2022-09-23T14:38:49Z
+knativeservings.example.promise.syntasso.io   2022-09-23T14:38:48Z
+postgreses.example.promise.syntasso.io        2022-09-23T14:38:51Z
+//hightlight-end
+promises.platform.kratix.io                   2022-09-23T14:37:20Z
+workplacements.platform.kratix.io             2022-09-23T14:37:20Z
+works.platform.kratix.io                      2022-09-23T14:37:20Z
+```
+
 Verify the `workerClusterResources` (more details in future steps) are installed on your worker cluster<br/>
 <sub>(This may take a few minutes so `--watch` will watch the command)</sub>
 
@@ -183,12 +203,27 @@ and execute it.
 
 For those that are less familiar with Jenkins, you can watch this video to see how to navigate the UI for this task.
 
+
+<details>
+<summary>For step by step instructions in text, click here to expand</summary>
+
+1. From the _Dashboard_ page, click _New Item_ in the left menu
+2. Enter a name for the pipeline, e.g. `todo-app-pipeline`
+3. Select _Pipeline_ from the _Select item type_ dropdown
+4. Click _OK_
+5. In the _Pipeline_ section, paste the contents of the [Jenkinsfile](https://raw.githubusercontent.com/syntasso/workshop/main/sample-todo-app/ci/Jenkinsfile) in the _Script_ field
+8. Click _Save_
+9. Click _Build Now_ in the left menu
+10 Click on the running build
+10. Click _Console Output_ to see the pipeline progress
+
+</details>
+
 <div style={{"text-align":"center"}}>
 <video src="https://user-images.githubusercontent.com/201163/175933452-853af525-7fff-4dca-9ba9-032c07c8c393.mov" data-canonical-src="https://user-images.githubusercontent.com/201163/175933452-853af525-7fff-4dca-9ba9-032c07c8c393.mov" controls="controls" muted="muted" style={{"max-height":"500px"}}>
 </video>
 </div>
 
-<br />
 
 ### Validate the deployment {#validate-deployment}
 

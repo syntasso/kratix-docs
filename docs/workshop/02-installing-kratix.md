@@ -123,7 +123,7 @@ Now that you know what the installation looks like, bring Kratix to life.
 
 Create your `platform` cluster and install Kratix and MinIO.
 ```bash
-kind create cluster --name platform
+kind create cluster --name platform --image kindest/node:v1.24.0
 kubectl apply --filename distribution/kratix.yaml
 kubectl apply --filename hack/platform/minio-install.yaml
 ```
@@ -176,7 +176,7 @@ Running the above command will not change your local configuration, but rather u
 Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This will create a cluster for running the X as-a-Service workloads:
 
 ```bash
-kind create cluster --name worker
+kind create cluster --name worker --image kindest/node:v1.24.0
 
 # Register the worker cluster with the platform cluster
 kubectl apply \

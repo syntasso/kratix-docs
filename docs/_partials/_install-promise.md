@@ -18,6 +18,9 @@ Conceptually, Promises are the building blocks of Kratix that allow you to devel
 
 Now that you know more about Kratix Promises, follow the steps below to install a Promise.
 
+<br />
+<hr />
+
 ## Pre-requisites {#prerequisites}
 
 <PartialPreRequisites />
@@ -30,6 +33,10 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 1. [Request a new Jenkins instance](#request-instance)
 1. [Use the instance](#use-your-jenkins-instance)
 1. [Tear down your environment](#teardown)
+
+![Overview](/img/docs/Treasure_Trove-Install_a_Promise.jpeg)
+### Install the Jenkins Promise
+
 
 :::tip
 
@@ -45,10 +52,6 @@ The commands below will refer to a `KRATIX_REPO` env variable. You can either:
     ```
 :::
 
-![Overview](/img/docs/Treasure_Trove-Install_a_Promise.jpeg)
-
-
-### Install the Jenkins Promise
 
 Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
 
@@ -75,9 +78,7 @@ jenkins.example.promise.syntasso.io   2021-05-10T12:00:00Z
 On your `worker` cluster, you can verify that the Jenkins Operator is now installed, which gives the `worker` the ability to create Jenkins instances:
 
 ```bash
-kubectl get pods \
-    --context kind-worker \
-    --namespace default
+kubectl get pods --context kind-worker --namespace default
 ```
 
 The above command will give an output similar to (it may take a couple of minutes):

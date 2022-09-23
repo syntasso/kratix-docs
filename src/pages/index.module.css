@@ -21,3 +21,16 @@
   align-items: center;
   justify-content: center;
 }
+
+.promises {
+  color: #3E4656;
+  font-family: helvetica-w01-light,helvetica-w02-light,sans-serif;
+  font-size: 18px;
+  line-height: 1.8em;
+  font-weight: lighter;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+}

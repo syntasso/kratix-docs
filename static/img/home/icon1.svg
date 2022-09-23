@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="xMidYMid meet" data-bbox="20 20 160 160" viewBox="20 20 160 160" height="200" width="200" xmlns="http://www.w3.org/2000/svg" data-type="color" role="presentation" aria-hidden="true" aria-labelledby="svgcid-3gtfiz-ouaup4">
+    <defs>
+        <style>#comp-kzhajkyu1__item1 svg [data-color="1"] {fill: #940DAE;}</style>
+    </defs>
+    <title id="svgcid-3gtfiz-ouaup4">Icon 1</title>
+    <g>
+        <path d="M20 20v160c44.183 0 80-35.817 80-80S64.183 20 20 20z" fill="#940DAE" clip-rule="evenodd" fill-rule="evenodd" data-color="1"></path>
+        <path d="M100 100c0 44.183 35.817 80 80 80V20c-44.183 0-80 35.817-80 80z" fill="#940DAE" clip-rule="evenodd" fill-rule="evenodd" data-color="1"></path>
+    </g>
+</svg>
