@@ -56,17 +56,15 @@ The commands below will refer to a `KRATIX_REPO` env variable. You can either:
 Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
 
 ```bash
-kubectl apply \
-  --context kind-platform \
+kubectl --context kind-platform apply \
   --filename "${KRATIX_REPO}/samples/jenkins/jenkins-promise.yaml"
 ```
+<br />
 
-You can check that your `platform` cluster has registered Jenkins as a new available Kratix Promise:
+Verify that your `platform` cluster has registered Jenkins as a new available Kratix Promise.
 
 ```bash
-kubectl get crds \
-    --context kind-platform \
-    jenkins.example.promise.syntasso.io
+kubectl --context kind-platform get crds jenkins.example.promise.syntasso.io
 ```
 
 The above command will give an output similar to
@@ -75,10 +73,14 @@ NAME                                  CREATED AT
 jenkins.example.promise.syntasso.io   2021-05-10T12:00:00Z
 ```
 
-On your `worker` cluster, you can verify that the Jenkins Operator is now installed, which gives the `worker` the ability to create Jenkins instances:
+<br />
+
+<p>On your <code>worker</code> cluster, verify that the Jenkins Operator is now installed, which gives the <code>worker</code> the ability to create Jenkins instances:<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 ```bash
-kubectl get pods --context kind-worker --namespace default
+kubectl --context kind-worker get pods --watch
 ```
 
 The above command will give an output similar to (it may take a couple of minutes):
@@ -88,20 +90,27 @@ NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-7886c47f9c-zschr   1/1     Running   0          1m
 ```
 
+<br />
+
 🎉  Congratulations! You have installed your first Kratix Promise, which means your application teams can now get on-demand instances of Jenkins from your platform.
 
 ### Request a Jenkins Instance {#request-instance}
 
 Application developers using your platform will be issued a Jenkins instance after applying a Kratix Resource Request.
+<br />
+<br />
 
 ![Verify-Instance](/img/docs/Treasure_Trove-Get_an_instance.jpeg)
+<br />
+
 
 Test your platform by acting as an application developer and submitting a Resource Request.
 ```bash
-kubectl apply \
-    --context kind-platform \
+kubectl --context kind-platform apply \
     --filename "${KRATIX_REPO}/samples/jenkins/jenkins-resource-request.yaml"
 ```
+
+<br />
 
 Verify that the Resource Request was issued on the `platform` cluster.
 ```bash
@@ -116,10 +125,12 @@ example             1m
 
 Eventually (it can take a couple of minutes), a new Jenkins instance should spin up on your `worker` cluster. You can verify this by running the following command:
 
+<p>Verify the instance was created on the worker cluster<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
+
 ```bash
-kubectl get pods \
-    --context kind-worker \
-    --namespace default get pods
+kubectl --context kind-worker get pods --watch
 ```
 
 The above command will give an output similar to
@@ -128,6 +139,7 @@ NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-example                     1/1     Running   0          1m
 jenkins-operator-7886c47f9c-zschr   1/1     Running   0          10m
 ```
+<br />
 
 🎉  Congratulations! You have successfully requested and created an on-demand instance of Jenkins from your platform.
 
@@ -149,13 +161,11 @@ kubectl --context kind-worker port-forward jenkins-example 8080:8080
 Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below:
 
 ```console jsx title="username"
-kubectl get secret jenkins-operator-credentials-example \
-    --context kind-worker \
+kubectl --context kind-worker get secret jenkins-operator-credentials-example \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl get secret jenkins-operator-credentials-example \
-    --context kind-worker \
+kubectl --context kind-worker get secret jenkins-operator-credentials-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 
@@ -179,4 +189,6 @@ kind delete clusters platform worker
 
 ---
 
-**🎉 Congratulations!** You have installed a Kratix Promise and used it to create on-demand instances of a service. Now you will [deploy a web app that uses multiple Kratix Promises](multiple-promises).
+## 🎉 &nbsp; Congratulations!
+✅&nbsp;&nbsp; You have installed a Kratix Promise and used it to create on-demand instances of a service. <br />
+👉🏾&nbsp;&nbsp; Now you will [deploy a web app that uses multiple Kratix Promises](multiple-promises).

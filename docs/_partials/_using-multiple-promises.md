@@ -44,6 +44,7 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-promise.yaml
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/jenkins/jenkins-promise.yaml
 ```
+<br />
 
 Verify the Promises are all installed on your platform cluster
 ```console
@@ -57,8 +58,9 @@ ha-postgres-promise       1m
 jenkins-promise           1m
 knative-serving-promise   1m
 ```
+<br />
 
-Verify the CRDs are all installed on your platform cluster
+Verify the CRDs are all installed on your platform cluster. Note that you know have `jenkins`, `knativeserving`, and `postgres` available.
 
 ```console
 kubectl --context kind-platform get crds
@@ -68,18 +70,20 @@ The above command will give an output similar to
 ```console
 NAME                                          CREATED AT
 clusters.platform.kratix.io                   2022-09-23T14:37:20Z
-//highlight-start
+#highlight-start
 jenkins.example.promise.syntasso.io           2022-09-23T14:38:49Z
 knativeservings.example.promise.syntasso.io   2022-09-23T14:38:48Z
 postgreses.example.promise.syntasso.io        2022-09-23T14:38:51Z
-//hightlight-end
+#highlight-end
 promises.platform.kratix.io                   2022-09-23T14:37:20Z
 workplacements.platform.kratix.io             2022-09-23T14:37:20Z
 works.platform.kratix.io                      2022-09-23T14:37:20Z
 ```
+<br />
 
-Verify the `workerClusterResources` (more details in future steps) are installed on your worker cluster<br/>
-<sub>(This may take a few minutes so `--watch` will watch the command)</sub>
+<p>Verify the <code>workerClusterResources</code> (more details in future steps) are installed on your worker cluster<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 ```console
 kubectl --context kind-worker get pods --watch
@@ -105,13 +109,13 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 ```
 <br />
 
-By requesting these three resources, you will start three pods, one for the Jenkins server (named `jenkins-example`), and two which create a postgres cluster (named per the Resource Request name, `acid-minimal`). To verify you have all the necessary resources up and running<br/>
-<sub>(This may take a few minutes so `--watch` will watch the command)</sub>
+<p>By requesting these three resources, you will start three pods, one for the Jenkins server (named <code>jenkins-example</code>), and two which create a postgres cluster (named per the Resource Request name, <code>acid-minimal</code>). To verify you have all the necessary resources up and running<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 ```console
 kubectl --context kind-worker get pods --watch
 ```
-<br />
 
 The above command will give an output similar to
 ```console
@@ -151,13 +155,13 @@ example       1m
 ```
 <br />
 
-Verify the instance is created on the worker cluster<br/>
-<sub>(This may take a few minutes so `--watch` will watch the command)</sub>
+<p>Verify the instance is created on the worker cluster<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 ```console
 kubectl get pods --namespace default --context kind-worker --watch
 ```
-<br />
 
 The above command will give an output similar to
 ```console
@@ -181,19 +185,15 @@ kubectl --context kind-worker port-forward jenkins-example 8080:8080
 ```
 <br />
 
-Navigate to http://localhost:8080 and log in with the credentials you copy from the below commands.
+Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below:
 
-<br />
-
-Copy and paste the Jenkins username into the login page
-```console
-kubectl --context kind-worker get secret jenkins-operator-credentials-example --output 'jsonpath={.data.user}' | base64 --decode
+```console jsx title="username"
+kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+    -o 'jsonpath={.data.user}' | base64 -d
 ```
-<br />
-
-Copy and paste the Jenkins password into the login page
-```console
-kubectl --context kind-worker get secret jenkins-operator-credentials-example --output 'jsonpath={.data.password}' | base64 --decode
+```console jsx title="password"
+kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+    -o 'jsonpath={.data.password}' | base64 -d
 ```
 <br />
 
@@ -201,11 +201,11 @@ In the Jenkins UI, create a new pipeline using this
 [Jenkinsfile](https://raw.githubusercontent.com/syntasso/workshop/main/sample-todo-app/ci/Jenkinsfile)
 and execute it.
 
-For those that are less familiar with Jenkins, you can watch this video to see how to navigate the UI for this task.
+For those that are less familiar with Jenkins, you can either expand the instructions below or watch the video to see how to navigate the UI for this task.
 
 
 <details>
-<summary>For step by step instructions in text, click here to expand</summary>
+<summary>Configuring a Jenkins Pipeline</summary>
 
 1. From the _Dashboard_ page, click _New Item_ in the left menu
 2. Enter a name for the pipeline, e.g. `todo-app-pipeline`
@@ -232,7 +232,6 @@ Verify that the Knative Service for the application is ready:
 ```console
 kubectl --context kind-worker get services.serving.knative.dev
 ```
-<br />
 
 The above command will give an output similar to
 ```console
@@ -256,7 +255,6 @@ Now curl the app:
 ```console
 curl -H "Host: todo.default.example.com" localhost:8081
 ```
-<br />
 
 
 ## Summary {#summary}

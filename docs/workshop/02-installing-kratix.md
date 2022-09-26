@@ -127,6 +127,7 @@ kind create cluster --name platform --image kindest/node:v1.24.0
 kubectl apply --filename distribution/kratix.yaml
 kubectl apply --filename hack/platform/minio-install.yaml
 ```
+<br />
 
 Verify that the Kratix API is now available.
 ```bash
@@ -141,12 +142,11 @@ promises.platform.kratix.io            2022-05-10T12:00:00Z
 workplacements.platform.kratix.io      2022-05-10T12:00:00Z
 works.platform.kratix.io               2022-05-10T12:00:00Z
 ```
+<br />
 
 Verify Kratix and MinIO are installed and healthy.
 ```bash
-kubectl get pods \
-    --context kind-platform \
-    --namespace kratix-platform-system
+kubectl --context kind-platform get pods --namespace kratix-platform-system
 ```
 
 You should see something similar to
@@ -155,6 +155,7 @@ NAME                                                  READY   STATUS       RESTA
 kratix-platform-controller-manager-769855f9bb-8srtj   2/2     Running      0          1h
 minio-6f75d9fbcf-5cn7w                                1/1     Running      0          1h
 ```
+<br />
 
 #### Adjust multi-cluster networking for KinD {#kind-networking}
 
@@ -191,6 +192,7 @@ kubectl apply \
     --filename hack/worker/gitops-tk-resources.yaml \
     --context kind-worker
 ```
+<br />
 
 Verify Flux is installed and configured (i.e., Flux knows where in MinIO to look for resources to install).
 ```bash
@@ -205,6 +207,7 @@ NAME                        URL   READY   STATUS                                
 kratix-workload-crds              True    Fetched revision: 9343bf26ec16db995d7b53ff63c64b7dfb9789c4   1m
 kratix-workload-resources         True    Fetched revision: f2d918e21d4c5cc65791d121f4a3375ad80a3eac   1m
 ```
+<br />
 
 Once Flux is installed and running, the Kratix resources will be visible on the `worker` cluster.
 
@@ -216,10 +219,10 @@ kubectl --context kind-worker get namespaces --watch
 You should see something similar to
 ```console
 NAME                   STATUS   AGE
-//highlight-next-line
+#highlight-next-line
 kratix-worker-system   Active   1m
 default                Active   3m32s
-//highlight-next-line
+#highlight-next-line
 flux-system            Active   3m23s
 kube-node-lease        Active   3m33s
 kube-public            Active   3m33s
@@ -241,5 +244,6 @@ To recap the steps we took:
 Next you will install your first Kratix Promise.
 
 
-**🎉 &nbsp; Congratulations!** Kratix is now installed. <br />
+## 🎉 &nbsp; Congratulations!
+✅&nbsp;&nbsp;Kratix is now installed. <br />
 👉🏾&nbsp;&nbsp; Next you will [install an sample Kratix Promise](installing-a-promise).

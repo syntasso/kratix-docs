@@ -20,7 +20,7 @@ Your team works with all of these users to understand the if, when, and how of e
 
 This platform needs to be extensible and flexible&mdash;your users will have new and changing needs, and you'll want to quickly respond to valuable feature requests.
 
-Kratix and Promises make it easier to create a platform paved with paved paths that deliver value easily and quickly.
+Kratix and Promises make it easier to create a platform paved with golden paths that deliver value easily and quickly.
 
 Now you will create and enhance a Promise as a response to user and business needs.
 
@@ -208,7 +208,12 @@ To make sure each Postgres instance includes `costCentre`, you need to make the 
 
 To ensure Zalando's Postgres Operator is aware of the label, you need to add configuration when installing the Operator. The configuration the Operator needs will be under a new key: [`inherited_labels`](https://github.com/zalando/postgres-operator/blob/master/docs/reference/operator_parameters.md#kubernetes-resources?:=inherited_labels).
 
-> ☝🏾&nbsp;&nbsp;&nbsp;Note that `inherited_labels` is unique to how Zalando's Postgres Operator works. If you were using a different Operator (or writing your own!), a different change may be required (or no change at all).
+
+:::info
+
+`inherited_labels` is unique to how Zalando's Postgres Operator works. If you were using a different Operator (or writing your own!), a different change may be required (or no change at all).
+
+:::
 
 Following the Zalando [`docs`](https://github.com/zalando/postgres-operator/blob/master/docs/reference/operator_parameters.md#kubernetes-resources?:=inherited_labels), you need to add `inherited_labels` in a particular spot.
 
@@ -415,7 +420,7 @@ It should be the base manifest with all the custom values inserted and look like
 <details>
     <summary>👀&nbsp;&nbsp;Click here to view an example of expected output YAML</summary>
 
-```yaml jsx title="expected output/output.yaml"
+```yaml jsx title="expected kratix/samples/postgres/request-pipeline-image/output/output.yaml"
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
@@ -458,7 +463,7 @@ kind load docker-image kratix-workshop/postgres-request-pipeline:dev --name plat
 
 The new image is built and available on your platform cluster. Update your Promise to use the new image.
 
-Open the Promise definition file (`postgres-promise.yaml`). From the top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the current `syntasso/postgres-request-pipeline` image with the newly created `kratix-workshop/postgres-request-pipeline:dev` image.
+Open the Promise definition file (`kratix/samples/postgres/postgres-promise.yaml`). From the top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the current `syntasso/postgres-request-pipeline` image with the newly created `kratix-workshop/postgres-request-pipeline:dev` image.
 
 <details>
   <summary>👀&nbsp;&nbsp;Click here to see the resulting xaasRequestPipeline section which should be indented under `spec` in the Promise yaml</summary>
@@ -477,11 +482,13 @@ You can now install your enhanced Postgres Promise on your platform. Make sure y
 ```console
 kubectl --context kind-platform apply --filename postgres-promise.yaml
 ```
+<br />
 
 Check that your Promise's resource is available.
 ```console
 kubectl --context kind-platform get crds
 ```
+<br />
 
 You should see something similar to
 ```console
@@ -492,6 +499,7 @@ promises.platform.kratix.io                   2022-08-09T14:35:54Z
 workplacements.platform.kratix.io             2022-08-09T14:35:54Z
 works.platform.kratix.io                      2022-08-09T14:35:55Z
 ```
+<br />
 
 Check that the `workerClusterResources` have been installed.
 
@@ -500,12 +508,14 @@ For Postgres, you can see in the Promise file that there are a number of RBAC re
 ```console
 kubectl --context kind-worker --namespace default get pods
 ```
+<br />
 
 You should see something similar to
 ```console
 NAME                                 READY   STATUS    RESTARTS   AGE
 postgres-operator-6c6dbd4459-hcsg2   1/1     Running   0          1m
 ```
+<br />
 
 You have successfully released a new platform capability! Your users can request a Postgres instance, and that instance will include their `costCentre`.
 
@@ -556,10 +566,12 @@ Back as a platform engineer, you want to ensure that the platform and Promise be
 
 After you applied the Kratix Resource Request in the step above, you should eventually see a new pod executing the `request-pipeline-image/execute-pipeline.sh` script you created.
 
-Check by listing the pods on the platform (this may take a few minutes):
+<p>Check by listing the pods on the platform:<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 ```console
-kubectl --context kind-platform get pods
+kubectl --context kind-platform get pods --watch
 ```
 
 You should see something similar to
@@ -574,7 +586,9 @@ Then view the pipeline logs by running _(replace SHA with the value from the out
 kubectl --context kind-platform logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-ha-postgres-promise-default-<SHA>
 ```
 
-On the worker cluster, you will eventually see a Postgres service as a two-pod cluster in the `Running` state with the name defined in the request (`postgres-resource-request.yaml`). This may take a few minutes so `--watch` will watch the command&mdash;press `Ctrl+C` to stop watching.
+<p>On the worker cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined in the request (<code>postgres-resource-request.yaml</code>).<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 ```console
 kubectl --context kind-worker get pods --watch
