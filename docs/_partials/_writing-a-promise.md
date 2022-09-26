@@ -601,14 +601,14 @@ You have now authored your firs promise. Congratulations 🎉
 
 To recap the steps we took:
 1. ✅&nbsp;&nbsp;Generated a Kratix Promise template
-1. ✅&nbsp;&nbsp;Defined your Promise API with a X as-a-Service Custom Resource Definition
+1. ✅&nbsp;&nbsp;`xaasCrd`: Defined your Promise API with a X as-a-Service Custom Resource Definition
 1. ✅&nbsp;&nbsp;Created your Promise instance base manifest
-1. ✅&nbsp;&nbsp;Built a simple request pipeline
+1. ✅&nbsp;&nbsp;`xaasRequestPipeline`: Built a simple request pipeline
 1. ✅&nbsp;&nbsp;Packaged the pipeline as a Docker image
 1. ✅&nbsp;&nbsp;Tested the pipeline Docker image
-1. ✅&nbsp;&nbsp;Defined your `workerClusterResources` in your Promise definition
+1. ✅&nbsp;&nbsp;`workerClusterResources`: Defined what needs to be present on your worker clusters to fulfil this Promise
 1. ✅&nbsp;&nbsp;Installed your Kratix Promise
-1. ✅&nbsp;&nbsp;Created and submitted a Resource Request
+1. ✅&nbsp;&nbsp;Created and submitted a Kratix Resource Request
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
 ## Tearing it all down {#teardown}
