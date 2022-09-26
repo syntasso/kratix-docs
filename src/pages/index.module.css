@@ -21,35 +21,11 @@
   max-width: 980px;
 }
 
-.actionLink {
-  /* height: 100px; */
-  text-align: center;
-  vertical-align: middle;
-}
-.actionIcon {
-  /* width: 30px; */
-  height: 50px;
-  /* float: left; */
-
-}
 
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 2rem;
   }
-}
-
-.buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 1.5rem;
-  text-decoration: underline;
-  font-weight: bold;
-}
-
-.buttons a {
-  margin: 0 0 0 -1rem;
 }
 
 .promises {

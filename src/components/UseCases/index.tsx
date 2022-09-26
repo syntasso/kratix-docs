@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './styles.module.css';
+import ActionButtons from '@site/src/components/ActionButtons';
 
 type UseCaseItem = {
   title: string;
@@ -90,7 +91,7 @@ function UseCase({title, Svg, description}: UseCaseItem) {
 }
 
 
-export default function HomepageFeatures(): JSX.Element {
+export default function UseCases(): JSX.Element {
   return (
     <section className={clsx('background-color--dark color--light', styles.useCases)}>
       <div className="container">
@@ -99,6 +100,7 @@ export default function HomepageFeatures(): JSX.Element {
           {UseCaseList.map((props, idx) => (
             <UseCase key={idx} {...props} />
           ))}
+          <ActionButtons />
       </div>
     </section>
   );

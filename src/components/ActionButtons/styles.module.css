@@ -1,0 +1,22 @@
+.actionLink {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.actionIcon {
+  height: 50px;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1.5rem;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.buttons a {
+  margin: 0 0 0 -1rem;
+  font-size: 1.5rem;
+}

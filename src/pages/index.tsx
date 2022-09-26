@@ -1,13 +1,12 @@
 import React from 'react';
 import clsx from 'clsx';
-import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import ActionButtons from '@site/src/components/ActionButtons';
 import UseCases from '@site/src/components/UseCases';
 import styles from './index.module.css';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import Rocket from '@site/static/img/home/rocket.svg';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
@@ -25,23 +24,7 @@ function HomepageHeader() {
             <img className={styles.kratixLogo} src={useBaseUrl('/img/kratix_banner_logo.jpeg')} alt="Kratix Logo" />
           </div>
         </div>
-        <div className={styles.buttons}>
-            <Rocket className={styles.actionIcon} />
-          <Link className={clsx('button button--lg', styles.actionLink)} to="/docs/main/intro">
-            Get Started Here
-          </Link>
-
-          <img className={styles.actionIcon} src={require('@site/static/img/home/github_logo.webp').default} alt="Github Logo" />
-          <Link className="button button--lg" to="https://github.com/syntasso/kratix">
-            Explore the Code
-          </Link>
-{/*
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/main/intro">
-            Read the docs
-          </Link> */}
-        </div>
+        <ActionButtons />
       </div>
     </header>
   );
