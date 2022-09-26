@@ -124,7 +124,7 @@ Here, add your `costCentre` YAML from above as a sibling to the existing `prepar
 
 
 <details>
-  <summary>👀&nbsp;&nbsp;Click here to view a final version of the extended `xaasCrd` which should be indented so as to nest under the `spec` header</summary>
+  <summary>👀&nbsp;&nbsp;Click here to view a final version of the extended <code>xaasCrd</code> which should be indented so as to nest under the <code>spec</code> header</summary>
 
 ```yaml
 xaasCrd:
@@ -226,7 +226,7 @@ To verify you're in the right place, the object should be `kind: ConfigMap` with
 Under the `data` map, add `inherited_labels: costCentre`.
 
 <details>
-  <summary>👀&nbsp;&nbsp;Click here to see the complete `ConfigMap` resource after this change</summary>
+  <summary>👀&nbsp;&nbsp;Click here to see the complete <code>ConfigMap</code> resource after this change</summary>
 
 ```yaml
 # Note, the property was added to the top of the data map
@@ -466,11 +466,22 @@ The new image is built and available on your platform cluster. Update your Promi
 Open the Promise definition file (`kratix/samples/postgres/postgres-promise.yaml`). From the top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the current `syntasso/postgres-request-pipeline` image with the newly created `kratix-workshop/postgres-request-pipeline:dev` image.
 
 <details>
-  <summary>👀&nbsp;&nbsp;Click here to see the resulting xaasRequestPipeline section which should be indented under `spec` in the Promise yaml</summary>
+  <summary>👀&nbsp;&nbsp;Click here to see the resulting xaasRequestPipeline section which should be indented under <code>spec</code> in the Promise yaml</summary>
 
 ```yaml jsx title="kratix/samples/postgres/postgres-promise.yaml"
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  name: ha-postgres-promise
+spec:
+  xaasCrd:
+  # ...
   xaasRequestPipeline:
+  #highlight-next-line
   - kratix-workshop/postgres-request-pipeline:dev
+  workerClusterResources:
+  # ...
 ```
 </details>
 

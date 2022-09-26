@@ -76,7 +76,7 @@ const UseCaseList: UseCaseItem[] = [
 function UseCase({title, Svg, description}: UseCaseItem) {
   return (
     <div className="row">
-      <div className="col col--1 col--offset-2 text--right">
+      <div className={clsx('col col--1 col--offset-2 text--right', styles.iconCol)} >
         <div className={styles.useCaseWrap}>
           <Svg className={styles.useCaseSvg} role="img" />
         </div>
@@ -92,9 +92,10 @@ function UseCase({title, Svg, description}: UseCaseItem) {
 
 export default function HomepageFeatures(): JSX.Element {
   return (
-    <section className={clsx('background-color--dark color--light')}>
+    <section className={clsx('background-color--dark color--light', styles.useCases)}>
       <div className="container">
-        <h2 className="text--center">Kratix Promise Use Cases</h2>
+        <h2 className={clsx('text--center', styles.title)}>Kratix Promise Use Cases</h2>
+        <hr />
           {UseCaseList.map((props, idx) => (
             <UseCase key={idx} {...props} />
           ))}

@@ -144,9 +144,12 @@ works.platform.kratix.io               2022-05-10T12:00:00Z
 ```
 <br />
 
-Verify Kratix and MinIO are installed and healthy.
+<p>Verify Kratix and MinIO are installed and healthy.<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
+
 ```bash
-kubectl --context kind-platform get pods --namespace kratix-platform-system
+kubectl --context kind-platform get pods --namespace kratix-platform-system --watch
 ```
 
 You should see something similar to
@@ -194,11 +197,15 @@ kubectl apply \
 ```
 <br />
 
-Verify Flux is installed and configured (i.e., Flux knows where in MinIO to look for resources to install).
+<p>Verify Flux is installed and configured (i.e., Flux knows where in MinIO to look for resources to install).<br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
+
 ```bash
 kubectl get buckets.source.toolkit.fluxcd.io \
     --context kind-worker \
-    --namespace flux-system
+    --namespace flux-system \
+    --watch
 ```
 
 You should see something similar to
@@ -211,7 +218,10 @@ kratix-workload-resources         True    Fetched revision: f2d918e21d4c5cc65791
 
 Once Flux is installed and running, the Kratix resources will be visible on the `worker` cluster.
 
-Verify that you can deploy resources to `worker`&mdash;check if your "canary" resource has been deployed. This may take a few minutes so `--watch` will append updates to the bottom of the output (use <kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>⌃</kbd>+<kbd>C</kbd> to stop watching).
+<p>Verify that you can deploy resources to <code>worker</code>&mdash;check if your "canary" resource has been deployed. <br />
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
+
 ```bash
 kubectl --context kind-worker get namespaces --watch
 ```

@@ -501,6 +501,12 @@ jenkins.example.promise.syntasso.io   2021-09-09T11:21:10Z
 kubectl --context kind-worker get pods --watch
 ```
 
+The above command will give an output similar to
+```console
+NAME                                 READY   STATUS    RESTARTS   AGE
+jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
+```
+
 ### Create and submit a Kratix Resource Request {#create-resource-request}
 
 You can now request instances of Jenkins. Create a file in the `jenkins-promise` directory called `jenkins-resource-request.yaml` with the following content:
