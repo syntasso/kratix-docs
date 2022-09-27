@@ -158,7 +158,9 @@ kubectl --context kind-worker port-forward jenkins-example 8080:8080
 
 :::
 
-Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below:
+Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below.
+In production, you want the credentials to be stored in a secure location where it could be accessed by the application team.
+In this example, credentials are stored as unencrypted Kubernetes secrets.
 
 ```console jsx title="username"
 kubectl --context kind-worker get secret jenkins-operator-credentials-example \
