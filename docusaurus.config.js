@@ -9,7 +9,7 @@ const config = {
   title: 'Kratix',
   tagline: 'A framework for building platforms',
   url: 'https://syntasso.github.io',
-  baseUrl: '/kratix-docs/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -41,17 +41,17 @@ const config = {
           editUrl:
             'https://github.com/syntasso/kratix-docs/tree/main',
         },
-        blog: {
-          showReadingTime: true,
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/syntasso/kratix-docs/tree/main',
-        },
+        // blog: {
+        //   showReadingTime: true,
+        //   // Remove this to remove the "edit this page" links.
+        //   editUrl:
+        //     'https://github.com/syntasso/kratix-docs/tree/main',
+        // },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
         gtag: {
-          trackingID: 'G-226F0LR9KE',
+          trackingID: 'G-88SJVH10M9',
           anonymizeIP: true,
         },
       }),
@@ -133,13 +133,17 @@ const config = {
           {
             title: 'More',
             items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
+              // {
+              //   label: 'Blog',
+              //   to: '/blog',
+              // },
               {
                 label: 'GitHub',
                 href: 'https://github.com/syntasso/kratix',
+              },
+              {
+                label: 'Syntasso',
+                href: 'https://syntasso.io',
               },
             ],
           },
