@@ -39,3 +39,8 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 ```
 
 If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+
+
+#### Checking the deployment
+
+To see if the update has been published, check the [GitHub actions](https://github.com/syntasso/kratix-docs/actions) for the project.

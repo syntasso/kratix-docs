@@ -9,7 +9,7 @@ const config = {
   title: 'Kratix',
   tagline: 'A framework for building platforms',
   url: 'https://syntasso.github.io',
-  baseUrl: '/',
+  baseUrl: '/kratix-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -51,7 +51,7 @@ const config = {
           customCss: require.resolve('./src/css/custom.css'),
         },
         gtag: {
-          trackingID: 'G-88SJVH10M9',
+          trackingID: 'G-88SJVH10M9', 
           anonymizeIP: true,
         },
       }),
