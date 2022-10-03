@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkratix_docs=self.webpackChunkkratix_docs||[]).push([[76],{2974:e=>{e.exports=JSON.parse('{"permalink":"/kratix-docs/blog/tags/hello","page":1,"postsPerPage":10,"totalPages":1,"totalCount":2,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

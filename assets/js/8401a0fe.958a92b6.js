@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkratix_docs=self.webpackChunkkratix_docs||[]).push([[2583],{8769:a=>{a.exports=JSON.parse('{"label":"hello","permalink":"/kratix-docs/blog/tags/hello","allTagsPath":"/kratix-docs/blog/tags","count":2}')}}]);
