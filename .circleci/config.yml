@@ -4,19 +4,24 @@ orbs:
   node: circleci/node@5.0.3
 
 jobs:
-  yarn-install:
+  yarn-build:
     executor: node/default
     steps:
       - checkout
       - node/install-packages:
           cache-path: ~/project/node_modules
           pkg-manager: yarn
+      - run: yarn build
+  deploy:
+    executor: node/default
+    steps:
+      - run: yarn deploy
+
+
 workflows:
   build-and-deploy:
     jobs:
-      - yarn-install
-      - node/run:
-          requires:
-            - yarn-install
-          yarn-run: build
-          pkg-manager: yarn
+      - yarn-build
+      - deploy:
+          requires: [ yarn-build ]
+      
