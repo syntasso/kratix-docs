@@ -12,9 +12,15 @@ jobs:
           cache-path: ~/project/node_modules
           pkg-manager: yarn
       - run: yarn build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
   deploy:
     executor: node/default
     steps:
+      - attach_workspace:
+          at: .
       - run: yarn deploy
 
 
