@@ -22,10 +22,21 @@ jobs:
       - attach_workspace:
           at: .
       - add_ssh_keys:
+          # Add github deploy key
+          # https://circleci.com/docs/github-integration#create-a-github-deploy-key
           fingerprints:
             - "8a:22:0b:a6:fb:bd:d8:75:87:1c:07:39:1e:7f:6b:3b"
-      - run: yarn deploy
-
+      - run:
+          # see https://circleci.com/docs/github-integration#establish-the-authenticity-of-an-ssh-host
+          name: add github.com to known hosts
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com > ~/.ssh/known_hosts
+      - run:
+          name: deploy
+          command: |
+            yarn deploy
+          no_output_timeout: 2m
 
 workflows:
   build-and-deploy:
