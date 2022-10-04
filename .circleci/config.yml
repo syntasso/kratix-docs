@@ -19,3 +19,4 @@ workflows:
           requires:
             - yarn-install
           yarn-run: build
+          pkg-manager: yarn
