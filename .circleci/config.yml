@@ -21,6 +21,9 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - add_ssh_keys:
+          fingerprints:
+            - "8a:22:0b:a6:fb:bd:d8:75:87:1c:07:39:1e:7f:6b:3b"
       - run: yarn deploy
 
 
