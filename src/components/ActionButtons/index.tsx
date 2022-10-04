@@ -8,7 +8,7 @@ export default function ActionButtons(): JSX.Element {
   return (
     <div className={styles.buttons}>
         <Rocket className={styles.actionIcon} />
-        <Link className={clsx('button button--lg', styles.actionLink)} to="/docs/main/intro">
+        <Link className={clsx('button button--lg', styles.actionLink)} to="/docs/main/overview">
             Get Started Here
         </Link>
 

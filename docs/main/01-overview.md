@@ -18,7 +18,7 @@ If you can't find what you need, or need help with building your platform as a p
 
 ### How to learn Kratix
 
-* Want to see Kratix in action? [Watch it here →](whats-kratix#-want-to-see-kratix-in-action)
+* Want to see Kratix in action? [Watch it here →](intro#-want-to-see-kratix-in-action)
 * Want to jump straight to the terminal? Check out the [Quick Start Guide →](guides/installing-kratix)
 <!-- * Want to dive deeper? Check out our collection of [guides](../category/guides): -->
 <!-- * **To understand core concepts**, jump to [fundamentals →](../category/fundamentals) -->
