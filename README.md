@@ -1,14 +1,16 @@
-# Website
+# Kratix Docs
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+Kratix documentation is built using [Docusaurus 2](https://docusaurus.io/). The live version of the documentation is available at [kratix.io](https://kratix.io).
 
-### Installation
+## Installation
 
 ```
-$ yarn
+$ yarn install
 ```
 
-### Local Development
+This command will install all the dependencies required to build the website. If you don't have `yarn` installed, check out the [installation guide](https://yarnpkg.com/getting-started/install).
+
+## Local Development
 
 ```
 $ yarn start
@@ -16,31 +18,34 @@ $ yarn start
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
-### Build
+## Build, test, and verify
 
 ```
 $ yarn build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+This command generates static content into the `build` directory and can be served using any static contents hosting service. Building the website also runs a lightweight test suite that ensure there are no broken links in the documentation.
 
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
+```bash
+$ yarn serve
 ```
 
-Not using SSH:
+This command starts a local server, serving the contents of the `build` directory. This is useful for testing the production build locally.
 
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
+## Deployment
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+Publishing the website managed by CircleCI and is triggered by a commit to the `main` branch. The CircleCI configuration is available in the `.circleci` directory.
 
+The live website is hosted on GitHub Pages and the deployment is done by pushing the generated static files to the `gh-pages` branch. The yarn `deploy` task is configured to do this. A [CircleCI pipeline](https://app.circleci.com/pipelines/github/syntasso/kratix-docs?branch=main) is responsible for running the `deploy` task.
 
-#### Checking the deployment
+> Note: a branch protection rule is in place to prevent direct commits to the `gh-pages` branch. The `gh-pages` branch is only updated by the CircleCI job.
 
-To see if the update has been published, check the [GitHub actions](https://github.com/syntasso/kratix-docs/actions) for the project.
+Once the `gh-pages` is updated, a Github Actions will be triggered to update the live website, and is available [here](https://github.com/syntasso/kratix-docs/actions/workflows/pages/pages-build-deployment).
+
+Once the Action completes, you can verify the documentation at [kratix.io](https://kratix.io).
+
+## Docs structure
+
+The landing page is built with React and the source code can be found in [src/pages/index.tsx](src/pages/index.tsx). From there, you can find the other React components that make up the landing page.
+
+The documentation pages are located in the [docs](docs) directory.

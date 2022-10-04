@@ -12,7 +12,6 @@ title: Overview
 </figcaption>
 </figure>
 
-
 Welcome to the official Kratix documentation! Here you will find a growing collection of guides and articles to get you up and running with Kratix on your Kubernetes clusters.
 
 If you can't find what you need, or need help with building your platform as a product, reach out to us on [Github](https://github.com/syntasso/kratix/) or through [Syntasso.io](https://www.syntasso.io/contact-us) and we'll be happy to help.
@@ -30,9 +29,9 @@ If you can't find what you need, or need help with building your platform as a p
 
 You will find the following sections in the documentation:
 
-| Section                                        | Description                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| **[Guides](../category/guides)**               | All you need to get started with Kratix, from installing it to combining multiple promises. |
+| Section                           | Description                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| **[Guides](../category/guides)**  | All you need to get started with Kratix, from installing it to combining multiple promises. |
 
 <!-- | **[Fundamentals](../category/fundamentals)**   | Learn about the fundamental concepts of Kratix, and how to leverage it to build platforms.  | -->
 <!-- | **[Architecture](../category/architecture)**   | Dive deeper on how Kratix actually works.                                                   | -->
