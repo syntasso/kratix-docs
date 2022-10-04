@@ -13,12 +13,11 @@ const config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  trailingSlash: false,
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
   organizationName: 'syntasso', // Usually your GitHub org/user name.
   projectName: 'kratix-docs', // Usually your repo name.
+  trailingSlash: false,
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -41,6 +40,7 @@ const config = {
           editUrl:
             'https://github.com/syntasso/kratix-docs/tree/main',
         },
+        // uncommed to add the blog section to the website
         // blog: {
         //   showReadingTime: true,
         //   // Remove this to remove the "edit this page" links.
@@ -51,7 +51,7 @@ const config = {
           customCss: require.resolve('./src/css/custom.css'),
         },
         gtag: {
-          trackingID: 'G-88SJVH10M9', 
+          trackingID: 'G-88SJVH10M9',
           anonymizeIP: true,
         },
       }),
@@ -116,14 +116,6 @@ const config = {
           {
             title: 'Community',
             items: [
-              // {
-              //   label: 'Stack Overflow',
-              //   href: 'https://stackoverflow.com/questions/tagged/kratix',
-              // },
-              // {
-              //   label: 'Discord',
-              //   href: 'https://discordapp.com/invite/docusaurus',
-              // },
               {
                 label: 'Twitter',
                 href: 'https://twitter.com/kratixio',
@@ -133,10 +125,6 @@ const config = {
           {
             title: 'More',
             items: [
-              // {
-              //   label: 'Blog',
-              //   to: '/blog',
-              // },
               {
                 label: 'GitHub',
                 href: 'https://github.com/syntasso/kratix',
