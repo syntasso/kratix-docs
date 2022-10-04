@@ -44,7 +44,10 @@ jobs:
 workflows:
   build-and-deploy:
     jobs:
-      - yarn-build
+      - yarn-build:
+          filters:
+            branches:
+              only: main
       - deploy:
           requires: [ yarn-build ]
       
