@@ -1,0 +1,53 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.0.3
+
+jobs:
+  yarn-build:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          pkg-manager: yarn
+      - run: yarn build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  deploy:
+    executor: node/default
+    steps:
+      - attach_workspace:
+          at: .
+      - add_ssh_keys:
+          # Add github deploy key
+          # https://circleci.com/docs/github-integration#create-a-github-deploy-key
+          fingerprints:
+            - "8a:22:0b:a6:fb:bd:d8:75:87:1c:07:39:1e:7f:6b:3b"
+      - run:
+          # see https://circleci.com/docs/github-integration#establish-the-authenticity-of-an-ssh-host
+          name: setup git
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com > ~/.ssh/known_hosts
+
+            git config --global user.name "syntassodev"
+            git config --global user.email "kratix@syntasso.io"
+      - run:
+          name: deploy
+          command: |
+            yarn deploy
+          no_output_timeout: 2m
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - yarn-build:
+          filters:
+            branches:
+              only: main
+      - deploy:
+          requires: [ yarn-build ]
+      
