@@ -28,10 +28,13 @@ jobs:
             - "8a:22:0b:a6:fb:bd:d8:75:87:1c:07:39:1e:7f:6b:3b"
       - run:
           # see https://circleci.com/docs/github-integration#establish-the-authenticity-of-an-ssh-host
-          name: add github.com to known hosts
+          name: setup git
           command: |
             mkdir -p ~/.ssh
             ssh-keyscan github.com > ~/.ssh/known_hosts
+
+            git config --global user.name "syntassodev"
+            git config --global user.email "kratix@syntasso.io"
       - run:
           name: deploy
           command: |
