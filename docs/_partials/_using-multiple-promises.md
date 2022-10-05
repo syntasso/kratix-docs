@@ -144,7 +144,7 @@ kourier-system         Active   1h
 
 Verify that the Kratix Resource Request was issued on the platform cluster.
 ```console
-kubectl get jenkins.example.promise.syntasso.io
+kubectl --context kind-platform get jenkins.example.promise.syntasso.io
 ```
 <br />
 
@@ -160,7 +160,7 @@ example       1m
 </p>
 
 ```console
-kubectl get pods --namespace default --context kind-worker --watch
+kubectl --context kind-worker get pods --namespace default --watch
 ```
 
 The above command will give an output similar to

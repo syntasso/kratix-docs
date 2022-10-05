@@ -216,9 +216,9 @@ kratix-workload-resources         True    Fetched revision: f2d918e21d4c5cc65791
 ```
 <br />
 
-Once Flux is installed and running, the Kratix resources will be visible on the `worker` cluster.
+Once Flux is running, the Kratix running on the `platform` cluster will have the ability to manage resources on the `worker` cluster.
 
-<p>Verify that you can deploy resources to <code>worker</code>&mdash;check if your "canary" resource has been deployed. <br />
+<p>Verify that you can deploy resources to the <code>worker</code> cluster&mdash;Kratix will always create a `kratix-worker-cluster` namespace, so you can check the namespace to ensure the installation has been successful.<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 

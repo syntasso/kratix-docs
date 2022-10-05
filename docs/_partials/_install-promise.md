@@ -23,6 +23,12 @@ Now that you know more about Kratix Promises, follow the steps below to install 
 
 ## Pre-requisites {#prerequisites}
 
+:::info
+
+If you just completed the [Installing Kratix](./installing-kratix) step, you can skip this section.
+
+:::
+
 <PartialPreRequisites />
 
 ## Install the Kratix sample Jenkins Promise
@@ -75,7 +81,7 @@ jenkins.example.promise.syntasso.io   2021-05-10T12:00:00Z
 
 <br />
 
-<p>On your <code>worker</code> cluster, verify that the Jenkins Operator is now installed, which gives the <code>worker</code> the ability to create Jenkins instances:<br />
+<p>The Jenkins Promise requires the Jenkins Operator to be deployed to the <code>worker</code> clusters. Kratix will deploy the operator when you apply the Promise. You can verify that the Jenkins Operator is now installed<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
