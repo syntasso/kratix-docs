@@ -9,7 +9,7 @@ const config = {
   title: 'Kratix',
   tagline: 'A framework for building platforms',
   url: 'https://syntasso.github.io',
-  baseUrl: '/kratix-docs/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
