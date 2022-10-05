@@ -173,7 +173,7 @@ jenkins-operator-7886c47f9c-zschr   1/1     Running   0          10m
 
 #### Run the application deploy pipeline {#deploy-pipeline}
 
-With all the necessary resources available, you will now change hats to be a part of the application team who can now design and run their own CI/CD pipeline using the provided Jenkins service.
+With all the necessary resources available, you will now change hats to be a part of the application team who can now design and run their own CI/CD pipeline using the provided Jenkins service. In this step, you will deploy a [sample application](https://github.com/syntasso/sample-golang-app) through a Jenkins pipeline, that uses Postgres for persistence and Knative for serving the application.
 
 Access the Jenkins UI in a browser, as in the [previous step](installing-a-promise).
 
@@ -198,7 +198,7 @@ kubectl --context kind-worker get secret jenkins-operator-credentials-example \
 <br />
 
 In the Jenkins UI, create a new pipeline using this
-[Jenkinsfile](https://raw.githubusercontent.com/syntasso/workshop/main/sample-todo-app/ci/Jenkinsfile)
+[Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile)
 and execute it.
 
 For those that are less familiar with Jenkins, you can either expand the instructions below or watch the video to see how to navigate the UI for this task.
