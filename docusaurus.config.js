@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Kratix',
   tagline: 'A framework for building platforms',
-  url: 'https://syntasso.github.io',
+  url: 'https://kratix.io',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
