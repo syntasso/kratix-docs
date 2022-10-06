@@ -1,5 +1,4 @@
 ---
-sidebar_position: 1
 description: Kratix is a framework for building Platforms
 title: Overview
 ---
