@@ -211,7 +211,7 @@ For those that are less familiar with Jenkins, you can either expand the instruc
 2. Enter a name for the pipeline, e.g. `todo-app-pipeline`
 3. Select _Pipeline_ from the _Select item type_ dropdown
 4. Click _OK_
-5. In the _Pipeline_ section, paste the contents of the [Jenkinsfile](https://raw.githubusercontent.com/syntasso/workshop/main/sample-todo-app/ci/Jenkinsfile) in the _Script_ field
+5. In the _Pipeline_ section, paste the contents of the [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile) in the _Script_ field
 8. Click _Save_
 9. Click _Build Now_ in the left menu
 10 Click on the running build
