@@ -2,10 +2,11 @@
 description: Kratix is a framework for building Platforms
 title: Overview
 ---
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Overview
 
-<figure><img src="https://github.com/syntasso/kratix/raw/main/docs/images/white_logo_color_background.jpg" alt=""/>
+<figure><img src={useBaseUrl('/img/white_logo_color_background.jpeg')} alt="Kratix Logo"/>
 <figcaption style={{"text-align": "center"}}>
 <small>κρατήστε μια υπόσχεση | kratíste mia ypóschesi | Keep a promise</small>
 </figcaption>
