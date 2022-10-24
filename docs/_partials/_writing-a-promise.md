@@ -315,7 +315,7 @@ Your file directory should now include the new file as shown below
 
 The `/input` directory is where your incoming Kratix Resource Request will be written when a user wants an instance.
 
-Create a sample `objecy.yaml` Resource Request in the `/input` with the contents below
+Create a sample `object.yaml` Resource Request in the `/input` with the contents below
 
 ```yaml jsx title="jenkins-promise/request-pipeline-image/input/object.yaml"
 apiVersion: promise.example.com/v1
