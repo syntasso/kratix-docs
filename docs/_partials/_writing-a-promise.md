@@ -603,7 +603,7 @@ The contract with each pipeline container is simple and straightforward:
 * The resources in `/output` of the last container in the `xaasRequestPipeline` array will be scheduled and applied to the appropriate worker clusters.
 
 ## Recap {#summary}
-You have now authored your firs promise. Congratulations 🎉
+You have now authored your first promise. Congratulations 🎉
 
 To recap the steps we took:
 1. ✅&nbsp;&nbsp;Generated a Kratix Promise template
