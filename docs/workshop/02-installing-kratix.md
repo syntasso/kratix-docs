@@ -51,6 +51,12 @@ For this workshop, we'll use Kratix on two local Kubernetes clusters. Install th
   Used to orchestrate containers. `kind` (above) requires that you have Docker installed and configured. <br />
   See [Get Docker](https://docs.docker.com/get-docker/) to install.
 
+  :::caution
+
+  Docker Desktop (For Mac) v4.13.0 has a [known issue](https://github.com/docker/for-mac/issues/6530) that crashes Docker Daemon on specific situations. Please ensure you are using an earlier or later version of Docker.
+
+  :::
+
 1. `kubectl` / **Kubernetes command-line tool**: <br />
 The CLI for Kubernetes&mdash;allows you to run commands against Kubernetes clusters.<br />
 See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).

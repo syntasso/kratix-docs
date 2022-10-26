@@ -14,13 +14,43 @@ slug: /events/2022-kcduk/using-multiple-promises
 
 ## Bootstrap a local cluster with Kratix {#set-up}
 
-You need a fresh installation of Kratix for this section. The simplest way to do so is by running the quick-start script from within the Kratix directory.
+### System setup {#pre-requisites}
+
+For this workshop, we'll use Kratix on two local Kubernetes clusters. Install the prerequisites listed below if they aren't already on your system.
+
+1. `kind` CLI / **Kubernetes-in-Docker(KinD)**: <br />
+  Used to create and manage local Kubernetes clusters in Docker. <br />
+  See [the quick start guide](https://kind.sigs.k8s.io/docs/user/quick-start/) to install.
+
+1. `docker` CLI / **Docker**: <br />
+  Used to orchestrate containers. `kind` (above) requires that you have Docker installed and configured. <br />
+  See [Get Docker](https://docs.docker.com/get-docker/) to install.
+
+  :::caution
+
+  Docker Desktop (For Mac) v4.13.0 has a [known issue](https://github.com/docker/for-mac/issues/6530) that crashes Docker Daemon on specific situations. Please ensure you are using an earlier or later version of Docker.
+
+  :::
+
+1. `kubectl` / **Kubernetes command-line tool**: <br />
+The CLI for Kubernetes&mdash;allows you to run commands against Kubernetes clusters.<br />
+See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
+
+#### Update your Docker resource allocations {#docker-config}
+In order to complete all tutorials in this series, you must allocate enough resources to Docker. Docker requires:
+* 5 CPU
+* 12GB Memory
+* 4GB swap
+
+This can be managed through your tool of choice (e.g. Docker Desktop, Rancher, etc).
+
+### Quick Start Kratix
+
+You need a fresh installation of Kratix for this workshop. The simplest way to bootstrap your environment is running the quick-start script from within the Kratix directory.
 
 ```bash
 git clone https://github.com/syntasso/kratix.git
-```
-
-```bash
+cd kratix
 ./scripts/quick-start.sh --recreate
 ```
 
