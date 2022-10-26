@@ -208,8 +208,8 @@ kubectl --context kind-worker get services.serving.knative.dev
 
 The above command will give an output similar to
 ```console
-NAME   URL                               LATESTCREATED   LATESTREADY   READY   REASON
-todo   http://todo.default.example.com   todo-00001      todo-00001    True
+NAME   URL                             LATESTCREATED   LATESTREADY   READY   REASON
+todo   http://todo.default.local.gd    todo-00001      todo-00001    True
 ```
 <br />
 
@@ -224,11 +224,7 @@ kubectl --context kind-worker --namespace kourier-system port-forward svc/kourie
 ```
 <br />
 
-Now curl the app:
-```console
-curl -H "Host: todo.default.example.com" localhost:8081
-```
-
+Now go to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081) to see the app running.
 
 ## Summary {#summary}
 Your platform has pieced together two different Promises to provide a solution for an application team to deploy a new service using Knative and Postgres. Well done!
