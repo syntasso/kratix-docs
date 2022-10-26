@@ -40,7 +40,7 @@ const config = {
           editUrl:
             'https://github.com/syntasso/kratix-docs/tree/main',
         },
-        // uncommed to add the blog section to the website
+        // uncomment to add the blog section to the website
         // blog: {
         //   showReadingTime: true,
         //   // Remove this to remove the "edit this page" links.
@@ -77,7 +77,7 @@ const config = {
             label: 'Docs',
           },
           {
-            to: '/workshop',
+            // to: '/workshop', # TODO: test if this changes behaviour
             type: 'doc',
             docId: 'workshop/intro',
             label: 'Workshop',

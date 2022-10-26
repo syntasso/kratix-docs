@@ -1,0 +1,8 @@
+{
+  "label": "KCD UK 2022 Workshop",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "Workshop for the Kubernetes Community Days UK 2022"
+  }
+}
