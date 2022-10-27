@@ -107,7 +107,7 @@ setup the name of the Promise. Update the `promise.yaml` so that the name is set
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: Jenkins
+  name: jenkins
 spec:
   # workerClusterResources:
   # xaasCrd:
@@ -187,7 +187,7 @@ Replace the `workerClusterResources` field in the `promise.yaml` with the comple
 ### Create your Resource Request Pipeline {#create-pipeline}
 You've now completed setting up the `workerClusterResources` which deploys the Jenkins Operator to all worker clusters. You also have set up the `xaasCrd` which requests values from your users to customise an instance request. The Kratix pipeline is where you can define business logic generate a Jenkins instance request using the custom values.
 
-The Jenkins Operator defines a Jenkins custom resources which is used to request an instance where the spec is any custom configuration. Below is an example: 
+The Jenkins Operator defines a Jenkins custom resources which is used to request an instance where the spec is any custom configuration. Below is an example:
 
 ```yaml
 apiVersion: jenkins.io/v1alpha2
@@ -219,7 +219,7 @@ Inside the `request-pipeline-image/` directory you will find a the following fil
 
 ```
 Dockerfile
-example-asset.yaml
+asset.yaml
 execute-pipeline.sh
 ```
 
@@ -229,7 +229,7 @@ First lets add an asset file containing an example Jenkins custom resource, we c
 
 Update the contents of `asset.yaml` to contain the following:
 
-```yaml jsx title="request-pipeline-image/assets.yaml"
+```yaml jsx title="request-pipeline-image/asset.yaml"
 apiVersion: jenkins.io/v1alpha2
 kind: Jenkins
 metadata:
@@ -305,7 +305,7 @@ spec:
 
 Inside the Dockerfile we already have this `asset.yaml` added, meaning that it can be accessed by the `execute-pipeline.sh` script. Lets now update the `execute-pipeline.sh` script to set the desired name.
 
-Kratix will provide the users resource request (the `xaasCrd` instance) as an input to the `execute-pipeline.sh` script by placing it at `/input/object.yaml`. The script needs to output the desired resources to `/output/`. 
+Kratix will provide the user's resource request (the `xaasCrd` instance) as an input to the `execute-pipeline.sh` script by placing it at `/input/object.yaml`. The script needs to output the desired resources to `/output/`.
 
 Update the `execute-pipeline.sh` script to contain the following:
 
@@ -326,7 +326,7 @@ cat asset.yaml |  \
 
 You've successfully wired up the pipeline to create a Jenkins custom resource that matches the users desired input.
 
-Before going ahead and shipping this Promise its good to test it works first. 
+Before going ahead and shipping this Promise its good to test it works first.
 
 ### Test your pipeline image {#test-image}
 
@@ -345,15 +345,14 @@ spec:
 ```
 
 
-Run the container, providing this `test-input` directory as the `/input/` directory.
+Run the container, providing this `test-input` directory as the `/input/` directory. We will also mount `/output` to the `test-output` directory.
 ```bash
-cd jenkins-promise/request-pipeline-image
-docker build --tag kratix-workshop/jenkins-request-pipeline:dev .
-docker run -v ${PWD}/test-input:/input -v ${PWD}/test-output:/output kratix-workshop/jenkins-request-pipeline:dev
+docker build --tag kratix-workshop/jenkins-request-pipeline:dev -f request-pipeline-image/Dockerfile request-pipeline-image
+docker run -v ${PWD}/request-pipeline-image/test-input:/input -v ${PWD}/request-pipeline-image/test-output:/output kratix-workshop/jenkins-request-pipeline:dev
 ```
 <br />
 
-Verify the contents of the `test-output`/ directory contains the desired `metadata.name`.
+Verify the contents of the `request-pipeline-image/test-output`/ directory contains the desired `metadata.name`.
 
 ### Build your pipeline image {#build-image}
 Once you are satisified that your pipeline is producing the expected result, load the Docker image to the local KinD cache:
@@ -366,19 +365,19 @@ kind load docker-image kratix-workshop/jenkins-request-pipeline:dev --name platf
 The final step of creating the `xaasRequestPipeline` is to reference your docker image from the `spec.xaasRequestPipeline` field in the `promise.yaml`.
 
 Add the image to the array in `promise.yaml`.
-```yaml jsx title="jenkins-promise/jenkins-promise-template.yaml"
+```yaml jsx title="promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: jenkins-promise
+  name: jenkins
 spec:
   workerClusterResources:
+  xaasCrd:
+    ...
   #highlight-start
   xaasRequestPipeline:
   - kratix-workshop/jenkins-request-pipeline:dev
   #highlight-end
-  xaasCrd:
-    ...
 ```
 
 In summary, you have:
@@ -396,7 +395,7 @@ From your Promise directory, you can now install the Promise in Kratix.
 At this point, your Promise directory structure should look like:
 
 ```
-📂 jenkins-promise
+📂 promise-template
 ├── 📂 request-pipeline-image
 │   ├── 📂  test-input
 │   │   └── object.yaml
@@ -421,10 +420,9 @@ kratix-platform-controller-manager-769855f9bb-8srtj   2/2     Running      0    
 minio-6f75d9fbcf-5cn7w                                1/1     Running      0          1h
 ```
 
-If that is not the case, please go back to [Prepare your environment](#prepare-your-environment) and follow the instructions.
+If that is not the case, please go back to [Part I](using-multiple-promises#set-up) and follow the instructions.
 
-
-From the `jenkins-promise` directory, run:
+From the `promise-template` directory, run:
 
 ```
 kubectl apply --context kind-platform --filename promise.yaml
@@ -461,9 +459,9 @@ jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
 
 ### Create and submit a Kratix Resource Request {#create-resource-request}
 
-You can now request instances of Jenkins. Create a file in the `jenkins-promise` directory called `jenkins-resource-request.yaml` with the following content:
+You can now request instances of Jenkins. Create a file in the called `jenkins-resource-request.yaml` with the following content:
 
-```yaml jxs title="jenkins-promise/jenkins-resource-request.yaml"
+```yaml jxs title="promise-template/jenkins-resource-request.yaml"
 apiVersion: example.promise.syntasso.io/v1
 kind: jenkins
 metadata:
@@ -496,7 +494,7 @@ For more details, you can view the pipeline logs with
 ```bash
 kubectl logs \
   --context kind-platform \
-  --selector kratix-promise-id=jenkins-promise \
+  --selector kratix-promise-id=jenkins-default \
   --container xaas-request-pipeline-stage-1
 ```
 
@@ -510,8 +508,8 @@ kubectl --context kind-worker get pods --all-namespaces --watch
 
 The above command will eventually give an output similar to
 ```console
-NAME                                READY   STATUS    RESTARTS   AGE
-jenkins-my-amazing-jenkins          1/1     Running   0          1m
+NAME                           READY   STATUS    RESTARTS   AGE
+jenkins-super-cool-name        1/1     Running   0          1m
 ...
 ```
 <br />
@@ -526,7 +524,7 @@ Before you can access Jenkins UI, you must port forward from within the Kubernet
 _**Open a new terminal to request the port forward**_.
 
 ```console
-kubectl --context kind-worker port-forward jenkins-example 8080:8080
+kubectl --context kind-worker port-forward jenkins-super-cool-name 8080:8080
 ```
 
 :::
@@ -536,11 +534,11 @@ In production, you want the credentials to be stored in a secure location where 
 In this example, credentials are stored as unencrypted Kubernetes secrets.
 
 ```console jsx title="username"
-kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+kubectl --context kind-worker get secret jenkins-operator-credentials-super-cool-name \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+kubectl --context kind-worker get secret jenkins-operator-credentials-super-cool-name \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 
@@ -581,4 +579,3 @@ To clean up your environment, run the following command:
 ```bash
 kind delete clusters platform worker
 ```
-
