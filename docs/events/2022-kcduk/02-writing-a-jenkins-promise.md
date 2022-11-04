@@ -35,7 +35,7 @@ A Kratix Promise is a YAML document that defines a contract between the platform
 
 ## Basics of getting a promised instance to your users
 
-At a very high level
+At a very high level:
 
 * You talk to users of your platform to find out what they're using and what they need.
 * You write a Kratix Promise for the service
@@ -44,7 +44,7 @@ At a very high level
   * In `xaasRequestPipeline`, you list Docker images that will take the user's request and decorate it with configuration that you or the business require.
 * You install the Promise on your platform cluster, where Kratix is installed.
 * Your user wants an instance of the Promise.
-* Your user submit a Kratix Resource Request that lists what they want and how they want it, and this complies with the `xaasCrd` (more details on this request later).
+* Your user submits a Kratix Resource Request that lists what they want and how they want it, and this complies with the `xaasCrd` (more details on this request later).
 * Kratix fires off the request pipeline that you defined in `xaasRequestPipeline` and passes the Resource Request as an input.
 * The pipeline outputs valid Kubernetes documents that say what the user wants and what the business wants for that Promise instance.
 * The worker cluster has what it needs based on the `workerClusterResources` and is ready to create the instance when the request comes through.
@@ -103,7 +103,7 @@ cd promise-template
 
 You've decided you want to create a Jenkins promise available to your users. To do this you need to setup the `promise.yaml` file. First lets
 setup the name of the Promise. Update the `promise.yaml` so that the name is set to `Jenkins`:
-```yaml jsx title="xaasCrd in promise.yaml"
+```yaml jsx title="promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -157,7 +157,7 @@ The `workerClusterResources` describes everything required to be running on the 
 For this Promise, the `workerClusterResources` needs to contain the Jenkins Operator. One option to deploy the Jenkins Operator is to use a helm chart. Flux is already in use on the worker clusters and provides an easy way to reference and configure Helm charts. In this case, you will use a `HelmRepository` resource to reference the public Jenkins Operator Helm chart. Then you will use a `Helm Release` resource to deploy an instance of that chart including any custom values.
 
 Replace the `workerClusterResources` field in the `promise.yaml` with the complete field details below. Ensure the indentation is correct (`workerClusterResources` is nested under `spec`).
-```yaml jsx title="xaasCrd in promise.yaml"
+```yaml jsx title="workerClusterResources in promise.yaml"
   workerClusterResources:
   - apiVersion: source.toolkit.fluxcd.io/v1beta1
     kind: HelmRepository
@@ -459,9 +459,9 @@ jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
 
 ### Create and submit a Kratix Resource Request {#create-resource-request}
 
-You can now request instances of Jenkins. Create a file in the called `jenkins-resource-request.yaml` with the following content:
+You can now request instances of Jenkins. Update `resource-request.yaml` with the following content:
 
-```yaml jxs title="promise-template/jenkins-resource-request.yaml"
+```yaml jxs title="promise-template/resource-request.yaml"
 apiVersion: example.promise.syntasso.io/v1
 kind: jenkins
 metadata:
@@ -473,7 +473,7 @@ spec:
 You can now send the resource request to Kratix:
 
 ```bash
-kubectl apply --context kind-platform --filename jenkins-resource-request.yaml
+kubectl apply --context kind-platform --filename resource-request.yaml
 ```
 
 Applying the Kratix Promise will trigger your pipeline steps which in turn requests an instance of Jenkins from the operator. While the pipeline can run quite quickly, Jenkins requires quite a few resources to be installed including a deployment and a runner which means the full install may take a few minutes.

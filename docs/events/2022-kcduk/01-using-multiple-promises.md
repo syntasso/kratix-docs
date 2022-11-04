@@ -197,6 +197,11 @@ To deploy the app, run:
 kubectl --context kind-worker apply --filename https://raw.githubusercontent.com/syntasso/sample-golang-app/main/k8s/serving.yaml
 ```
 
+:::note
+It takes some time for Knative to get up and running. If you get a webhook-related error wait a few minutes
+before trying the command again.
+:::
+
 <!-- TODO: add verification instructions? -->
 ### Validate the deployment {#validate-deployment}
 
