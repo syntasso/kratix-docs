@@ -16,20 +16,15 @@ To delete a promise, run the command below, making sure to replace the
 kubectl delete promises.platform.kratix.io <promise-name>
 ```
 
-This command may take a few minutes to complete, while Kratix deletes all the
-resources associated with Promise. Deleting a Promise will eventually delete the
-Promise files from the Repository.
-
-Deleting a Promise will eventually delete the associated files from the Repository.
-Alone, this will not delete resources from Worker clusters. For that to happen, the
-GitOps toolkit listening to changes in the Repository must be configured to remove
-previously applied objects once they get deleted. For example, on Flux CD, the [prune
-configuration
-option](https://fluxcd.io/flux/components/kustomize/kustomization/#garbage-collection)
-must be `enabled` in the `Kustomization`.
-
-It's also possible to delete a Promise by providing the Promise definition file:
+Alternatively you can delete a Promise by providing the Promise definition file:
 
 ```
 kubectl delete --filename promise.yaml
 ```
+
+Deleting a Promise will take a few minutes to complete while Kratix deletes all the
+resources associated with Promise. Once finished it will take some time for all
+of the worker cluster resources to be deleted as changes are synced across to
+the worker cluster by Flux.
+
+

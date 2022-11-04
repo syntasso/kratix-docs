@@ -24,10 +24,5 @@ To find the Resource Request Name, run:
 kubectl get <Promise CRD>
 ```
 
-Deleting a Resource Request will eventually delete the associated files from the
-Repository. Alone, this will not delete resources from Worker clusters. For that to
-happen, the GitOps toolkit listening to changes in the Repository must be configured to
-remove previously applied objects once they get deleted. For example, on Flux CD, the
-[prune configuration
-option](https://fluxcd.io/flux/components/kustomize/kustomization/#garbage-collection)
-must be `enabled` in the `Kustomization`.
+Deleting a Resource Request will eventually delete the resources created on the worker cluster.
+This can take some time as the changes are synced across to the worker cluster by Flux.
