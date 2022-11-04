@@ -26,7 +26,7 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 1. [Install the Jenkins Promise](#install-the-jenkins-promise)
 1. [Request a new Jenkins instance](#request-instance)
 1. [Use the instance](#use-your-jenkins-instance)
-1. [Tear down your environment](#teardown)
+1. [Cleanup environment](#cleanup)
 
 ![Overview](/img/docs/Treasure_Trove-Install_a_Promise.jpeg)
 ### Install the Jenkins Promise
@@ -176,12 +176,46 @@ To recap the steps you took:
 
 This is only the beginning of working with Promises. Next you will deploy three different Promises to provide a complete solution for an application team.
 
-## Tearing it all down {#teardown}
-To clean up your environment, run the following command:
+## Cleanup environment {#cleanup}
+To clean up your environment you need to delete the Jenkins Resource Requests and the Jenkins Promise.
 
+To delete the Jenkins resource requests:
 ```bash
-kind delete clusters platform worker
+kubectl --context kind-platform delete \
+    --filename "${KRATIX_REPO}/samples/jenkins/jenkins-resource-request.yaml"
 ```
+
+Verify the Jenkins Resource Request in the platform cluster is gone
+```console
+kubectl --context kind-platform get jenkins
+```
+
+
+and the resources created in the worker cluster have been deleted
+```console
+kubectl --context kind-worker get pods
+```
+
+The above command will give an output similar to (it may take a couple of minutes)
+
+```console
+NAME                                READY   STATUS    RESTARTS   AGE
+jenkins-operator-7886c47f9c-zschr   1/1     Running   0          1m
+```
+
+
+
+Now you can delete the Jenkins Promise
+```bash
+kubectl --context kind-platform delete \
+  --filename "${KRATIX_REPO}/samples/jenkins/jenkins-promise.yaml"
+```
+
+Verify the Jenkins Resource Request in the platform cluster is gone
+```console
+kubectl --context kind-platform get promises
+```
+
 
 ---
 

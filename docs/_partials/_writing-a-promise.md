@@ -75,7 +75,8 @@ This guide will follow the steps below:
 1. [Create and submit a Kratix Resource Request](#create-resource-request)
 1. [Review of a Kratix Promise parts (in detail)](#promise-review)
 1. [Summary](#summary)
-1. [Tear down your environment](#teardown)
+1. [Cleanup environment](#cleanup)
+
 
 <hr />
 
@@ -614,11 +615,19 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Created and submitted a Kratix Resource Request
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
-## Tearing it all down {#teardown}
-To clean up your environment, run the following command:
+## Cleanup environment {#cleanup}
 
+To clean up your environment you need to delete the Jenkins Promise and the Resource Requests.
+Kratix will automatically cleanup any Resource Requests when the parent Promise is deleted.
+
+Delete the Jenkins promise
 ```bash
-kind delete clusters platform worker
+kubectl delete --context kind-platform --filename jenkins-promise.yaml
+```
+
+Verify the Jenkins promise is deleted
+```console
+kubectl --context kind-platform get promises
 ```
 
 ---
