@@ -1,4 +1,3 @@
-import PartialPreRequisites from './_prereqs.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
 **In this tutorial, you will**
@@ -29,10 +28,6 @@ Now you will create and enhance a Promise as a response to user and business nee
 <br />
 
 ## From off-the-shelf to ready for the paved path
-
-### Pre-requisites {#prerequisites}
-
-<PartialPreRequisites />
 
 ### The scenario
 

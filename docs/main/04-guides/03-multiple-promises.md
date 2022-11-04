@@ -2,7 +2,10 @@
 description: Using multiple promises
 title: Using Multiple Promises
 ---
+import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 import UsingMultiplePromise, {toc as UsingMultipleTOC} from '../../_partials/_using-multiple-promises.md';
+
+<PartialPreRequisites />
 
 <UsingMultiplePromise />
 

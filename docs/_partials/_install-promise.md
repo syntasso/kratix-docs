@@ -1,5 +1,3 @@
-import PartialPreRequisites from './_prereqs.md';
-
 **In this guide, you will**
 1. [learn more about Kratix Promises](#what-is-a-kratix-promise)
 1. [install Jenkins as a Kratix Promise](#install-the-kratix-sample-jenkins-promise)
@@ -20,16 +18,6 @@ Now that you know more about Kratix Promises, follow the steps below to install 
 
 <br />
 <hr />
-
-## Pre-requisites {#prerequisites}
-
-:::info
-
-If you just completed the [Installing Kratix](./installing-kratix) step, you can skip this section.
-
-:::
-
-<PartialPreRequisites />
 
 ## Install the Kratix sample Jenkins Promise
 

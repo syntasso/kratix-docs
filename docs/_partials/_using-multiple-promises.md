@@ -1,4 +1,3 @@
-import PartialPreRequisites from './_prereqs.md';
 
 **In this tutorial, you will**
 1. [learn more about the power of Promises](#power-of-promises)
@@ -23,17 +22,12 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 ![Overview](/img/docs/Treasure_Trove-Install_Multiple_Promises.jpeg)
 
 ### Steps
-1. [Complete pre-requistes](#prerequisites), if required
 1. [Install Promises](#install-all-promises)
 1. [Request instances](#request-instances)
 1. [Run the deploy pipeline](#deploy-pipeline)
 1. [Test the application](#test-app)
 1. [Summary](#summary)
 1. [Tear down your environment](#teardown)
-
-### Pre-requisites {#prerequisites}
-
-<PartialPreRequisites />
 
 ### Install all required Promises {#install-all-promises}
 

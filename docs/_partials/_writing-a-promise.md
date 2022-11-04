@@ -1,4 +1,3 @@
-import PartialPreRequisites from './_prereqs.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -82,8 +81,6 @@ This guide will follow the steps below:
 
 
 ### Prepare your environment {#prepare-your-environment}
-
-<PartialPreRequisites />
 
 ### Directory setup {#directory-setup}
 

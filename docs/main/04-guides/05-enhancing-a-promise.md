@@ -2,7 +2,10 @@
 description: learn how to extend an existing promise
 title: Enhancing a Promise
 ---
+import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 import EnhancingPromise, {toc as EnhancingPromiseTOC} from '../../_partials/_enhancing-a-promise.md';
+
+<PartialPreRequisites />
 
 <EnhancingPromise />
 
