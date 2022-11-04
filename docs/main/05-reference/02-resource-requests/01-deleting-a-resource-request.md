@@ -24,5 +24,5 @@ To find the Resource Request Name, run:
 kubectl get <Promise CRD>
 ```
 
-Deleting a Resource Request will eventually delete the resources created on the worker cluster.
-This can take some time as the changes are synced across to the worker cluster by Flux.
+After the Resource Request is deleted it takes some time for Flux to
+sync the changes across to the worker cluster.
