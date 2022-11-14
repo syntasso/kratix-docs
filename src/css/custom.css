@@ -39,3 +39,9 @@
 .color--light {
   color: #ffffff
 }
+
+
+/* announcement bar */
+[role="banner"] {
+  background-color: lightyellow!important;
+}

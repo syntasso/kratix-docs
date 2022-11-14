@@ -54,8 +54,6 @@ cd kratix
 ./scripts/quick-start.sh --recreate
 ```
 
-Alternatively, you can go back to [Installing Kratix](../../workshop/02-installing-kratix.md) and follow the appropriate guide.
-
 ## Install multiple promises as a platform engineer {#platform-engineer}
 
 ### The power of Promises {#power-of-promises}

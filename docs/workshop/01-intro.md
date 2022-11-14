@@ -6,8 +6,13 @@ id: intro
 ---
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-
 # Introducing Kratix 🎉
+
+:::tip
+
+Are you on KCD UK? Click [here](/docs/events/2022-kcduk/using-multiple-promises) for the event workshop.
+
+:::
 
 ## Welcome!
 
