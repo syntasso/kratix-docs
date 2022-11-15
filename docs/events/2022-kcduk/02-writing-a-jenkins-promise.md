@@ -102,7 +102,7 @@ cd promise-template
 ### Define your Promise API {#promise-api}
 
 You've decided you want to create a Jenkins promise available to your users. To do this you need to setup the `promise.yaml` file. First lets
-setup the name of the Promise. Update the `promise.yaml` so that the name is set to `Jenkins`:
+setup the name of the Promise. Update the `promise.yaml` so that the name is set to `jenkins`:
 ```yaml jsx title="promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
