@@ -134,7 +134,7 @@ const config = {
       announcementBar: {
         id: 'kcd-uk-event-announcement',
         content:
-          '👉 Are you on KCD UK? Click <a href="/docs/events/2022-kcduk/using-multiple-promises">here</a> for the event workshop 👈',
+          '👉 Are you on KCD UK? Click <a href="/docs/category/kcd-uk-2022-workshop">here</a> for the event workshop 👈',
         isCloseable: false,
       },
     }),

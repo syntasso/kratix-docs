@@ -10,7 +10,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 :::tip
 
-Are you on KCD UK? Click [here](/docs/events/2022-kcduk/using-multiple-promises) for the event workshop.
+Are you on KCD UK? Click [here](/docs/category/kcd-uk-2022-workshop) for the event workshop.
 
 :::
 
