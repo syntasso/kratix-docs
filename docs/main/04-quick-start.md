@@ -21,7 +21,7 @@ recommend starting wtih a local cluster tool like
 Install Kratix and its dependencies with the command below:
 
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/single-cluster/install-all-in-one.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/install-all-in-one.yaml
 ```
 
 The above will install Kratix, MinIO, and FluxCD. MinIO will be the repository for the
@@ -37,7 +37,7 @@ the Worker clusters. The commands below will register the cluster, as well as co
 FluxCD to watch for the cluster's repository:
 
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/single-cluster/config-all-in-one.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/config-all-in-one.yaml
 ```
 
 Once the system reconciles, the Kratix resources should now be visible on the your
@@ -119,9 +119,7 @@ To clean up the created resources, run:
 
 ```console
 kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
-kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
-kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
-kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
+kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/install-all-in-one.yaml
 ```
 
 ## 🎉 Congratulations!
