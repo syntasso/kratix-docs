@@ -13,6 +13,8 @@ export default function GettingStarted({}: Props): JSX.Element {
   const win1ID = uniqueId('window-1');
   const win2ID = uniqueId('window-2');
   const win3ID = uniqueId('window-3');
+  const color = getComputedStyle(document.documentElement).getPropertyValue('--color-purple');
+
   return (
     <div className={styles.gettingStarted}>
 
@@ -59,7 +61,7 @@ export default function GettingStarted({}: Props): JSX.Element {
         toOffsetX={-250}
         fromOffsetY={-20}
         dynamicUpdate={true}
-        color={"lightgray"}
+        color={color}
       />
       <CurvedArrow
         fromSelector={`#${win2ID}`}
@@ -70,7 +72,7 @@ export default function GettingStarted({}: Props): JSX.Element {
         toOffsetX={250}
         fromOffsetY={-20}
         dynamicUpdate={true}
-        color={"lightgray"}
+        color={color}
       />
     </div>
   );
