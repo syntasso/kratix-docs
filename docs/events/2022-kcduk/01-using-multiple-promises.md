@@ -90,8 +90,10 @@ kubectl --context kind-platform get promises
 The above command will give an output similar to
 ```console
 NAME                      AGE
+#highlight-start
 ha-postgres-promise       1m
 knative-serving-promise   1m
+#highlight-end
 ```
 <br />
 
@@ -126,7 +128,9 @@ kubectl --context kind-worker get pods --watch
 The above command will give an output similar to
 ```console
 NAME                                 READY   STATUS    RESTARTS   AGE
+#highlight-start
 postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
+#highlight-end
 ```
 <br />
 
@@ -141,7 +145,25 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 ```
 <br />
 
-<p>By requesting these resources, you will start two pods which create a postgres cluster (named per the Resource Request name, <code>acid-minimal</code>). To verify you have all the necessary resources up and running<br />
+<p>By requesting these resources, you will kick off two creation pipelines on the platform cluster.
+These pipelines are defined by the Promises you previously installed and can be seen by running the following command
+</p>
+
+```console
+kubectl --context kind-platform get pods --watch
+```
+
+This will result in a similar output to below:
+```console
+NAME                                                     READY   STATUS      RESTARTS   AGE
+#highlight-start
+request-pipeline-ha-postgres-promise-default-266c2       0/1     Completed   0          1m
+request-pipeline-knative-serving-promise-default-4ffed   0/1     Completed   0          1m
+#highlight-end
+```
+<br />
+
+<p>These pipelines will result in two pods being stared on the worker cluster which create a postgres cluster (named per the Resource Request name, <code>acid-minimal</code>). To verify you have all the necessary resources up and running<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -152,9 +174,11 @@ kubectl --context kind-worker get pods --watch
 The above command will give an output similar to
 ```console
 NAME                                      READY   STATUS    RESTARTS         AGE
+#highlight-start
 acid-minimal-cluster-0                    1/1     Running   0                5m
 acid-minimal-cluster-1                    1/1     Running   0                5m
-...
+#highlight-end
+postgres-operator-6c6dbd4459-4jf5h        1/1     Running   0                10m
 ```
 <br />
 
@@ -167,9 +191,17 @@ kubectl --context kind-worker get namespaces
 The above command will give an output similar to
 ```console
 NAME                   STATUS   AGE
-knative-serving        Active   1h
-kourier-system         Active   1h
-...
+default                Active   5m
+flux-system            Active   5m
+#highlight-start
+knative-serving        Active   1m
+kourier-system         Active   1m
+#highlight-end
+kratix-worker-system   Active   3m
+kube-node-lease        Active   5m
+kube-public            Active   5m
+kube-system            Active   5m
+local-path-storage     Active   5m
 ```
 <br />
 
@@ -182,7 +214,9 @@ kubectl --context kind-platform get postgreses.example.promise.syntasso.io
 The above command will give an output similar to
 ```console
 NAME                    AGE
+#highlight-start
 acid-minimal-cluster    1m
+#highlight-end
 ```
 
 ### Run the application
@@ -212,7 +246,9 @@ kubectl --context kind-worker get services.serving.knative.dev
 The above command will give an output similar to
 ```console
 NAME   URL                             LATESTCREATED   LATESTREADY   READY   REASON
+#highlight-start
 todo   http://todo.default.local.gd    todo-00001      todo-00001    True
+#highlight-end
 ```
 <br />
 
