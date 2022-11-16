@@ -1,0 +1,29 @@
+ .window {
+    border: 3px solid var(--ifm-color-emphasis-200);
+    border-radius: var(--ifm-global-radius);
+    box-shadow: var(--ifm-global-shadow-lw);
+    margin-bottom: var(--ifm-leading);
+    max-width: 30em;
+  }
+
+  .windowHeader {
+    background: var(--ifm-color-emphasis-200);
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  [data-theme='light'] {
+    --ifm-background-color: #fff;
+  }
+
+  .windowBody {
+    background-color: var(--ifm-background-color);
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+    padding: 1rem;
+  }
+
+  .windowBody *:last-child {
+    margin-bottom: 0;
+  }

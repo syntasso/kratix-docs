@@ -80,6 +80,7 @@ export default function HomepageFeatures(): JSX.Element {
   return (
     <section className={clsx('background-color--dark', styles.features)}>
       <div className="container">
+        <h2 className="text--center color--light margin-bottom--lg">Why Kratix?</h2>
         <div className="row feature">
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
