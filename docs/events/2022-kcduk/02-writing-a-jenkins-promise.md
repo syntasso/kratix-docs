@@ -1,11 +1,11 @@
 ---
-description: Writing a Jenkins Promise
+description: Extend Kratix by writing your own Promise to provide CI-as-a-Service
 title: Part 2
-id: writing-a-jenkins-promise
-slug: /events/2022-kcduk/writing-a-jenkins-promise
+id: writing-a-ci-promise
+slug: /events/2022-kcduk/writing-a-ci-promise
 ---
 
-# Writing a Jenkins Promise
+# Writing a CI Promise
 
 ```mdx-code-block
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -45,13 +45,13 @@ cd promise-template
 
 The first file we're going to touch is the `promise.yaml`. This is where you
 will define all the pieces that make of your promise. Let's start by giving the
-Promise a proper name. Update the `metadata.name` in `promise.yaml` to `jenkins`:
+Promise a proper name. Update the `metadata.name` in `promise.yaml` to `ci`:
 
 ```yaml jsx title="promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: jenkins
+  name: ci
 spec:
   # workerClusterResources:
   # xaasCrd:
@@ -85,9 +85,10 @@ service.
   </p>
 </details>
 
-For the purpose of this tutorial, you will create an API that accepts a single
-`string` parameter called `name`. This will be the name of the Jenkins instance that this
-promise will eventually create.
+For the purpose of this tutorial, you will create an API that accepts two parameters:
+* a `string` parameter called `name`: the name that identifies the CI deployment.
+* a `string` parameter called `toolkit`: the underlying CI/CD software to be
+  provided. For now, you will only support Jenkins.
 
 Replace the `xaasCrd` field in `promise.yaml` with the complete field details
 below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
@@ -97,14 +98,14 @@ below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
-      name: jenkins.example.promise.syntasso.io
+      name: ci.example.promise.syntasso.io
     spec:
       group: example.promise.syntasso.io
       scope: Namespaced
       names:
-        plural: jenkins
-        singular: jenkins
-        kind: jenkins
+        plural: ci
+        singular: ci
+        kind: ci
       versions:
       - name: v1
         served: true
@@ -116,22 +117,23 @@ below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
               spec:
                 type: object
                 properties:
-                  name:
-                    type: string
+                  name: { type: string }
+                  toolkit: { type: string }
 ```
 
 You have now defined the as-a-Service API.
 
 ### Define the Worker Cluster Resources {#worker-cluster-resources}
 
-The `workerClusterResources` describes everything required in order to complete the 
-delivery of a requested instance. Kratix applies this content on all registered worker 
+The `workerClusterResources` describes everything required in order to complete the
+delivery of a requested instance. Kratix applies this content on all registered worker
 clusters.
 
-For this Promise, the `workerClusterResources` needs to contain the Jenkins Operator and
-its CRDs. For simplicity, you will use the Flux provided `HelmRepository` and `HelmRelease` APIs
-present in the Worker Cluster. These allow Helm charts to be defined and referenced easily and 
-are available because the GitOps provider of choice for this demo is FluxCD.
+Since we are only supporting Jenkins in our CI Promise, the `workerClusterResources`
+needs only to contain the Jenkins Operator and its CRDs. For simplicity, you will use the
+Flux provided `HelmRepository` and `HelmRelease` APIs present in the Worker Cluster.
+These allow Helm charts to be defined and referenced easily and are available because the
+GitOps provider of choice for this demo is FluxCD.
 
 <details>
   <summary>Unsure what is an Operator?</summary>
@@ -152,7 +154,7 @@ are available because the GitOps provider of choice for this demo is FluxCD.
   <summary>Unsure what is Helm?</summary>
   <p>
     Helm helps you manage Kubernetes applications — Helm Charts help you define, install, and
-    upgrade even the most complex Kubernetes application. 
+    upgrade even the most complex Kubernetes application.
   </p>
   <p>
     Learn more <a href="https://helm.sh" target="__blank">here.</a>
@@ -170,14 +172,14 @@ under `spec`).
     metadata:
       name: jenkins-operator-repo
     spec:
-      interval: 5m
+      interval: 20s
       url: https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/chart
   - apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
       name: jenkins-operator
     spec:
-      interval: 5m
+      interval: 20s
       values:
         jenkins:
           enabled: false
@@ -192,25 +194,16 @@ under `spec`).
 
 ### Create your Resource Request Pipeline {#create-pipeline}
 
-The Kratix pipeline is where you encode all of the business logic to generate a 
-compliant Jenkins instance request while still using any custom values provided by the 
+The Kratix pipeline is where you encode all of the business logic to generate a
+compliant instance request while still using any custom values provided by the
 user request.
-
-<!-- The Jenkins Operator defines a Jenkins custom resources which is used to request an -->
-<!-- instance where the spec is any custom configuration. -->
-
-<!-- You need to setup a pipeline to produce a Jenkins request that meets your business and -->
-<!-- user requirements. -->
 
 #### Build a simple request pipeline {#pipeline-script}
 
-<!-- TODO: explain pipeline input/output -->
-
-To deploy a Jenkins via the Jenkins Operator, we will need to create a valid Jenkins
-custom resource document, as defined by the Operator. The pipeline image will include a
-basic template for this Jenkins document and will update it depending on the user 
-specific request details.
-
+To support Jenkins in our CI Promise, our pipeline will need to create a valid
+Jenkins custom resource document, as defined by the Operator. The pipeline
+image will include a basic template for this Jenkins document and will update
+it depending on the user specific request details.
 
 First, let's define the base document. Update the contents of `asset.yaml` to contain the
 following:
@@ -290,7 +283,7 @@ spec:
 ```
 
 Now update the `execute-pipeline.sh` script to update the template with the user-provided
-name:
+name when the request is of a new Jenkins:
 
 ```bash jsx title="request-pipeline-image/execute-pipeline.sh"
 #!/bin/sh
@@ -299,12 +292,18 @@ set -x
 
 # Read users input from the object
 export NAME=$(yq eval '.spec.name' /input/object.yaml)
+toolkit=$(yq eval '.spec.toolkit' /input/object.yaml)
 
-# Replace defaults with user provided values
-# and place the contents in /output/
-cat asset.yaml |  \
-  yq eval '.metadata.name = env(NAME)' - \
-  > /output/jenkins_instance.yaml
+if [[ "${toolkit}" = "jenkins" ]]; then
+  # Replace defaults with user provided values
+  # and place the contents in /output/
+  cat asset.yaml |  \
+    yq eval '.metadata.name = env(NAME)' - \
+    > /output/jenkins_instance.yaml
+else
+  echo "${toolkit} is not supported"
+  exit 1
+fi
 ```
 
 You've successfully wired up the pipeline to create a Jenkins custom resource that
@@ -319,18 +318,19 @@ contents below
 
 ```yaml jsx title="request-pipeline-image/test-input/object.yaml"
 apiVersion: example.promise.syntasso.io/v1
-kind: jenkins
+kind: ci
 metadata:
   name: example-resource-request
 spec:
   name: super-cool-name
+  toolkit: jenkins
 ```
 
 To test, run the following:
 
 ```bash
-docker build --tag kratix-workshop/jenkins-request-pipeline:dev -f request-pipeline-image/Dockerfile request-pipeline-image
-docker run -v ${PWD}/request-pipeline-image/test-input:/input -v ${PWD}/request-pipeline-image/test-output:/output kratix-workshop/jenkins-request-pipeline:dev
+docker build --tag kratix-workshop/ci-request-pipeline:dev -f request-pipeline-image/Dockerfile request-pipeline-image
+docker run -v ${PWD}/request-pipeline-image/test-input:/input -v ${PWD}/request-pipeline-image/test-output:/output kratix-workshop/ci-request-pipeline:dev
 ```
 
 Verify the contents of the `request-pipeline-image/test-output`/ directory contains the
@@ -346,14 +346,14 @@ Add the image to the array in `promise.yaml`.
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: jenkins
+  name: ci
 spec:
   workerClusterResources:
   xaasCrd:
     ...
   #highlight-start
   xaasRequestPipeline:
-  - kratix-workshop/jenkins-request-pipeline:dev
+  - kratix-workshop/ci-request-pipeline:dev
   #highlight-end
 ```
 
@@ -361,7 +361,7 @@ For simplicity, we will load the pipeline image directly into the KinD platform 
 with the command below:
 
 ```bash title="Load image to KinD cache"
-kind load docker-image kratix-workshop/jenkins-request-pipeline:dev --name platform
+kind load docker-image kratix-workshop/ci-request-pipeline:dev --name platform
 ```
 
 ### Install your Promise {#install-promise}
@@ -382,7 +382,7 @@ The above command will give an output similar to
 ```console
 NAME                                  CREATED AT
 //highlight-next-line
-jenkins.example.promise.syntasso.io   2021-09-09T11:21:10Z
+ci.example.promise.syntasso.io   2021-09-09T11:21:10Z
 ```
 <br />
 
@@ -412,11 +412,12 @@ The users of your platform can now request instances of Jenkins. Update
 
 ```yaml jxs title="promise-template/resource-request.yaml"
 apiVersion: example.promise.syntasso.io/v1
-kind: jenkins
+kind: ci
 metadata:
-  name: example-resource-request
+  name: team-a-ci
 spec:
   name: super-cool-name
+  toolkit: jenkins
 ```
 
 You can now send the resource request to Kratix:
@@ -435,16 +436,16 @@ kubectl --context kind-platform get pods
 This should result in something similar to:
 
 ```console
-NAME                                             READY   STATUS      RESTARTS   AGE
+NAME                                READY   STATUS      RESTARTS   AGE
 //highlight-next-line
-request-pipeline-jenkins-promise-default-9d40b   0/1     Completed   0          1m
+request-pipeline-ci-default-9d40b   0/1     Completed   0          1m
 ```
 
 You can view the pipeline logs with
 ```bash
 kubectl logs \
   --context kind-platform \
-  --selector kratix-promise-id=jenkins-default \
+  --selector kratix-promise-id=ci-default \
   --container xaas-request-pipeline-stage-1
 ```
 
@@ -504,9 +505,10 @@ docs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom
 #### `workerClusterResources`
 
 The `workerClusterResources` describes everything required to fulfil the Promise. Kratix
-applies this content on all registered worker clusters. For instance with the Jenkins
+applies this content on all registered worker clusters. For instance with the CI
 Promise, the `workerClusterResources` contains the Jenkins CRD, the Jenkins Operator, and
-the resources the Operator requires.
+the resources the Operator requires. If in the future you decide to support
+other CI tools, you'll need to add the dependencies for them in here.
 
 #### `xaasRequestPipeline`
 

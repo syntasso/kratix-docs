@@ -278,4 +278,4 @@ This is only the beginning of working with Promises. Next you will learn how to 
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp; You have deployed a web app that uses multiple Kratix Promises. <br />
-👉🏾&nbsp;&nbsp; Now you will [write your own Jenkins Promise to learn more about how Kratix Promises work](writing-a-jenkins-promise).
+👉🏾&nbsp;&nbsp; Now you will [write your own Promise to provide CI-as-a-Service](writing-a-ci-promise)
