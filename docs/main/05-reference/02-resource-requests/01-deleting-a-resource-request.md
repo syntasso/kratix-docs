@@ -31,5 +31,8 @@ definition file:
 kubectl delete --filename resource-request.yaml
 ```
 
-After the Resource Request is deleted it takes some time for the GitOps configuration
-to sync the deletions across to the worker cluster.
+All resources created by the Resource Request are applied to the work clusters using GitOps.
+This mean that when Kratix deletes the resources its removing them from the GitOps Repository and
+is delegating the responsibility to delete them on the worker cluster to the GitOps
+controller. This results in a small delay
+between the resources being declared as deleted and them being actually deleted.
