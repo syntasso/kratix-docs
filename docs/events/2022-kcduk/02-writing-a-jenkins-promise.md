@@ -60,14 +60,12 @@ spec:
 
 #### Defining the xaasCrd
 
-<!-- @TODO Hook: Explain k8s CRDs -->
-
 The `xaasCrd` is the interface you are exposing to the platform users. It defines what
 properties they are allowed to configure when requesting a new instance of that promised
 service.
 
 <details>
-  <summary>Unsure what's a Custom Resource Definition (CRD)?</summary>
+  <summary>Unsure what is a Custom Resource Definition (CRD)?</summary>
   <p>
     A <em>resource</em> is an endpoint in the Kubernetes API that stores a collection of API
     objects of a certain kind; for example, the built-in pods resource contains a
@@ -126,16 +124,17 @@ You have now defined the as-a-Service API.
 
 ### Define the Worker Cluster Resources {#worker-cluster-resources}
 
-The `workerClusterResources` describes everything required to be running on the cluster
-before a users request is applied. Kratix applies this content on all registered worker
+The `workerClusterResources` describes everything required in order to complete the 
+delivery of a requested instance. Kratix applies this content on all registered worker 
 clusters.
 
 For this Promise, the `workerClusterResources` needs to contain the Jenkins Operator and
-its CRDs. For simplicity, you will use the `HelmRepository` and `HelmRelease` APIs
-present in the Worker Cluster you will define the resources by using Flux's APIs.
+its CRDs. For simplicity, you will use the Flux provided `HelmRepository` and `HelmRelease` APIs
+present in the Worker Cluster. These allow Helm charts to be defined and referenced easily and 
+are available because the GitOps provider of choice for this demo is FluxCD.
 
 <details>
-  <summary>Unsure what's an Operator?</summary>
+  <summary>Unsure what is an Operator?</summary>
   <p>
     The Kubernetes project defines "Operator" in a simple way: <strong>Operators are
     software extensions that use custom resources to manage applications and their
@@ -150,7 +149,7 @@ present in the Worker Cluster you will define the resources by using Flux's APIs
 </details>
 
 <details>
-  <summary>Unsure what's Helm?</summary>
+  <summary>Unsure what is Helm?</summary>
   <p>
     Helm helps you manage Kubernetes applications — Helm Charts help you define, install, and
     upgrade even the most complex Kubernetes application. 
@@ -193,8 +192,9 @@ under `spec`).
 
 ### Create your Resource Request Pipeline {#create-pipeline}
 
-The Kratix pipeline is where you can define business logic generate a Jenkins instance
-request using the custom values.
+The Kratix pipeline is where you encode all of the business logic to generate a 
+compliant Jenkins instance request while still using any custom values provided by the 
+user request.
 
 <!-- The Jenkins Operator defines a Jenkins custom resources which is used to request an -->
 <!-- instance where the spec is any custom configuration. -->
@@ -208,8 +208,8 @@ request using the custom values.
 
 To deploy a Jenkins via the Jenkins Operator, we will need to create a valid Jenkins
 custom resource document, as defined by the Operator. The pipeline image will include a
-basic template for this Jenkins document and will update it depending on the user's
-inputs.
+basic template for this Jenkins document and will update it depending on the user 
+specific request details.
 
 
 First, let's define the base document. Update the contents of `asset.yaml` to contain the
