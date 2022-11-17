@@ -23,8 +23,12 @@ kubectl delete --filename promise.yaml
 ```
 
 Deleting a Promise will take a few minutes to complete while Kratix deletes all the
-resources associated with Promise. Once finished it will take some time for all
-of the worker cluster resources to be deleted as changes are synced across to
-the worker clusters by Flux.
+resources associated with Promise. This includes any resource requests and all the
+worker cluster resources.
 
+All resources created by the Promise are applied to the work clusters using GitOps.
+What this mean is that when Kratix deletes the resources all it does is delete
+them from the GitOps Repository. Its then up to the GitOps reconciler running
+on the worker clusters to cleanup the resources. This results in a small delay
+between the resources being declared as deleted and them being actually deleted.
 
