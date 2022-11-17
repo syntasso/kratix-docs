@@ -1,3 +1,4 @@
+import PartialCleanupAllPromises from './_cleanup.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -617,18 +618,7 @@ To recap the steps we took:
 
 ## Cleanup environment {#cleanup}
 
-To clean up your environment you need to delete the Jenkins Promise and the Resource Requests.
-Kratix will automatically cleanup any Resource Requests when the parent Promise is deleted.
-
-Delete the Jenkins promise
-```bash
-kubectl delete --context kind-platform --filename jenkins-promise.yaml
-```
-
-Verify the Jenkins promise is deleted
-```console
-kubectl --context kind-platform get promises
-```
+<PartialCleanupAllPromises />
 
 ---
 

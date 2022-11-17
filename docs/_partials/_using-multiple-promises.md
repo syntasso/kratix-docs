@@ -1,3 +1,4 @@
+import PartialCleanupAllPromises from './_cleanup.md';
 
 **In this tutorial, you will**
 1. [learn more about the power of Promises](#power-of-promises)
@@ -260,24 +261,7 @@ This is only the beginning of working with Promises. Next you will learn how to 
 
 ## Cleanup environment {#cleanup}
 
-To clean up your environment you need to delete the Promises and the Resource Requests.
-Kratix will automatically cleanup any Resource Requests when the parent Promise is deleted.
-
-To delete all the promises
-```bash
-kubectl --context kind-platform delete promises --all
-```
-
-Verify all the promises are deleted
-```console
-kubectl --context kind-platform get promises
-```
-
-When Resource Requests are deleted, it may take a few minutes for the running infrastructure to be removed. When this is complete, you the worker cluster should not have any pods or knative specific namespaces:
-```console
-kubectl --context kind-worker get pods
-kubectl --context kind-worker get namespaces
-```
+<PartialCleanupAllPromises />
 
 <br />
 
