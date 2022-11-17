@@ -27,8 +27,8 @@ resources associated with Promise. This includes any resource requests and all t
 worker cluster resources.
 
 All resources created by the Promise are applied to the work clusters using GitOps.
-What this mean is that when Kratix deletes the resources all it does is delete
-them from the GitOps Repository. Its then up to the GitOps reconciler running
-on the worker clusters to cleanup the resources. This results in a small delay
+This mean that when Kratix deletes the resources its removing them from the GitOps Repository and
+is delegating the responsibility to delete them on the worker cluster to the GitOps
+controller. This results in a small delay
 between the resources being declared as deleted and them being actually deleted.
 
