@@ -273,7 +273,7 @@ Verify all the promises are deleted
 kubectl --context kind-platform get promises
 ```
 
-Verify all the resources created by the Promise and Resource requests are gone (this might take a couple minutes)
+When Resource Requests are deleted, it may take a few minutes for the running infrastructure to be removed. When this is complete, you the worker cluster should not have any pods or knative specific namespaces:
 ```console
 kubectl --context kind-worker get pods
 kubectl --context kind-worker get namespaces
