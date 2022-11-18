@@ -1,19 +1,16 @@
-import React, { type ReactNode } from "react";
+import React from "react";
 import uniqueId from 'lodash/uniqueId'
-import CurvedArrow from "react-curved-arrow";
-import clsx from "clsx";
-
 import styles from "./styles.module.css";
 import Window from "@site/src/components/Window";
 import Link from '@docusaurus/Link';
+import CurvedArrow from 'react-curved-arrow';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 
 interface Props {}
-
 export default function GettingStarted({}: Props): JSX.Element {
   const win1ID = uniqueId('window-1');
   const win2ID = uniqueId('window-2');
   const win3ID = uniqueId('window-3');
-  const color = getComputedStyle(document.documentElement).getPropertyValue('--color-purple');
 
   return (
     <div className={styles.gettingStarted}>
@@ -48,31 +45,40 @@ export default function GettingStarted({}: Props): JSX.Element {
         <strong>🎉 Your Promised Postgres is ready to use! 🎉</strong>
       </p>
       <p>
-      Follow our <Link to="/docs/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and clusters.
+        Follow our <Link to="/docs/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and clusters.
       </p>
 
-      <CurvedArrow
-        fromSelector={`#${win1ID}`}
-        toSelector={`#${win2ID}`}
-        width={3}
-        middleX={-50}
-        fromOffsetX={-250}
-        toOffsetX={-250}
-        fromOffsetY={-20}
-        dynamicUpdate={true}
-        color={color}
-      />
-      <CurvedArrow
-        fromSelector={`#${win2ID}`}
-        toSelector={`#${win3ID}`}
-        width={3}
-        middleX={50}
-        fromOffsetX={250}
-        toOffsetX={250}
-        fromOffsetY={-20}
-        dynamicUpdate={true}
-        color={color}
-      />
+      <BrowserOnly fallback={<div></div>}>
+        {() => {
+          const color = getComputedStyle(document.documentElement).getPropertyValue('--color-purple');
+          return (
+            <div>
+              <CurvedArrow
+                fromSelector={`#${win1ID}`}
+                toSelector={`#${win2ID}`}
+                width={3}
+                middleX={-50}
+                fromOffsetX={-250}
+                toOffsetX={-250}
+                fromOffsetY={-20}
+                dynamicUpdate={true}
+                color={color}
+              />
+              <CurvedArrow
+                fromSelector={`#${win2ID}`}
+                toSelector={`#${win3ID}`}
+                width={3}
+                middleX={50}
+                fromOffsetX={250}
+                toOffsetX={250}
+                fromOffsetY={-20}
+                dynamicUpdate={true}
+                color={color}
+              />
+            </div>
+          );
+        }}
+      </BrowserOnly>
     </div>
   );
 }
