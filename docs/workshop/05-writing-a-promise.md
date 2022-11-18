@@ -2,11 +2,15 @@
 description: Learn how to write a Kratix Promise
 title: Writing a Kratix Promise
 ---
+import PartialPreRequisites from '../_partials/_workshop_prereqs.md';
 import WritingPromise, {toc as WritingPromiseTOC} from '../_partials/_writing-a-promise.md';
 
 This is Part 4 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Using multiple Kratix Promises](multiple-promises) <br />
 👉🏾&nbsp;&nbsp; Next: [Enhancing a Kratix Promise](enhancing-a-promise)
+
+
+<PartialPreRequisites />
 
 <hr />
 

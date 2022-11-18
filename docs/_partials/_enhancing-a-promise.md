@@ -1,4 +1,4 @@
-import PartialPreRequisites from './_prereqs.md';
+import PartialCleanupAllPromises from './_cleanup.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
 **In this tutorial, you will**
@@ -29,10 +29,6 @@ Now you will create and enhance a Promise as a response to user and business nee
 <br />
 
 ## From off-the-shelf to ready for the paved path
-
-### Pre-requisites {#prerequisites}
-
-<PartialPreRequisites />
 
 ### The scenario
 
@@ -636,8 +632,12 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance
 1. ✅&nbsp;&nbsp;Installed the modified Promise on your platform
 1. ✅&nbsp;&nbsp;Checked it works: make a request to your platform for a Postgres instance
+
 <br />
-<br />
+
+## Cleanup environment {#cleanup}
+
+<PartialCleanupAllPromises />
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp; You have enhanced a Kratix Promise to suit your organisation's needs. This concludes our introduction to Kratix. <br />

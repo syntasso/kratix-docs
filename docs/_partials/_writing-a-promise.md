@@ -1,4 +1,4 @@
-import PartialPreRequisites from './_prereqs.md';
+import PartialCleanupAllPromises from './_cleanup.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -76,14 +76,13 @@ This guide will follow the steps below:
 1. [Create and submit a Kratix Resource Request](#create-resource-request)
 1. [Review of a Kratix Promise parts (in detail)](#promise-review)
 1. [Summary](#summary)
-1. [Tear down your environment](#teardown)
+1. [Cleanup environment](#cleanup)
+
 
 <hr />
 
 
 ### Prepare your environment {#prepare-your-environment}
-
-<PartialPreRequisites />
 
 ### Directory setup {#directory-setup}
 
@@ -617,12 +616,9 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Created and submitted a Kratix Resource Request
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
-## Tearing it all down {#teardown}
-To clean up your environment, run the following command:
+## Cleanup environment {#cleanup}
 
-```bash
-kind delete clusters platform worker
-```
+<PartialCleanupAllPromises />
 
 ---
 
