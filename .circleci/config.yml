@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.0.3
+  slack: circleci/slack@4.10.1
 
 jobs:
   yarn-build:
@@ -16,6 +17,13 @@ jobs:
           root: .
           paths:
             - .
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+
   deploy:
     executor: node/default
     steps:
@@ -46,8 +54,10 @@ workflows:
   build-and-deploy:
     jobs:
       - yarn-build:
+          context:
+          - slack-secrets
+      - deploy:
+          requires: [ yarn-build ]
           filters:
             branches:
               only: main
-      - deploy:
-          requires: [ yarn-build ]
