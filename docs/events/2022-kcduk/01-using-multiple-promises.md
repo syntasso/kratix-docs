@@ -7,14 +7,22 @@ slug: /events/2022-kcduk/using-multiple-promises
 
 # Use Kratix Promises to build a paved path
 
-**In this tutorial, you will**
+## What you will do
+
+**As a Platform Engineer**
 1. [Bootstrap a local cluster with Kratix](#set-up)
-1. [Install multiple promises as a platform engineer](#platform-engineer)
-1. [Request an instance as a application developer](#application-developer)
+1. [Install multiple promises as a platform engineer](#install-promises)
 
-## Bootstrap a local cluster with Kratix {#set-up}
+**As a Platform User**
+1. [Request an instance as a application developer](#request-instance)
 
-### System setup {#pre-requisites}
+<hr />
+
+## Platform Engineer
+
+### Bootstrap a local cluster with Kratix {#set-up}
+
+#### System setup {#pre-requisites}
 
 For this workshop, we'll use Kratix on two local Kubernetes clusters. Install the prerequisites listed below if they aren't already on your system.
 
@@ -36,7 +44,7 @@ For this workshop, we'll use Kratix on two local Kubernetes clusters. Install th
 The CLI for Kubernetes&mdash;allows you to run commands against Kubernetes clusters.<br />
 See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
 
-#### Update your Docker resource allocations {#docker-config}
+##### Update your Docker resource allocations {#docker-config}
 In order to complete all tutorials in this series, you must allocate enough resources to Docker. Docker requires:
 * 5 CPU
 * 12GB Memory
@@ -44,7 +52,7 @@ In order to complete all tutorials in this series, you must allocate enough reso
 
 This can be managed through your tool of choice (e.g. Docker Desktop, Rancher, etc).
 
-### Quick Start Kratix
+#### Quick Start Kratix
 
 You need a fresh installation of Kratix for this workshop. The simplest way to bootstrap your environment is running the quick-start script from within the Kratix directory.
 
@@ -53,33 +61,30 @@ git clone https://github.com/syntasso/kratix.git
 cd kratix
 ./scripts/quick-start.sh --recreate
 ```
-
-## Install multiple promises as a platform engineer {#platform-engineer}
-
-### The power of Promises {#power-of-promises}
-
-Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs. Through writing and extending Promises, Platform teams can raise the value line of the platform they provide. They can use multiple simpler, low-level Promises to provide an experience tailored to their users needs.
-
-Consider the task of setting up development environments for application teams. This task is usually repetitive and requires many cookie-cutter steps. It may involve wiring up Git repos, spinning up a CI/CD server, creating a PaaS to run the applications, instructing CI/CD to listen to the Git repos and push successful builds into the PaaS, and finally wiring applications to their required data services.
-
-A Promise can encapsulate all the required steps and handle the toil of running those low-level tasks. It can be designed as a single Promise that does it all, or it can be a collection of Promises that, combined, deliver the desired functionality.
-
-Now you will see the power of Kratix Promises by deploying a web app that uses multiple Promises.
-
 <br />
-<hr />
 <br />
 
-![Overview](/img/docs/Treasure_Trove-Install_Multiple_Promises_no_jenkins.jpeg)
+![Environment setup](/img/docs/events/kratix_diagrams-PlatformDev-Setup_environment.jpg)
 
-### Install all required Promises {#install-all-promises}
+### Install multiple promises {#install-promises}
 
-In order for an application team to deploy an application to a dev environment they require a relational datastore (postgres) and networking for user traffic (Knative). To deliver this functionality on-demand with Kratix install the required Promises on your platform cluster:
+#### Install all required Promises {#install-all-promises}
 
-```console
+Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs in a self-service way. To deliver a dev environment for a new application, with Kratix install Promises for knative serving and Postgres on your platform cluster:
+
+```bash title="Install knative and Postgres promises"
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-promise.yaml
 ```
+
+When a Promise is installed into the cluster, it will do two visible things:
+1. Teach Kratix how to accept requests for an instance of the service
+1. Set up any prerequisite infrastructure that is required to create an instance
+
+<br />
+<br />
+
+![Installing a promise](/img/docs/events/kratix_diagrams-PlatformDev-Install_promises.jpg)
 <br />
 
 Verify the Promises are all installed on your platform cluster
@@ -97,8 +102,7 @@ knative-serving-promise   1m
 ```
 <br />
 
-Verify the CRDs are all installed on your platform cluster. Note that you know have `knativeserving` and `postgres` available.
-
+Verify the CRDs that let a customer request an instance have been installed
 ```console
 kubectl --context kind-platform get crds
 ```
@@ -117,12 +121,10 @@ works.platform.kratix.io                      2022-09-23T14:37:20Z
 ```
 <br />
 
-<p>Verify the <code>workerClusterResources</code> are installed on your worker cluster<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
-</p>
+Finally, verify the prerequisite infrastructure for delivering Postgres on demand have been installed on the worker cluster
 
 ```console
-kubectl --context kind-worker get pods --watch
+kubectl --context kind-worker get pods
 ```
 
 The above command will give an output similar to
@@ -132,11 +134,37 @@ NAME                                 READY   STATUS    RESTARTS   AGE
 postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 #highlight-end
 ```
+
+and for knative
+
+```bash
+kubectl --context kind-worker get crds
+```
+
+The above command will give an output similar to
+```console
+NAME                                                  CREATED AT
+alerts.notification.toolkit.fluxcd.io                 2022-11-17T12:00:00Z
+buckets.source.toolkit.fluxcd.io                      2022-11-17T12:00:00Z
+#highlight-start
+certificates.networking.internal.knative.dev          2022-11-17T12:11:00Z
+clusterdomainclaims.networking.internal.knative.dev   2022-11-17T12:11:00Z
+configurations.serving.knative.dev                    2022-11-17T12:11:00Z
+domainmappings.serving.knative.dev                    2022-11-17T12:11:00Z
+#highlight-end
+gitrepositories.source.toolkit.fluxcd.io              2022-11-17T12:00:00Z
+...
+```
+
 <br />
 
-## Request an instance as an application developer {#application-developer}
+## Platform User
 
-![Overview-instances](/img/docs/Treasure_Trove-Get_instances_of_multiple_Promises_no_jenkins.jpeg)
+### Request resources for a dev environment {#request-instance}
+
+As an application dev, you have a new app you want to deploy along with a new database. To do this, you can make a request for the resources you need providing only the details that are required.
+
+![Requesting resources](/img/docs/events/kratix_diagrams-AppDev_Request-instances.jpg)
 
 Submit a set of Kratix Resource Requests to get a Knative Serving component and a Postgres database.
 ```console
@@ -145,8 +173,21 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 ```
 <br />
 
-<p>By requesting these resources, you will kick off two creation pipelines on the platform cluster.
-These pipelines are defined by the Promises you previously installed and can be seen by running the following command
+Verify that the Kratix Resource Request was issued on the platform cluster.
+```console
+kubectl --context kind-platform get postgreses.example.promise.syntasso.io
+```
+<br />
+
+The above command will give an output similar to
+```console
+NAME                    AGE
+#highlight-start
+acid-minimal-cluster    1m
+#highlight-end
+```
+
+<p>Each request needs to be delivered through the pipeline defined by the platform team. If you want to peak at what is happening, you can use the following command
 </p>
 
 ```console
@@ -163,9 +204,13 @@ request-pipeline-knative-serving-promise-default-4ffed   0/1     Completed   0  
 ```
 <br />
 
-<p>These pipelines will result in two pods being stared on the worker cluster which create a postgres cluster (named per the Resource Request name, <code>acid-minimal</code>). To verify you have all the necessary resources up and running<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+<p>These pipelines configure your resources in an opinionated way. Including setting the replicas for postgres to two. To verify your Postgres cluster (named per the Resource Request name, <code>acid-minimal</code>) is up and running you can use the following command.<br />
 </p>
+:::note
+This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching
+:::
+
+<br />
 
 ```console
 kubectl --context kind-worker get pods --watch
@@ -205,23 +250,9 @@ local-path-storage     Active   5m
 ```
 <br />
 
-Verify that the Kratix Resource Request was issued on the platform cluster.
-```console
-kubectl --context kind-platform get postgreses.example.promise.syntasso.io
-```
-<br />
+#### Run the application
 
-The above command will give an output similar to
-```console
-NAME                    AGE
-#highlight-start
-acid-minimal-cluster    1m
-#highlight-end
-```
-
-### Run the application
-
-With all the necessary resources available, you can now run your app using the just created services. In this step, you will deploy a [sample application](https://github.com/syntasso/sample-golang-app) that uses Postgres for persistence and Knative for serving the application.
+With all the necessary resources available, you can now run your app using the just created services. In this step, you will deploy a [sample application](https://github.com/syntasso/sample-golang-app) that uses Postgres for persistence and knative for serving the application.
 
 To deploy the app, run:
 
@@ -235,7 +266,7 @@ before trying the command again.
 :::
 
 <!-- TODO: add verification instructions? -->
-### Validate the deployment {#validate-deployment}
+#### Validate the deployment {#validate-deployment}
 
 Verify that the Knative Service for the application is ready:
 
@@ -252,7 +283,7 @@ todo   http://todo.default.local.gd    todo-00001      todo-00001    True
 ```
 <br />
 
-### Test the deployed application {#test-app}
+#### Test the deployed application {#test-app}
 
 Now test the app.
 
@@ -265,7 +296,7 @@ kubectl --context kind-worker --namespace kourier-system port-forward svc/kourie
 
 Now go to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081) to see the app running.
 
-## Summary {#summary}
+### Summary {#summary}
 Your platform has pieced together two different Promises to provide a solution for an application team to deploy a new service using Knative and Postgres. Well done!
 
 To recap the steps we took:
