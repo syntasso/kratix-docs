@@ -18,7 +18,7 @@ export default function GettingStarted({}: Props): JSX.Element {
   return (
     <div className={styles.gettingStarted}>
 
-      <h2>Deliver your platform in three commands</h2>
+      <h2>Deliver Your Platform in Three Easy Commands</h2>
 
       <div className={styles.terminal} id={win1ID}>
         <Window title="1. Install Kratix">
@@ -31,7 +31,7 @@ export default function GettingStarted({}: Props): JSX.Element {
       <div className={styles.terminal} id={win2ID}>
         <Window title="2. Install a Promise">
           <span className={styles.terminalBody}>
-            $&gt; kubectl apply -f postgres-promise.yaml
+            $&gt; kubectl apply -f promise-postgres.yaml
           </span>
         </Window>
       </div>
@@ -39,17 +39,16 @@ export default function GettingStarted({}: Props): JSX.Element {
       <div className={styles.terminal} id={win3ID}>
         <Window title="3. Request a resource from your Promise">
           <span className={styles.terminalBody}>
-            $&gt; kubectl apply -f my-postgres-request.yaml
+            $&gt; kubectl apply -f request-postgres.yaml
           </span>
         </Window>
       </div>
 
       <p>
-        <strong>🎉 Your Promised Postgres cluster is ready to use! 🎉</strong>
+        <strong>🎉 Your Promised Postgres is ready to use! 🎉</strong>
       </p>
       <p>
-      Follow our <Link to="/docs/main/quick-start">Quick Start</Link> and try
-      this for real on a single cluster.
+      Follow our <Link to="/docs/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and clusters.
       </p>
 
       <CurvedArrow
