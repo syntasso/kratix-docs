@@ -1,4 +1,4 @@
-import PartialPreRequisites from './_prereqs.md';
+import PartialCleanupAllPromises from './_cleanup.md';
 
 **In this tutorial, you will**
 1. [learn more about the power of Promises](#power-of-promises)
@@ -23,17 +23,12 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 ![Overview](/img/docs/Treasure_Trove-Install_Multiple_Promises.jpeg)
 
 ### Steps
-1. [Complete pre-requistes](#prerequisites), if required
 1. [Install Promises](#install-all-promises)
 1. [Request instances](#request-instances)
 1. [Run the deploy pipeline](#deploy-pipeline)
 1. [Test the application](#test-app)
 1. [Summary](#summary)
-1. [Tear down your environment](#teardown)
-
-### Pre-requisites {#prerequisites}
-
-<PartialPreRequisites />
+1. [Cleanup environment](#cleanup)
 
 ### Install all required Promises {#install-all-promises}
 
@@ -264,13 +259,10 @@ To recap the steps we took:
 
 This is only the beginning of working with Promises. Next you will learn how to write and update Promises, and in the final thoughts we will showcase the composability of Promises to further optimise this workflow from three requests down to one.
 
-## Tearing it all down {#teardown}
+## Cleanup environment {#cleanup}
 
-The next section in this tutorial requires a clean Kratix installation. Before heading to it, please clean up your environment by running:
+<PartialCleanupAllPromises />
 
-```bash
-kind delete clusters platform worker
-```
 <br />
 
 ## 🎉 &nbsp; Congratulations!

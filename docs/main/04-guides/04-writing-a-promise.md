@@ -2,7 +2,10 @@
 description: Writing a Kratix promise
 title: Writing a Promise
 ---
+import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 import WritingPromise, {toc as WritingPromiseTOC} from '../../_partials/_writing-a-promise.md';
+
+<PartialPreRequisites />
 
 <WritingPromise />
 

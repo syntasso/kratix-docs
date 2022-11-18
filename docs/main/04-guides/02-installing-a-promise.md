@@ -1,9 +1,12 @@
 ---
 description: Install a use a Kratix Promise
 ---
+import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 import GuideInstallPromise, {toc as GuideInstallTOC} from '../../_partials/_install-promise.md';
 
 # Installing and using a Promise
+
+<PartialPreRequisites />
 
 <GuideInstallPromise />
 
