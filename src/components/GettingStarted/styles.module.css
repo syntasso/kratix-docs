@@ -1,0 +1,18 @@
+.gettingStarted {
+  text-align: center;
+}
+
+.gettingStarted h2 {
+  padding: 1em 0 0.2em;
+  color: var(--heading-color)
+}
+
+.terminal > * {
+  width: 100%;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.terminalBody {
+  font: 1rem var(--ifm-font-family-monospace);
+}

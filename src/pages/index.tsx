@@ -6,7 +6,8 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import ActionButtons from '@site/src/components/ActionButtons';
 import UseCases from '@site/src/components/UseCases';
 import styles from './index.module.css';
-import useBaseUrl from '@docusaurus/useBaseUrl';
+import useBaseUrl from '@docusaurus/useBaseUrl'
+import GettingStarted from '@site/src/components/GettingStarted'
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
@@ -87,6 +88,7 @@ export default function Home(): JSX.Element {
       description="Description will go into a meta tag in <head />">
       <HomepageHeader />
       <main>
+        <GettingStarted />
         <HomepageFeatures />
         <HomepagePromises />
         <UseCases />

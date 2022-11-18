@@ -4,9 +4,9 @@
  */
 
 .heroBanner {
-  padding: 4rem 0;
+  padding: 4rem 2rem 2.5rem 2rem;
   /* text-align: center; */
-  min-height: 500px;
+  /* min-height: 500px; */
   position: relative;
   overflow: hidden;
   background-image: url('/img/home/puzzle-splash.webp');

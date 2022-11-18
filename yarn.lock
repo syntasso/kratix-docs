@@ -6063,6 +6063,13 @@ react-base16-styling@^0.6.0:
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
 
+react-curved-arrow@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/react-curved-arrow/-/react-curved-arrow-0.1.0.tgz#5ecbbddbb6ee1926802491b91961988a37b30368"
+  integrity sha512-0tW3uj1kGBWLyK3Hhtax4iXm0l9lEcH3U0Rrgyg+2Uec+5j4D327kVxjX5J+wFC8tK2frOhxyG9Mez5jgdtDYw==
+  dependencies:
+    react "16.12.0"
+
 react-dev-utils@^12.0.1:
   version "12.0.1"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-12.0.1.tgz#ba92edb4a1f379bd46ccd6bcd4e7bc398df33e73"
@@ -6209,6 +6216,15 @@ react-waypoint@^10.3.0:
     consolidated-events "^1.1.0 || ^2.0.0"
     prop-types "^15.0.0"
     react-is "^17.0.1 || ^18.0.0"
+
+react@16.12.0:
+  version "16.12.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.12.0.tgz#0c0a9c6a142429e3614834d5a778e18aa78a0b83"
+  integrity sha512-fglqy3k5E+81pA8s+7K0/T3DBCF0ZDOher1elBFzF7O6arXJgzyu/FW+COxFvAWXJoJN9KIZbT2LXlukwphYTA==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
 
 react@^17.0.2:
   version "17.0.2"
