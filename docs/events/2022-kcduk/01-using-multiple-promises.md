@@ -167,7 +167,8 @@ As an application dev, you have a new app you want to deploy along with a new da
 ![Requesting resources](/img/docs/events/kratix_diagrams-AppDev_Request-instances.jpg)
 
 Submit a set of Kratix Resource Requests to get a Knative Serving component and a Postgres database.
-```console
+
+```console title="Request instances"
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-resource-request.yaml
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-resource-request.yaml
 ```
@@ -177,7 +178,6 @@ Verify that the Kratix Resource Request was issued on the platform cluster.
 ```console
 kubectl --context kind-platform get postgreses.example.promise.syntasso.io
 ```
-<br />
 
 The above command will give an output similar to
 ```console
@@ -186,6 +186,8 @@ NAME                    AGE
 acid-minimal-cluster    1m
 #highlight-end
 ```
+
+<br />
 
 <p>Each request needs to be delivered through the pipeline defined by the platform team. If you want to peak at what is happening, you can use the following command
 </p>
@@ -202,19 +204,22 @@ request-pipeline-ha-postgres-promise-default-266c2       0/1     Completed   0  
 request-pipeline-knative-serving-promise-default-4ffed   0/1     Completed   0          1m
 #highlight-end
 ```
-<br />
 
 <p>These pipelines configure your resources in an opinionated way. Including setting the replicas for postgres to two. To verify your Postgres cluster (named per the Resource Request name, <code>acid-minimal</code>) is up and running you can use the following command.<br />
 </p>
-:::note
-This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching
-:::
 
 <br />
 
 ```console
 kubectl --context kind-worker get pods --watch
 ```
+
+:::note
+
+This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching
+
+:::
+
 
 The above command will give an output similar to
 ```console
@@ -231,7 +236,6 @@ Verify that knative has also installed its networking resources into two new nam
 ```console
 kubectl --context kind-worker get namespaces
 ```
-<br />
 
 The above command will give an output similar to
 ```console
@@ -265,6 +269,8 @@ It takes some time for Knative to get up and running. If you get a webhook-relat
 before trying the command again.
 :::
 
+<br />
+
 <!-- TODO: add verification instructions? -->
 #### Validate the deployment {#validate-deployment}
 
@@ -292,7 +298,6 @@ On a separate terminal, you'll need to open access to the app by port-forwarding
 ```console
 kubectl --context kind-worker --namespace kourier-system port-forward svc/kourier 8081:80
 ```
-<br />
 
 Now go to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081) to see the app running.
 
