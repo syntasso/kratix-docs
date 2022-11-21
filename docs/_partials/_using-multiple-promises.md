@@ -260,8 +260,26 @@ To recap the steps we took:
 This is only the beginning of working with Promises. Next you will learn how to write and update Promises, and in the final thoughts we will showcase the composability of Promises to further optimise this workflow from three requests down to one.
 
 ## Cleanup environment {#cleanup}
+To clean up your environment first delete the Resource Requests for the Jenkins, Knative and Postgres Promises.
 
-<PartialCleanupAllPromises />
+```bash
+kubectl --context kind-platform delete jenkins,knativeservings,postgreses --all
+```
+
+Verify the resources belonging to the Resource Requests have been deleted in the worker cluster
+```console
+kubectl --context kind-worker get pods,namespaces
+```
+
+Now all the Resource Requests have been deleted you can delete the Promises
+```bash
+kubectl --context kind-platform delete promises --all
+```
+
+Verify the worker cluster resources are deleted from the worker cluster
+```console
+kubectl --context kind-worker get pods
+```
 
 <br />
 
