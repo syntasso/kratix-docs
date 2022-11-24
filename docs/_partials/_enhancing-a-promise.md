@@ -636,8 +636,26 @@ To recap the steps we took:
 <br />
 
 ## Cleanup environment {#cleanup}
+To clean up your environment first delete the Resource Requests for the Postgres instance
 
-<PartialCleanupAllPromises />
+```bash
+kubectl --context kind-platform delete --filename postgres-resource-request.yaml
+```
+
+Verify the resources belonging to the Resource Requests have been deleted in the worker cluster
+```console
+kubectl --context kind-worker get pods
+```
+
+Now the Resource Requests have been deleted you can delete the Promise
+```bash
+kubectl --context kind-platform delete --filename postgres-promise.yaml
+```
+
+Verify the worker cluster resources are deleted from the worker cluster
+```console
+kubectl --context kind-worker get pods
+```
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp; You have enhanced a Kratix Promise to suit your organisation's needs. This concludes our introduction to Kratix. <br />

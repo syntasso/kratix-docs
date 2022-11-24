@@ -215,7 +215,7 @@ Verify the Jenkins Promise is gone
 kubectl --context kind-platform get promises
 ```
 
-and the Jenkins Operator is deleted from the worker cluster (this might take a couple mintes)
+and the Jenkins Operator is deleted from the worker cluster (this might take a couple minutes)
 ```console
 kubectl --context kind-worker get pods
 ```

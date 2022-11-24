@@ -617,8 +617,26 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
 ## Cleanup environment {#cleanup}
+To clean up your environment first delete the Resource Requests for the Jenkins instance
 
-<PartialCleanupAllPromises />
+```bash
+kubectl --context kind-platform delete --filename jenkins-resource-request.yaml
+```
+
+Verify the resources belonging to the Resource Requests have been deleted in the worker cluster
+```console
+kubectl --context kind-worker get pods
+```
+
+Now the Resource Requests have been deleted you can delete the Promises
+```bash
+kubectl --context kind-platform delete --filename jenkins-promise.yaml
+```
+
+Verify the worker cluster resources are deleted from the worker cluster
+```console
+kubectl --context kind-worker get pods
+```
 
 ---
 
