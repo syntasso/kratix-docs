@@ -15,6 +15,15 @@ This is Part 5, the final hands-on part, of [a series](intro) illustrating how K
 
 <EnhancingPromise />
 
+<hr />
+
+<p style={{"font-size": "2rem"}}>
+    <strong>🎉 Congratulations!</strong>
+</p>
+
+✅&nbsp;&nbsp; You have enhanced a Kratix Promise to suit your organisation's needs. This concludes our introduction to Kratix. <br />
+👉🏾&nbsp;&nbsp; Let's [see where to go from here](./whats-next).
+
 <!--
     Workaround for ToC of imported content
     See https://github.com/facebook/docusaurus/issues/3915#issuecomment-896193142

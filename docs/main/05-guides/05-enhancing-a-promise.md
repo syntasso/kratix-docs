@@ -13,4 +13,11 @@ import EnhancingPromise, {toc as EnhancingPromiseTOC} from '../../_partials/_enh
     Workaround for ToC of imported content
     See https://github.com/facebook/docusaurus/issues/3915#issuecomment-896193142
 -->
+<p style={{"font-size": "2rem"}}>
+    <strong>🎉 Congratulations!</strong>
+</p>
+
+✅&nbsp;&nbsp; You have enhanced a Kratix Promise to suit your organisation's needs. <br />
+👉🏾&nbsp;&nbsp; Let's [add a new worker cluster](./scheduling-clusters).
+
 export const toc = [...EnhancingPromiseTOC];
