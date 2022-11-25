@@ -13,7 +13,8 @@ installed. For that, you can follow the [Installing a Promise](installing-a-prom
 guide. Before continuing, ensure you have a Platform cluster and a Worker cluster created
 with KinD:
 
-```console
+
+```shell-session
 $ kind get clusters
 platform
 worker
@@ -25,7 +26,7 @@ worker-cluster-1   1h
 
 You should also have a Jenkins Promise installed:
 
-```console
+```shell-session
 $ kubectl --context kind-platform get promises.platform.kratix.io
 NAME              AGE
 jenkins-promise   1h
@@ -33,7 +34,7 @@ jenkins-promise   1h
 
 On the Worker cluster, you should see the Jenkins Operator running:
 
-```console
+```shell-session
 $ kubectl --context kind-worker get pods
 NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-gczpb   1/1     Running   0          1h
@@ -74,13 +75,13 @@ spec:
 
 Apply the Cluster document to the Platform cluster:
 
-```console
+```bash
 kubectl --context kind-platform apply --filename worker-cluster-2.yaml
 ```
 
 Check the Cluster was created:
 
-```console {4}
+```shell-session {4}
 $ kubectl --context kind-platform get clusters.platform.kratix.io
 NAME               AGE
 worker-cluster-1   1h
@@ -91,7 +92,7 @@ Kratix will react to the new Cluster by scheduling the installation of the Jenki
 to the new Worker Cluster. After a couple of minutes, you should see the Jenkins Operator
 running on the new Worker Cluster:
 
-```console {3}
+```shell-session {3}
 $ kubectl --context kind-worker-cluster-2 get pods
 NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h

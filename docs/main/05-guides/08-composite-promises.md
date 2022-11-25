@@ -65,7 +65,7 @@ cd /path/to/kratix
 
 You can now install a "Paved Path" Promise:
 
-```console
+```bash
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-promise.yaml
 ```
 
@@ -77,7 +77,7 @@ will have the following side-effects:
 
 To verify the installation was successful, run:
 
-```console
+```shell-session
 $ kubectl --context kind-platform get promises
 NAME                      AGE
 ha-postgres-promise       1h
@@ -99,14 +99,14 @@ clusterdomainclaims.networking.internal.knative.dev   2022-11-25T12:24:20Z
 Platform users can now send Resource Requests for a new "Paved Path". That will create a
 new Knative Serving and a new Postgres database in the Worker Cluster:
 
-```console
+```bash
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-resource-request.yaml
 ```
 
 You can see the pipeline for the Paved Path Promise running, which will in turn trigger
 the Knative and Postgres pipelines:
 
-```console
+```shell-session
 $ kubectl --context kind-platform get pods
 NAME                                                     READY   STATUS      RESTARTS   AGE
 request-pipeline-ha-postgres-promise-default-617a3       0/1     Completed   0          64s
@@ -116,7 +116,7 @@ request-pipeline-paved-path-demo-promise-default-d3a89   0/1     Completed   0  
 
 Eventually, the resources will be ready to be used:
 
-```console
+```shell-session
 $ kubectl --context kind-worker get pods -A
 NAMESPACE            NAME                          READY   STATUS      RESTARTS   AGE
 default              acid-minimal-cluster-0        1/1     Running     0          1h
@@ -199,7 +199,7 @@ telling Kratix to install the sub-Promises into Clusters with a
 You may have noticed that, when registering the Platform Cluster, the Cluster definition
 included exactly that label. You can verify the applied labels with:
 
-```console
+```shell-session
 $ kubectl --context kind-platform get clusters.platform.kratix.io --show-labels
 NAME                 AGE    LABELS
 #highlight-start

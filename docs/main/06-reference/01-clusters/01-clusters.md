@@ -3,11 +3,6 @@ description: Learn more about the Cluster document
 title: Clusters
 ---
 
-This reference provides detailed examples of defining, configuring, and using Composite
-Resources in Crossplane. You can also refer to Crossplane’s API documentation for more
-details. If you’re looking for a more general overview of Composite Resources and
-Composition in Crossplane, try the Composite Resources page under Concepts.
-
 This page contains documentation for the Kratix Cluster. The Cluster Resource is a
 representation of a system where workloads can be scheduled to, which in turn are usually
 Kubernetes clusters. See below for the API documentation:
@@ -91,10 +86,10 @@ The table below contains a few examples:
   _no label_                     |  _no selector_                  |  ✅
   `env: dev`                     |  _no selector_                  |  ✅
   `env: dev`                     |  `env: dev`                     |  ✅
-  `env: dev` <br /> `region: uk` |  `env: dev`                     |  ✅
-  `env: dev` <br /> `region: uk` |  `env: dev` <br /> `region: uk` |  ✅
+  `env: dev` <br /> `zone:eu`    |  `env: dev`                     |  ✅
+  `env: dev` <br /> `zone:eu`    |  `env: dev` <br /> `zone:eu` |  ✅
   `env: dev`                     |  `env: prod`                    |  ⛔️
-  `env: dev`                     |  `env: dev` <br /> `region: uk` |  ⛔️
+  `env: dev`                     |  `env: dev` <br /> `zone:eu` |  ⛔️
    _no label_                    |  `env: dev`                     |  ⛔️
 
 ## Workload scheduling

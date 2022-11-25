@@ -19,6 +19,7 @@
 
   --heading-color: #3e4656;
   --color-purple: #940dae;
+  --color-shell-symbol: #a9a9a9;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -33,6 +34,9 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 
   --heading-color: #fff;
+  --color-purple: #d69dff;
+
+  --color-shell-symbol: #4ff579;
 }
 
 .background-color--dark {
@@ -50,4 +54,11 @@
 /* announcement bar */
 [role="banner"] {
   background-color: lightyellow!important;
+}
+
+.token.output {
+  color: var(--ifm-color-primary);
+}
+.token.command.shell-symbol {
+  color: var(--color-shell-symbol);
 }
