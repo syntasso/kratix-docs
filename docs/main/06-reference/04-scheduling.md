@@ -15,8 +15,8 @@ in two stages:
 1. Determining where the workloads will run following a Resource Requests ([Scheduling Workloads](#workloads))
 
 The following sections in this page document those stages. For hands-on scheduling guides,
-check the [Adding a new Worker Cluster](../../guides/scheduling-clusters) and [Composite
-Promise](../../guides/composite-promises) pages.
+check the [Adding a new Worker Cluster](../guides/scheduling-clusters) and [Composite
+Promise](../guides/composite-promises) pages.
 
 ## Scheduling Promises {#promises}
 
@@ -142,4 +142,4 @@ To enable this functionality, the following needs to be true:
   Platform cluster
 
 For detailed instruction on the above, please check the [Composite
-Promises](../../guides/composite-promises) guide.
+Promises](../guides/composite-promises) guide.
