@@ -8,12 +8,6 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Introducing Kratix 🎉
 
-:::tip
-
-Are you on KCD UK? Click [here](/docs/category/kcd-uk-2022-workshop) for the event workshop.
-
-:::
-
 ## Welcome!
 
 <img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
