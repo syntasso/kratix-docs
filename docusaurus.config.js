@@ -3,6 +3,7 @@
 
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const abbr = require('remark-abbr');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -39,6 +40,9 @@ const config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/syntasso/kratix-docs/tree/main',
+          remarkPlugins: [
+            abbr
+          ],
         },
         // uncomment to add the blog section to the website
         // blog: {
@@ -130,6 +134,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['shell-session']
       },
       announcementBar: {
         id: 'kcd-uk-event-announcement',

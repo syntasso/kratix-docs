@@ -657,6 +657,3 @@ Verify the worker cluster resources are deleted from the worker cluster
 kubectl --context kind-worker get pods
 ```
 
-## 🎉 &nbsp; Congratulations!
-✅&nbsp;&nbsp; You have enhanced a Kratix Promise to suit your organisation's needs. This concludes our introduction to Kratix. <br />
-👉🏾&nbsp;&nbsp; Let's [see where to go from here](./whats-next).
