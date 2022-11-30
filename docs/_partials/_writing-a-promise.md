@@ -519,7 +519,7 @@ spec:
   name: my-amazing-jenkins
 ```
 
-You can now send the resource request to Kratix:
+You can now send the Resource Request to Kratix:
 
 ```bash
 kubectl apply --context kind-platform --filename jenkins-resource-request.yaml
