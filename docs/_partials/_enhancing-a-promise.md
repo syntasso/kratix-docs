@@ -457,7 +457,7 @@ kind load docker-image kratix-workshop/postgres-request-pipeline:dev --name plat
 
 #### Update the Promise's `xaasRequestPipeline` value
 
-The new image is built and available on your platform cluster. Update your Promise to use the new image.
+The new image is built and available on your Platform Cluster. Update your Promise to use the new image.
 
 Open the Promise definition file (`kratix/samples/postgres/postgres-promise.yaml`). From the top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the current `syntasso/postgres-request-pipeline` image with the newly created `kratix-workshop/postgres-request-pipeline:dev` image.
 
@@ -559,7 +559,7 @@ spec:
 ```
 </details>
 
-Then apply the request file to the platform cluster:
+Then apply the request file to the Platform Cluster:
 
 ```console
 kubectl --context kind-platform apply --filename postgres-resource-request.yaml

@@ -11,7 +11,7 @@ slug: /events/2022-kcduk/using-multiple-promises
 
 **As a Platform Engineer**
 1. [Bootstrap a local cluster with Kratix](#set-up)
-1. [Install multiple promises as a platform engineer](#install-promises)
+1. [Install multiple Promises as a platform engineer](#install-promises)
 
 **As a Platform User**
 1. [Request an instance as a application developer](#request-instance)
@@ -66,13 +66,13 @@ cd kratix
 
 ![Environment setup](/img/docs/events/kratix_diagrams-PlatformDev-Setup_environment.jpg)
 
-### Install multiple promises {#install-promises}
+### Install multiple Promises {#install-promises}
 
 #### Install all required Promises {#install-all-promises}
 
 Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs in a self-service way. To deliver a dev environment for a new application, with Kratix install Promises for knative serving and Postgres on your platform cluster:
 
-```bash title="Install knative and Postgres promises"
+```bash title="Install knative and Postgres Promises"
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-promise.yaml
 ```

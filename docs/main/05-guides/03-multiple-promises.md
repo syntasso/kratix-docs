@@ -1,5 +1,5 @@
 ---
-description: Using multiple promises
+description: Using multiple Promises
 title: Using Multiple Promises
 ---
 import PartialPreRequisites from '../../_partials/_generic_prereqs.md';

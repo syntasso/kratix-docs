@@ -23,7 +23,7 @@ If you can't find what you need, or need help with building your platform as a p
 <!-- * Want to dive deeper? Check out our collection of [guides](../category/guides): -->
 <!-- * **To understand core concepts**, jump to [fundamentals →](../category/fundamentals) -->
 <!-- * **To understand how Kratix works**, jump to [architecture →](../category/architecture) -->
-<!-- * **To build a powerful platform,** check out how to [combine promises →](guides/combining-promises) -->
+<!-- * **To build a powerful platform,** check out how to [combine Promises →](guides/combining-promises) -->
 
 ### How the documentation is organised
 
@@ -31,7 +31,7 @@ You will find the following sections in the documentation:
 
 | Section                           | Description                                                                                 |
 | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| **[Guides](../category/guides)**  | All you need to get started with Kratix, from installing it to combining multiple promises. |
+| **[Guides](../category/guides)**  | All you need to get started with Kratix, from installing it to combining multiple Promises. |
 
 <!-- | **[Fundamentals](../category/fundamentals)**   | Learn about the fundamental concepts of Kratix, and how to leverage it to build platforms.  | -->
 <!-- | **[Architecture](../category/architecture)**   | Dive deeper on how Kratix actually works.                                                   | -->

@@ -1,5 +1,5 @@
 ---
-description: Guides on how to create composite promises
+description: Guides on how to create Composite Promises
 title: Composite Promise
 ---
 
