@@ -1,5 +1,5 @@
 ---
-description: Tutorial on adding a new worker cluster
+description: Tutorial on adding a new Worker Cluster
 title: Adding a new Worker Cluster
 ---
 
@@ -10,7 +10,7 @@ cluster will be automatically installed in the clusters joining the platform.
 ## Pre-requisites
 To see this in action, you will need an environment running Kratix with a Promise
 installed. For that, you can follow the [Installing a Promise](installing-a-promise)
-guide. Before continuing, ensure you have a Platform cluster and a Worker cluster created
+guide. Before continuing, ensure you have a Platform Cluster and a Worker Cluster created
 with KinD:
 
 
@@ -32,7 +32,7 @@ NAME              AGE
 jenkins-promise   1h
 ```
 
-On the Worker cluster, you should see the Jenkins Operator running:
+On the Worker Cluster, you should see the Jenkins Operator running:
 
 ```shell-session
 $ kubectl --context kind-worker get pods

@@ -51,7 +51,7 @@ The commands below will refer to a `KRATIX_REPO` env variable. You can either:
 :::
 
 
-Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
+Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform Cluster:
 
 ```bash
 kubectl --context kind-platform apply \
@@ -123,7 +123,7 @@ example             1m
 
 Eventually (it can take a couple of minutes), a new Jenkins instance should spin up on your `worker` cluster. You can verify this by running the following command:
 
-<p>Verify the instance was created on the worker cluster<br />
+<p>Verify the instance was created on the Worker Cluster<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -189,13 +189,13 @@ kubectl --context kind-platform delete \
     --filename "${KRATIX_REPO}/samples/jenkins/jenkins-resource-request.yaml"
 ```
 
-Verify the Jenkins Resource Request in the platform cluster is gone
+Verify the Jenkins Resource Request in the Platform Cluster is gone
 ```console
 kubectl --context kind-platform get jenkins
 ```
 
 
-and the resources for the Jenkins instance in the worker cluster have been deleted
+and the resources for the Jenkins instance in the Worker Cluster have been deleted
 ```console
 kubectl --context kind-worker get pods
 ```
@@ -219,7 +219,7 @@ Verify the Jenkins Promise is gone
 kubectl --context kind-platform get promises
 ```
 
-and the Jenkins Operator is deleted from the worker cluster (this might take a couple minutes)
+and the Jenkins Operator is deleted from the Worker Cluster (this might take a couple minutes)
 ```console
 kubectl --context kind-worker get pods
 ```

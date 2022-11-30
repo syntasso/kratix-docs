@@ -25,7 +25,7 @@ You can also run `./scripts/quick-start.sh` from the root of the [Kratix reposit
 
 :::
 
-### Set up a Platform cluster <a href="#platform-setup" id="platform-setup"></a>
+### Set up a Platform Cluster <a href="#platform-setup" id="platform-setup"></a>
 
 Create your `platform` cluster and install Kratix and MinIO. MinIO will be the repository for the GitOps toolkit. For production installations, MinIO can be replaced by Git or any other S3-compatible storage, depending on your preference.
 
@@ -39,14 +39,14 @@ kubectl apply --context kind-platform --filename https://raw.githubusercontent.c
 kubectl apply --context kind-platform --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
 ```
 
-### Set up your Worker cluster <a href="#worker-setup" id="worker-setup"></a>
+### Set up your Worker Cluster <a href="#worker-setup" id="worker-setup"></a>
 
 Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This will create a cluster for running the X as-a-Service workloads:
 
 ```bash
 kind create cluster --name worker
 
-# Register the worker cluster with the platform cluster
+# Register the Worker Cluster with the Platform Cluster
 kubectl apply --context kind-platform --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 
 # Install flux on the worker

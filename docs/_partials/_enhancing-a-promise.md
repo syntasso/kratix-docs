@@ -47,7 +47,7 @@ _In this guide, you only need create a new Postgres Promise that creates Postgre
 
 1. [Get a base Promise](#base-promise)
 1. [Change the Promise so that _the user who wants an instance_ knows they need to include their `costCentre` name when they make their request to the platform](#xaas-crd)
-1. [Change the Promise so that _the worker cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`](#worker-cluster-resources)
+1. [Change the Promise so that _the Worker Cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`](#worker-cluster-resources)
 1. [Change the Promise so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance](#xaas-request-pipeline)
 1. [Install the modified Promise on your platform](#install-promise)
 1. [Check it works: make a request to your platform for a Postgres instance](#verify-resource)
@@ -174,7 +174,7 @@ xaasCrd:
 
 ### Step three: `workerClusterResources` {#worker-cluster-resources}
 
-> Change the Promise so that _the worker cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`
+> Change the Promise so that _the Worker Cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`
 
 #### About `workerClusterResources`
 
@@ -296,7 +296,7 @@ Under the `data` map, add `inherited_labels: costCentre`.
   alt="Kratix logo"
 />
 
-`xaasRequestPipeline` is the pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a worker cluster.
+`xaasRequestPipeline` is the pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
 
 Conceptually, a pipeline is the manipulation of an input value to generate an output value. There are three parts to a Kratix Promise request pipeline.
 
@@ -510,7 +510,7 @@ works.platform.kratix.io                      2022-08-09T14:35:55Z
 
 Check that the `workerClusterResources` have been installed.
 
-For Postgres, you can see in the Promise file that there are a number of RBAC resources, as well as a deployment that installs the Postgres Operator in the worker cluster. That means that when the Promise is successfully applied you will see the `postgres-operator` deployment in the worker cluster. That's also an indication that the Operator is ready to provision a new instance.
+For Postgres, you can see in the Promise file that there are a number of RBAC resources, as well as a deployment that installs the Postgres Operator in the Worker Cluster. That means that when the Promise is successfully applied you will see the `postgres-operator` deployment in the Worker Cluster. That's also an indication that the Operator is ready to provision a new instance.
 
 ```console
 kubectl --context kind-worker --namespace default get pods
@@ -593,7 +593,7 @@ Then view the pipeline logs by running _(replace SHA with the value from the out
 kubectl --context kind-platform logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-ha-postgres-promise-default-<SHA>
 ```
 
-<p>On the worker cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined in the request (<code>postgres-resource-request.yaml</code>).<br />
+<p>On the Worker Cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined in the request (<code>postgres-resource-request.yaml</code>).<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -628,7 +628,7 @@ Your platform has a new Promise. Your users have access to a new service from th
 To recap the steps we took:
 1. ✅&nbsp;&nbsp;Aquired a base Promise
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the user who wants an instance_ knows they need to include their `costCentre` name when they make their request to the platform
-1. ✅&nbsp;&nbsp;Changed the Promise so that _the worker cluster_ Operator that creates the instance knows to apply the new `costCentre` label `costCentre`
+1. ✅&nbsp;&nbsp;Changed the Promise so that _the Worker Cluster_ Operator that creates the instance knows to apply the new `costCentre` label `costCentre`
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance
 1. ✅&nbsp;&nbsp;Installed the modified Promise on your platform
 1. ✅&nbsp;&nbsp;Checked it works: make a request to your platform for a Postgres instance
@@ -642,7 +642,7 @@ To clean up your environment first delete the Resource Requests for the Postgres
 kubectl --context kind-platform delete --filename postgres-resource-request.yaml
 ```
 
-Verify the resources belonging to the Resource Requests have been deleted in the worker cluster
+Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
 ```console
 kubectl --context kind-worker get pods
 ```
@@ -652,7 +652,7 @@ Now the Resource Requests have been deleted you can delete the Promise
 kubectl --context kind-platform delete --filename postgres-promise.yaml
 ```
 
-Verify the worker cluster resources are deleted from the worker cluster
+Verify the Worker Cluster Resources are deleted from the Worker Cluster
 ```console
 kubectl --context kind-worker get pods
 ```

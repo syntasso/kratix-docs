@@ -357,7 +357,7 @@ spec:
   #highlight-end
 ```
 
-For simplicity, we will load the pipeline image directly into the KinD platform cluster
+For simplicity, we will load the pipeline image directly into the KinD Platform Cluster
 with the command below:
 
 ```bash title="Load image to KinD cache"
@@ -449,7 +449,7 @@ kubectl logs \
   --container xaas-request-pipeline-stage-1
 ```
 
-<p>Then you can watch for the creation of your Jenkins instance by targeting the worker cluster:<br />
+<p>Then you can watch for the creation of your Jenkins instance by targeting the Worker Cluster:<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -505,7 +505,7 @@ docs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom
 #### `workerClusterResources`
 
 The `workerClusterResources` describes everything required to fulfil the Promise. Kratix
-applies this content on all registered worker clusters. For instance with the CI
+applies this content on all registered Worker Clusters. For instance with the CI
 Promise, the `workerClusterResources` contains the Jenkins CRD, the Jenkins Operator, and
 the resources the Operator requires. If in the future you decide to support
 other CI tools, you'll need to add the dependencies for them in here.
@@ -530,7 +530,7 @@ The contract with each pipeline container is simple and straightforward:
   responsibilites.
 * The container writes any resources to be created to `/output/`.
 * The resources in `/output` of the last container in the `xaasRequestPipeline` array
-  will be scheduled and applied to the appropriate worker clusters.
+  will be scheduled and applied to the appropriate Worker Clusters.
 
 ## Recap {#summary}
 You have now authored your first promise. Congratulations 🎉

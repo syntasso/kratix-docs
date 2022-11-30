@@ -32,7 +32,7 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 
 ### Install all required Promises {#install-all-promises}
 
-In order for an application team to deploy an application to a dev environment they require a relational datastore (postgres), networking for user traffic (Knative), and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality on-demand with Kratix install the required Promises on your platform cluster:
+In order for an application team to deploy an application to a dev environment they require a relational datastore (postgres), networking for user traffic (Knative), and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality on-demand with Kratix install the required Promises on your Platform Cluster:
 
 ```console
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
@@ -41,7 +41,7 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 ```
 <br />
 
-Verify the Promises are all installed on your platform cluster
+Verify the Promises are all installed on your Platform Cluster
 ```console
 kubectl --context kind-platform get promises
 ```
@@ -55,7 +55,7 @@ knative-serving-promise   1m
 ```
 <br />
 
-Verify the CRDs are all installed on your platform cluster. Note that you know have `jenkins`, `knativeserving`, and `postgres` available.
+Verify the CRDs are all installed on your Platform Cluster. Note that you know have `jenkins`, `knativeserving`, and `postgres` available.
 
 ```console
 kubectl --context kind-platform get crds
@@ -76,7 +76,7 @@ works.platform.kratix.io                      2022-09-23T14:37:20Z
 ```
 <br />
 
-<p>Verify the <code>workerClusterResources</code> (more details in future steps) are installed on your worker cluster<br />
+<p>Verify the <code>workerClusterResources</code> (more details in future steps) are installed on your Worker Cluster<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -137,7 +137,7 @@ kourier-system         Active   1h
 ```
 <br />
 
-Verify that the Kratix Resource Request was issued on the platform cluster.
+Verify that the Kratix Resource Request was issued on the Platform Cluster.
 ```console
 kubectl --context kind-platform get jenkins.example.promise.syntasso.io
 ```
@@ -150,7 +150,7 @@ example       1m
 ```
 <br />
 
-<p>Verify the instance is created on the worker cluster<br />
+<p>Verify the instance is created on the Worker Cluster<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -266,7 +266,7 @@ To clean up your environment first delete the Resource Requests for the Jenkins,
 kubectl --context kind-platform delete jenkins,knativeservings,postgreses --all
 ```
 
-Verify the resources belonging to the Resource Requests have been deleted in the worker cluster
+Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
 ```console
 kubectl --context kind-worker get pods,namespaces
 ```
@@ -276,7 +276,7 @@ Now all the Resource Requests have been deleted you can delete the Promises
 kubectl --context kind-platform delete promises --all
 ```
 
-Verify the worker cluster resources are deleted from the worker cluster
+Verify the Worker Cluster resources are deleted from the Worker Cluster
 ```console
 kubectl --context kind-worker get pods
 ```

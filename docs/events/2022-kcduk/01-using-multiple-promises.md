@@ -70,7 +70,7 @@ cd kratix
 
 #### Install all required Promises {#install-all-promises}
 
-Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs in a self-service way. To deliver a dev environment for a new application, with Kratix install Promises for knative serving and Postgres on your platform cluster:
+Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs in a self-service way. To deliver a dev environment for a new application, with Kratix install Promises for knative serving and Postgres on your Platform Cluster:
 
 ```bash title="Install knative and Postgres Promises"
 kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
@@ -87,7 +87,7 @@ When a Promise is installed into the cluster, it will do two visible things:
 ![Installing a promise](/img/docs/events/kratix_diagrams-PlatformDev-Install_promises.jpg)
 <br />
 
-Verify the Promises are all installed on your platform cluster
+Verify the Promises are all installed on your Platform Cluster
 ```console
 kubectl --context kind-platform get promises
 ```
@@ -121,7 +121,7 @@ works.platform.kratix.io                      2022-09-23T14:37:20Z
 ```
 <br />
 
-Finally, verify the prerequisite infrastructure for delivering Postgres on demand have been installed on the worker cluster
+Finally, verify the prerequisite infrastructure for delivering Postgres on demand have been installed on the Worker Cluster
 
 ```console
 kubectl --context kind-worker get pods
@@ -174,7 +174,7 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 ```
 <br />
 
-Verify that the Kratix Resource Request was issued on the platform cluster.
+Verify that the Kratix Resource Request was issued on the Platform Cluster.
 ```console
 kubectl --context kind-platform get postgreses.example.promise.syntasso.io
 ```

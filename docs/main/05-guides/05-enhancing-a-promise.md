@@ -18,6 +18,6 @@ import EnhancingPromise, {toc as EnhancingPromiseTOC} from '../../_partials/_enh
 </p>
 
 ✅&nbsp;&nbsp; You have enhanced a Kratix Promise to suit your organisation's needs. <br />
-👉🏾&nbsp;&nbsp; Let's [add a new worker cluster](./scheduling-clusters).
+👉🏾&nbsp;&nbsp; Let's [add a new Worker Cluster](./scheduling-clusters).
 
 export const toc = [...EnhancingPromiseTOC];

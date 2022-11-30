@@ -188,12 +188,12 @@ Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This
 ```bash
 kind create cluster --name worker --image kindest/node:v1.24.0
 
-# Register the worker cluster with the platform cluster
+# Register the Worker Cluster with the Platform Cluster
 kubectl apply \
     --filename config/samples/platform_v1alpha1_worker_cluster.yaml\
     --context kind-platform
 
-# Install Flux on the worker cluster
+# Install Flux on the Worker Cluster
 kubectl apply \
     --filename hack/worker/gitops-tk-install.yaml \
     --context kind-worker
