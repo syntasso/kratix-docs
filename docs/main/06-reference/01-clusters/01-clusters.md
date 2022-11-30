@@ -1,6 +1,7 @@
 ---
 description: Learn more about the Cluster document
 title: Clusters
+id: intro-clusters
 ---
 
 This page contains documentation for the Kratix Cluster. The Cluster Resource is a

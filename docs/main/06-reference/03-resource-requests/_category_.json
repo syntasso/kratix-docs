@@ -1,8 +1,8 @@
 {
   "label": "Resource Requests",
-  "position": 2,
+  "position": 1,
   "link": {
-    "type": "generated-index",
-    "description": "Reference documentation for everything related to the Kratix Resource Requests"
+    "type": "doc",
+    "id": "main/reference/resource-requests/intro"
   }
 }

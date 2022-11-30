@@ -4,7 +4,11 @@
 
 ## What is a Kratix Promise?
 
-Conceptually, Promises are the building blocks of Kratix that allow you to develop your platform incrementally. Technically, a Promise is a YAML document that defines a contract between the Platform and its users. You can explore more about this contract and the internals of a Kratix Promise in the [writing a Promise](writing-a-promise) guide.
+Conceptually, Promises are the building blocks of Kratix that allow you to
+develop your platform incrementally. Technically, a Promise is a YAML document
+that defines a contract between the Platform and its users. You can explore
+more about this contract and the internals of a Kratix Promise in the [writing
+a Promise](writing-a-promise) guide.
 
 ## Kratix Promises
 
