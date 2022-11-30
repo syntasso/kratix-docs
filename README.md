@@ -18,6 +18,14 @@ $ yarn start
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
+### Running in Docker
+
+You can also run it in Docker:
+
+```
+docker run -it -v `pwd`:/app -p 3000:3000 node /bin/bash -c "cd /app; yarn run start --host 0.0.0.0-"
+```
+
 ## Build, test, and verify
 
 ```
