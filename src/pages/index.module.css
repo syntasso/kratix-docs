@@ -36,6 +36,14 @@
   font-weight: lighter;
 }
 
+.actionButtons {
+  padding-bottom: 40px;
+}
+
+.sampleArchitecture img{
+margin-top: 10px;
+}
+
 .kratixDescription {
   font-size: 22px;
 }

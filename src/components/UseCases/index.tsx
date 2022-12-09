@@ -100,7 +100,6 @@ export default function UseCases(): JSX.Element {
           {UseCaseList.map((props, idx) => (
             <UseCase key={idx} {...props} />
           ))}
-          <ActionButtons />
       </div>
     </section>
   );

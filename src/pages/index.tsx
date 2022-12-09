@@ -83,16 +83,26 @@ function HomepagePromises() {
 function HomepageArchDiagrams() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <div className={clsx('container padding--lg', styles.architecture)}>
-      <h2 className="text--center">A sample Kratix architecture: FOOD2GO.com</h2>
+    <div className={clsx('container padding--lg', styles.sampleArchitecture)}>
+      <h2>A sample Kratix architecture: FOOD2GO.com</h2>
 
-      <div className="row margin-top--xl">
+      <div className="row">
         <img
           src={useBaseUrl('/img/kratix-arch-diagram.png')}
           alt="A sample Kratix architecture in production using multiple Kratix Promises to deploy workloads to multiple clusters"
         />
       </div>
     </div>
+  );
+}
+
+function ActionButtonFrame(): JSX.Element {
+  return (
+    <section className={clsx('background-color--dark color--light', styles.actionButtons)}>
+      <div className="container">
+          <ActionButtons />
+      </div>
+    </section>
   );
 }
 
@@ -109,6 +119,7 @@ export default function Home(): JSX.Element {
         <HomepagePromises />
         <UseCases />
         <HomepageArchDiagrams />
+        <ActionButtonFrame />
       </main>
     </Layout>
   );
