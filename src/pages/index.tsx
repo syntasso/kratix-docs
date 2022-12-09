@@ -80,6 +80,22 @@ function HomepagePromises() {
   );
 }
 
+function HomepageArchDiagrams() {
+  const {siteConfig} = useDocusaurusContext();
+  return (
+    <div className={clsx('container padding--lg', styles.architecture)}>
+      <h2 className="text--center">A sample Kratix architecture: FOOD2GO.com</h2>
+
+      <div className="row margin-top--xl">
+        <img
+          src={useBaseUrl('/img/kratix-arch-diagram.png')}
+          alt="A sample Kratix architecture in production using multiple Kratix Promises to deploy workloads to multiple clusters"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Home(): JSX.Element {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -92,6 +108,7 @@ export default function Home(): JSX.Element {
         <HomepageFeatures />
         <HomepagePromises />
         <UseCases />
+        <HomepageArchDiagrams />
       </main>
     </Layout>
   );
