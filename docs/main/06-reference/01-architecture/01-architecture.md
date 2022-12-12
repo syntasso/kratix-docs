@@ -32,7 +32,7 @@ For example, in the diagram there are three clusters that are exclusively Worker
 
 ### Kratix Workloads
 
-The primary role for these Worker clusters is to run workloads requested by consumers of the platform. 
+The primary role for these Worker clusters is to run workloads requested by consumers of the platform.
 
 For example, the _EKS_ Worker cluster has a number of workloads that were requested by _Team 2_ via the _Web App Golden Path_ Promise: two instances of Jenkins, two instances of PostgreSQL, and three instances of Nginx.
 
@@ -44,7 +44,7 @@ For example, when the _Web App Golden Path_ Promise was installed on the Platfor
 
 ### Platform as a Worker
 
-The Platform itself can _also_ be registered as a Worker cluster, which is required if the Platform offers any [Composite Promises](../guides/composite-promise).
+The Platform itself can _also_ be registered as a Worker cluster, which is required if the Platform offers any [Composite Promises](../guides/composite-promises).
 
 The _Web App Golden Path_ Promise is a Composite Promise because it is composed of three lower-level Promises: Jenkins, PostgreSQL, and Nginx. Composite Promises allow Platform teams to provide higher-level value by combining lower-level Promises available in the Marketplace.
 
