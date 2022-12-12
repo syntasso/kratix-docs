@@ -8,11 +8,11 @@ Clusters are added to the platform. By default, any Promise installed in the Pla
 cluster will be automatically installed in the clusters joining the platform.
 
 ## Pre-requisites
+
 To see this in action, you will need an environment running Kratix with a Promise
 installed. For that, you can follow the [Installing a Promise](installing-a-promise)
 guide. Before continuing, ensure you have a Platform Cluster and a Worker Cluster created
 with KinD:
-
 
 ```shell-session
 $ kind get clusters
@@ -41,6 +41,7 @@ jenkins-operator-778d6fc487-gczpb   1/1     Running   0          1h
 ```
 
 ## Preparing the new Cluster
+
 You will now add a new Cluster to the Platform Cluster and watch Kratix reconciling the
 system. For that, you need to first create the new Kubernetes cluster:
 
@@ -58,6 +59,7 @@ cd /path/to/kratix
 ```
 
 ## Registering the Cluster
+
 You can now register your cluster. Create a file called `worker-cluster-2.yaml` with the
 following contents:
 
@@ -102,9 +104,10 @@ When you request a new Jenkins, the instance will be created in one of the avail
 Clusters, in a non-deterministic way.
 
 For further documentation on Cluster Scheduling, check the [Cluster Reference
-documentation](../reference/clusters)
+documentation](../reference/clusters/intro)
 
 ## 🎉 Congratulations
+
 ✅&nbsp;&nbsp; You have created and registered a new Cluster and watched the system react to it.<br />
 👉🏾&nbsp;&nbsp; Let's [write composite promises](./composite-promises).
 

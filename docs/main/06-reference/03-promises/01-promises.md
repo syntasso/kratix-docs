@@ -1,5 +1,5 @@
 ---
-id: intro-promise
+id: intro
 ---
 
 # Promises
@@ -22,21 +22,20 @@ functionality.
 
 ## Benefits
 
-* enable you to build your platform incrementally and in response to the needs
+- enable you to build your platform incrementally and in response to the needs
   of your users.
-* codify the contract between platform teams and application teams for the
+- codify the contract between platform teams and application teams for the
   delivery of a specific service, e.g. a database, an identity service, a
   supply chain, or a complete development pipeline of patterns and tools.
-* are easy to build, deploy, and update.
-* are sharable and reusable between platforms, teams, business units, and other
+- are easy to build, deploy, and update.
+- are sharable and reusable between platforms, teams, business units, and other
   organisations.
-* add up to a frictionless experience when platform users want to create
+- add up to a frictionless experience when platform users want to create
   services that they need to deliver value.
 
 To see Promises in-action, check out the guides: [Installing a
 Promise](../../guides/installing-a-promise) and [Writing a
 Promise](../../guides/writing-a-promise).
-
 
 ## Promise API
 
@@ -54,12 +53,12 @@ spec:
 
   # Array of Kubernetes resources to be installed in the Worker Clusters
   workerClusterResources:
-  - apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: service-operator
-  - #...
-  - #...
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: service-operator
+    -  #...
+    -  #...
 
   # CRD that a Platform User uses to request an instance of this Promise
   xaasCrd:
@@ -70,7 +69,7 @@ spec:
   # Ordered list of Docker containers
   # Executed in response to a Resource Request
   xaasRequestPipeline:
-  - myorg/pipeline-image-1
-  - myorg/pipeline-image-2
-  - #...
+    - myorg/pipeline-image-1
+    - myorg/pipeline-image-2
+    -  #...
 ```

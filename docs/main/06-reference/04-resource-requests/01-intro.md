@@ -4,7 +4,7 @@ id: intro
 
 # Resource Requests
 
-One of the components of a [Promise](../promises/intro-promise) is the
+One of the components of a [Promise](../promises/intro) is the
 `xaasCrd`. In it, Promise Authors set the contract between the Platform and its
 users, defining what properties the user can configured in the Promised
 service.

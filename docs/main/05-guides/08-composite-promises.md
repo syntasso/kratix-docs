@@ -7,10 +7,10 @@ title: Composite Promise
 import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 ```
 
-*[WCR]: Worker Cluster Resources
-*[WCRs]: Worker Cluster Resources
-*[CRD]: Custom Resource Definition
-*[CRDs]: Custom Resource Definition
+_[WCR]: Worker Cluster Resources
+_[WCRs]: Worker Cluster Resources
+_[CRD]: Custom Resource Definition
+_[CRDs]: Custom Resource Definition
 
 Composite Promises are Promises that, in its WCR, contain other Promises. That
 ability allows Platform teams deliver entire stacks on demand, instead of
@@ -29,7 +29,7 @@ To install a Composite Promises, the first step is to register the Platform clus
 as an available Worker Cluster. That's because the WCR for the Composite Promises are
 Promises themselves, hence need to be scheduled to the Platform cluster.
 
-Create a new [Cluster document](../reference/clusters) `platform-cluster.yaml` with the
+Create a new [Cluster document](../reference/clusters/intro) `platform-cluster.yaml` with the
 following contents:
 
 ```yaml title="platform-cluster.yaml"
@@ -72,8 +72,8 @@ kubectl --context kind-platform apply --filename https://raw.githubusercontent.c
 This Promise is composed of a Knative and Postgres. Installing the Promise on the Platform
 will have the following side-effects:
 
-* Three Promises will be installed in the Platform Cluster: Paved Path, Knative and Postgres.
-* The Knative and Postgres's WCR will be installed on the Worker Cluster.
+- Three Promises will be installed in the Platform Cluster: Paved Path, Knative and Postgres.
+- The Knative and Postgres's WCR will be installed on the Worker Cluster.
 
 To verify the installation was successful, run:
 
@@ -144,28 +144,28 @@ spec:
   clusterSelector:
     environment: platform
   workerClusterResources:
-  #highlight-start
-  - apiVersion: platform.kratix.io/v1alpha1
-    kind: Promise
-  #highlight-end
-    metadata:
-      name: knative-serving-promise
-    spec:
-      clusterSelector:
-        environment: dev
-      workerClusterResources:
-      # remainder of the knative promise
-  #highlight-start
-  - apiVersion: platform.kratix.io/v1alpha1
-    kind: Promise
-  #highlight-end
-    metadata:
-      name: ha-postgres-promise
-    spec:
-      clusterSelector:
-        environment: dev
-      workerClusterResources:
-      # remainder of the postgres promise ...
+    #highlight-start
+    - apiVersion: platform.kratix.io/v1alpha1
+      kind: Promise
+      #highlight-end
+      metadata:
+        name: knative-serving-promise
+      spec:
+        clusterSelector:
+          environment: dev
+        workerClusterResources:
+        # remainder of the knative promise
+    #highlight-start
+    - apiVersion: platform.kratix.io/v1alpha1
+      kind: Promise
+      #highlight-end
+      metadata:
+        name: ha-postgres-promise
+      spec:
+        clusterSelector:
+          environment: dev
+        workerClusterResources:
+        # remainder of the postgres promise ...
   # remainder of the paved path promise...
 ```
 
@@ -174,7 +174,6 @@ its CRDs) is only installed in the Platform Cluster, you need to ensure the WCR 
 applied exclusively to the Platform Cluster.
 
 That is controlled by the `clusterSelector`:
-
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -187,8 +186,8 @@ spec:
     environment: platform
   #highlight-end
   workerClusterResources:
-  - # knative Promise
-  - # postgresPromise
+    -  # knative Promise
+    -  # postgresPromise
   # remainder of the paved path promise
 ```
 
@@ -214,7 +213,6 @@ script, it registered the Worker Cluster with a label `environment: dev` (as
 per output above). The `clusterSelector` field in the sub-Promises are set to
 exactly that:
 
-
 ```yaml showLineNumbers
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
@@ -224,28 +222,28 @@ spec:
   clusterSelector:
     environment: platform
   workerClusterResources:
-  - apiVersion: platform.kratix.io/v1alpha1
-    kind: Promise
-    metadata:
-      name: knative-serving-promise
-    spec:
-      #highlight-start
-      clusterSelector:
-        environment: dev
-      #highlight-end
-      workerClusterResources:
-      # remainder of the knative promise
-  - apiVersion: platform.kratix.io/v1alpha1
-    kind: Promise
-    metadata:
-      name: ha-postgres-promise
-    spec:
-      #highlight-start
-      clusterSelector:
-        environment: dev
-      #highlight-end
-      workerClusterResources:
-      # remainder of the postgres promise ...
+    - apiVersion: platform.kratix.io/v1alpha1
+      kind: Promise
+      metadata:
+        name: knative-serving-promise
+      spec:
+        #highlight-start
+        clusterSelector:
+          environment: dev
+        #highlight-end
+        workerClusterResources:
+        # remainder of the knative promise
+    - apiVersion: platform.kratix.io/v1alpha1
+      kind: Promise
+      metadata:
+        name: ha-postgres-promise
+      spec:
+        #highlight-start
+        clusterSelector:
+          environment: dev
+        #highlight-end
+        workerClusterResources:
+        # remainder of the postgres promise ...
   # remainder of the paved path promise...
 ```
 
@@ -267,5 +265,5 @@ pipeline is doing in its
 
 ## 🎉 Congratulations
 
-✅  &nbsp; You have just installed and used your first Composite Promise. <br/>
-👉  &nbsp; Let's see [where to go from here](./whats-next).
+✅ &nbsp; You have just installed and used your first Composite Promise. <br/>
+👉 &nbsp; Let's see [where to go from here](./whats-next).
