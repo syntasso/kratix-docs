@@ -84,7 +84,7 @@ function HomepageArchDiagrams() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <div className={clsx('container padding--lg', styles.sampleArchitecture)}>
-      <h2>A sample Kratix architecture: FOOD2GO.com</h2>
+      <h2>A sample Kratix architecture: EasyEaty</h2>
 
       <div className="row">
         <img
