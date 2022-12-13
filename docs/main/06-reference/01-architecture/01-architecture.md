@@ -1,5 +1,5 @@
 ---
-description: Learn more about the Architecture document
+description: Learn more about how to deploy Kratix in a prod-like environment
 title: Architecture
 id: intro
 ---
