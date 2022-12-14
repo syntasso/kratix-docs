@@ -9,7 +9,8 @@ either be a Git server (like Github or Gitea) or a S3-compatible object store
 details](/docs/main/reference/architecture).
 
 This page documents how to setup Kratix with Git on a KinD cluster. It will also
-install and instantiate Gitea as the Git server.
+install and instantiate Gitea as the Git server. To deploy Kratix with an
+S3-compatible repository, check out [this guide](/docs/main/guides/installing-kratix).
 
 ## Installing Kratix
 

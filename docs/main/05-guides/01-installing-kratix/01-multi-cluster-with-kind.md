@@ -29,7 +29,7 @@ You can also run `./scripts/quick-start.sh` from the root of the [Kratix reposit
 
 Create your `platform` cluster and install Kratix and MinIO. MinIO will be the
 repository for the GitOps toolkit. You can try Kratix with Git by following
-[this guide](/docs/main/guides/installing-kratix/using-git). For production
+[this guide](/docs/main/guides/installing-kratix/running-with-git). For production
 installations, MinIO can be replaced by Git or any other S3-compatible storage,
 depending on your preference.
 
