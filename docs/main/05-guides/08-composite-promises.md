@@ -6,11 +6,11 @@ title: Composite Promise
 ```mdx-code-block
 import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 ```
-
-_[WCR]: Worker Cluster Resources
-_[WCRs]: Worker Cluster Resources
-_[CRD]: Custom Resource Definition
-_[CRDs]: Custom Resource Definition
+<!-- remark-abbr terms -->
+*[WCR]: Worker Cluster Resources
+*[WCRs]: Worker Cluster Resources
+*[CRD]: Custom Resource Definition
+*[CRDs]: Custom Resource Definition
 
 Composite Promises are Promises that, in its WCR, contain other Promises. That
 ability allows Platform teams deliver entire stacks on demand, instead of
