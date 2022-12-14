@@ -41,7 +41,15 @@ Kratix committers are currently working on an easy to use Helm Promise template 
 
 ### Crossplane
 
-Crossplane is an ideal candidate for a Promise, and works well with Kratix. Crossplane's complexity can be hidden from stream-aligned teams by platform teams, and IaaS(AWS, Google, MS)-specific clusters, with bespoke Crossplane implementations, used with a Kratix-powered platform. A sample Crossplane Promise is under development.
+Crossplane is an ideal candidate for a Promise, and works well with Kratix.
+Crossplane's complexity can be hidden from stream-aligned teams by platform
+teams, and IaaS(AWS, Google, MS)-specific clusters, with bespoke Crossplane
+implementations, used with a Kratix-powered platform. A sample Crossplane
+Promise is under development.
+
+Check out [this blog
+post](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix)
+to see how Kratix and Crossplane can work together.
 
 ### OLM
 
