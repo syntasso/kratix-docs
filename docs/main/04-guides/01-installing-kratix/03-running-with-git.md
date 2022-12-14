@@ -5,8 +5,8 @@ title: Running with Git
 
 Kratix talks to the Worker clusters through a Repository. This Repository can be
 either be a Git server (like Github or Gitea) or a S3-compatible object store
-(like GCS and MinIO). Check [the reference architecture for more
-details](/docs/main/reference/architecture).
+(like GCS and MinIO). Check [the reference deployment topology for more
+details](/docs/main/reference/deployment-topology).
 
 This page documents how to setup Kratix with Git on a KinD cluster. It will also
 install and instantiate Gitea as the Git server. To deploy Kratix with an

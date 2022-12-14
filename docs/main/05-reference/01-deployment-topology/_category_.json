@@ -1,0 +1,8 @@
+{
+  "label": "Deployment topology",
+  "position": 1,
+  "link": {
+    "type": "doc",
+    "id": "main/reference/deployment-topology/intro"
+  }
+}

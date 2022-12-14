@@ -26,7 +26,7 @@ For more on the Platform Gap, check out [_Crossing the Platform Gap_ article on 
 * Discover and consume the services in their organisation on-demand using standard Kubernetes APIs.
 * Consume as-a-Service from the platform, safe in the knowledge that the service is fit for purpose in their organisation.
 
-## Comparison with other tools
+## Collaboration with other tools
 
 ### Kubernetes Operators
 
@@ -51,10 +51,10 @@ Check out [this blog
 post](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix)
 to see how Kratix and Crossplane can work together.
 
-### OLM
+### Operator Lifecycle Manager
 
 RedHat's Operator Lifecycle Manager (OLM) is an ideal candidate for a Promise. OLM is a single-cluster solution, of high complexity, and ideally suited for Kratix's multi-cluster GitOps orchestration, combined with the codification of the roles for the platform and stream-aligned teams. OLM is an excellent way to manage the operators used by Kratix.
 
-### OCM
+### Open Cluster Management
 
 Open Cluster Management (OCM) shares many ideas with Kratix, in particular the "Work" resource across multiple clusters, but takes a different direction in some areas. OCM philosophically appears to attempt to treat multiple clusters as one big cluster, with tight coupling between managed clusters via the klusterlet agent. Kratix decouples managed clusters, orchestrating the distributed platform via the GitOps Toolkit, enabling greater scale and resiliency of the platform as a whole. The enables the platform team to readily debug, audit, and control what's being deployed to managed clusters. This also enables the platform team to pause updates from the Platform Cluster to Worker Clusters, or add additional resources to the GitOps repositories directly.
