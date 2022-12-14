@@ -58,7 +58,7 @@ script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --name kind-platform
+./scripts/install-gitops --context kind-platform --bucket-path platform
 ```
 
 ## Install a Composite Promise

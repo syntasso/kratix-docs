@@ -55,7 +55,7 @@ directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --name kind-worker-cluster-2
+./scripts/install-gitops --context kind-worker-cluster-2 --bucket-path worker-cluster-2
 ```
 
 ## Registering the Cluster
