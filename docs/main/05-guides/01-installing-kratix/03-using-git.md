@@ -68,5 +68,5 @@ kratix-worker-system   Active   1m
 ```
 
 🎉   **Congratulations!** Kratix is now ready to receive workloads, backed by
-Git. Jump to [Installing and using a Promise](installing-a-promise) to spin up
+Git. Jump to [Installing and using a Promise](../installing-a-promise) to spin up
 your first as-a-service workload.
