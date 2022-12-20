@@ -1,5 +1,3 @@
-import useBaseUrl from '@docusaurus/useBaseUrl'
-
 export const Promises = [
   {
     name: "Knative",
