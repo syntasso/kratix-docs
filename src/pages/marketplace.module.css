@@ -3,7 +3,6 @@
   flex-wrap: 'wrap';
   justify-content: 'space-around';
   overflow: 'hidden';
-  background-color: pink;
 }
 
 .main {
@@ -14,10 +13,6 @@
 
 ul {
  margin: auto !important;
-}
-
-.card {
-  height: 100%;
 }
 
 .logo {
@@ -44,8 +39,8 @@ ul {
 }
 
 .cardAction:hover {
-      text-decoration: none;
-      color: black;
+  text-decoration: none;
+  color: black;
 }
 
 header h1 {

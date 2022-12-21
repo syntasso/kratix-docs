@@ -8,7 +8,6 @@ import { Promises } from '../data/promise-data';
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 
-
 import {
   Card,
   CardActionArea,
