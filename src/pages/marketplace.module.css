@@ -1,18 +1,23 @@
+.root {
+  display: 'flex';
+  flex-wrap: 'wrap';
+  justify-content: 'space-around';
+  overflow: 'hidden';
+  background-color: pink;
+}
+
 .main {
   max-width: 1600px;
   margin: auto;
   padding: 50px 0;
 }
 
-.gridList {
-  height: auto;
-  margin: auto;
+ul {
+ margin: auto !important;
 }
 
 .card {
-  max-width: 500px;
   height: 100%;
-  margin: 15px
 }
 
 .logo {
