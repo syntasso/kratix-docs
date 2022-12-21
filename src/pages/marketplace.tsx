@@ -1,101 +1,50 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import useBaseUrl from '@docusaurus/useBaseUrl'
 
-import GridList from '@material-ui/core/GridList';
+import styles from './marketplace.module.css';
+import { Promises } from '../data/promise-data';
+
+import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import {
   Card,
   CardActionArea,
   CardContent,
   CardMedia,
-} from '@material-ui/core';
-import Chip from '@mui/material/Chip';
-import { makeStyles } from '@material-ui/core/styles';
+  Chip,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { Promises } from '../data/promise-data';
-
-import useBaseUrl from '@docusaurus/useBaseUrl'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '& > *': {
-      margin: 'auto',
-      width: '25ch',
-    }
-  },
-  main: {
-    maxWidth: 1600,
-    margin: 'auto',
-    padding: '50px 0'
-  },
-  gridList: {
-    height: 'auto',
-    margin: 'auto'
-  },
-  card: {
-    maxWidth: 500,
-    height: '100%',
-    margin: '15px'
-  }, 
-  logo: {
-    maxWidth: 170,
-    margin: 'auto',
-    padding: '20px 0 0'
-
-  },
-  categoriesList: {
-    display: 'flex',
-    justifyContent: 'left',
-    flexWrap: 'wrap',
-    listStyle: 'none',
-    padding: '20px 0 0',
-    margin: 0  
-  },
-  cardTitle: {
-    marginTop: '10px'
-  },
-  cardDescription: {
-    minHeight: 60
-  },
-  cardAction: {
-    '&:hover': {
-      textDecoration: 'none',
-      color: 'black'
-    }
-  }
-}));
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
 export default function Marketplace() {
-  const classes = useStyles();
   return (
     <Layout title='Kratix Marketplace' description='Use Kratix Marketplace to find your next Kratix Promise'>
-      <main className={classes.main}>
+      <main className={styles.main}>
         <header>
-          <h1 style={{ textAlign: 'center'}}>Kratix Marketplace</h1>
+          <h1>Kratix Marketplace</h1>
         </header>
-        <GridList cellHeight={'auto'} className={classes.gridList} spacing={0} >
+        <GridList cellHeight={'auto'} className={styles.gridList} spacing={0} >
           {Promises.map((tile) => (
-            <Card className={classes.card} key={tile.name}>
+            <Card className={styles.card} key={tile.name}>
               <CardActionArea 
                 href='https://www.github.com/syntasso/kratix-marketplace' 
                 target='_blank' 
-                className={classes.cardAction}>
+                className={styles.cardAction}>
                 <CardMedia
                   component='img'
                   alt={tile.name}
-                  className={classes.logo}
+                  className={styles.logo}
                   image={useBaseUrl('/img/marketplace/' + tile.name.toLowerCase() + '.svg')}
                   title={tile.name}
-                  
                 />
                 <CardContent>
-                  <h2 className={classes.cardTitle}>{tile.name}</h2>
-                  <p className={classes.cardDescription}>{tile.description}</p>
+                  <h2 className={styles.cardTitle}>{tile.name}</h2>
+                  <p className={styles.cardDescription}>{tile.description}</p>
                   
-                  <ul className={classes.categoriesList}>
+                  <ul className={styles.categoriesList}>
                   {tile.categories.map((category) => (
                     <ListItem key={category}>
                       <Chip

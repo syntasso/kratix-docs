@@ -1,0 +1,48 @@
+.main {
+  max-width: 1600px;
+  margin: auto;
+  padding: 50px 0;
+}
+
+.gridList {
+  height: auto;
+  margin: auto;
+}
+
+.card {
+  max-width: 500px;
+  height: 100%;
+  margin: 15px
+}
+
+.logo {
+  max-width: 170px;
+  margin: auto;
+  padding: 20px 0 0;
+}
+
+.categoriesList {
+  display: flex;
+  justify-content: left;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 20px 0 0;
+  margin: 0;
+}
+
+.cardTitle {
+  margin-top: 10px;
+}
+
+.cardDescription {
+  min-height: 60px;
+}
+
+.cardAction:hover {
+      text-decoration: none;
+      color: black;
+}
+
+header h1 {
+  text-align: center;
+}
