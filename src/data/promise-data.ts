@@ -56,7 +56,7 @@ export const Promises = [
   },
   {
     name: "Grafana / Prometheus",
-    description: "Event monitoring and alerting using Promtheues, visualised in Grafana",
+    description: "Event monitoring and alerting using Prometheus, visualised in Grafana",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/observability",
     logoUrl: '/img/marketplace/observability.svg',
     categories: [
@@ -84,7 +84,7 @@ export const Promises = [
   },
   {
     name: "ElasticSearch",
-    description: "Distributed, open search and analytics engine for all types of data, including textual, numerical, geospatial, structured, and unstructured",
+    description: "Distributed, open search and analytics engine for all types of data",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/elasticcloud",
     logoUrl: '/img/marketplace/elasticsearch.svg',
     categories: [
