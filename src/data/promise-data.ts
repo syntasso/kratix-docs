@@ -99,5 +99,14 @@ export const Promises = [
     categories: [
       "Kubernetes"
     ]
+  },
+  {
+    name: 'NGINX Ingress Controller',
+    description: 'Ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer',
+    url: 'https://github.com/syntasso/kratix-marketplace/tree/main/nginx-ingress',
+    logoUrl: '/img/marketplace/nginx.svg',
+    categories: [
+      'Networking'
+    ]
   }
 ];
