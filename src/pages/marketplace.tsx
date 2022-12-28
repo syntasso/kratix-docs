@@ -91,7 +91,7 @@ export function Marketplace(props) {
         </div>
         <div className="text--center margin-top--md">
           Want to contribute a Promise to the Marketplace?
-          <Link href="contributing"> Check out our guide</Link>
+          <Link href="/marketplace/contributing"> Check out our guide</Link>
         </div>
       </main>
     </Layout>
