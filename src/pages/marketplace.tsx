@@ -1,7 +1,5 @@
 import React from 'react';
 import Layout from '@theme/Layout';
-import useBaseUrl from '@docusaurus/useBaseUrl'
-
 import styles from './marketplace.module.css';
 import { Promises } from '../data/promise-data';
 
@@ -16,6 +14,7 @@ import {
   Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import Link from '@docusaurus/Link';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -39,39 +38,49 @@ export function Marketplace(props) {
   }
 
   return (
-    <Layout title='Kratix Marketplace' description='Use Kratix Marketplace to find your next Kratix Promise'>
+    <Layout
+      title="Kratix Marketplace"
+      description="Use Kratix Marketplace to find your next Kratix Promise"
+    >
       <main className={styles.main}>
         <header>
           <h1>Kratix Marketplace</h1>
         </header>
         <div className="root">
-          <GridList cellHeight={'auto'} className={styles.gridList} spacing={30} cols={getGridListCols()}>
+          <GridList
+            cellHeight={"auto"}
+            className={styles.gridList}
+            spacing={30}
+            cols={getGridListCols()}
+          >
             {Promises.map((tile) => (
               <div key={tile.name}>
                 <Card className={styles.card}>
-                  <CardActionArea 
-                    href='https://www.github.com/syntasso/kratix-marketplace' 
-                    target='_blank' 
-                    className={styles.cardAction}>
+                  <CardActionArea
+                    href={tile.url}
+                    target="_blank"
+                    className={styles.cardAction}
+                  >
                     <CardMedia
-                      component='img'
+                      component="img"
                       alt={tile.name}
-                      className={styles.logo}
-                      image={useBaseUrl('/img/marketplace/' + tile.name.toLowerCase() + '.svg')}
+                      image={tile.logoUrl}
                       title={tile.name}
+                      className={styles.logo}
                     />
+
                     <CardContent>
                       <h2 className={styles.cardTitle}>{tile.name}</h2>
-                      <p className={styles.cardDescription}>{tile.description}</p>
-                      
+                      <p className={styles.cardDescription}>
+                        {tile.description}
+                      </p>
+
                       <ul className={styles.categoriesList}>
-                      {tile.categories.map((category) => (
-                        <ListItem key={category}>
-                          <Chip
-                            variant='outlined'
-                            label={category} />
-                        </ListItem>
-                      ))}
+                        {tile.categories.map((category) => (
+                          <ListItem key={category}>
+                            <Chip variant="outlined" label={category} />
+                          </ListItem>
+                        ))}
                       </ul>
                     </CardContent>
                   </CardActionArea>
@@ -79,6 +88,10 @@ export function Marketplace(props) {
               </div>
             ))}
           </GridList>
+        </div>
+        <div className="text--center margin-top--md">
+          Want to contribute a Promise to the Marketplace?
+          <Link href="contributing"> Check out our guide</Link>
         </div>
       </main>
     </Layout>
