@@ -33,7 +33,8 @@ function PromiseCard({name, url, logoUrl, description, categories, available = t
   return (
       <Card className={clsx(styles.card, available ? null : styles.cardComingSoon)}>
         <CardActionArea
-          href={url}
+          href={url || '#'}
+          disabled={!available}
           target="_blank"
           className={styles.cardAction}
         >

@@ -115,7 +115,6 @@ export const PromisesComingSoon = [
   {
     name: "MongoDB",
     description: "Document-oriented NoSQL database",
-    url: "https://github.com/syntasso/kratix-marketplace/",
     logoUrl: '/img/marketplace/mongodb.svg',
     categories: [
       "Data"
