@@ -1,3 +1,8 @@
+
+:root {
+  --text-color:  rgb(209, 209, 209);
+}
+
 .root {
   display: 'flex';
   flex-wrap: 'wrap';
@@ -21,6 +26,11 @@ ul {
   padding: 20px 0 0;
 }
 
+.cardAction:hover {
+  text-decoration: none;
+  color: black;
+}
+
 .categoriesList {
   display: flex;
   justify-content: left;
@@ -38,11 +48,24 @@ ul {
   min-height: 80px;
 }
 
-.cardAction:hover {
-  text-decoration: none;
-  color: black;
-}
-
 header h1 {
   text-align: center;
+}
+
+[data-theme="dark"] {
+  .card {
+    background-color: #303846;
+    color: var(--text-color);
+  }
+
+  .cardAction:hover {
+    color: #fff;
+    .chip {
+      color: #fff;
+    }
+  }
+
+  .chip {
+    color: var(--text-color);
+  }
 }

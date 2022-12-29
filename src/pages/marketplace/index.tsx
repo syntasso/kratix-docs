@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
-import styles from './marketplace.module.css';
-import { Promises } from '../data/promise-data';
+import styles from './marketplace.module.scss';
+import { Promises } from '../../data/promise-data';
 
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
@@ -78,7 +78,7 @@ export function Marketplace(props) {
                       <ul className={styles.categoriesList}>
                         {tile.categories.map((category) => (
                           <ListItem key={category}>
-                            <Chip variant="outlined" label={category} />
+                            <Chip variant="outlined" label={category} className={styles.chip} />
                           </ListItem>
                         ))}
                       </ul>

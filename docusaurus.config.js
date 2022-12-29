@@ -62,7 +62,7 @@ const config = {
     ],
   ],
 
-  plugins: [],
+  plugins: ['docusaurus-plugin-sass'],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
