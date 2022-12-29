@@ -1,0 +1,35 @@
+---
+title: How to contribute a Promise
+description: Find out how to contribute a Promise to the Marketplace
+---
+
+# How to contribute a Promise
+
+The Kratix Marketplace is a place where you can share and find Promises, built
+by the community, for the community. If you'd like to contribute a Promise, you
+can do so by creating a Pull Request to the [Kratix
+Docs repository](https://github.com/syntasso/kratix-docs). The list of Promises
+is stored in the `src/data/promise-data.ts` file.
+
+You can add your Promise to the list using the following template:
+
+```typescript
+{
+  name: 'Promise Name',
+  description: 'Promise Description',
+  url: 'https://github.com/org/repository',
+  logoUrl: 'image.svg',
+  categories: ['Category 1', 'Category 2']
+}
+```
+
+## Promise structure
+
+There's no specific structure required for your Promise to be accepted, neither a
+particular repository where the Promise should be stored. For inspiration, you can take
+a look at the [Promises authored by Syntasso](https://github.com/syntasso/kratix-marketplace).
+
+## When will my Promise be available?
+
+Once the PR is submitted, it will be reviewed and tested by the Kratix team. Once merged,
+it should be available on the Marketplace within minutes.
