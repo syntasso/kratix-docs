@@ -1,6 +1,6 @@
 ---
-description: Learn more about how Kratix compares to other tools in the platform space
-title: How Kratix Compares
+description: Learn more about how Kratix compliments other tools in the platform space
+title: How Kratix Compliments
 id: intro
 ---
 
@@ -9,7 +9,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 <img
 align="right"
 src={useBaseUrl('/img/k+QUESTION.png')}
-alt="Kratix logo and Terraform logo"
+alt="Kratix logo"
 />
 
 We get asked “how does Kratix compare to technology X” in many of our conversations. In the platform space, Kratix overlaps with some, is very different to others and compliments many.

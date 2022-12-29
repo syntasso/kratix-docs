@@ -6,15 +6,15 @@ id: crossplane
 
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-_**TODO WRITE BLURB** Terraform (TODO LINK) is a thing that we need to describe here with many words and this is just filling up space but when we get words they will be great. Yes indeed._
-
-_We have written a tremendous [blog](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix) about how Kratix and Crossplane integration can complement each other._
+_**TODO WRITE BLURB** Crossplane (TODO LINK) is a thing that we need to describe here with many words and this is just filling up space but when we get words they will be great. Yes indeed._
 
 <img
-align="right"
-src={useBaseUrl('/img/k+crossplane.png')}
-alt="Kratix logo and Terraform logo"
+src={useBaseUrl('/img/k+crossplane_arch.png')}
+alt="Sample architecture with Kratix and Crossplane"
+style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 />
+
+_We have written a tremendous [blog](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix) about how Kratix and Crossplane integration can complement each other._
 
 Promises and Crossplane (TODO LINK) composition are similar in that they both provide declarative APIs, and a facade into more complicated underlying platform orchestration.
 
