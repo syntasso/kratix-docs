@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import styles from './marketplace.module.scss';
-import { Promises } from '../../data/promise-data';
+import { Promises, PromisesComingSoon } from '../../data/promise-data';
 
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
@@ -15,10 +15,55 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Link from '@docusaurus/Link';
+import clsx from 'clsx';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
+
+function ComingSoonBanner() {
+  return (
+    <div className={styles.comingSoonBanner}>
+      <h3 className={styles.comingSoonBannerTitle}>Coming Soon</h3>
+    </div>
+  )
+}
+
+function PromiseCard({name, url, logoUrl, description, categories, available = true}) {
+  return (
+      <Card className={clsx(styles.card, available ? null : styles.cardComingSoon)}>
+        <CardActionArea
+          href={url}
+          target="_blank"
+          className={styles.cardAction}
+        >
+          <CardMedia
+            component="img"
+            alt={name}
+            image={logoUrl}
+            title={name}
+            className={styles.logo}
+          />
+
+          <CardContent>
+            <h2 className={styles.cardTitle}>{name}</h2>
+            <p className={styles.cardDescription}>
+              {description}
+            </p>
+
+            <ul className={styles.categoriesList}>
+              {categories.map((category) => (
+                <ListItem key={category}>
+                  <Chip variant="outlined" label={category} className={styles.chip} />
+                </ListItem>
+              ))}
+            </ul>
+            {available ? null : <ComingSoonBanner /> }
+          </CardContent>
+        </CardActionArea>
+      </Card>
+  )
+}
 
 export function Marketplace(props) {
   const getGridListCols = () => {
@@ -55,36 +100,12 @@ export function Marketplace(props) {
           >
             {Promises.map((tile) => (
               <div key={tile.name}>
-                <Card className={styles.card}>
-                  <CardActionArea
-                    href={tile.url}
-                    target="_blank"
-                    className={styles.cardAction}
-                  >
-                    <CardMedia
-                      component="img"
-                      alt={tile.name}
-                      image={tile.logoUrl}
-                      title={tile.name}
-                      className={styles.logo}
-                    />
-
-                    <CardContent>
-                      <h2 className={styles.cardTitle}>{tile.name}</h2>
-                      <p className={styles.cardDescription}>
-                        {tile.description}
-                      </p>
-
-                      <ul className={styles.categoriesList}>
-                        {tile.categories.map((category) => (
-                          <ListItem key={category}>
-                            <Chip variant="outlined" label={category} className={styles.chip} />
-                          </ListItem>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
+                <PromiseCard {...tile} />
+              </div>
+            ))}
+            {PromisesComingSoon.map((tile) => (
+              <div key={tile.name}>
+                <PromiseCard {...tile} available={false} />
               </div>
             ))}
           </GridList>

@@ -1,6 +1,15 @@
 
 :root {
   --text-color:  rgb(209, 209, 209);
+  --banner-color: #65b142;
+}
+
+[data-theme='light'] {
+  --bg-card-coming-soon: #ececec;
+}
+
+[data-theme='dark'] {
+  --bg-card-coming-soon: rgb(45, 45, 45);
 }
 
 .root {
@@ -68,4 +77,27 @@ header h1 {
   .chip {
     color: var(--text-color);
   }
+}
+
+.comingSoonBanner {
+	position: absolute;
+	width: 150px;
+	height: 150px;
+	top: -5px;
+	left: -5px;
+
+  .comingSoonBannerTitle {
+    width: 200px;
+    padding: 15px;
+    background-color: var(--banner-color);
+    color: #fff;
+    text-align: center;
+    transform: rotate(-45deg) translate(-28%, -35%);
+    box-shadow: 0px 3px 3px rgba(0,0,0,0.4);
+    font-size: 1rem;
+  }
+}
+
+.card.cardComingSoon {
+  background-color: var(--bg-card-coming-soon);
 }
