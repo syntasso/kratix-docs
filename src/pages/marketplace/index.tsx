@@ -110,9 +110,16 @@ export function Marketplace(props) {
             ))}
           </GridList>
         </div>
-        <div className="text--center margin-top--md">
-          Want to contribute a Promise to the Marketplace?
-          <Link href="/marketplace/contributing"> Check out our guide</Link>
+        <div className={clsx('text--center', 'margin-top--md', styles.bottomText)}>
+          <p>
+            Want to contribute a Promise to the Marketplace?
+            <Link href="/marketplace/contributing">Check out our guide.</Link>
+          </p>
+
+          <p>
+            Do you have any feedback? Did not find what you were looking for?
+            <Link href="https://github.com/syntasso/kratix-marketplace/issues/new/choose">Submit it on Github</Link>
+          </p>
         </div>
       </main>
     </Layout>

@@ -101,3 +101,13 @@ header h1 {
 .card.cardComingSoon {
   background-color: var(--bg-card-coming-soon);
 }
+
+.bottomText {
+  a {
+    margin-left: 5px;
+  }
+
+  p {
+    margin-bottom: 0.3rem;
+  }
+}
