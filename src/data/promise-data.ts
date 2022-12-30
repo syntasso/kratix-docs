@@ -1,5 +1,14 @@
 export const Promises = [
   {
+    name: "RabbitMQ",
+    description: "Message broker software that implements the Advanced Message Queuing Protocol (AMQP)",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/rabbitmq",
+    logoUrl: '/img/marketplace/rabbitmq.svg',
+    categories: [
+      "Messaging"
+    ]
+  },
+  {
     name: "Knative",
     description: "Deploying, running, and managing serverless, cloud-native applications",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/knative",
