@@ -9,9 +9,9 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 _**TODO WRITE BLURB** Terraform (TODO LINK) is a thing that we need to describe here with many words and this is just filling up space but when we get words they will be great. Yes indeed._
 
 <img
-align="right"
-src={useBaseUrl('/img/k+terraform.png')}
-alt="Kratix logo and Terraform logo"
+src={useBaseUrl('/img/k+terraform_arch.png')}
+alt="Sample architecture with Kratix and Terraform"
+style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 />
 
 One of Syntasso’s first real-world integrations was with a Fintech company that had an existing microservices architecture running on public-cloud based Kubernetes. Much of this infrastructure was created using Terraform.
