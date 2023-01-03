@@ -71,9 +71,10 @@ spec:
   storageGB: 10
 ```
 
-When applied to the Platform Cluster, Kratix will trigger the Pipelines, passing the
-Resource Request YAML as an input. The Pipeline can then decide what needs to be done to
-create an instance of the service with the user-provided values.
+When applied to the Platform Cluster, Kratix will trigger the Pipeline.
+
+For more details on the pipeline, see the [pipeline reference](./02-pipelines.md).
+
 
 For a in-depth exploration of the Resource Request and Pipelines, check the [Writing a
 Promise](../../guides/writing-a-promise) and [Enhancing a
