@@ -6,7 +6,7 @@ id: terraform
 
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-_**TODO WRITE BLURB** Terraform (TODO LINK) is a thing that we need to describe here with many words and this is just filling up space but when we get words they will be great. Yes indeed._
+_**[Terraform](https://www.terraform.io/)** is a tool for writing infrastructure as code. It is used to define both cloud and on-prem resources in human-readable configuration files that you can version, reuse, and share._
 
 <img
 src={useBaseUrl('/img/k+terraform_arch.png')}

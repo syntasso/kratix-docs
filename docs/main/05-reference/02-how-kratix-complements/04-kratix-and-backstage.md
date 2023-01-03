@@ -6,9 +6,9 @@ id: backstage
 
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-_**TODO WRITE BLURB** Backstage (TODO LINK) is a thing that we need to describe here with many words and this is just filling up space but when we get words they will be great. Yes indeed._
+_**[Backstage](https://backstage.io/docs/overview/what-is-backstage)** is a thing that we need to describe here with many words and this is just filling up space but when we get words they will be great. Yes indeed._
 
-_Backstage (TODO LINK) is a framework for building developer portals. Kratix is a framework for building platforms. The two were almost designed to work perfectly with one another_
+_[Backstage](https://backstage.io/) is a framework for building developer portals. Kratix is a framework for building platforms. The two were almost designed to work perfectly with one another._
 
 <img
 align="right"
