@@ -33,4 +33,5 @@ A pipeline is run on each Resource Request reconciliation loop. Kuberentes recon
 * Recreating or restarting Kratix Controller
 * A change to the Resource Request (not yet supported)
 
+<br/>
 Therefore, all pipelines should be idempotent as there is a guarantee that they will be run multiple times a day, and may be run much more frequently depending on other environmental impacts like pod restarts.
