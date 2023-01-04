@@ -119,7 +119,7 @@ export function Marketplace(props) {
 
           <p>
             Do you have any feedback? Did not find what you were looking for?
-            <Link href="https://github.com/syntasso/kratix-marketplace/issues/new/choose">Submit an issue for it on Github</Link>
+            <Link href="https://github.com/syntasso/kratix-marketplace/issues/new/choose">Submit an issue for it on GitHub</Link>
           </p>
         </div>
       </main>
