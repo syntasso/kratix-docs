@@ -117,7 +117,16 @@ export const Promises = [
     categories: [
       'Networking'
     ]
-  }
+  },
+  {
+    name: "Crossplane",
+    description: "Orchestrate infrastructure across clouds",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/crossplane",
+    logoUrl: '/img/marketplace/crossplane.svg',
+    categories: [
+      "Infrastructure Provisioning"
+    ]
+  },
 ];
 
 export const PromisesComingSoon = [
