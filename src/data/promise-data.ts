@@ -2,7 +2,7 @@ export const Promises = [
   {
     name: "RabbitMQ",
     description: "Message broker software that implements the Advanced Message Queuing Protocol (AMQP)",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/rabbitmq",
+    url: "https://github.com/syntasso/promise-rabbitmq",
     logoUrl: '/img/marketplace/rabbitmq.svg',
     categories: [
       "Messaging"
@@ -66,7 +66,7 @@ export const Promises = [
   {
     name: "Grafana / Prometheus",
     description: "Event monitoring and alerting using Prometheus, visualised in Grafana",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/observability",
+    url: "https://github.com/syntasso/promise-observability",
     logoUrl: '/img/marketplace/observability.svg',
     categories: [
       "Monitoring",
@@ -94,7 +94,7 @@ export const Promises = [
   {
     name: "ElasticSearch",
     description: "Distributed, open search and analytics engine for all types of data",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/elasticcloud",
+    url: "https://github.com/syntasso/promise-elasticcloud",
     logoUrl: '/img/marketplace/elasticsearch.svg',
     categories: [
       "Search"
