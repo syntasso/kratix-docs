@@ -90,7 +90,10 @@ export function Marketplace(props) {
     >
       <main className={styles.main}>
         <header>
-          <h1>Kratix Marketplace</h1>
+          <hgroup>
+            <h1>Kratix Marketplace</h1>
+            <p className="text--center">Community Promises for <Link href="/">Kratix</Link>, the framework for building platforms.</p>
+          </hgroup>
         </header>
         <div className="root">
           <GridList
