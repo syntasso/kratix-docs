@@ -119,6 +119,15 @@ export const Promises = [
     ]
   },
   {
+    name: "Slack",
+    description: "Send Slack messages",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/slack",
+    logoUrl: '/img/marketplace/slack.svg',
+    categories: [
+      "Communication"
+    ]
+  },
+  {
     name: "Crossplane",
     description: "Orchestrate infrastructure across clouds",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/crossplane",
