@@ -92,7 +92,6 @@ const config = {
             position: 'left'
           },
           {
-            asdads
             href: 'https://github.com/syntasso/kratix',
             position: 'right',
             className: 'header-github-link',
