@@ -87,7 +87,7 @@ const config = {
             position: 'left'
           },
           {
-            to: 'Marketplace',
+            to: 'marketplace',
             label: 'Marketplace',
             position: 'left'
           },
