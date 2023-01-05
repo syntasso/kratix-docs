@@ -120,7 +120,7 @@ export const Promises = [
   },
   {
     name: "Slack",
-    description: "Send Slack messages",
+    description: "Example of an API integration in a Kratix Promise pipeline, using the Slack API to send messages",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/slack",
     logoUrl: '/img/marketplace/slack.svg',
     categories: [
