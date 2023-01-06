@@ -116,6 +116,15 @@ export const Promises = [
     logoUrl: '/img/marketplace/nginx.svg',
     categories: [
       'Networking'
+    ],
+  },
+  {
+    name: 'Dex',
+    description: 'A demo promise to showcase cluster authentication and authorization using OIDC as a service',
+    url: 'https://github.com/syntasso/kratix-marketplace/tree/main/dex-group-authentication',
+    logoUrl: '/img/marketplace/dex.svg',
+    categories: [
+      'Security'
     ]
   },
   {
