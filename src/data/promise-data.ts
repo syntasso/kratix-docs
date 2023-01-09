@@ -2,7 +2,7 @@ export const Promises = [
   {
     name: "RabbitMQ",
     description: "Message broker software that implements the Advanced Message Queuing Protocol (AMQP)",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/rabbitmq",
+    url: "https://github.com/syntasso/promise-rabbitmq",
     logoUrl: '/img/marketplace/rabbitmq.svg',
     categories: [
       "Messaging"
@@ -66,7 +66,7 @@ export const Promises = [
   {
     name: "Grafana / Prometheus",
     description: "Event monitoring and alerting using Prometheus, visualised in Grafana",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/observability",
+    url: "https://github.com/syntasso/promise-observability",
     logoUrl: '/img/marketplace/observability.svg',
     categories: [
       "Monitoring",
@@ -94,7 +94,7 @@ export const Promises = [
   {
     name: "ElasticSearch",
     description: "Distributed, open search and analytics engine for all types of data",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/elasticcloud",
+    url: "https://github.com/syntasso/promise-elasticcloud",
     logoUrl: '/img/marketplace/elasticsearch.svg',
     categories: [
       "Search"
@@ -116,8 +116,35 @@ export const Promises = [
     logoUrl: '/img/marketplace/nginx.svg',
     categories: [
       'Networking'
+    ],
+  },
+  {
+    name: 'Dex',
+    description: 'A demo promise to showcase cluster authentication and authorization using OIDC as a service',
+    url: 'https://github.com/syntasso/kratix-marketplace/tree/main/dex-group-authentication',
+    logoUrl: '/img/marketplace/dex.svg',
+    categories: [
+      'Security'
     ]
-  }
+  },
+  {
+    name: "Slack",
+    description: "Example of an API integration in a Kratix Promise pipeline, using the Slack API to send messages",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/slack",
+    logoUrl: '/img/marketplace/slack.svg',
+    categories: [
+      "Communication"
+    ]
+  },
+  {
+    name: "Crossplane",
+    description: "Orchestrate infrastructure across clouds",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/crossplane",
+    logoUrl: '/img/marketplace/crossplane.svg',
+    categories: [
+      "Infrastructure Provisioning"
+    ]
+  },
 ];
 
 export const PromisesComingSoon = [

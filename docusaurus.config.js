@@ -81,10 +81,14 @@ const config = {
             label: 'Docs',
           },
           {
-            // to: '/workshop', # TODO: test if this changes behaviour
             type: 'doc',
             docId: 'workshop/intro',
             label: 'Workshop',
+            position: 'left'
+          },
+          {
+            to: 'marketplace',
+            label: 'Marketplace',
             position: 'left'
           },
           {

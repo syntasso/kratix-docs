@@ -126,6 +126,8 @@ The table below contains a few examples:
    _no label_                    |  _no_selector_                  | `env: dev`             | ⛔️
 
 
+In the event that more than one cluster matches the resulting labels, Kratix will randomly select within the available matching registered Clusters. If you prefer to be certain of a single cluster match, it is suggested that you add a unique identifier to all clusters (e.g. `clusterName`) so that there can only ever be a single match.
+
 ## Composite Promises
 
 Composite Promises are Promises that, in its WCRs, contain other Promises. That ability

@@ -90,7 +90,10 @@ export function Marketplace(props) {
     >
       <main className={styles.main}>
         <header>
-          <h1>Kratix Marketplace</h1>
+          <hgroup>
+            <h1>Kratix Marketplace</h1>
+            <p className="text--center">Community Promises for <Link href="/">Kratix</Link>, the framework for building platforms.</p>
+          </hgroup>
         </header>
         <div className="root">
           <GridList
@@ -119,7 +122,7 @@ export function Marketplace(props) {
 
           <p>
             Do you have any feedback? Did not find what you were looking for?
-            <Link href="https://github.com/syntasso/kratix-marketplace/issues/new/choose">Submit it on Github</Link>
+            <Link href="https://github.com/syntasso/kratix-marketplace/issues/new/choose">Submit an issue for it on GitHub</Link>
           </p>
         </div>
       </main>
