@@ -4,17 +4,11 @@ id: intro
 
 # Resource Requests
 
-One of the components of a [Promise](../promises/intro) is the
-`xaasCrd`. In it, Promise Authors set the contract between the Platform and its
-users, defining what properties the user can configured in the Promised
-service.
+One of the components of a [Kratix Promise](../promises/intro) is the `xaasCrd`. `xaasCrd` sets the contract between the Platform and its users, and it defines what properties the user can configure in the Promised service.
 
-The Resource Request is the document Platform Users write, following the contract, to
-request the creation of instances of that Promised Service. Each Promise have their own
-contract, so each Promise will have their own Resource Request format.
+The Resource Request is the document Platform Users write, following the `xaasCrd` contract, to request instances of the Promised service. Each Promise has its own contract, so each Promise will have its own Resource Request format.
 
-Consider a Promise with the following `xaasCrd`, paying special attention to the
-highlighted fields:
+Consider a Promise with the following `xaasCrd`, paying special attention to the highlighted fields:
 
 ```yaml showLineNumbers
 apiVersion: apiextensions.k8s.io/v1
@@ -31,28 +25,27 @@ spec:
     singular: someservice
   scope: Namespaced
   versions:
-  # highlight-next-line
-  - name: v1
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          # highlight-start
-          spec:
-            type: object
-            properties:
-              region: {type: string}
-              storageGB: {type: integer}
-          # highlight-end
+    # highlight-next-line
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            # highlight-start
+            spec:
+              type: object
+              properties:
+                region: { type: string }
+                storageGB: { type: integer }
+            # highlight-end
 ```
 
 The Schema in this Promise defines, as the contract, two properties under `spec`: a
 string `region` and a integer `storageGB`.
 
-A user of the Platform would write a Resource Request that looks like the following
-document:
+A example Resource Request to get an instance of this Promised service would look like:
 
 ```yaml
 # Promise spec.group and versions
@@ -71,11 +64,6 @@ spec:
   storageGB: 10
 ```
 
-When applied to the Platform Cluster, Kratix will trigger the Pipeline.
+When applied to the Platform Cluster, Kratix will trigger the Pipeline. For more details on the Pipeline, see the [Pipeline reference](./02-pipelines.md).
 
-For more details on the pipeline, see the [pipeline reference](./02-pipelines.md).
-
-
-For a in-depth exploration of the Resource Request and Pipelines, check the [Writing a
-Promise](../../guides/writing-a-promise) and [Enhancing a
-Promise](../../guides/enhancing-a-promise) guides.
+For a in-depth exploration of the Resource Request and Pipelines, check the [Writing a Promise](../../guides/writing-a-promise) and [Enhancing a Promise](../../guides/enhancing-a-promise) guides.

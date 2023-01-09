@@ -4,9 +4,7 @@ title: Clusters
 id: intro
 ---
 
-This page contains documentation for the Kratix Cluster. The Cluster Resource is a
-representation of a system where workloads can be scheduled to, which in turn are usually
-Kubernetes clusters. See below for the API documentation:
+The Kratix Cluster Resource is the representation of a system where workloads can be scheduled to, which are usually Kubernetes clusters. See below for the API documentation:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -26,8 +24,8 @@ spec:
 ```
 
 When a new Cluster is registered in the Platform cluster (i.e., a new Cluster Resource is
-created), Kratix will create a pair of buckets: one for `resources`, one for `crds`. The
+created), Kratix will create a pair of buckets in the [Repository](../01-deployment-topology/01-deployment-topology.md#gitops-repository): one for `resources`, one for `crds`. The
 full path of the buckets will be:
 
-* `<spec.bucketPath>-resources`
-* `<spec.bucketPath>-crds`
+- `<spec.bucketPath>-resources`
+- `<spec.bucketPath>-crds`

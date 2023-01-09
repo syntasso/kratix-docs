@@ -5,11 +5,11 @@ title: Deleting
 
 :::caution
 
-Deleting a promise will cascade delete all the associated Resource Requests.
+Deleting a promise will cascade delete all the associated Resource Requests and Worker Cluster Resources.
 
 :::
 
-To delete a promise, run the command below, making sure to replace the
+To delete a Promise, run the command below, making sure to replace the
 `<promise name>` with the Promise you want to remove:
 
 ```shell-session
@@ -31,4 +31,3 @@ This mean that when Kratix deletes the resources its removing them from the GitO
 is delegating the responsibility to delete them on the Worker Cluster to the GitOps
 controller. This results in a small delay between the resources being declared
 as deleted and them being actually deleted.
-

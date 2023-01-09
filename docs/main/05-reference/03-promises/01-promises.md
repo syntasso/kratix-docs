@@ -4,9 +4,12 @@ id: intro
 
 # Promises
 
-Conceptually, Promises are the building blocks that enable teams to design
-platforms that specifically meet their customer needs. Technically, a Promise
-is a YAML document that defines a contract between the Platform and its users.
+Conceptually, Kratix Promises are the building blocks that enable teams to design
+platforms that specifically meet their customer needs.
+
+Technically, a Promise is a YAML document that defines a contract between the Platform and its users.
+
+## Use Case
 
 Consider the task of setting up development environments for application teams.
 This task is usually repetitive and requires many cookie-cutter steps. It may
@@ -22,6 +25,8 @@ functionality.
 
 ## Benefits
 
+Promises:
+
 - enable you to build your platform incrementally and in response to the needs
   of your users.
 - codify the contract between platform teams and application teams for the
@@ -33,9 +38,7 @@ functionality.
 - add up to a frictionless experience when platform users want to create
   services that they need to deliver value.
 
-To see Promises in-action, check out the guides: [Installing a
-Promise](../../guides/installing-a-promise) and [Writing a
-Promise](../../guides/writing-a-promise).
+To see Promises in-action, check out the guides: [Installing a Promise](../../guides/installing-a-promise) and [Writing a Promise](../../guides/writing-a-promise).
 
 ## Promise API
 
