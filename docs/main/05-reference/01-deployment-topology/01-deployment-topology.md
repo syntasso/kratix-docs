@@ -54,6 +54,6 @@ In order to populate the lower-level offerings in a Platform, Kratix has provide
 
 ## Pipelines and Off Cluster Resources
 
-Kratix Promises include a concept called Request Pipelines. These pipelines are defined by the Promise author and are executed in the Platform when a consumer makes a request for a Promise. Pipelines specify a set of containers that will run prior to the instantiation of workloads, and they encapsulate a number of organisational requirements.
+Kratix Promises include a concept called [Pipelines](./resource-requests/pipelines). These pipelines are defined by the Promise author and are executed in the Platform when a consumer makes a request for a Promise. Pipelines specify a set of containers that will run prior to the instantiation of workloads, and they encapsulate a number of organisational requirements.
 
 For example, when _Team 2_ requested the _Web App Golden Path_ Promise, the Request Pipeline executed and sent notifications via Slack, set up an on-call rota on PagerDuty, and created the appropriate tickets in Zendesk.
