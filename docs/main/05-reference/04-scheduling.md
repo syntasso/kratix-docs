@@ -3,8 +3,8 @@ description: Learn more about the Scheduling Promises and Workloads
 title: Scheduling
 ---
 
-*[WCR]: Worker Cluster Resource
-*[WCRs]: Worker Cluster Resources
+_[WCR]: Worker Cluster Resource
+_[WCRs]: Worker Cluster Resources
 
 One of the most powerful Kratix features is the ability Platform teams have to
 fully control scheduling of work across Kubernetes Cluster. Scheduling happens
@@ -20,20 +20,14 @@ Promise](../guides/composite-promises) pages.
 
 ## Scheduling Promises {#promises}
 
-By default, all Clusters registered with the Platform will have all the Promises Worker
-Cluster Resources installed in it. In other words, all registered Clusters will be ready
-to run workloads for all Promises. When a new Cluster is registered, Kratix will
-automatically install the WCRs for the Promises that are already installed in the
-Platform.
+By default, Worker Cluster Resources (WCRs) for every Promise on the platform will be installed on all Clusters registered with the platform. In other words, all registered Clusters will be ready to run workloads for all Promises. When a new Cluster is registered, Kratix will automatically install the WCRs for the Promises that are already installed in the Platform.
 
-Platform teams can, however, control which Clusters receive which Promises by using a
-combination of Cluster labels and Promise Cluster selectors.
+Platform teams can, however, control which Clusters receive which Promises by using a combination of Cluster labels and Promise Cluster selectors.
 
 The `labels` in the Cluster document are the standard Kubernetes
 [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/):
 simple, arbitrary, key/value pairs. In the example below, the Cluster object is being
 created with a label `environment` with value `dev`:
-
 
 ```yaml title="worker-cluster-2.yaml"
 apiVersion: platform.kratix.io/v1alpha1
