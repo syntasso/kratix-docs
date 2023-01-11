@@ -66,16 +66,16 @@ has no `labels`, only Promises with no `clusterSelector` will be applied.
 
 The table below contains a few examples:
 
-  Cluster Label                  |  Promise Selector               |  Match?
----------------------------------|---------------------------------|-------
-  _no label_                     |  _no selector_                  |  ✅
-  `env: dev`                     |  _no selector_                  |  ✅
-  `env: dev`                     |  `env: dev`                     |  ✅
-  `env: dev` <br /> `zone:eu`    |  `env: dev`                     |  ✅
-  `env: dev` <br /> `zone:eu`    |  `env: dev` <br /> `zone:eu` |  ✅
-  `env: dev`                     |  `env: prod`                    |  ⛔️
-  `env: dev`                     |  `env: dev` <br /> `zone:eu` |  ⛔️
-   _no label_                    |  `env: dev`                     |  ⛔️
+| Cluster Label               | Promise Selector            | Match? |
+| --------------------------- | --------------------------- | ------ |
+| _no label_                  | _no selector_               | ✅     |
+| `env: dev`                  | _no selector_               | ✅     |
+| `env: dev`                  | `env: dev`                  | ✅     |
+| `env: dev` <br /> `zone:eu` | `env: dev`                  | ✅     |
+| `env: dev` <br /> `zone:eu` | `env: dev` <br /> `zone:eu` | ✅     |
+| `env: dev`                  | `env: prod`                 | ⛔️    |
+| `env: dev`                  | `env: dev` <br /> `zone:eu` | ⛔️    |
+| _no label_                  | `env: dev`                  | ⛔️    |
 
 ## Scheduling Workloads {#workload}
 
@@ -107,18 +107,17 @@ Clusters with labels: `env=dev && env=prod` [^1].
 
 The table below contains a few examples:
 
-  Cluster Label                  |  Promise Selector               | cluster-selectors.yaml | Match?
----------------------------------|---------------------------------| ---------------------- | -------
-  _no label_                     |  _no selector_                  | _no_selector_          | ✅
-  `env: dev`                     |  _no selector_                  | _no_selector_          | ✅
-  `env: dev`                     |  `env: dev`                     | _no_selector_          | ✅
-  `env: dev` <br /> `zone: eu`   |  `env: dev`                     | `zone: eu`             | ✅
-  `env: dev` <br /> `zone: eu`   |  _no selector_                  | `zone: eu`             | ✅
-  `env: dev`                     |  `env: dev`                     | `env: prod`            | ⛔️
-  `env: dev`                     |  `env: prod`                    | `env: dev`             | ⛔️
-  `env: dev`                     |  `env: dev` <br /> `zone: eu`   | _no_selector_          | ⛔️
-   _no label_                    |  _no_selector_                  | `env: dev`             | ⛔️
-
+| Cluster Label                | Promise Selector             | cluster-selectors.yaml | Match? |
+| ---------------------------- | ---------------------------- | ---------------------- | ------ |
+| _no label_                   | _no selector_                | _no_selector_          | ✅     |
+| `env: dev`                   | _no selector_                | _no_selector_          | ✅     |
+| `env: dev`                   | `env: dev`                   | _no_selector_          | ✅     |
+| `env: dev` <br /> `zone: eu` | `env: dev`                   | `zone: eu`             | ✅     |
+| `env: dev` <br /> `zone: eu` | _no selector_                | `zone: eu`             | ✅     |
+| `env: dev`                   | `env: dev`                   | `env: prod`            | ⛔️    |
+| `env: dev`                   | `env: prod`                  | `env: dev`             | ⛔️    |
+| `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_          | ⛔️    |
+| _no label_                   | _no_selector_                | `env: dev`             | ⛔️    |
 
 In the event that more than one cluster matches the resulting labels, Kratix will randomly select within the available matching registered Clusters. If you prefer to be certain of a single cluster match, it is suggested that you add a unique identifier to all clusters (e.g. `clusterName`) so that there can only ever be a single match.
 
@@ -130,11 +129,11 @@ services.
 
 To enable this functionality, the following needs to be true:
 
-* The Platform cluster must register itself as a Worker cluster
-* The GitOps toolkit must be installed in the Platform cluster
-* The Composite Promise must instruct Kratix to install its WCR (i.e. the other Promises)
+- The Platform cluster must register itself as a Worker cluster
+- The GitOps toolkit must be installed in the Platform cluster
+- The Composite Promise must instruct Kratix to install its WCR (i.e. the other Promises)
   in the Platform cluster
-* Optionally, the sub-Promises may instruct Kratix to install their WCR outside the
+- Optionally, the sub-Promises may instruct Kratix to install their WCR outside the
   Platform cluster
 
 For detailed instruction on the above, please check the [Composite
