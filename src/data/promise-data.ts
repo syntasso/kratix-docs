@@ -145,6 +145,15 @@ export const Promises = [
       "Infrastructure Provisioning"
     ]
   },
+  {
+    name: "Waypoint",
+    description: "Open source solution that provides a modern workflow for build, deploy, and release",
+    url: "https://github.com/syntasso/promise-waypoint/tree/main",
+    logoUrl: '/img/marketplace/waypoint.svg',
+    categories: [
+      "App Delivery"
+    ]
+  },
 ];
 
 export const PromisesComingSoon = [
