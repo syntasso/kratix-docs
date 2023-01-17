@@ -24,11 +24,11 @@ Kratix enables platform teams to declare platform APIs that orchestrates workloa
 
 ## Why
 
-This divide between GUI and API makes Backstage and Kratix the perfect the perfect package.
+This divide between GUI and API makes Backstage and Kratix the perfect package.
 
 * **Decoupled architecture:**
 
-    GUI architectures in general–shine when their responsibility is limited to the UX experience. Rather than define your platform orchestartation in Backstage directly, you can have Backstage call the Kratix API which provides easier portability across GUIs, alternative experiences for more CLI driven users, and easier refactoring of platfom implementation due to stable API definitions.
+    GUI architectures shine when their responsibility is limited to the UX experience. Rather than define your platform orchestartation in Backstage directly, you can have Backstage call the Kratix API which provides easier portability across GUIs, alternative experiences for more CLI driven users, and easier refactoring of platfom implementation due to stable API definitions.
 
 * **Auto-populated GUI:**
 
@@ -43,7 +43,10 @@ Declarative UIs by default with Kratix:
 * Templates for Promises are automatically created when Promises are loaded. Giving consumers of the platform simple, predictable UX to create the instance of the Promises they require. This could be entire paved-path environments, or simply instances of services developers need. See the [Marketplace](https://www.kratix.io/marketplace) our Promises. 
 * Due to Kratix's powerful GitOps abstractions, the Backstage configuration data lives outside of Backstage, leaving your Kratix-driven Backstage ephemeral in nature. If your Backstage dies, no problem, redepoly it and your views will be automatically brought back to life by Kratix.
 
+<br />
+<div style={{"text-align":"center"}}>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/wj5VaXYTvrg" title="Use Kratix to provide on demand services through a Backstage UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
 
 <br/>
 
