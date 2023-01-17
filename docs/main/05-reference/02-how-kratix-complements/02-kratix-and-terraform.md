@@ -14,12 +14,36 @@ alt="Sample architecture with Kratix and Terraform"
 style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 />
 
-One of Syntasso’s first real-world integrations was with a Fintech company that had an existing microservices architecture running on public-cloud based Kubernetes. Much of this infrastructure was created using Terraform.
+## What
 
-The first use case we set out to solve was enabling their QA teams to spin up dedicated environments on demand via a simple API request. This was an evolution of their existing ticket-driven system that required a platform team member to create the testing environment on behalf of the QA teams.
+Terraform and Kratix both aim to enable infrastructure as code (IaC) but at different abstraction levels.
 
-Kratix is a framework for building platforms, part of that vision includes meeting customers where they are through simple integration with existing IaC technologies. In the use case outlined above, our customer built a TestEnvironment Promise to orchestrate their existing toolchain and to provide a more streamlined platform experience.
+Terraform has a mature community that supports managing cloud and other SaaS tooling through their custom HCL programming language. Using HCL, platform teams are able to create, modify, and delete infrastructure in a declarative way.
 
-The TestEnvironment Promise enabled the platform team to declaratively create a simple CRD which exposed a simple API to enable on-demand creation and deletion of environments as required. This API exposed variables that their QA needed to input into their on-demand environment, like the version of the system they needed to test. On request of a new test environment, the Promise pipeline took the variables from the API request and mapped them into the `Tfvars` file, which was used to imperatively drive the Terraform plan command before applying to create the cloud infrastructure. The Promise pipeline then simply waited until Terraform apply had completed the creation of the cloud infrastructure before continuing the Promise workflow with the deployment of the microservice architecture under test.
+Kratix enables platform teams to create [Promises](../promises/intro). Promises define an API for thier users (application engineers) to easily request on demand infrastructure. Promises also define any steps required to fulfil that request including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
 
-As Kratix takes no opinion on what technologies are used within a Promise, our client was quickly able to embed their existing IaC scripts directly into the TestEnvironment Promise to rapidly deliver on their use case: A shift of their manually-run, ticket-driven, IaC scripts into a declarative API, ready to be consumed on-demand driven by Kratix.
+## Why
+
+IaC has historically been implemented, and used, almost exclusively by platform and other infrastructure facing teams.
+
+Today, there is a larger focus on making this infrastructure self-service by end users like application engineers. Think Databases-as-a-Service or test environments-as-a-Service. While IaC may be the implementation of how to fulfil these requests, it is not always clear to an end user how to leverage a module to create a new instance so it often requires a ticket for the infrastructure team to complete. This creates blocking queues for end users and increased toil for infrastructure and platform teams.
+
+To provide on-demand services, a platform team is best suited decoupling their API for requesting a service from the implementation for how to create and manage them.
+
+## How
+
+Kratix enables platform teams to declare APIs that orchestrates workloads across your infrastructure. The orchestration of infrastructure can happnen in two ways in Kratix: 
+* via a declared [pipeline](https://kratix.io/docs/main/reference/resource-requests/pipelines) that is executed as part of every Promise request
+* via Kratix [scheduling](https://kratix.io/docs/main/reference/scheduling) workloads onto Kubernetes Clusters using GitOps
+
+Kratix pipeline stages are a perfect place to execute sequential tasks such as running Terraform plans and applies, billing checks, security scans, audits, resource decoration and more. These tasks all happen automatically each time a user requests an instance of a Promise.
+
+If you use tools like the [Terraform Cloud Operator](https://developer.hashicorp.com/terraform/tutorials/kubernetes/kubernetes-operator) by HashiCorp or the Weaveworks [Terraform Controller](https://docs.gitops.weave.works/docs/terraform/get-started/) then you can use the scheduling portion of Kratix to create your resources.
+
+<br/>
+
+If this sounds interesting to you, [contact us](https://www.syntasso.io/contact-us) and we can help you get started with Kratix and Backstage.
+
+## Additional resources
+
+* [Blog: How one of our early customers solved their QA environment challenges wiht Kratix and Terraform](https://www.syntasso.io/post/use-case-providing-self-service-environments-on-demand-using-kratix)

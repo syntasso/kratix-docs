@@ -14,12 +14,41 @@ src={useBaseUrl('/img/k+backstage.png')}
 alt="Kratix logo and Backstage logo"
 />
 
-Kratix takes the design position that Kubernetes is ubiquitous in most organizations. This choice has enabled us to build Kratix by extending the Kubernetes API to provide a consistent platform UX experience. Every time you load a Promise into Kratix you are extending the K8s API through the creation of custom resource definitions (CRDs), controller processes and custom resources. Platform teams often wish to abstract away this complexity and provide higher abstractions to ease platform usage—not just in the case of Kratix but in the case of all internal platforms. This pattern has led to the exciting rise of technologies such as Backstage.
+## What
 
-Backstage is a framework that enables UIs to be declaratively created with the aim of unifying infrastructure tooling, services, and documentation to produce a great developer experience. The difficulty with Backstage is that its plugins often require complex backends that are written in Javascript.
+Backstage and Kratix both believe that the most powerful platforms must be built by each organisation. While a platform needs to be custom built, both tools also encourage building on top of community provided support where possible. Both tools provide a framework for platform engineers that encourages user experience front and center.
 
-If you wish to build a Backstage workflow that depends on Terraform, Kubernetes, and an off-platform technology such as SAP then you will be left with an integration problem. The Backstage plugin managing the workflow would need to orchestrate all of those integrations to achieve the required results. This leaves your UX with too much knowledge of the underlying platform. This design also introduces a high cost of change if you wish to introduce another UX technology. In our experience Backstage–and UI architectures in general–shine when their responsibility is limited to the UX experience not being the source of knowledge on infrastructure wiring. This is where Kratix can really compliment Backstage.
+Backstage is a framework that enables GUIs to be declaratively created with the aim of unifying infrastructure tooling, services, and documentation to produce a great developer experience. Backstage is un-opinionated and decoupled from how you drive your platform infrastructure.
 
-Kratix is the framework for building platforms. A platform team can compose their platform by loading in [new capabilities](/marketplace) via a powerful abstraction known as Kratix [Promises](../04-promises/01-promises.md). Promises provide the perfect surface area to orchestrate the concerns of the platform. To take our example from above, if the platform team need to orchestrate Terraform, Kubernetes and off platform tools such as SAP with Promises they can create single consistent API, which is the perfect abstraction for a tool like Backstage to interact with. Promises also provide built-in [pipelines](../05-resource-requests/02-pipelines.md), and via the simple building blocks of containers can run any tools needed to orchestrate tools such as Terraform and SAP.
+Kratix enables platform teams to declare platform APIs that orchestrates workloads across your infrastructure. Kratix does not come with a packaged GUI.
 
-With Promises the platform team also gets the added benefit of being able to declaratively drive Backstage UIs with direct Kratix-Backstage integrations. When Promises are loaded then the Backstage portal is immediately updated with UI views that represent that Promise—for free driven by Kratix. Our Backstage for Kratix integration is in the works. If you wish to preview our Kratix Promise then [contact us](https://www.syntasso.io/contact-us).
+## Why
+
+This divide between GUI and API makes Backstage and Kratix the perfect the perfect package.
+
+* **Decoupled architecture:**
+
+    GUI architectures in general–shine when their responsibility is limited to the UX experience. Rather than define your platform orchestartation in Backstage directly, you can have Backstage call the Kratix API which provides easier portability across GUIs, alternative experiences for more CLI driven users, and easier refactoring of platfom implementation due to stable API definitions.
+
+* **Auto-populated GUI:**
+
+    Backstage GUIs must be declared: this is toil for the platform. Kratix can reduce this toil by integrating [Promises](../promises/intro) with Backstage by default. In addition, these GUIs can diverge from platform offerings if they are managed separately from the backend implementations. Promises that defined the API and the Backstage GUI at the same time provide automatic support for iterations on your offerings.
+
+## How
+
+Integrating Backstage with Kratix is simple. We point Backstage at the Kratix Platform cluster and that's it. Kratix will then build the Backstage views as Promises are loaded into to Kratix, and instances of those Promises are requested by users of the platform. 
+
+Declarative UIs by default with Kratix:
+* The Backstage Catalog is automatically populated when Kratix Promises are applied. 
+* Templates for Promises are automatically created when Promises are loaded. Giving consumers of the platform simple, predictable UX to create the instance of the Promises they require. This could be entire paved-path environments, or simply instances of services developers need. See the [Marketplace](https://www.kratix.io/marketplace) our Promises. 
+* Due to Kratix's powerful GitOps abstractions, the Backstage configuration data lives outside of Backstage, leaving your Kratix-driven Backstage ephemeral in nature. If your Backstage dies, no problem, redepoly it and your views will be automatically brought back to life by Kratix.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wj5VaXYTvrg" title="Use Kratix to provide on demand services through a Backstage UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+<br/>
+
+If this sounds interesting to you, [contact us](https://www.syntasso.io/contact-us) and we can help you get started with Kratix and Backstage.
+
+## Additional resources
+
+* [Blog: Kratix and Backstage, a perfect pair](https://www.syntasso.io/post/kratix-and-backstage-a-perfect-pair)
