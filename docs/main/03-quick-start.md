@@ -12,7 +12,7 @@ install Kratix on a single cluster.
 ## Prerequisite: Kubernetes Cluster
 
 Kratix requires a Kubernetes cluster to run. If you don't already have a cluster, we
-recommend starting wtih a local cluster tool like
+recommend starting with a local cluster tool like
 [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/) or
 [minikube](https://minikube.sigs.k8s.io/docs/start/).
 
@@ -40,7 +40,7 @@ FluxCD to watch for the cluster's repository:
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/config-all-in-one.yaml
 ```
 
-Once the system reconciles, the Kratix resources should now be visible on the your
+Once the system reconciles, the Kratix resources should now be visible on your
 cluster. You can verify its readiness by observing the `kratix-worker-system` namespace
 appearing in the cluster (it may take a couple of minutes):
 
@@ -58,7 +58,7 @@ Install the sample Postgres Promise with the command below:
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
 ```
 
-Installing the Promise will eventually start the Postgres Operator on your Cluster. You
+Installing the Promise will eventually start the Postgres Operator on your cluster. You
 can verify by running:
 
 ```console
