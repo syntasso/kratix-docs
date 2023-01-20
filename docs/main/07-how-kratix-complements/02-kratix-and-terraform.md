@@ -20,7 +20,7 @@ Terraform and Kratix both aim to enable infrastructure as code (IaC) but at diff
 
 Terraform has a mature community that supports managing cloud and other SaaS tooling through their custom HCL programming language. Using HCL, platform teams are able to create, modify, and delete infrastructure in a declarative way.
 
-Kratix enables platform teams to create [Promises](../promises/intro). Promises define an API for thier users (application engineers) to easily request on demand infrastructure. Promises also define any steps required to fulfil that request including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
+Kratix enables platform teams to create [Promises](../05-reference/04-promises/01-promises.md). Promises define an API for thier users (application engineers) to easily request on demand infrastructure. Promises also define any steps required to fulfil that request including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
 
 ## Why
 
@@ -32,9 +32,10 @@ To provide on-demand services, a platform team is best suited decoupling their A
 
 ## How
 
-Kratix enables platform teams to declare APIs that orchestrates workloads across your infrastructure. The orchestration of infrastructure can happnen in two ways in Kratix: 
-* via a declared [pipeline](https://kratix.io/docs/main/reference/resource-requests/pipelines) that is executed as part of every Promise request
-* via Kratix [scheduling](https://kratix.io/docs/main/reference/scheduling) workloads onto Kubernetes Clusters using GitOps
+Kratix enables platform teams to declare APIs that orchestrates workloads across your infrastructure. The orchestration of infrastructure can happnen in two ways in Kratix:
+
+- via a declared [pipeline](../05-reference/05-resource-requests/02-pipelines.md) that is executed as part of every Promise request
+- via Kratix [scheduling](../05-reference/04-scheduling.md) workloads onto Kubernetes Clusters using GitOps
 
 Kratix pipeline stages are a perfect place to execute sequential tasks such as running Terraform plans and applies, billing checks, security scans, audits, resource decoration and more. These tasks all happen automatically each time a user requests an instance of a Promise.
 
@@ -46,4 +47,4 @@ If this sounds interesting to you, [contact us](https://www.syntasso.io/contact-
 
 ## Additional resources
 
-* [Blog: How one of our early customers solved their QA environment challenges wiht Kratix and Terraform](https://www.syntasso.io/post/use-case-providing-self-service-environments-on-demand-using-kratix)
+- [Blog: How one of our early customers solved their QA environment challenges wiht Kratix and Terraform](https://www.syntasso.io/post/use-case-providing-self-service-environments-on-demand-using-kratix)
