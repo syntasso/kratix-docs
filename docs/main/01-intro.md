@@ -13,7 +13,7 @@ Check out a video overview of our product:
 ### Using Kratix to build your platform you can:
 
 * use GitOps workflow with Flux and familiar Kubernetes-native constructs.
-* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”. Learn more about Kratix Promises [here](./guides/writing-a-promise).
+* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of _Promises_. Learn more about Kratix Promises [here](./guides/writing-a-promise).
 * create a flexible platform with your paved paths as Promises.
 * evolve your platform easily as your business needs change.
 * start small on a laptop and expand to multi-team, multi-cluster, multi-region, and multi-cloud with a consistent API everywhere.
