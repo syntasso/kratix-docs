@@ -31,7 +31,7 @@ jobs:
           ref: main
       - name: Get the content of algolia.json as config
         id: algolia_config
-        run: echo "::set-output name=config::$(echo algolia-config.json | jq -r tostring)"
+        run: echo "::set-output name=config::$(cat algolia-config.json | jq -r tostring)"
       - name: Push indices to Algolia
         uses: signcl/docsearch-scraper-action@master
         env:
