@@ -44,8 +44,13 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Update Algolia
-        uses: addnab/docker-run-action@v3
-        with:
-          image: algolia/docsearch-scraper
-          options: -env=APPLICATION_ID=${ALGOLIA_APP_ID} --env=API_KEY=${ALGOLIA_API_KEY} --env "CONFIG=$(cat ./algolia-config.json | jq -r tostring)"
+      - name: Get the content of algolia.json as config
+        id: algolia_config
+        run: echo "::set-output name=config::$(echo algolia-config.json | jq -r tostring)"
+
+      - name: Push indices to Algolia
+        uses: signcl/docsearch-scraper-action@master
+        env:
+          APPLICATION_ID: ${{ secrets.ALGOLIA_APP_ID }}
+          API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+          CONFIG: ${{ steps.algolia_config.outputs.config }}
