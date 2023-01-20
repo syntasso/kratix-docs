@@ -1,10 +1,11 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: pages build and deployment
+name: update algolia
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["gh-pages"]
+  workflow_run:
+    workflows: [pages-build-deployment]
+    types:
+      - completed
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -22,34 +23,15 @@ concurrency:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: gh-pages
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload entire repository
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
-  update-search:
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
+          ref: main
       - name: Get the content of algolia.json as config
         id: algolia_config
         run: echo "::set-output name=config::$(echo algolia-config.json | jq -r tostring)"
-
       - name: Push indices to Algolia
         uses: signcl/docsearch-scraper-action@master
         env:
