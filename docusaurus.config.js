@@ -140,6 +140,14 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
         additionalLanguages: ['shell-session']
+      },
+      algolia: {
+        // Algolia application ID
+        appId: 'HCC8KZQZAN',
+        // Public API key
+        apiKey: 'e6987ab7376144570f40e7355b648d8a',
+        indexName: 'kratix_io',
+        contextualSearch: true,
       }
     }),
 };
