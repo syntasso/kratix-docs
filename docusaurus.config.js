@@ -143,10 +143,10 @@ const config = {
       },
       algolia: {
         // Algolia application ID
-        appId: 'HCC8KZQZAN',
+        appId: '0T1XCKLOOH',
         // Public API key
-        apiKey: 'e6987ab7376144570f40e7355b648d8a',
-        indexName: 'kratix_io',
+        apiKey: 'f03b43d042df527c0538ff3a332a39a7',
+        indexName: 'kratix',
         contextualSearch: true,
       }
     }),
