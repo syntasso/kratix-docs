@@ -38,37 +38,38 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 
 :::tip
 
-The commands below will refer to a `KRATIX_REPO` env variable. You can either:
+In this guide, we will be using Promises available on the [Kratix Marketplace](/marketplace).
+The commands below will refer to a `KRATIX_MARKETPLACE_REPO` env variable. You can either:
 
-* clone Kratix and set it to the path of your local clone:
+* clone the [Kratix Marketplace](https://github.com/syntasso/kratix-marketplace) and set it to the path of your local clone:
     ```bash
-    export KRATIX_REPO=/path/to/kratix
+    export KRATIX_MARKETPLACE_REPO=/path/to/kratix
     ```
 * set it to a remote URL:
     ```bash
-    export KRATIX_REPO="https://raw.githubusercontent.com/syntasso/kratix/main"
+    export KRATIX_MARKETPLACE_REPO="https://raw.githubusercontent.com/syntasso/kratix-marketplace/main"
     ```
 :::
 
 
-Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform Cluster:
+Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
 
 ```bash
 kubectl --context kind-platform apply \
-  --filename "${KRATIX_REPO}/samples/jenkins/jenkins-promise.yaml"
+  --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/promise.yaml"
 ```
 <br />
 
 Verify that your `platform` cluster has registered Jenkins as a new available Kratix Promise.
 
 ```bash
-kubectl --context kind-platform get crds jenkins.example.promise.syntasso.io
+kubectl --context kind-platform get crds jenkins.marketplace.kratix.io
 ```
 
 The above command will give an output similar to
 ```console
-NAME                                  CREATED AT
-jenkins.example.promise.syntasso.io   2021-05-10T12:00:00Z
+NAME                            CREATED AT
+jenkins.marketplace.kratix.io   2021-05-10T12:00:00Z
 ```
 
 <br />
@@ -105,14 +106,14 @@ Application developers using your platform will be issued a Jenkins instance aft
 Test your platform by acting as an application developer and submitting a Resource Request.
 ```bash
 kubectl --context kind-platform apply \
-    --filename "${KRATIX_REPO}/samples/jenkins/jenkins-resource-request.yaml"
+    --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/resource-request.yaml"
 ```
 
 <br />
 
 Verify that the Resource Request was issued on the `platform` cluster.
 ```bash
-kubectl --context kind-platform get jenkins.example.promise.syntasso.io
+kubectl --context kind-platform get jenkins.marketplace.kratix.io
 ```
 
 The above command will give an output similar to
@@ -123,7 +124,7 @@ example             1m
 
 Eventually (it can take a couple of minutes), a new Jenkins instance should spin up on your `worker` cluster. You can verify this by running the following command:
 
-<p>Verify the instance was created on the Worker Cluster<br />
+<p>Verify the instance was created on the worker cluster<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -134,7 +135,7 @@ kubectl --context kind-worker get pods --watch
 The above command will give an output similar to
 ```console
 NAME                                READY   STATUS    RESTARTS   AGE
-jenkins-example                     1/1     Running   0          1m
+jenkins-dev-example                 1/1     Running   0          1m
 jenkins-operator-7886c47f9c-zschr   1/1     Running   0          10m
 ```
 <br />
@@ -151,7 +152,7 @@ Before you can access Jenkins UI, you must port forward from within the Kubernet
 _**Open a new terminal to request the port forward**_.
 
 ```console
-kubectl --context kind-worker port-forward jenkins-example 8080:8080
+kubectl --context kind-worker port-forward jenkins-dev-example 8080:8080
 ```
 
 :::
@@ -161,11 +162,11 @@ In production, you want the credentials to be stored in a secure location where 
 In this example, credentials are stored as unencrypted Kubernetes secrets.
 
 ```console jsx title="username"
-kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 
@@ -186,16 +187,16 @@ To clean up your environment you need to delete the Jenkins Resource Requests an
 To delete the Jenkins Resource Requests:
 ```bash
 kubectl --context kind-platform delete \
-    --filename "${KRATIX_REPO}/samples/jenkins/jenkins-resource-request.yaml"
+    --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/resource-request.yaml"
 ```
 
-Verify the Jenkins Resource Request in the Platform Cluster is gone
+Verify the Jenkins Resource Request in the platform cluster is gone
 ```console
 kubectl --context kind-platform get jenkins
 ```
 
 
-and the resources for the Jenkins instance in the Worker Cluster have been deleted
+and the resources for the Jenkins instance in the worker cluster have been deleted
 ```console
 kubectl --context kind-worker get pods
 ```
@@ -211,7 +212,7 @@ jenkins-operator-7886c47f9c-zschr   1/1     Running   0          1m
 Now you can delete the Jenkins Promise
 ```bash
 kubectl --context kind-platform delete \
-  --filename "${KRATIX_REPO}/samples/jenkins/jenkins-promise.yaml"
+  --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/promise.yaml"
 ```
 
 Verify the Jenkins Promise is gone
@@ -219,7 +220,7 @@ Verify the Jenkins Promise is gone
 kubectl --context kind-platform get promises
 ```
 
-and the Jenkins Operator is deleted from the Worker Cluster (this might take a couple minutes)
+and the Jenkins Operator is deleted from the worker cluster (this might take a couple minutes)
 ```console
 kubectl --context kind-worker get pods
 ```

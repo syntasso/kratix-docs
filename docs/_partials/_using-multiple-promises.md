@@ -35,9 +35,9 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 In order for an application team to deploy an application to a dev environment they require a relational datastore (postgres), networking for user traffic (Knative), and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality on-demand with Kratix install the required Promises on your Platform Cluster:
 
 ```console
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-promise.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/jenkins/jenkins-promise.yaml
+kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/postgresql/promise.yaml
+kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/promise.yaml
+kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
 ```
 <br />
 
@@ -48,14 +48,14 @@ kubectl --context kind-platform get promises
 
 The above command will give an output similar to
 ```console
-NAME                      AGE
-ha-postgres-promise       1m
-jenkins-promise           1m
-knative-serving-promise   1m
+NAME         AGE
+jenkins      1m
+knative      1m
+postgresql   1m
 ```
 <br />
 
-Verify the CRDs are all installed on your Platform Cluster. Note that you know have `jenkins`, `knativeserving`, and `postgres` available.
+Verify the CRDs are all installed on your Platform Cluster. Note that you know have `jenkins`, `knative`, and `postgres` available.
 
 ```console
 kubectl --context kind-platform get crds
@@ -63,16 +63,16 @@ kubectl --context kind-platform get crds
 
 The above command will give an output similar to
 ```console
-NAME                                          CREATED AT
-clusters.platform.kratix.io                   2022-09-23T14:37:20Z
+NAME                                CREATED AT
+clusters.platform.kratix.io         2023-01-24T17:00:37Z
 #highlight-start
-jenkins.example.promise.syntasso.io           2022-09-23T14:38:49Z
-knativeservings.example.promise.syntasso.io   2022-09-23T14:38:48Z
-postgreses.example.promise.syntasso.io        2022-09-23T14:38:51Z
+jenkins.marketplace.kratix.io       2023-01-24T17:22:50Z
+knatives.marketplace.kratix.io      2023-01-24T17:23:50Z
+postgresqls.marketplace.kratix.io   2023-01-24T17:23:51Z
 #highlight-end
-promises.platform.kratix.io                   2022-09-23T14:37:20Z
-workplacements.platform.kratix.io             2022-09-23T14:37:20Z
-works.platform.kratix.io                      2022-09-23T14:37:20Z
+promises.platform.kratix.io         2023-01-24T17:00:37Z
+workplacements.platform.kratix.io   2023-01-24T17:00:37Z
+works.platform.kratix.io            2023-01-24T17:00:37Z
 ```
 <br />
 
@@ -98,14 +98,19 @@ postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 
 Submit a set of Kratix Resource Requests to get a Knative Serving component, a Jenkins instance and a Postgres database.
 ```console
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-resource-request.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-resource-request.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/jenkins/jenkins-resource-request.yaml
+kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/postgresql/resource-request.yaml
+kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/resource-request.yaml
+kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/resource-request.yaml
 ```
 <br />
 
-<p>By requesting these three resources, you will start three pods, one for the Jenkins server (named <code>jenkins-example</code>), and two which create a postgres cluster (named per the Resource Request name, <code>acid-minimal</code>). To verify you have all the necessary resources up and running<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+<p>By requesting these three resources, you will start three pods, one for the
+Jenkins server (named <code>jenkins-dev-example</code>), and two which create a
+postgres cluster (named per the Resource Request name,
+<code>acid-example-postgresql</code>). To verify you have all the necessary resources up
+and running<br /> <sub>(This may take a few minutes so <code>--watch</code>
+will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop
+watching)</sub>
 </p>
 
 ```console
@@ -114,10 +119,9 @@ kubectl --context kind-worker get pods --watch
 
 The above command will give an output similar to
 ```console
-NAME                                      READY   STATUS    RESTARTS         AGE
-acid-minimal-cluster-0                    1/1     Running   0                5m
-acid-minimal-cluster-1                    1/1     Running   0                5m
-jenkins-example                           1/1     Running   0                5m
+NAME                                READY   STATUS      RESTARTS   AGE
+acid-example-postgresql-0           1/1     Running     0          5m
+jenkins-dev-example                 1/1     Running     0          5m
 ...
 ```
 <br />
@@ -139,7 +143,7 @@ kourier-system         Active   1h
 
 Verify that the Kratix Resource Request was issued on the Platform Cluster.
 ```console
-kubectl --context kind-platform get jenkins.example.promise.syntasso.io
+kubectl --context kind-platform get jenkins.marketplace.kratix.io
 ```
 <br />
 
@@ -150,44 +154,41 @@ example       1m
 ```
 <br />
 
-<p>Verify the instance is created on the Worker Cluster<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
-</p>
-
-```console
-kubectl --context kind-worker get pods --namespace default --watch
-```
-
-The above command will give an output similar to
-```console
-NAME                                READY   STATUS    RESTARTS   AGE
-jenkins-example                     1/1     Running   0          1m
-jenkins-operator-7886c47f9c-zschr   1/1     Running   0          10m
-```
-<br />
-
 #### Run the application deploy pipeline {#deploy-pipeline}
 
-With all the necessary resources available, you will now change hats to be a part of the application team who can now design and run their own CI/CD pipeline using the provided Jenkins service. In this step, you will deploy a [sample application](https://github.com/syntasso/sample-golang-app) through a Jenkins pipeline, that uses Postgres for persistence and Knative for serving the application.
+With all the necessary resources available, you will now change hats to be a
+part of the application team who can now design and run their own CI/CD
+pipeline using the provided Jenkins service. In this step, you will deploy a
+[sample application](https://github.com/syntasso/sample-golang-app) through a
+Jenkins pipeline, that uses Postgres for persistence and Knative for serving
+the application.
 
-Access the Jenkins UI in a browser, as in the [previous step](installing-a-promise).
+First, create a service account on the Worker cluster, so Jenkins can create
+Knative Services from the pipeline:
+
+```
+kubectl --context kind-worker apply -f \
+    https://raw.githubusercontent.com/syntasso/sample-golang-app/main/k8s/service-account.yaml
+```
 
 <br />
 
-Port forward for browser access to the Jenkins UI
+Access the Jenkins UI in a browser, as in the [previous
+step](installing-a-promise). Port forward for browser access to the Jenkins UI:
+
 ```console
-kubectl --context kind-worker port-forward jenkins-example 8080:8080
+kubectl --context kind-worker port-forward jenkins-dev-example 8080:8080
 ```
 <br />
 
 Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below:
 
 ```console jsx title="username"
-kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl --context kind-worker get secret jenkins-operator-credentials-example \
+kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 <br />
@@ -207,10 +208,10 @@ For those that are less familiar with Jenkins, you can either expand the instruc
 3. Select _Pipeline_ from the _Select item type_ dropdown
 4. Click _OK_
 5. In the _Pipeline_ section, paste the contents of the [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile) in the _Script_ field
-8. Click _Save_
-9. Click _Build Now_ in the left menu
-10 Click on the running build
-10. Click _Console Output_ to see the pipeline progress
+6. Click _Save_
+7. Click _Build Now_ in the left menu
+8. Click on the running build
+9. Click _Console Output_ to see the pipeline progress
 
 </details>
 
@@ -263,7 +264,7 @@ This is only the beginning of working with Promises. Next you will learn how to 
 To clean up your environment first delete the Resource Requests for the Jenkins, Knative and Postgres Promises.
 
 ```bash
-kubectl --context kind-platform delete jenkins,knativeservings,postgreses --all
+kubectl --context kind-platform delete jenkins,knative,postgresqls --all
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster

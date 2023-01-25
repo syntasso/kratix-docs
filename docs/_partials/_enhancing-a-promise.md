@@ -55,36 +55,45 @@ _In this guide, you only need create a new Postgres Promise that creates Postgre
 
 ### Step one: Get a base Promise {#base-promise}
 
-Kratix has a sample Postgres Promise. You'll use that as your base. Start by cloning the repository:
+There's a PostgreSQL promise available on the [Marketplace](http://kratix.io/marketplace). You'll use that as your base. Start by cloning the repository:
 
 ```console
-git clone https://github.com/syntasso/kratix.git
+git clone https://github.com/syntasso/promise-postgresql.git
 ```
 
 Take a look
 ```console
-cd kratix/samples/postgres/
+cd promise-postgresql
 ls
 ```
 
-You should see the `postgres-promise.yaml` file. This is the Promise definition that you'll modify and install on your platform. Ignore everything else in the folder for now.
+You should see something a structure similar to the one below:
 
-```
-. 📂 kratix
+```bash
+. 📂 promise-postgresql
+#highlight-next-line
+  ├── promise.yaml
+  ├── resource-request.yaml
   ├── ...
-  └── 📂 samples
-      ├── ...
-      └── 📂 postgres
-          ├── 📂 request-pipeline-image
-          │   ├── Dockerfile
-          │   ├── execute-pipeline.sh
-          │   └── minimal-postgres-manifest.yaml
-          ├── 📂 resources
-          │   └──zalando-postgres.yaml
-          ├── postgres-promise-template.yaml
-          ├── postgres-promise.yaml
-          └── postgres-resource-request.yaml
+  └── 📂 internal
+      ├── 📂 request-pipeline
+      │   ├── 📂 resources
+      │   │   └── minimal-postgres-manifest.yaml
+      │   ├── Dockerfile
+      │   ├── execute-pipeline.sh
+      ├── 📂 resources
+      │   ├── operator.yaml
+      │   └── ...
+      ├── 📂 scripts
+      │   ├── test
+      │   └── ...
+      └── README.md
 ```
+
+
+You should see the `promise.yaml` file. This is the Promise definition
+that you'll modify and install on your platform. Ignore everything else in the
+folder for now.
 
 ### Step two: `xaasCrd` {#xaas-crd}
 > Change the Promise so that _the user who wants an instance_ knows they need to include their `costCentre` name when they make their request to the platform
@@ -97,15 +106,17 @@ You should see the `postgres-promise.yaml` file. This is the Promise definition 
   alt="screenshot of a YAML file, highlighting the presence of the xaasCrd key"
 />
 
-`xaasCrd` is the CRD exposed to the users of the [Promise](writing-a-promise). To see `xaasCrd` in the Promise definition file, open `postgres-promise.yaml` and look under the `spec` section.
+`xaasCrd` is the CRD exposed to the users of the [Promise](writing-a-promise).
+To see `xaasCrd` in the Promise definition file, open `promise.yaml`
+and look under the `spec` section.
 
 `xaasCrd` is the contract with the user who wants an instance. It's where you get to define the required and optional configuration options exposed to your users.
 
-You can already see a number of properties in this section of the `postgres-promise.yaml` file. These properties are defined within a versioned schema and can have different types and validations.
+You can already see a number of properties in this section of the `promise.yaml` file. These properties are defined within a versioned schema and can have different types and validations.
 
 #### Update `xaasCrd`
 
-To add the required cost centre configuration, add the following to the `postgres-promise.yaml`:
+To add the required cost centre configuration, add the following to the `promise.yaml`:
 
 ```yaml
 costCentre:
@@ -114,9 +125,9 @@ costCentre:
 ```
 From the top of the file, navigate to
 
-`spec` > `xaasCrd` > `spec` > `versions`[0] > `schema` > <br /> `openAPIV3Schema` > `properties` > `spec` > `properties`
+`spec` > `xaasCrd` > `spec` > `versions[0]` > `schema` > <br /> `openAPIV3Schema` > `properties` > `spec` > `properties`
 
-Here, add your `costCentre` YAML from above as a sibling to the existing `preparedDatabases` property.
+Here, add your `costCentre` YAML from above as a sibling to the existing `dbName` property.
 
 
 <details>
@@ -127,44 +138,42 @@ xaasCrd:
   apiVersion: apiextensions.k8s.io/v1
   kind: CustomResourceDefinition
   metadata:
-    name: postgreses.example.promise.syntasso.io
+    name: postgresqls.marketplace.kratix.io
   spec:
-    group: example.promise.syntasso.io
+    group: marketplace.kratix.io
     names:
-      kind: postgres
-      plural: postgreses
-      singular: postgres
+      kind: postgresql
+      plural: postgresqls
+      singular: postgresql
     scope: Namespaced
     versions:
-    - name: v1
+    - name: v1alpha1
       schema:
         openAPIV3Schema:
           properties:
             spec:
               properties:
+                #highlight-start
                 costCentre:
                   pattern: "^[a-zA-Z0-9_.-]*$"
                   type: string
-                preparedDatabases:
-                  additionalProperties:
-                    properties:
-                      defaultUsers:
-                        type: boolean
-                      extensions:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      schemas:
-                        additionalProperties:
-                          properties:
-                            defaultRoles:
-                              type: boolean
-                            defaultUsers:
-                              type: boolean
-                          type: object
-                        type: object
-                    type: object
-                  type: object
+                #highlight-end
+                dbName:
+                  default: postgres
+                  description: |
+                    Database name. A database will be created with this name. The owner of the database will be the teamId.
+                  type: string
+                env:
+                  default: dev
+                  description: |
+                    Configures and deploys this PostgreSQL with environment specific configuration. Prod PostgreSQL are configured with backups and more resources.
+                  pattern: ^(dev|prod)$
+                  type: string
+                teamId:
+                  default: acid
+                  description: |
+                    Team ID. A superuser role will be created with this name.
+                  type: string
               type: object
           type: object
       served: true
@@ -215,73 +224,151 @@ Following the Zalando [`docs`](https://github.com/zalando/postgres-operator/blob
 
 From the top of the file, navigate to
 
-`spec` > `workerClusterResources`[0] > `data`
+`spec` > `workerClusterResources[7]` > `configuration` > `kubernetes`
 
-To verify you're in the right place, the object should be `kind: ConfigMap` with `name: postgres-operator`.
+To verify you're in the right place, the object should be `kind: OperatorConfiguration` with `name: postgres-operator`.
 
-Under the `data` map, add `inherited_labels: costCentre`.
+Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
 
 <details>
-  <summary>👀&nbsp;&nbsp;Click here to see the complete <code>ConfigMap</code> resource after this change</summary>
+  <summary>👀&nbsp;&nbsp;Click here to see the complete <code>OperatorConfiguration</code> resource after this change</summary>
 
 ```yaml
-# Note, the property was added to the top of the data map
-- apiVersion: v1
-  data:
-    inherited_labels: costCentre
-    api_port: "8080"
-    aws_region: eu-central-1
-    cluster_domain: cluster.local
-    cluster_history_entries: "1000"
-    cluster_labels: application:spilo
-    cluster_name_label: cluster-name
-    connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-16
-    db_hosted_zone: db.example.com
-    debug_logging: "true"
-    docker_image: registry.opensource.zalan.do/acid/spilo-13:2.0-p7
-    enable_ebs_gp3_migration: "false"
-    enable_master_load_balancer: "false"
-    enable_pgversion_env_var: "true"
-    enable_replica_load_balancer: "false"
-    enable_spilo_wal_path_compat: "true"
-    enable_team_member_deprecation: "false"
-    enable_teams_api: "false"
-    external_traffic_policy: Cluster
-    logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup:v1.6.3
-    logical_backup_job_prefix: logical-backup-
-    logical_backup_provider: s3
-    logical_backup_s3_bucket: my-bucket-url
-    logical_backup_s3_sse: AES256
-    logical_backup_schedule: 30 00 * * *
-    major_version_upgrade_mode: manual
-    master_dns_name_format: '{cluster}.{team}.{hostedzone}'
-    pdb_name_format: postgres-{cluster}-pdb
-    pod_deletion_wait_timeout: 10m
-    pod_label_wait_timeout: 10m
-    pod_management_policy: ordered_ready
-    pod_role_label: spilo-role
-    pod_service_account_name: postgres-pod
-    pod_terminate_grace_period: 5m
-    ready_wait_interval: 3s
-    ready_wait_timeout: 30s
+# Note, the property was added to the top of the configuration.kubernetes
+- apiVersion: acid.zalan.do/v1
+  configuration:
+    aws_or_gcp:
+      aws_region: eu-central-1
+      enable_ebs_gp3_migration: false
+    connection_pooler:
+      connection_pooler_default_cpu_limit: "1"
+      connection_pooler_default_cpu_request: 500m
+      connection_pooler_default_memory_limit: 100Mi
+      connection_pooler_default_memory_request: 100Mi
+      connection_pooler_image: registry.opensource.zalan.do/acid/pgbouncer:master-22
+      connection_pooler_max_db_connections: 60
+      connection_pooler_mode: transaction
+      connection_pooler_number_of_instances: 2
+      connection_pooler_schema: pooler
+      connection_pooler_user: pooler
+    crd_categories:
+    - all
+    debug:
+      debug_logging: true
+      enable_database_access: true
+    docker_image: registry.opensource.zalan.do/acid/spilo-14:2.1-p6
+    enable_crd_registration: true
+    enable_lazy_spilo_upgrade: false
+    enable_pgversion_env_var: true
+    enable_shm_volume: true
+    enable_spilo_wal_path_compat: false
+    etcd_host: ""
+    kubernetes:
+      #highlight-next-line
+      inherited_labels: [costCentre]
+      cluster_domain: cluster.local
+      cluster_labels:
+        application: spilo
+      cluster_name_label: cluster-name
+      enable_cross_namespace_secret: false
+      enable_init_containers: true
+      enable_pod_antiaffinity: false
+      enable_pod_disruption_budget: true
+      enable_sidecars: true
+      oauth_token_secret_name: postgres-operator
+      pdb_name_format: postgres-{cluster}-pdb
+      pod_antiaffinity_topology_key: kubernetes.io/hostname
+      pod_management_policy: ordered_ready
+      pod_role_label: spilo-role
+      pod_service_account_name: postgres-pod
+      pod_terminate_grace_period: 5m
+      secret_name_template: '{username}.{cluster}.credentials.{tprkind}.{tprgroup}'
+      spilo_allow_privilege_escalation: true
+      spilo_privileged: false
+      storage_resize_mode: pvc
+      watched_namespace: '*'
+    load_balancer:
+      db_hosted_zone: db.example.com
+      enable_master_load_balancer: false
+      enable_master_pooler_load_balancer: false
+      enable_replica_load_balancer: false
+      enable_replica_pooler_load_balancer: false
+      external_traffic_policy: Cluster
+      master_dns_name_format: '{cluster}.{team}.{hostedzone}'
+      replica_dns_name_format: '{cluster}-repl.{team}.{hostedzone}'
+    logging_rest_api:
+      api_port: 8080
+      cluster_history_entries: 1000
+      ring_log_lines: 100
+    logical_backup:
+      logical_backup_docker_image: registry.opensource.zalan.do/acid/logical-backup:v1.8.0
+      logical_backup_job_prefix: logical-backup-
+      logical_backup_provider: s3
+      logical_backup_s3_access_key_id: ""
+      logical_backup_s3_bucket: my-bucket-url
+      logical_backup_s3_endpoint: ""
+      logical_backup_s3_region: ""
+      logical_backup_s3_retention_time: ""
+      logical_backup_s3_secret_access_key: ""
+      logical_backup_s3_sse: AES256
+      logical_backup_schedule: 30 00 * * *
+    major_version_upgrade:
+      major_version_upgrade_mode: "off"
+      minimal_major_version: "9.6"
+      target_major_version: "14"
+    max_instances: -1
+    min_instances: -1
+    postgres_pod_resources:
+      default_cpu_limit: "1"
+      default_cpu_request: 100m
+      default_memory_limit: 500Mi
+      default_memory_request: 100Mi
+      min_cpu_limit: 250m
+      min_memory_limit: 250Mi
     repair_period: 5m
-    replica_dns_name_format: '{cluster}-repl.{team}.{hostedzone}'
-    replication_username: standby
-    resource_check_interval: 3s
-    resource_check_timeout: 10m
     resync_period: 30m
-    ring_log_lines: "100"
-    role_deletion_suffix: _deleted
-    secret_name_template: '{username}.{cluster}.credentials'
-    spilo_allow_privilege_escalation: "true"
-    spilo_privileged: "false"
-    storage_resize_mode: pvc
-    super_username: postgres
-    watched_namespace: '*'
-    workers: "8"
-  kind: ConfigMap
+    teams_api:
+      enable_admin_role_for_users: true
+      enable_postgres_team_crd: false
+      enable_postgres_team_crd_superusers: false
+      enable_team_member_deprecation: false
+      enable_team_superuser: false
+      enable_teams_api: false
+      pam_role_name: zalandos
+      postgres_superuser_teams:
+      - postgres_superusers
+      protected_role_names:
+      - admin
+      - cron_admin
+      role_deletion_suffix: _deleted
+      team_admin_role: admin
+      team_api_role_configuration:
+        log_statement: all
+    timeouts:
+      patroni_api_check_interval: 1s
+      patroni_api_check_timeout: 5s
+      pod_deletion_wait_timeout: 10m
+      pod_label_wait_timeout: 10m
+      ready_wait_interval: 3s
+      ready_wait_timeout: 30s
+      resource_check_interval: 3s
+      resource_check_timeout: 10m
+    users:
+      enable_password_rotation: false
+      password_rotation_interval: 90
+      password_rotation_user_retention: 180
+      replication_username: standby
+      super_username: postgres
+    workers: 8
+  kind: OperatorConfiguration
   metadata:
+    labels:
+      app.kubernetes.io/instance: postgres-operator
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: postgres-operator
+      helm.sh/chart: postgres-operator-1.8.2
     name: postgres-operator
+    namespace: default
 ```
 </details>
 
@@ -298,25 +385,34 @@ Under the `data` map, add `inherited_labels: costCentre`.
 
 `xaasRequestPipeline` is the pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
 
-Conceptually, a pipeline is the manipulation of an input value to generate an output value. There are three parts to a Kratix Promise request pipeline.
+Conceptually, a pipeline is the manipulation of an input value to generate an output value. There are three parts to the PostgreSQL request pipeline.
 
-* `minimal-postgres-manifest.yaml`
+* `resources/minimal-postgres-manifest.yaml`
 * `execute-pipeline.sh`
 * `Dockerfile`
 
 
-You can see these files in the `request-pipeline-image` directory. To connect the new user input label, we will need to make sure the pipelins both reads it in, and applies it to the right place in the customised resource outputs. This requires you to change two of files:
+<br />
+
+You can see these files in the `internal/request-pipeline` directory. To
+connect the new user input label, we will need to make sure the pipelins both
+reads it in, and applies it to the right place in the customised resource
+outputs. This requires you to change two of files:
 
 1. Resource template: This resource needs to hold reference to the `costCentre` _label_
 1. Pipeline script: Inject the user's `costCentre` _actual value_ into the resource template to generate the output
 
 #### Update the `minimal-postgres-manifest.yaml` to add in the property
 
-The `minimal-postgres-manifest.yaml` is the pipeline basic template for the Postgres instance. This is a valid Kubernetes document that the Postgres Operator can understand.
+The `minimal-postgres-manifest.yaml` is the pipeline basic template for the
+Postgres instance. This is a valid Kubernetes document that the Postgres
+Operator can understand.
 
-You know every Postgres instance needs the `costCentre`. Change the metadata in `minimal-postgres-manifest.yaml` to include the `costCentre` label. This sets up a holding spot for the `costCentre` value the user sends in the request.
+You know every Postgres instance needs the `costCentre`. Change the metadata in
+`minimal-postgres-manifest.yaml` to include the `costCentre` label. This sets
+up a holding spot for the `costCentre` value the user sends in the request.
 
-```yaml jsx title=kratix/samples/postgres/request-pipeline-image/minimal-postgres-manifest.yaml
+```yaml jsx title=promise-postgresql/internal/request-pipeline/resources/minimal-postgres-manifest.yaml
 labels:
   costCentre: TBD
 ```
@@ -324,10 +420,9 @@ labels:
 <details>
 <summary>👀&nbsp;&nbsp;Click here for the complete metadata section</summary>
 
-```yaml jsx title=kratix/samples/postgres/request-pipeline-image/minimal-postgres-manifest.yaml
+```yaml jsx title=promise-postgresql/internal/request-pipeline/resources/minimal-postgres-manifest.yaml
 metadata:
-  name: TBD
-  namespace: default
+  name: acid-minimal-cluster
   labels:
     costCentre: TBD
 ```
@@ -335,9 +430,15 @@ metadata:
 
 #### Update the `execute-pipeline.sh` to add in the user's value
 
-The `execute-pipeline.sh` (in `kratix/samples/postgres/request-pipeline-image`) runs when Docker builds the image for the pipeline. This script is where the pipeline logic lives.
+The `execute-pipeline.sh` (in `promise-postgresql/internal/request-pipeline`)
+runs when Docker builds the image for the pipeline. This script is where the
+pipeline logic lives.
 
-You can see that the script is already parsing the Kratix Resource Request to identify key user variables (`name`, `namespace`, `preparedDatabases`). The script then uses [yq](https://github.com/mikefarah/yq) to add those user-provided values to the output document. You can do the same to process the user's `costCentre`.
+You can see that the script is already parsing the Kratix Resource Request to
+identify key user variables (`name`, `namespace`, `teamId`, etc). The
+script then uses [yq](https://github.com/mikefarah/yq) to add those
+user-provided values to the output document. You can do the same to process the
+user's `costCentre`.
 
 In the `execute-pipeline.sh`
 1. Export another environment variable to store the value
@@ -352,27 +453,49 @@ In the `execute-pipeline.sh`
 <details>
   <summary>👀&nbsp;&nbsp;Click here to view an example of the final script</summary>
 
-```bash jsx title=kratix/samples/postgres/request-pipeline-image/execute-pipeline.sh
-#!/bin/sh
+```bash jsx title=promise-postgresql/internal/request-pipeline/execute-pipeline.sh
+#!/usr/bin/env sh
 
 set -x
 
-# Store all input files in a known location
-cp -r /tmp/transfer/* /input/
+base_instance="/tmp/transfer/minimal-postgres-manifest.yaml"
 
-# Read current values from the provided Kratix Resource Request
-export NAME=$(yq eval '.metadata.name' /input/object.yaml)
-export NAMESPACE=$(yq eval '.metadata.namespace' /input/object.yaml)
+# Read current values from the provided resource request
+name="$(yq eval '.metadata.name' /input/object.yaml)"
+
+env_type="$(yq eval '.spec.env // "dev"' /input/object.yaml)"
+team="$(yq eval '.spec.teamId // "acid"' /input/object.yaml)"
+dbname="$(yq eval '.spec.dbName // "postgres"' /input/object.yaml)"
+
+instance_name="${team}-${name}-postgresql"
+
+backup="false"
+size="1Gi"
+instances="1"
+if [ $env_type = "prod" ]; then
+  backup="true"
+  size="10Gi"
+  instances="3"
+fi
+
+#highlight-next-line
 export COST_CENTRE=$(yq eval '.spec.costCentre' /input/object.yaml)
-export PREPARED_DBS=$(yq eval '.spec.preparedDatabases' /input/object.yaml)
 
 # Replace defaults with user provided values
-cat /input/minimal-postgres-manifest.yaml |  \
-  yq eval '.metadata.name = env(NAME) |
-          .metadata.namespace = env(NAMESPACE) |
-          .metadata.labels.costCentre = env(COST_CENTRE) |
-          .spec.preparedDatabases = env(PREPARED_DBS)' - \
-  > /output/output.yaml
+cat ${base_instance} |
+  yq eval "
+  #highlight-next-line
+    .metadata.labels.costCentre = env(COST_CENTRE) |
+    .metadata.namespace = \"default\" |
+    .metadata.name = \"${instance_name}\" |
+    .spec.enableLogicalBackup = ${backup} |
+    .spec.teamId = \"${team}\" |
+    .spec.volume.size = \"${size}\" |
+    .spec.numberOfInstances = ${instances} |
+    .spec.users = {\"${team}\": [\"superuser\", \"createdb\"]} |
+    .spec.databases = {\"$dbname\": \"$team\"} |
+    del(.spec.preparedDatabases)
+  " - > /output/postgres-instance.yaml
 ```
 </details>
 
@@ -380,66 +503,64 @@ cat /input/minimal-postgres-manifest.yaml |  \
 
 You can easily validate your pipeline locally by building and running the Docker image with the correct volume mounts.
 
-Check that you are in the `kratix/samples/postgres` directory, and run the block below to:
+Check that you are in the `promise-postgresql` directory, and run the block below to:
 
-1. create two directories inside `request-pipeline-image`: `input` and `output`
+1. create two directories inside `internal/request-pipeline`: `input` and `output`
 1. create expected input file (i.e., the request from your user)
 
 ```console
-cd request-pipeline-image
+cd internal/request-pipeline
 mkdir -p {input,output}
 cat > input/object.yaml <<EOF
 ---
-apiVersion: example.promise.syntasso.io/v1
-kind: postgres
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
 metadata:
-  name: acid-minimal-cluster
+  name: example
   namespace: default
 spec:
   costCentre: "rnd-10002"
-  preparedDatabases:
-    mydb: {}
+  env: dev
+  teamId: acid
+  dbName: bestdb
 EOF
 ```
 
-Now test the pipeline by doing a Docker build and run. _Check that, per the step above, you are still in the `request-pipeline-image` directory._
+Now test the pipeline by doing a Docker build and run. _Check that, per the step above, you are still in the `internal/request-pipeline` directory._
 
 ```console
 docker build . --tag kratix-workshop/postgres-request-pipeline:dev
 docker run -v ${PWD}/input:/input -v ${PWD}/output:/output kratix-workshop/postgres-request-pipeline:dev
 ```
 
-Now you can validate the `output/output.yaml` file.
+Now you can validate the `output/postgres-instance.yaml` file.
 
 It should be the base manifest with all the custom values inserted and look like the example below. If your output is different, go back and check the steps from above and the files in the directory. Repeat this process until your output matches the output below.
 
 <details>
     <summary>👀&nbsp;&nbsp;Click here to view an example of expected output YAML</summary>
 
-```yaml jsx title="expected kratix/samples/postgres/request-pipeline-image/output/output.yaml"
+```yaml jsx title="expected promise-postgresql/internal/request-pipeline/output/postgres-instance.yaml"
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
-  name: acid-minimal-cluster
-  namespace: default
+  name: acid-example-postgresql
   labels:
-    costCentre: rnd-10002
+    costCentre: TBD
 spec:
   teamId: "acid"
   volume:
     size: 1Gi
-  numberOfInstances: 2
+  numberOfInstances: 1
   users:
-    zalando: # database owner
+    acid:
       - superuser
       - createdb
-    foo_user: [] # role for application foo
   databases:
-    foo: zalando # dbname: owner
-  preparedDatabases:
-    mydb: {}
+    bestdb: acid
   postgresql:
-    version: "13"
+    version: "15"
+  enableLogicalBackup: false
 ```
 </details>
 
@@ -459,17 +580,19 @@ kind load docker-image kratix-workshop/postgres-request-pipeline:dev --name plat
 
 The new image is built and available on your Platform Cluster. Update your Promise to use the new image.
 
-Open the Promise definition file (`kratix/samples/postgres/postgres-promise.yaml`). From the top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the current `syntasso/postgres-request-pipeline` image with the newly created `kratix-workshop/postgres-request-pipeline:dev` image.
+Open the Promise definition file (`promise-postgresql/promise.yaml`). From the
+top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the
+current value image with the newly created
+`kratix-workshop/postgres-request-pipeline:dev` image.
 
 <details>
   <summary>👀&nbsp;&nbsp;Click here to see the resulting xaasRequestPipeline section which should be indented under <code>spec</code> in the Promise yaml</summary>
 
-```yaml jsx title="kratix/samples/postgres/postgres-promise.yaml"
+```yaml jsx title="promise-postgresql/promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  creationTimestamp: null
-  name: ha-postgres-promise
+  name: postgresql
 spec:
   xaasCrd:
   # ...
@@ -484,10 +607,10 @@ spec:
 ### Step five: Install {#install-promise}
 > Install the modified Promise on your platform
 
-You can now install your enhanced Postgres Promise on your platform. Make sure you're in the `kratix/samples/postgres/` directory.
+You can now install your enhanced Postgres Promise on your platform. Make sure you're in the `promise-postgresql/` directory.
 
 ```console
-kubectl --context kind-platform apply --filename postgres-promise.yaml
+kubectl --context kind-platform apply --filename promise.yaml
 ```
 <br />
 
@@ -499,18 +622,23 @@ kubectl --context kind-platform get crds
 
 You should see something similar to
 ```console
-NAME                                          CREATED AT
-clusters.platform.kratix.io                   2022-08-09T14:35:54Z
-postgreses.example.promise.syntasso.io        2022-08-09T14:54:26Z
-promises.platform.kratix.io                   2022-08-09T14:35:54Z
-workplacements.platform.kratix.io             2022-08-09T14:35:54Z
-works.platform.kratix.io                      2022-08-09T14:35:55Z
+NAME                                     CREATED AT
+clusters.platform.kratix.io              2022-08-09T14:35:54Z
+# highlight-next-line
+postgresqls.marketplace.kratix.io        2022-08-09T14:54:26Z
+promises.platform.kratix.io              2022-08-09T14:35:54Z
+workplacements.platform.kratix.io        2022-08-09T14:35:54Z
+works.platform.kratix.io                 2022-08-09T14:35:55Z
 ```
 <br />
 
 Check that the `workerClusterResources` have been installed.
 
-For Postgres, you can see in the Promise file that there are a number of RBAC resources, as well as a deployment that installs the Postgres Operator in the Worker Cluster. That means that when the Promise is successfully applied you will see the `postgres-operator` deployment in the Worker Cluster. That's also an indication that the Operator is ready to provision a new instance.
+For Postgres, you can see in the Promise file that there are a number of RBAC
+resources, as well as a deployment that installs the Postgres Operator in the
+Worker Cluster. That means that when the Promise is successfully applied you
+will see the `postgres-operator` deployment in the Worker Cluster. That's also
+an indication that the Operator is ready to provision a new instance.
 
 ```console
 kubectl --context kind-worker --namespace default get pods
@@ -534,44 +662,53 @@ You have successfully released a new platform capability! Your users can request
 
 Switching hats to test your release, now act as one of your users to make sure the Promise creates working instances.
 
-You need to create a Kratix Resource Request, which is a valid Kubernetes resource. Like all Kubernetes resources, this  must include all [required fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/#required-fields):
+You need to create a Kratix Resource Request, which is a valid Kubernetes
+resource. Like all Kubernetes resources, this  must include all [required
+fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/#required-fields):
 
-1. `apiVersion` where the resource can be found. This is `example.promise.syntasso.io/v1` in your Postgres Promise (from `spec.xaasCrd.spec.group` in `postgres-promise.yaml`).
-1. `kind`. This is `postgres` in your Postgres Promise (from `spec.xaasCrd.spec.name` in `postgres-promise.yaml`).
-1. Values for required fields. Fields are `preparedDatabases` and `costCentre` in your Postgres Promise (from `spec` > `xaasCrd` > `spec` > `versions`[0] > `schema` > `openAPIV3Schema` > `properties` > `spec` > `properties` in `postgres-promise.yaml`).
+1. `apiVersion` where the resource can be found. This is `marketplace.kratix.io/v1alpha1` in your Postgres Promise (from `spec.xaasCrd.spec.group` in `promise.yaml`).
+1. `kind`. This is `postgresql` in your Postgres Promise (from `spec.xaasCrd.spec.name` in `promise.yaml`).
+1. Values for required fields. Fields are `teamId`, `env`, `dbName` and `costCentre` in your Postgres Promise (from `spec` > `xaasCrd` > `spec` > `versions`[0] > `schema` > `openAPIV3Schema` > `properties` > `spec` > `properties` in `promise.yaml`).
 1. A unique name and namespace combination.
 
-In the sample Resource Request (`kratix/samples/postgres/postgres-resource-request.yaml`) add the additional `costCentre` field as a sibling to the `preparedDatabases` field with any valid input. For example, `costCentre: "rnd-10002"`.
+In the sample Resource Request (`promise-postgresql/resource-request.yaml`) add
+the additional `costCentre` field as a sibling to the other fields under `spec`
+with any valid input. For example, `costCentre: "rnd-10002"`.
 
 <details>
 <summary>👀&nbsp;&nbsp;Click here for the full Postgres Resource Request</summary>
 
-```yaml jsx title="kratix/samples/postgres/postgres-resource-request.yaml"
-apiVersion: example.promise.syntasso.io/v1
-kind: postgres
+```yaml jsx title="promise-postgresql/resource-request.yaml"
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
 metadata:
-  name: acid-minimal-cluster
+  name: example
   namespace: default
 spec:
   costCentre: "rnd-10002"
-  preparedDatabases:
-    mydb: {}
+  env: dev
+  teamId: acid
+  dbName: bestdb
 ```
 </details>
 
 Then apply the request file to the Platform Cluster:
 
 ```console
-kubectl --context kind-platform apply --filename postgres-resource-request.yaml
+kubectl --context kind-platform apply --filename resource-request.yaml
 ```
 
 We will validate the outcomes of this command in the next section.
 
 #### Validating the created Postgres
 
-Back as a platform engineer, you want to ensure that the platform and Promise behaved as it should when creating the instances and that the instances have met the reequirements for the feature.
+Back as a platform engineer, you want to ensure that the platform and Promise
+behaved as it should when creating the instances and that the instances have
+met the reequirements for the feature.
 
-After you applied the Kratix Resource Request in the step above, you should eventually see a new pod executing the `request-pipeline-image/execute-pipeline.sh` script you created.
+After you applied the Kratix Resource Request in the step above, you should
+eventually see a new pod executing the
+`execute-pipeline.sh` script you created.
 
 <p>Check by listing the pods on the platform:<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
@@ -583,14 +720,14 @@ kubectl --context kind-platform get pods --watch
 
 You should see something similar to
 ```console
-NAME                                                     READY   STATUS      RESTARTS   AGE
-request-pipeline-ha-postgres-promise-default-<SHA>       0/1     Completed   0          1h
+NAME                                          READY   STATUS      RESTARTS   AGE
+request-pipeline-postgresql-default-SHA     0/1     Completed   0          1h
 ```
 
 Then view the pipeline logs by running _(replace SHA with the value from the output of `get pods` above)_:
 
 ```console
-kubectl --context kind-platform logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-ha-postgres-promise-default-<SHA>
+kubectl --context kind-platform logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-postgresql-default-SHA
 ```
 
 <p>On the Worker Cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined in the request (<code>postgres-resource-request.yaml</code>).<br />
@@ -603,9 +740,8 @@ kubectl --context kind-worker get pods --watch
 
 You should see something similar to
 ```
-NAME                                 READY   STATUS    RESTARTS   AGE
-acid-minimal-cluster-0               1/1     Running   0          1h
-acid-minimal-cluster-1               1/1     Running   0          1h
+NAME                             READY   STATUS    RESTARTS   AGE
+acid-example-postgresql-0        1/1     Running   0          1h
 ...
 ```
 
@@ -617,13 +753,14 @@ kubectl --context kind-worker get pods --selector costCentre=rnd-10002
 
 You should see something similar to
 ```
-NAME                     READY   STATUS    RESTARTS   AGE
-acid-minimal-cluster-0   1/1     Running   0          1h
-acid-minimal-cluster-1   1/1     Running   0          1h
+NAME                          READY   STATUS    RESTARTS   AGE
+acid-example-postgresql-0     1/1     Running   0          1h
 ```
 
 ## Summary
-Your platform has a new Promise. Your users have access to a new service from the Promise. Your finance team has the ability to track service usage. Well done!
+Your platform has a new Promise. Your users have access to a new service from
+the Promise. Your finance team has the ability to track service usage. Well
+done!
 
 To recap the steps we took:
 1. ✅&nbsp;&nbsp;Aquired a base Promise
@@ -639,7 +776,7 @@ To recap the steps we took:
 To clean up your environment first delete the Resource Requests for the Postgres instance
 
 ```bash
-kubectl --context kind-platform delete --filename postgres-resource-request.yaml
+kubectl --context kind-platform delete --filename resource-request.yaml
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
@@ -649,7 +786,7 @@ kubectl --context kind-worker get pods
 
 Now the Resource Requests have been deleted you can delete the Promise
 ```bash
-kubectl --context kind-platform delete --filename postgres-promise.yaml
+kubectl --context kind-platform delete --filename promise.yaml
 ```
 
 Verify the Worker Cluster Resources are deleted from the Worker Cluster
