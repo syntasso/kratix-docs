@@ -29,7 +29,7 @@ export const Promises = [
   {
     name: "PostgreSQL",
     description: "SQL-compliant relational database management system ",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/postgresql",
+    url: "https://github.com/syntasso/promise-postgresql",
     logoUrl: '/img/marketplace/postgresql.svg',
     categories: [
       "Data"
