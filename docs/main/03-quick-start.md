@@ -84,33 +84,32 @@ You can verify the pipeline pod by running:
 
 ```console
 $ kubectl get pods
-NAME                                                 READY   STATUS      RESTARTS   AGE
+NAME                                          READY   STATUS      RESTARTS   AGE
 //highlight-next-line
-request-pipeline-ha-postgres-promise-default-152bb   0/1     Completed   0          72s
-postgres-operator-6c6dbd4459-pbcjp                   1/1     Running     0          6m55s
+request-pipeline-postgresql-default-8f012     0/1     Completed   0          72s
+postgres-operator-6c6dbd4459-pbcjp            1/1     Running     0          6m55s
 ```
 
 Eventually, the Postgres instance pods will come up as well:
 
 ```console
 $ kubectl get pods
-NAME                                                 READY   STATUS      RESTARTS   AGE
+NAME                                         READY   STATUS      RESTARTS   AGE
 //highlight-start
-acid-minimal-cluster-0                               1/1     Running     0          113s
-acid-minimal-cluster-1                               1/1     Running     0          90s
+acid-example-postgresql-0                    1/1     Running     0          113s
 //highlight-end
-postgres-operator-6c6dbd4459-pbcjp                   1/1     Running     0          6m55s
-request-pipeline-ha-postgres-promise-default-152bb   0/1     Completed   0          2m17s
+postgres-operator-6c6dbd4459-pbcjp           1/1     Running     0          6m55s
+request-pipeline-postgresql-default-8f012    0/1     Completed   0          2m17s
 ```
 
 
 You are now ready to use your Postgres instance! To validate, you can run:
 
 ```
-kubectl exec -it acid-minimal-cluster-0 -- sh -c "
-    PGPASSWORD=$(kubectl get secret zalando.acid-minimal-cluster.credentials -o 'jsonpath={.data.password}' | base64 -d) \
-    PGUSER=$(kubectl get secret zalando.acid-minimal-cluster.credentials -o 'jsonpath={.data.username}' | base64 -d) \
-    psql mydb"
+kubectl exec -it acid-example-postgresql-0 -- sh -c "
+    PGPASSWORD=$(kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d) \
+    PGUSER=$(kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.username}' | base64 -d) \
+    psql bestdb"
 ```
 
 ## Clean up
