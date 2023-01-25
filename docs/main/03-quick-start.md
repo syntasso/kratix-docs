@@ -55,7 +55,7 @@ kratix-worker-system   Active   1m
 Install the sample Postgres Promise with the command below:
 
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
 ```
 
 Installing the Promise will eventually start the Postgres Operator on your cluster. You
@@ -77,7 +77,7 @@ Once the Postgres Operator is up and running, you can request a new Postgres ins
 the command below:
 
 ```console
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-resource-request.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/resource-request.yaml
 ```
 
 You can verify the pipeline pod by running:
@@ -118,7 +118,7 @@ kubectl exec -it acid-minimal-cluster-0 -- sh -c "
 To clean up the created resources, run:
 
 ```console
-kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
+kubectl delete --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
 kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/install-all-in-one.yaml
 ```
 

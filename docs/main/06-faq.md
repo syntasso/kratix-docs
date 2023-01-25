@@ -22,7 +22,12 @@ Add images to the `xaasRequestPipeline` array inside the Promise definition to e
 
 ### Is Kratix only useful for deploying simple services?
 
-Quite the opposite, Kratix is at its most powerful when deploying complex services. The more complexity is removed from the stream-aligned teams (and encapsulated in the platform), the lower their cognitive load, and the more productive they are. See the [Kpack-and-Knative Application Stack](https://github.com/Syntasso/kratix/tree/main/samples/appstack) as an example of a more complex Promise making life easier for stream-aligned teams.
+Quite the opposite, Kratix is at its most powerful when deploying complex
+services. The more complexity is removed from the stream-aligned teams (and
+encapsulated in the platform), the lower their cognitive load, and the more
+productive they are. See the [Compound Promises
+page](./guides/composite-promises) for details on how you would create larger,
+more complex Promises by combining Promises
 
 ### My organisation would like to add all of our tooling as Promises to our platform, and some of our tools are challenging to deploy and manage. I worry a single platform team would get overwhelmed. How do I scale up?
 
