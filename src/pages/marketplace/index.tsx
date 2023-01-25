@@ -89,7 +89,7 @@ export function Marketplace(props) {
       description="Use Kratix Marketplace to find your next Kratix Promise"
     >
       <main className={styles.main}>
-        <header>
+        <header className={"text--center"}>
           <hgroup>
             <h1>Kratix Marketplace</h1>
             <p className="text--center">Community Promises for <Link href="/">Kratix</Link>, the framework for building platforms.</p>
