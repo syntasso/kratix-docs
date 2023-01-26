@@ -167,6 +167,18 @@ export const Promises = [
     ]
   },
   {
+    name: "App-as-a-Service",
+    description: "Example of a Promise delivering 'App-as-a-Service'. \
+      Check the Compound Promises section in the documentation for \
+      more information.",
+    url: "https://github.com/syntasso/kratix/tree/main/demo/app-as-a-service",
+    logoUrl: '/img/marketplace/app-as-a-service.svg',
+    example: true,
+    categories: [
+      "Example", "Compound Promise"
+    ]
+  },
+  {
     name: "MongoDB",
     description: "Document-oriented NoSQL database",
     logoUrl: '/img/marketplace/mongodb.svg',
