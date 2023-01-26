@@ -15,8 +15,8 @@ in two stages:
 1. Determining where the workloads will run following a Resource Requests ([Scheduling Workloads](#workloads))
 
 The following sections in this page document those stages. For hands-on scheduling guides,
-check the [Adding a new Worker Cluster](../guides/scheduling-clusters) and [Composite
-Promise](../guides/composite-promises) pages.
+check the [Adding a new Worker Cluster](../guides/scheduling-clusters) and [Compound
+Promise](../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
 
@@ -121,9 +121,9 @@ The table below contains a few examples:
 
 In the event that more than one cluster matches the resulting labels, Kratix will randomly select within the available matching registered Clusters. If you prefer to be certain of a single cluster match, it is suggested that you add a unique identifier to all clusters (e.g. `clusterName`) so that there can only ever be a single match.
 
-## Composite Promises
+## Compound Promises
 
-Composite Promises are Promises that, in its WCRs, contain other Promises. That ability
+Compound Promises are Promises that, in its WCRs, contain other Promises. That ability
 allows Platform teams deliver entire stacks on demand, instead of simple databases or
 services.
 
@@ -131,10 +131,10 @@ To enable this functionality, the following needs to be true:
 
 - The Platform cluster must register itself as a Worker cluster
 - The GitOps toolkit must be installed in the Platform cluster
-- The Composite Promise must instruct Kratix to install its WCR (i.e. the other Promises)
+- The Compound Promise must instruct Kratix to install its WCR (i.e. the other Promises)
   in the Platform cluster
 - Optionally, the sub-Promises may instruct Kratix to install their WCR outside the
   Platform cluster
 
-For detailed instruction on the above, please check the [Composite
-Promises](../guides/composite-promises) guide.
+For detailed instruction on the above, please check the [Compound
+Promises](../guides/compound-promises) guide.

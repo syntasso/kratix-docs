@@ -1,6 +1,6 @@
 ---
-description: Guides on how to create Composite Promises
-title: Composite Promise
+description: Guides on how to create Compound Promises
+title: Compound Promise
 ---
 
 ```mdx-code-block
@@ -12,21 +12,21 @@ import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
 *[CRD]: Custom Resource Definition
 *[CRDs]: Custom Resource Definition
 
-Composite Promises are Promises that, in its WCR, contain other Promises. That
+Compound Promises are Promises that, in its WCR, contain other Promises. That
 ability allows Platform teams deliver entire stacks on demand, instead of
 simple databases or services.
 
 **In this tutorial, you will**
 
-1. encapsulate multiple Promises into a Composite Promise
-1. request a complete development environment through a Composite Promise
+1. encapsulate multiple Promises into a Compound Promise
+1. request a complete development environment through a Compound Promise
 
 <PartialPreRequisites />
 
 ## Register the Platform as a Worker
 
-To install a Composite Promises, the first step is to register the Platform cluster itself
-as an available Worker Cluster. That's because the WCR for the Composite Promises are
+To install a Compound Promises, the first step is to register the Platform cluster itself
+as an available Worker Cluster. That's because the WCR for the Compound Promises are
 Promises themselves, hence need to be scheduled to the Platform cluster.
 
 Create a new [Cluster document](../reference/clusters/intro) `platform-cluster.yaml` with the
@@ -61,7 +61,7 @@ cd /path/to/kratix
 ./scripts/install-gitops --context kind-platform --bucket-path platform
 ```
 
-## Install a Composite Promise
+## Install a Compound Promise
 
 You can now install a "Paved Path" Promise:
 
@@ -129,7 +129,7 @@ knative-serving      default-domain-dl972          0/1     Completed   0        
 ...
 ```
 
-🎉 **Congratulations**: you have installed a Composite Promise and created an instance of the Paved Path!
+🎉 **Congratulations**: you have installed a Compound Promise and created an instance of the Paved Path!
 
 ## A closer look in the Promise
 
@@ -256,7 +256,7 @@ sub-Promises dependencies in the Worker Cluster.
 
 When a Resource Request is created, the Paved Path Pipeline is triggered. Usually, the
 output of the pipeline is a set of Kubernetes Resources that need to be created. For
-Composite Promises, that's usually a set of Resource Requests to be applied in the
+Compound Promises, that's usually a set of Resource Requests to be applied in the
 Platform itself.
 
 The Paved Path Promise is a very basic example, but you can see that's exactly what the
@@ -265,5 +265,5 @@ pipeline is doing in its
 
 ## 🎉 Congratulations
 
-✅ &nbsp; You have just installed and used your first Composite Promise. <br/>
+✅ &nbsp; You have just installed and used your first Compound Promise. <br/>
 👉 &nbsp; Let's see [where to go from here](./whats-next).

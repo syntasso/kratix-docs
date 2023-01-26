@@ -31,4 +31,6 @@ Follow our handy guides to get started on the basics as quickly as possible:
 * [Installing and using a Promise](./guides/installing-a-promise)
 * [Writing a Promise](./guides/writing-a-promise)
 
+<br />
+
 If you can't find what you need, or need help with building your platform as a product, reach out to us on [Github](https://github.com/syntasso/kratix/) or through [Syntasso.io](https://www.syntasso.io/contact-us) and we'll be happy to help.

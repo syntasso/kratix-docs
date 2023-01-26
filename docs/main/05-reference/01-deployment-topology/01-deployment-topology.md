@@ -44,9 +44,9 @@ For example, when the _Web App Golden Path_ Promise was installed on the Platfor
 
 ### Platform as a Worker
 
-The Platform itself can _also_ be registered as a Worker cluster, which is required if the Platform offers any [Composite Promises](../guides/composite-promises).
+The Platform itself can _also_ be registered as a Worker cluster, which is required if the Platform offers any [Compound Promises](../guides/compound-promises).
 
-The _Web App Golden Path_ Promise is a Composite Promise because it is composed of three lower-level Promises: Jenkins, PostgreSQL, and Nginx. Composite Promises allow Platform teams to provide higher-level value by combining lower-level Promises available in the Marketplace.
+The _Web App Golden Path_ Promise is a Compound Promise because it is composed of three lower-level Promises: Jenkins, PostgreSQL, and Nginx. Compound Promises allow Platform teams to provide higher-level value by combining lower-level Promises available in the Marketplace.
 
 ## Kratix Marketplace
 
