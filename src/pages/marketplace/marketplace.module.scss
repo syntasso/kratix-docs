@@ -1,7 +1,8 @@
 
 :root {
   --text-color:  rgb(209, 209, 209);
-  --banner-color: #65b142;
+  --coming-soon-banner-color: #65b142;
+  --example-banner-color: #86C6EE;
 }
 
 [data-theme='light'] {
@@ -75,17 +76,16 @@ ul {
   }
 }
 
-.comingSoonBanner {
-	position: absolute;
-	width: 150px;
-	height: 150px;
-	top: -5px;
-	left: -5px;
+.banner {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  top: -5px;
+  left: -5px;
 
-  .comingSoonBannerTitle {
+  .bannerTitle {
     width: 200px;
     padding: 15px;
-    background-color: var(--banner-color);
     color: #fff;
     text-align: center;
     transform: rotate(-45deg) translate(-28%, -35%);
@@ -93,6 +93,19 @@ ul {
     font-size: 1rem;
   }
 }
+
+.preview {
+  .bannerTitle {
+    background-color: var(--coming-soon-banner-color);
+  }
+}
+
+.example {
+  .bannerTitle {
+    background-color: var(--example-banner-color);
+  }
+}
+
 
 .card.cardComingSoon {
   background-color: var(--bg-card-coming-soon);

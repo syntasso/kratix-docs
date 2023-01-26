@@ -154,13 +154,23 @@ export const Promises = [
       "App Delivery"
     ]
   },
-];
-
-export const PromisesComingSoon = [
+  {
+    name: "Paved Path",
+    description: "Example of a Promise delivering a 'Paved Path' with Knative and PostgreSQL. \
+      Check the Compound Promises section in the documentation for \
+      more information.",
+    url: "https://github.com/syntasso/kratix/tree/main/samples/paved-path-demo/",
+    logoUrl: '/img/marketplace/pavedpath.svg',
+    example: true,
+    categories: [
+      "Example", "Compound Promise"
+    ]
+  },
   {
     name: "MongoDB",
     description: "Document-oriented NoSQL database",
     logoUrl: '/img/marketplace/mongodb.svg',
+    available: false,
     categories: [
       "Data"
     ]

@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import styles from './marketplace.module.scss';
-import { Promises, PromisesComingSoon } from '../../data/promise-data';
+import { Promises } from '../../data/promise-data';
 
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
@@ -21,15 +21,15 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
-function ComingSoonBanner() {
+function Banner({title, style}) {
   return (
-    <div className={styles.comingSoonBanner}>
-      <h3 className={styles.comingSoonBannerTitle}>Coming Soon</h3>
+    <div className={clsx(styles.banner, style)}>
+      <h3 className={styles.bannerTitle}>{ title }</h3>
     </div>
   )
 }
 
-function PromiseCard({name, url, logoUrl, description, categories, available = true}) {
+function PromiseCard({name, url, logoUrl, description, categories, available = true, example = false}) {
   return (
       <Card className={clsx(styles.card, available ? null : styles.cardComingSoon)}>
         <CardActionArea
@@ -59,7 +59,8 @@ function PromiseCard({name, url, logoUrl, description, categories, available = t
                 </ListItem>
               ))}
             </ul>
-            {available ? null : <ComingSoonBanner /> }
+            {!available ? <Banner title="Coming Soon" style={styles.preview} /> : null }
+            {example ? <Banner title="Example" style={styles.example} /> : null }
           </CardContent>
         </CardActionArea>
       </Card>
@@ -105,11 +106,6 @@ export function Marketplace(props) {
             {Promises.map((tile) => (
               <div key={tile.name}>
                 <PromiseCard {...tile} />
-              </div>
-            ))}
-            {PromisesComingSoon.map((tile) => (
-              <div key={tile.name}>
-                <PromiseCard {...tile} available={false} />
               </div>
             ))}
           </GridList>
