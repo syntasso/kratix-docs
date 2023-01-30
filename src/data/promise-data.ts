@@ -156,11 +156,20 @@ export const Promises = [
   },
   {
     name: "Kubeflow Pipelines",
-    description: "Kubeflow Pipelines is a platform for building and deploying portable, scalable machine learning (ML) workflows based on Docker containers.",
+    description: "Kubeflow Pipelines is a platform for building and deploying portable, scalable machine learning (ML) workflows based on Docker containers",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/kubeflow-pipelines",
     logoUrl: '/img/marketplace/kubeflow-pipelines.svg',
     categories: [
       "Machine Learning"
+    ]
+  },
+  {
+    name: "cert-manager",
+    description: "cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/cert-manager",
+    logoUrl: '/img/marketplace/cert-manager.svg',
+    categories: [
+      "Security"
     ]
   },
   {
