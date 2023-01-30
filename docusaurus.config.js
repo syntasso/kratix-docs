@@ -92,6 +92,12 @@ const config = {
             position: 'left'
           },
           {
+            type: 'doc',
+            docId: 'main/community',
+            position: 'left',
+            label: 'Community',
+          },
+          {
             href: 'https://github.com/syntasso/kratix',
             position: 'right',
             className: 'header-github-link',
