@@ -155,6 +155,15 @@ export const Promises = [
     ]
   },
   {
+    name: "Kubeflow Pipelines",
+    description: "Kubeflow Pipelines is a platform for building and deploying portable, scalable machine learning (ML) workflows based on Docker containers.",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/kubeflow-pipelines",
+    logoUrl: '/img/marketplace/kubeflow-pipelines.svg',
+    categories: [
+      "Machine Learning"
+    ]
+  },
+  {
     name: "Paved Path",
     description: "Example of a Promise delivering a 'Paved Path' with Knative and PostgreSQL. \
       Check the Compound Promises section in the documentation for \
