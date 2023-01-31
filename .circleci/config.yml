@@ -5,7 +5,7 @@ orbs:
   slack: circleci/slack@4.10.1
 
 jobs:
-  yarn-build:
+  build-and-deploy:
     executor: node/default
     steps:
       - checkout
@@ -13,19 +13,9 @@ jobs:
           cache-path: ~/project/node_modules
           pkg-manager: yarn
       - run: yarn build
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
       - slack/notify:
           event: fail
           template: basic_fail_1
-
-  deploy:
-    executor: node/default
-    steps:
-      - attach_workspace:
-          at: .
       - add_ssh_keys:
           # Add github deploy key
           # https://circleci.com/docs/github-integration#create-a-github-deploy-key
@@ -50,11 +40,9 @@ jobs:
 workflows:
   build-and-deploy:
     jobs:
-      - yarn-build:
+      - build-and-deploy:
           context:
           - slack-secrets
-      - deploy:
-          requires: [ yarn-build ]
           filters:
             branches:
               only: main
