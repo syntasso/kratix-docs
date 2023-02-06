@@ -3,8 +3,8 @@ description: Learn more about the Scheduling Promises and Workloads
 title: Scheduling
 ---
 
-_[WCR]: Worker Cluster Resource
-_[WCRs]: Worker Cluster Resources
+*[WCR]: Worker Cluster Resource
+*[WCRs]: Worker Cluster Resources
 
 One of the most powerful Kratix features is the ability Platform teams have to
 fully control scheduling of work across Kubernetes Cluster. Scheduling happens
