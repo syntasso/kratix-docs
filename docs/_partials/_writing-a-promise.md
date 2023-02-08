@@ -253,6 +253,9 @@ chmod +x jenkins-promise/request-pipeline-image/execute-pipeline.sh
 ```
 <br />
 
+Pipelines also have the capability to write back information to the resource requester
+by writing to the status. See [status documentation for more infoformation.](../main/05-reference/05-resource-requests/04-status.md)
+
 #### Package your pipeline step as a Docker image {#docker-file}
 
 Create a `Dockerfile` in the `request-pipeline-image` directory and copy the contents below.
