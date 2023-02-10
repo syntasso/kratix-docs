@@ -1,8 +1,12 @@
 ---
 description: Get Kratix up and running
+title: Quick Start
 ---
 
-# Quick Start
+```mdx-code-block
+import PartialInstall from '../_partials/installation/_single-cluster-install.md';
+import PartialConfigure from '../_partials/installation/_single-cluster-configure.md';
+```
 
 One of the most powerful features of Kratix is its ability to handle requests for
 resources, and deploy them to a remote specific cluster. However, Kratix also works well
@@ -18,33 +22,17 @@ recommend starting with a local cluster tool like
 
 ## 1. Install Kratix
 
-Install Kratix and its dependencies with the command below:
-
-```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/install-all-in-one.yaml
-```
-
-The above will install Kratix, MinIO, and FluxCD. MinIO will be the repository for the
-GitOps, while FluxCD will watch the repository for any changes that need to be applied to
-the cluster. For production installations, both can be replaced with other tools and
-technologies depending on your preference.
+<PartialInstall />
 
 ### Configure
 
-Once Kratix is installed, you can register Kubernetes clusters where workloads should run.
-On single cluster installations, the same cluster performs the role of the Platform and
-the Worker clusters. The commands below will register the cluster, as well as configure
-FluxCD to watch for the cluster's repository:
-
-```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/config-all-in-one.yaml
-```
+<PartialConfigure />
 
 Once the system reconciles, the Kratix resources should now be visible on your
 cluster. You can verify its readiness by observing the `kratix-worker-system` namespace
 appearing in the cluster (it may take a couple of minutes):
 
-```console
+```shell-session
 $ kubectl get namespace kratix-worker-system
 NAME                   STATUS   AGE
 kratix-worker-system   Active   1m
@@ -82,7 +70,7 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-post
 
 You can verify the pipeline pod by running:
 
-```console
+```shell-session
 $ kubectl get pods
 NAME                                          READY   STATUS      RESTARTS   AGE
 //highlight-next-line
@@ -92,7 +80,7 @@ postgres-operator-6c6dbd4459-pbcjp            1/1     Running     0          6m5
 
 Eventually, the Postgres instance pods will come up as well:
 
-```console
+```shell-session
 $ kubectl get pods
 NAME                                         READY   STATUS      RESTARTS   AGE
 //highlight-start

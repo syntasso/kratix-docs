@@ -1,8 +1,12 @@
 ---
 description: Run Kratix locally using minikube
+title: Single Cluster with minikube
 ---
 
-# Single Cluster with minikube
+```mdx-code-block
+import PartialInstall from '../../../_partials/installation/_single-cluster-install.md';
+import PartialConfigure from '../../../_partials/installation/_single-cluster-configure.md';
+```
 
 One of the most powerful features of Kratix is its ability to handle requests for resources, and deploy them to a remote specific cluster. However, Kratix also works well in a single cluster environment. This guide will walk you through the steps to install Kratix on a single cluster, using minikube.
 
@@ -18,12 +22,20 @@ One of the most powerful features of Kratix is its ability to handle requests fo
 
 ## Install Kratix
 
-Create your cluster with minikube and install Kratix and MinIO. MinIO will be the repository for the GitOps toolkit. For production installations, MinIO can be replaced by Git or any other S3-compatible storage, depending on your preference.
-
+Create your cluster with minikube:
 
 ```bash
 minikube start
+```
 
+<PartialInstall />
+
+<details>
+  <summary>Alternative install instructions</summary>
+
+To install Kratix and MinIO separately, run the commands below:
+
+```bash
 # Install Kratix
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
 
@@ -31,18 +43,30 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
 ```
 
+</details>
+
 ### Set up the Gitops toolkit
 
-This stage would typically be set up on a Worker cluster. On single cluster installations, the same cluster performs the role of the Platform and the Worker cluster. The commands below will set up the GitOps toolkit and register
+<PartialConfigure />
+
+<details>
+  <summary>Alternative install instructions</summary>
+
+To register the minikube cluster as a Kratix Worker Cluster, run the command below:
 
 ```bash
-# Register the cluster with Kratix
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
+```
 
+You can then install and conigure Flux with the commands below:
+
+```bash
 # Install the GitOps toolkit
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-single-cluster.yaml
 ```
+
+</details>
 
 Once Flux is installed and running (this may take a few minutes), the Kratix resources should now be visible on the your cluster. You can verify its readiness by observing the `kratix-worker-system` namespace appearing in the cluster:
 
