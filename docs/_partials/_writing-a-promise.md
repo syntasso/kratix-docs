@@ -223,13 +223,21 @@ spec:
 
 #### Build a simple request pipeline {#pipeline-script}
 
-Kratix takes no opinion on the tooling used within a pipeline. Kratix will pass a set of resources to the pipeline, and expect back a set of resources. What happens within the pipeline, and what tooling is used, is a decision left entirely to you.
+Kratix takes no opinion on the tooling used within a pipeline. Kratix will pass
+a set of resources to the pipeline, and expect back a set of resources. What
+happens within the pipeline, and what tooling is used, is a decision left
+entirely to you. For further documentation on how pipelines work, check [Kratix
+Pipelines](/docs/main/reference/resource-requests/pipelines)
 
-For this example, you're taking a name from the Kratix Resource Request for an instance and passing it to the Jenkins custom resource output.
+For this example, you're taking a name from the Kratix Resource Request for an
+instance and passing it to the Jenkins custom resource output.
 
-To keep this transformation simple, you'll use a combination of `sed` and `yq` to do the work.
+To keep this transformation simple, you'll use a combination of `sed` and `yq`
+to do the work.
 
-Create a script file in the `request-pipeline-image` directory called `execute-pipeline.sh` and copy the contents below. The script will be executed when the pipeline runs.
+Create a script file in the `request-pipeline-image` directory called
+`execute-pipeline.sh` and copy the contents below. The script will be executed
+when the pipeline runs.
 
 ```bash jsx title="jenkins-promise/request-pipeline-image/execute-pipeline.sh"
 #!/bin/sh
@@ -599,8 +607,12 @@ The pipeline is an array of Docker images, and those images are executed in orde
 Each container in the `xaasRequestPipeline` array should output complete, valid Kubernetes resources.
 
 The contract with each pipeline container is simple and straightforward:
-* The first container in the list receives the resource document created by the user's request&mdash;this request will comply with the `xaasCrd` described above. The document is available to the pipeline in `/input/object.yaml`.
-* The container's command then executes with the input object and fulfils its responsibilites.
+* The first container in the list receives the resource document created by the
+  user's request&mdash;this request will comply with the `xaasCrd` described
+  above. The document will be always available to the pipeline in
+  `/input/object.yaml`.
+* The container's command then executes with the input object and fulfils its
+  responsibilites. 
 * The container writes any resources to be created to `/output/`.
 * The resources in `/output` of the last container in the `xaasRequestPipeline` array will be scheduled and applied to the appropriate Worker Clusters.
 
