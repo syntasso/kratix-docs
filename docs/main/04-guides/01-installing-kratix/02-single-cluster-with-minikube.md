@@ -20,7 +20,7 @@ One of the most powerful features of Kratix is its ability to handle requests fo
    The CLI for Kubernetes — allows you to run commands against Kubernetes clusters. See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
 
 
-## Install Kratix
+## Bootstap the cluster
 
 Create your cluster with minikube:
 
@@ -41,11 +41,14 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/
 
 # Install MinIO
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
+
+# Install Flux
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
 ```
 
 </details>
 
-### Set up the Gitops toolkit
+### Configure the Platform
 
 <PartialConfigure />
 
@@ -62,7 +65,6 @@ You can then install and conigure Flux with the commands below:
 
 ```bash
 # Install the GitOps toolkit
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-single-cluster.yaml
 ```
 
