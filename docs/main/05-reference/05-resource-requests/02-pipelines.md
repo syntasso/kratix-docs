@@ -5,7 +5,9 @@ title: Pipelines
 
 # Resource Request Pipelines
 
-The pipeline is an ordered list of OCI-compliant images that run as an ordered set of init containers in a Kubernetes pod. Each container is given read and write access to the same storage.
+The pipeline is an ordered list of OCI-compliant images that run as an ordered
+set of init containers in a Kubernetes pod. Each container is given read and
+write access to the same storage.
 
 :::info
 
@@ -33,3 +35,38 @@ A pipeline is run on each Resource Request reconciliation loop. Kuberentes recon
 
 <br/>
 Because of this, all pipelines should be idempotent as there is a guarantee that they will be run multiple times a day, and may be run much more frequently depending on other environmental impacts like pod restarts.
+
+## Passing secrets to the Pipeline
+
+:::caution Under Development
+
+We're currently working on providing alternative ways to read secrets from both self hosted and SaaS providers. If you'd like early access, reach out.
+
+:::
+
+To allow the pipeline to access in-cluster secrets, do the following while targeting the Platform Cluster:
+
+1. Create the Secret you'd like to access. For example:
+  ```bash
+kubectl create secret generic promise-secret --from-literal=apikey=topsecret
+  ```
+1. Create a Cluster Role giving `get` permissions to the `promise-secret` created above:
+  ```bash
+kubectl create clusterrole promise-secret-cr \
+      --verb=get \
+      --resource=secrets \
+      --resource-name=promise-secret
+  ```
+1. Create a Cluste Role Binding, associating the pipeline Service Account (created by Kratix, on Promise install) to the Cluster Role, by referencing the Cluster Role created above:
+  ```bash
+# Replace PROMISE with the name of your promise
+kubectl create clusterrolebinding promise-secret \
+      --clusterrole=promise-secret-cr \
+      --serviceaccount=default:PROMISE-default-pipeline-secret \
+  ```
+1. Access the Base64 enconded Secret in the pipeline with the `kubectl` CLI
+  ```
+  kubectl get secret promise-secret -o=jsonpath='{.data.apikey}'
+  ```
+
+For a working example, check the [Slack Promise](https://github.com/syntasso/kratix-marketplace/tree/main/slack) available in the Marketplace.
