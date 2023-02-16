@@ -1,20 +1,29 @@
 export const Promises = [
   {
-    name: "RabbitMQ",
-    description: "Message broker software that implements the Advanced Message Queuing Protocol (AMQP)",
-    url: "https://github.com/syntasso/promise-rabbitmq",
-    logoUrl: '/img/marketplace/rabbitmq.svg',
-    categories: [
-      "Messaging"
-    ]
-  },
-  {
     name: "Knative",
     description: "Deploying, running, and managing serverless, cloud-native applications",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/knative",
     logoUrl: '/img/marketplace/knative.svg',
     categories: [
       "App Delivery"
+    ]
+  },
+  {
+    name: "Dapr",
+    description: "Event-driven runtime that makes it easy for any developer to build resilient, stateless and stateful applications",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/dapr",
+    logoUrl: '/img/marketplace/dapr.svg',
+    categories: [
+      "Microservices", "Event Driven"
+    ]
+  },
+  {
+    name: "RabbitMQ",
+    description: "Message broker software that implements the Advanced Message Queuing Protocol (AMQP)",
+    url: "https://github.com/syntasso/promise-rabbitmq",
+    logoUrl: '/img/marketplace/rabbitmq.svg',
+    categories: [
+      "Messaging"
     ]
   },
   {
@@ -194,15 +203,6 @@ export const Promises = [
     example: true,
     categories: [
       "Example", "Compound Promise"
-    ]
-  },
-  {
-    name: "Dapr",
-    description: "Event-driven runtime that makes it easy for any developer to build resilient, stateless and stateful applications",
-    url: "https://github.com/syntasso/kratix-marketplace/tree/main/dapr",
-    logoUrl: '/img/marketplace/dapr.svg',
-    categories: [
-      "Microservices", "Event Driven"
     ]
   },
   {
