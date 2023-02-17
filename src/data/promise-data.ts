@@ -36,6 +36,15 @@ export const Promises = [
     ]
   },
   {
+    name: "Kubevela",
+    description: "A modern software delivery and management control plane",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/kubevela",
+    logoUrl: '/img/marketplace/kubevela.svg',
+    categories: [
+      "App Delivery"
+    ]
+  },
+  {
     name: "Vault",
     description: "Identity-based secrets and encryption management system",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/vault",
