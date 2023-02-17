@@ -1,6 +1,7 @@
 ---
-description: Get Kratix up and running
+description: Quickest way to test Kratix
 title: Quick Start
+sidebar_label: Quick Start
 ---
 
 ```mdx-code-block

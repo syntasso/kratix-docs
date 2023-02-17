@@ -2,10 +2,8 @@ import React from 'react';
 import Layout from '@theme/Layout';
 import styles from './marketplace.module.scss';
 import { Promises } from '../../data/promise-data';
-
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
-
 import {
   Card,
   CardActionArea,
@@ -13,9 +11,16 @@ import {
   CardMedia,
   Chip,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import {
+  Breakpoint,
+  Theme,
+  styled,
+  useTheme,
+} from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Link from '@docusaurus/Link';
 import clsx from 'clsx';
+type BreakpointOrNull = Breakpoint | null;
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -67,17 +72,30 @@ function PromiseCard({name, url, logoUrl, description, categories, available = t
   )
 }
 
-export function Marketplace(props) {
+function useWidth() {
+  const theme: Theme = useTheme();
+  const keys: readonly Breakpoint[] = [...theme.breakpoints.keys].reverse();
+  return (
+    keys.reduce((output: BreakpointOrNull, key: Breakpoint) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const matches = useMediaQuery(theme.breakpoints.up(key));
+      return !output && matches ? key : output;
+    }, null) || 'xs'
+  );
+}
+
+export function Marketplace(): JSX.Element {
   const getGridListCols = () => {
-    if (isWidthUp('xl', props.width)) {
+    const width = useWidth();
+    if (isWidthUp('xl', width)) {
       return 4;
     }
 
-    if (isWidthUp('lg', props.width)) {
+    if (isWidthUp('lg', width)) {
       return 3;
     }
 
-    if (isWidthUp('md', props.width)) {
+    if (isWidthUp('md', width)) {
       return 2;
     }
 
@@ -126,4 +144,4 @@ export function Marketplace(props) {
   );
 }
 
-export default withWidth()(Marketplace);
+export default Marketplace;

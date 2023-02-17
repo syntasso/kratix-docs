@@ -1,4 +1,7 @@
 ---
+description: Documentation for the lifecycle of Resource Requests
+title: Promise Resource Requests
+sidebar_label: Introduction
 id: intro
 ---
 

@@ -1,6 +1,7 @@
 ---
-description: Deleting a Resource Request
-title: Deleting
+description: Documentation for deleting a Resource Request
+title: Deleting a Resource Request
+sidebar_label: Deleting
 ---
 
 To delete a Resource Request, run:

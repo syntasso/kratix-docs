@@ -1,4 +1,7 @@
 ---
+title: Promise Custom Resource
+sidebar_label: Introduction
+description: Documentation for the Kratix Promise Custom Resource
 id: intro
 ---
 

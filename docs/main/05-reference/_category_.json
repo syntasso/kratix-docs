@@ -3,6 +3,6 @@
   "position": 5,
   "link": {
     "type": "generated-index",
-    "description": "Reference documentation for installing, configuring, and deleting Kratix resources"
+    "description": "Reference documentation for Kratix concepts and how Kratix components interact."
   }
 }

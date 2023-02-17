@@ -1,3 +1,8 @@
+---
+title: Frequently Asked Questions
+description: Common questions about Kratix and how it fits in the Kubernetes ecosystem
+---
+
 # Frequently Asked Questions
 
 ### What does the "day two" experience of a Kratix-based platform look like?

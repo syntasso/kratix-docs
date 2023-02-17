@@ -1,6 +1,7 @@
 ---
-description: Learn more about the Scheduling Promises and Workloads
-title: Scheduling
+title: Scheduling Workloads
+sidebar_label: Scheduling
+description: Learn more about how Kratix schedules Promises and Workloads, and how you can control the scheduling process.
 ---
 
 *[WCR]: Worker Cluster Resource

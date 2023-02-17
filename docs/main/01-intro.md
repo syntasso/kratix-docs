@@ -1,3 +1,10 @@
+---
+title: Introduction
+description: Introduction to Kratix and how to get started quickly.
+keywords: [kratix documentation]
+sidebar_label: Introduction
+---
+
 # Introduction
 
 ## What is Kratix?

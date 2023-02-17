@@ -1,6 +1,7 @@
 ---
-description: Learn more about the Cluster document
-title: Clusters
+description: Documentation for the Kratix Cluster Custom Resource
+title: Cluster Custom Resource
+sidebar_label: Clusters
 id: intro
 ---
 

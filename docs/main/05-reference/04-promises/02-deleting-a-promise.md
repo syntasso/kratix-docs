@@ -1,6 +1,7 @@
 ---
-description: Deleting a promise
-title: Deleting
+description: Documentation for deleting a Kratix Promise
+title: Deleting a Promise
+sidebar_label: deleting
 ---
 
 :::caution

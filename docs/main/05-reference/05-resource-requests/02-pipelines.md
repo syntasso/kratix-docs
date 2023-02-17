@@ -1,6 +1,7 @@
 ---
-description: Resource Request Pipelines
-title: Pipelines
+description: Documentation for writing Promise Pipelines, covering how Kratix internally execute the Pipeline containers
+title: Promise Pipelines
+sidebar_label: Pipelines
 ---
 
 # Resource Request Pipelines

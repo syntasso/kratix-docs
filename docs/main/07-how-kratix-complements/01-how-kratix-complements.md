@@ -9,7 +9,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 <img
 align="right"
 src={useBaseUrl('/img/k+QUESTION.png')}
-alt="Kratix logo"
+alt="Kratix logo followed by a plus sign and a question mark"
 />
 
 We get asked “how does Kratix compare to technology X” in many of our conversations. In the platform space, Kratix overlaps with some, is very different to others, and complements many.

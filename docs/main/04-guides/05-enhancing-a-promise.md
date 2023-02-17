@@ -1,5 +1,5 @@
 ---
-description: learn how to extend an existing promise
+description: Learn how to extend an existing Promise, from updating the API to changing the Pipeline behaviour
 title: Enhancing a Promise
 ---
 import PartialPreRequisites from '../../_partials/_generic_prereqs.md';

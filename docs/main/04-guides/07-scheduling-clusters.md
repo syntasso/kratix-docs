@@ -1,5 +1,5 @@
 ---
-description: Tutorial on adding a new Worker Cluster
+description: Guide on how to register a new Worker Cluster with Kratix
 title: Adding a new Worker Cluster
 ---
 

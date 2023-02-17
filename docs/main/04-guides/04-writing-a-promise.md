@@ -1,5 +1,5 @@
 ---
-description: Writing a Kratix promise
+description: Guide on how to write and package a Kratix Promise
 title: Writing a Promise
 ---
 import PartialPreRequisites from '../../_partials/_generic_prereqs.md';

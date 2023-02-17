@@ -1,5 +1,5 @@
 ---
-description: Guides on how to create Compound Promises
+description: Learn how to combine multiple promises into a single Compound Promise, delivering full developer experiences
 title: Compound Promise
 ---
 

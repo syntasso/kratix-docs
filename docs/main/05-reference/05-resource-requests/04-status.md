@@ -1,3 +1,9 @@
+---
+title: Resource Request Status
+sidebar_label: Status
+description: Documentation on how to expose information from the Pipeline to the Platform user through the Resource Request Status field
+---
+
 # Status
 As part of your pipeline you can optionally send information about the
 resource request back to the resource requester by writing information to `/metadata/status.yaml`.

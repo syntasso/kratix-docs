@@ -67,6 +67,9 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      metadata: [{
+        name: 'keywords', content: 'kratix docs, kratix documentation'
+      }],
       navbar: {
         title: 'Kratix',
         logo: {

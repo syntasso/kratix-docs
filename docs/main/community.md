@@ -3,6 +3,7 @@ custom_edit_url: null
 title: Community
 pagination_next: null
 pagination_prev: null
+description: Find out how to contact and chat with Kratix authors
 ---
 
 # Contact Us

@@ -1,5 +1,5 @@
 ---
-description: Learn more about how Kratix works with Terraform
+description: Kratix and Terraform can work well together. Find out how one complements the other.
 title: Kratix and Terraform
 id: terraform
 ---
