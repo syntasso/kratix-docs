@@ -59,7 +59,7 @@ kubectl create clusterrole promise-secret-cr \
   ```
 1. Create a Cluste Role Binding, associating the pipeline Service Account (created by Kratix, on Promise install) to the Cluster Role, by referencing the Cluster Role created above:
   ```bash
-# Replace PROMISE with the name of your promise
+  # Replace PROMISE with the name of your promise
 kubectl create clusterrolebinding promise-secret \
       --clusterrole=promise-secret-cr \
       --serviceaccount=default:PROMISE-default-pipeline-secret \
