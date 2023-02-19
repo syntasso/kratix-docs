@@ -1,7 +1,7 @@
 export const Promises = [
   {
     name: "Knative",
-    description: "Deploying, running, and managing serverless, cloud-native applications",
+    description: "A service to deploy, run, and manage serverless, cloud-native applications",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/knative",
     logoUrl: '/img/marketplace/knative.svg',
     categories: [
@@ -10,7 +10,7 @@ export const Promises = [
   },
   {
     name: "RabbitMQ",
-    description: "Message broker software that implements the Advanced Message Queuing Protocol (AMQP)",
+    description: "A message broker that implements the Advanced Message Queuing Protocol (AMQP)",
     url: "https://github.com/syntasso/promise-rabbitmq",
     logoUrl: '/img/marketplace/rabbitmq.svg',
     categories: [
@@ -19,7 +19,7 @@ export const Promises = [
   },
   {
     name: "Redis",
-    description: "An in-memory data structure store, used as a distributed, in-memory key–value database, cache and message broke",
+    description: "A distributed, in-memory, key–value database, cache and message broker",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/redis",
     logoUrl: '/img/marketplace/redis.svg',
     categories: [
@@ -28,7 +28,7 @@ export const Promises = [
   },
   {
     name: "PostgreSQL",
-    description: "SQL-compliant relational database management system ",
+    description: "A SQL-compliant relational database management system",
     url: "https://github.com/syntasso/promise-postgresql",
     logoUrl: '/img/marketplace/postgresql.svg',
     categories: [
@@ -46,7 +46,7 @@ export const Promises = [
   },
   {
     name: "Vault",
-    description: "Identity-based secrets and encryption management system",
+    description: "An identity-based secrets and encryption management system",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/vault",
     logoUrl: '/img/marketplace/vault.svg',
     categories: [
@@ -55,7 +55,7 @@ export const Promises = [
   },
   {
     name: "Jenkins",
-    description: "Continuous integration/continuous delivery and deployment (CI/CD) automation software",
+    description: "A continuous integration/continuous delivery and deployment (CI/CD) automation software",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/jenkins",
     logoUrl: '/img/marketplace/jenkins.svg',
     categories: [
@@ -64,7 +64,7 @@ export const Promises = [
   },
   {
     name: "ArgoCD",
-    description: "Declarative continuous delivery tool",
+    description: "A declarative continuous delivery tool",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/argocd-application",
     logoUrl: '/img/marketplace/argocd.svg',
     categories: [
@@ -74,7 +74,7 @@ export const Promises = [
   },
   {
     name: "Grafana / Prometheus",
-    description: "Event monitoring and alerting using Prometheus, visualised in Grafana",
+    description: "A service  with event monitoring and alerting using Prometheus, visualised in Grafana",
     url: "https://github.com/syntasso/promise-observability",
     logoUrl: '/img/marketplace/observability.svg',
     categories: [
@@ -84,7 +84,7 @@ export const Promises = [
   },
   {
     name: "Kafka",
-    description: "Distributed event store and stream-processing platform",
+    description: "A distributed event store and stream-processing platform",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/kafka",
     logoUrl: '/img/marketplace/kafka.svg',
     categories: [
@@ -93,7 +93,7 @@ export const Promises = [
   },
   {
     name: "Istio",
-    description: "Service mesh, for observability, traffic management, security, and policy",
+    description: "A service mesh, for observability, traffic management, security, and policy",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/istio",
     logoUrl: '/img/marketplace/istio.svg',
     categories: [
@@ -102,7 +102,7 @@ export const Promises = [
   },
   {
     name: "ElasticSearch",
-    description: "Distributed, open search and analytics engine for all types of data",
+    description: "A distributed, open search and analytics engine for all types of data",
     url: "https://github.com/syntasso/promise-elasticcloud",
     logoUrl: '/img/marketplace/elasticsearch.svg',
     categories: [
@@ -111,7 +111,7 @@ export const Promises = [
   },
   {
     name: "Namespace",
-    description: "Provides Kubernetes Namespaces as-a-Service",
+    description: "A service that provides Kubernetes Namespaces as-a-Service",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/namespace",
     logoUrl: '/img/marketplace/ns.svg',
     categories: [
@@ -120,7 +120,7 @@ export const Promises = [
   },
   {
     name: 'NGINX Ingress Controller',
-    description: 'Ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer',
+    description: 'An ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer',
     url: 'https://github.com/syntasso/kratix-marketplace/tree/main/nginx-ingress',
     logoUrl: '/img/marketplace/nginx.svg',
     categories: [
@@ -129,7 +129,7 @@ export const Promises = [
   },
   {
     name: 'Dex',
-    description: 'A demo promise to showcase cluster authentication and authorization using OIDC as a service',
+    description: 'A demo Promise with cluster authentication and authorization using OIDC as a service',
     url: 'https://github.com/syntasso/kratix-marketplace/tree/main/dex-group-authentication',
     logoUrl: '/img/marketplace/dex.svg',
     categories: [
@@ -138,7 +138,7 @@ export const Promises = [
   },
   {
     name: "Slack",
-    description: "Example of an API integration in a Kratix Promise pipeline, using the Slack API to send messages",
+    description: "A demo Promise with an API integration in the Promise pipeline: send messages via the Slack API",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/slack",
     logoUrl: '/img/marketplace/slack.svg',
     categories: [
@@ -147,7 +147,7 @@ export const Promises = [
   },
   {
     name: "Crossplane",
-    description: "Orchestrate infrastructure across clouds",
+    description: "A service to orchestrate infrastructure across clouds",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/crossplane",
     logoUrl: '/img/marketplace/crossplane.svg',
     categories: [
@@ -156,7 +156,7 @@ export const Promises = [
   },
   {
     name: "Waypoint",
-    description: "Open source solution that provides a modern workflow for build, deploy, and release",
+    description: "An open source solution that provides a modern workflow for build, deploy, and release",
     url: "https://github.com/syntasso/promise-waypoint/tree/main",
     logoUrl: '/img/marketplace/waypoint.svg',
     categories: [
@@ -165,7 +165,7 @@ export const Promises = [
   },
   {
     name: "Kubeflow Pipelines",
-    description: "Kubeflow Pipelines is a platform for building and deploying portable, scalable machine learning (ML) workflows based on Docker containers",
+    description: "A platform for building and deploying portable, scalable machine learning (ML) workflows based on Docker containers",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/kubeflow-pipelines",
     logoUrl: '/img/marketplace/kubeflow-pipelines.svg',
     categories: [
@@ -174,7 +174,7 @@ export const Promises = [
   },
   {
     name: "cert-manager",
-    description: "cert-manager adds certificates and certificate issuers as resource types in Kubernetes clusters, and simplifies the process of obtaining, renewing and using those certificates",
+    description: "A manager for certificates and certificate issuers as resource types in Kubernetes clusters",
     url: "https://github.com/syntasso/kratix-marketplace/tree/main/cert-manager",
     logoUrl: '/img/marketplace/cert-manager.svg',
     categories: [
@@ -183,9 +183,8 @@ export const Promises = [
   },
   {
     name: "Paved Path",
-    description: "Example of a Promise delivering a 'Paved Path' with Knative and PostgreSQL. \
-      Check the Compound Promises section in the documentation for \
-      more information.",
+    description: "A 'Paved Path' service with Knative and PostgreSQL. \
+      Check the Compound Promises docs for more information.",
     url: "https://github.com/syntasso/kratix/tree/main/samples/paved-path-demo/",
     logoUrl: '/img/marketplace/pavedpath.svg',
     example: true,
@@ -195,9 +194,8 @@ export const Promises = [
   },
   {
     name: "App-as-a-Service",
-    description: "Example of a Promise delivering 'App-as-a-Service'. \
-      Check the Compound Promises section in the documentation for \
-      more information.",
+    description: "An example Promise delivering 'App-as-a-Service'. \
+      Check the Compound Promises docs for more information.",
     url: "https://github.com/syntasso/kratix/tree/main/demo/app-as-a-service",
     logoUrl: '/img/marketplace/app-as-a-service.svg',
     example: true,
@@ -207,7 +205,7 @@ export const Promises = [
   },
   {
     name: "MongoDB",
-    description: "Document-oriented NoSQL database",
+    description: "A document-oriented NoSQL database",
     logoUrl: '/img/marketplace/mongodb.svg',
     available: false,
     categories: [

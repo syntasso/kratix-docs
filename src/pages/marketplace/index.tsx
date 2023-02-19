@@ -128,7 +128,7 @@ export function Marketplace(): JSX.Element {
             ))}
           </GridList>
         </div>
-        <div className={clsx('text--center', 'margin-top--md', styles.bottomText)}>
+        <div className={clsx('text--center', 'margin-top--xl', styles.bottomText)}>
           <p>
             Want to contribute a Promise to the Marketplace?
             <Link href="/marketplace/contributing">Check out our guide.</Link>
