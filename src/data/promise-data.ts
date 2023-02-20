@@ -9,6 +9,15 @@ export const Promises = [
     ]
   },
   {
+    name: "Dapr",
+    description: "An event-driven runtime that makes it easy for any developer to build resilient, stateless and stateful applications",
+    url: "https://github.com/syntasso/kratix-marketplace/tree/main/dapr",
+    logoUrl: '/img/marketplace/dapr.svg',
+    categories: [
+      "Microservices", "Event Driven"
+    ]
+  },
+  {
     name: "RabbitMQ",
     description: "A message broker that implements the Advanced Message Queuing Protocol (AMQP)",
     url: "https://github.com/syntasso/promise-rabbitmq",
