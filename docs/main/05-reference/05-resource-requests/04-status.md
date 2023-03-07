@@ -41,7 +41,7 @@ communicate information back to the resource requester. Kratix will automaticall
 inject the required fields for status into the `xaasCRD`,you do not have to manually
 add these fields.
 
-# Conditions
+## Conditions
 Kratix follows the Kubernetes convention of using [conditions](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states)
 to convey the status of a resource and to allow programmatic interactions. When a
 resource request is created the `PipelineCompleted` condition will be set. The `status`
