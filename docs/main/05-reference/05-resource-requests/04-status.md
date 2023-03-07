@@ -40,3 +40,41 @@ They will see all the additional key values. Status provides a simple way to
 communicate information back to the resource requester. Kratix will automatically
 inject the required fields for status into the `xaasCRD`,you do not have to manually
 add these fields.
+
+# Conditions
+Kratix follows the Kubernetes convention of using [conditions](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states)
+to convey the status of a resource and to allow programmatic interactions. When a
+resource request is created the `PipelineCompleted` condition will be set. The `status`
+for the pipeline will be `False` until the pipeline is completed. For example
+when a resource request is created for the first time the status will look like:
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2023-03-07T15:50:22Z"
+    message: Pipeline has not completed
+    reason: PipelineNotCompleted
+    status: "False"
+    type: PipelineCompleted
+```
+
+once the pipeline has been completed it will look like:
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2023-03-07T15:50:30Z"
+    message: Pipeline completed
+    reason: PipelineExecutedSuccessfully
+    status: "True"
+    type: PipelineCompleted
+```
+
+Conditions can be used to by external systems to programmatically check when a
+resource requests pipeline has been completed. Kubectl also has built-in support
+for waiting for a condition to be met. For example after creating a resource
+request a user can run the following to have the CLI wait for the pipeline to be
+completed:
+```
+kubectl wait redis/example --for=condition=PipelineCompleted --timeout=60s
+```
+
+Once the condition is `True` the command will exit.
