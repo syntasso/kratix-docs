@@ -155,7 +155,7 @@ works.platform.kratix.io               2022-05-10T12:00:00Z
 </p>
 
 ```bash
-kubectl --context kind-platform get pods --namespace kratix-platform-system --watch
+kubectl --context $PLATFORM get pods --namespace kratix-platform-system --watch
 ```
 
 You should see something similar to
@@ -191,15 +191,15 @@ kind create cluster --name worker --image kindest/node:v1.24.0
 # Register the Worker Cluster with the Platform Cluster
 kubectl apply \
     --filename config/samples/platform_v1alpha1_worker_cluster.yaml\
-    --context kind-platform
+    --context $PLATFORM
 
 # Install Flux on the Worker Cluster
 kubectl apply \
     --filename hack/worker/gitops-tk-install.yaml \
-    --context kind-worker
+    --context $WORKER
 kubectl apply \
     --filename hack/worker/gitops-tk-resources.yaml \
-    --context kind-worker
+    --context $WORKER
 ```
 <br />
 
@@ -209,7 +209,7 @@ kubectl apply \
 
 ```bash
 kubectl get buckets.source.toolkit.fluxcd.io \
-    --context kind-worker \
+    --context $WORKER \
     --namespace flux-system \
     --watch
 ```
@@ -229,7 +229,7 @@ Once Flux is running, the Kratix running on the `platform` cluster will have the
 </p>
 
 ```bash
-kubectl --context kind-worker get namespaces --watch
+kubectl --context $WORKER get namespaces --watch
 ```
 
 You should see something similar to

@@ -19,7 +19,7 @@ $ kind get clusters
 platform
 worker
 
-$ kubectl --context kind-platform get clusters.platform.kratix.io
+$ kubectl --context $PLATFORM get clusters.platform.kratix.io
 NAME               AGE
 worker-cluster-1   1h
 ```
@@ -27,7 +27,7 @@ worker-cluster-1   1h
 You should also have a Jenkins Promise installed:
 
 ```shell-session
-$ kubectl --context kind-platform get promises.platform.kratix.io
+$ kubectl --context $PLATFORM get promises.platform.kratix.io
 NAME              AGE
 jenkins-promise   1h
 ```
@@ -35,7 +35,7 @@ jenkins-promise   1h
 On the Worker Cluster, you should see the Jenkins Operator running:
 
 ```shell-session
-$ kubectl --context kind-worker get pods
+$ kubectl --context $WORKER get pods
 NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-gczpb   1/1     Running   0          1h
 ```
@@ -55,7 +55,7 @@ directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --context kind-worker-cluster-2 --bucket-path worker-cluster-2
+./scripts/install-gitops --context $WORKER-cluster-2 --bucket-path worker-cluster-2
 ```
 
 ## Registering the Cluster
@@ -78,13 +78,13 @@ spec:
 Apply the Cluster document to the Platform cluster:
 
 ```bash
-kubectl --context kind-platform apply --filename worker-cluster-2.yaml
+kubectl --context $PLATFORM apply --filename worker-cluster-2.yaml
 ```
 
 Check the Cluster was created:
 
 ```shell-session {4}
-$ kubectl --context kind-platform get clusters.platform.kratix.io
+$ kubectl --context $PLATFORM get clusters.platform.kratix.io
 NAME               AGE
 worker-cluster-1   1h
 worker-cluster-2   1h
@@ -95,7 +95,7 @@ to the new Worker Cluster. After a couple of minutes, you should see the Jenkins
 running on the new Worker Cluster:
 
 ```shell-session {3}
-$ kubectl --context kind-worker-cluster-2 get pods
+$ kubectl --context $WORKER-cluster-2 get pods
 NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h
 ```

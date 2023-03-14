@@ -73,8 +73,8 @@ cd kratix
 Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs in a self-service way. To deliver a dev environment for a new application, with Kratix install Promises for knative serving and Postgres on your Platform Cluster:
 
 ```bash title="Install knative and Postgres Promises"
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-promise.yaml
 ```
 
 When a Promise is installed into the cluster, it will do two visible things:
@@ -89,7 +89,7 @@ When a Promise is installed into the cluster, it will do two visible things:
 
 Verify the Promises are all installed on your Platform Cluster
 ```console
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 The above command will give an output similar to
@@ -104,7 +104,7 @@ knative-serving-promise   1m
 
 Verify the CRDs that let a customer request an instance have been installed
 ```console
-kubectl --context kind-platform get crds
+kubectl --context $PLATFORM get crds
 ```
 
 The above command will give an output similar to
@@ -124,7 +124,7 @@ works.platform.kratix.io                      2022-09-23T14:37:20Z
 Finally, verify the prerequisite infrastructure for delivering Postgres on demand have been installed on the Worker Cluster
 
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 The above command will give an output similar to
@@ -138,7 +138,7 @@ postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 and for knative
 
 ```bash
-kubectl --context kind-worker get crds
+kubectl --context $WORKER get crds
 ```
 
 The above command will give an output similar to
@@ -169,14 +169,14 @@ As an application dev, you have a new app you want to deploy along with a new da
 Submit a set of Kratix Resource Requests to get a Knative Serving component and a Postgres database.
 
 ```console title="Request instances"
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-resource-request.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/postgres/postgres-resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/knative-serving/knative-serving-resource-request.yaml
 ```
 <br />
 
 Verify that the Kratix Resource Request was issued on the Platform Cluster.
 ```console
-kubectl --context kind-platform get postgreses.example.promise.syntasso.io
+kubectl --context $PLATFORM get postgreses.example.promise.syntasso.io
 ```
 
 The above command will give an output similar to
@@ -193,7 +193,7 @@ acid-minimal-cluster    1m
 </p>
 
 ```console
-kubectl --context kind-platform get pods --watch
+kubectl --context $PLATFORM get pods --watch
 ```
 
 This will result in a similar output to below:
@@ -211,7 +211,7 @@ request-pipeline-knative-serving-promise-default-4ffed   0/1     Completed   0  
 <br />
 
 ```console
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 :::note
@@ -234,7 +234,7 @@ postgres-operator-6c6dbd4459-4jf5h        1/1     Running   0                10m
 
 Verify that knative has also installed its networking resources into two new namespaces
 ```console
-kubectl --context kind-worker get namespaces
+kubectl --context $WORKER get namespaces
 ```
 
 The above command will give an output similar to
@@ -261,7 +261,7 @@ With all the necessary resources available, you can now run your app using the j
 To deploy the app, run:
 
 ```console
-kubectl --context kind-worker apply --filename https://raw.githubusercontent.com/syntasso/sample-golang-app/main/k8s/serving.yaml
+kubectl --context $WORKER apply --filename https://raw.githubusercontent.com/syntasso/sample-golang-app/main/k8s/serving.yaml
 ```
 
 :::note
@@ -277,7 +277,7 @@ before trying the command again.
 Verify that the Knative Service for the application is ready:
 
 ```console
-kubectl --context kind-worker get services.serving.knative.dev
+kubectl --context $WORKER get services.serving.knative.dev
 ```
 
 The above command will give an output similar to
@@ -296,7 +296,7 @@ Now test the app.
 On a separate terminal, you'll need to open access to the app by port-forwarding the kourier service:
 
 ```console
-kubectl --context kind-worker --namespace kourier-system port-forward svc/kourier 8081:80
+kubectl --context $WORKER --namespace kourier-system port-forward svc/kourier 8081:80
 ```
 
 Now go to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081) to see the app running.

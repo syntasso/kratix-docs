@@ -35,15 +35,15 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 In order for an application team to deploy an application to a dev environment they require a relational datastore (postgres), networking for user traffic (Knative), and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality on-demand with Kratix install the required Promises on your Platform Cluster:
 
 ```console
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/postgresql/promise.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/promise.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/postgresql/promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
 ```
 <br />
 
 Verify the Promises are all installed on your Platform Cluster
 ```console
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 The above command will give an output similar to
@@ -58,7 +58,7 @@ postgresql   1m
 Verify the CRDs are all installed on your Platform Cluster. Note that you know have `jenkins`, `knative`, and `postgres` available.
 
 ```console
-kubectl --context kind-platform get crds
+kubectl --context $PLATFORM get crds
 ```
 
 The above command will give an output similar to
@@ -81,7 +81,7 @@ works.platform.kratix.io            2023-01-24T17:00:37Z
 </p>
 
 ```console
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to
@@ -98,9 +98,9 @@ postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 
 Submit a set of Kratix Resource Requests to get a Knative Serving component, a Jenkins instance and a Postgres database.
 ```console
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/postgresql/resource-request.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/resource-request.yaml
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/postgresql/resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/resource-request.yaml
 ```
 <br />
 
@@ -114,7 +114,7 @@ watching)</sub>
 </p>
 
 ```console
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to
@@ -128,7 +128,7 @@ jenkins-dev-example                 1/1     Running     0          5m
 
 Verify that knative has also installed its networking resources into two new namespaces
 ```console
-kubectl --context kind-worker get namespaces
+kubectl --context $WORKER get namespaces
 ```
 <br />
 
@@ -143,7 +143,7 @@ kourier-system         Active   1h
 
 Verify that the Kratix Resource Request was issued on the Platform Cluster.
 ```console
-kubectl --context kind-platform get jenkins.marketplace.kratix.io
+kubectl --context $PLATFORM get jenkins.marketplace.kratix.io
 ```
 <br />
 
@@ -167,7 +167,7 @@ First, create a service account on the Worker cluster, so Jenkins can create
 Knative Services from the pipeline:
 
 ```
-kubectl --context kind-worker apply -f \
+kubectl --context $WORKER apply -f \
     https://raw.githubusercontent.com/syntasso/sample-golang-app/main/k8s/service-account.yaml
 ```
 
@@ -177,18 +177,18 @@ Access the Jenkins UI in a browser, as in the [previous
 step](installing-a-promise). Port forward for browser access to the Jenkins UI:
 
 ```console
-kubectl --context kind-worker port-forward jenkins-dev-example 8080:8080
+kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
 ```
 <br />
 
 Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below:
 
 ```console jsx title="username"
-kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
+kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
+kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 <br />
@@ -226,7 +226,7 @@ For those that are less familiar with Jenkins, you can either expand the instruc
 Verify that the Knative Service for the application is ready:
 
 ```console
-kubectl --context kind-worker get services.serving.knative.dev
+kubectl --context $WORKER get services.serving.knative.dev
 ```
 
 The above command will give an output similar to
@@ -243,7 +243,7 @@ Now test the app.
 On a separate terminal, you'll need to open access to the app by port-forwarding the kourier service:
 
 ```console
-kubectl --context kind-worker --namespace kourier-system port-forward svc/kourier 8081:80
+kubectl --context $WORKER --namespace kourier-system port-forward svc/kourier 8081:80
 ```
 <br />
 
@@ -264,22 +264,22 @@ This is only the beginning of working with Promises. Next you will learn how to 
 To clean up your environment first delete the Resource Requests for the Jenkins, Knative and Postgres Promises.
 
 ```bash
-kubectl --context kind-platform delete jenkins,knative,postgresqls --all
+kubectl --context $PLATFORM delete jenkins,knative,postgresqls --all
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
 ```console
-kubectl --context kind-worker get pods,namespaces
+kubectl --context $WORKER get pods,namespaces
 ```
 
 Now all the Resource Requests have been deleted you can delete the Promises
 ```bash
-kubectl --context kind-platform delete promises --all
+kubectl --context $PLATFORM delete promises --all
 ```
 
 Verify the Worker Cluster resources are deleted from the Worker Cluster
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 <br />

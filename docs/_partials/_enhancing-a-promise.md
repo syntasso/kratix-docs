@@ -610,13 +610,13 @@ spec:
 You can now install your enhanced Postgres Promise on your platform. Make sure you're in the `promise-postgresql/` directory.
 
 ```console
-kubectl --context kind-platform apply --filename promise.yaml
+kubectl --context $PLATFORM apply --filename promise.yaml
 ```
 <br />
 
 Check that your Promise's resource is available.
 ```console
-kubectl --context kind-platform get crds
+kubectl --context $PLATFORM get crds
 ```
 <br />
 
@@ -641,7 +641,7 @@ will see the `postgres-operator` deployment in the Worker Cluster. That's also
 an indication that the Operator is ready to provision a new instance.
 
 ```console
-kubectl --context kind-worker --namespace default get pods
+kubectl --context $WORKER --namespace default get pods
 ```
 <br />
 
@@ -695,7 +695,7 @@ spec:
 Then apply the request file to the Platform Cluster:
 
 ```console
-kubectl --context kind-platform apply --filename resource-request.yaml
+kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```
 
 We will validate the outcomes of this command in the next section.
@@ -715,7 +715,7 @@ eventually see a new pod executing the
 </p>
 
 ```console
-kubectl --context kind-platform get pods --watch
+kubectl --context $PLATFORM get pods --watch
 ```
 
 You should see something similar to
@@ -727,7 +727,7 @@ request-pipeline-postgresql-default-SHA     0/1     Completed   0          1h
 Then view the pipeline logs by running _(replace SHA with the value from the output of `get pods` above)_:
 
 ```console
-kubectl --context kind-platform logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-postgresql-default-SHA
+kubectl --context $PLATFORM logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-postgresql-default-SHA
 ```
 
 <p>On the Worker Cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined in the request (<code>postgres-resource-request.yaml</code>).<br />
@@ -735,7 +735,7 @@ kubectl --context kind-platform logs --container xaas-request-pipeline-stage-1 p
 </p>
 
 ```console
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 You should see something similar to
@@ -748,7 +748,7 @@ acid-example-postgresql-0        1/1     Running   0          1h
 For the finance team, the pods will provide cost tracking through your new `costCentre` label. This can be confirmed by only selecting pods that contain the provided cost centre value:
 
 ```console
-kubectl --context kind-worker get pods --selector costCentre=rnd-10002
+kubectl --context $WORKER get pods --selector costCentre=rnd-10002
 ```
 
 You should see something similar to
@@ -776,21 +776,21 @@ To recap the steps we took:
 To clean up your environment first delete the Resource Requests for the Postgres instance
 
 ```bash
-kubectl --context kind-platform delete --filename resource-request.yaml
+kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 Now the Resource Requests have been deleted you can delete the Promise
 ```bash
-kubectl --context kind-platform delete --filename promise.yaml
+kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
 Verify the Worker Cluster Resources are deleted from the Worker Cluster
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 

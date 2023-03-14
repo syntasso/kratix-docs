@@ -37,10 +37,10 @@ depending on your preference.
 kind create cluster --name platform
 
 # Install Kratix
-kubectl apply --context kind-platform --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
+kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
 
 # Install MinIO
-kubectl apply --context kind-platform --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
+kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
 ```
 
 ### Set up your Worker Cluster <a href="#worker-setup" id="worker-setup"></a>
@@ -51,17 +51,17 @@ Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This
 kind create cluster --name worker
 
 # Register the Worker Cluster with the Platform Cluster
-kubectl apply --context kind-platform --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
+kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 
 # Install flux on the worker
-kubectl apply --context kind-worker --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
-kubectl apply --context kind-worker --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml
 ```
 
 Flux will eventually reconcile the clusters state, making the `worker` cluster ready to receive workloads. You can verify its readiness by observing the `kratix-worker-system` namespace appearing in the `worker` cluster:
 
 ```bash
-$ kubectl --context kind-worker get namespaces
+$ kubectl --context $WORKER get namespaces
 NAME                   STATUS   AGE
 ...
 kratix-worker-system   Active   1m

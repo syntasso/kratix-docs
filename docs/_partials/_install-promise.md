@@ -55,7 +55,7 @@ The commands below will refer to a `KRATIX_MARKETPLACE_REPO` env variable. You c
 Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
 
 ```bash
-kubectl --context kind-platform apply \
+kubectl --context $PLATFORM apply \
   --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/promise.yaml"
 ```
 <br />
@@ -63,7 +63,7 @@ kubectl --context kind-platform apply \
 Verify that your `platform` cluster has registered Jenkins as a new available Kratix Promise.
 
 ```bash
-kubectl --context kind-platform get crds jenkins.marketplace.kratix.io
+kubectl --context $PLATFORM get crds jenkins.marketplace.kratix.io
 ```
 
 The above command will give an output similar to
@@ -79,7 +79,7 @@ jenkins.marketplace.kratix.io   2021-05-10T12:00:00Z
 </p>
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to (it may take a couple of minutes):
@@ -105,7 +105,7 @@ Application developers using your platform will be issued a Jenkins instance aft
 
 Test your platform by acting as an application developer and submitting a Resource Request.
 ```bash
-kubectl --context kind-platform apply \
+kubectl --context $PLATFORM apply \
     --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/resource-request.yaml"
 ```
 
@@ -113,7 +113,7 @@ kubectl --context kind-platform apply \
 
 Verify that the Resource Request was issued on the `platform` cluster.
 ```bash
-kubectl --context kind-platform get jenkins.marketplace.kratix.io
+kubectl --context $PLATFORM get jenkins.marketplace.kratix.io
 ```
 
 The above command will give an output similar to
@@ -129,7 +129,7 @@ Eventually (it can take a couple of minutes), a new Jenkins instance should spin
 </p>
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to
@@ -152,7 +152,7 @@ Before you can access Jenkins UI, you must port forward from within the Kubernet
 _**Open a new terminal to request the port forward**_.
 
 ```console
-kubectl --context kind-worker port-forward jenkins-dev-example 8080:8080
+kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
 ```
 
 :::
@@ -162,11 +162,11 @@ In production, you want the credentials to be stored in a secure location where 
 In this example, credentials are stored as unencrypted Kubernetes secrets.
 
 ```console jsx title="username"
-kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
+kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl --context kind-worker get secret jenkins-operator-credentials-dev-example \
+kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 
@@ -186,19 +186,19 @@ To clean up your environment you need to delete the Jenkins Resource Requests an
 
 To delete the Jenkins Resource Requests:
 ```bash
-kubectl --context kind-platform delete \
+kubectl --context $PLATFORM delete \
     --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/resource-request.yaml"
 ```
 
 Verify the Jenkins Resource Request in the platform cluster is gone
 ```console
-kubectl --context kind-platform get jenkins
+kubectl --context $PLATFORM get jenkins
 ```
 
 
 and the resources for the Jenkins instance in the worker cluster have been deleted
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 The above command will give an output similar to (it may take a couple of minutes)
@@ -211,18 +211,18 @@ jenkins-operator-7886c47f9c-zschr   1/1     Running   0          1m
 
 Now you can delete the Jenkins Promise
 ```bash
-kubectl --context kind-platform delete \
+kubectl --context $PLATFORM delete \
   --filename "${KRATIX_MARKETPLACE_REPO}/jenkins/promise.yaml"
 ```
 
 Verify the Jenkins Promise is gone
 ```console
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 and the Jenkins Operator is deleted from the worker cluster (this might take a couple minutes)
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 

@@ -47,7 +47,7 @@ spec:
 Register the Cluster:
 
 ```bash
-kubectl --context kind-platform apply --filename platform-cluster.yaml
+kubectl --context $PLATFORM apply --filename platform-cluster.yaml
 ```
 
 ## Install and configure GitOps
@@ -58,7 +58,7 @@ script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --context kind-platform --bucket-path platform
+./scripts/install-gitops --context $PLATFORM --bucket-path platform
 ```
 
 ## Install a Compound Promise
@@ -66,7 +66,7 @@ cd /path/to/kratix
 You can now install a "Paved Path" Promise:
 
 ```bash
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-promise.yaml
 ```
 
 This Promise is composed of a Knative and Postgres. Installing the Promise on the Platform
@@ -78,17 +78,17 @@ will have the following side-effects:
 To verify the installation was successful, run:
 
 ```shell-session
-$ kubectl --context kind-platform get promises
+$ kubectl --context $PLATFORM get promises
 NAME                      AGE
 ha-postgres-promise       1h
 knative-serving-promise   1h
 paved-path-demo-promise   1h
 
-$ kubectl --context kind-worker get pods -A
+$ kubectl --context $WORKER get pods -A
 NAME                                 READY   STATUS    RESTARTS   AGE
 postgres-operator-6c6dbd4459-kv5lw   1/1     Running   0          1h
 
-$ kubectl --context kind-worker get crds | grep knative
+$ kubectl --context $WORKER get crds | grep knative
 certificates.networking.internal.knative.dev          2022-11-25T12:24:20Z
 clusterdomainclaims.networking.internal.knative.dev   2022-11-25T12:24:20Z
 ...
@@ -100,14 +100,14 @@ Platform users can now send Resource Requests for a new "Paved Path". That will 
 new Knative Serving and a new Postgres database in the Worker Cluster:
 
 ```bash
-kubectl --context kind-platform apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-resource-request.yaml
 ```
 
 You can see the pipeline for the Paved Path Promise running, which will in turn trigger
 the Knative and Postgres pipelines:
 
 ```shell-session
-$ kubectl --context kind-platform get pods
+$ kubectl --context $PLATFORM get pods
 NAME                                                     READY   STATUS      RESTARTS   AGE
 request-pipeline-ha-postgres-promise-default-617a3       0/1     Completed   0          64s
 request-pipeline-knative-serving-promise-default-e0157   0/1     Completed   0          64s
@@ -117,7 +117,7 @@ request-pipeline-paved-path-demo-promise-default-d3a89   0/1     Completed   0  
 Eventually, the resources will be ready to be used:
 
 ```shell-session
-$ kubectl --context kind-worker get pods -A
+$ kubectl --context $WORKER get pods -A
 NAMESPACE            NAME                          READY   STATUS      RESTARTS   AGE
 default              acid-minimal-cluster-0        1/1     Running     0          1h
 default              acid-minimal-cluster-1        1/1     Running     0          1h
@@ -199,7 +199,7 @@ You may have noticed that, when registering the Platform Cluster, the Cluster de
 included exactly that label. You can verify the applied labels with:
 
 ```shell-session
-$ kubectl --context kind-platform get clusters.platform.kratix.io --show-labels
+$ kubectl --context $PLATFORM get clusters.platform.kratix.io --show-labels
 NAME                 AGE    LABELS
 #highlight-start
 platform-cluster     1hr    environment=platform

@@ -468,7 +468,7 @@ At this point, your Promise directory structure should look like:
 
 Before installing your promise, verify that Kratix and MinIO are installed and healthy.
 ```bash
-kubectl --context kind-platform get pods --namespace kratix-platform-system
+kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 ```
 
 You should see something similar to
@@ -485,7 +485,7 @@ If that is not the case, please go back to [Prepare your environment](#prepare-y
 From the `jenkins-promise` directory, run:
 
 ```
-kubectl apply --context kind-platform --filename jenkins-promise.yaml
+kubectl apply --context $PLATFORM --filename jenkins-promise.yaml
 ```
 
 <p>Verify the Promise installed<br />
@@ -493,7 +493,7 @@ kubectl apply --context kind-platform --filename jenkins-promise.yaml
 </p>
 
 ```bash
-kubectl --context kind-platform get crds --watch
+kubectl --context $PLATFORM get crds --watch
 ```
 
 The above command will give an output similar to
@@ -508,7 +508,7 @@ jenkins.example.promise.syntasso.io   2021-09-09T11:21:10Z
 </p>
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to
@@ -533,14 +533,14 @@ spec:
 You can now send the Resource Request to Kratix:
 
 ```bash
-kubectl apply --context kind-platform --filename jenkins-resource-request.yaml
+kubectl apply --context $PLATFORM --filename jenkins-resource-request.yaml
 ```
 
 Applying the Kratix Promise will trigger your pipeline steps which in turn requests an instance of Jenkins from the operator. While the pipeline can run quite quickly, Jenkins requires quite a few resources to be installed including a deployment and a runner which means the full install may take a few minutes.
 
 You can see a bit of what is happening by first looking for your pipeline completion
 ```bash
-kubectl --context kind-platform get pods
+kubectl --context $PLATFORM get pods
 ```
 
 This should result in something similar to
@@ -553,7 +553,7 @@ request-pipeline-jenkins-promise-default-9d40b   0/1     Completed   0          
 For more details, you can view the pipeline logs with
 ```bash
 kubectl logs \
-  --context kind-platform \
+  --context $PLATFORM \
   --selector kratix-promise-id=jenkins-promise-default \
   --container xaas-request-pipeline-stage-1
 ```
@@ -571,7 +571,7 @@ This should result in something like
 </p>
 
 ```bash
-kubectl --context kind-worker get pods --all-namespaces --watch
+kubectl --context $WORKER get pods --all-namespaces --watch
 ```
 
 The above command will eventually give an output similar to
@@ -635,22 +635,22 @@ To recap the steps we took:
 To clean up your environment first delete the Resource Requests for the Jenkins instance
 
 ```bash
-kubectl --context kind-platform delete --filename jenkins-resource-request.yaml
+kubectl --context $PLATFORM delete --filename jenkins-resource-request.yaml
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 Now the Resource Requests have been deleted you can delete the Promises
 ```bash
-kubectl --context kind-platform delete --filename jenkins-promise.yaml
+kubectl --context $PLATFORM delete --filename jenkins-promise.yaml
 ```
 
 Verify the Worker Cluster Resources are deleted from the Worker Cluster
 ```console
-kubectl --context kind-worker get pods
+kubectl --context $WORKER get pods
 ```
 
 ---

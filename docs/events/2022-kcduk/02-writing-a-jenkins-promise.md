@@ -369,13 +369,13 @@ kind load docker-image kratix-workshop/ci-request-pipeline:dev --name platform
 From the `promise-template` directory, run:
 
 ```bash title="Apply Promise"
-kubectl apply --context kind-platform --filename promise.yaml
+kubectl apply --context $PLATFORM --filename promise.yaml
 ```
 
 Verify the Promise installed:
 
 ```bash
-kubectl --context kind-platform get crds
+kubectl --context $PLATFORM get crds
 ```
 
 The above command will give an output similar to
@@ -391,7 +391,7 @@ ci.example.promise.syntasso.io   2021-09-09T11:21:10Z
 </p>
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to
@@ -423,14 +423,14 @@ spec:
 You can now send the resource request to Kratix:
 
 ```bash title="Request a new Jenkins"
-kubectl apply --context kind-platform --filename resource-request.yaml
+kubectl apply --context $PLATFORM --filename resource-request.yaml
 ```
 
 Applying the Kratix Promise will trigger your pipeline. You can see the pipeline by
 checking the pods:
 
 ```bash
-kubectl --context kind-platform get pods
+kubectl --context $PLATFORM get pods
 ```
 
 This should result in something similar to:
@@ -444,7 +444,7 @@ request-pipeline-ci-default-9d40b   0/1     Completed   0          1m
 You can view the pipeline logs with
 ```bash
 kubectl logs \
-  --context kind-platform \
+  --context $PLATFORM \
   --selector kratix-promise-id=ci-default \
   --container xaas-request-pipeline-stage-1
 ```
@@ -454,7 +454,7 @@ kubectl logs \
 </p>
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will eventually give an output similar to
@@ -472,7 +472,7 @@ Access the Jenkins UI in a browser to ensure the instance is working.
 _**Open a new terminal to request the port forward**_.
 
 ```console
-kubectl --context kind-worker port-forward jenkins-super-cool-name 8080:8080
+kubectl --context $WORKER port-forward jenkins-super-cool-name 8080:8080
 ```
 
 :::
@@ -481,11 +481,11 @@ Navigate to [http://localhost:8080](http://localhost:8080) and log in with the
 credentials you get from the commands below:
 
 ```console jsx title="username"
-kubectl --context kind-worker get secret jenkins-operator-credentials-super-cool-name \
+kubectl --context $WORKER get secret jenkins-operator-credentials-super-cool-name \
     -o 'jsonpath={.data.user}' | base64 -d
 ```
 ```console jsx title="password"
-kubectl --context kind-worker get secret jenkins-operator-credentials-super-cool-name \
+kubectl --context $WORKER get secret jenkins-operator-credentials-super-cool-name \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 
