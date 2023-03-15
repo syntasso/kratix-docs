@@ -292,7 +292,7 @@ Your file directory should now include the new file as shown below
   └── 📂 resources
 ```
 
-Next build your Docker image. You will later load the image to the KinD local cache, so there's no need to replace the image tag:
+Next build your Docker image:
 
 ```bash
 cd jenkins-promise/request-pipeline-image
@@ -345,11 +345,23 @@ docker run -v ${PWD}/input:/input -v ${PWD}/output:/output kratix-workshop/jenki
 
 Verify the contents of the `output` directory. These will be scheduled and deployed by Kratix to a Worker Cluster once the pipeline is executed, as a response for the Resource Request. They need to be valid Kubernetes resources that can be applied to any cluster with the Promise's `workerClusterResources` installed (see beneath).
 
-Once you are satisified that your pipeline is producing the expected result, load the Docker image to the local KinD cache:
+Once you are satisified that your pipeline is producing the expected result,
+you will need to make it available to your Kubernetes cluster. You can load the
+it to the local KinD cache:
 
 ```bash
 kind load docker-image kratix-workshop/jenkins-request-pipeline:dev --name platform
 ```
+
+<details>
+  <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
+  If you have not created your Kubernetes clusters with KinD, you will need to either:
+  <ul>
+    <li>Push the image to a Image repository (like Dockerhub), or </li>
+    <li>Use the appropriate command to load the image (for example, <code>minikube cache add</code> if you are using minikube)</li>
+  </ul>
+</details>
+
 <br />
 
 The final step of creating the `xaasRequestPipeline` is to reference your docker image from the `spec.xaasRequestPipeline` field in the `jenkins-promise-template.yaml`.

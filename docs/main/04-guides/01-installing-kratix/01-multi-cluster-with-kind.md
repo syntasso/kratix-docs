@@ -36,6 +36,9 @@ depending on your preference.
 ```bash
 kind create cluster --name platform
 
+# set PLATFORM to point to the Platform cluster context
+export PLATFORM="kind-platform"
+
 # Install Kratix
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
 
@@ -49,6 +52,9 @@ Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This
 
 ```bash
 kind create cluster --name worker
+
+# set WORKER to point to the Worker cluster context
+export WORKER="kind-worker"
 
 # Register the Worker Cluster with the Platform Cluster
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml

@@ -1,6 +1,6 @@
 ---
-description: Run Kratix locally using minikube
-title: Single Cluster with minikube
+description: Run Kratix on a Single Cluster setup
+title: Single Cluster
 ---
 
 ```mdx-code-block
@@ -8,23 +8,16 @@ import PartialInstall from '../../../_partials/installation/_single-cluster-inst
 import PartialConfigure from '../../../_partials/installation/_single-cluster-configure.md';
 ```
 
-One of the most powerful features of Kratix is its ability to handle requests for resources, and deploy them to a remote specific cluster. However, Kratix also works well in a single cluster environment. This guide will walk you through the steps to install Kratix on a single cluster, using minikube.
-
-## System Setup
-
-1. `minikube`:
-   Used to create and manage a local Kubernetes cluster in Docker. See [the minikube documentation](https://minikube.sigs.k8s.io/docs/start/) to install and start a local cluster.
-2. `docker` CLI / **Docker**:
-   Used to orchestrate containers. `minikube` (above) requires that you have Docker installed and configured. See [Get Docker](https://docs.docker.com/get-docker/) to install.
-3. `kubectl` / **Kubernetes command-line tool**:
-   The CLI for Kubernetes — allows you to run commands against Kubernetes clusters. See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
-
+One of the most powerful features of Kratix is its ability to handle requests
+for resources, and deploy them to a remote specific cluster. However, Kratix
+also works well in a single cluster environment. This guide will walk you
+through the steps to install Kratix on a single cluster.
 
 ## Bootstap the cluster
 
-Create your cluster with minikube:
+You will need access to a Kubernetes cluster to deploy Kratix. If you'd like to test Kratix in your local machine, you can create a cluster with [minikube](https://minikube.sigs.k8s.io/docs/start/).
 
-```bash
+```
 minikube start
 ```
 

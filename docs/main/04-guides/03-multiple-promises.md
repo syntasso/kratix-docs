@@ -2,7 +2,7 @@
 description: Guide on how one can use multiple promises to deliver developer experiences
 title: Using Multiple Promises
 ---
-import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
+import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 import UsingMultiplePromise, {toc as UsingMultipleTOC} from '../../_partials/_using-multiple-promises.md';
 
 <PartialPreRequisites />

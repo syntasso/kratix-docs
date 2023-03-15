@@ -566,15 +566,25 @@ spec:
 
 #### Give the platform access to your pipeline image
 
-Once you have made and validated all the pipeline image changes, you will need to make the newly created `kratix-workshop/postgres-request-pipeline:dev` image accessible.
+Once you have made and validated all the pipeline image changes, you will need
+to make the newly created `kratix-workshop/postgres-request-pipeline:dev` image
+accessible.
 
-You have [installed Kratix across two KinD clusters](installing-kratix) as a prerequisite for the exercise. Because of that, you can take advantage of the fact that Kubernetes will always look for locally cached images first.
-
-Load the image into local caches by running the command below. This will stop any remote DockerHub calls.
+If you created your clusters with KinD, you can load the image into local cache
+by running the command below. This will stop any remote DockerHub calls.
 
 ```console
 kind load docker-image kratix-workshop/postgres-request-pipeline:dev --name platform
 ```
+
+<details>
+  <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
+  If you have not created your Kubernetes clusters with KinD, you will need to either:
+  <ul>
+    <li>Push the image to a Image repository (like Dockerhub), or </li>
+    <li>Use the appropriate command to load the image (for example, <code>minikube cache add</code> if you are using minikube)</li>
+  </ul>
+</details>
 
 #### Update the Promise's `xaasRequestPipeline` value
 

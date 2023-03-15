@@ -2,12 +2,12 @@
 title: Installing and using a Promise
 description: Step by step guide to install Kratix and your first Promise.
 ---
-import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
+import PartialGuidesPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 import GuideInstallPromise, {toc as GuideInstallTOC} from '../../_partials/_install-promise.md';
 
 # Installing and using a Promise
 
-<PartialPreRequisites />
+<PartialGuidesPreRequisites />
 
 <GuideInstallPromise />
 

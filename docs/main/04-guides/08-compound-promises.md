@@ -4,7 +4,7 @@ title: Compound Promise
 ---
 
 ```mdx-code-block
-import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
+import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 ```
 <!-- remark-abbr terms -->
 *[WCR]: Worker Cluster Resources

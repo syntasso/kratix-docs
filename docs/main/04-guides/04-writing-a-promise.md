@@ -2,10 +2,10 @@
 description: Guide on how to write and package a Kratix Promise
 title: Writing a Promise
 ---
-import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
+import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 import WritingPromise, {toc as WritingPromiseTOC} from '../../_partials/_writing-a-promise.md';
 
-<PartialPreRequisites />
+<PartialPreRequisites/>
 
 <WritingPromise />
 

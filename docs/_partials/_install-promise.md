@@ -100,8 +100,6 @@ Application developers using your platform will be issued a Jenkins instance aft
 <br />
 
 ![Verify-Instance](/img/docs/Treasure_Trove-Get_an_instance.jpeg)
-<br />
-
 
 Test your platform by acting as an application developer and submitting a Resource Request.
 ```bash

@@ -8,27 +8,53 @@ either be a Git server (like Github or Gitea) or a S3-compatible object store
 (like GCS and MinIO). Check [the reference deployment topology for more
 details](/docs/main/reference/deployment-topology).
 
-This page documents how to setup Kratix with Git on a KinD cluster. It will also
-install and instantiate Gitea as the Git server. To deploy Kratix with an
-S3-compatible repository, check out [this guide](/docs/main/guides/installing-kratix).
+This page documents how to setup Kratix with Git. It will also install Gitea as
+the Git server. To deploy Kratix with an S3-compatible repository, check out
+[this guide](/docs/main/guides/installing-kratix).
 
 ## Installing Kratix
 
 :::tip
 
 You can also run `./scripts/quick-start.sh --git` from the root of the [Kratix
-repository](https://github.com/syntasso/kratix).
+repository](https://github.com/syntasso/kratix) to test it locally with KinD.
 
 :::
 
+
+### Create the Kubernetes Clusters
+
+You can run Kratix either with a multi-cluster or a single-cluster setup. The
+commands on this document assume that two environment variables are set:
+
+1. `PLATFORM` representing the Platform cluster Kubernetes context
+2. `WORKER` representing the Worker cluster Kubernetes context
+
+For example, with KinD, you can create two clusters and set the variables with:
+
+```bash
+# Create the clusters
+kind create cluster --name platform
+kind create cluster --name worker
+
+# Set the environment variables
+export PLATFORM="kind-platform"
+export WORKER="kind-worker"
+```
+
+For single cluster setups, the two variables should be set to the same value.
+You can find your cluster context by running:
+
+```
+kubectl config get-contexts
+```
+
 ### Set up a Platform Cluster {#platform-setup}
 
-Create your `platform` cluster and install Gitea and Kratix. Gitea will be the
+In your Platform cluster, install Gitea and Kratix. Gitea will be the
 repository for the GitOps toolkit.
 
 ```bash
-kind create cluster --name platform
-
 # Install Gitea
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/gitea-install.yaml
 
@@ -39,12 +65,10 @@ curl -s https://raw.githubusercontent.com/syntasso/kratix/main/distribution/krat
 
 ### Set up your Worker Cluster {#worker-setup}
 
-Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This
+In your Worker cluster, install [Flux](https://fluxcd.io/). This
 will create a cluster for running the X as-a-Service workloads:
 
 ```bash
-kind create cluster --name worker
-
 # Register the Worker Cluster with the Platform Cluster
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 

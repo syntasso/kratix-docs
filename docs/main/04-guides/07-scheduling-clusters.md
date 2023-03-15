@@ -9,24 +9,32 @@ cluster will be automatically installed in the clusters joining the platform.
 
 ## Pre-requisites
 
-To see this in action, you will need an environment running Kratix with a Promise
-installed. For that, you can follow the [Installing a Promise](installing-a-promise)
-guide. Before continuing, ensure you have a Platform Cluster and a Worker Cluster created
-with KinD:
+In this section, we will register a new Kubernetes Cluster with Kratix, and
+verify its multi-cluster capabilities. Before continuing, you will a Platform
+Kubernetes cluster running Kratix, and a second Worker Kubernetes cluster
+registered with the Platform. You also need at least one Promise installed on
+the Platform. 
+
+For the context of this guide, we will assume the setup from [Installing Kratix
+with KinD](./installing-kratix) and that the following environment variables are
+set:
+
+```bash
+export PLATFORM="kind-platform"
+export WORKER="kind-worker"
+```
+
+We will also use the [Jenkins
+Promise](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins) as an
+example. Follow [Installing a Promise](./installing-a-promise) to get Jenkins
+installed, if needed.
+
 
 ```shell-session
-$ kind get clusters
-platform
-worker
-
 $ kubectl --context $PLATFORM get clusters.platform.kratix.io
 NAME               AGE
 worker-cluster-1   1h
-```
 
-You should also have a Jenkins Promise installed:
-
-```shell-session
 $ kubectl --context $PLATFORM get promises.platform.kratix.io
 NAME              AGE
 jenkins-promise   1h
@@ -40,6 +48,8 @@ NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-gczpb   1/1     Running   0          1h
 ```
 
+If your setup is different, update the commands accordingly.
+
 ## Preparing the new Cluster
 
 You will now add a new Cluster to the Platform Cluster and watch Kratix reconciling the
@@ -47,6 +57,7 @@ system. For that, you need to first create the new Kubernetes cluster:
 
 ```bash
 kind create cluster --name worker-cluster-2
+export WORKER_2="kind-worker-cluster-2"
 ```
 
 Next, install the GitOps toolkit and create the necessary GitOps resources. The quickest
@@ -55,7 +66,7 @@ directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --context $WORKER-cluster-2 --bucket-path worker-cluster-2
+./scripts/install-gitops --context ${WORKER_2} --bucket-path worker-cluster-2
 ```
 
 ## Registering the Cluster
@@ -95,7 +106,7 @@ to the new Worker Cluster. After a couple of minutes, you should see the Jenkins
 running on the new Worker Cluster:
 
 ```shell-session {3}
-$ kubectl --context $WORKER-cluster-2 get pods
+$ kubectl --context ${WORKER_2} get pods
 NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h
 ```

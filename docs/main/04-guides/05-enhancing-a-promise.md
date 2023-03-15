@@ -2,7 +2,7 @@
 description: Learn how to extend an existing Promise, from updating the API to changing the Pipeline behaviour
 title: Enhancing a Promise
 ---
-import PartialPreRequisites from '../../_partials/_generic_prereqs.md';
+import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 import EnhancingPromise, {toc as EnhancingPromiseTOC} from '../../_partials/_enhancing-a-promise.md';
 
 <PartialPreRequisites />
