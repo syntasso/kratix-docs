@@ -66,6 +66,10 @@
 .token.command.shell-symbol {
   color: var(--color-shell-symbol);
 }
+.token.variable {
+  color: var(--color-purple)!important;
+  font-style: normal!important;
+}
 
 .header-github-link:hover {
   opacity: 0.6;
