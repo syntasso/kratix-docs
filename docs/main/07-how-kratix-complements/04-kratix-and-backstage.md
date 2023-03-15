@@ -32,7 +32,7 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 
 - **Auto-populated GUI:**
 
-  Backstage GUIs must be declared: this is toil for the platform. Kratix can reduce this toil by integrating [Promises](../05-reference/04-promises/01-promises.md) with Backstage by default. In addition, these GUIs can diverge from platform offerings if they are managed separately from the backend implementations. Promises that defined the API and the Backstage GUI at the same time provide automatic support for iterations on your offerings.
+  Backstage GUIs must be declared: this is toil for the platform. Kratix can reduce this toil by integrating [Promises](../05-reference/03-promises/01-promises.md) with Backstage by default. In addition, these GUIs can diverge from platform offerings if they are managed separately from the backend implementations. Promises that defined the API and the Backstage GUI at the same time provide automatic support for iterations on your offerings.
 
 ## How
 

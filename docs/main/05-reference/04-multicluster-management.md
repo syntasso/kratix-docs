@@ -1,6 +1,6 @@
 ---
-title: Scheduling Workloads
-sidebar_label: Scheduling
+title: Multi-cluster management
+sidebar_label: Multi-cluster management
 description: Learn more about how Kratix schedules Promises and Workloads, and how you can control the scheduling process.
 ---
 
@@ -8,8 +8,10 @@ description: Learn more about how Kratix schedules Promises and Workloads, and h
 *[WCRs]: Worker Cluster Resources
 
 One of the most powerful Kratix features is the ability Platform teams have to
-fully control scheduling of work across Kubernetes Cluster. Scheduling happens
-in two stages:
+fully control the scheduling of work across Kubernetes Cluster, i.e., to
+determine in which cluster a certain workload should be deployed to.
+
+In Kratix, scheduling happens in two stages:
 
 1. Determining which Promises are installed in which Clusters ([Scheduling
    Promises](#promises))
@@ -78,7 +80,7 @@ The table below contains a few examples:
 | `env: dev`                  | `env: dev` <br /> `zone:eu` | ⛔️    |
 | _no label_                  | `env: dev`                  | ⛔️    |
 
-## Scheduling Workloads {#workload}
+## Scheduling Workloads {#workloads}
 
 When a new Resource Request comes in, Kratix reacts by triggering the Request Pipeline, as
 defined in the Promise's `spec.xaasRequestPipeline`. The output of the pipeline will be
