@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import styles from './marketplace.module.scss';
-import { Promises } from '../../data/promise-data';
+import Promises from '../../data/promise-data.json';
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import {
