@@ -192,6 +192,16 @@
     ]
   },
   {
+    "name": "Jaeger OTel",
+    "description": "An OpenTelemetry operator that ships data to the trace visualiser Jaeger",
+    "url": "https://github.com/avillela/kratix-playground/tree/main/oteloperator-promise",
+    "logoUrl": "/img/marketplace/otel+jaeger.svg",
+    "categories": [
+      "Observability",
+      "Tracing"
+    ]
+  },
+  {
     "name": "Paved Path",
     "description": "A 'Paved Path' service with Knative and PostgreSQL.       Check the Compound Promises docs for more information.",
     "url": "https://github.com/syntasso/kratix/tree/main/samples/paved-path-demo/",
