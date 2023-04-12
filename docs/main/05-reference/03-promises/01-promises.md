@@ -75,7 +75,7 @@ spec:
   # Ordered list of Docker containers
   # Executed in response to a Resource Request
   xaasRequestPipeline:
-    - myorg/pipeline-image-1
-    - myorg/pipeline-image-2
+    - myorg/pipeline-image-1 # Kubernetes defaults to docker.io
+    - ghcr.io/myorg/pipeline-image-2
     -  #...
 ```
