@@ -37,7 +37,7 @@ At a very high level
 * You install the Promise on your Platform Cluster, where Kratix is installed.
 * Your user wants an instance of the Promise.
 * Your user submit a Kratix Resource Request that lists what they want and how they want it, and this complies with the `xaasCrd` (more details on this request later).
-* Kratix fires off the request pipeline that you defined in `xaasRequestPipeline` and passes the Resource Request as an input.
+* Kratix fires off the first container in the defined in `xaasRequestPipeline` and passes the Resource Request as an input. Subsequent containers will have the previous container's output available as input. For further details on the internal works of multiple pipeline images, check the [Pipelines reference documentation](/docs/main/reference/resource-requests/pipelines)
 * The pipeline outputs valid Kubernetes documents that say what the user wants and what the business wants for that Promise instance.
 * The Worker Cluster has what it needs based on the `workerClusterResources` and is ready to create the instance when the request comes through.
 
