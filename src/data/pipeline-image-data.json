@@ -7,5 +7,14 @@
     "categories": [
       "Communication"
     ]
+  },
+  {
+    "name": "Sealed Secrets",
+    "description": "Pipeline image that can parse Secrets from input and encrypt them with kubeseal",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/pipeline-marketplace-images/sealedsecrets",
+    "logoUrl": "/img/marketplace/images/sealedsecrets.svg",
+    "categories": [
+      "Security"
+    ]
   }
 ]
