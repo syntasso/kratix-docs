@@ -2,6 +2,7 @@ import React from 'react';
 import Layout from '@theme/Layout';
 import styles from './marketplace.module.scss';
 import Promises from '../../data/promise-data.json';
+import PipelineImages from '../../data/pipeline-image-data.json';
 import GridList from '@material-ui/core/GridList'; // TODO use @mui equivalent instead
 import withWidth, { isWidthUp } from '@material-ui/core/withWidth';
 import {
@@ -21,6 +22,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Link from '@docusaurus/Link';
 import clsx from 'clsx';
 type BreakpointOrNull = Breakpoint | null;
+import {useLocation} from "react-router-dom";
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -34,7 +36,7 @@ function Banner({title, style}) {
   )
 }
 
-function PromiseCard({name, url, logoUrl, description, categories, available = true, example = false}) {
+function MarketplaceCard({name, url, logoUrl, description, categories, available = true, example = false}) {
   return (
       <Card className={clsx(styles.card, available ? null : styles.cardComingSoon)}>
         <CardActionArea
@@ -102,6 +104,9 @@ export function Marketplace(): JSX.Element {
     return 1;
   }
 
+  const search = useLocation().search;
+  const showImages = new URLSearchParams(search).get("showImages")
+
   return (
     <Layout
       title="Kratix Marketplace"
@@ -115,18 +120,40 @@ export function Marketplace(): JSX.Element {
           </hgroup>
         </header>
         <div className="root">
-          <GridList
-            cellHeight={"auto"}
-            className={styles.gridList}
-            spacing={30}
-            cols={getGridListCols()}
-          >
-            {Promises.map((tile) => (
-              <div key={tile.name}>
-                <PromiseCard {...tile} />
-              </div>
-            ))}
-          </GridList>
+          <section>
+            <GridList
+              cellHeight={"auto"}
+              className={styles.gridList}
+              spacing={30}
+              cols={getGridListCols()}
+            >
+              {Promises.map((tile: any) => (
+                <div key={tile.name}>
+                  <MarketplaceCard {...tile} />
+                </div>
+              ))}
+            </GridList>
+          </section>
+
+          <section className={ ! showImages ? "hidden": "" }>
+            <hgroup className="text--center">
+              <h2>Pipeline Images</h2>
+              <p className="text--center">Community Pipeline images for <Link href="/docs/main/reference/promises/intro">Kratix Promises</Link>.</p>
+            </hgroup>
+
+            <GridList
+              cellHeight={"auto"}
+              className={styles.gridList}
+              spacing={30}
+              cols={getGridListCols()}
+            >
+              {PipelineImages.map((tile: any) => (
+                <div key={tile.name}>
+                  <MarketplaceCard {...tile} />
+                </div>
+              ))}
+            </GridList>
+          </section>
         </div>
         <div className={clsx('text--center', 'margin-top--xl', styles.bottomText)}>
           <p>

@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Slack",
+    "description": "Pipeline image that can send notifications to Slack channels",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/pipeline-marketplace-images/slack",
+    "logoUrl": "/img/marketplace/images/slack.svg",
+    "categories": [
+      "Communication"
+    ]
+  }
+]
