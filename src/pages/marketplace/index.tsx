@@ -105,7 +105,7 @@ export function Marketplace(): JSX.Element {
   }
 
   const search = useLocation().search;
-  const showImages = new URLSearchParams(search).get("showImages")
+  const showImages = new URLSearchParams(search).get("showImages") == "true"
 
   return (
     <Layout
