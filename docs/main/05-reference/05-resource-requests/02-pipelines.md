@@ -109,7 +109,7 @@ To allow the pipeline to access in-cluster secrets, target the Platform Cluster 
   # Replace PROMISE with the name of your promise
   kubectl create clusterrolebinding promise-secret \
       --clusterrole=promise-secret-cr \
-      --serviceaccount=default:PROMISE-default-promise-pipeline \
+      --serviceaccount=default:PROMISE-default-promise-pipeline
   ```
 1. Access the Base64 enconded Secret in the pipeline with the `kubectl` CLI
   ```
