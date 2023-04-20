@@ -105,8 +105,12 @@ export function Marketplace(): JSX.Element {
   }
 
   const search = useLocation().search;
-  console.log(search);
   const showImages = new URLSearchParams(search).get("showImages") == "true"
+
+  let pipelineMktClass = "pipelineSection"
+  if (!showImages) {
+    pipelineMktClass = "hidden"
+  }
 
   return (
     <Layout
@@ -136,7 +140,7 @@ export function Marketplace(): JSX.Element {
             </GridList>
           </section>
 
-          <section className={ ! showImages ? "hidden": "" }>
+          <section className={pipelineMktClass}>
             <hgroup className="text--center">
               <h2>Pipeline Images</h2>
               <p className="text--center">Community Pipeline images for <Link href="/docs/main/reference/promises/intro">Kratix Promises</Link>.</p>
