@@ -105,7 +105,7 @@ export function Marketplace(): JSX.Element {
   }
 
   const search = useLocation().search;
-  const showImages = new URLSearchParams(search).get("showImages") == "true"
+  const showImages = new URLSearchParams(search).get("pipeline") == "true"
 
   let pipelineMktClass = "pipelineSection"
   if (!showImages) {
