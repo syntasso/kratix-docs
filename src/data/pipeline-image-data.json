@@ -16,5 +16,14 @@
     "categories": [
       "Security"
     ]
+  },
+  {
+    "name": "Trivy",
+    "description": "Scan images referenced in Kubernetes manifests for vulnerabilities with Trivy",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/pipeline-marketplace-images/trivy",
+    "logoUrl": "/img/marketplace/images/trivy-hz.svg",
+    "categories": [
+      "Security"
+    ]
   }
 ]

@@ -22,7 +22,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Link from '@docusaurus/Link';
 import clsx from 'clsx';
 type BreakpointOrNull = Breakpoint | null;
-import {useLocation} from "react-router-dom";
+import {useLocation} from '@docusaurus/router';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
