@@ -25,5 +25,14 @@
     "categories": [
       "Security"
     ]
+  },
+  {
+    "name": "Vault",
+    "description": "Remove Secret documents and store the values in Vault",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/pipeline-marketplace-images/vault",
+    "logoUrl": "/img/marketplace/images/vault.svg",
+    "categories": [
+      "Security"
+    ]
   }
 ]
