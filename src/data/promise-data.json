@@ -202,6 +202,16 @@
     ]
   },
   {
+    "name": "Unleash",
+    "description": "Feature flag management solution built with privacy, simplicity, and flexibility in mind",
+    "url": "https://github.com/syntasso/promise-unleash/tree/main",
+    "logoUrl": "/img/marketplace/unleash.svg",
+    "categories": [
+      "App Delivery",
+      "Feature Flags"
+    ]
+  },
+  {
     "name": "Paved Path",
     "description": "A 'Paved Path' service with Knative and PostgreSQL.       Check the Compound Promises docs for more information.",
     "url": "https://github.com/syntasso/kratix/tree/main/samples/paved-path-demo/",
