@@ -186,7 +186,7 @@ Running the above command will not change your local configuration, but rather u
 Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This will create a cluster for running the X as-a-Service workloads:
 
 ```bash
-kind create cluster --name worker --image kindest/node:v1.24.0
+kind create cluster --name worker --image kindest/node:v1.24.0 --config hack/worker/kind-worker-config.yaml
 
 # Register the Worker Cluster with the Platform Cluster
 kubectl apply \

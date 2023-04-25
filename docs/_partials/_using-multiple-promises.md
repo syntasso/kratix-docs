@@ -43,13 +43,13 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 ### Install all required Promises {#install-all-promises}
 
 In order for an application team to deploy an application to a dev environment
-they require a relational datastore (postgres), networking for user traffic (Knative),
+they require a relational datastore (postgres), networking for user traffic (Nginx Ingress),
 and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality
 on-demand with Kratix install the required Promises on your Platform Cluster:
 
 ```console
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/nginx-ingress/promise.yaml
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
 ```
 <br />
@@ -61,15 +61,15 @@ kubectl --context $PLATFORM get promises
 
 The above command will give an output similar to
 ```console
-NAME         AGE
-jenkins      1m
-knative      1m
-postgresql   1m
+NAME           AGE
+jenkins        1m
+nginx-ingress  1m
+postgresql     1m
 ```
 <br />
 
 Verify the CRDs are all installed on your Platform Cluster. Note that you know
-have `jenkins`, `knative`, and `postgres` available.
+have `jenkins`, and `postgres` available (notice no Nginx CRD! We will get to that later).
 
 ```console
 kubectl --context $PLATFORM get crds
@@ -81,7 +81,6 @@ NAME                                CREATED AT
 clusters.platform.kratix.io         2023-01-24T17:00:37Z
 #highlight-start
 jenkins.marketplace.kratix.io       2023-01-24T17:22:50Z
-knatives.marketplace.kratix.io      2023-01-24T17:23:50Z
 postgresqls.marketplace.kratix.io   2023-01-24T17:23:51Z
 #highlight-end
 promises.platform.kratix.io         2023-01-24T17:00:37Z
@@ -102,27 +101,34 @@ kubectl --context $WORKER get pods --watch
 The above command will give an output similar to
 ```console
 NAME                                 READY   STATUS    RESTARTS   AGE
-jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
+jenkins-operator-6c89d97d4f-r474w    1/1     running   0          1m
+nginx-nginx-ingress-58c4dcb47d-tws   1/1     running   0          1m
 postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 ```
+
+As mentioned above, there is no CRD for the Nginx Ingress Promise. This Promise
+only contains Worker Cluster Resources, it has no `xaasCrd` or `xaasRequestPipeine`.
+For any software that you want installed by-default on your clusters and that don't
+require any per-instance requests you can just fill in only the `workerClusterResources`
+fields. Other good examples of this might be running Observability stacks, e.g.
+Prometheus or a Service Mesh, e.g. Istio.
 <br />
 
 ### Request instances {#request-instances}
 
 ![Overview-instances](/img/docs/Treasure_Trove-Get_instances_of_multiple_Promises.jpeg)
 
-Submit a set of Kratix Resource Requests to get a Knative Serving component, a
+Submit a set of Kratix Resource Requests to get a
 Jenkins instance and a Postgres database.
 ```console
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/resource-request.yaml
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/resource-request.yaml
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/resource-request.yaml
 ```
 <br />
 
-<p>By requesting these three resources, you will start three pods, one for the
-Jenkins server (named <code>jenkins-dev-example</code>), and two which create a
-postgres cluster (named per the Resource Request name,
+<p>By requesting these two resources, you will start two pods, one for the
+Jenkins server (named <code>jenkins-dev-example</code>), and another which create a
+Postgres cluster (named per the Resource Request name,
 <code>acid-example-postgresql</code>). To verify you have all the necessary resources up
 and running<br /> <sub>(This may take a few minutes so <code>--watch</code>
 will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop
@@ -138,21 +144,6 @@ The above command will give an output similar to
 NAME                                READY   STATUS      RESTARTS   AGE
 acid-example-postgresql-0           1/1     Running     0          5m
 jenkins-dev-example                 1/1     Running     0          5m
-...
-```
-<br />
-
-Verify that knative has also installed its networking resources into two new namespaces
-```console
-kubectl --context $WORKER get namespaces
-```
-<br />
-
-The above command will give an output similar to
-```console
-NAME                   STATUS   AGE
-knative-serving        Active   1h
-kourier-system         Active   1h
 ...
 ```
 <br />
@@ -176,11 +167,11 @@ With all the necessary resources available, you will now change hats to be a
 part of the application team who can now design and run their own CI/CD
 pipeline using the provided Jenkins service. In this step, you will deploy a
 [sample application](https://github.com/syntasso/sample-golang-app) through a
-Jenkins pipeline, that uses Postgres for persistence and Knative for serving
+Jenkins pipeline, that uses Postgres for persistence and Nginx for serving
 the application.
 
 First, create a service account on the Worker cluster, so Jenkins can create
-Knative Services from the pipeline:
+Deployments from the pipeline:
 
 ```
 kubectl --context $WORKER apply -f \
@@ -240,32 +231,49 @@ below or watch the video to see how to navigate the UI for this task.
 
 ### Validate the deployment {#validate-deployment}
 
-Verify that the Knative Service for the application is ready:
+Verify that the `todo` deployment is ready:
 
 ```console
-kubectl --context $WORKER get services.serving.knative.dev
+kubectl --context $WORKER get pods
 ```
 
 The above command will give an output similar to
 ```console
-NAME   URL                            LATESTCREATED   LATESTREADY   READY   REASON
-todo   http://todo.default.local.gd   todo-00001      todo-00001    True
+NAME                                   READY   STATUS    RESTARTS   AGE
+acid-example-postgresql-0              1/1     Running   0          158m
+jenkins-dev-example                    1/1     Running   0          157m
+jenkins-operator-7f58798d5c-ph9dh      1/1     Running   0          3h
+nginx-nginx-ingress-58c4dcb47d-twwqs   1/1     Running   0          3h
+postgres-operator-79754946d-pn45n      1/1     Running   0          3h
+#highlight-start
+todo-58896c88d5-5txdl                  1/1     Running   0          2m55s
+#highlight-end
 ```
 <br />
 
 ### Test the deployed application {#test-app}
 
-Now test the app.
+Now test the app. Navigate to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081)
+to see the app running. 
 
-On a separate terminal, you'll need to open access to the app by port-forwarding
-the kourier service:
+<details>
+  <summary> If you have setup your clusters not using KinD then <strong>Click here </strong>
+  for instructions on how to access the app </summary>
 
-```console
-kubectl --context $WORKER --namespace kourier-system port-forward svc/kourier 8081:80
-```
-<br />
+    1. Setup a port-forward to Nginx:
+       ```console
+        kubectl port-forward svc/nginx-nginx-ingress 8081:80
+       ```
+    1. Curl the endpoint with the Host header set
+       ```console
+        curl -s -H "host: todo.local.gd" localhost:8081
+       ```
+       Alternatively navigate to localhost:8081 in the browser and use a plugin (e.g.
+       [ModHeader](https://chrome.google.com/webstore/detail/modheader-modify-http-hea/idgpnmonknjnojddfkpgkljpfnnfcklj))
+       to set the Host header.
+</details>
 
-Now go to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081) to see the app running.
+
 
 ## Summary {#summary}
 Your platform has pieced together three different Promises to provide a complete
@@ -283,10 +291,10 @@ write and update Promises, and in the final thoughts we will showcase the compos
 of Promises to further optimise this workflow from three requests down to one.
 
 ## Cleanup environment {#cleanup}
-To clean up your environment first delete the Resource Requests for the Jenkins, Knative and Postgres Promises.
+To clean up your environment first delete the Resource Requests for the Jenkins, Nginx and Postgres Promises.
 
 ```bash
-kubectl --context $PLATFORM delete jenkins,knative,postgresqls --all
+kubectl --context $PLATFORM delete jenkins,nginx-ingress,postgresqls --all
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
