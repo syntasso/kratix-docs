@@ -6,11 +6,21 @@ import PartialCleanupAllPromises from './_cleanup.md';
 
 # The power of Promises {#power-of-promises}
 
-As covered previously, Promises are the building blocks that enable teams to design platforms that specifically meet their customer needs. Through writing and extending Promises, Platform teams can raise the value line of the platform they provide. They can use multiple simpler, low-level Promises to provide an experience tailored to their users needs.
+As covered previously, Promises are the building blocks that enable teams to design
+platforms that specifically meet their customer needs. Through writing and extending
+Promises, Platform teams can raise the value line of the platform they provide.
+They can use multiple simpler, low-level Promises to provide an experience tailored
+to their users needs.
 
-Consider the task of setting up development environments for application teams. This task is usually repetitive and requires many cookie-cutter steps. It may involve wiring up Git repos, spinning up a CI/CD server, creating a PaaS to run the applications, instructing CI/CD to listen to the Git repos and push successful builds into the PaaS, and finally wiring applications to their required data services.
+Consider the task of setting up development environments for application teams.
+This task is usually repetitive and requires many cookie-cutter steps. It may
+involve wiring up Git repos, spinning up a CI/CD server, creating a PaaS to run
+the applications, instructing CI/CD to listen to the Git repos and push successful
+builds into the PaaS, and finally wiring applications to their required data services.
 
-A Promise can encapsulate all the required steps and handle the toil of running those low-level tasks. It can be designed as a single Promise that does it all, or it can be a collection of Promises that, combined, deliver the desired functionality.
+A Promise can encapsulate all the required steps and handle the toil of running
+those low-level tasks. It can be designed as a single Promise that does it all,
+or it can be a collection of Promises that, combined, deliver the desired functionality.
 
 Now you will see the power of Kratix Promises by deploying a web app that uses multiple Promises.
 
@@ -32,7 +42,10 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 
 ### Install all required Promises {#install-all-promises}
 
-In order for an application team to deploy an application to a dev environment they require a relational datastore (postgres), networking for user traffic (Knative), and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality on-demand with Kratix install the required Promises on your Platform Cluster:
+In order for an application team to deploy an application to a dev environment
+they require a relational datastore (postgres), networking for user traffic (Knative),
+and a CI/CD service for ongoing improvements (Jenkins). To deliver this functionality
+on-demand with Kratix install the required Promises on your Platform Cluster:
 
 ```console
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
@@ -55,7 +68,8 @@ postgresql   1m
 ```
 <br />
 
-Verify the CRDs are all installed on your Platform Cluster. Note that you know have `jenkins`, `knative`, and `postgres` available.
+Verify the CRDs are all installed on your Platform Cluster. Note that you know
+have `jenkins`, `knative`, and `postgres` available.
 
 ```console
 kubectl --context $PLATFORM get crds
@@ -76,8 +90,9 @@ works.platform.kratix.io            2023-01-24T17:00:37Z
 ```
 <br />
 
-<p>Verify the <code>workerClusterResources</code> (more details in future steps) are installed on your Worker Cluster<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+<p>Verify the <code>workerClusterResources</code> (more details in future steps)
+are installed on your Worker Cluster<br /> <sub>(This may take a few minutes so
+<code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
 ```console
@@ -96,7 +111,8 @@ postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 
 ![Overview-instances](/img/docs/Treasure_Trove-Get_instances_of_multiple_Promises.jpeg)
 
-Submit a set of Kratix Resource Requests to get a Knative Serving component, a Jenkins instance and a Postgres database.
+Submit a set of Kratix Resource Requests to get a Knative Serving component, a
+Jenkins instance and a Postgres database.
 ```console
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/resource-request.yaml
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/knative/resource-request.yaml
@@ -197,7 +213,8 @@ In the Jenkins UI, create a new pipeline using this
 [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile)
 and execute it.
 
-For those that are less familiar with Jenkins, you can either expand the instructions below or watch the video to see how to navigate the UI for this task.
+For those that are less familiar with Jenkins, you can either expand the instructions
+below or watch the video to see how to navigate the UI for this task.
 
 
 <details>
@@ -240,7 +257,8 @@ todo   http://todo.default.local.gd   todo-00001      todo-00001    True
 
 Now test the app.
 
-On a separate terminal, you'll need to open access to the app by port-forwarding the kourier service:
+On a separate terminal, you'll need to open access to the app by port-forwarding
+the kourier service:
 
 ```console
 kubectl --context $WORKER --namespace kourier-system port-forward svc/kourier 8081:80
@@ -250,7 +268,9 @@ kubectl --context $WORKER --namespace kourier-system port-forward svc/kourier 80
 Now go to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081) to see the app running.
 
 ## Summary {#summary}
-Your platform has pieced together three different Promises to provide a complete solution for an application team to deploy a new service to dev using your suggested CI/CD and hosting solutions. Well done!
+Your platform has pieced together three different Promises to provide a complete
+solution for an application team to deploy a new service to dev using your suggested
+CI/CD and hosting solutions. Well done!
 
 To recap the steps we took:
 1. ✅&nbsp;&nbsp;Installed all three Kratix Promises
@@ -258,7 +278,9 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Created and run a CI/CD pipeline for a new application
 1. ✅&nbsp;&nbsp;Viewed an endpoint from a newly deployed and networked application
 
-This is only the beginning of working with Promises. Next you will learn how to write and update Promises, and in the final thoughts we will showcase the composability of Promises to further optimise this workflow from three requests down to one.
+This is only the beginning of working with Promises. Next you will learn how to
+write and update Promises, and in the final thoughts we will showcase the composability
+of Promises to further optimise this workflow from three requests down to one.
 
 ## Cleanup environment {#cleanup}
 To clean up your environment first delete the Resource Requests for the Jenkins, Knative and Postgres Promises.
