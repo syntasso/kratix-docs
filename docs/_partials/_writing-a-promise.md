@@ -101,6 +101,11 @@ clone down the repository and make changes locally:
 git clone https://github.com/syntasso/workshop-promise-template
 ```
 
+Once cloned change into the directory:
+```bash
+cd workshop-promise-template/
+```
+
 ### Define your Promise API {#promise-api}
 
 For the purpose of this tutorial, you will create an API that accepts a single `string`
@@ -144,11 +149,11 @@ You have now defined the as-a-Service API.
 
 #### Create your Promise instance base manifest {#base-instance}
 
-Next build the pipeline to use details from a Kratix Promise _Resource Request_ into the Kubernetes resources required to create a running instance of the Jenkins service. For that, copy the YAML file below and save it in `internal/request-pipeline-image/jenkins-instance.yaml`.
+Next build the pipeline to use details from a Kratix Promise _Resource Request_ into the Kubernetes resources required to create a running instance of the Jenkins service. For that, copy the YAML file below and save it in `internal/request-pipeline/jenkins-instance.yaml`.
 <details>
   <summary><strong>CLICK HERE</strong> to expand the contents of the <code>jenkins-instance.yaml</code> file.</summary>
 
-```yaml jsx title="internal/request-pipeline-image/jenkins-instance.yaml"
+```yaml jsx title="internal/request-pipeline/jenkins-instance.yaml"
 apiVersion: jenkins.io/v1alpha2
 kind: Jenkins
 metadata:
@@ -230,22 +235,23 @@ instance and passing it to the Jenkins custom resource output.
 To keep this transformation simple, you'll use a combination of `sed` and `yq`
 to do the work.
 
-Update the `execute-pipeline` script in the `request-pipeline-image` directory
+Update the `execute-pipeline` script in the `request-pipeline` directory
 with the contents beow
-```bash jsx title="internal/request-pipeline-image/execute-pipeline"
+```bash jsx title="internal/request-pipeline/execute-pipeline"
 #!/bin/sh
 
 set -x
 
 #Get the name from the Promise Custom resource
-instanceName=\$(yq eval '.spec.name' /input/object.yaml)
+instanceName=$(yq eval '.spec.name' /input/object.yaml)
 
 # Inject the name into the Jenkins resources
-find /tmp/transfer -type f -exec sed -i \\
-  -e "s/<tbr-name>/\${instanceName//\//\\/}/g" \\
+find /tmp/transfer -type f -exec sed -i \
+  -e "s/<tbr-name>/${instanceName}/g" \
   {} \;
 
 cp /tmp/transfer/* /output/
+
 ```
 
 Pipelines also have the capability to write back information to the resource requester
@@ -253,14 +259,14 @@ by writing to the status. See [status documentation for more infoformation.](../
 
 #### Package your pipeline step as a Docker image {#docker-file}
 
-Update the `Dockerfile` in the `request-pipeline-image` directory to contain the following:
+Update the `Dockerfile` in the `request-pipeline` directory to contain the following:
 
-```dockerfile jsx title="internal/request-pipeline-image/Dockerfile"
+```dockerfile jsx title="internal/request-pipeline/Dockerfile"
 FROM "mikefarah/yq:4"
 RUN [ "mkdir", "/tmp/transfer" ]
 
 ADD jenkins-instance.yaml /tmp/transfer/jenkins-instance.yaml
-ADD execute-pipeline execute-pipeline.sh
+ADD execute-pipeline execute-pipeline
 
 CMD [ "sh", "-c", "./execute-pipeline"]
 ENTRYPOINT []
@@ -289,9 +295,9 @@ mimic what Kratix would do when it executes the pipeline and assert that the cor
 `/output` is written.
 
 To test this lets create a sample `/input/object.yaml` Resource Request in the
-`internal/request-pipeline-image/test-input/` directory with the contents below
+`internal/request-pipeline/test-input/` directory with the contents below
 
-```yaml jsx title="internal/request-pipeline-image/input/object.yaml"
+```yaml jsx title="internal/request-pipeline/test-input/object.yaml"
 apiVersion: promise.example.com/v1
 kind: jenkins
 metadata:
@@ -302,7 +308,7 @@ spec:
 
 Run the container and examine the output
 ```bash
-docker run -v ${PWD}/request-pipeline/test-input:/input -v ${PWD}/request-pipeline/test-output:/output $PIPELINE_NAME
+docker run -v ${PWD}/internal/request-pipeline/test-input:/input -v ${PWD}/internal/request-pipeline/test-output:/output $PIPELINE_NAME
 ```
 <br />
 
@@ -319,19 +325,11 @@ KinD you can load it in by running:
 ./internal/scripts/pipeline-image load
 ```
 
-If you are not using KinD you can either manually load the image if the cluster
-you are using supports it (e.g. `minikube cache add`) or push the image to a remote
-repository by running:
-
-```bash
-./internal/scripts/pipeline-image push
-```
-
 <details>
   <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
   If you have not created your Kubernetes clusters with KinD, you will need to either:
   <ul>
-    <li>Push the image to a Image repository (like Dockerhub), or </li>
+    <li>Push the image to a Image repository (like Dockerhub) by running `./internal/scripts/pipeline-image push`</li>
     <li>Use the appropriate command to load the image (for example, <code>minikube cache add</code> if you are using minikube)</li>
   </ul>
 </details>
@@ -434,18 +432,22 @@ At this point, your Promise directory structure should look like:
 
 ```
 📂 promise
-├── 📂 request-pipeline-image
+├── 📂 request-pipeline
+│   ├── Dockerfile
+│   ├── execute-pipeline
+│   │── jenkins-instance.yaml
 │   ├── 📂  test-input
 │   │   └── object.yaml
 │   ├── 📂  test-output
 │   │   └── jenkins_instance.yaml
-│   ├── Dockerfile
-│   ├── execute-pipeline
-│   └── jenkins-instance.yaml
 ├── 📂 resources
 │   ├── jenkins.io_jenkins.yaml
 │   └── all-in-one-v1alpha2.yaml
+├── 📂 scripts
+│   ├── inject-wcr
+│   └── pipeline-image
 └── promise.yaml
+└── README
 └── resource-request.yaml
 ```
 <br />
