@@ -68,8 +68,8 @@ postgresql     1m
 ```
 <br />
 
-Verify the CRDs are all installed on your Platform Cluster. Note that you know
-have `jenkins`, and `postgres` available (notice no Nginx CRD! We will get to that later).
+Verify the CRDs are all installed on your Platform Cluster. Note that you now
+have `jenkins` and `postgres` available (and no Nginx CRD; we will get to that later).
 
 ```console
 kubectl --context $PLATFORM get crds
@@ -156,8 +156,8 @@ kubectl --context $PLATFORM get jenkins.marketplace.kratix.io
 
 The above command will give an output similar to
 ```console
-NAME          AGE
-example       1m
+NAME          Status
+example       Resource Requested
 ```
 <br />
 
@@ -180,15 +180,8 @@ kubectl --context $WORKER apply -f \
 
 <br />
 
-Access the Jenkins UI in a browser, as in the [previous
-step](installing-a-promise). Port forward for browser access to the Jenkins UI:
-
-```console
-kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
-```
-<br />
-
-Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below:
+To access the Jenkins UI in the browser, first take note of the credentials by
+running the commands below:
 
 ```console jsx title="username"
 kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
@@ -199,6 +192,16 @@ kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 <br />
+
+Port forward for browser access to the Jenkins UI:
+
+```console
+kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
+```
+<br />
+
+Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials.
+
 
 In the Jenkins UI, create a new pipeline using this
 [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile)
@@ -215,11 +218,12 @@ below or watch the video to see how to navigate the UI for this task.
 2. Enter a name for the pipeline, e.g. `todo-app-pipeline`
 3. Select _Pipeline_ from the _Select item type_ dropdown
 4. Click _OK_
-5. In the _Pipeline_ section, paste the contents of the [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile) in the _Script_ field
-6. Click _Save_
-7. Click _Build Now_ in the left menu
-8. Click on the running build
-9. Click _Console Output_ to see the pipeline progress
+5. Scroll to the _Pipeline_ section
+6. Paste the contents of the [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile) in the _Script_ field
+7. Click _Save_
+8. Click _Build Now_ in the left menu
+9. Click on the running build
+10. Click _Console Output_ to see the pipeline progress
 
 </details>
 
@@ -253,24 +257,25 @@ todo-58896c88d5-5txdl                  1/1     Running   0          2m55s
 
 ### Test the deployed application {#test-app}
 
-Now test the app. Navigate to [http://todo.default.local.gd:8081](http://todo.default.local.gd:8081)
+Now test the app. Navigate to [http://todo.local.gd:31338](http://todo.local.gd:31338)
 to see the app running. 
 
 <details>
   <summary> If you have setup your clusters not using KinD then <strong>Click here </strong>
   for instructions on how to access the app </summary>
 
-    1. Setup a port-forward to Nginx:
-       ```console
-        kubectl port-forward svc/nginx-nginx-ingress 8081:80
-       ```
-    1. Curl the endpoint with the Host header set
-       ```console
-        curl -s -H "host: todo.local.gd" localhost:8081
-       ```
-       Alternatively navigate to localhost:8081 in the browser and use a plugin (e.g.
-       [ModHeader](https://chrome.google.com/webstore/detail/modheader-modify-http-hea/idgpnmonknjnojddfkpgkljpfnnfcklj))
-       to set the Host header.
+1. Setup a port-forward to Nginx:
+   ```console
+    kubectl --context $WORKER port-forward svc/nginx-nginx-ingress 31338:80
+   ```
+1. Curl the endpoint with the Host header set
+   ```console
+    curl -s -H "host: todo.local.gd" localhost:31338
+   ```
+   Alternatively navigate to localhost:31338 in the browser and use a plugin (e.g.
+   [ModHeader](https://chrome.google.com/webstore/detail/modheader-modify-http-hea/idgpnmonknjnojddfkpgkljpfnnfcklj))
+   to set the Host header to "todo.local.gd"
+
 </details>
 
 
@@ -293,8 +298,8 @@ of Promises to further optimise this workflow from three requests down to one.
 ## Cleanup environment {#cleanup}
 To clean up your environment first delete the Resource Requests for the Jenkins, Nginx and Postgres Promises.
 
-```bash
-kubectl --context $PLATFORM delete jenkins,nginx-ingress,postgresqls --all
+```console
+kubectl --context $PLATFORM delete jenkins,postgresqls --all
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
@@ -303,13 +308,19 @@ kubectl --context $WORKER get pods,namespaces
 ```
 
 Now all the Resource Requests have been deleted you can delete the Promises
-```bash
+```console
 kubectl --context $PLATFORM delete promises --all
 ```
 
 Verify the Worker Cluster resources are deleted from the Worker Cluster
 ```console
 kubectl --context $WORKER get pods
+```
+
+Finally, remove the app artefacts
+```console
+kubectl --context $WORKER delete -f https://raw.githubusercontent.com/syntasso/sample-golang-app/workshop-refactor/k8s/service-account.yaml
+kubectl --context $WORKER delete -f https://raw.githubusercontent.com/syntasso/sample-golang-app/workshop-refactor/k8s/app.yaml
 ```
 
 <br />
