@@ -57,7 +57,6 @@ This guide will follow the steps below:
 **Define Promise**
 1. [Prepare your environment](#prepare-your-environment), if required
 1. [Directory setup](#directory-setup)
-1. [Generate a Promise template](#promise-template)
 
 **Promise definition: xaasCrd**
 1. [X as-a-Service Custom Resource Definition: define your Promise API](#promise-api)
@@ -86,36 +85,32 @@ This guide will follow the steps below:
 
 ### Directory setup {#directory-setup}
 
-To begin writing a Promise you will need a basic directory structure to work in. You can generate this folder structure in any local directory by running
+To make writing a promise easier we have setup a template repository to start from.
+If you wish to save the work you make to GitHub navigate to the [repository](https://github.com/syntasso/workshop-promise-template)
+and [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)
+the repository and clone it down:
 
 ```bash
-mkdir -p jenkins-promise/{resources,request-pipeline-image}
-cd jenkins-promise
+git clone https://github.com/<username>/workshop-promise-template
 ```
 
-### Generate a Promise template {#promise-template}
+If you don't want to save your changes or want to setup the fork later you can directly
+clone down the repository and make changes locally:
 
-Generate a basic `jenkins-promise-template.yaml` to work with
-```jsx title="jenkins-promise/jenkins-promise.yaml"
-apiVersion: platform.kratix.io/v1alpha1
-kind: Promise
-metadata:
-  name: jenkins-promise
-spec:
-  workerClusterResources:
-  xaasRequestPipeline:
-  xaasCrd:
+```bash
+git clone https://github.com/syntasso/workshop-promise-template
 ```
-
-You will fill in the fields under `spec` as you progress through the tutorial.
 
 ### Define your Promise API {#promise-api}
 
-For the purpose of this tutorial, you will create an API that accepts a single `string` parameter called `name`. In real world scenarios, the API can be as simple or as complex you design it to be. The Promise API is defined within the `xaasCrd` of your Promise YAML.
+For the purpose of this tutorial, you will create an API that accepts a single `string`
+parameter called `name`. In real world scenarios, the API can be as simple or as
+complex you design it to be. The Promise API is defined within the `xaasCrd` of
+your Promise YAML.
 
-Replace the `xaasCrd` field in `jenkins-promise-template.yaml` with the complete field details below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
+Replace the `xaasCrd` field in `promise.yaml` with the complete field details below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
 
-```yaml jsx title="xaasCrd in jenkins-promise/jenkins-promise.yaml"
+```yaml jsx title="xaasCrd in promise.yaml"
   xaasCrd:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
@@ -149,11 +144,11 @@ You have now defined the as-a-Service API.
 
 #### Create your Promise instance base manifest {#base-instance}
 
-Next build the pipeline to use details from a Kratix Promise _Resource Request_ into the Kubernetes resources required to create a running instance of the Jenkins service. For that, copy the YAML file below and save it in `request-pipeline-image/jenkins-instance.yaml`.
+Next build the pipeline to use details from a Kratix Promise _Resource Request_ into the Kubernetes resources required to create a running instance of the Jenkins service. For that, copy the YAML file below and save it in `internal/request-pipeline-image/jenkins-instance.yaml`.
 <details>
   <summary><strong>CLICK HERE</strong> to expand the contents of the <code>jenkins-instance.yaml</code> file.</summary>
 
-```yaml jsx title="jenkins-promise/request-pipeline-image/jenkins-instance.yaml"
+```yaml jsx title="internal/request-pipeline-image/jenkins-instance.yaml"
 apiVersion: jenkins.io/v1alpha2
 kind: Jenkins
 metadata:
@@ -235,11 +230,9 @@ instance and passing it to the Jenkins custom resource output.
 To keep this transformation simple, you'll use a combination of `sed` and `yq`
 to do the work.
 
-Create a script file in the `request-pipeline-image` directory called
-`execute-pipeline.sh` and copy the contents below. The script will be executed
-when the pipeline runs.
-
-```bash jsx title="jenkins-promise/request-pipeline-image/execute-pipeline.sh"
+Update the `execute-pipeline` script in the `request-pipeline-image` directory
+with the contents beow
+```bash jsx title="internal/request-pipeline-image/execute-pipeline"
 #!/bin/sh
 
 set -x
@@ -255,102 +248,83 @@ find /tmp/transfer -type f -exec sed -i \\
 cp /tmp/transfer/* /output/
 ```
 
-Then make it executable:
-```bash
-chmod +x jenkins-promise/request-pipeline-image/execute-pipeline.sh
-```
-<br />
-
 Pipelines also have the capability to write back information to the resource requester
 by writing to the status. See [status documentation for more infoformation.](../main/05-reference/05-resource-requests/04-status.md)
 
 #### Package your pipeline step as a Docker image {#docker-file}
 
-Create a `Dockerfile` in the `request-pipeline-image` directory and copy the contents below.
+Update the `Dockerfile` in the `request-pipeline-image` directory to contain the following:
 
-```dockerfile jsx title="jenkins-promise/request-pipeline-image/Dockerfile"
+```dockerfile jsx title="internal/request-pipeline-image/Dockerfile"
 FROM "mikefarah/yq:4"
 RUN [ "mkdir", "/tmp/transfer" ]
 
 ADD jenkins-instance.yaml /tmp/transfer/jenkins-instance.yaml
-ADD execute-pipeline.sh execute-pipeline.sh
+ADD execute-pipeline execute-pipeline.sh
 
-CMD [ "sh", "-c", "./execute-pipeline.sh"]
+CMD [ "sh", "-c", "./execute-pipeline"]
 ENTRYPOINT []
 ```
 <br />
 
-Your file directory should now include the new file as shown below
-
-```
-. 📂 jenkins-promise
-  ├── jenkins-promise-template.yaml
-  ├── 📂 request-pipeline-image
-  │   ├── Dockerfile
-  │   ├── execute-pipeline.sh
-  │   └── jenkins-instance.yaml
-  └── 📂 resources
-```
-
-Next build your Docker image:
+Next build your Docker image. First lets give the Docker image a name. If you are
+not using `KinD` you may need to push the image later on, in that case change the name
+to one suitable for your registry, e.g. if you use Dockerhub
+`my-dockerhub-username/jenkins-request-pipeline:dev`
 
 ```bash
-cd jenkins-promise/request-pipeline-image
-docker build --tag kratix-workshop/jenkins-request-pipeline:dev .
+export PIPELINE_NAME=kratix-workshop/jenkins-request-pipeline:dev
+```
+
+Then we can build the image
+```bash
+./internal/scripts/pipeline-image build
 ```
 
 ### Test your pipeline image {#test-image}
 
-Test the Docker container image by supplying an input resource and examining the output resource.
+Because the request pipeline is just a Dockerimage, we can easily test that our
+script behaves as desired by testing it locally. We can provide an example `/input` to
+mimic what Kratix would do when it executes the pipeline and assert that the correct
+`/output` is written.
 
-Create the test input and output directories locally within the `request-pipeline-image` directory:
+To test this lets create a sample `/input/object.yaml` Resource Request in the
+`internal/request-pipeline-image/test-input/` directory with the contents below
 
-```bash
-mkdir jenkins-promise/request-pipeline-image/{input,output}
-```
-
-Your file directory should now include the new file as shown below
-
-```
-. 📂 jenkins-promise
-  ├── jenkins-promise-template.yaml
-  ├── 📂 request-pipeline-image
-  │   ├── 📂 🆕 input
-  │   ├── 📂 🆕 output
-  │   ├── Dockerfile
-  │   ├── execute-pipeline.sh
-  │   └── jenkins-instance.yaml
-  └── 📂 resources
-```
-
-The `/input` directory is where your incoming Kratix Resource Request will be written when a user wants an instance.
-
-Create a sample `object.yaml` Resource Request in the `/input` with the contents below
-
-```yaml jsx title="jenkins-promise/request-pipeline-image/input/object.yaml"
+```yaml jsx title="internal/request-pipeline-image/input/object.yaml"
 apiVersion: promise.example.com/v1
 kind: jenkins
 metadata:
-  name: my-jenkins-promise-request
+  name: my-promise-request
 spec:
   name: my-amazing-jenkins
 ```
 
 Run the container and examine the output
 ```bash
-cd jenkins-promise/request-pipeline-image
-docker run -v ${PWD}/input:/input -v ${PWD}/output:/output kratix-workshop/jenkins-request-pipeline:dev
+docker run -v ${PWD}/request-pipeline/test-input:/input -v ${PWD}/request-pipeline/test-output:/output $PIPELINE_NAME
 ```
 <br />
 
-Verify the contents of the `output` directory. These will be scheduled and deployed by Kratix to a Worker Cluster once the pipeline is executed, as a response for the Resource Request. They need to be valid Kubernetes resources that can be applied to any cluster with the Promise's `workerClusterResources` installed (see beneath).
+Verify the contents in the `request-pipeline/test-output` directory match the desired outcome. These
+will be scheduled and deployed by Kratix to a Worker Cluster once the pipeline
+is executed. They need to be valid Kubernetes resources that can be applied to
+any cluster with the Promise's `workerClusterResources` installed (see beneath).
 
-Once you are satisified that your pipeline is producing the expected result,
-you will need to make it available to your Kubernetes cluster. You can load the
-it to the local KinD cache:
+Once you are satisfied that your pipeline is producing the expected result,
+you will need to make it available to your Kubernetes cluster. If you are using
+KinD you can load it in by running:
 
 ```bash
-kind load docker-image kratix-workshop/jenkins-request-pipeline:dev --name platform
+./internal/scripts/pipeline-image load
+```
+
+If you are not using KinD you can either manually load the image if the cluster
+you are using supports it (e.g. `minikube cache add`) or push the image to a remote
+repository by running:
+
+```bash
+./internal/scripts/pipeline-image push
 ```
 
 <details>
@@ -364,19 +338,19 @@ kind load docker-image kratix-workshop/jenkins-request-pipeline:dev --name platf
 
 <br />
 
-The final step of creating the `xaasRequestPipeline` is to reference your docker image from the `spec.xaasRequestPipeline` field in the `jenkins-promise-template.yaml`.
+The final step of creating the `xaasRequestPipeline` is to reference your docker image from the `spec.xaasRequestPipeline` field in the `promise.yaml`.
 
-Add the image to the array in `jenkins-promise-template.yaml`.
-```yaml jsx title="jenkins-promise/jenkins-promise-template.yaml"
+Add the image to the array in `promise.yaml`.
+```yaml jsx title="promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: jenkins-promise
+  name: promise
 spec:
   workerClusterResources:
   #highlight-start
   xaasRequestPipeline:
-  - kratix-workshop/jenkins-request-pipeline:dev
+  - <value of $PIPELINE_NAME>
   #highlight-end
   xaasCrd:
     ...
@@ -385,7 +359,7 @@ spec:
 In summary, you have:
 - Created a container image containing:
     - A template file to be injected with per-instance details (`jenkins-instance.yaml`)
-    - A shell script to retrieve the per-instance details from the user's request, and inject them into the template (`execute-pipeline.sh`)
+    - A shell script to retrieve the per-instance details from the user's request, and inject them into the template (`execute-pipeline`)
     - A command set to the shell script
 - Created a set of directories(`input`/`output`) and sample user request(`input/object.yaml`)
 - Executed the pipeline image locally as a test
@@ -397,20 +371,19 @@ In summary, you have:
 
 The `workerClusterResources` describes everything required to fulfil the Promise. Kratix applies this content on all registered Worker Clusters.
 
-For this Promise, the `workerClusterResources` needs to contain the Jenkins CRD, the Jenkins Operator, and the resources the Operator requires.
+For this Promise, the `workerClusterResources` needs to contain the Jenkins CRD and Operator.
 
-Run the following command from the `jenkins-promise` directory:
+Run the following commands to download the resource files
 
 ```bash
-mkdir -p resources
-curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/fbea1ed790e7a9deb2311e1f565ee93f07d89022/config/crd/bases/jenkins.io_jenkins.yaml --output resources/jenkins.io_jenkins.yaml --silent
-curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/8fee7f2806c363a5ceae569a725c17ef82ff2b58/deploy/all-in-one-v1alpha2.yaml --output resources/all-in-one-v1alpha2.yaml --silent
+curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/fbea1ed790e7a9deb2311e1f565ee93f07d89022/config/crd/bases/jenkins.io_jenkins.yaml --output internal/resources/jenkins.io_jenkins.yaml --silent
+curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/8fee7f2806c363a5ceae569a725c17ef82ff2b58/deploy/all-in-one-v1alpha2.yaml --output internal/resources/all-in-one-v1alpha2.yaml --silent
 ```
 <br />
 
-The commands above will download the necessary files in the `resources` directory. You are now ready to inject the Jenkins files into the `jenkins-promise-template.yaml`.
+The commands above will download the necessary files in the `internal/resources` directory. You are now ready to inject the Jenkins files into the `promise.yaml`.
 
-To make this step simpler we have written a _very basic_ tool to grab all YAML documents from all YAML files located in `resources` and inject them into the `workerClusterResources` field.
+To make this step simpler we have written a _very basic_ tool to grab all YAML documents from all YAML files located in `internal/resources` and inject them into the `workerClusterResources` field in the `promise.yaml`.
 
 To use this tool, you will need to download the correct binary for your computer from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.1):
 
@@ -448,12 +421,10 @@ Once you have downloaded the correct binary, run:
 
 
 ```bash
-./worker-resource-builder \
-  -k8s-resources-directory ./resources \
-  -promise ./jenkins-promise-template.yaml > ./jenkins-promise.yaml
+./internal/scripts/inject-wcr
 ```
 
-This created your finished Promise definition, `jenkins-promise.yaml`.
+This created your finished Promise definition, `promise.yaml`.
 
 ### Install your Promise {#install-promise}
 
@@ -462,19 +433,20 @@ From your Promise directory, you can now install the Promise in Kratix.
 At this point, your Promise directory structure should look like:
 
 ```
-📂 jenkins-promise
+📂 promise
 ├── 📂 request-pipeline-image
-│   ├── 📂  input
+│   ├── 📂  test-input
 │   │   └── object.yaml
-│   ├── 📂  output
+│   ├── 📂  test-output
 │   │   └── jenkins_instance.yaml
 │   ├── Dockerfile
-│   ├── execute-pipeline.sh
+│   ├── execute-pipeline
 │   └── jenkins-instance.yaml
 ├── 📂 resources
 │   ├── jenkins.io_jenkins.yaml
 │   └── all-in-one-v1alpha2.yaml
-└── jenkins-promise-template.yaml
+└── promise.yaml
+└── resource-request.yaml
 ```
 <br />
 
@@ -494,10 +466,10 @@ If that is not the case, please go back to [Prepare your environment](#prepare-y
 
 
 
-From the `jenkins-promise` directory, run:
+From the `promise` directory, run:
 
 ```
-kubectl apply --context $PLATFORM --filename jenkins-promise.yaml
+kubectl apply --context $PLATFORM --filename promise.yaml
 ```
 
 <p>Verify the Promise installed<br />
@@ -531,13 +503,13 @@ jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
 
 ### Create and submit a Kratix Resource Request {#create-resource-request}
 
-You can now request instances of Jenkins. Create a file in the `jenkins-promise` directory called `jenkins-resource-request.yaml` with the following content:
+You can now request instances of Jenkins. Create a file in the `promise` directory called `resource-request.yaml` with the following content:
 
-```yaml jxs title="jenkins-promise/jenkins-resource-request.yaml"
+```yaml jxs title="resource-request.yaml"
 apiVersion: example.promise.syntasso.io/v1
 kind: jenkins
 metadata:
-  name: my-jenkins-promise-request
+  name: my-promise-request
 spec:
   name: my-amazing-jenkins
 ```
@@ -545,7 +517,7 @@ spec:
 You can now send the Resource Request to Kratix:
 
 ```bash
-kubectl apply --context $PLATFORM --filename jenkins-resource-request.yaml
+kubectl apply --context $PLATFORM --filename resource-request.yaml
 ```
 
 Applying the Kratix Promise will trigger your pipeline steps which in turn requests an instance of Jenkins from the operator. While the pipeline can run quite quickly, Jenkins requires quite a few resources to be installed including a deployment and a runner which means the full install may take a few minutes.
@@ -558,7 +530,7 @@ kubectl --context $PLATFORM get pods
 This should result in something similar to
 ```console
 NAME                                             READY   STATUS      RESTARTS   AGE
-request-pipeline-jenkins-promise-default-9d40b   0/1     Completed   0          1m
+request-pipeline-promise-default-9d40b   0/1     Completed   0          1m
 ```
 <br />
 
@@ -566,7 +538,7 @@ For more details, you can view the pipeline logs with
 ```bash
 kubectl logs \
   --context $PLATFORM \
-  --selector kratix-promise-id=jenkins-promise-default \
+  --selector kratix-promise-id=promise-default \
   --container xaas-request-pipeline-stage-1
 ```
 
@@ -632,7 +604,6 @@ The contract with each pipeline container is simple and straightforward:
 You have now authored your first promise. Congratulations 🎉
 
 To recap the steps we took:
-1. ✅&nbsp;&nbsp;Generated a Kratix Promise template
 1. ✅&nbsp;&nbsp;`xaasCrd`: Defined your Promise API with a X as-a-Service Custom Resource Definition
 1. ✅&nbsp;&nbsp;Created your Promise instance base manifest
 1. ✅&nbsp;&nbsp;`xaasRequestPipeline`: Built a simple request pipeline
@@ -647,7 +618,7 @@ To recap the steps we took:
 To clean up your environment first delete the Resource Requests for the Jenkins instance
 
 ```bash
-kubectl --context $PLATFORM delete --filename jenkins-resource-request.yaml
+kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
 Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
@@ -657,7 +628,7 @@ kubectl --context $WORKER get pods
 
 Now the Resource Requests have been deleted you can delete the Promises
 ```bash
-kubectl --context $PLATFORM delete --filename jenkins-promise.yaml
+kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
 Verify the Worker Cluster Resources are deleted from the Worker Cluster
