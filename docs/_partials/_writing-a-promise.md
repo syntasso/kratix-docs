@@ -9,11 +9,14 @@ import TabItem from '@theme/TabItem';
 
 ## What's inside a Kratix Promise?
 
-You've [installed Kratix and three sample Promises](multiple-promises). Now you'll create a Promise from scratch.
+You've [installed Kratix and three sample Promises](multiple-promises). Now
+you'll create a Promise from scratch.
 
-From [installing a Promise](installing-a-promise), a Kratix Promise is a YAML document that defines a contract between the platform and its users. It is what allows platforms to be built incrementally.
+From [installing a Promise](installing-a-promise), a Kratix Promise is a YAML
+document that defines a contract between the platform and its users. It is what
+allows platforms to be built incrementally.
 
-### A Promise consists of three parts:
+It consists of three parts:
 
 <img
   align="right"
@@ -21,35 +24,78 @@ From [installing a Promise](installing-a-promise), a Kratix Promise is a YAML do
   alt="Kratix logo"
 />
 
-1. `xaasCrd`: the CRD that an application developer uses to request an instance of the Kratix Promise from the Platform Cluster.
-1. `workerClusterResources`: a collection of Kubernetes resources that enable the creation of an instance and will be pre-installed in the Worker Clusters.
-1. `xaasRequestPipeline`: an ordered list of docker containers that result in the creation an instance of the promised service on a Worker Cluster.
+1. `xaasCrd`: the CRD that an application developer uses to request an instance
+   of the Kratix Promise from the Platform Cluster.
+1. `workerClusterResources`: a collection of Kubernetes resources that enable
+   the creation of an instance and will be pre-installed in the Worker Clusters.
+1. `xaasRequestPipeline`: an ordered list of container images that result in the
+   creation an instance of the promised service on a Worker Cluster, executing
+   the series of steps required by your business to create that instance.
 
-## Recap: basics of getting a promised instance to your users
+### Platform Team Journey
 
-At a very high level
+Following a Platform-as-a-Product approach to writing a promise, the steps would
+be similar to the ones listed below:
 
-* You talk to users of your platform to find out what they're using and what they need.
-* You write a Kratix Promise for a service that your users and teams need.
-  * In `xaasCrd`, you list what your users can configure in their request.
-  * In `workerClusterResources`, you list what resources are required for Kratix to fulfil the Promise.
-  * In `xaasRequestPipeline`, you list Docker images that will take the user's request and decorate it with configuration that you or the business require.
+* You talk to users of your platform to find out what they're using and what
+  they need.
+* You determine what the API of the Promise should be. You consider questions
+  like: what are the configuration options you want to expose to your users? Do
+  you need to provide low-level options or will the users be happy with
+  higher-level abstractions?
+    * In the Promise, you write the `xaasCrd` with the desired API
+* Next, you determine what are the software dependencies you need to fulfill the
+  Promise. You may find out you need a [Kubernetes
+  Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+  running on the Worker cluster, for example.
+    * In the Promise, you add those dependencies in the `workerClusterResources`
+* Finally, you determine what are the series of steps that needs to be executed
+  for the instance to be created. It may include translating the user's request
+  into the Operator's expected document, injecting custom configuration, sending
+  requests to internal APIs to verify permissions, scanning images for
+  vulnerabilities, etc.
+    * In the Promise, you list those steps in the `xaasRequuestPipeline`
 * You install the Promise on your Platform Cluster, where Kratix is installed.
-* Your user wants an instance of the Promise.
-* Your user submit a Kratix Resource Request that lists what they want and how they want it, and this complies with the `xaasCrd` (more details on this request later).
-* Kratix fires off the first container in the defined in `xaasRequestPipeline` and passes the Resource Request as an input. Subsequent containers will have the previous container's output available as input. For further details on the internal works of multiple pipeline images, check the [Pipelines reference documentation](/docs/main/reference/resource-requests/pipelines)
-* The pipeline outputs valid Kubernetes documents that say what the user wants and what the business wants for that Promise instance.
-* The Worker Cluster has what it needs based on the `workerClusterResources` and is ready to create the instance when the request comes through.
 
-## A Kratix Promise to deliver Jenkins
+### Platform User Journey
 
-Imagine your platform team has received its fourth request from its fourth team for a Jenkins instance. You decide four times is too many times to manually set up Jenkins.
+The Platform User, on the other hand, goes through the following journey:
 
-Now you'll write a Jenkins Promise and install it on your platform so that your four teams get Jenkins&mdash;and you get time back for more valuable work.
+* In the Platform Cluster, the user lists the available Promises and find the
+  service they want.
+* They write a Kratix Resource Request that lists what they want and how they want
+  it.
+    * As determined by the `xaasCrd` defined in the Promise.
+* The user then sends the Resource Request to the Platform.
+
+
+### Fulfiling the Promise
+
+At this point, Kratix will execute the following steps:
+
+* Kratix fires off the first container in the defined in `xaasRequestPipeline`
+  and passes the Resource Request as an input. Subsequent containers will have
+  the previous container's output available as input. For further details on the
+  internal works of multiple pipeline images, check the [Pipelines reference
+  documentation](/docs/main/reference/resource-requests/pipelines).
+* Once all pipeline containers are executed, a series of documents are
+  outputted, encapsulating the user's request into valid Kubernetes objects.
+* Those documents are schedule to an available Worker Cluster, which in turn has
+  the necessary depedencies installed (via the `workerClusterResources`)
+* The instances are created and the user is informed, via the Request's Status,
+  what it needs to get hold of the instance.
+
 
 <hr />
 
 ## Writing your own Kratix Promise
+
+Imagine your platform team has received its fourth request from its fourth team
+for a Jenkins instance. You decide four times is too many times to manually set
+up Jenkins.
+
+Now you'll write a Jenkins Promise and install it on your platform so that your
+four teams get Jenkins&mdash;and you get time back for more valuable work.
 
 This guide will follow the steps below:
 
@@ -108,12 +154,13 @@ cd workshop-promise-template/
 
 ### Define your Promise API {#promise-api}
 
-For the purpose of this tutorial, you will create an API that accepts a single `string`
-parameter called `name`. In real world scenarios, the API can be as simple or as
-complex you design it to be. The Promise API is defined within the `xaasCrd` of
-your Promise YAML.
+For the purpose of this tutorial, you will create an API that accepts a single
+`string` parameter called `name`. In real world scenarios, the API can be as
+simple or as complex you design it to be. The Promise API is defined within the
+`xaasCrd` of your Promise YAML.
 
-Replace the `xaasCrd` field in `promise.yaml` with the complete field details below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
+Replace the `xaasCrd` field in `promise.yaml` with the complete field details
+below. Ensure the indentation is correct (`xaasCrd` is nested under `spec`).
 
 ```yaml jsx title="xaasCrd in promise.yaml"
   xaasCrd:
@@ -149,7 +196,11 @@ You have now defined the as-a-Service API.
 
 #### Create your Promise instance base manifest {#base-instance}
 
-Next build the pipeline to use details from a Kratix Promise _Resource Request_ into the Kubernetes resources required to create a running instance of the Jenkins service. For that, copy the YAML file below and save it in `internal/request-pipeline/jenkins-instance.yaml`.
+Next build the pipeline to use details from a Kratix Promise _Resource Request_
+into the Kubernetes resources required to create a running instance of the
+Jenkins service. For that, copy the YAML file below and save it in
+`internal/request-pipeline/jenkins-instance.yaml`.
+
 <details>
   <summary><strong>CLICK HERE</strong> to expand the contents of the <code>jenkins-instance.yaml</code> file.</summary>
 
@@ -226,8 +277,7 @@ spec:
 Kratix takes no opinion on the tooling used within a pipeline. Kratix will pass
 a set of resources to the pipeline, and expect back a set of resources. What
 happens within the pipeline, and what tooling is used, is a decision left
-entirely to you. For further documentation on how pipelines work, check [Kratix
-Pipelines](/docs/main/reference/resource-requests/pipelines)
+entirely to you.
 
 For this example, you're taking a name from the Kratix Resource Request for an
 instance and passing it to the Jenkins custom resource output.
@@ -236,7 +286,8 @@ To keep this transformation simple, you'll use a combination of `sed` and `yq`
 to do the work.
 
 Update the `execute-pipeline` script in the `request-pipeline` directory
-with the contents beow
+with the contents below:
+
 ```bash jsx title="internal/request-pipeline/execute-pipeline"
 #!/bin/sh
 
@@ -251,11 +302,11 @@ find /tmp/transfer -type f -exec sed -i \
   {} \;
 
 cp /tmp/transfer/* /output/
-
 ```
 
-Pipelines also have the capability to write back information to the resource requester
-by writing to the status. See [status documentation for more infoformation.](../main/05-reference/05-resource-requests/04-status.md)
+Pipelines also have the capability to write back information to the resource
+requester by writing to the status. See [status documentation for more
+infoformation.](../main/05-reference/05-resource-requests/04-status.md)
 
 #### Package your pipeline step as a Docker image {#docker-file}
 
@@ -273,9 +324,9 @@ ENTRYPOINT []
 ```
 <br />
 
-Next build your Docker image. First lets give the Docker image a name. If you are
-not using `KinD` you may need to push the image later on, in that case change the name
-to one suitable for your registry, e.g. if you use Dockerhub
+Next build your Docker image. First lets give the Docker image a name. If you
+are not using `KinD` you may need to push the image later on, in that case
+change the name to one suitable for your registry, e.g. if you use Dockerhub
 `my-dockerhub-username/jenkins-request-pipeline:dev`
 
 ```bash
@@ -290,9 +341,9 @@ Then we can build the image
 ### Test your pipeline image {#test-image}
 
 Because the request pipeline is just a Dockerimage, we can easily test that our
-script behaves as desired by testing it locally. We can provide an example `/input` to
-mimic what Kratix would do when it executes the pipeline and assert that the correct
-`/output` is written.
+script behaves as desired by testing it locally. We can provide an example
+`/input` to mimic what Kratix would do when it executes the pipeline and assert
+that the correct `/output` is written.
 
 To test this lets create a sample `/input/object.yaml` Resource Request in the
 `internal/request-pipeline/test-input/` directory with the contents below
@@ -308,18 +359,21 @@ spec:
 
 Run the container and examine the output
 ```bash
-docker run -v ${PWD}/internal/request-pipeline/test-input:/input -v ${PWD}/internal/request-pipeline/test-output:/output $PIPELINE_NAME
+docker run \
+  -v ${PWD}/internal/request-pipeline/test-input:/input \
+  -v ${PWD}/internal/request-pipeline/test-output:/output $PIPELINE_NAME
 ```
 <br />
 
-Verify the contents in the `request-pipeline/test-output` directory match the desired outcome. These
-will be scheduled and deployed by Kratix to a Worker Cluster once the pipeline
-is executed. They need to be valid Kubernetes resources that can be applied to
-any cluster with the Promise's `workerClusterResources` installed (see beneath).
+Verify the contents in the `request-pipeline/test-output` directory match the
+desired outcome. These will be scheduled and deployed by Kratix to a Worker
+Cluster once the pipeline is executed. They need to be valid Kubernetes
+resources that can be applied to any cluster with the Promise's
+`workerClusterResources` installed (see beneath).
 
-Once you are satisfied that your pipeline is producing the expected result,
-you will need to make it available to your Kubernetes cluster. If you are using
-KinD you can load it in by running:
+Once you are satisfied that your pipeline is producing the expected result, you
+will need to make it available to your Kubernetes cluster. If you are using KinD
+you can load it in by running:
 
 ```bash
 ./internal/scripts/pipeline-image load
@@ -336,7 +390,8 @@ KinD you can load it in by running:
 
 <br />
 
-The final step of creating the `xaasRequestPipeline` is to reference your docker image from the `spec.xaasRequestPipeline` field in the `promise.yaml`.
+The final step of creating the `xaasRequestPipeline` is to reference your docker
+image from the `spec.xaasRequestPipeline` field in the `promise.yaml`.
 
 Add the image to the array in `promise.yaml`.
 ```yaml jsx title="promise.yaml"
@@ -354,12 +409,33 @@ spec:
     ...
 ```
 
+:::tip About Pipelines
+
+Although the example here is a simple one, pipelines are one the of most
+powerful features of Kratix.
+
+The pipeline enables platform teams to deliver compelling developer experiences
+on the platform, fully customized to meet both the users' and the organization's
+needs.
+
+Furthermore, pipeline images can have their own development workflow, being
+fully tested and released on their own schedule. A well-designed image can also
+be reused across many Promises, reducing duplication.
+
+:::
+
+<br />
+
 In summary, you have:
+
 - Created a container image containing:
-    - A template file to be injected with per-instance details (`jenkins-instance.yaml`)
-    - A shell script to retrieve the per-instance details from the user's request, and inject them into the template (`execute-pipeline`)
+    - A template file to be injected with per-instance details
+      (`jenkins-instance.yaml`)
+    - A shell script to retrieve the per-instance details from the user's
+      request, and inject them into the template (`execute-pipeline`)
     - A command set to the shell script
-- Created a set of directories(`input`/`output`) and sample user request(`input/object.yaml`)
+- Created a set of directories(`input`/`output`) and sample user
+  request(`input/object.yaml`)
 - Executed the pipeline image locally as a test
 - Pushed the image to the registry
 - Added the image to the Promise definition in the `xaasRequestPipeline` array
@@ -367,9 +443,11 @@ In summary, you have:
 
 ### Define your `workerClusterResources` in your Promise definition {#worker-cluster-resources}
 
-The `workerClusterResources` describes everything required to fulfil the Promise. Kratix applies this content on all registered Worker Clusters.
+The `workerClusterResources` describes everything required to fulfil the
+Promise. Kratix applies this content on all registered Worker Clusters.
 
-For this Promise, the `workerClusterResources` needs to contain the Jenkins CRD and Operator.
+For this Promise, the `workerClusterResources` needs to contain the Jenkins CRD
+and Operator.
 
 Run the following commands to download the resource files
 
@@ -379,11 +457,16 @@ curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/8fee7f2806c
 ```
 <br />
 
-The commands above will download the necessary files in the `internal/resources` directory. You are now ready to inject the Jenkins files into the `promise.yaml`.
+The commands above will download the necessary files in the `internal/resources`
+directory. You are now ready to inject the Jenkins files into the
+`promise.yaml`.
 
-To make this step simpler we have written a _very basic_ tool to grab all YAML documents from all YAML files located in `internal/resources` and inject them into the `workerClusterResources` field in the `promise.yaml`.
+To make this step simpler we have written a _very basic_ tool to grab all YAML
+documents from all YAML files located in `internal/resources` and inject them
+into the `workerClusterResources` field in the `promise.yaml`.
 
-To use this tool, you will need to download the correct binary for your computer from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.1):
+To use this tool, you will need to download the correct binary for your computer
+from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.1):
 
 <Tabs>
   <TabItem value="darwin-amd64" label="Intel Mac" default>
@@ -452,21 +535,23 @@ At this point, your Promise directory structure should look like:
 ```
 <br />
 
-Before installing your promise, verify that Kratix and MinIO are installed and healthy.
+Before installing your promise, verify that Kratix and MinIO are installed and
+healthy.
+
 ```bash
 kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 ```
 
 You should see something similar to
+
 ```console
 NAME                                                  READY   STATUS       RESTARTS   AGE
 kratix-platform-controller-manager-769855f9bb-8srtj   2/2     Running      0          1h
 minio-6f75d9fbcf-5cn7w                                1/1     Running      0          1h
 ```
 
-If that is not the case, please go back to [Prepare your environment](#prepare-your-environment) and follow the instructions.
-
-
+If that is not the case, please go back to [Prepare your
+environment](#prepare-your-environment) and follow the instructions.
 
 From the `promise` directory, run:
 
@@ -474,9 +559,9 @@ From the `promise` directory, run:
 kubectl apply --context $PLATFORM --filename promise.yaml
 ```
 
-<p>Verify the Promise installed<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
-</p>
+<p>Verify the Promise is installed<br /> <sub>(This may take a few minutes so
+<code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd>
+to stop watching)</sub> </p>
 
 ```bash
 kubectl --context $PLATFORM get crds --watch
@@ -489,9 +574,9 @@ jenkins.example.promise.syntasso.io   2021-09-09T11:21:10Z
 ```
 <br />
 
-<p>Verify the Jenkins Operator is running<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
-</p>
+<p>Verify the Jenkins Operator is running<br /> <sub>(This may take a few
+minutes so <code>--watch</code> will watch the command. Press
+<kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub> </p>
 
 ```bash
 kubectl --context $WORKER get pods --watch
@@ -505,7 +590,8 @@ jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
 
 ### Create and submit a Kratix Resource Request {#create-resource-request}
 
-You can now request instances of Jenkins. Create a file in the `promise` directory called `resource-request.yaml` with the following content:
+You can now request instances of Jenkins. Create a file in the `promise`
+directory called `resource-request.yaml` with the following content:
 
 ```yaml jxs title="resource-request.yaml"
 apiVersion: example.promise.syntasso.io/v1
@@ -522,7 +608,10 @@ You can now send the Resource Request to Kratix:
 kubectl apply --context $PLATFORM --filename resource-request.yaml
 ```
 
-Applying the Kratix Promise will trigger your pipeline steps which in turn requests an instance of Jenkins from the operator. While the pipeline can run quite quickly, Jenkins requires quite a few resources to be installed including a deployment and a runner which means the full install may take a few minutes.
+Applying the Kratix Promise will trigger your pipeline steps which in turn
+requests an instance of Jenkins from the operator. While the pipeline can run
+quite quickly, Jenkins requires quite a few resources to be installed including
+a deployment and a runner which means the full install may take a few minutes.
 
 You can see a bit of what is happening by first looking for your pipeline completion
 ```bash
@@ -552,9 +641,10 @@ This should result in something like
 + cp /tmp/transfer/jenkins-instance.yaml /output/
 ```
 
-<p>Then you can watch for the creation of your Jenkins instance by targeting the Worker Cluster:<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
-</p>
+<p>Then you can watch for the creation of your Jenkins instance by targeting the
+Worker Cluster:<br /> <sub>(This may take a few minutes so <code>--watch</code>
+will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop
+watching)</sub> </p>
 
 ```bash
 kubectl --context $WORKER get pods --all-namespaces --watch
@@ -568,7 +658,8 @@ jenkins-my-amazing-jenkins          1/1     Running   0          1m
 ```
 <br />
 
-For verification, access the Jenkins UI in a browser, as in [previous steps](./installing-a-promise#use-your-jenkins-instance).
+For verification, access the Jenkins UI in a browser, as in [previous
+steps](./installing-a-promise#use-your-jenkins-instance).
 
 
 Let's now take a look at what you have done in more details.
@@ -578,19 +669,30 @@ Let's now take a look at what you have done in more details.
 
 #### `xaasCrd`
 
-The `xaasCrd` is your user-facing API for the Promise. It defines the options that users can configure when they request the Promise. The complexity of the `xaasCrd` API is up to you. You can read more about writing Custom Resource Definitions in the [Kubernetes docs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition).
+The `xaasCrd` is your user-facing API for the Promise. It defines the options
+that users can configure when they request the Promise. The complexity of the
+`xaasCrd` API is up to you. You can read more about writing Custom Resource
+Definitions in the [Kubernetes
+docs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition).
 
 #### `workerClusterResources`
 
-The `workerClusterResources` describes everything required to fulfil the Promise. Kratix applies this content on all registered Worker Clusters. For instance with the Jenkins Promise, the `workerClusterResources` contains the Jenkins CRD, the Jenkins Operator, and the resources the Operator requires.
+The `workerClusterResources` describes everything required to fulfil the
+Promise. Kratix applies this content on all registered Worker Clusters. For
+instance with the Jenkins Promise, the `workerClusterResources` contains the
+Jenkins CRD, the Jenkins Operator, and the resources the Operator requires.
 
 #### `xaasRequestPipeline`
 
-The `xaasRequestPipeline` defines a set of jobs to run when Kratix receives a request for an instance of one of its Promises.
+The `xaasRequestPipeline` defines a set of jobs to run when Kratix receives a
+request for an instance of one of its Promises.
 
-The pipeline is an array of Docker images, and those images are executed in order. The pipeline enables you to write Promises with specialised images and combine those images as needed.
+The pipeline is an array of container images, executed in order. The pipeline
+enables you to write Promises with specialised images and combine those images
+as needed.
 
-Each container in the `xaasRequestPipeline` array should output complete, valid Kubernetes resources.
+Each container in the `xaasRequestPipeline` array should output complete, valid
+Kubernetes resources.
 
 The contract with each pipeline container is simple and straightforward:
 * The first container in the list receives the resource document created by the
@@ -598,42 +700,51 @@ The contract with each pipeline container is simple and straightforward:
   above. The document will be always available to the pipeline in
   `/input/object.yaml`.
 * The container's command then executes with the input object and fulfils its
-  responsibilites. 
+  responsibilites.
 * The container writes any resources to be created to `/output/`.
-* The resources in `/output` of the last container in the `xaasRequestPipeline` array will be scheduled and applied to the appropriate Worker Clusters.
+* The resources in `/output` of the last container in the `xaasRequestPipeline`
+  array will be scheduled and applied to the appropriate Worker Clusters.
 
 ## Recap {#summary}
 You have now authored your first promise. Congratulations 🎉
 
 To recap the steps we took:
-1. ✅&nbsp;&nbsp;`xaasCrd`: Defined your Promise API with a X as-a-Service Custom Resource Definition
+1. ✅&nbsp;&nbsp;`xaasCrd`: Defined your Promise API with a X as-a-Service
+   Custom Resource Definition
 1. ✅&nbsp;&nbsp;Created your Promise instance base manifest
 1. ✅&nbsp;&nbsp;`xaasRequestPipeline`: Built a simple request pipeline
 1. ✅&nbsp;&nbsp;Packaged the pipeline as a Docker image
 1. ✅&nbsp;&nbsp;Tested the pipeline Docker image
-1. ✅&nbsp;&nbsp;`workerClusterResources`: Defined what needs to be present on your Worker Clusters to fulfil this Promise
+1. ✅&nbsp;&nbsp;`workerClusterResources`: Defined what needs to be present on
+   your Worker Clusters to fulfil this Promise
 1. ✅&nbsp;&nbsp;Installed your Kratix Promise
 1. ✅&nbsp;&nbsp;Created and submitted a Kratix Resource Request
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
 ## Cleanup environment {#cleanup}
-To clean up your environment first delete the Resource Requests for the Jenkins instance
+
+To clean up your environment first delete the Resource Requests for the Jenkins
+instance
 
 ```bash
 kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
-Verify the resources belonging to the Resource Requests have been deleted in the Worker Cluster
+Verify the resources belonging to the Resource Requests have been deleted in the
+Worker Cluster
+
 ```console
 kubectl --context $WORKER get pods
 ```
 
 Now the Resource Requests have been deleted you can delete the Promises
+
 ```bash
 kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
 Verify the Worker Cluster Resources are deleted from the Worker Cluster
+
 ```console
 kubectl --context $WORKER get pods
 ```
