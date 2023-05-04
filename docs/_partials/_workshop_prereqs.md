@@ -7,3 +7,10 @@ can run the following from inside the Kratix repo to get a fresh environment:
 ```bash
 ./scripts/quick-start.sh --recreate
 ```
+
+Also, make sure to that the following environment variables are set:
+
+```bash
+export PLATFORM="kind-platform"
+export WORKER="kind-worker"
+```

@@ -135,9 +135,18 @@ kubectl apply --filename hack/platform/minio-install.yaml
 ```
 <br />
 
+As we create clusters, some `kubectl` commands will target the Platform cluster,
+while others will target the Worker cluster. To simplify, make sure to set the
+following environment variables
+
+```bash
+export PLATFORM="kind-platform"
+export WORKER="kind-worker"
+```
+
 Verify that the Kratix API is now available.
 ```bash
-kubectl get crds
+kubectl --context $PLATFORM get crds
 ```
 
 You should see something similar to

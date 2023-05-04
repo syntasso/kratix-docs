@@ -9,13 +9,9 @@ so is by running the quick-start script from within the Kratix directory.
 
 Alternatively, you can go back to [Installing Kratix](./installing-kratix) and follow the appropriate guide.
 
-For the context of this guide, we will assume the setup from [Installing
-Kratix](./installing-kratix) and that the following environment variables are set:
-
+Also, make sure to that the following environment variables are set:
 
 ```bash
 export PLATFORM="kind-platform"
 export WORKER="kind-worker"
 ```
-
-If your setup is different, update the commands accordingly.
