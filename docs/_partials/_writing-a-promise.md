@@ -1,4 +1,5 @@
 import PartialCleanupAllPromises from './_cleanup.md';
+import PartialPreRequisites from './_workshop_prereqs.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -129,25 +130,31 @@ This guide will follow the steps below:
 
 ### Prepare your environment {#prepare-your-environment}
 
+<PartialPreRequisites />
+
+
 ### Directory setup {#directory-setup}
 
-To make writing a promise easier we have setup a template repository to start from.
-If you wish to save the work you make to GitHub navigate to the [repository](https://github.com/syntasso/workshop-promise-template)
-and [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)
-the repository and clone it down:
+To quick-start your Promise, we have setup a template repository to start from.
 
-```bash
-git clone https://github.com/<username>/workshop-promise-template
-```
-
-If you don't want to save your changes or want to setup the fork later you can directly
-clone down the repository and make changes locally:
+You can start by
+[forking](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)
+the [template repository](https://github.com/syntasso/workshop-promise-template)
+or by cloning it directly.
 
 ```bash
 git clone https://github.com/syntasso/workshop-promise-template
 ```
 
-Once cloned change into the directory:
+:::tip
+
+If you'd like to save the Promise you will write, consider forking the template
+repository.
+
+:::
+
+Once cloned, change into the directory:
+
 ```bash
 cd workshop-promise-template/
 ```
@@ -324,9 +331,9 @@ ENTRYPOINT []
 ```
 <br />
 
-Next build your Docker image. First lets give the Docker image a name. If you
-are not using `KinD` you may need to push the image later on, in that case
-change the name to one suitable for your registry, e.g. if you use Dockerhub
+Next build your Docker image. First lets give it a name. If you are not using
+`KinD`, you may need to push the image later on, in that case change the name to
+one suitable for your registry, e.g. if you use Dockerhub
 `my-dockerhub-username/jenkins-request-pipeline:dev`
 
 ```bash
@@ -340,10 +347,10 @@ Then we can build the image
 
 ### Test your pipeline image {#test-image}
 
-Because the request pipeline is just a Dockerimage, we can easily test that our
-script behaves as desired by testing it locally. We can provide an example
-`/input` to mimic what Kratix would do when it executes the pipeline and assert
-that the correct `/output` is written.
+Since the Request Pipeline is a series of containers, we can easily test
+individual images in isolation. We can provide an example `/input` to mimic what
+Kratix would do when it executes the pipeline and assert that the correct
+`/output` is written.
 
 To test this lets create a sample `/input/object.yaml` Resource Request in the
 `internal/request-pipeline/test-input/` directory with the contents below
@@ -357,7 +364,7 @@ spec:
   name: my-amazing-jenkins
 ```
 
-Run the container and examine the output
+Run the container, mounting the volumes
 ```bash
 docker run \
   -v ${PWD}/internal/request-pipeline/test-input:/input \
@@ -365,25 +372,28 @@ docker run \
 ```
 <br />
 
-Verify the contents in the `request-pipeline/test-output` directory match the
-desired outcome. These will be scheduled and deployed by Kratix to a Worker
-Cluster once the pipeline is executed. They need to be valid Kubernetes
-resources that can be applied to any cluster with the Promise's
+Verify the contents in the `internal/request-pipeline/test-output` directory
+match the desired outcome. Note how the Jenkins `metadata.name` correspond to
+the name on the Resource Request. This is exactly what we setup our pipeline to
+do!
+
+The documents you see in the directory. will be scheduled and deployed by Kratix
+to a Worker Cluster once the pipeline is executed. They need to be valid
+Kubernetes resources that can be applied to any cluster with the Promise's
 `workerClusterResources` installed (see beneath).
 
 Once you are satisfied that your pipeline is producing the expected result, you
-will need to make it available to your Kubernetes cluster. If you are using KinD
-you can load it in by running:
+will need to make the container image available to your Kubernetes cluster. If
+you are using KinD you can load it in by running:
 
 ```bash
 ./internal/scripts/pipeline-image load
 ```
-
 <details>
   <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
   If you have not created your Kubernetes clusters with KinD, you will need to either:
   <ul>
-    <li>Push the image to a Image repository (like Dockerhub) by running `./internal/scripts/pipeline-image push`</li>
+    <li>Push the image to a Image repository (like Dockerhub) by running <code>./internal/scripts/pipeline-image push</code></li>
     <li>Use the appropriate command to load the image (for example, <code>minikube cache add</code> if you are using minikube)</li>
   </ul>
 </details>
@@ -393,7 +403,8 @@ you can load it in by running:
 The final step of creating the `xaasRequestPipeline` is to reference your docker
 image from the `spec.xaasRequestPipeline` field in the `promise.yaml`.
 
-Add the image to the array in `promise.yaml`.
+Add the image to the array in `promise.yaml`:
+
 ```yaml jsx title="promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
@@ -433,11 +444,8 @@ In summary, you have:
       (`jenkins-instance.yaml`)
     - A shell script to retrieve the per-instance details from the user's
       request, and inject them into the template (`execute-pipeline`)
-    - A command set to the shell script
-- Created a set of directories(`input`/`output`) and sample user
-  request(`input/object.yaml`)
-- Executed the pipeline image locally as a test
-- Pushed the image to the registry
+- Executed the pipeline image locally to validate its output
+- Loaded the image into the Platform Cluster (or pushed it to the registry)
 - Added the image to the Promise definition in the `xaasRequestPipeline` array
 
 
@@ -466,32 +474,32 @@ documents from all YAML files located in `internal/resources` and inject them
 into the `workerClusterResources` field in the `promise.yaml`.
 
 To use this tool, you will need to download the correct binary for your computer
-from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.1):
+from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.2):
 
 <Tabs>
   <TabItem value="darwin-amd64" label="Intel Mac" default>
 
-    curl -sLo worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.1/worker-resource-builder-v0.0.0-1-darwin-amd64
-    chmod +x worker-resource-builder
+    curl -sLo internal/scripts/worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.2/worker-resource-builder-v0.0.2-darwin-amd64
+    chmod +x internal/scripts/worker-resource-builder
 
   </TabItem>
   <TabItem value="darwin-arm64" label="Apple Silicon Mac">
 
 
-    curl -sLo worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.1/worker-resource-builder-v0.0.0-1-darwin-arm64
-    chmod +x worker-resource-builder
+    curl -sLo internal/scripts/worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.2/worker-resource-builder-v0.0.2-darwin-arm64
+    chmod +x internal/scripts/worker-resource-builder
 
   </TabItem>
   <TabItem value="linux-arm64" label="Linux ARM64">
 
-    curl -sLo worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.1/worker-resource-builder-v0.0.0-1-linux-arm64
-    chmod +x worker-resource-builder
+    curl -sLo internal/scripts/worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.2/worker-resource-builder-v0.0.2-linux-arm64
+    chmod +x internal/scripts/worker-resource-builder
 
   </TabItem>
     <TabItem value="linux-amd64" label="Linux AMD64">
 
-    curl -sLo worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.1/worker-resource-builder-v0.0.0-1-linux-amd64
-    chmod +x worker-resource-builder
+    curl -sLo internal/scripts/worker-resource-builder https://github.com/syntasso/kratix/releases/download/v0.0.2/worker-resource-builder-v0.0.2-linux-amd64
+    chmod +x internal/scripts/worker-resource-builder
 
   </TabItem>
 </Tabs>
@@ -505,7 +513,8 @@ Once you have downloaded the correct binary, run:
 ./internal/scripts/inject-wcr
 ```
 
-This created your finished Promise definition, `promise.yaml`.
+The `promise.yaml` file is now updated with the `workerClusterResources` and you
+are ready to install it!
 
 ### Install your Promise {#install-promise}
 
@@ -514,25 +523,29 @@ From your Promise directory, you can now install the Promise in Kratix.
 At this point, your Promise directory structure should look like:
 
 ```
-📂 promise
-├── 📂 request-pipeline
-│   ├── Dockerfile
-│   ├── execute-pipeline
-│   │── jenkins-instance.yaml
-│   ├── 📂  test-input
-│   │   └── object.yaml
-│   ├── 📂  test-output
-│   │   └── jenkins_instance.yaml
-├── 📂 resources
-│   ├── jenkins.io_jenkins.yaml
-│   └── all-in-one-v1alpha2.yaml
-├── 📂 scripts
-│   ├── inject-wcr
-│   └── pipeline-image
-└── promise.yaml
-└── README
+📂
+├── README.md
+├── 📂 internal
+│   ├── README.md
+│   ├── 📂 request-pipeline
+│   │   ├── Dockerfile
+│   │   ├── execute-pipeline
+│   │   ├── jenkins-instance.yaml
+│   │   ├── test-input
+│   │   │   └── object.yaml
+│   │   └── test-output
+│   │       └── jenkins-instance.yaml
+│   ├── 📂 resources
+│   │   ├── all-in-one-v1alpha2.yaml
+│   │   └── jenkins.io_jenkins.yaml
+│   └── 📂 scripts
+│       ├── inject-wcr
+│       ├── pipeline-image
+│       └── worker-resource-builder
+├── promise.yaml
 └── resource-request.yaml
 ```
+
 <br />
 
 Before installing your promise, verify that Kratix and MinIO are installed and
@@ -590,8 +603,8 @@ jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
 
 ### Create and submit a Kratix Resource Request {#create-resource-request}
 
-You can now request instances of Jenkins. Create a file in the `promise`
-directory called `resource-request.yaml` with the following content:
+You can now request instances of Jenkins. Create a file in the root directory
+called `resource-request.yaml` with the following contents:
 
 ```yaml jxs title="resource-request.yaml"
 apiVersion: example.promise.syntasso.io/v1
@@ -629,8 +642,8 @@ For more details, you can view the pipeline logs with
 ```bash
 kubectl logs \
   --context $PLATFORM \
-  --selector kratix-promise-id=promise-default \
-  --container xaas-request-pipeline-stage-1
+  --selector kratix-promise-id=jenkins-default \
+  --container xaas-request-pipeline-stage-0
 ```
 
 This should result in something like
@@ -665,7 +678,7 @@ steps](./installing-a-promise#use-your-jenkins-instance).
 Let's now take a look at what you have done in more details.
 
 
-### Review of a Kratix Promise parts (in detail) {#promise-review}
+### Kratix Promise parts: in details {#promise-review}
 
 #### `xaasCrd`
 

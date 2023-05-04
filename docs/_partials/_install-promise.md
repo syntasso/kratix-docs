@@ -150,14 +150,13 @@ Before you can access Jenkins UI, you must port forward from within the Kubernet
 _**Open a new terminal to request the port forward**_.
 
 ```console
+export WORKER=kind-worker
 kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
 ```
 
 :::
 
-Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials you get from the commands below.
-In production, you want the credentials to be stored in a secure location where it could be accessed by the application team.
-In this example, credentials are stored as unencrypted Kubernetes secrets.
+You can find Jenkins credentials by running:
 
 ```console jsx title="username"
 kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
@@ -167,6 +166,11 @@ kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
 kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
+
+Navigate to [http://localhost:8080](http://localhost:8080) and log in with the
+credentials. In production, you want the credentials to be stored in a secure
+location where it could be accessed by the application team. In this example,
+credentials are stored as unencrypted Kubernetes secrets.
 
 ## Summary
 
@@ -179,7 +183,7 @@ To recap the steps you took:
 
 This is only the beginning of working with Promises. Next you will deploy three different Promises to provide a complete solution for an application team.
 
-## Cleanup environment {#cleanup}
+## Clean up environment {#cleanup}
 To clean up your environment you need to delete the Jenkins Resource Requests and the Jenkins Promise.
 
 To delete the Jenkins Resource Requests:
@@ -223,6 +227,9 @@ and the Jenkins Operator is deleted from the worker cluster (this might take a c
 kubectl --context $WORKER get pods
 ```
 
+Alternatively, you could delete the Promise directly. Kratix will delete all
+instances on Promise deletion by default. For more details, check the [deletion
+reference docs](/docs/main/reference/promises/deleting-a-promise)
 
 ---
 

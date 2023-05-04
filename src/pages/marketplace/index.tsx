@@ -111,7 +111,6 @@ export function Marketplace(): JSX.Element {
   if (!showImages) {
     pipelineMktClass = "hidden"
   }
-  console.log(pipelineMktClass)
 
   return (
     <Layout

@@ -16,6 +16,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 If you just completed the [Installing Kratix](./installing-kratix) step, you can skip the pre-requisites section.
 
 :::
+
 <PartialPreRequisites />
 
 <hr />
