@@ -8,7 +8,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 ## Using Kratix to support your organisation
 
-As [you've seen](./installing-a-promise), Kratix can support Promises for services like Jenkins, Knative, and Postgres.
+As [you've seen](./installing-a-promise), Kratix can support Promises for services like Jenkins, Nginx, and Postgres.
 
 When you think about providing services for things like automation, deployment or data, how often are you able to choose a service (like Postgres) and offer it to your users straight off the shelf?
 
@@ -546,7 +546,7 @@ kind: postgresql
 metadata:
   name: acid-example-postgresql
   labels:
-    costCentre: TBD
+    costCentre: "rnd-10002"
 spec:
   teamId: "acid"
   volume:
@@ -642,7 +642,10 @@ works.platform.kratix.io                 2022-08-09T14:35:55Z
 ```
 <br />
 
-Check that the `workerClusterResources` have been installed.
+<p>Check that the `workerClusterResources` have been installed on the
+worker:<br/>
+<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+</p>
 
 For Postgres, you can see in the Promise file that there are a number of RBAC
 resources, as well as a deployment that installs the Postgres Operator in the

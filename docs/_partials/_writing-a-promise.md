@@ -35,39 +35,34 @@ It consists of three parts:
 
 ### Platform Team Journey
 
-Following a Platform-as-a-Product approach to writing a promise, the steps would
-be similar to the ones listed below:
+Thinking of your platform as-a-Product, steps to write a Promise are:
 
-* You talk to users of your platform to find out what they're using and what
+* Talk to users of your platform to find out what they're using and what
   they need.
-* You determine what the API of the Promise should be. You consider questions
-  like: what are the configuration options you want to expose to your users? Do
-  you need to provide low-level options or will the users be happy with
+* Determine what the API of the Promise should be.
+    * What are the configuration options you want to expose to your users?
+    * Do you need to provide low-level options or will the users be happy with
   higher-level abstractions?
-    * In the Promise, you write the `xaasCrd` with the desired API
-* Next, you determine what are the software dependencies you need to fulfill the
+* In the Promise, write the `xaasCrd` with the desired API.
+* Next, determine what the software dependencies are that you need to fulfill the
   Promise. You may find out you need a [Kubernetes
   Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
   running on the Worker cluster, for example.
-    * In the Promise, you add those dependencies in the `workerClusterResources`
-* Finally, you determine what are the series of steps that needs to be executed
-  for the instance to be created. It may include translating the user's request
-  into the Operator's expected document, injecting custom configuration, sending
-  requests to internal APIs to verify permissions, scanning images for
-  vulnerabilities, etc.
-    * In the Promise, you list those steps in the `xaasRequuestPipeline`
-* You install the Promise on your Platform Cluster, where Kratix is installed.
+* In the Promise, add your dependencies in the `workerClusterResources`.
+* Finally, determine the steps that need to be executed for the instance to be created.
+These may include translating the user's request into the Operator's expected document,
+injecting custom configuration, sending requests to internal APIs to verify permissions,
+scanning images for vulnerabilities, etc.
+* In the Promise, list those steps in the `xaasRequuestPipeline`.
+* Install the Promise on your Platform Cluster, where Kratix is installed.
 
 ### Platform User Journey
 
-The Platform User, on the other hand, goes through the following journey:
+To use the Promise once it is installed on the platform, a platform user will:
 
-* In the Platform Cluster, the user lists the available Promises and find the
-  service they want.
-* They write a Kratix Resource Request that lists what they want and how they want
-  it.
-    * As determined by the `xaasCrd` defined in the Promise.
-* The user then sends the Resource Request to the Platform.
+* List the available Promises in the platform cluster to find what they want.
+* Write a Kratix Resource Request for the service, as defined by the `xaasCrd` in the Promise.
+* Send the Resource Request to the Platform.
 
 
 ### Fulfiling the Promise
@@ -82,9 +77,9 @@ At this point, Kratix will execute the following steps:
 * Once all pipeline containers are executed, a series of documents are
   outputted, encapsulating the user's request into valid Kubernetes objects.
 * Those documents are schedule to an available Worker Cluster, which in turn has
-  the necessary depedencies installed (via the `workerClusterResources`)
-* The instances are created and the user is informed, via the Request's Status,
-  what it needs to get hold of the instance.
+  the necessary dependencies installed (via the `workerClusterResources`)
+* The instances are created, and the user can reference the request's status to
+  access the instances.
 
 
 <hr />
@@ -103,7 +98,7 @@ This guide will follow the steps below:
 
 **Define Promise**
 1. [Prepare your environment](#prepare-your-environment), if required
-1. [Directory setup](#directory-setup)
+1. [Set up your directories](#directory-setup)
 
 **Promise definition: xaasCrd**
 1. [X as-a-Service Custom Resource Definition: define your Promise API](#promise-api)
@@ -382,10 +377,10 @@ match the desired outcome. Note how the Jenkins `metadata.name` correspond to
 the name on the Resource Request. This is exactly what we setup our pipeline to
 do!
 
-The documents you see in the directory. will be scheduled and deployed by Kratix
+The documents you see in the directory will be scheduled and deployed by Kratix
 to a Worker Cluster once the pipeline is executed. They need to be valid
 Kubernetes resources that can be applied to any cluster with the Promise's
-`workerClusterResources` installed (see beneath).
+`workerClusterResources` installed (see below).
 
 Once you are satisfied that your pipeline is producing the expected result, you
 will need to make the container image available to your Kubernetes cluster. If
