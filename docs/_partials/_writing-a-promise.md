@@ -229,25 +229,10 @@ spec:
   jenkinsAPISettings:
     authorizationStrategy: createUser
   master:
-    basePlugins:
-    - name: kubernetes
-      version: "1.31.3"
-    - name: workflow-job
-      version: "1180.v04c4e75dce43"
-    - name: workflow-aggregator
-      version: "2.7"
-    - name: git
-      version: "4.11.0"
-    - name: job-dsl
-      version: "1.79"
-    - name: configuration-as-code
-      version: "1414.v878271fc496f"
-    - name: kubernetes-credentials-provider
-      version: "0.20"
     disableCSRFProtection: false
     containers:
       - name: jenkins-master
-        image: jenkins/jenkins:2.332.2-lts
+        image: jenkins/jenkins:2.396-jdk17
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 12
@@ -276,6 +261,26 @@ spec:
           requests:
             cpu: "1"
             memory: 500Mi
+        env:
+          - name: DEBUG_JENKINS_OPERATOR
+            value: "true"
+          - name: JAVA_OPTS
+            value: -Xmx2048m -XX:MinRAMPercentage=50.0 -XX:MaxRAMPercentage=80.0 -Djenkins.install.runSetupWizard=false -Djava.awt.headless=true
+    basePlugins:
+      - name: kubernetes
+        version: 3802.vb_b_600831fcb_3
+      - name: workflow-job
+        version: 1289.vd1c337fd5354
+      - name: workflow-aggregator
+        version: "2.6"
+      - name: git
+        version: 4.11.3
+      - name: job-dsl
+        version: 1.78.3
+      - name: configuration-as-code
+        version: 1569.vb_72405b_80249
+      - name: kubernetes-credentials-provider
+        version: 1.208.v128ee9800c04
 ```
 </details>
 
@@ -460,8 +465,8 @@ and Operator.
 Run the following commands to download the resource files
 
 ```bash
-curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/fbea1ed790e7a9deb2311e1f565ee93f07d89022/config/crd/bases/jenkins.io_jenkins.yaml --output internal/resources/jenkins.io_jenkins.yaml --silent
-curl https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/8fee7f2806c363a5ceae569a725c17ef82ff2b58/deploy/all-in-one-v1alpha2.yaml --output internal/resources/all-in-one-v1alpha2.yaml --silent
+curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/resources/jenkins.io_jenkins.yaml --output internal/resources/jenkins.io_jenkins.yaml --silent
+curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/resources/all-in-one-v1alpha2.yaml --output internal/resources/all-in-one-v1alpha2.yaml --silent
 ```
 <br />
 
