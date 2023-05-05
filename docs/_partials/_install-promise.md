@@ -116,8 +116,8 @@ kubectl --context $PLATFORM get jenkins.marketplace.kratix.io
 
 The above command will give an output similar to
 ```console
-NAME                AGE
-example             1m
+NAME      STATUS                
+example   Resource requested
 ```
 
 Eventually (it can take a couple of minutes), a new Jenkins instance should spin up on your `worker` cluster. You can verify this by running the following command:
