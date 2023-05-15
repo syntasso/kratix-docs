@@ -43,7 +43,7 @@ The commands below will refer to a `KRATIX_MARKETPLACE_REPO` env variable. You c
 
 * clone the [Kratix Marketplace](https://github.com/syntasso/kratix-marketplace) and set it to the path of your local clone:
     ```bash
-    export KRATIX_MARKETPLACE_REPO=/path/to/kratix
+    export KRATIX_MARKETPLACE_REPO=/path/to/kratix-marketplace
     ```
 * set it to a remote URL:
     ```bash
@@ -116,7 +116,7 @@ kubectl --context $PLATFORM get jenkins.marketplace.kratix.io
 
 The above command will give an output similar to
 ```console
-NAME      STATUS                
+NAME      STATUS
 example   Resource requested
 ```
 
