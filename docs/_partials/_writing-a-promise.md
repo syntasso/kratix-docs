@@ -523,7 +523,7 @@ From your Promise directory, you can now install the Promise in Kratix.
 At this point, your Promise directory structure should look like:
 
 ```
-📂
+📂 workshop-promise-template
 ├── README.md
 ├── 📂 internal
 │   ├── README.md
