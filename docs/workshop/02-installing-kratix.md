@@ -226,8 +226,8 @@ kubectl get buckets.source.toolkit.fluxcd.io \
 You should see something similar to
 ```console
 NAME                        URL   READY   STATUS                                                       AGE
-kratix-workload-crds              True    Fetched revision: 9343bf26ec16db995d7b53ff63c64b7dfb9789c4   1m
-kratix-workload-resources         True    Fetched revision: f2d918e21d4c5cc65791d121f4a3375ad80a3eac   1m
+kratix-workload-crds              True    stored artifact for revision: 9343bf26ec16db995d7b53ff63c64b7dfb9789c4   1m
+kratix-workload-resources         True    stored artifact for revision: f2d918e21d4c5cc65791d121f4a3375ad80a3eac   1m
 ```
 <br />
 
