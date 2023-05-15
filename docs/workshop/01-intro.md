@@ -31,7 +31,7 @@ Learn more about Kratix and install Kratix locally using KinD
 Learn more about Kratix Promises and install a sample Jenkins Promise
 
 1. [Using multiple Kratix Promises](multiple-promises) <br />
-Use Kratix with sample Promises for Knative, Postgres and Jenkins
+Use Kratix with sample Promises for Nginx, Postgres and Jenkins
 
 1. [Writing and installing a Kratix Promise](writing-a-promise/) <br />
 Write a Jenkins Promise and deploy it to Kratix
