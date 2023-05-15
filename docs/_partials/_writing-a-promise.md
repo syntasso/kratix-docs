@@ -370,6 +370,7 @@ spec:
 
 Run the container, mounting the volumes
 ```bash
+chmod 777 ./internal/request-pipeline/test-output
 docker run \
   -v ${PWD}/internal/request-pipeline/test-input:/input \
   -v ${PWD}/internal/request-pipeline/test-output:/output $PIPELINE_NAME
