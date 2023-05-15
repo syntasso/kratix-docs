@@ -1,6 +1,9 @@
+<!-- BEGIN SKIP INSTRUQT -->
 **In this guide, you will**
 1. [learn more about Kratix Promises](#what-is-a-kratix-promise)
 1. [install Jenkins as a Kratix Promise](#install-the-kratix-sample-jenkins-promise)
+
+<!-- END SKIP INSTRUQT -->
 
 ## What is a Kratix Promise?
 
@@ -33,24 +36,31 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 1. [Cleanup environment](#cleanup)
 
 ![Overview](/img/docs/Treasure_Trove-Install_a_Promise.jpeg)
+
 ### Install the Jenkins Promise
 
+<!-- BEGIN SKIP INSTRUQT -->
 
 :::tip
+
+<!-- END SKIP INSTRUQT -->
 
 In this guide, we will be using Promises available on the [Kratix Marketplace](/marketplace).
 The commands below will refer to a `KRATIX_MARKETPLACE_REPO` env variable. You can either:
 
 * clone the [Kratix Marketplace](https://github.com/syntasso/kratix-marketplace) and set it to the path of your local clone:
     ```bash
-    export KRATIX_MARKETPLACE_REPO=/path/to/kratix
+    export KRATIX_MARKETPLACE_REPO=/path/to/kratix-marketplace
     ```
 * set it to a remote URL:
     ```bash
     export KRATIX_MARKETPLACE_REPO="https://raw.githubusercontent.com/syntasso/kratix-marketplace/main"
     ```
+<!-- BEGIN SKIP INSTRUQT -->
+
 :::
 
+<!-- END SKIP INSTRUQT -->
 
 Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
 
@@ -116,7 +126,7 @@ kubectl --context $PLATFORM get jenkins.marketplace.kratix.io
 
 The above command will give an output similar to
 ```console
-NAME      STATUS                
+NAME      STATUS
 example   Resource requested
 ```
 
@@ -142,7 +152,9 @@ jenkins-operator-7886c47f9c-zschr   1/1     Running   0          10m
 
 ### Use your Jenkins instance
 
-Access the Jenkins UI in a browser to ensure the instance is working.
+Access the Jenkins UI in a browser to ensure the instance is up and running.
+
+<!-- BEGIN SKIP INSTRUQT -->
 
 :::note
 Before you can access Jenkins UI, you must port forward from within the Kubernetes cluster to a local port on your computer. Running the `port-forward` command is continuous&mdash;as long as the command is running, the connection stays open.
@@ -156,6 +168,8 @@ kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
 
 :::
 
+<!-- END SKIP INSTRUQT -->
+
 You can find Jenkins credentials by running:
 
 ```console jsx title="username"
@@ -167,10 +181,22 @@ kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
     -o 'jsonpath={.data.password}' | base64 -d
 ```
 
+<p style={{display: "none"}}>
+Click on the Jenkins UI tab and log in with
+the credentials. In production, you want the credentials to be stored in a
+secure location where it could be accessed by the application team. In this
+example, credentials are stored as unencrypted Kubernetes secrets.
+
+<!-- BEGIN SKIP INSTRUQT -->
+
+</p>
+
 Navigate to [http://localhost:8080](http://localhost:8080) and log in with the
 credentials. In production, you want the credentials to be stored in a secure
 location where it could be accessed by the application team. In this example,
 credentials are stored as unencrypted Kubernetes secrets.
+
+<!-- END SKIP INSTRUQT -->
 
 ## Summary
 
@@ -182,6 +208,8 @@ To recap the steps you took:
 1. ✅&nbsp;&nbsp;Tested the instance by logging in to the Jenkins UI
 
 This is only the beginning of working with Promises. Next you will deploy three different Promises to provide a complete solution for an application team.
+
+<!-- BEGIN SKIP INSTRUQT -->
 
 ## Clean up environment {#cleanup}
 To clean up your environment you need to delete the Jenkins Resource Requests and the Jenkins Promise.
@@ -230,6 +258,8 @@ kubectl --context $WORKER get pods
 Alternatively, you could delete the Promise directly. Kratix will delete all
 instances on Promise deletion by default. For more details, check the [deletion
 reference docs](/docs/main/reference/promises/deleting-a-promise)
+
+<!-- END SKIP INSTRUQT -->
 
 ---
 

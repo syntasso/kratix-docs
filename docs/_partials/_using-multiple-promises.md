@@ -1,4 +1,8 @@
+<!-- BEGIN SKIP INSTRUQT -->
+
 import PartialCleanupAllPromises from './_cleanup.md';
+
+<!-- END SKIP INSTRUQT -->
 
 **In this tutorial, you will**
 1. [learn more about the power of Promises](#power-of-promises)
@@ -193,6 +197,7 @@ kubectl --context $WORKER get secret jenkins-operator-credentials-dev-example \
 ```
 <br />
 
+<!-- BEGIN SKIP INSTRUQT -->
 Port forward for browser access to the Jenkins UI:
 
 ```console
@@ -202,8 +207,17 @@ kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
 
 Navigate to [http://localhost:8080](http://localhost:8080) and log in with the credentials.
 
+<p style={{display: "none"}}>
 
-In the Jenkins UI, create a new pipeline using this
+<!-- END SKIP INSTRUQT -->
+Navigate to the Jenkins UI tab and log in with the credentials.
+
+<!-- BEGIN SKIP INSTRUQT -->
+</p>
+
+<!-- END SKIP INSTRUQT -->
+
+On Jenkins, create a new pipeline using this
 [Jenkinsfile](https://raw.githubusercontent.com/syntasso/sample-golang-app/main/ci/Jenkinsfile)
 and execute it.
 
@@ -257,8 +271,9 @@ todo-58896c88d5-5txdl                  1/1     Running   0          2m55s
 
 ### Test the deployed application {#test-app}
 
+<!-- BEGIN SKIP INSTRUQT -->
 Now test the app. Navigate to [http://todo.local.gd:31338](http://todo.local.gd:31338)
-to see the app running. 
+to see the app running.
 
 <details>
   <summary> If you have setup your clusters not using KinD then <strong>Click here </strong>
@@ -278,8 +293,15 @@ to see the app running.
 
 </details>
 
+<p style={{display: "none"}}>
 
+<!-- END SKIP INSTRUQT -->
+Now test the app. Navigate to "Todo App" tab to see the app running.
 
+<!-- BEGIN SKIP INSTRUQT -->
+</p>
+
+<!-- END SKIP INSTRUQT -->
 ## Summary {#summary}
 Your platform has pieced together three different Promises to provide a complete
 solution for an application team to deploy a new service to dev using your suggested
@@ -294,6 +316,8 @@ To recap the steps we took:
 This is only the beginning of working with Promises. Next you will learn how to
 write and update Promises, and in the final thoughts we will showcase the composability
 of Promises to further optimise this workflow from three requests down to one.
+
+<!-- BEGIN SKIP INSTRUQT -->
 
 ## Cleanup environment {#cleanup}
 To clean up your environment first delete the Resource Requests for the Jenkins, Nginx and Postgres Promises.
@@ -322,6 +346,8 @@ Finally, remove the app artefacts
 kubectl --context $WORKER delete -f https://raw.githubusercontent.com/syntasso/sample-golang-app/workshop-refactor/k8s/service-account.yaml
 kubectl --context $WORKER delete -f https://raw.githubusercontent.com/syntasso/sample-golang-app/workshop-refactor/k8s/app.yaml
 ```
+
+<!-- END SKIP INSTRUQT -->
 
 <br />
 

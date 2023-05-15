@@ -1,8 +1,11 @@
+<!-- BEGIN SKIP INSTRUQT -->
 import PartialCleanupAllPromises from './_cleanup.md';
 import PartialPreRequisites from './_workshop_prereqs.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+<!-- END SKIP INSTRUQT -->
 
 **In this tutorial, you will**
 1. [learn more about what's inside a Kratix Promise](#whats-inside-a-kratix-promise)
@@ -19,11 +22,14 @@ allows platforms to be built incrementally.
 
 It consists of three parts:
 
+<!-- BEGIN SKIP INSTRUQT -->
 <img
   align="right"
   src={useBaseUrl('/img/docs/base-promise-structure.png')}
   alt="Kratix logo"
 />
+
+<!-- END SKIP INSTRUQT -->
 
 1. `xaasCrd`: the CRD that an application developer uses to request an instance
    of the Kratix Promise from the Platform Cluster.
@@ -96,8 +102,10 @@ four teams get Jenkins&mdash;and you get time back for more valuable work.
 This guide will follow the steps below:
 
 
+<!-- BEGIN SKIP INSTRUQT -->
 **Define Promise**
 1. [Prepare your environment](#prepare-your-environment), if required
+<!-- END SKIP INSTRUQT -->
 1. [Set up your directories](#directory-setup)
 
 **Promise definition: xaasCrd**
@@ -123,10 +131,12 @@ This guide will follow the steps below:
 <hr />
 
 
+<!-- BEGIN SKIP INSTRUQT -->
 ### Prepare your environment {#prepare-your-environment}
 
 <PartialPreRequisites />
 
+<!-- END SKIP INSTRUQT -->
 
 ### Directory setup {#directory-setup}
 
@@ -141,12 +151,14 @@ or by cloning it directly.
 git clone https://github.com/syntasso/workshop-promise-template
 ```
 
+<!-- BEGIN SKIP INSTRUQT -->
 :::tip
 
 If you'd like to save the Promise you will write, consider forking the template
 repository.
 
 :::
+<!-- END SKIP INSTRUQT -->
 
 Once cloned, change into the directory:
 
@@ -420,6 +432,8 @@ spec:
     ...
 ```
 
+<!-- BEGIN SKIP INSTRUQT -->
+
 :::tip About Pipelines
 
 Although the example here is a simple one, pipelines are one the of most
@@ -434,6 +448,8 @@ fully tested and released on their own schedule. A well-designed image can also
 be reused across many Promises, reducing duplication.
 
 :::
+
+<!-- END SKIP INSTRUQT -->
 
 <br />
 
@@ -734,6 +750,7 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Created and submitted a Kratix Resource Request
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
+<!-- BEGIN SKIP INSTRUQT -->
 ## Cleanup environment {#cleanup}
 
 To clean up your environment first delete the Resource Requests for the Jenkins
@@ -761,6 +778,8 @@ Verify the Worker Cluster Resources are deleted from the Worker Cluster
 ```console
 kubectl --context $WORKER get pods
 ```
+
+<!-- END SKIP INSTRUQT -->
 
 ---
 
