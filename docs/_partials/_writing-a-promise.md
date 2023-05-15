@@ -213,6 +213,10 @@ metadata:
   name: <tbr-name>
   namespace: default
 spec:
+  service:
+    type: NodePort
+    port: 8080
+    nodePort: 30269
   configurationAsCode:
     configurations: []
     secret:
