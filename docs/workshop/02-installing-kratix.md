@@ -129,7 +129,7 @@ Now that you know what the installation looks like, bring Kratix to life.
 
 Create your `platform` cluster and install Kratix and MinIO.
 ```bash
-kind create cluster --name platform --image kindest/node:v1.24.0
+kind create cluster --name platform --image kindest/node:v1.24.0 --config hack/platform/kind-platform-config.yaml
 kubectl apply --filename distribution/kratix.yaml
 kubectl apply --filename hack/platform/minio-install.yaml
 ```
