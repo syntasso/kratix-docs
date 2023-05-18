@@ -53,7 +53,7 @@ Thinking of your platform as-a-Product, steps to write a Promise are:
 These may include translating the user's request into the Operator's expected document,
 injecting custom configuration, sending requests to internal APIs to verify permissions,
 scanning images for vulnerabilities, etc.
-* In the Promise, list those steps in the `xaasRequuestPipeline`.
+* In the Promise, list those steps in the `xaasRequestPipeline`.
 * Install the Promise on your Platform Cluster, where Kratix is installed.
 
 ### Platform User Journey
