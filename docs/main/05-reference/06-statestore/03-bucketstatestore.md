@@ -50,12 +50,16 @@ data:
   secretAccessKey: # base64 encoded secretAccessKey
 ```
 
+### S3-Compatible Providers
+Any S3-Compatible provider will work with Kratix. See the documentation on how
+to use some of the available providers below:
+- [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
+- [GCS S3-compatible storage](https://cloud.google.com/storage/docs/interoperability)
+- [MinIO](https://min.io/docs/minio/linux/reference/minio-mc/mc-mb.html)
 
-## Best Practises
-Its recommended that the bucket configured is only used by Kratix and doesn't contain
-any other objects. Its also recommended that credentials provided only have read/write
-access to the specific bucket.
+For other providers see there documentation for setting up the bucket and credentials.
 
+---
 
 Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
