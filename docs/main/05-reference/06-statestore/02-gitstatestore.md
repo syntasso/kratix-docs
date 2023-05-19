@@ -5,7 +5,7 @@ sidebar_label: GitStateStore
 id: gitstatestore
 ---
 
-## GitStateStore
+# GitStateStore
 
 Kratix supports writing to Git repositories. See below for the API documentation:
 ```yaml

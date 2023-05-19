@@ -5,7 +5,7 @@ sidebar_label: BucketStateStore
 id: bucketstatestore
 ---
 
-## BucketStateStore
+# BucketStateStore
 
 Kratix supports writing to S3-Compatible buckets. See below for the API documentation:
 
@@ -33,7 +33,28 @@ spec:
     # The Top-level path in the Bucket repository to write to: optional
 ```
 
-### Auth
+## Auth
+
+Kratix uses the credentials contained in the `secretRef` to authenticate with the
+S3-Compatible Bucket. Kratix currently supports `accessKeyID` and `secretAccessKey` to authenticate.
+The secret should be in the following format:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: # name
+  namespace: # namespace
+type: Opaque
+data:
+  accessKeyID: # base64 encoded accessKeyID
+  secretAccessKey: # base64 encoded secretAccessKey
+```
+
+
+## Best Practises
+Its recommended that the bucket configured is only used by Kratix and doesn't contain
+any other objects. Its also recommended that credentials provided only have read/write
+access to the specific bucket.
 
 
 Require a different method of authentication? Get in touch with us at
