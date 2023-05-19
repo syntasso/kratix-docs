@@ -34,8 +34,8 @@ For example, with KinD, you can create two clusters and set the variables with:
 
 ```bash
 # Create the clusters
-kind create cluster --name platform
-kind create cluster --name worker
+kind create cluster --name platform --image kindest/node:v1.24.7
+kind create cluster --name worker --image kindest/node:v1.24.7
 
 # Set the environment variables
 export PLATFORM="kind-platform"
@@ -59,8 +59,7 @@ repository for the GitOps toolkit.
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/gitea-install.yaml
 
 # Install Kratix
-curl -s https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml | sed "s/repository-type=s3/repository-type=git/g" |
-   kubectl apply --filename -
+curl -s https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
 ```
 
 ### Set up your Worker Cluster {#worker-setup}

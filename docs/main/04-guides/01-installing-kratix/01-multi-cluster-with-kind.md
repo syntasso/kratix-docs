@@ -28,10 +28,10 @@ You can also run `./scripts/quick-start.sh` from the root of the [Kratix reposit
 ### Set up a Platform Cluster <a href="#platform-setup" id="platform-setup"></a>
 
 Create your `platform` cluster and install Kratix and MinIO. MinIO will be the
-repository for the GitOps toolkit. You can try Kratix with Git by following
-[this guide](/docs/main/guides/installing-kratix/running-with-git). For production
-installations, MinIO can be replaced by Git or any other S3-compatible storage,
-depending on your preference.
+[StateStore](/docs/main/05-reference/06-statestore/01-statestore.md) for Kratix to write to
+and we will configure the GitOps toolkit to pull down from MinIO on the worker cluster.
+You can try Kratix with [Git as the StateStore](/docs/main/05-reference/06-statestore/02-gitstatestore.md)
+by following [this guide](/docs/main/guides/installing-kratix/running-with-git).
 
 ```bash
 kind create cluster --name platform
@@ -56,10 +56,11 @@ kind create cluster --name worker
 # set WORKER to point to the Worker cluster context
 export WORKER="kind-worker"
 
-# Register the Worker Cluster with the Platform Cluster
+# Register MinIO as a StateStore and register the worker Cluster with the Platform Cluster
+kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 
-# Install flux on the worker
+# Install flux on the worker and configure it to pull down from MinIO
 kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
 kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml
 ```

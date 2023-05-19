@@ -51,6 +51,7 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/
 To register the minikube cluster as a Kratix Worker Cluster, run the command below:
 
 ```bash
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 ```
 
