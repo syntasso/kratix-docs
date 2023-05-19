@@ -152,7 +152,9 @@ kubectl --context $PLATFORM get crds
 You should see something similar to
 ```console
 NAME                                   CREATED AT
+bucketstatestores.platform.kratix.io   2022-05-10T12:00:00Z
 clusters.platform.kratix.io            2022-05-10T12:00:00Z
+gitstatestores.platform.kratix.io      2022-05-10T12:00:00Z
 promises.platform.kratix.io            2022-05-10T12:00:00Z
 workplacements.platform.kratix.io      2022-05-10T12:00:00Z
 works.platform.kratix.io               2022-05-10T12:00:00Z
@@ -197,15 +199,22 @@ Create your Kratix `worker` cluster and install [Flux](https://fluxcd.io/). This
 ```bash
 kind create cluster --name worker --image kindest/node:v1.24.0 --config hack/worker/kind-worker-config.yaml
 
+# Register MinIO as a BucketStateStore
+kubectl apply \
+    --filename config/samples/platform_v1alpha1_bucketstatestore.yaml \
+    --context $PLATFORM
+
 # Register the Worker Cluster with the Platform Cluster
 kubectl apply \
-    --filename config/samples/platform_v1alpha1_worker_cluster.yaml\
+    --filename config/samples/platform_v1alpha1_worker_cluster.yaml \
     --context $PLATFORM
 
 # Install Flux on the Worker Cluster
 kubectl apply \
     --filename hack/worker/gitops-tk-install.yaml \
     --context $WORKER
+
+# Configure Flux on the worker to pull down from MinIO
 kubectl apply \
     --filename hack/worker/gitops-tk-resources.yaml \
     --context $WORKER
