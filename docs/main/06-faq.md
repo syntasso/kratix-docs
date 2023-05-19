@@ -54,10 +54,6 @@ Core Kratix functionality is evolving to utilise the best of the Kubernetes ecos
 Good news! We've created a page in our docs around how Kratix [schedules its
 workloads](./reference/multicluster-management).
 
-### How do I use GitHub/GitLab/S3/other instead of MinIO in my GitOps pipeline?
-
-Kratix currently supports MinIO and [Gitea](./guides/installing-kratix/running-with-git). Soon this will be swappable with other Git and storage providers.
-
 ### How does Kratix compare to other tools?
 
 [See here](./value-of-kratix#comparison-with-other-tools)
