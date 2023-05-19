@@ -10,10 +10,10 @@ cluster will be automatically installed in the clusters joining the platform.
 ## Pre-requisites
 
 In this section, we will register a new Kubernetes Cluster with Kratix, and
-verify its multi-cluster capabilities. Before continuing, you will a Platform
-Kubernetes cluster running Kratix, and a second Worker Kubernetes cluster
-registered with the Platform. You also need at least one Promise installed on
-the Platform. 
+verify its multi-cluster capabilities. Before continuing, you will need a Platform
+Kubernetes cluster running Kratix, and a second worker Kubernetes cluster to
+register with the Platform. You also need at least one Promise installed on
+the Platform.
 
 For the context of this guide, we will assume the setup from [Installing Kratix
 with KinD](./installing-kratix) and that the following environment variables are
@@ -66,7 +66,7 @@ directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --context ${WORKER_2} --bucket-path worker-cluster-2
+./scripts/install-gitops --context ${WORKER_2} --path worker-cluster-2
 ```
 
 ## Registering the Cluster
@@ -82,10 +82,13 @@ metadata:
   labels:
     environment: dev
 spec:
-  id: worker-cluster-2-id
-  bucketPath: worker-cluster-2
+  stateStoreRef:
+    name: default
+    namespace: default
+    kind: BucketStateStore
 ```
 
+The cluster will using the pre-existing MinIO [StateStore](/docs/main/05-reference/06-statestore/01-statestore.md).
 Apply the Cluster document to the Platform cluster:
 
 ```bash

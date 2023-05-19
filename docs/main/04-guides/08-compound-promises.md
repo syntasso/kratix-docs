@@ -37,11 +37,14 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Cluster
 metadata:
   name: platform-cluster
+  namespace: default
   labels:
     environment: platform
 spec:
-  id: platform-cluster
-  bucketPath: platform
+  stateStoreRef:
+    name: default
+    namespace: default
+    kind: BucketStateStore
 ```
 
 Register the Cluster:
@@ -58,7 +61,7 @@ script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --context $PLATFORM --bucket-path platform
+./scripts/install-gitops --context $PLATFORM --path platform-cluster
 ```
 
 ## Install a Compound Promise
