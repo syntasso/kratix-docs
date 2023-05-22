@@ -56,7 +56,7 @@ You will now add a new Cluster to the Platform Cluster and watch Kratix reconcil
 system. For that, you need to first create the new Kubernetes cluster:
 
 ```bash
-kind create cluster --name worker-cluster-2
+kind create cluster --image kindest/node:v1.24.0 --name worker-cluster-2
 export WORKER_2="kind-worker-cluster-2"
 ```
 
