@@ -36,7 +36,10 @@ When a new Cluster is registered in the Platform cluster (i.e., a new Cluster Re
 created), Kratix will write to two paths in the [StateStore](../06-statestore/01-statestore.md):
 one for `resources`, one for `crds`. The path within the `StateStore` follows the following pattern:
 ```
-<statestore.Spec.Path>/<cluster.Spec.Path>/<cluster.Metadata.Namespace>/<cluster.Metadata.Name>/
+statestore.Spec.Path/
+    cluster.Spec.Path/
+        cluster.Metadata.Namespace/
+            cluster.Metadata.Name/
 ```
 
 For example:
@@ -75,5 +78,6 @@ The above configuration would result in the following paths being written to:
  - `clusters/dev/default/worker-cluster-1/resources/`
 
 <br/>
+
 The paths should be used when setting up the worker clusters to pull
 down from the `StateStore`.
