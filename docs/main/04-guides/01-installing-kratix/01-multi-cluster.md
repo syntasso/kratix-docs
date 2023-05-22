@@ -49,7 +49,7 @@ kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/s
 ```
 
 ## Set up StateStore
-Kratix uses GitOps to provision resources on the worker clusters. You can configure Kraix
+Kratix uses GitOps to provision resources on the worker clusters. You can configure Kratix
 with multiple different GitOps repositories by creating [StateStores](/docs/main/05-reference/06-statestore/01-statestore.md).
 Kratix supports [BucketStateStore](/docs/main/05-reference/06-statestore/03-bucketstatestore.md)
 and [GitStateStore](/docs/main/05-reference/06-statestore/02-gitstatestore.md).
