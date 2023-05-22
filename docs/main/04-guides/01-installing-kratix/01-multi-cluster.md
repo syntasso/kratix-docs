@@ -1,9 +1,12 @@
 ---
 description: Run Kratix
 slug: /main/guides/installing-kratix
+title: Multi Cluster
 ---
-
-# Multi-cluster
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
 
 ## System setup
 
@@ -28,9 +31,9 @@ instance instead.
 
 :::
 
-## Set up Platform Cluster <a href="#platform-setup" id="platform-setup"></a>
+## Set up Platform Cluster {#platform-setup}
 
-If you are not using a pre-existing cluster, create your platform cluster locally using kinD:
+If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
 ```bash
 kind create cluster --name platform
 # set PLATFORM to point to the Platform cluster context
@@ -45,47 +48,50 @@ on the platform cluster.
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
 ```
 
-Kratix is now installed on the platform cluster.
-
 ## Set up StateStore
 Kratix uses GitOps to provision resources on the worker clusters. You can configure Kraix
 with multiple different GitOps repositories by creating [StateStores](/docs/main/05-reference/06-statestore/01-statestore.md).
 Kratix supports [BucketStateStore](/docs/main/05-reference/06-statestore/03-bucketstatestore.md)
 and [GitStateStore](/docs/main/05-reference/06-statestore/02-gitstatestore.md).
 
-If your are using local KinD clusters you can install Gitea or MinIO as an in-cluster
-Git/BucketStateStore
+If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster StateStore
 
-<details>
-  <summary> KinD MinIO </summary>
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="minio" label="Bucket (on KinD)">
 
-```bash
-# Install MinIO and register it as a BucketStateStore
-kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
-kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
-```
-</details>
+  ```bash
+  # Install MinIO and register it as a BucketStateStore
+  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
+  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
+  ```
+
+  </TabItem>
+
+  <TabItem value="gitea" label="Git (on KinD)">
+
+  ```bash
+  # Install Gitea and register it as a GitStateStore
+  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/gitea-install.yaml
+  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_gitstatestore.yaml
+  ```
+
+  </TabItem>
+
+  <TabItem value="custom" label="Custom">
+
+  If your aren't using KinD clusters you will need to create your own [StateStore](/docs/main/05-reference/06-statestore/01-statestore.md)
+  that is accessible by the platform and worker cluster. Follow the [docs for creating StateStores](/docs/main/05-reference/06-statestore/01-statestore.md).
+
+  </TabItem>
+
+</Tabs>
 
 
-<details>
-  <summary> KinD Gitea </summary>
 
-```bash
-# Install Gitea and register it as a GitStateStore
-kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/gitea-install.yaml
-kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_gitstatestore.yaml
-```
-</details>
-
-
-If your aren't using KinD clusters you will need to create your own [StateStore](/docs/main/05-reference/06-statestore/01-statestore.md)
-that is accessible by the platform and worker cluster. Follow the [docs for creating StateStores](/docs/main/05-reference/06-statestore/01-statestore.md).
-
-
-## Set up your Worker Cluster <a href="#worker-setup" id="worker-setup"></a>
+## Set up your Worker Cluster {#worker-setup}
 
 ### Create worker cluster
-If you are not using a pre-existing cluster, create your platform cluster locally using kinD:
+If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
 ```bash
 kind create cluster --name worker
 
@@ -106,75 +112,75 @@ kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syn
 
 
 ### Configure Flux
-Now that Flux is installed we need to configure it to pull down from the Kratix StateStore.
-Follow the steps below that match the StateStore you created previously
+Now that Flux is installed, we need to configure it to pull down from the Kratix StateStore.
+Follow the steps below that match the StateStore you created previously:
 
-<details>
-  <summary> KinD MinIO </summary>
+<Tabs className="boxedTabs" groupId="stateStore">
+<TabItem value="minio" label="Bucket (on KinD)">
 
-```
+```bash
 # Configure Flux to pull down from MinIO
 kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml
 ```
 
-</details>
+</TabItem>
 
-<details>
-  <summary> KinD Gitea </summary>
+<TabItem value="gitea" label="Git (on KinD)">
 
-```
+```bash
 # Configure Flux to pull down from Gitea
 kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-git.yaml
 ```
-</details>
 
-<details>
-  <summary> Custom StateStore </summary>
+</TabItem>
 
-You will need to manual configure the Flux resources to use the Git/Bucket created.
+<TabItem value="custom" label="Custom">
 
-- Bucket: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml)
-  to use the endpoint, bucket and credentials for your Bucket.
-- Git: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-git.yaml)
-  to use the url, branch, and credentials for your Git Repository.
+  You will need to manual configure the Flux resources to use the Git/Bucket created.
 
-</details>
+  - Bucket: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml)
+    to use the endpoint, bucket and credentials for your Bucket.
+  - Git: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-git.yaml)
+    to use the url, branch, and credentials for your Git Repository.
+
+</TabItem>
+</Tabs>
 
 ### Register cluster with Kratix
 
-Now Kratix is setup to write to the StateStore, and the worker cluster is configured
-to pull down from the StateStore you can register the cluster with Kratix.
-Follow the steps below that match the StateStore you created previously
+The final step is to tell Kratix that the cluster is ready to receive workloads.
+Follow the steps below that match the StateStore you created previously:
 
-<details>
-  <summary> KinD MinIO </summary>
+<Tabs className="boxedTabs" groupId="stateStore">
+<TabItem value="minio" label="Bucket (on KinD)">
 
-```
+```bash
 # Configure Flux to pull down from MinIO
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 ```
 
-</details>
+</TabItem>
 
-<details>
-  <summary> KinD Gitea </summary>
+<TabItem value="gitea" label="Git (on KinD)">
 
-```
+```bash
 # Install flux on the worker and configure it to pull down from MinIO
 curl https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml | \
   sed "s_BucketStateStore_GitStateStore_g" | \
   kubectl apply --context $PLATFORM --filename -
 ```
-</details>
 
-<details>
-  <summary> Custom StateStore </summary>
-You will need to manual configure the Cluster resources to use created StateStore. 
+</TabItem>
+
+<TabItem value="custom" label="Custom">
+
+You will need to manual configure the Cluster resources to use created StateStore.
 Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml),
 replacing the `spec.StateStoreRef.name`, `spec.StateStoreRef.namespace` and `spec.StateStoreRef.kind`
 to match the previously created StateStore
-</details>
 
+</TabItem>
+</Tabs>
 
 Flux will eventually reconcile the clusters state, making the `worker` cluster ready
 to receive workloads. You can verify its readiness by observing the `kratix-worker-system`
@@ -188,4 +194,4 @@ kratix-worker-system   Active   1m
 ...
 ```
 
-🎉   **Congratulations!** Kratix is now ready to receive workloads. Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service workload.
+🎉   **Congratulations!** Kratix is now installed! Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service workload.
