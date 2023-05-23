@@ -26,8 +26,6 @@ spec:
   stateStoreRef:
     # The name of the StateStore to use: required
     name: default
-    # The namespace of the StateStore to use: optional, defaults to the clusters namespace
-    namespace: default
     # The kind of the StateStore to use: required, valid options: GitStateStore, BucketStateStore
     kind: BucketStateStore
 ```
@@ -57,7 +55,6 @@ spec:
   bucketName: kratix
   secretRef:
     name: aws-credentials
-    namespace: default
 ---
 apiVersion: platform.kratix.io/v1alpha1
 kind: Cluster
@@ -69,7 +66,6 @@ spec:
   path: dev
   stateStoreRef:
     name: default
-    namespace: default
     kind: BucketStateStore
 ```
 

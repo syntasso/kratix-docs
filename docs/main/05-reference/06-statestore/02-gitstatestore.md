@@ -23,8 +23,6 @@ spec:
   secretRef:
     # The name of the secret to use to authenticate: required
     name: gitea-credentials
-    # The namespace of the secret to use: optional, defaults to the GitStateStore namespace
-    namespace: gitea
   # The address of the git repository. If auth method is basic auth, use `http`/`https` format: required
   url: https://github.com/syntasso/kratix-repo
 ```

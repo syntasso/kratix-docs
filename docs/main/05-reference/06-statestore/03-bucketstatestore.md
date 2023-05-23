@@ -28,9 +28,6 @@ spec:
   secretRef:
     # The name of the secret to use to authenticate: required
     name: s3-credentials
-    # The namespace of the secret to use: optional, defaults to the BucketStateStore namespace
-    namespace: default
-    # The Top-level path in the Bucket repository to write to: optional
 ```
 
 ## Auth

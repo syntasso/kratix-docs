@@ -43,7 +43,6 @@ metadata:
 spec:
   stateStoreRef:
     name: default
-    namespace: default
     kind: BucketStateStore
 ```
 
