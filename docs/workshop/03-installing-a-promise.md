@@ -350,6 +350,8 @@ kind: Cluster
 metadata:
    name: worker-cluster
    namespace: default
+   labels:
+    environment: dev
 spec:
    stateStoreRef:
       name: minio-store

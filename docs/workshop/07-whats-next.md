@@ -4,8 +4,6 @@ title: What's next?
 ---
 import WhatsNext, {toc as WhatsNextTOC} from '../_partials/_whats-next.md';
 
-👈🏾&nbsp;&nbsp; Previous: [Enhancing a Kratix Promise](./enhancing-a-promise) <br />
-
 <hr />
 
 <WhatsNext />

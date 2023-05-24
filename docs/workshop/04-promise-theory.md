@@ -6,7 +6,7 @@ id: promise-theory
 
 This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install a Kratix Promise](installing-a-promise) <br />
-👉🏾&nbsp;&nbsp; Next: [Writing and installing a Kratix Promise](todo)
+👉🏾&nbsp;&nbsp; Next: [Using Compound Promises](multiple-promises)
 
 <hr />
 

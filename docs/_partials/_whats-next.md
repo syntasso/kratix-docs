@@ -1,16 +1,14 @@
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-Our last hands-on session went through how to [enhance a Postgres Promise](enhancing-a-promise).
-
 What about further enhancements? What about more Promises?
 
 ## Designing the right Promise for a single service
 
 <img
-  align="right"
-  width="500px"
-  src={useBaseUrl('/img/docs/Treasure_Trove-Final_Thoughts-Single_Promise.jpeg')}
-  alt="Single Kratix Promise"
+align="right"
+width="500px"
+src={useBaseUrl('/img/docs/Treasure_Trove-Final_Thoughts-Single_Promise.jpeg')}
+alt="Single Kratix Promise"
 />
 
 Platform teams in any form add tremendous value to an organisation. They reduce cognitive load for application teams, which enables those teams to have faster 'flow'.
@@ -22,15 +20,19 @@ Here is an experience you might have on a platform team as you work to support y
 What you aim to deliver is:
 
 ### A standardised development tool...
+
 But through a Slack message, you happen to learn that four application teams are all using four different flavours of Postgres. Each team's database is in a different cloud, each has a different backup strategy, and each uses different levels of monitoring.
 
 ### ...optimised for scale...
+
 However after learning about the four 'shadow IT' Postgres databases, you poll application teams and realise the problem is bigger than you thought. Now you need to manually intervene in each team's backlog to audit the situation and ensure each database is healthy and compliant.
 
 ### ...pre-configured to meet your business requirements...
+
 Requirements are fixed, but you have to deal with the nuance in each type of Postgres. So you have to manually enforce quotas via your audits at the end of each month; manually reconcile service instances, teams, and billed cost centres; and manually inform interested stakeholders when costs change.
 
 ### ...and automatically secured according to your policies.
+
 Security is complex, and each Postgres defines their security details in different places. So you need to manually verify that each Postgres configuration is acceptable according to the broader security protocols; manually make sure proper signoff has happened before deployments move forward; and manually run third-party software against code that is being shipped to make sure dependecies don't have vulnerabilities.
 <br/>
 
@@ -43,10 +45,10 @@ Stepping back, the beauty of Kratix is in its flexibility. It allows you to enca
 ## Designing the right Golden Paths with multiple Promises
 
 <img
-  align="right"
-  width="500px"
-  src={useBaseUrl('/img/docs/Treasure_Trove-Final_Thoughts-Higher_Level_Promise.jpeg')}
-  alt="Higher level Promise"
+align="right"
+width="500px"
+src={useBaseUrl('/img/docs/Treasure_Trove-Final_Thoughts-Higher_Level_Promise.jpeg')}
+alt="Higher level Promise"
 />
 
 The value of your platform increases dramatically when you offer application teams tailored Golden Paths. A [“Golden Path”](https://www.syntasso.io/post/paving-golden-paths-on-multi-cluster-kubernetes-part-1-the-theory) is the opinionated and supported path to “build something”. Imagine a complete development environment setup&mdash;networking, integration, security, governance, compliance, and deployment&mdash;all available on-demand. By paving a Golden Path the platform team makes doing the right thing easy for application teams.
@@ -60,6 +62,7 @@ We believe composable Promises are at the core of the value that Kratix provides
 Take a moment to imagine the most valuable bundle of services that your platform could offer to your application teams. Now that you've had experience building a platform with Kratix, translate that bundle of services into a composed Promise using Kratix.
 
 ## Learn more
+
 If the idea of treating your platform as-a-Product is new concept to you, watch _ [Crossing the Platform Gap](https://youtu.be/pAk5GReIs90)_ short talk below by [Paula Kennedy](https://twitter.com/PaulaLKennedy) or read our two-part series about [Paving Golden Paths](https://www.syntasso.io/post/paving-golden-paths-on-multi-cluster-kubernetes-part-1-the-theory) on the Syntasso blog.
 
 <div style={{"text-align":"center"}}>
@@ -67,4 +70,5 @@ If the idea of treating your platform as-a-Product is new concept to you, watch 
 </div>
 
 ## Get in touch
+
 💭&nbsp;&nbsp; If learning about Kratix and platforms as products sounds intriguing and you'd like to chat with us, we'd love to hear from you. Please reach out on https://www.syntasso.io/contact-us.
