@@ -92,3 +92,9 @@
 .hidden {
   display: none;
 }
+
+.bounded {
+  svg {
+    width: 5rem;
+  }
+}

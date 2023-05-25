@@ -17,9 +17,14 @@ This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 
 ## Promise Components
 
-INSERT HERE DIAGRAM
 
-### API
+```mdx-code-block
+import PromiseDiagram from "/img/docs/workshop/promise-diagram.svg"
+```
+
+<PromiseDiagram />
+
+### 1. API
 
 The first part of a Primise is the Promise API. Like any other API, it serves as
 a contractual agreement between the software provider (the Platform) and the
@@ -46,7 +51,7 @@ for example. You could have
 Platform. You could easily use Kratix behind a GitOps Repository, or a ticketing
 system, or CI/CD tools.
 
-### Imperative Pipelines
+### 2. Imperative Pipeline
 
 The second part of the Promise is the Request Pipeline. It's in the Pipeline you
 define you business processes, codifying the steps required by your organisation
@@ -83,7 +88,7 @@ all images must be scanned for vulnerabilities, you can add a Snyk image to your
 Promise; if you want to get an alert when a certain event happens, you can add a
 Slack image.
 
-### Declarative State
+### 3. Declarative State
 
 Kratix follows the same *declare and converge* apprach as Kubernetes. The
 pipeline executes a series of *imperative* steps to generate the *declarative
@@ -101,7 +106,7 @@ steps to produce the desired state and store that state in the GitOps State
 Store. For instance, you could have a pipeline that declares Terraform plans to
 be scheduled on a system running Terraform.
 
-### Dependencies
+### 4. Dependencies
 
 The final part of a Promise is its Dependencies. A dependency is anything that
 must be installed or available on Worker clusters prior to enable the service

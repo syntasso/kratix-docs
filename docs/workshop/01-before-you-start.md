@@ -1,5 +1,5 @@
 ---
-id: workshop-setup
+id: setuo
 title: Pre-requisites
 description: Find out what you need in installed before starting the workshop
 ---
@@ -19,6 +19,23 @@ tools:
 1. `kubectl` / **Kubernetes command-line tool**: <br /> The CLI for
    Kubernetes&mdash;allows you to run commands against Kubernetes clusters. <br
    /> See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
+
+:::info
+
+You can run the workshop without KinD. Ideally, you would need access to two
+Kubernetes clusters.
+
+One cluster will be the Platform cluster, where Kratix will be installed.
+Whenever you see `--context kind-platform`, replace it with the context of your
+platform cluster.
+
+The other worker will be the Worker cluster. Whenever you see `--context
+kind-worker`, replace it with the context of your worker cluster.
+
+If you want to try it on a single cluster, you can omit the `--context` flag and
+argument entirely.
+
+:::
 
 ## Docker Resources {#docker-config}
 
