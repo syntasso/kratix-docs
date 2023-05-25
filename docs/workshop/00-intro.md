@@ -12,7 +12,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 <img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
 
-This workshop introduces you to the [Kratix](https://www.kratix.io) framework. We have created a series of tutorials that build up your understanding of what Kratix is, how Kratix works, and how you can use Kratix to deliver a first-class platform within your organisation.
+This workshop introduces you to the [Kratix](https://www.kratix.io) framework.
+We have created a series of tutorials that build up your understanding of what
+Kratix is, how Kratix works, and how you can use Kratix to deliver a first-class
+platform within your organisation.
 
 Before beginning this workshop, consider your answers to the following questions:
 
@@ -52,4 +55,6 @@ Extend an existing sample Postgres Promise by configuring specifically for you, 
 How can Kratix help you?
 
 ## 🥁 Let's start
+
 Begin with [setting up your machine for the workshop](setup).
+

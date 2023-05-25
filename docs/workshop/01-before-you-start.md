@@ -1,5 +1,5 @@
 ---
-id: setuo
+id: setup
 title: Pre-requisites
 description: Find out what you need in installed before starting the workshop
 ---

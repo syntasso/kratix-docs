@@ -12,9 +12,10 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 **in this tutorial, you will**
 
-* install your first Kratix Promise
-* learn about worker cluster configuration
-* request an instance of the Promised service
+* [learn what Promises are](#promise-definition)
+* [install your first Kratix Promise](#install-jenkins)
+* [learn about configuring a Worker cluster](#configure-worker)
+* [request an instance of the Promised service](#request-jenkins)
 
 Following the [Installing Kratix](installing-kratix) tutorial, you should now
 have a deployment of both Kratix and MinIO running on your Platform cluster:
@@ -50,7 +51,7 @@ to check the configuration parameters.
 
 With that, you have all the pieces you need to install your first Promise!
 
-## What's a Promise?
+## What's a Promise? {#promise-definition}
 
 A Promise is the building block that Kratix provides to enable Platform teams to
 build their platforms incrementally. Promises are what allow the Platform to
@@ -75,10 +76,10 @@ provide anything-as-a-Service, and are composed of mainly three pieces:
 
 </details>
 
-In the [next section](todo), we'll unpack what's inside a Promise and explain the theory
+In the [next section](promise-theory), we'll unpack what's inside a Promise and explain the theory
 behind it.
 
-## Provide Jenkins-as-a-Service
+## Provide Jenkins-as-a-Service {#install-jenkins}
 
 In this tutorial, we will provide Jenkins-as-a-Service in the Platform, making
 it available on-demand for the developers using it.
@@ -132,7 +133,7 @@ No resources found
 
 Let's fix that.
 
-## Set up a Worker Cluster
+## Set up a Worker Cluster {#configure-worker}
 
 ### Create the cluster
 
@@ -319,7 +320,7 @@ avoid failures when a resource documents uses a GVK being defined by a CRD
 document.
 
 For further details on the naming convention for the buckets and paths, check
-the [documentation](todo).
+the [documentation](../main/reference/statestore/intro).
 
 If you try to list the Kustomizations at this point, you should see the
 following message on Status:
@@ -373,7 +374,8 @@ what is the kind of State Store being used by this Cluster.
 That means different Clusters can use different backing storage. For example,
 you can have a set of Clusters backed by Git, while another set of Clusters can
 be backed by a Bucket. Further configuration options pertaining paths are also
-available both in the [State Store](todo) and the [Cluster object](todo).
+available both in the [State Store](../main/reference/statestore/intro) and the
+[Cluster object](../main/reference/clusters/intro).
 
 </details>
 
@@ -407,7 +409,7 @@ certain Promises available in certain clusters.
 Great! The Jenkins Promise installation is now complete. Let's switch roles for
 a moment and become the developer requesting a new Jenkins instance.
 
-## Request a Jenkins Instance
+## Request a Jenkins Instance {#request-jenkins}
 
 As a user of the Platform, you can find out what's available by checking the
 installed Promises:
@@ -502,11 +504,6 @@ kubectl --context kind-worker port-forward pod/jenkins-dev-<NAME> 8080:30269
   kubectl get secrets --context kind-worker --selector app=jenkins-operator -o go-template='{{range .items}}{{"username: "}}{{.data.user|base64decode}}{{"\n"}}{{"password: "}}{{.data.password|base64decode}}{{"\n"}}{{end}}'
   ```
 
-  Kratix is not opinionated about how Secrets should be managed in the Platform.
-  You can find integrations with [Vault](todo) and [Sealed Secrets](todo) on the
-  [Pipeline images marketplace](todo), but you can decide how you want to expose
-  the credentials to the platform user.
-
 </details>
 
 ## Summary
@@ -519,4 +516,5 @@ To recap the steps we took:
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp;Your promise is now installed. <br />
-👉🏾&nbsp;&nbsp;Next, let's learn more about the theory behind Promises
+👉🏾&nbsp;&nbsp;Next, let's learn more about th[e theory behind
+Promises](promise-theory)

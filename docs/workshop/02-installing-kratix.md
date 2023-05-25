@@ -12,7 +12,7 @@ This is Part 1 of [a series](intro) illustrating how Kratix works. <br />
 
 **In this tutorial, you will**
 * [learn more about Kratix as a framework](#what-is-kratix)
-* [install a multi-cluster Kratix using KinD](#install-kratix)
+* [install and configure Kratix on a Kubernetes cluster](#install-kratix)
 
 <img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
 
@@ -35,9 +35,9 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 
 <hr />
 
-## Hands on: Installing Kratix
+## Hands on: Installing Kratix {#install-kratix}
 
-Before continuing, make sure to go back to [pre-requisites](./workshop-setup)
+Before continuing, make sure to go back to [pre-requisites](setup)
 and follow the guide if you haven't done that already.
 
 This guide will go through the following steps:
@@ -129,7 +129,7 @@ that workload. In Kratix terms, those clusters are called "workers".
 
 In this workshop, we will use a MinIO bucket created on MinIO instance local to
 the platform cluster. Kratix supports both S3-compatible buckets as Git
-repositories as the state store. Please check the [docs](todo) for further
+repositories as the state store. Please check the [docs](../main/reference/statestore/intro) for further
 details.
 
 To install MinIO locally, run:
@@ -233,7 +233,7 @@ secretAccessKey:  10 bytes
 ```
 
 For further details on State Stores, check the [State Store documentation
-page](todo)
+page](../main/reference/statestore/intro)
 
 </details>
 
@@ -253,4 +253,4 @@ To recap the steps we took:
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp;Kratix is now installed. <br />
-👉🏾&nbsp;&nbsp; Next you will [install an sample Kratix Promise](installing-a-promise).
+👉🏾&nbsp;&nbsp;Next you will [install an sample Kratix Promise](installing-a-promise).
