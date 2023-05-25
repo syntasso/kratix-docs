@@ -471,7 +471,7 @@ Worker cluster is watching. You will soon see the Jenkins instance pod starting
 up on the Worker cluster (it may take a couple of minutes):
 
 ```shell-session
-$ kubectl --kind-worker get pods
+$ kubectl --context kind-worker get pods
 NAME                                READY   STATUS    RESTARTS   AGE
 //highlight-next-line
 jenkins-dev-example                 0/1     Running   0          1m

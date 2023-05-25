@@ -131,6 +131,7 @@ spec:
   stateStoreRef:
     name: minio-store
     kind: BucketStateStore
+EOF
 ```
 
 The Paved Path Promise dependencies (i.e. other Promises) cannot be installed to
@@ -228,6 +229,7 @@ You can see the Pipelines in actions by watching the Pods running on your
 Platform cluster (it may take a few seconds):
 
 ```shell-session
+$ kubectl --context kind-platform get pods
 NAME                                        READY   STATUS      RESTARTS   AGE
 request-pipeline-deployment-default-22ee9   0/1     Completed   0          18s
 request-pipeline-paved-path-default-8769b   0/1     Completed   0          40s
@@ -241,11 +243,11 @@ GotOps toolkit and deployed onto the Worker (it may take a few minutes):
 ```shell-session
 $ kubectl --context kind-worker get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
-//highlight-nextline
+#highlight-next-line
 acid-todo-postgresql-0                 1/1     Running   0          110s
 nginx-nginx-ingress-58c4dcb47d-49fd8   1/1     Running   0          10m
 postgres-operator-79754946d-nmkhr      1/1     Running   0          10m
-//highlight-nextline
+#highlight-next-line
 todo-84f6b6698-vqxqm                   1/1     Running   0          74s
 ```
 
