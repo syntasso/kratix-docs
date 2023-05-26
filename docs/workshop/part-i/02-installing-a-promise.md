@@ -1,7 +1,8 @@
 ---
-description: Install a Promise on the Platform cluster, followed by the creation and registration of a new Worker cluster
+description: Create and configure a Worker cluster, and install a Promise
 title: Installing a Promise
 id: installing-a-promise
+slug: ../installing-a-promise
 ---
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />

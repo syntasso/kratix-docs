@@ -1,10 +1,11 @@
 ---
-description: learn how to extend an existing promise
+description: Extend a Promise, adding extra functionality
 title: Enhancing a Promise
+slug: ../enhancing-a-promise
 ---
 
-import PartialPreRequisites from '../\_partials/\_workshop_prereqs.md';
-import EnhancingPromise, {toc as EnhancingPromiseTOC} from '../\_partials/\_enhancing-a-promise.md';
+import PartialPreRequisites from '../../\_partials/\_workshop_prereqs.md';
+import EnhancingPromise, {toc as EnhancingPromiseTOC} from '../../\_partials/\_enhancing-a-promise.md';
 
 👈🏾&nbsp;&nbsp; Previous: [Writing and installing a Kratix Promise](writing-a-promise) <br />
 👉🏾&nbsp;&nbsp; Next: [Final Thoughts](whats-next)

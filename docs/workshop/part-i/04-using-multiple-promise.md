@@ -1,7 +1,8 @@
 ---
-description: Learn about the power of Compound Promises to deliver complete developer experiences
+description: Learn about how Compound Promises can deliver complete developer experiences
 title: Using Compound Promises
 id: multiple-promises
+slug: ../multiple-promises
 ---
 
 This is Part 4 of [a series](intro) illustrating how Kratix works. <br />

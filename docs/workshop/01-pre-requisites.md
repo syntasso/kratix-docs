@@ -22,7 +22,7 @@ tools:
 
 :::info
 
-You can run the workshop without KinD. Ideally, you would need access to two
+You can run the workshop without KinD. Ideally, you will have access to two
 Kubernetes clusters.
 
 One cluster will be the Platform cluster, where Kratix will be installed.
@@ -61,3 +61,6 @@ If you have clusters named `platform` or `worker` please delete them with:
 ```bash
 kind delete clusters platform worker
 ```
+
+You are now ready to start. Navigate to the [next
+section](installing-kratix) and get started!

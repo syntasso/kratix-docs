@@ -1,0 +1,10 @@
+{
+  "label": "Part I",
+  "position": 3,
+  "collapsed": false,
+  "collapsible": true,
+  "link": {
+    "type": "generated-index",
+    "description": "Part I of this workshop focus on operating Kratix. You will learn about:"
+  }
+}

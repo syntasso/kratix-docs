@@ -1,7 +1,8 @@
 ---
-description: Learn how to install kratix
+description: Create a Platform Cluster, install and configure Kratix
 title: Installing Kratix
 id: installing-kratix
+slug: ../installing-kratix
 ---
 import useBaseUrl from '@docusaurus/useBaseUrl';
 

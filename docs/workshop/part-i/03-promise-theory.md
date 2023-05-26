@@ -2,6 +2,7 @@
 description: Learn about what parts make up a Promise and how to leverage the power of promises in your platform
 title: Unpacking a Promise
 id: promise-theory
+slug: ../promise-theory
 ---
 
 This is Part 3 of [a series](intro) illustrating how Kratix works. <br />

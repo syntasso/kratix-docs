@@ -1,12 +1,13 @@
 ---
 sidebar_position: 1
 description: Overview of the workshop and explanation of what to expect from each section
-title: Overview
 id: intro
+title: Overview
 ---
+```mdx-code-block
 import useBaseUrl from '@docusaurus/useBaseUrl';
+```
 
-# Introducing Kratix 🎉
 
 ## Welcome!
 
@@ -23,6 +24,10 @@ Before beginning this workshop, consider your answers to the following questions
 * How easy is it for you to provide and maintain that service?
 * How easy is it for application developers to use that service?
 * How can you enhance flow for your application developers and reduce effort for you and your platform team?
+
+We hope that, by going through the workshop and learning Kratix's concepts, it
+will become evident how you could incorporate Kratix into your Platform to
+provide a better developer experience.
 
 ## The series
 
@@ -41,15 +46,18 @@ Learn more about Kratix Promises and install a sample Jenkins Promise.
 Learn about what parts make up a Promise and how to leverage the power of promises in your platform.
 
 1. [Using multiple Kratix Promises](multiple-promises) <br />
-Use Kratix with sample Promises for Nginx, Postgres and Jenkins
+Learn about Compound Promises, and how the combination of Promises can provide
+more compelling developer experiences.
 
 ### Part II
 
 1. [Writing and installing a Kratix Promise](writing-a-promise/) <br />
-Write a Jenkins Promise and deploy it to Kratix
+Write a Jenkins Promise and deploy it to Kratix.
 
 1. [Enhancing a Kratix Promise](enhancing-a-promise/) <br />
-Extend an existing sample Postgres Promise by configuring specifically for you, your team, and your organisation
+Extend an existing sample Postgres Promise by configuring specifically for you, your team, and your organisation.
+
+### Conclusion
 
 1. [Final Thoughts](whats-next) <br />
 How can Kratix help you?

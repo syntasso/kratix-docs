@@ -1,8 +1,9 @@
 ---
-description: Learn how to write a Kratix Promise
+description: Write a Promise from scratch
 title: Writing a Kratix Promise
+slug: ../writing-a-promise
 ---
-import WritingPromise, {toc as WritingPromiseTOC} from '../_partials/_writing-a-promise.md';
+import WritingPromise, {toc as WritingPromiseTOC} from '../../_partials/_writing-a-promise.md';
 
 👉🏾&nbsp;&nbsp; Next: [Enhancing a Kratix Promise](enhancing-a-promise)
 
