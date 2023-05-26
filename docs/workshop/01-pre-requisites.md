@@ -13,8 +13,8 @@ tools:
   See [the quick start guide](https://kind.sigs.k8s.io/docs/user/quick-start/) to install.
 
 1. `docker` CLI / **Docker**: <br /> Used to orchestrate containers. `kind`
-   (above) requires that you have Docker installed and configured. <br /> See
-   [Get Docker](https://docs.docker.com/get-docker/) to install.
+   requires that you have Docker installed and configured. <br /> See [Get
+   Docker](https://docs.docker.com/get-docker/) to install.
 
 1. `kubectl` / **Kubernetes command-line tool**: <br /> The CLI for
    Kubernetes&mdash;allows you to run commands against Kubernetes clusters. <br

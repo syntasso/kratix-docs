@@ -76,12 +76,12 @@ kind create cluster --name platform \
 ```
 
 The command above will create a cluster on the specified Kubernetes version and
-update your local `.kube/config` with the credentials to access the cluster. The
-config file specified is needed to simplify accessing services running in the
-cluster without the need to forward any ports.
+update your local `.kube/config` with the credentials to access the cluster. We
+are also providing `kind` with a config file to simplify accessing the services
+running in the cluster.
 
-Once the creation completes, you should be able to reach to your local cluster
-on the `kind-platform` context:
+Once the creation completes, you cab reach the local Platform cluster with the
+`kind-platform` context:
 
 ```shell-session
 $ kubectl --context kind-platform cluster-info
@@ -93,15 +93,16 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ### Install Kratix {#kratix-setup}
 
-To install Kratix, all you need is to apply the Kratix distribution file:
+To install Kratix, all you need is the Kratix distribution file. Run the command
+below to deploy it on the Platform cluster:
 
 ```bash
 kubectl --context kind-platform apply --filename distribution/kratix.yaml
 ```
 
 The command above will create a Kratix deployment (on the
-`kratix-platform-system` namespace), as well as install all the APIs that Kratix
-needs. You can verify the installation by running:
+`kratix-platform-system` namespace). It will also install all the APIs that
+Kratix needs. You can verify the installation by running:
 
 ```shell-session
 $ kubectl --context kind-platform get crds
@@ -118,22 +119,24 @@ NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 ```
 
-With Kratix's APIs available, we can now tell Kratix which repositories it will
-use to deploy and manage the workloads.
+We can now tell Kratix which repositories it will use to deploy and manage the
+workloads.
 
 ### Set up the GitOps State Store {#gitops-setup}
 
-One of Kratix capabilities is to orchestrate and schedule workloads across an
-array of clusters. It leverages the power of GitOps, by writing documents to a
-store, that's later picked up and applied to the clusters tasked with running
-that workload. In Kratix terms, those clusters are called "workers".
+One of Kratix capabilities is its ability to efficiently orchestrate and
+schedule workloads across a fleet of clusters. This is achieved by harnessing
+the power of GitOps, where documents are written to a centralized store and
+subsequently applied to the designated clusters responsible for executing the
+specified workload. Within Kratix, these clusters are referred to as _workers_.
 
-In this workshop, we will use a MinIO bucket created on MinIO instance local to
-the platform cluster. Kratix supports both S3-compatible buckets as Git
-repositories as the state store. Please check the [docs](../main/reference/statestore/intro) for further
-details.
+In this workshop, we will use a MinIO bucket created on MinIO instance running
+in the Platform cluster. It's worth noting that Kratix seamlessly integrates
+with both S3-compatible buckets and Git repositories, allowing for flexible
+options when it comes to choosing the state store. Please check the
+[docs](../main/reference/statestore/intro) for further details.
 
-To install MinIO locally, run:
+To install the MinIO instance, run:
 
 ```bash
 kubectl --context kind-platform apply --filename hack/platform/minio-install.yaml
@@ -162,10 +165,10 @@ Once the Job completes, let's make the MinIO bucket known to Kratix.
 
 ### Create the Kratix State Store {#statestore-setup}
 
-The State Store represents the different backing storage options that Kratix can
-write to. When registering a worker cluster with Kratix, you'll need to specify
-which state store you want to use, and Kratix will write to it when scheduling
-works to that cluster.
+The State Store represents the various backing storage options to which Kratix
+can write. When registering a worker cluster with Kratix, you will need to
+specify the state store you intend to use. Kratix will then write to the
+specified state store when scheduling workloads for execution on that cluster.
 
 Go ahead and create a new State Store pointing to the MinIO bucket you just
 created:
