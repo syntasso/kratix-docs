@@ -80,11 +80,18 @@ update your local `.kube/config` with the credentials to access the cluster. We
 are also providing `kind` with a config file to simplify accessing the services
 running in the cluster.
 
-Once the creation completes, you cab reach the local Platform cluster with the
-`kind-platform` context:
+Once the creation completes, you can reach the local Platform cluster with the
+`kind-platform` context.
+
+Verify the cluster is ready:
+
+```bash
+kubectl --context kind-platform cluster-info
+```
+
+The above command will give an output similar to:
 
 ```shell-session
-$ kubectl --context kind-platform cluster-info
 Kubernetes control plane is running at https://127.0.0.1:XXXX
 CoreDNS is running at https://127.0.0.1:55960/api/v1/...
 
@@ -93,8 +100,9 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ### Install Kratix {#kratix-setup}
 
-To install Kratix, all you need is the Kratix distribution file. Run the command
-below to deploy it on the Platform cluster:
+To install Kratix, all you need is the Kratix distribution file.
+
+Run the command below to deploy Kratix on the Platform cluster:
 
 ```bash
 kubectl --context kind-platform apply --filename distribution/kratix.yaml
@@ -102,10 +110,16 @@ kubectl --context kind-platform apply --filename distribution/kratix.yaml
 
 The command above will create a Kratix deployment (on the
 `kratix-platform-system` namespace). It will also install all the APIs that
-Kratix needs. You can verify the installation by running:
+Kratix needs.
 
+Verify the Kratix CRDs are available:
+
+```bash
+kubectl --context kind-platform get crds
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get crds
 NAME                                         CREATED AT
 bucketstatestores.platform.kratix.io         2023-05-22T12:02:41Z
 clusters.platform.kratix.io                  2023-05-22T12:02:41Z
@@ -113,8 +127,17 @@ gitstatestores.platform.kratix.io            2023-05-22T12:02:41Z
 promises.platform.kratix.io                  2023-05-22T12:02:41Z
 workplacements.platform.kratix.io            2023-05-22T12:02:42Z
 works.platform.kratix.io                     2023-05-22T12:02:42Z
+```
 
-$ kubectl --context kind-platform get deployments --namespace kratix-platform-system
+Verify the Kratix deployment:
+
+```bash
+kubectl --context kind-platform get deployments --namespace kratix-platform-system
+```
+
+The above command will give an output similar to:
+
+```shell-session
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 ```
@@ -148,15 +171,29 @@ The above command will:
 - Create a Secret with the MinIO credentials
 - Run a Job to create a bucket called `kratix` on the MinIO instance. <br />
 
-You can verify the installation by running:
+Verify the installation:
+
+```bash
+kubectl --context kind-platform get deployments --namespace kratix-platform-system
+```
+
+The above command will give an output similar to:
 
 ```shell-session
-$ kubectl --context kind-platform get deployments --namespace kratix-platform-system
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 minio                                1/1     1            1           1h
+```
 
-$ kubectl --context kind-platform get jobs
+Verify the Create Bucket job:
+
+```
+kubectl --context kind-platform get jobs
+```
+
+The above command will give an output similar to:
+
+```shell-session
 NAME                  COMPLETIONS   DURATION   AGE
 minio-create-bucket   1/1           3m5s       1h
 ```
@@ -170,8 +207,8 @@ can write. When registering a worker cluster with Kratix, you will need to
 specify the state store you intend to use. Kratix will then write to the
 specified state store when scheduling workloads for execution on that cluster.
 
-Go ahead and create a new State Store pointing to the MinIO bucket you just
-created:
+Create a new State Store pointing to the MinIO bucket created on the previous
+step:
 
 ```yaml
 cat << EOF | kubectl --context kind-platform apply -f -
@@ -189,8 +226,13 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+bucketstatestore.platform.kratix.io/minio-store created
+```
+
 <details>
-<summary>State Store in details</summary>
+<summary>More on the Kratix State Store</summary>
 
 The StateStore document contains the configuration needed to access the actual
 backing storage.
@@ -206,8 +248,12 @@ running with TLS enabled, we set `insecure` to true.
 
 You can see the MinIO service on the `kratix-platform-system`:
 
+```bash
+kubectl --context kind-platform --namespace kratix-platform-system get service minio
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform --namespace kratix-platform-system get service minio
 NAME    TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
 minio   NodePort   10.96.96.166   <none>        80:31337/TCP   17h
 ```
@@ -221,8 +267,12 @@ Store, containing the credentials to access the store. For `BucketStateStore`,
 Kratix expects to find an `accessKeyID` and a `secretAccessKey` when resolving
 the secret. As part of the MinIO deployment, we created the necessary secret:
 
+```bash
+kubectl --context kind-platform describe secret minio-credentials
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform describe secret minio-credentials
 Name:         minio-credentials
 Namespace:    default
 Labels:       <none>

@@ -19,20 +19,30 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 - [request an instance of the Promised service](#request-jenkins)
 
 Following the [Installing Kratix](installing-kratix) tutorial, you should now
-have a deployment of both Kratix and MinIO running on your Platform cluster:
+have a deployment of both Kratix and MinIO running on your Platform cluster.
+Verify the current state of your installation:
+
+```bash
+kubectl --context kind-platform get deployments --namespace kratix-platform-system
+```
+
+The above command will give an output similar to:
 
 ```shell-session
-$ kubectl --context kind-platform get deployments --namespace kratix-platform-system
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 minio                                1/1     1            1           1h
 ```
 
 You should also have a State Store created and configured to point to the
-`kratix` bucket on MinIO:
+`kratix` bucket on MinIO. Verify the `bucketstatestores`:
 
+```bash
+kubectl --context kind-platform get bucketstatestores.platform.kratix.io
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get bucketstatestores.platform.kratix.io
 NAME          AGE
 minio-store   1h
 ```
@@ -49,6 +59,9 @@ kubectl --context kind-platform \
 to check the configuration parameters.
 
 :::
+
+If your outputs do not align with the expected, please refer back to
+[Installing Kratix](installing-kratix).
 
 With that, you have all the pieces you need to install your first Promise!
 
@@ -90,7 +103,9 @@ for developers using the Platform. Kratix offers a variety of ready-to-use
 Promises in the [Kratix Marketplace](/marketplace), including a Jenkins Promise
 that we can utilize to complete this task. By following the [Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins),
-we can easily run the installation steps:
+you can find the installation steps.
+
+Install the Jenkins Promise:
 
 ```bash
 kubectl apply \
@@ -102,27 +117,35 @@ And that's it! Promise installed!
 
 However, if you look closely, the Kratix controller will be complaining:
 
-```shell-session
-$ kubectl --context kind-platform --namespace kratix-platform-system \
-   logs deployment/kratix-platform-controller-manager \
-   --container manager
+```bash
+kubectl --context kind-platform --namespace kratix-platform-system \
+  logs deployment/kratix-platform-controller-manager \
+  --container manager | grep "Reconciler error"
+```
 
-   # output formatted for readability
-   ERROR	Reconciler error {
-        "Work": {"name":"jenkins-default","namespace":"default"},
-        "error": "no Clusters can be selected for clusterSelector"
-   }
+The above command will give an output similar to:
+```shell-session
+# output formatted for readability
+ERROR	Reconciler error {
+    "Work": {"name":"jenkins-default","namespace":"default"},
+    "error": "no Clusters can be selected for clusterSelector"
+}
 ```
 
 To better explain what's going on, let's go through what just happens when
 Kratix receives a request.
 
-Either due to a Promise being installed or a service being requested, Kratix
-reacts by creating a _Work_. You can see the Work created by the installation of
-the Jenkins Promise with:
+When a Promise is installed, or when a service is requested, Kratix reacts by
+creating a _Work_.
+
+Verify the Works created with:
+```bash
+kubectl get works.platform.kratix.io
+```
+
+The above command will give an output similar to:
 
 ```shell-session
-$ kubectl get works.platform.kratix.io
 NAME              AGE
 jenkins-default   1h
 ```
@@ -130,10 +153,16 @@ jenkins-default   1h
 Once a Work is created, the Kratix Scheduler kicks in. It tries to find a
 cluster that can run the workload defined in the Work. However, at present, we
 haven't registered any Clusters with Kratix, so it cannot schedule the workload
-just yet. You can check the list of registered clusters with:
+just yet.
 
+Verify the registered clusters:
+
+```bash
+kubectl --context kind-platform get clusters.platform.kratix.io --all-namespaces
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get clusters.platform.kratix.io --all-namespaces
 No resources found
 ```
 
@@ -144,7 +173,9 @@ So, to fix the error, we must register a new Cluster. Let's do that now.
 ### Create the cluster
 
 We'll create a second Kubernetes cluster with `kind`, and this cluster will be
-dedicated to running the Kratix workloads:
+dedicated to running the Kratix workloads.
+
+Create a new cluster:
 
 ```bash
 # make sure you are still in the "kratix" directory
@@ -159,10 +190,16 @@ providing `kind` with a configuration file to facilitate accessing the deployed
 services later on.
 
 Once the creation completes, you can reach your worker cluster on the
-`kind-worker` context:
+`kind-worker` context.
 
+Verify the cluster is ready:
+
+```bash
+kubectl --context kind-worker cluster-info
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-worker cluster-info
 Kubernetes control plane is running at https://127.0.0.1:YYYYY
 CoreDNS is running at https://127.0.0.1:59160/api/v1/...
 
@@ -181,7 +218,28 @@ to be used on the clusters. In this tutorial, we will utilise
 [Flux](https://fluxcd.io/) on the Worker, and configure it to reconcile the
 state from the MinIO bucket.
 
-Let's start by installing Flux on the Worker:
+To install and configure Flux, run the following script from the Kratix
+repository:
+
+```bash
+./scripts/install-gitops --context kind-worker --path worker-cluster
+```
+
+The script above will:
+
+* Install Flux
+* Create a new Flux `Bucket` Source
+* Create two Flux `Kustomizations`
+
+The Flux `Kustomizations` are responsible for continuously reconciling with the state
+declared in the `Source`.
+
+<details>
+<summary>Configuring the Worker Cluster: the manual way</summary>
+
+If you prefer to configure the Worker cluster manually, follow the steps below.
+
+Install Flux on the Worker cluster:
 
 ```bash
 kubectl apply \
@@ -191,7 +249,7 @@ kubectl apply \
 
 Next, let's tell Flux about the MinIO bucket. For that, we will create a new
 Flux [Bucket Source](https://fluxcd.io/flux/components/source/buckets/),
-together with a Secret containing the bucket credentials:
+together with a Secret containing the bucket credentials.
 
 :::caution
 
@@ -201,27 +259,39 @@ cluster, and we want to access it from the Worker cluster, we cannot leverage
 Kubernetes DNS as we did in the previous tutorial.
 
 `172.18.0.2` will often be the address of the Platform cluster running on KinD.
-Please make sure to double check this address:
+Please make sure to double check this address.
 
+Verify the Platform control-plane IP:
+
+```bash
+docker inspect platform-control-plane | grep '"IPAddress": "172' | awk -F '"' '{print $4}'
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ docker inspect platform-control-plane | grep '"IPAddress": "172' | awk -F '"' '{print $4}'
 172.18.0.2
 ```
 
-If the command above outputs a different IP, make sure to update the
-Bucket configuration accordingly.
+If the command above outputs a different IP, make sure to update the Bucket
+configuration below accordingly.
 
-The port part of the endpoint should always be 31337. You can verify by checking
-the NodePort of the MinIO service in the Platform cluster:
+The port part of the endpoint should always be 31337. Verify the NodePort of the
+MinIO service in the Platform cluster:
+
+```bash
+kubectl --context kind-platform get services minio --namespace kratix-platform-system
+```
+
+The above command will give an output similar to:
 
 ```shell-session
-$ kubectl --context kind-platform get services minio --namespace kratix-platform-system
 NAME    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
 minio   NodePort   10.96.45.28   <none>        80:31337/TCP   1h
 ```
 
 :::
 
+Create the Flux Source Bucket (and Secret):
 
 ```yaml
 cat <<EOF | kubectl --context kind-worker apply -f -
@@ -252,22 +322,33 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+secret/minio-credentials created
+bucket.source.toolkit.fluxcd.io/kratix-bucket created
+```
+
 We won't dive into details of how to configure Flux Sources, but please read on their
 [documentation](https://fluxcd.io/flux/components/source/) if you are curious.
 
-Once the Bucket Source is created, you can validate the configuration by running:
+Once the Bucket Source is created, validates Flux can reach the bucket:
 
+```bash
+kubectl --context kind-worker get buckets.source.toolkit.fluxcd.io --namespace flux-system
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-worker get buckets.source.toolkit.fluxcd.io --namespace flux-system
 NAME            ENDPOINT           AGE     READY   STATUS
 kratix-bucket   172.18.0.2:31337   1h      True    stored artifact: revision 'sha256:some-sha'
 ```
 
-Next, you must tell Flux what is must do with this Source. Flux does continue
+Next, you must tell Flux what is must do with this Source. Flux does continuous
 delivery through the [Kustomize
-Controller](https://fluxcd.io/flux/components/kustomize/). You can define a
-Flux `Kustomization` that watches for a Source and reconciles on events. Let's
-go ahead and define the Kustomizations:
+Controller](https://fluxcd.io/flux/components/kustomize/). You can define a Flux
+`Kustomization` that watches for a Source and reconciles on events.
+
+Create the Flux Kustomizations:
 
 ```yaml
 cat <<EOF | kubectl --context kind-worker apply --filename -
@@ -302,6 +383,12 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-crds created
+kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-resources created
+```
+
 You will notice that we are creating two Kustomizations. When scheduling
 Works, Kratix will separate the documents based on their GVK (Group, Version,
 Kind):
@@ -326,18 +413,24 @@ the [documentation](../main/reference/statestore/intro). For more on
 Kustomizations, check [the Flux docs
 page](https://fluxcd.io/flux/components/kustomize/kustomization/)
 
-If you try to list the Kustomizations at this point, you should see the
-following message on Status:
+</details>
 
+Verify the status of the Kustomizations:
+
+```bash
+kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system
 NAME                        AGE   READY   STATUS
 kratix-workload-crds        20s   False   kustomization path not found: stat /tmp/kustomization-540356764/default/worker-cluster/crds: no such file or directory
 kratix-workload-resources   20s   False   dependency 'flux-system/kratix-workload-crds' is not ready
 ```
 
-That's because the path within the bucket does not yet exist. As mentioned,
-Kratix will create it when the cluster is registered.
+As you can see, Flux is not able to reconcile the state right now. That's
+because the path within the bucket does not exist yet. As mentioned, Kratix will
+create it when the cluster is registered.
 
 ### Register the cluster with Kratix
 
@@ -364,8 +457,13 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+cluster.platform.kratix.io/worker-cluster created
+```
+
 <details>
-<summary>Cluster in details</summary>
+<summary>Cluster in detail</summary>
 
 The Kratix Cluster Resource is the representation of a system where workloads
 can be scheduled to. Those system are usually other Kubernetes clusters.
@@ -380,29 +478,52 @@ you can have a set of Clusters backed by Git, while another set of Clusters can
 be backed by a Bucket. Further configuration options pertaining paths are also
 available both in the [State Store](../main/reference/statestore/intro) and the
 [Cluster object](../main/reference/clusters/intro).
-
 </details>
 
 With the Cluster registered, Kratix now have a place where it can run workloads.
 If you fetch the WorkPlacements, you should see that the Jenkins Promise has now
-been scheduled to the Worker cluster:
+been scheduled to the Worker cluster.
 
+Verify the Work Placements:
+
+```bash
+kubectl --context kind-platform get workplacements.platform.kratix.io
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get workplacements.platform.kratix.io
 NAME                             AGE
 jenkins-default.worker-cluster   1h
 ```
 
 That means that all the dependencies the Jenkins Promise needs to fulfill a
 Jenkins request are now penciled to be installed in the Worker cluster. One of
-the dependencies for the Jenkins Promise is the Jenkins Operator itself. You can
-verify that the Jenkins Operator is starting up by fetching the deployments in
-the Worker cluster (it may take a couple of minutes for it to appear):
+the dependencies for the Jenkins Promise is the Jenkins Operator itself.
+
+Verify that the Jenkins Operator starts in the Worker cluster:
 
 ```shell-session
-$ kubectl --context kind-worker get deployments
+kubectl --context kind-worker get deployments --watch
+```
+
+:::tip
+
+`kubectl` commands with the `--watch` flag block your terminal indefinetely. To
+exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+
+:::
+
+
+The above command will give an output similar to (it may take a couple of
+minutes):
+
+```shell-session
 NAME               READY   UP-TO-DATE   AVAILABLE   AGE
-jenkins-operator   1/1     1            1           1h
+jenkins-operator   0/1     0            0           0s
+jenkins-operator   0/1     0            0           0s
+jenkins-operator   0/1     0            0           0s
+jenkins-operator   0/1     1            0           0s
+jenkins-operator   1/1     1            1           11s
 ```
 
 If at this stage we create another Kubernetes cluster and follow similar steps
@@ -418,14 +539,20 @@ a moment and become the developer requesting a new Jenkins instance.
 As a user of the Platform, you can find out what's available by checking the
 installed Promises:
 
+```bash
+kubectl --context kind-platform get promises.platform.kratix.io
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get promises.platform.kratix.io
 NAME      AGE
 jenkins   1h
 ```
 
 To request a Jenkins instance, all you need is to send a new Jenkins Resource
-Request to the Platform:
+Request to the Platform.
+
+Create a Jenkins Instance:
 
 ```yaml
 cat <<EOF | kubectl --context kind-platform apply --filename -
@@ -439,6 +566,11 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+jenkins.marketplace.kratix.io/example created
+```
+
 When writing the Resource Request, the Platform user will have all the
 configuration options exposed to them as part of the Promise API, as defined by
 the Platform team. The Jenkins Promise we are using is exposing a single
@@ -446,11 +578,16 @@ configuration option: `spec.env` (see the [Jenkins Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
 When set to `prod`, the resulting instance will have backups enabled.
 
-Once Kratix receives the request, it will create a new Work (it may take a
-couple of minutes):
+Once Kratix receives the request, it will create a new Work.
 
+Verify the Works (it may take a couple of minutes for the new Work to appear):
+
+```bash
+kubectl --context kind-platform get works.platform.kratix.io --watch
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get works.platform.kratix.io
 NAME                              AGE
 jenkins-default                   1h
 //highlight-next-line
@@ -459,10 +596,16 @@ jenkins-default-default-example   1m
 
 Once the Work is created, Kratix will look for available clusters and determine
 where the Workload should be scheduled. As we only have on cluster registered,
-it will be scheduled to that cluster:
+it will be scheduled to that cluster.
 
+Verify the Work Placements:
+
+```bash
+kubectl --context kind-platform get workplacements.platform.kratix.io --watch
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get workplacements.platform.kratix.io
 NAME                                               AGE
 //highlight-next-line
 jenkins-default-default-example.worker-cluster     1m
@@ -471,10 +614,13 @@ jenkins-default.worker-cluster                     1h
 
 Kratix will then write the documents to the directory within the bucket that the
 Worker cluster is watching. You will soon see the Jenkins instance pod starting
-up on the Worker cluster (it may take a couple of minutes):
+up on the Worker cluster.
+
+Verify the Jenkins instance is booting up (it may take a couple of minutes, and
+it may go into a _Terminating_ a few times):
 
 ```shell-session
-$ kubectl --context kind-worker get pods
+$ kubectl --context kind-worker get pods --watch
 NAME                                READY   STATUS    RESTARTS   AGE
 //highlight-next-line
 jenkins-dev-example                 0/1     Running   0          1m
@@ -509,6 +655,37 @@ kubectl get secrets --context kind-worker --selector app=jenkins-operator -o go-
 ```
 
 </details>
+
+## Clean up
+
+We won't be using the Jenkins or the Jenkins Promise anymore. So let's go ahead
+and delete the resources.
+
+Delete the Jenkins Promise:
+
+```bash
+kubectl --context kind-platform delete promise jenkins
+```
+
+The above command will give an output similar to:
+```shell-session
+promise.platform.kratix.io "jenkins" deleted
+```
+
+The delete command will also cascade-delete all traces of Jenkins from our
+Platform, including the deployed Jenkins on the Worker cluster.
+
+Verify that the Jenkins instance gets deleted:
+
+```bash
+kubectl get pods --context kind-worker
+```
+
+The above command will give an output similar to (it may take a few minutes):
+
+```shell-session
+No resources found in default namespace.
+```
 
 ## Summary
 

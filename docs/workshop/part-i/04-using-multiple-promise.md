@@ -44,46 +44,40 @@ In this tutorial, we will install and use a Compound Promise.
 ## Installing a Compound Promise
 
 At this stage, you should still have your Platform and your Worker clusters
-running:
+running.
 
+Verify Kratix status:
+
+```bash
+kubectl --context kind-platform get pods --namespace kratix-platform-system
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get pods --namespace kratix-platform-system
 NAME                                                  READY   STATUS    RESTARTS   AGE
 kratix-platform-controller-manager-7cc49f598b-zqkmz   2/2     Running   0          4h4m
 minio-6f75d9fbcf-jpstv                                1/1     Running   0          4h4m
-
-$ kubectl --context kind-worker get pods
-NAME                                READY   STATUS    RESTARTS   AGE
-jenkins-dev-example                 1/1     Running   0          1h
-jenkins-operator-7f58798d5c-sr825   1/1     Running   0          1h
 ```
 
-We won't be using the Jenkins or the Jenkins Promise anymore. So let's go ahead
-and delete the resources:
+In this tutorial, we will use a Compound Promise that you can find on the Kratix
+repository, under `samples/paved-path-nginx`. This Compound Promise encapsulate
+the Nginx and the Postgres Promises. It also includes a "Deployment" Promise to
+run the application image.
 
-```bash
-kubectl --context kind-platform delete promise jenkins
-```
-
-The command above will cascade-delete all traces of Jenkins from our Platform,
-including the deployed Jenkins on the Worker cluster.
-
-There's an example Compound Promise on the Kratix repository under
-`samples/paved-path-nginx`. This Compound Promise encapsulate the Nginx and the
-Postgres Promises. It also includes a "Deployment" Promise to run the
-application image.
-
-Let's go ahead and install it (ensure you are in the Kratix directory before
-running the command below):
+From the Kratix directory, install the Paved Path Promise:
 
 ```bash
 kubectl --context kind-platform apply --filename samples/paved-path-nginx/promise.yaml
 ```
 
-Once it's applied, you can check it should now be available on the Platform:
+Verify the Promise is available:
 
+```bash
+kubectl --context kind-platform get promises
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get promises
 NAME            AGE
 paved-path       1m
 ```
@@ -91,16 +85,21 @@ paved-path       1m
 However, similar to last time, if we check the Kratix Controller Manager logs,
 we will once again see a failure to reconcile.
 
-```shell-session
-$ kubectl --context kind-platform --namespace kratix-platform-system \
-   logs deployment/kratix-platform-controller-manager \
-   --container manager
+Verify the Kratix Controller Manager logs
 
-   # output formatted for readability
-   ERROR    Reconciler error {
-        "Work": {"name":"paved-path-default","namespace":"default"},
-        "error": "no Clusters can be selected for clusterSelector"
-   }
+```shell-session
+kubectl --context kind-platform --namespace kratix-platform-system \
+ logs deployment/kratix-platform-controller-manager \
+ --container manager | grep "Reconciler error"
+```
+
+The above command will give an output similar to:
+```shell-session
+# output formatted for readability
+ERROR    Reconciler error {
+  "Work": {"name":"paved-path-default","namespace":"default"},
+  "error": "no Clusters can be selected for clusterSelector"
+}
 ```
 
 By reading the [Paved Path Promise
@@ -116,8 +115,9 @@ that, we will follow a similar process as we executed previously.
 
 ### Registering the Platform as a Worker
 
-First, let's register the Platform cluster itself as a worker cluster. We can do
-that by creating a Cluster object:
+First, let's register the Platform cluster itself as a worker cluster.
+
+Register the Platform as a Worker:
 
 ```yaml
 cat <<EOF | kubectl --context kind-platform apply -f -
@@ -135,6 +135,11 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+cluster.platform.kratix.io/platform-cluster created
+```
+
 The Paved Path Promise dependencies (i.e. other Promises) cannot be installed to
 any Worker cluster. It should only be installed on clusters where the Promise
 CRD is available&mdash;which is usually only in the Platform cluster.
@@ -145,19 +150,32 @@ that says _only install the dependencies in clusters with a label `environment`
 with value `platform`_. That's why, if you look closely on the Cluster
 definition above, we are labelling the Platform cluster with those values.
 
-We also need to install the GitOps toolkit on the Platform cluster. We could do
-it manually as last time, but you can also just run the `install-gitops` script
-located inside the `scripts` directory:
+We also need to install the GitOps toolkit on the Platform cluster.
+
+Run the `install-gitops` script located inside the `scripts` directory:
 
 ```bash
 ./scripts/install-gitops --context kind-platform --path platform-cluster
 ```
 
 Once the Flux running on the Platform picks up the changes, you should see the
-sub-Promises appearing in the Platform cluster:
+sub-Promises appearing in the Platform cluster.
 
+Verify the available Promises:
+
+```bash
+kubectl --context kind-platform get promises --watch
+```
+
+:::tip
+
+`kubectl` commands with the `--watch` flag block your terminal indefinetely. To
+exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+
+:::
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get promises
 NAME            AGE
 deployment      10m
 nginx-ingress   10m
@@ -166,23 +184,37 @@ postgresql      10m
 ```
 
 The Paved Path Promise also determines that the sub-Promises dependencies should
-only be installed to clusters with label `environment = dev`. Fortunatelly, we
-already labelled the Worker cluster with that label when we created it:
+only be installed to clusters with label `environment = dev`. We already
+labelled the Worker cluster with that label when we created it.
 
+Verify the registered Clusters labels:
+
+```bash
+kubectl --context kind-platform get clusters --show-labels
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get clusters --show-labels
 NAME               AGE   LABELS
 platform-cluster   1h    environment=platform
 worker-cluster     1h    environment=dev
 ```
 
 Checking the Worker cluster, we should see the Nginx Controller and the
-PostgreSQL operator starting (it may take a few minutes):
+PostgreSQL operator starting up.
+
+Verify the deployments on the Worker cluster:
+
+```bash
+kubectl --context kind-worker get deployments --watch
+```
+
+The above command will give an output similar to (it may take a few minutes for
+it to appear and to start):
 
 ```shell-session
-$ kubectl --context kind-worker get deployments
 NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
-nginx-nginx-ingress   0/1     1            1           1m
+nginx-nginx-ingress   1/1     1            1           1m
 postgres-operator     1/1     1            1           1m
 ```
 
@@ -191,10 +223,15 @@ using the Promises!
 
 ## Request a Paved Path
 
-As a Platform user, you now have a few choices:
+As a Platform user, you now have a few choices of Promises. Verify the available
+Promises:
 
+```bash
+kubectl --context kind-platform get promises
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get promises
 NAME            AGE
 deployment      1h
 nginx-ingress   1h
@@ -222,27 +259,43 @@ spec:
 EOF
 ```
 
+The above command will give an output similar to:
+```shell-session
+app.example.promise.syntasso.io/example created
+```
+
 The Paved Path Promise will take that request and generate the necessary
 requests for the sub-Promises, as well as doing the wire up of the services and
 the application.
 
-You can see the Pipelines in actions by watching the Pods running on your
-Platform cluster (it may take a few seconds):
+Verify the Pipelines running on the Platform cluster:
 
+
+```bash
+kubectl --context kind-platform get pods --watch
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-platform get pods
 NAME                                        READY   STATUS      RESTARTS   AGE
 request-pipeline-deployment-default-22ee9   0/1     Completed   0          18s
 request-pipeline-paved-path-default-8769b   0/1     Completed   0          40s
 request-pipeline-postgresql-default-c3516   0/1     Completed   0          18s
 ```
 
-Kratix will, once again, store the pipeline output (i.e. the desired state) in
+Kratix will, once again, stores the pipeline output (i.e. the desired state) in
 the State Store for the Worker cluster, which will in turn be picked up by the
-GotOps toolkit and deployed onto the Worker (it may take a few minutes):
+GitOps toolkit and deployed onto the Worker.
 
+Verify that the requested pods start on the Worker cluster (it may take a few
+minutes):
+
+```bash
+kubectl --context kind-worker get pods --watch
+```
+
+The above command will give an output similar to:
 ```shell-session
-$ kubectl --context kind-worker get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
 #highlight-next-line
 acid-todo-postgresql-0                 1/1     Running   0          110s
