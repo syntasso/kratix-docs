@@ -49,14 +49,12 @@ minio-store   1h
 
 :::tip
 
-You can run
+To check the configuration parameters, run:
 
 ```bash
 kubectl --context kind-platform \
    describe bucketstatestore minio-store
 ```
-
-to check the configuration parameters.
 
 :::
 
@@ -117,7 +115,7 @@ And that's it! Promise installed!
 
 However, if you look closely, the Kratix controller will be complaining:
 
-```bash
+```yaml
 kubectl --context kind-platform --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
   --container manager | grep "Reconciler error"
@@ -175,10 +173,9 @@ So, to fix the error, we must register a new Cluster. Let's do that now.
 We'll create a second Kubernetes cluster with `kind`, and this cluster will be
 dedicated to running the Kratix workloads.
 
-Create a new cluster:
+From the `kratix` directory, create a new cluster:
 
 ```bash
-# make sure you are still in the "kratix" directory
 kind create cluster --name worker \
     --image kindest/node:v1.24.0 \
      --config hack/worker/kind-worker-config.yaml
@@ -415,11 +412,19 @@ page](https://fluxcd.io/flux/components/kustomize/kustomization/)
 
 </details>
 
-Verify the status of the Kustomizations:
+Once Flux finishes starting, verify the status of the Kustomizations:
 
 ```bash
-kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system
+kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system --watch
 ```
+
+:::tip
+
+`kubectl` commands with the `--watch` flag block your terminal indefinetely. To
+exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+
+:::
+
 
 The above command will give an output similar to:
 ```shell-session
@@ -505,14 +510,6 @@ Verify that the Jenkins Operator starts in the Worker cluster:
 ```shell-session
 kubectl --context kind-worker get deployments --watch
 ```
-
-:::tip
-
-`kubectl` commands with the `--watch` flag block your terminal indefinetely. To
-exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>.
-
-:::
-
 
 The above command will give an output similar to (it may take a couple of
 minutes):
@@ -619,16 +616,27 @@ up on the Worker cluster.
 Verify the Jenkins instance is booting up (it may take a couple of minutes, and
 it may go into a _Terminating_ a few times):
 
+```bash
+kubectl --context kind-worker get pods --watch
+```
+
+The above command will give an output similar to:
+
+:::note
+
+It will take a couple of minutes for Jenkins to start, and it may cycle through
+a few states, including _Terminating_, before it eventually succeeds.
+
+:::
+
 ```shell-session
-$ kubectl --context kind-worker get pods --watch
 NAME                                READY   STATUS    RESTARTS   AGE
 //highlight-next-line
 jenkins-dev-example                 0/1     Running   0          1m
 jenkins-operator-7f58798d5c-sr825   1/1     Running   0          1h
 ```
 
-When the `Ready` column reports `1/1` for `jenkins-dev-example` (it may take a
-few minutes since Jenkins takes a while to actually start), your Jenkins
+When the `Ready` column reports `1/1` for `jenkins-dev-example`, your Jenkins
 instance is fully deployed and ready to be accessed!
 
 Go to [http://localhost:30269](http://localhost:30269) and check it out!

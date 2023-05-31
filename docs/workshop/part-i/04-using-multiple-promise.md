@@ -16,7 +16,7 @@ This is Part 4 of [a series](intro) illustrating how Kratix works. <br />
 - learn about Compound Promises
 - see a Compound Promise in action
 
-## What's a Compound Promises
+## What's a Compound Promise?
 
 Imagine that you want to provide your users with a simpler way to deploy their
 applications. You do your research and notice that most teams use a similar
@@ -87,14 +87,14 @@ we will once again see a failure to reconcile.
 
 Verify the Kratix Controller Manager logs
 
-```shell-session
+```bash
 kubectl --context kind-platform --namespace kratix-platform-system \
  logs deployment/kratix-platform-controller-manager \
  --container manager | grep "Reconciler error"
 ```
 
 The above command will give an output similar to:
-```shell-session
+```yaml
 # output formatted for readability
 ERROR    Reconciler error {
   "Work": {"name":"paved-path-default","namespace":"default"},
@@ -114,8 +114,6 @@ ensure those dependencies are installed on the Platform cluster itself. For
 that, we will follow a similar process as we executed previously.
 
 ### Registering the Platform as a Worker
-
-First, let's register the Platform cluster itself as a worker cluster.
 
 Register the Platform as a Worker:
 

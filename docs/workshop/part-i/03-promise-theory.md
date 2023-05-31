@@ -63,19 +63,6 @@ in response to a new request to the platform. When you, as the developer using
 the Platform, submitted a request for a new Jenkins instance, the Jenkins
 Request Pipeline was triggered.
 
-:::tip
-
-You can see the pipeline execution by checking the pods on your Platform
-cluster:
-
-```shell-session
-$ kubectl --context kind-platform get pods
-NAME                                     READY   STATUS      RESTARTS   AGE
-request-pipeline-jenkins-default-80067   0/1     Completed   0          1h
-```
-
-:::
-
 The Jenkins Pipeline is responsible for receiving the user's Resource Request
 and converting it into the necessary resources to create a functional Jenkins
 instance. The Pipeline outputs a series of documents that define the desired
