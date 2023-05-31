@@ -35,7 +35,7 @@ services and it should be possible to get the specialised ones.
 You decide to provide each of the individual services as a Promise. Specialist
 teams can then use the API to get the exact service they need.
 
-To deliver the simple experience though, you want to orchestrate those Promises
+To deliver the simpler experience though, you want to orchestrate those Promises
 in a higher-level promise. In Kratix terms, this is a Compound Promise: a
 Promise that define other Promises as its dependencies.
 
