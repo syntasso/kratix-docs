@@ -162,7 +162,7 @@ options when it comes to choosing the state store. Please check the
 To install the MinIO instance, run:
 
 ```bash
-kubectl --context kind-platform apply --filename hack/platform/minio-install.yaml
+kubectl --context kind-platform apply --filename config/samples/minio-install.yaml
 ```
 
 The above command will:
