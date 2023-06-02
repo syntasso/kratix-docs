@@ -112,7 +112,7 @@ The command above will create a Kratix deployment (on the
 `kratix-platform-system` namespace). It will also install all the APIs that
 Kratix needs.
 
-Verify the Kratix CRDs are available:
+Verify that the Kratix CRDs are available:
 
 ```bash
 kubectl --context kind-platform get crds
@@ -128,6 +128,24 @@ promises.platform.kratix.io                  2023-05-22T12:02:41Z
 workplacements.platform.kratix.io            2023-05-22T12:02:42Z
 works.platform.kratix.io                     2023-05-22T12:02:42Z
 ```
+
+:::info What are CRDs?
+
+A Custom Resource (CR) is an extension of the Kubernetes API that is not
+necessarily available in a default Kubernetes installation. It represents a
+customisation of a particular Kubernetes installation.
+
+A Custom Resource Definition (CRD) is the object you create to teach your
+Kubernetes cluster about this new API.
+
+Kratix comes with multiple API extensions, as per the command above.
+
+Check the Kubernetes documentation for further details on [Custom
+Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
+and [Custom Resources
+Definition](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
+
+:::
 
 Verify the Kratix deployment:
 
