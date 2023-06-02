@@ -72,7 +72,7 @@ go ahead and create the Platform cluster:
 ```bash
 kind create cluster --name platform \
     --image kindest/node:v1.24.0 \
-    --config hack/platform/kind-platform-config.yaml
+    --config config/samples/kind-platform-config.yaml
 ```
 
 The command above will create a cluster on the specified Kubernetes version and

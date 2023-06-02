@@ -178,7 +178,7 @@ From the `kratix` directory, create a new cluster:
 ```bash
 kind create cluster --name worker \
     --image kindest/node:v1.24.0 \
-     --config hack/worker/kind-worker-config.yaml
+     --config config/samples/kind-worker-config.yaml
 ```
 
 Similar to when we created the Plaform cluster, `kind` will update your local
