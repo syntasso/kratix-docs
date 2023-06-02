@@ -92,3 +92,21 @@
 .hidden {
   display: none;
 }
+
+
+figure.diagram {
+  text-align: center;
+
+  & > figcaption {
+    font-size: 0.75rem;
+  }
+  .small {
+    width: 65%;
+  }
+
+  .medium {
+    width: 75%;
+  }
+
+}
+
