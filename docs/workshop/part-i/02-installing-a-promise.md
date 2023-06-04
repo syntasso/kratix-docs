@@ -450,31 +450,6 @@ page](https://fluxcd.io/flux/components/kustomize/kustomization/)
 
 </details>
 
-<!-- Once Flux finishes starting, verify the status of the Kustomizations: -->
-<!---->
-<!-- ```bash -->
-<!-- kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system --watch -->
-<!-- ``` -->
-<!---->
-<!-- :::tip -->
-<!---->
-<!-- `kubectl` commands with the `--watch` flag block your terminal indefinetely. To -->
-<!-- exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>. -->
-<!---->
-<!-- ::: -->
-<!---->
-<!---->
-<!-- The above command will give an output similar to: -->
-<!-- ```shell-session -->
-<!-- NAME                        AGE   READY   STATUS -->
-<!-- kratix-workload-crds        20s   False   kustomization path not found: stat /tmp/kustomization-540356764/default/worker-cluster/crds: no such file or directory -->
-<!-- kratix-workload-resources   20s   False   dependency 'flux-system/kratix-workload-crds' is not ready -->
-<!-- ``` -->
-<!---->
-<!-- As you can see, Flux is not able to reconcile the state right now. That's -->
-<!-- because the path within the bucket does not exist yet. As mentioned, Kratix will -->
-<!-- create it when the cluster is registered. -->
-
 ### Register the cluster with Kratix
 
 With the Worker cluster ready, we can now register it with Kratix. Note that the
@@ -529,25 +504,6 @@ That means that the Jenkins Promise dependencies will now be scheduled to the
 Worker cluster. As previously mentioned, one of those dependencies is the
 Jenkins Operator.
 
-<!---->
-<!-- If you fetch the WorkPlacements, you should see that the Jenkins Promise has now -->
-<!-- been scheduled to the Worker cluster. -->
-<!---->
-<!-- Verify the Work Placements: -->
-<!---->
-<!-- ```bash -->
-<!-- kubectl --context kind-platform get workplacements.platform.kratix.io -->
-<!-- ``` -->
-<!---->
-<!-- The above command will give an output similar to: -->
-<!-- ```shell-session -->
-<!-- NAME                             AGE -->
-<!-- jenkins-default.worker-cluster   1h -->
-<!-- ``` -->
-
-<!-- That means that all the dependencies the Jenkins Promise needs to fulfill a -->
-<!-- Jenkins request are now penciled to be installed in the Worker cluster. One of -->
-<!-- the dependencies for the Jenkins Promise is the Jenkins Operator itself. -->
 
 Verify that the Jenkins Operator starts in the Worker cluster:
 
@@ -566,6 +522,9 @@ jenkins-operator   0/1     0            0           0s
 jenkins-operator   0/1     1            0           0s
 jenkins-operator   1/1     1            1           11s
 ```
+
+Once the jenkins-operator deployment is ready, press <kbd>Ctrl</kbd>+<kbd>C</kbd>
+to exit the watch mode.
 
 If at this stage we create another Kubernetes cluster and follow similar steps
 as the above, the Jenkins Promise dependencies would also be installed on the
@@ -702,7 +661,8 @@ jenkins-operator-7f58798d5c-sr825   1/1     Running   0          1h
 ```
 
 When the `Ready` column reports `1/1` for `jenkins-dev-example`, your Jenkins
-instance is fully deployed and ready to be accessed!
+instance is fully deployed and ready to be accessed! Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
+exit the watch mode.
 
 Go to [http://localhost:30269](http://localhost:30269) and check it out!
 
