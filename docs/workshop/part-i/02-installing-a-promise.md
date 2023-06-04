@@ -88,18 +88,39 @@ for details.
 
 </details>
 
-In the [next section](promise-theory), we'll unpack what's inside a Promise and explain the theory
-behind it.
+### Promise Architecture
+
+```mdx-code-block
+import PromiseDiagram from "/img/docs/workshop/promise-diagram.svg"
+```
+
+<figure class="diagram">
+  <PromiseDiagram className="medium"/>
+
+  <figcaption>A Promise in details</figcaption>
+</figure>
+
+At a very high-level, a Promise is made up of four parts:
+
+1. **The Promise API:** The Promise API is what the users of the Platform will
+   interact with when requesting a new instance of the Promised Service
+2. **The Imperative Pipeline:** A series of containers where Platform teams can
+   codify all of their business requirements.
+3. **The Declarative State:** The pipeline executes a series of *imperative*
+   steps top generate a *declarative state* that's then persisted into the State
+   Store. Other systems will then *converge* on that state.
+4. **The Dependencies**: A dependency is anything that must be installed or made
+   available on Worker clusters to enable the promised service to run.
+
+As you go through installing and using the Promise, we will unpack and highlight
+the parts of the Promise you are interacting with.
 
 ## Provide Jenkins-as-a-Service {#install-jenkins}
 
-In this tutorial, we will provide Jenkins-as-a-Service in the Platform, making
-it available on-demand for the developers using it.
-
 This tutorial will focus on making Jenkins-as-a-Service available, on-demand,
 for developers using the Platform. Kratix offers a variety of ready-to-use
-Promises in the [Kratix Marketplace](/marketplace), including a Jenkins Promise
-that we can utilize to complete this task. By following the [Promise
+Promises in the [Kratix Marketplace](/marketplace), including a Jenkins Promise.
+You will utilise this Promise to complete this task. By following the [Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins),
 you can find the installation steps.
 
@@ -113,7 +134,43 @@ kubectl apply \
 
 And that's it! Promise installed!
 
-However, if you look closely, the Kratix controller will be complaining:
+Once the Promise is installed, the Platform cluster is extended with a new API:
+the Jenkins Promise API. This API teaches the Platform cluster how to deal with
+requests for Jenkins instances.
+
+```bash
+kubectl --context kind-platform get crds | grep jenkins
+```
+
+The above command will give an output similar to:
+
+```shell-session
+jenkins.marketplace.kratix.io          2023-01-01T01:01:01Z
+```
+
+Kratix will also write to the State Store a declaration of state, informing any
+Worker clusters they should install the Promise dependencies. For the Jenkins
+Promise, the dependencies include the Jenkins Operator.
+
+However, at this state, we have no Worker cluster.
+
+<details>
+<summary>🤔 What's a Worker Cluster?</summary>
+
+In Kratix terms, a _Worker Cluster_ is any system _converging_ on the state
+declared by Kratix.
+
+It's important to note that Kratix makes no assumptions about the Worker cluster
+themselves. Although Worker clusters are often Kubernetes clusters, they may be
+any system that can interpret whatever state is being declared as desired.
+
+For example, you may write a Promise that tells Kratix to declare Terraform
+plans as desired state, and a Worker cluster may be a system applying these
+plans as they are written to the State Store.
+
+</details>
+
+In fact, if you look closely, the Kratix controller will be complaining:
 
 ```yaml
 kubectl --context kind-platform --namespace kratix-platform-system \
@@ -130,30 +187,10 @@ ERROR	Reconciler error {
 }
 ```
 
-To better explain what's going on, let's go through what just happens when
-Kratix receives a request.
+This is Kratix telling you that it cannot find any Clusters that can get the
+Jenkins Promise dependencies installed.
 
-When a Promise is installed, or when a service is requested, Kratix reacts by
-creating a _Work_.
-
-Verify the Works created with:
-```bash
-kubectl get works.platform.kratix.io
-```
-
-The above command will give an output similar to:
-
-```shell-session
-NAME              AGE
-jenkins-default   1h
-```
-
-Once a Work is created, the Kratix Scheduler kicks in. It tries to find a
-cluster that can run the workload defined in the Work. However, at present, we
-haven't registered any Clusters with Kratix, so it cannot schedule the workload
-just yet.
-
-Verify the registered clusters:
+You can also verify the registered clusters:
 
 ```bash
 kubectl --context kind-platform get clusters.platform.kratix.io --all-namespaces
@@ -164,13 +201,14 @@ The above command will give an output similar to:
 No resources found
 ```
 
-So, to fix the error, we must register a new Cluster. Let's do that now.
+So, to fix the error, we must create and register a new Worker Cluster. Let's do that
+now.
 
 ## Set up a Worker Cluster {#configure-worker}
 
 ### Create the cluster
 
-We'll create a second Kubernetes cluster with `kind`, and this cluster will be
+You'll create a second Kubernetes cluster with `kind`, and this cluster will be
 dedicated to running the Kratix workloads.
 
 From the `kratix` directory, create a new cluster:
@@ -412,37 +450,38 @@ page](https://fluxcd.io/flux/components/kustomize/kustomization/)
 
 </details>
 
-Once Flux finishes starting, verify the status of the Kustomizations:
-
-```bash
-kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system --watch
-```
-
-:::tip
-
-`kubectl` commands with the `--watch` flag block your terminal indefinetely. To
-exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>.
-
-:::
-
-
-The above command will give an output similar to:
-```shell-session
-NAME                        AGE   READY   STATUS
-kratix-workload-crds        20s   False   kustomization path not found: stat /tmp/kustomization-540356764/default/worker-cluster/crds: no such file or directory
-kratix-workload-resources   20s   False   dependency 'flux-system/kratix-workload-crds' is not ready
-```
-
-As you can see, Flux is not able to reconcile the state right now. That's
-because the path within the bucket does not exist yet. As mentioned, Kratix will
-create it when the cluster is registered.
+<!-- Once Flux finishes starting, verify the status of the Kustomizations: -->
+<!---->
+<!-- ```bash -->
+<!-- kubectl --context kind-worker get kustomizations.kustomize.toolkit.fluxcd.io --namespace flux-system --watch -->
+<!-- ``` -->
+<!---->
+<!-- :::tip -->
+<!---->
+<!-- `kubectl` commands with the `--watch` flag block your terminal indefinetely. To -->
+<!-- exit the watch mode, press <kbd>Ctrl</kbd>+<kbd>C</kbd>. -->
+<!---->
+<!-- ::: -->
+<!---->
+<!---->
+<!-- The above command will give an output similar to: -->
+<!-- ```shell-session -->
+<!-- NAME                        AGE   READY   STATUS -->
+<!-- kratix-workload-crds        20s   False   kustomization path not found: stat /tmp/kustomization-540356764/default/worker-cluster/crds: no such file or directory -->
+<!-- kratix-workload-resources   20s   False   dependency 'flux-system/kratix-workload-crds' is not ready -->
+<!-- ``` -->
+<!---->
+<!-- As you can see, Flux is not able to reconcile the state right now. That's -->
+<!-- because the path within the bucket does not exist yet. As mentioned, Kratix will -->
+<!-- create it when the cluster is registered. -->
 
 ### Register the cluster with Kratix
 
 With the Worker cluster ready, we can now register it with Kratix. Note that the
 order of operations here is not important; we could've registered the Worker
 first and then followed th steps above. Kratix would've scheduled to the State
-Store, and the state would eventually be applied to a Worker.
+Store path representing the Worker cluster, and the state would eventually be
+applied to a Worker.
 
 To register a cluster, create a `Cluster` object on your Platform cluster:
 
@@ -486,24 +525,29 @@ available both in the [State Store](../main/reference/statestore/intro) and the
 </details>
 
 With the Cluster registered, Kratix now have a place where it can run workloads.
-If you fetch the WorkPlacements, you should see that the Jenkins Promise has now
-been scheduled to the Worker cluster.
+That means that the Jenkins Promise dependencies will now be scheduled to the
+Worker cluster. As previously mentioned, one of those dependencies is the
+Jenkins Operator.
 
-Verify the Work Placements:
+<!---->
+<!-- If you fetch the WorkPlacements, you should see that the Jenkins Promise has now -->
+<!-- been scheduled to the Worker cluster. -->
+<!---->
+<!-- Verify the Work Placements: -->
+<!---->
+<!-- ```bash -->
+<!-- kubectl --context kind-platform get workplacements.platform.kratix.io -->
+<!-- ``` -->
+<!---->
+<!-- The above command will give an output similar to: -->
+<!-- ```shell-session -->
+<!-- NAME                             AGE -->
+<!-- jenkins-default.worker-cluster   1h -->
+<!-- ``` -->
 
-```bash
-kubectl --context kind-platform get workplacements.platform.kratix.io
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME                             AGE
-jenkins-default.worker-cluster   1h
-```
-
-That means that all the dependencies the Jenkins Promise needs to fulfill a
-Jenkins request are now penciled to be installed in the Worker cluster. One of
-the dependencies for the Jenkins Promise is the Jenkins Operator itself.
+<!-- That means that all the dependencies the Jenkins Promise needs to fulfill a -->
+<!-- Jenkins request are now penciled to be installed in the Worker cluster. One of -->
+<!-- the dependencies for the Jenkins Promise is the Jenkins Operator itself. -->
 
 Verify that the Jenkins Operator starts in the Worker cluster:
 
@@ -568,6 +612,20 @@ The above command will give an output similar to:
 jenkins.marketplace.kratix.io/example created
 ```
 
+<details>
+<summary>🤔 How do Platform users interact with the Promise API?</summary>
+
+In this example, users are interacting with the API using the `kubectl`
+directly. However, how users of your platform will, it's up to you.
+
+For example, you could have a
+[Backstage](https://www.syntasso.io/post/kratix-and-backstage-a-perfect-pair)
+instance on top of the API to facilitate the creation of services. Similarly,
+you can employ [Compass](https://www.syntasso.io/post/kratix-and-compass) as a
+driving force for your Platform. Kratix can seamlessly integrate with various
+systems such as GitOps Repositories, ticketing systems, or CI/CD tools.
+</details>
+
 When writing the Resource Request, the Platform user will have all the
 configuration options exposed to them as part of the Promise API, as defined by
 the Platform team. The Jenkins Promise we are using is exposing a single
@@ -575,46 +633,53 @@ configuration option: `spec.env` (see the [Jenkins Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
 When set to `prod`, the resulting instance will have backups enabled.
 
-Once Kratix receives the request, it will create a new Work.
+<details>
+<summary>🤔 How's the Promise API determined?</summary>
 
-Verify the Works (it may take a couple of minutes for the new Work to appear):
+The Promise API is fully defined by the Platform team. They have the choice to
+hide complexity, making it easy for users to request new services.
+Alternatively, they can offer users greater flexibility, allowing them to
+fine-tune lower-level details of the Service or select the specific cluster
+where the workload should run.
+</details>
+
+Once the request is created, Kratix will kick-off the Imperative Pipeline of the
+Promise. The Jenkins Promise Pipeline is a very basic pipeline that transforms
+the user's request into a Jenkins instance manifest.
+
+However, Pipelines can do much more. It is within the Pipeline that you define
+the business processes of your organisation, encapsulating the steps required to
+deliver the promised service on-demand. Through Pipelines, Platform teams have the
+flexibility to customise the Promise according to their specific business and
+compliance requirements.
+
+For instance, in an organization where all container images must undergo
+vulnerability scanning, you can include a Snyk image in your Promise. Similarly,
+if you wish to receive alerts for specific events, you can include a Slack
+image.
+
+Furthermore, the containers utilised in a pipeline are designed to be reusable.
+This allows Platform teams to encode specific rules once and apply them
+consistently across all services within the platform.
+
+Verify the Jenkins Pipeline execution:
 
 ```bash
-kubectl --context kind-platform get works.platform.kratix.io --watch
+kubectl --context kind-platform get pods
 ```
 
 The above command will give an output similar to:
 ```shell-session
-NAME                              AGE
-jenkins-default                   1h
-//highlight-next-line
-jenkins-default-default-example   1m
+NAME                                     READY   STATUS      RESTARTS   AGE
+request-pipeline-jenkins-default-c726b   0/1     Completed   0          71s
 ```
 
-Once the Work is created, Kratix will look for available clusters and determine
-where the Workload should be scheduled. As we only have on cluster registered,
-it will be scheduled to that cluster.
+Once the pipeline completes, Kratix will write the documents it outputted (i.e.
+the declaration of state) to the directory within the bucket that the Worker
+cluster is watching. You will soon see the Jenkins instance pod starting up on
+the Worker cluster.
 
-Verify the Work Placements:
-
-```bash
-kubectl --context kind-platform get workplacements.platform.kratix.io --watch
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME                                               AGE
-//highlight-next-line
-jenkins-default-default-example.worker-cluster     1m
-jenkins-default.worker-cluster                     1h
-```
-
-Kratix will then write the documents to the directory within the bucket that the
-Worker cluster is watching. You will soon see the Jenkins instance pod starting
-up on the Worker cluster.
-
-Verify the Jenkins instance is booting up (it may take a couple of minutes, and
-it may go into a _Terminating_ a few times):
+Verify the Jenkins instance is booting up:
 
 ```bash
 kubectl --context kind-worker get pods --watch

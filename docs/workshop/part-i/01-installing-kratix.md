@@ -66,8 +66,8 @@ Kubernetes cluster where Kratix itself is installed is often referred to as "the
 platform". The first step in getting Kratix up and running is to have a hold of
 a Kubernetes cluster where we can install it.
 
-In this workshop, we will use `kind` to run Kubernetes clusters locally. Let's
-go ahead and create the Platform cluster:
+In this workshop, we will use `kind` to run Kubernetes clusters locally. Run the
+following command to create the Platform cluster:
 
 ```bash
 kind create cluster --name platform \
@@ -75,7 +75,7 @@ kind create cluster --name platform \
     --config config/samples/kind-platform-config.yaml
 ```
 
-The command above will create a cluster on the specified Kubernetes version and
+This command will create a cluster on the specified Kubernetes version and
 update your local `.kube/config` with the credentials to access the cluster. We
 are also providing `kind` with a config file to simplify accessing the services
 running in the cluster.
@@ -108,7 +108,7 @@ Run the command below to deploy Kratix on the Platform cluster:
 kubectl --context kind-platform apply --filename distribution/kratix.yaml
 ```
 
-The command above will create a Kratix deployment (on the
+This command will create a Kratix deployment (on the
 `kratix-platform-system` namespace). It will also install all the APIs that
 Kratix needs.
 
