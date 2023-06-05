@@ -7,7 +7,7 @@ slug: ../installing-a-promise
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install Kratix](installing-kratix) <br />
-👉🏾&nbsp;&nbsp; Next: [Unpacking a Promise](promise-theory)
+👉🏾&nbsp;&nbsp; Next: [Using a Compound Promise](multiple-promises)
 
 <hr />
 
@@ -137,6 +137,17 @@ And that's it! Promise installed!
 Once the Promise is installed, the Platform cluster is extended with a new API:
 the Jenkins Promise API. This API teaches the Platform cluster how to deal with
 requests for Jenkins instances.
+
+<details>
+<summary>🤔 How's the Promise API determined?</summary>
+
+The Promise API is fully defined by the Platform team. They have the choice to
+hide complexity, making it easy for users to request new services.
+Alternatively, they can offer users greater flexibility, allowing them to
+fine-tune lower-level details of the Service or select the specific cluster
+where the workload should run.
+</details>
+
 
 ```bash
 kubectl --context kind-platform get crds | grep jenkins
@@ -592,16 +603,6 @@ configuration option: `spec.env` (see the [Jenkins Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
 When set to `prod`, the resulting instance will have backups enabled.
 
-<details>
-<summary>🤔 How's the Promise API determined?</summary>
-
-The Promise API is fully defined by the Platform team. They have the choice to
-hide complexity, making it easy for users to request new services.
-Alternatively, they can offer users greater flexibility, allowing them to
-fine-tune lower-level details of the Service or select the specific cluster
-where the workload should run.
-</details>
-
 Once the request is created, Kratix will kick-off the Imperative Pipeline of the
 Promise. The Jenkins Promise Pipeline is a very basic pipeline that transforms
 the user's request into a Jenkins instance manifest.
@@ -732,5 +733,5 @@ To recap the steps we took:
 ## 🎉 &nbsp; Congratulations!
 
 ✅&nbsp;&nbsp;Your promise is now installed. <br />
-👉🏾&nbsp;&nbsp;Next, let's learn more about th[e theory behind
-Promises](promise-theory)
+👉🏾&nbsp;&nbsp;Next, let's learn more about [Compound
+Promises](multiple-promises)

@@ -14,9 +14,9 @@ import InstallationCompleteDiagram from "/img/docs/workshop/compound-promise-ins
 import PipelineDiagram from "/img/docs/workshop/compound-promise-pipeline-execution-diagram.svg"
 ```
 
-This is Part 4 of [a series](intro) illustrating how Kratix works. <br />
+This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install a Kratix Promise](installing-a-promise) <br />
-👉🏾&nbsp;&nbsp; Next: [Unpacking a Promise](promise-theory)
+👉🏾&nbsp;&nbsp; Next: [What's next](whats-next)
 
 <hr />
 

@@ -42,9 +42,6 @@ Learn more about Kratix and install Kratix locally using KinD.
 1. [Install a Kratix Promise](installing-a-promise) <br />
 Learn more about Kratix Promises and install a sample Jenkins Promise.
 
-1. [Unpacking a Promise](promise-theory) <br />
-Learn about what parts make up a Promise and how to leverage the power of promises in your platform.
-
 1. [Using multiple Kratix Promises](multiple-promises) <br />
 Learn about Compound Promises, and how the combination of Promises can provide
 more compelling developer experiences.
