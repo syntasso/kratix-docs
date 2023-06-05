@@ -262,10 +262,10 @@ kubectl --context kind-platform get promises --watch
 The above command will give an output similar to:
 ```shell-session
 cluster.platform.kratix.io/platform-cluster labeled
-NAME         AGE
-easyapp   10m
-nginx-ingress   0s
-postgresql      0s
+NAME            AGE
+easyapp         10m
+nginx-ingress    0s
+postgresql       0s
 ...
 ```
 

@@ -4,6 +4,12 @@ title: Installing a Promise
 id: installing-a-promise
 slug: ../installing-a-promise
 ---
+```mdx-code-block
+import InstallErrorDiagram from "/img/docs/workshop/install-a-promise-install-error.svg"
+import InstallSuccessDiagram from "/img/docs/workshop/install-a-promise-install-success.svg"
+import ResourceRequestDiagram from "/img/docs/workshop/install-a-promise-request.svg"
+import PipelineDiagram from "/img/docs/workshop/install-a-promise-pipeline.svg"
+```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install Kratix](installing-kratix) <br />
@@ -80,7 +86,7 @@ provide anything-as-a-Service, and are composed of mainly three pieces:
    <summary>🤔 How's that different from Helm? Or Crossplane? Or... </summary>
 
 Kratix positions itself as a framework for building Platforms. Instead of
-thinkins _Kratix or X_, think **Kratix and X**. The team has written
+thinking _Kratix or X_, think **Kratix and X**. The team has written
 extensively on how Kratix can work together with other Kubernetes tools.
 Please check [The Value of
 Kratix](https://kratix.io/docs/main/value-of-kratix#collaboration-with-other-tools)
@@ -200,6 +206,10 @@ ERROR	Reconciler error {
 
 This is Kratix telling you that it cannot find any Clusters that can get the
 Jenkins Promise dependencies installed.
+
+<figure class="diagram">
+  <InstallErrorDiagram className="large"/>
+</figure>
 
 You can also verify the registered clusters:
 
@@ -516,6 +526,13 @@ Worker cluster. As previously mentioned, one of those dependencies is the
 Jenkins Operator.
 
 
+<figure class="diagram">
+  <InstallSuccessDiagram className="large"/>
+
+  <figcaption>Installation of the Jenkins Promise</figcaption>
+</figure>
+
+
 Verify that the Jenkins Operator starts in the Worker cluster:
 
 ```shell-session
@@ -613,6 +630,12 @@ deliver the promised service on-demand. Through Pipelines, Platform teams have t
 flexibility to customise the Promise according to their specific business and
 compliance requirements.
 
+
+<figure class="diagram">
+  <PipelineDiagram className="large"/>
+  <figcaption>An example multi-stage Pipeline</figcaption>
+</figure>
+
 For instance, in an organization where all container images must undergo
 vulnerability scanning, you can include a Snyk image in your Promise. Similarly,
 if you wish to receive alerts for specific events, you can include a Slack
@@ -638,6 +661,10 @@ Once the pipeline completes, Kratix will write the documents it outputted (i.e.
 the declaration of state) to the directory within the bucket that the Worker
 cluster is watching. You will soon see the Jenkins instance pod starting up on
 the Worker cluster.
+
+<figure class="diagram">
+  <ResourceRequestDiagram className="large"/>
+</figure>
 
 Verify the Jenkins instance is booting up:
 
