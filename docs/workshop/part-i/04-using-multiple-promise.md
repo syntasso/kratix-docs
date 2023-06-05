@@ -98,7 +98,7 @@ through the same steps you ran during the Worker cluster registration in
 There's a script in the `kratix` directory that will do exactly that. Run:
 
 ```bash
-./scripts/register-worker --name platform-cluster --context kind-platform
+./scripts/register-worker --name platform-cluster --context kind-platform --state-store minio-store
 ```
 
 The Platform cluster should now be registered with Kratix and ready to receive
@@ -255,7 +255,7 @@ Note that the Platform cluster is missing the required label. Adding the missing
 label should cause the system to converge to the desired state:
 
 ```bash
-kubectl --context kind-platform label cluster platform-cluster environment=platform
+kubectl --context kind-platform label cluster platform-cluster environment=platform; \
 kubectl --context kind-platform get promises --watch
 ```
 
