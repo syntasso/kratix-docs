@@ -19,6 +19,16 @@
     ]
   },
   {
+    "name": "vcluster",
+    "description": "An open source tool for creating and managing virtual Kubernetes clusters. A Kubernetes control plane in a namespace.",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/vcluster",
+    "logoUrl": "/img/marketplace/vcluster.svg",
+    "categories": [
+      "Infrastructure Provisioning",
+      "Kubernetes"
+    ]
+  },
+  {
     "name": "RabbitMQ",
     "description": "A message broker that implements the Advanced Message Queuing Protocol (AMQP)",
     "url": "https://github.com/syntasso/promise-rabbitmq",
