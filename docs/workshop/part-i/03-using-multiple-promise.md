@@ -412,7 +412,7 @@ service.
 <figure class="diagram">
   <PipelineDiagram className="large"/>
 
-  <figcaption>EasyApp Pipeline execution; NGINX ommited from brevity</figcaption>
+  <figcaption>EasyApp Pipeline execution; NGINX omitted from brevity</figcaption>
 </figure>
 
 Verify the Pipelines running on the Platform cluster:
