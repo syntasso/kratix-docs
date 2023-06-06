@@ -410,9 +410,9 @@ service.
 
 
 <figure class="diagram">
-  <PipelineDiagram className="small"/>
+  <PipelineDiagram className="large"/>
 
-  <figcaption>EasyApp Pipeline execution</figcaption>
+  <figcaption>EasyApp Pipeline execution; NGINX ommited from brevity</figcaption>
 </figure>
 
 Verify the Pipelines running on the Platform cluster:
