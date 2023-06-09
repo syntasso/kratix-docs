@@ -9,6 +9,7 @@ import InstallErrorDiagram from "/img/docs/workshop/install-a-promise-install-er
 import InstallSuccessDiagram from "/img/docs/workshop/install-a-promise-install-success.svg"
 import ResourceRequestDiagram from "/img/docs/workshop/install-a-promise-request.svg"
 import PipelineDiagram from "/img/docs/workshop/install-a-promise-pipeline.svg"
+import PartialPromise from '../../_partials/_promise-architecture.md';
 ```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
@@ -29,7 +30,7 @@ have a deployment of both Kratix and MinIO running on your Platform cluster.
 Verify the current state of your installation:
 
 ```bash
-kubectl --context kind-platform get deployments --namespace kratix-platform-system
+kubectl --context $PLATFORM get deployments --namespace kratix-platform-system
 ```
 
 The above command will give an output similar to:
@@ -44,7 +45,7 @@ You should also have a State Store created and configured to point to the
 `kratix` bucket on MinIO. Verify the `bucketstatestores`:
 
 ```bash
-kubectl --context kind-platform get bucketstatestores.platform.kratix.io
+kubectl --context $PLATFORM get bucketstatestores.platform.kratix.io
 ```
 
 The above command will give an output similar to:
@@ -58,7 +59,7 @@ minio-store   1h
 To check the configuration parameters, run:
 
 ```bash
-kubectl --context kind-platform \
+kubectl --context $PLATFORM \
    describe bucketstatestore minio-store
 ```
 
@@ -96,29 +97,9 @@ for details.
 
 ### Promise Architecture
 
-```mdx-code-block
-import PromiseDiagram from "/img/docs/workshop/promise-diagram.svg"
-```
+<PartialPromise />
 
-<figure class="diagram">
-  <PromiseDiagram className="medium"/>
-
-  <figcaption>A Promise in details</figcaption>
-</figure>
-
-At a very high-level, a Promise is made up of four parts:
-
-1. **The Promise API:** The Promise API is what the users of the Platform will
-   interact with when requesting a new instance of the Promised Service
-2. **The Imperative Pipeline:** A series of containers where Platform teams can
-   codify all of their business requirements.
-3. **The Declarative State:** The pipeline executes a series of *imperative*
-   steps to generate a *declarative state* that's then persisted into the State
-   Store. Other systems will then *converge* on that state.
-4. **The Dependencies**: A dependency is anything that must be installed or made
-   available on Worker clusters to enable the promised service to run.
-
-As you go through installing and using the Promise, we will unpack and highlight
+As you go through installing and using the Promise, this tutorial will unpack and highlight
 the parts of the Promise you are interacting with.
 
 ## Provide Jenkins-as-a-Service {#install-jenkins}
@@ -133,9 +114,9 @@ you can find the installation steps.
 Install the Jenkins Promise:
 
 ```bash
-kubectl apply \
-   --context kind-platform \
-   --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
+kubectl --context $PLATFORM \
+  apply \
+  --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
 ```
 
 And that's it! Promise installed!
@@ -156,7 +137,7 @@ where the workload should run.
 
 
 ```bash
-kubectl --context kind-platform get crds | grep jenkins
+kubectl --context $PLATFORM get crds | grep jenkins
 ```
 
 The above command will give an output similar to:
@@ -169,7 +150,7 @@ Kratix will also write to the State Store a declaration of state, informing any
 Worker clusters they should install the Promise dependencies. For the Jenkins
 Promise, the dependencies include the Jenkins Operator.
 
-However, at this state, we have no Worker cluster.
+However, at this state, there are no Worker clusters.
 
 <details>
 <summary>🤔 What's a Worker Cluster?</summary>
@@ -190,7 +171,7 @@ plans as they are written to the State Store.
 In fact, if you look closely, the Kratix controller will be complaining:
 
 ```yaml
-kubectl --context kind-platform --namespace kratix-platform-system \
+kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
   --container manager | grep "Reconciler error"
 ```
@@ -214,7 +195,7 @@ Jenkins Promise dependencies installed.
 You can also verify the registered clusters:
 
 ```bash
-kubectl --context kind-platform get clusters.platform.kratix.io --all-namespaces
+kubectl --context $PLATFORM get clusters.platform.kratix.io --all-namespaces
 ```
 
 The above command will give an output similar to:
@@ -222,14 +203,13 @@ The above command will give an output similar to:
 No resources found
 ```
 
-So, to fix the error, we must create and register a new Worker Cluster. Let's do that
-now.
+So, to fix the error, you must create and register a new Worker Cluster.
 
 ## Set up a Worker Cluster {#configure-worker}
 
 ### Create the cluster
 
-You'll create a second Kubernetes cluster with `kind`, and this cluster will be
+You will create a second Kubernetes cluster with `kind`, and this cluster will be
 dedicated to running the Kratix workloads.
 
 From the `kratix` directory, create a new cluster:
@@ -240,9 +220,9 @@ kind create cluster --name worker \
      --config config/samples/kind-worker-config.yaml
 ```
 
-Similar to when we created the Plaform cluster, `kind` will update your local
-configuration with the details to access the worker cluster. We are also
-providing `kind` with a configuration file to facilitate accessing the deployed
+Similar to when you created the Platform cluster, `kind` will update your local
+configuration with the details to access the worker cluster. This command also
+provides `kind` with a configuration file to facilitate accessing the deployed
 services later on.
 
 Once the creation completes, you can reach your worker cluster on the
@@ -251,7 +231,8 @@ Once the creation completes, you can reach your worker cluster on the
 Verify the cluster is ready:
 
 ```bash
-kubectl --context kind-worker cluster-info
+export WORKER="kind-worker"
+kubectl --context $WORKER cluster-info
 ```
 
 The above command will give an output similar to:
@@ -262,7 +243,11 @@ CoreDNS is running at https://127.0.0.1:59160/api/v1/...
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
-Before registering the Worker cluster with the Platform, let's make it ready to
+:::tip
+Note that You have now saved a local environment variable `WORKER` to make it easier for the ongoing commands in this workshop
+:::
+
+Before registering the Worker cluster with the Platform, you will need to make it ready to
 receive the workloads.
 
 ### Configure the cluster
@@ -270,7 +255,7 @@ receive the workloads.
 Kratix schedules works by writing a state declaration (following Kubernetes
 declare-and-converge pattern) to the designated State Store. When it comes to
 reconciling the declared state, Kratix remains agnostic about the specific tool
-to be used on the clusters. In this tutorial, we will utilise
+to be used on the clusters. In this tutorial, you will utilise
 [Flux](https://fluxcd.io/) on the Worker, and configure it to reconcile the
 state from the MinIO bucket.
 
@@ -278,7 +263,7 @@ To install and configure Flux, run the following script from the Kratix
 repository:
 
 ```bash
-./scripts/install-gitops --context kind-worker --path worker-cluster
+./scripts/install-gitops --context $WORKER --path worker-cluster
 ```
 
 The script above will:
@@ -298,26 +283,26 @@ If you prefer to configure the Worker cluster manually, follow the steps below.
 Install Flux on the Worker cluster:
 
 ```bash
-kubectl apply \
-   --context kind-worker \
-   --filename https://github.com/fluxcd/flux2/releases/download/v2.0.0-rc.3/install.yaml
+kubectl --context $WORKER \
+  apply \
+  --filename https://github.com/fluxcd/flux2/releases/download/v2.0.0-rc.3/install.yaml
 ```
 
-Next, let's tell Flux about the MinIO bucket. For that, we will create a new
+Next, Flux must be configured to read from the MinIO bucket. For that, you will create a new
 Flux [Bucket Source](https://fluxcd.io/flux/components/source/buckets/),
 together with a Secret containing the bucket credentials.
 
 :::caution
 
 You may notice that the value of the Bucket `endpoint` on the document below is
-set to `172.18.0.2:31337`. Since the MinIO server is running on the Platform
-cluster, and we want to access it from the Worker cluster, we cannot leverage
-Kubernetes DNS as we did in the previous tutorial.
+set to `172.18.0.2:31337`.
+
+In the previous tutorial you were able to access the server with in-cluster Kubernetes
+DNS. Since Flux now  need to access MinIO _across_ clusters you will neeed to use
+an externally available endpoint.
 
 `172.18.0.2` will often be the address of the Platform cluster running on KinD.
-Please make sure to double check this address.
-
-Verify the Platform control-plane IP:
+You can confirm this address with the following command:
 
 ```bash
 docker inspect platform-control-plane | grep '"IPAddress": "172' | awk -F '"' '{print $4}'
@@ -335,7 +320,7 @@ The port part of the endpoint should always be 31337. Verify the NodePort of the
 MinIO service in the Platform cluster:
 
 ```bash
-kubectl --context kind-platform get services minio --namespace kratix-platform-system
+kubectl --context $PLATFORM get services minio --namespace kratix-platform-system
 ```
 
 The above command will give an output similar to:
@@ -350,7 +335,7 @@ minio   NodePort   10.96.45.28   <none>        80:31337/TCP   1h
 Create the Flux Source Bucket (and Secret):
 
 ```yaml
-cat <<EOF | kubectl --context kind-worker apply -f -
+cat <<EOF | kubectl --context $WORKER apply -f -
 ---
 apiVersion: v1
 kind: Secret
@@ -384,13 +369,13 @@ secret/minio-credentials created
 bucket.source.toolkit.fluxcd.io/kratix-bucket created
 ```
 
-We won't dive into details of how to configure Flux Sources, but please read on their
+This tutorial will not dive into details of how to configure Flux Sources, but please read on their
 [documentation](https://fluxcd.io/flux/components/source/) if you are curious.
 
 Once the Bucket Source is created, validates Flux can reach the bucket:
 
 ```bash
-kubectl --context kind-worker get buckets.source.toolkit.fluxcd.io --namespace flux-system
+kubectl --context $WORKER get buckets.source.toolkit.fluxcd.io --namespace flux-system
 ```
 
 The above command will give an output similar to:
@@ -407,7 +392,7 @@ Controller](https://fluxcd.io/flux/components/kustomize/). You can define a Flux
 Create the Flux Kustomizations:
 
 ```yaml
-cat <<EOF | kubectl --context kind-worker apply --filename -
+cat <<EOF | kubectl --context $WORKER apply --filename -
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -445,7 +430,7 @@ kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-crds created
 kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-resources created
 ```
 
-You will notice that we are creating two Kustomizations. When scheduling
+You will notice that there are two Kustomizations created. When scheduling
 Works, Kratix will separate the documents based on their GVK (Group, Version,
 Kind):
 
@@ -455,7 +440,7 @@ Kind):
 - All other documents will be written to a specific `resources` path within the
   State Store.
 
-When we later on register the Cluster, Kratix will use the cluster's `namespace`
+Later when you register the Cluster, Kratix will use the cluster's `namespace`
 and `name` to build the full path for that cluster within the State Store.
 
 The first Kustomization above is for the CRDs, while the second is for the other
@@ -492,16 +477,16 @@ exit the watch mode.
 
 ### Register the cluster with Kratix
 
-With the Worker cluster ready, we can now register it with Kratix. Note that the
-order of operations here is not important; we could've registered the Worker
-first and then followed th steps above. Kratix would've scheduled to the State
+With the Worker cluster ready, you can now register it with Kratix. Note that the
+order of operations here is not important; you could have registered the Worker
+first and then followed th steps above. Kratix would have scheduled to the State
 Store path representing the Worker cluster, and the state would eventually be
 applied to a Worker.
 
 To register a cluster, create a `Cluster` object on your Platform cluster:
 
 ```yaml
-cat <<EOF | kubectl --context kind-platform apply --filename -
+cat <<EOF | kubectl --context $PLATFORM apply --filename -
 apiVersion: platform.kratix.io/v1alpha1
 kind: Cluster
 metadata:
@@ -528,8 +513,8 @@ The Kratix Cluster Resource is the representation of a system where workloads
 can be scheduled to. Those system are usually other Kubernetes clusters.
 
 The only required field is `spec.stateStoreRef`. It contains a reference to a State
-Store present in the Platform. In our example, it points to the `minio-store`
-object we created on the previous step. The `spec.StateStoreRef.kind` determines
+Store present in the Platform. In this example, it points to the `minio-store`
+object you created on the previous step. The `spec.StateStoreRef.kind` determines
 what is the kind of State Store being used by this Cluster.
 
 That means different Clusters can use different backing storage. For example,
@@ -555,7 +540,7 @@ Jenkins Operator.
 Verify that the Jenkins Operator starts in the Worker cluster:
 
 ```shell-session
-kubectl --context kind-worker get deployments --watch
+kubectl --context $WORKER get deployments --watch
 ```
 
 The above command will give an output similar to (it may take a couple of
@@ -573,12 +558,15 @@ jenkins-operator   1/1     1            1           11s
 Once the jenkins-operator deployment is ready, press <kbd>Ctrl</kbd>+<kbd>C</kbd>
 to exit the watch mode.
 
-If at this stage we create another Kubernetes cluster and follow similar steps
+If at this stage you create another Kubernetes cluster and follow similar steps
 as the above, the Jenkins Promise dependencies would also be installed on the
-new Worker cluster. We will later on see how we can nudge Kratix to only make
-certain Promises available in certain clusters.
+new Worker cluster. 
 
-Great! The Jenkins Promise installation is now complete. Let's switch roles for
+
+Later in this tutorial you will learn how to make certain Promises available in
+certain clusters based on Promise configurations.
+
+Great! The Jenkins Promise installation is now complete. It is time to switch roles for
 a moment and become the developer requesting a new Jenkins instance.
 
 ## Request a Jenkins Instance {#request-jenkins}
@@ -587,7 +575,7 @@ As a user of the Platform, you can find out what's available by checking the
 installed Promises:
 
 ```bash
-kubectl --context kind-platform get promises.platform.kratix.io
+kubectl --context $PLATFORM get promises.platform.kratix.io
 ```
 
 The above command will give an output similar to:
@@ -602,7 +590,7 @@ Request to the Platform.
 Create a Jenkins Instance:
 
 ```yaml
-cat <<EOF | kubectl --context kind-platform apply --filename -
+cat <<EOF | kubectl --context $PLATFORM apply --filename -
 apiVersion: marketplace.kratix.io/v1alpha1
 kind: jenkins
 metadata:
@@ -634,7 +622,7 @@ systems such as GitOps Repositories, ticketing systems, or CI/CD tools.
 
 When writing the Resource Request, the Platform user will have all the
 configuration options exposed to them as part of the Promise API, as defined by
-the Platform team. The Jenkins Promise we are using is exposing a single
+the Platform team. The Jenkins Promise exposes a single
 configuration option: `spec.env` (see the [Jenkins Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
 When set to `prod`, the resulting instance will have backups enabled.
@@ -667,7 +655,7 @@ consistently across all services within the platform.
 Verify the Jenkins Pipeline execution:
 
 ```bash
-kubectl --context kind-platform get pods
+kubectl --context $PLATFORM get pods
 ```
 
 The above command will give an output similar to:
@@ -688,7 +676,7 @@ the Worker cluster.
 Verify the Jenkins instance is booting up:
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to:
@@ -719,7 +707,7 @@ If you gave your Jenkins a different name, you may need port-forwarding to
 access the running instance:
 
 ```shell-session
-kubectl --context kind-worker port-forward pod/jenkins-dev-<NAME> 8080:30269
+kubectl --context $WORKER port-forward pod/jenkins-dev-<NAME> 8080:30269
 ```
 
 :::
@@ -731,20 +719,20 @@ To login to Jenkins, you will need to fetch the credentials on the Worker
 cluster:
 
 ```bash
-kubectl get secrets --context kind-worker --selector app=jenkins-operator -o go-template='{{range .items}}{{"username: "}}{{.data.user|base64decode}}{{"\n"}}{{"password: "}}{{.data.password|base64decode}}{{"\n"}}{{end}}'
+kubectl --context $WORKER get secrets --selector app=jenkins-operator -o go-template='{{range .items}}{{"username: "}}{{.data.user|base64decode}}{{"\n"}}{{"password: "}}{{.data.password|base64decode}}{{"\n"}}{{end}}'
 ```
 
 </details>
 
 ## Clean up
 
-We won't be using the Jenkins or the Jenkins Promise anymore. So let's go ahead
-and delete the resources.
+The next steps of the tutorial will not require on this Jenkins promise. Go ahead
+and delete the resource to minimise the compute required to run this tutorial.
 
 Delete the Jenkins Promise:
 
 ```bash
-kubectl --context kind-platform delete promise jenkins
+kubectl --context $PLATFORM delete promise jenkins
 ```
 
 The above command will give an output similar to:
@@ -752,13 +740,13 @@ The above command will give an output similar to:
 promise.platform.kratix.io "jenkins" deleted
 ```
 
-The delete command will also cascade-delete all traces of Jenkins from our
+The delete command will also cascade-delete all traces of Jenkins from the
 Platform, including the deployed Jenkins on the Worker cluster.
 
 Verify that the Jenkins instance gets deleted:
 
 ```bash
-kubectl get pods --context kind-worker
+kubectl --context $WORKER get pods
 ```
 
 The above command will give an output similar to (it may take a few minutes):
@@ -769,7 +757,7 @@ No resources found in default namespace.
 
 ## Summary
 
-To recap the steps we took:
+To recap the steps you took:
 
 1. ✅&nbsp;&nbsp;Installed the Jenkins Promise
 1. ✅&nbsp;&nbsp;Created and configured a Worker cluster
@@ -778,6 +766,6 @@ To recap the steps we took:
 
 ## 🎉 &nbsp; Congratulations!
 
-✅&nbsp;&nbsp;Your promise is now installed. <br />
-👉🏾&nbsp;&nbsp;Next, let's learn more about [Compound
+✅&nbsp;&nbsp;Your Promise is now installed. <br />
+👉🏾&nbsp;&nbsp;Next, you will learn more about [Compound
 Promises](multiple-promises)

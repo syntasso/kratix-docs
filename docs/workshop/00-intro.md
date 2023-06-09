@@ -14,7 +14,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 <img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
 
 This workshop introduces you to the [Kratix](https://www.kratix.io) framework.
-We have created a series of tutorials that build up your understanding of what
+Over a series of tutorials you will build a deeper understanding of what
 Kratix is, how Kratix works, and how you can use Kratix to deliver a first-class
 platform within your organisation.
 
@@ -32,7 +32,7 @@ provide a better developer experience.
 ## The series
 
 This workshop is divided into two parts. On Part I, the focus is on operating
-Kratix. On Part II, we will dive into writing and extending Promises.
+Kratix. On Part II, you will dive into writing and extending Promises.
 
 ### Part I
 
@@ -48,18 +48,29 @@ more compelling developer experiences.
 
 ### Part II
 
-1. [Writing and installing a Kratix Promise](writing-a-promise/) <br />
-Write a Jenkins Promise and deploy it to Kratix.
+1. [Create your first service API](creating-an-api) <br />
+Learn more about how to design and implement an API using Kratix Promises.
 
-1. [Enhancing a Kratix Promise](enhancing-a-promise/) <br />
-Extend an existing sample Postgres Promise by configuring specifically for you, your team, and your organisation.
+1. [Deliver a service on each user request](service-on-demand) <br />
+Learn more about the Promise pipeline and how it can provision an on-demand request.
+
+1. [Extracting shared dependencies](shared-dependencies) <br />
+Learn more about how a Promise can pre-install shared dependencies to make vending
+instances easier and faster.
+
+1. [Intentionally schedule Promise resources](schedule-promise) <br />
+Learn more about how you, as the platform team, can manage where resources are
+installed to manage capacity, security, and other business requirements.
+
+1. [Update the Resource Request status](update-status) <br />
+Use what you have learned so far to make one more update to your Promise
+which provides Application Developers context on the status of their Request.
 
 ### Conclusion
 
 1. [Final Thoughts](whats-next) <br />
 How can Kratix help you?
 
-## 🥁 Let's start
+## 🥁 Time to get started
 
 Begin with [setting up your machine for the workshop](setup).
-

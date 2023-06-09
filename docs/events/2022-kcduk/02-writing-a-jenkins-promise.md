@@ -420,7 +420,7 @@ spec:
   toolkit: jenkins
 ```
 
-You can now send the resource request to Kratix:
+You can now send the Resource Request to Kratix:
 
 ```bash title="Request a new Jenkins"
 kubectl apply --context $PLATFORM --filename resource-request.yaml

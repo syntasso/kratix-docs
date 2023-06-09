@@ -96,10 +96,20 @@
 
 figure.diagram {
   text-align: center;
+  &.right {
+    float: right;
+
+    margin: 0 auto;
+  }
 
   & > figcaption {
     font-size: 0.75rem;
   }
+
+  .tiny {
+    width: 35%;
+  }
+
   .small {
     width: 65%;
   }
@@ -108,5 +118,8 @@ figure.diagram {
     width: 75%;
   }
 
+  .fullwidth {
+    width: 100%;
+  }
 }
 

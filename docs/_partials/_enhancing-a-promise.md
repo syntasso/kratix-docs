@@ -460,7 +460,7 @@ set -x
 
 base_instance="/tmp/transfer/minimal-postgres-manifest.yaml"
 
-# Read current values from the provided resource request
+# Read current values from the provided Resource Request
 name="$(yq eval '.metadata.name' /input/object.yaml)"
 
 env_type="$(yq eval '.spec.env // "dev"' /input/object.yaml)"
@@ -785,7 +785,7 @@ To recap the steps we took:
 
 <br />
 
-## Cleanup environment {#cleanup}
+## Clean up environment {#cleanup}
 To clean up your environment first delete the Resource Requests for the Postgres instance
 
 ```bash

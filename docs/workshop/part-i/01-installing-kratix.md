@@ -24,7 +24,7 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 ### Using Kratix to build your platform you can:
 
 * use GitOps workflow with Flux and familiar Kubernetes-native constructs.
-* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”. We'll talk more about Kratix Promises in [the next step](installing-a-promise).
+* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”.This tutorial will talk more about Kratix Promises in [the next step](installing-a-promise).
 * create a flexible platform with your paved paths as Promises.
 * evolve your platform easily as your business needs change.
 * start small on a laptop and expand to multi-team, multi-cluster, multi-region, and multi-cloud with a consistent API everywhere.
@@ -64,9 +64,9 @@ cd kratix
 Kratix leverages the GitOps toolkit to deliver multi-cluster capabilities. The
 Kubernetes cluster where Kratix itself is installed is often referred to as "the
 platform". The first step in getting Kratix up and running is to have a hold of
-a Kubernetes cluster where we can install it.
+a Kubernetes cluster where you can install it.
 
-In this workshop, we will use `kind` to run Kubernetes clusters locally. Run the
+In this workshop, you will use `kind` to run Kubernetes clusters locally. Run the
 following command to create the Platform cluster:
 
 ```bash
@@ -76,7 +76,7 @@ kind create cluster --name platform \
 ```
 
 This command will create a cluster on the specified Kubernetes version and
-update your local `.kube/config` with the credentials to access the cluster. We
+update your local `.kube/config` with the credentials to access the cluster. You
 are also providing `kind` with a config file to simplify accessing the services
 running in the cluster.
 
@@ -86,7 +86,8 @@ Once the creation completes, you can reach the local Platform cluster with the
 Verify the cluster is ready:
 
 ```bash
-kubectl --context kind-platform cluster-info
+export PLATFORM="kind-platform"
+kubectl --context $PLATFORM cluster-info
 ```
 
 The above command will give an output similar to:
@@ -98,6 +99,10 @@ CoreDNS is running at https://127.0.0.1:55960/api/v1/...
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
+:::tip
+Note that You have now saved a local environment variable `PLATFORM` to make it easier for the ongoing commands in this workshop
+:::
+
 ### Install Kratix {#kratix-setup}
 
 To install Kratix, all you need is the Kratix distribution file.
@@ -105,7 +110,7 @@ To install Kratix, all you need is the Kratix distribution file.
 Run the command below to deploy Kratix on the Platform cluster:
 
 ```bash
-kubectl --context kind-platform apply --filename distribution/kratix.yaml
+kubectl --context $PLATFORM apply --filename distribution/kratix.yaml
 ```
 
 This command will create a Kratix deployment (on the
@@ -115,7 +120,7 @@ Kratix needs.
 Verify that the Kratix CRDs are available:
 
 ```bash
-kubectl --context kind-platform get crds
+kubectl --context $PLATFORM get crds
 ```
 
 The above command will give an output similar to:
@@ -150,7 +155,7 @@ Definition](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/
 Verify the Kratix deployment:
 
 ```bash
-kubectl --context kind-platform get deployments --namespace kratix-platform-system
+kubectl --context $PLATFORM get deployments --namespace kratix-platform-system
 ```
 
 The above command will give an output similar to:
@@ -160,7 +165,7 @@ NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 ```
 
-We can now tell Kratix which repositories it will use to deploy and manage the
+You can now tell Kratix which repositories it will use to deploy and manage the
 workloads.
 
 ### Set up the GitOps State Store {#gitops-setup}
@@ -171,7 +176,7 @@ the power of GitOps, where documents are written to a centralised store and
 subsequently applied to the designated clusters responsible for executing the
 specified workload. Within Kratix, these clusters are referred to as _workers_.
 
-In this workshop, we will use a MinIO bucket created on MinIO instance running
+This tutorial will use a MinIO bucket created on MinIO instance running
 in the Platform cluster. It's worth noting that Kratix seamlessly integrates
 with both S3-compatible buckets and Git repositories, allowing for flexible
 options when it comes to choosing the state store. Please check the
@@ -180,7 +185,7 @@ options when it comes to choosing the state store. Please check the
 To install the MinIO instance, run:
 
 ```bash
-kubectl --context kind-platform apply --filename config/samples/minio-install.yaml
+kubectl --context $PLATFORM apply --filename config/samples/minio-install.yaml
 ```
 
 The above command will:
@@ -192,7 +197,7 @@ The above command will:
 Verify the installation:
 
 ```bash
-kubectl --context kind-platform get deployments --namespace kratix-platform-system
+kubectl --context $PLATFORM get deployments --namespace kratix-platform-system
 ```
 
 The above command will give an output similar to:
@@ -206,7 +211,7 @@ minio                                1/1     1            1           1h
 Verify the Create Bucket job:
 
 ```
-kubectl --context kind-platform get jobs
+kubectl --context $PLATFORM get jobs
 ```
 
 The above command will give an output similar to:
@@ -216,7 +221,7 @@ NAME                  COMPLETIONS   DURATION   AGE
 minio-create-bucket   1/1           3m5s       1h
 ```
 
-Once the Job completes, let's make the MinIO bucket known to Kratix.
+Once the Job completes, you are able register the MinIO bucket with Kratix.
 
 ### Create the Kratix State Store {#statestore-setup}
 
@@ -229,7 +234,7 @@ Create a new State Store pointing to the MinIO bucket created on the previous
 step:
 
 ```yaml
-cat << EOF | kubectl --context kind-platform apply -f -
+cat << EOF | kubectl --context $PLATFORM apply -f -
 apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
 metadata:
@@ -255,19 +260,19 @@ bucketstatestore.platform.kratix.io/minio-store created
 The StateStore document contains the configuration needed to access the actual
 backing storage.
 
-On the example above, we created a new `BucketStateStore`, since we will be
-using a MinIO bucket as storage, but you could use any other S3-compatible
+On the example above, you created a new `BucketStateStore`, since a MinIO bucket 
+has been provisioned for storage, but you could use any other S3-compatible
 storage like Amazon S3 and Google Cloud Storage.
 
 The `spec` includes the details needed to access that specific kind of State
-Store. On the example above, we configure the `endpoint` to the cluster address
-of the MinIO server we deployed on the Platform cluster. Since MinIO is not
-running with TLS enabled, we set `insecure` to true.
+Store. On the example above, you configured the `endpoint` to the cluster address
+of the MinIO server you deployed on the Platform cluster. Since MinIO is running
+in cluster and without TLS enabled, it is necessary to set `insecure` to true.
 
 You can see the MinIO service on the `kratix-platform-system`:
 
 ```bash
-kubectl --context kind-platform --namespace kratix-platform-system get service minio
+kubectl --context $PLATFORM --namespace kratix-platform-system get service minio
 ```
 
 The above command will give an output similar to:
@@ -277,16 +282,16 @@ minio   NodePort   10.96.96.166   <none>        80:31337/TCP   17h
 ```
 
 `bucketName` refers to the actual bucket on the MinIO server. The bucket needs
-to exist prior to Kratix trying to use it. That's why we ran a Job to create the
-`kratix` bucket during the MinIO setup.
+to exist prior to Kratix trying to use it. As a part of setting up MinIO you
+ran a Job to create the base `kratix` bucket.
 
 Finally, `secretRef` points to a secret, on the same namespace as the State
 Store, containing the credentials to access the store. For `BucketStateStore`,
 Kratix expects to find an `accessKeyID` and a `secretAccessKey` when resolving
-the secret. As part of the MinIO deployment, we created the necessary secret:
+the secret. As part of the MinIO deployment, you also created the necessary secret:
 
 ```bash
-kubectl --context kind-platform describe secret minio-credentials
+kubectl --context $PLATFORM describe secret minio-credentials
 ```
 
 The above command will give an output similar to:
@@ -316,10 +321,10 @@ section to install your first Promise!
 
 Your platform is ready to receive Promises! Well done!
 
-To recap the steps we took:
+To recap the steps you took:
 1. ✅&nbsp;&nbsp;Created a Platform cluster
 1. ✅&nbsp;&nbsp;Installed Kratix on the `platform` cluster
-1. ✅&nbsp;&nbsp;Installed MinIO on the `platform` cluster as the document store for our GitOps solution
+1. ✅&nbsp;&nbsp;Installed MinIO on the `platform` cluster as the GitOps document store
 1. ✅&nbsp;&nbsp;Told Kratix about the MinIO bucket
 
 

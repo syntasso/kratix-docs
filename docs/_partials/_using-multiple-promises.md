@@ -38,7 +38,7 @@ Now you will see the power of Kratix Promises by deploying a web app that uses m
 1. [Run the deploy pipeline](#deploy-pipeline)
 1. [Test the application](#test-app)
 1. [Summary](#summary)
-1. [Cleanup environment](#cleanup)
+1. [Clean up environment](#cleanup)
 
 ### Install all required Promises {#install-all-promises}
 
@@ -295,7 +295,7 @@ This is only the beginning of working with Promises. Next you will learn how to
 write and update Promises, and in the final thoughts we will showcase the composability
 of Promises to further optimise this workflow from three requests down to one.
 
-## Cleanup environment {#cleanup}
+## Clean up environment {#cleanup}
 To clean up your environment first delete the Resource Requests for the Jenkins, Nginx and Postgres Promises.
 
 ```console

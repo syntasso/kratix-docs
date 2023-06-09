@@ -30,7 +30,7 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 1. [Install the Jenkins Promise](#install-the-jenkins-promise)
 1. [Request a new Jenkins instance](#request-instance)
 1. [Use the instance](#use-your-jenkins-instance)
-1. [Cleanup environment](#cleanup)
+1. [Clean up environment](#cleanup)
 
 ![Overview](/img/docs/Treasure_Trove-Install_a_Promise.jpeg)
 ### Install the Jenkins Promise

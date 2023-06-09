@@ -4,7 +4,7 @@
   "collapsed": false,
   "collapsible": true,
   "link": {
-    "type": "generated-index",
-    "description": "Part II of this workshop focus on writing and extending Kratix Promises. You will:"
+    "type": "doc",
+    "id": "workshop/part-ii/intro"
   }
 }

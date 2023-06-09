@@ -1,18 +1,14 @@
-To clean up your environment you need to delete the Promises and the Resource Requests.
-Kratix will automatically cleanup any Resource Requests when the parent Promise is deleted.
+Before moving on, please clean up your environment by deleting the current Promises and Resource Requests.
+Kratix will, by default, clean up any Resource Requests when the parent Promise is deleted.
 
-To delete all the Promises
+To delete all the Promises, run:
+
 ```bash
 kubectl --context $PLATFORM delete promises --all
 ```
 
-Verify all the Promises are deleted
-```console
-kubectl --context $PLATFORM get promises
-```
+The above command will give an output similar to:
 
-Verify all the resources created by the Promise and Resource Requests are gone (this might take a couple minutes)
-```console
-kubectl --context $WORKER get pods
-kubectl --context $WORKER get namespaces
+```shell-session
+promise.platform.kratix.io/elastic-cloud deleted
 ```

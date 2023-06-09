@@ -1,5 +1,5 @@
 import PartialCleanupAllPromises from './_cleanup.md';
-import PartialPreRequisites from './_workshop_prereqs.md';
+import PartialPreRequisites from './_clean-kratix-or-rebuild.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -117,7 +117,7 @@ This guide will follow the steps below:
 1. [Create and submit a Kratix Resource Request](#create-resource-request)
 1. [Review of a Kratix Promise parts (in detail)](#promise-review)
 1. [Summary](#summary)
-1. [Cleanup environment](#cleanup)
+1. [Clean up environment](#cleanup)
 
 
 <hr />
@@ -739,7 +739,7 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Created and submitted a Kratix Resource Request
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise
 
-## Cleanup environment {#cleanup}
+## Clean up environment {#cleanup}
 
 To clean up your environment first delete the Resource Requests for the Jenkins
 instance

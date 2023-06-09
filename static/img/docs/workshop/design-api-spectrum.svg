@@ -1,0 +1,16 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 873.50390625 60">
+  <!-- svg-source:excalidraw -->
+  
+  <defs>
+    <style class="style-fonts">
+      @font-face {
+        font-family: "Virgil";
+        src: url("https://excalidraw.com/Virgil.woff2");
+      }
+      @font-face {
+        font-family: "Cascadia";
+        src: url("https://excalidraw.com/Cascadia.woff2");
+      }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="873.50390625" height="60" fill="#ffffff"></rect><g stroke-linecap="round"><g transform="translate(190.00000000000023 24.19402793127483) rotate(0 235.75343674863313 0)"><path d="M0 0 C78.58 0, 392.92 0, 471.51 0 M0 0 C78.58 0, 392.92 0, 471.51 0" stroke="#1e1e1e" stroke-width="4" fill="none"></path></g><g transform="translate(190.00000000000023 24.19402793127483) rotate(0 235.75343674863313 0)"><path d="M0 0 L13.59 -6.34 L13.59 6.34 L0 0" stroke="none" stroke-width="0" fill="#1e1e1e" fill-rule="evenodd"></path><path d="M0 0 C4.47 -2.09, 8.94 -4.17, 13.59 -6.34 M0 0 C2.75 -1.28, 5.5 -2.57, 13.59 -6.34 M13.59 -6.34 C13.59 -2.64, 13.59 1.05, 13.59 6.34 M13.59 -6.34 C13.59 -2.84, 13.59 0.65, 13.59 6.34 M13.59 6.34 C9.86 4.6, 6.13 2.86, 0 0 M13.59 6.34 C9.32 4.35, 5.05 2.35, 0 0 M0 0 C0 0, 0 0, 0 0 M0 0 C0 0, 0 0, 0 0" stroke="#1e1e1e" stroke-width="4" fill="none"></path></g><g transform="translate(190.00000000000023 24.19402793127483) rotate(0 235.75343674863313 0)"><path d="M471.51 0 L457.91 6.34 L457.91 -6.34 L471.51 0" stroke="none" stroke-width="0" fill="#1e1e1e" fill-rule="evenodd"></path><path d="M471.51 0 C467.03 2.09, 462.56 4.17, 457.91 6.34 M471.51 0 C468.76 1.28, 466.01 2.57, 457.91 6.34 M457.91 6.34 C457.91 2.64, 457.91 -1.05, 457.91 -6.34 M457.91 6.34 C457.91 2.84, 457.91 -0.65, 457.91 -6.34 M457.91 -6.34 C461.64 -4.6, 465.38 -2.86, 471.51 0 M457.91 -6.34 C462.19 -4.35, 466.46 -2.35, 471.51 0 M471.51 0 C471.51 0, 471.51 0, 471.51 0 M471.51 0 C471.51 0, 471.51 0, 471.51 0" stroke="#1e1e1e" stroke-width="4" fill="none"></path></g></g><mask></mask><g transform="translate(10 10) rotate(0 83.87994384765625 20)"><text x="83.87994384765625" y="0" font-family="Virgil, Segoe UI Emoji" font-size="16px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="text-before-edge">👍 maximum flexibility</text><text x="83.87994384765625" y="20" font-family="Virgil, Segoe UI Emoji" font-size="16px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="text-before-edge">👎 complex</text></g><g transform="translate(670 10) rotate(0 96.751953125 20)"><text x="96.751953125" y="0" font-family="Virgil, Segoe UI Emoji" font-size="16px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="text-before-edge">👍 easy to get started</text><text x="96.751953125" y="20" font-family="Virgil, Segoe UI Emoji" font-size="16px" fill="#1e1e1e" text-anchor="middle" style="white-space: pre;" direction="ltr" dominant-baseline="text-before-edge">👎 no configurability</text></g></svg>

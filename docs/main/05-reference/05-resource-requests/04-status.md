@@ -6,7 +6,7 @@ description: Documentation on how to expose information from the Pipeline to the
 
 # Status
 As part of your pipeline you can optionally send information about the
-resource request back to the resource requester by writing information to `/metadata/status.yaml`.
+Resource Request back to the resource requester by writing information to `/metadata/status.yaml`.
 The file can contain arbitrary key values, with the `message` key being a special key that is communicated back
 to the user when running `kubectl get <resource-request>`. For example if my pipeline wrote the
 following to the `/metadata/status.yaml` file:
@@ -17,8 +17,8 @@ following to the `/metadata/status.yaml` file:
    dbName: root
  ```
 
-Kratix would pickup the status and apply it back to the resource request. The
-user would see the following when getting the resource request:
+Kratix would pickup the status and apply it back to the Resource Request. The
+user would see the following when getting the Resource Request:
 ```shell
 kubectl get database
 NAME                   STATUS
@@ -44,9 +44,9 @@ add these fields.
 ## Conditions
 Kratix follows the Kubernetes convention of using [conditions](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states)
 to convey the status of a resource and to allow programmatic interactions. When a
-resource request is created the `PipelineCompleted` condition will be set. The `status`
+Resource Request is created the `PipelineCompleted` condition will be set. The `status`
 for the pipeline will be `False` until the pipeline is completed. For example
-when a resource request is created for the first time the status will look like:
+when a Resource Request is created for the first time the status will look like:
 ```yaml
 status:
   conditions:
@@ -69,7 +69,7 @@ status:
 ```
 
 Conditions can be used to by external systems to programmatically check when a
-resource requests pipeline has been completed. Kubectl also has built-in support
+Resource Requests pipeline has been completed. Kubectl also has built-in support
 for waiting for a condition to be met. For example after creating a resource
 request a user can run the following to have the CLI wait for the pipeline to be
 completed:

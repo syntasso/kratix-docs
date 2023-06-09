@@ -16,7 +16,7 @@ import PipelineDiagram from "/img/docs/workshop/compound-promise-pipeline-execut
 
 This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install a Kratix Promise](installing-a-promise) <br />
-👉🏾&nbsp;&nbsp; Next: [What's next](whats-next)
+👉🏾&nbsp;&nbsp; Next: [Part II](part-ii/intro)
 
 <hr />
 
@@ -44,7 +44,7 @@ provide each of the individual services as a Promise. Specialist teams can then
 use the API to get the exact service they need.
 
 To deliver the simpler experience though, you want to orchestrate those Promises
-in a higher-level promise. In Kratix terms, this is a Compound Promise: a
+in a higher-level Promise. In Kratix terms, this is a Compound Promise: a
 Promise that define other Promises as its dependencies.
 
 <figure class="diagram">
@@ -72,7 +72,7 @@ where workloads can be scheduled to.
 Before jumping in, verify that Kratix is still up and running on your Platform cluster:
 
 ```bash
-kubectl --context kind-platform get pods --namespace kratix-platform-system
+kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 ```
 
 The above command will give an output similar to:
@@ -98,14 +98,14 @@ through the same steps you ran during the Worker cluster registration in
 There's a script in the `kratix` directory that will do exactly that. Run:
 
 ```bash
-./scripts/register-worker --name platform-cluster --context kind-platform --state-store minio-store
+./scripts/register-worker --name platform-cluster --context $PLATFORM --state-store minio-store
 ```
 
 The Platform cluster should now be registered with Kratix and ready to receive
 the workloads. Verify:
 
 ```bash
-kubectl --context kind-platform get clusters
+kubectl --context $PLATFORM get clusters
 ```
 
 The above command will give an output similar to:
@@ -119,7 +119,7 @@ You should also see a `kratix-worker-system` namespace, indicating that Flux is
 correctly configured. Verify:
 
 ```bash
-kubectl --context kind-platform get namespaces --watch
+kubectl --context $PLATFORM get namespaces --watch
 ```
 
 The above command will give an output similar to:
@@ -142,7 +142,7 @@ You are now ready to install the EasyApp Promise.
 Ensure there's no other Promise currently installed:
 
 ```bash
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 The above command will give an output similar to:
@@ -156,7 +156,7 @@ If the Jenkins Promise is still showing up on your list, delete it before
 continuing:
 
 ```bash
-kubectl --context kind-platform delete promise jenkins
+kubectl --context $PLATFORM delete promise jenkins
 ```
 
 :::
@@ -170,19 +170,19 @@ kubectl --context kind-platform delete promise jenkins
 Since the EasyApp Promise declares two other Promises as its dependencies,
 installing it will add a total of three Promises to the platform:
 
-* The EasyApp promise itself
+* The EasyApp Promise itself
 * Its dependencies: NGINX and PostgreSQL
 
 From the Kratix directory, install the EasyApp Promise:
 
 ```bash
-kubectl --context kind-platform apply --filename samples/easy-app/promise.yaml
+kubectl --context $PLATFORM apply --filename samples/easy-app/promise.yaml
 ```
 
 Validate the three Promises are now available:
 
 ```bash
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 The above command will give an output similar to:
@@ -196,7 +196,7 @@ actually installed. Check the Kratix Controller Manager logs for insights on
 what is happening:
 
 ```bash
-kubectl --context kind-platform --namespace kratix-platform-system \
+kubectl --context $PLATFORM --namespace kratix-platform-system \
  logs deployment/kratix-platform-controller-manager \
  --container manager | grep "Reconciler error"
 ```
@@ -216,7 +216,7 @@ suitable clusters for hosting dependencies and workloads. Check the Cluster
 Selector defined for the EasyApp Promise:
 
 ```bash
-kubectl --context kind-platform describe promise easyapp | \
+kubectl --context $PLATFORM describe promise easyapp | \
   grep "Spec" --after-context 2 --max-count 1
 ```
 
@@ -236,7 +236,7 @@ Check the registered Clusters again, but this time ask `kubectl` to also show
 the Cluster labels:
 
 ```bash
-kubectl --context kind-platform get clusters --show-labels
+kubectl --context $PLATFORM get clusters --show-labels
 ```
 
 The above command will give an output similar to:
@@ -255,13 +255,13 @@ Note that the Platform cluster is missing the required label. Adding the missing
 label should cause the system to converge to the desired state:
 
 ```bash
-kubectl --context kind-platform label cluster platform-cluster environment=platform; \
-kubectl --context kind-platform get promises --watch
+kubectl --context $PLATFORM label cluster platform-cluster environment=platform; \
+kubectl --context $PLATFORM get promises --watch
 ```
 
 The above command will give an output similar to:
 ```shell-session
-cluster.platform.kratix.io/platform-cluster labeled
+cluster.platform.kratix.io/platform-cluster labelled
 NAME            AGE
 easyapp         10m
 nginx-ingress    0s
@@ -282,8 +282,8 @@ Cluster. The EasyApp sub-Promises are also declaring a Cluster Selector.
 Verify:
 
 ```bash
-kubectl --context kind-platform describe promise nginx-ingress | grep "Spec" -A 2 -m 1
-kubectl --context kind-platform describe promise postgresql | grep "Spec" -A 2 -m 1
+kubectl --context $PLATFORM describe promise nginx-ingress | grep "Spec" -A 2 -m 1
+kubectl --context $PLATFORM describe promise postgresql | grep "Spec" -A 2 -m 1
 ```
 
 The above command will give an output similar to:
@@ -305,7 +305,7 @@ As you may have noted before, the Worker cluster is already labelled correctly.
 Verify:
 
 ```bash
-kubectl --context kind-platform get cluster worker-cluster --show-labels
+kubectl --context $PLATFORM get cluster worker-cluster --show-labels
 ```
 
 The above command will give an output similar to:
@@ -318,7 +318,7 @@ Since the Worker Cluster include the label, the NGINX and PostgreSQL Promise
 dependencies should be getting installed into the Worker cluster. Verify:
 
 ```bash
-kubectl --context kind-worker get deployments --watch
+kubectl --context $WORKER get deployments --watch
 ```
 
 The above command will give an output similar to (it may take a few minutes for
@@ -353,7 +353,7 @@ Promise gets updated or upgraded, its dependencies are seamlessly propagated
 across the fleet. If a Cluster labels change, Kratix will automatically converge
 on the expected system state.
 
-If you are curious to learn more about Kratix Schedling, check the
+If you are curious to learn more about Kratix Scheduling, check the
 [Multi-cluster Management](../main/reference/multicluster-management) docs.
 
 :::
@@ -365,7 +365,7 @@ As a Platform user, you now have a few choices of Promises. Verify the available
 Promises:
 
 ```bash
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 The above command will give an output similar to:
@@ -378,14 +378,14 @@ postgresql      1h
 
 You could request each one of those services individually if you need
 fine-grained control of how they ought to be deployed, or you can use the
-EasyApp promise to get an opinionated deployment of each of those. In this
-example, you don't really care about the details; all you want is to run your
+EasyApp Promise to get an opinionated deployment of each of those. In this
+example, don't really care about the details; all you want is to run your
 application.
 
 Create a Resource Request for a new EasyApp offering:
 
 ```yaml
-cat <<EOF | kubectl --context kind-platform apply --filename -
+cat <<EOF | kubectl --context $PLATFORM apply --filename -
 ---
 apiVersion: example.promise.syntasso.io/v1
 kind: EasyApp
@@ -419,7 +419,7 @@ Verify the Pipelines running on the Platform cluster:
 
 
 ```bash
-kubectl --context kind-platform get pods --watch
+kubectl --context $PLATFORM get pods --watch
 ```
 
 The above command will give an output similar to:
@@ -441,7 +441,7 @@ Verify that the requested pods start on the Worker cluster (it may take a few
 minutes):
 
 ```bash
-kubectl --context kind-worker get pods --watch
+kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to:
@@ -465,7 +465,7 @@ The app is now fully deployed! You can now access it on
 
 You have installed a Compound Promise and created an instance of the _EasyApp_!
 
-✅&nbsp;&nbsp;This tutorial concludes our Introduction to Kratix. <br />
+✅&nbsp;&nbsp;This tutorial concludes the Introduction to Kratix. <br />
 👉🏾&nbsp;&nbsp;You can go ahead and start the next module to learn [how to write your own
-Promises](writing-a-promise) or jump to [What's next](whats-next) to learn about
+Promises](part-ii/intro) or jump to [What's next](whats-next) to learn about
 what else you can achieve with Kratix.

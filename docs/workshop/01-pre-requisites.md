@@ -4,7 +4,7 @@ title: Pre-requisites
 description: Find out what you need in installed before starting the workshop
 ---
 
-In this workshop, we'll deploy Kratix on a local Kubernetes cluster, and deploy
+In this workshop, you will deploy Kratix on a local Kubernetes cluster, and deploy
 Kratix workloads on another Kubernetes cluster. You will need the following
 tools:
 

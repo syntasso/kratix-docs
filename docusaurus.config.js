@@ -70,6 +70,11 @@ const config = {
       metadata: [{
         name: 'keywords', content: 'kratix docs, kratix documentation'
       }],
+      docs: {
+        sidebar: {
+          hideable: true,
+        },
+      },
       navbar: {
         title: 'Kratix',
         logo: {
@@ -148,7 +153,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
-        additionalLanguages: ['shell-session']
+        additionalLanguages: ['shell-session', 'docker']
       },
       algolia: {
         // Algolia application ID
