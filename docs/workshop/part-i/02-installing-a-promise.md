@@ -123,7 +123,7 @@ the parts of the Promise you are interacting with.
 
 ## Provide Jenkins-as-a-Service {#install-jenkins}
 
-This tutorial will focus on making Jenkins-as-a-Service available, on-demand,
+This tutorial will focus on making Jenkins-as-a-Service available, on demand,
 for developers using the Platform. Kratix offers a variety of ready-to-use
 Promises in the [Kratix Marketplace](/marketplace), including a Jenkins Promise.
 You will utilise this Promise to complete this task. By following the [Promise
@@ -718,7 +718,7 @@ Go to [http://localhost:30269](http://localhost:30269) and check it out!
 If you gave your Jenkins a different name, you may need port-forwarding to
 access the running instance:
 
-```shell
+```shell-session
 kubectl --context kind-worker port-forward pod/jenkins-dev-<NAME> 8080:30269
 ```
 

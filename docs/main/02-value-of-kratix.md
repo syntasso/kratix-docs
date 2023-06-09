@@ -24,7 +24,7 @@ For more on the Platform Gap, check out [_Crossing the Platform Gap_ article on 
 
 **A Stream-Aligned / Application Team can:**
 
-* Discover and consume the services in their organisation on-demand using standard Kubernetes APIs.
+* Discover and consume the services in their organisation on demand using standard Kubernetes APIs.
 * Consume as-a-Service from the platform, safe in the knowledge that the service is fit for purpose in their organisation.
 
 ## Collaboration with other tools

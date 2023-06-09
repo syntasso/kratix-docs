@@ -46,7 +46,7 @@ Declarative UIs by default with Kratix:
 
 <br />
 <div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/wj5VaXYTvrg" title="Use Kratix to provide on demand services through a Backstage UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wj5VaXYTvrg" title="Use Kratix to provide on-demand services through a Backstage UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
 
 <br/>

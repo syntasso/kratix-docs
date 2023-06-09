@@ -20,7 +20,7 @@ Terraform and Kratix both aim to enable infrastructure as code (IaC) but at diff
 
 Terraform has a mature community that supports managing cloud and other SaaS tooling through their custom HCL programming language. Using HCL, platform teams are able to create, modify, and delete infrastructure in a declarative way.
 
-Kratix enables platform teams to create [Promises](../05-reference/03-promises/01-promises.md). Promises define an API for thier users (application engineers) to easily request on demand infrastructure. Promises also define any steps required to fulfil that request including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
+Kratix enables platform teams to create [Promises](../05-reference/03-promises/01-promises.md). Promises define an API for thier users (application engineers) to easily request on-demand infrastructure. Promises also define any steps required to fulfil that request including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
 
 ## Why
 
