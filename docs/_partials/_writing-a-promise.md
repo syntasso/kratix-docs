@@ -553,7 +553,7 @@ At this point, your Promise directory structure should look like:
 
 <br />
 
-Before installing your promise, verify that Kratix and MinIO are installed and
+Before installing your Promise, verify that Kratix and MinIO are installed and
 healthy.
 
 ```bash
@@ -724,7 +724,7 @@ The contract with each pipeline container is simple and straightforward:
   array will be scheduled and applied to the appropriate Worker Clusters.
 
 ## Recap {#summary}
-You have now authored your first promise. Congratulations 🎉
+You have now authored your first Promise. Congratulations 🎉
 
 To recap the steps we took:
 1. ✅&nbsp;&nbsp;`xaasCrd`: Defined your Promise API with a X as-a-Service

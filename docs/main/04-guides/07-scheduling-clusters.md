@@ -122,6 +122,6 @@ documentation](../reference/clusters/intro)
 ## 🎉 Congratulations
 
 ✅&nbsp;&nbsp; You have created and registered a new Cluster and watched the system react to it.<br />
-👉🏾&nbsp;&nbsp; Let's [write compound promises](./compound-promises).
+👉🏾&nbsp;&nbsp; Let's [write compound Promises](./compound-promises).
 
 export const toc = [...EnhancingPromiseTOC];

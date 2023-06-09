@@ -6,7 +6,7 @@ sidebar_label: Deleting
 
 :::caution
 
-Deleting a promise will cascade delete all the associated Resource Requests and Worker Cluster Resources.
+Deleting a Promise will cascade delete all the associated Resource Requests and Worker Cluster Resources.
 
 :::
 

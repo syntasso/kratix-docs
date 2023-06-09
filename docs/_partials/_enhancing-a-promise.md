@@ -55,7 +55,7 @@ _In this guide, you only need create a new Postgres Promise that creates Postgre
 
 ### Step one: Get a base Promise {#base-promise}
 
-There's a PostgreSQL promise available on the [Marketplace](http://kratix.io/marketplace). You'll use that as your base. Start by cloning the repository:
+There's a PostgreSQL Promise available on the [Marketplace](http://kratix.io/marketplace). You'll use that as your base. Start by cloning the repository:
 
 ```console
 git clone https://github.com/syntasso/promise-postgresql.git
@@ -806,4 +806,3 @@ Verify the Worker Cluster Resources are deleted from the Worker Cluster
 ```console
 kubectl --context $WORKER get pods
 ```
-

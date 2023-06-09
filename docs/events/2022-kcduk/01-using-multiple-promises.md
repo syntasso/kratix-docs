@@ -84,7 +84,7 @@ When a Promise is installed into the cluster, it will do two visible things:
 <br />
 <br />
 
-![Installing a promise](/img/docs/events/kratix_diagrams-PlatformDev-Install_promises.jpg)
+![Installing a Promise](/img/docs/events/kratix_diagrams-PlatformDev-Install_promises.jpg)
 <br />
 
 Verify the Promises are all installed on your Platform Cluster

@@ -17,4 +17,4 @@ If you like what you've seen, please [get in touch](https://www.syntasso.io/cont
 
 ## Continue exploring
 
-You can also continue exploring Kratix. A good place to go next is to the [Enhancing a promise](/docs/main/guides/enhancing-a-promise) guide, to learn more about how you can extend Promises to better suit your team needs.
+You can also continue exploring Kratix. A good place to go next is to the [Enhancing a Promise](/docs/main/guides/enhancing-a-promise) guide, to learn more about how you can extend Promises to better suit your team needs.

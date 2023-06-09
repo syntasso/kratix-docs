@@ -1,5 +1,5 @@
 ---
-description: Guide on how one can use multiple promises to deliver developer experiences
+description: Guide on how one can use multiple Promises to deliver developer experiences
 title: Using Multiple Promises
 ---
 import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';

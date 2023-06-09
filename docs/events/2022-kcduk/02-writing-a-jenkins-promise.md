@@ -30,7 +30,7 @@ import TabItem from '@theme/TabItem';
 ### Directory setup {#directory-setup}
 
 To begin writing a Promise you will need a basic directory structure to work in. You can
-use our promise template to get started.
+use our Promise template to get started.
 
 Run the following commands in a working directory of your choosing.
 
@@ -44,7 +44,7 @@ cd promise-template
 #### Defining the name
 
 The first file we're going to touch is the `promise.yaml`. This is where you
-will define all the pieces that make of your promise. Let's start by giving the
+will define all the pieces that make of your Promise. Let's start by giving the
 Promise a proper name. Update the `metadata.name` in `promise.yaml` to `ci`:
 
 ```yaml jsx title="promise.yaml"
@@ -533,7 +533,7 @@ The contract with each pipeline container is simple and straightforward:
   will be scheduled and applied to the appropriate Worker Clusters.
 
 ## Recap {#summary}
-You have now authored your first promise. Congratulations 🎉
+You have now authored your first Promise. Congratulations 🎉
 
 ## Tearing it all down {#teardown}
 To clean up your environment, run the following command:

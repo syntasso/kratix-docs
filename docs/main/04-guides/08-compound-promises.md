@@ -156,7 +156,7 @@ spec:
         clusterSelector:
           environment: dev
         workerClusterResources:
-        # remainder of the knative promise
+        # remainder of the knative Promise
     #highlight-start
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
@@ -167,8 +167,8 @@ spec:
         clusterSelector:
           environment: dev
         workerClusterResources:
-        # remainder of the postgres promise ...
-  # remainder of the paved path promise...
+        # remainder of the postgres Promise ...
+  # remainder of the paved path Promise...
 ```
 
 Since Paved Path Promise WCRs are Promises, and considering that Kratix (and
@@ -190,7 +190,7 @@ spec:
   workerClusterResources:
     -  # knative Promise
     -  # postgresPromise
-  # remainder of the paved path promise
+  # remainder of the paved path Promise
 ```
 
 The Paved Path Promise `clusterSelector` is set to `environment: platform`. That is
@@ -234,7 +234,7 @@ spec:
           environment: dev
         #highlight-end
         workerClusterResources:
-        # remainder of the knative promise
+        # remainder of the knative Promise
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
       metadata:
@@ -245,8 +245,8 @@ spec:
           environment: dev
         #highlight-end
         workerClusterResources:
-        # remainder of the postgres promise ...
-  # remainder of the paved path promise...
+        # remainder of the postgres Promise ...
+  # remainder of the paved path Promise...
 ```
 
 This configuration ensures the Knative CRDs and the Postgres Operator are installed
