@@ -13,8 +13,12 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 ### Want to see Kratix in action?
 
 Check out a video overview of our product:
+<!-- <div style={{"text-align":"center"}}> -->
+<!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
+<!-- </div> -->
+
 <div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gdMNS3V-ogo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
 
 ### Using Kratix to build your platform you can:
