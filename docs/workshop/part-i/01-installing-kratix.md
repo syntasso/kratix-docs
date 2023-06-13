@@ -167,7 +167,7 @@ workloads.
 
 One of Kratix capabilities is its ability to efficiently orchestrate and
 schedule workloads across a fleet of clusters. This is achieved by harnessing
-the power of GitOps, where documents are written to a centralized store and
+the power of GitOps, where documents are written to a centralised store and
 subsequently applied to the designated clusters responsible for executing the
 specified workload. Within Kratix, these clusters are referred to as _workers_.
 
