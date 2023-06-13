@@ -113,7 +113,7 @@ At a very high-level, a Promise is made up of four parts:
 2. **The Imperative Pipeline:** A series of containers where Platform teams can
    codify all of their business requirements.
 3. **The Declarative State:** The pipeline executes a series of *imperative*
-   steps top generate a *declarative state* that's then persisted into the State
+   steps to generate a *declarative state* that's then persisted into the State
    Store. Other systems will then *converge* on that state.
 4. **The Dependencies**: A dependency is anything that must be installed or made
    available on Worker clusters to enable the promised service to run.
@@ -470,6 +470,25 @@ Kustomizations, check [the Flux docs
 page](https://fluxcd.io/flux/components/kustomize/kustomization/)
 
 </details>
+
+Wait for Flux to start:
+
+```bash
+kubectl --context kind-worker get deployments --namespace flux-system --watch
+```
+
+The above command will give an output similar to:
+```shell-session
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
+helm-controller           1/1     1            1           10m
+kustomize-controller      1/1     1            1           10m
+notification-controller   1/1     1            1           10m
+source-controller         1/1     1            1           10m
+```
+
+Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
+exit the watch mode.
+
 
 ### Register the cluster with Kratix
 

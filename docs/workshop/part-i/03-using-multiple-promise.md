@@ -372,14 +372,14 @@ The above command will give an output similar to:
 ```shell-session
 NAME            AGE
 nginx-ingress   1h
-easyapp      1h
+easyapp         1h
 postgresql      1h
 ```
 
 You could request each one of those services individually if you need
 fine-grained control of how they ought to be deployed, or you can use the
 EasyApp promise to get an opinionated deployment of each of those. In this
-example, don't really care about the details; all you want is to run your
+example, you don't really care about the details; all you want is to run your
 application.
 
 Create a Resource Request for a new EasyApp offering:
@@ -425,7 +425,7 @@ kubectl --context kind-platform get pods --watch
 The above command will give an output similar to:
 ```shell-session
 NAME                                        READY   STATUS      RESTARTS   AGE
-request-pipeline-deployment-default-22ee9   0/1     Completed   0          18s
+request-pipeline-nginx-default-22ee9        0/1     Completed   0          18s
 request-pipeline-easyapp-default-8769b      0/1     Completed   0          40s
 request-pipeline-postgresql-default-c3516   0/1     Completed   0          18s
 ```
