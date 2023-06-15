@@ -73,7 +73,7 @@ to by specifying the `clusterSelector` field.
 This field contains a map of key values that are all the labels that must be matched to
 a cluster. Update the Promise to contain the new `clusterSelector` field shown below:
 
-```yaml title=jenkins-promise.yaml
+```yaml title=promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -88,6 +88,7 @@ spec:
 ```
 
 ### Apply the Promise
+
 The Promise is now setup to only schedule to clusters with the matching label. Create
 the Promise in Kubernetes:
 
@@ -160,7 +161,7 @@ be used.
 To achieve this with Kratix, you can optionally set additional labels at request time by
 outputting them from the pipeline.
 
-Kratix has a convention of using a [`/metadata](../../../docs/main/reference/resource-requests/pipelines#metadata)
+Kratix has a convention of using a [`/metadata`](../../../docs/main/reference/resource-requests/pipelines#metadata)
 directory to manage important configurations generated in the pipeline that are independent of
 the resources you want stored in a GitOps state store.
 
@@ -177,7 +178,7 @@ Kratix should only schedule these Resource Requests to clusters with a large poo
 
 Add the following to the end of the `pipeline/run` script:
 
-```bash
+```bash title=pipeline/run -- add to the end
 if ${enableDataCollection}; then
   echo "Setting additional cluster selectors: pvCapacity=large"
   echo "pvCapacity: large" > /metadata/cluster-selectors.yaml
@@ -185,15 +186,17 @@ fi
 ```
 
 ### Build the image
-Since the pipeline script has changed you need to rebuild and load the docker image.
 
-First you need to build the image and load it into the local KinD cluster:
+Since the pipeline script has changed you need to rebuild and load the docker
+image. Run:
+
 ```bash
 ./scripts/build-pipeline
 ```
 
 ### Send a Resource Request
-Finally, make a Resource Request with the `enableDataCollection` set to `true`:
+Finally, make a Resource Request with the `enableDataCollection` set to `true`.
+Open the `resource-request.yaml` and update the config.
 
 ```bash
 kubectl --context $PLATFORM apply --filename resource-request.yaml
@@ -273,11 +276,14 @@ Request matches a Kratix Cluster so begins the scheduling process:
 kubectl --context $WORKER get pods -w
 ```
 
-The above command will give an output similar to:
+The above command will give an output similar to (it may take a few minutes):
 ```shell-session
 NAME                            READY   STATUS    RESTARTS   AGE
 elastic-instance-es-default-0   1/1     Running   0          5m
 ```
+
+Once you verify the scheduling has started, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
+exit the watch mode.
 
 ## Summary {#summary}
 
