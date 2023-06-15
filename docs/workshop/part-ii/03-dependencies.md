@@ -296,7 +296,9 @@ kubectl --context $PLATFORM get pods
 
 The above command will give an output similar to:
 ```shell-session
-
+NAME                                           READY   STATUS      RESTARTS   AGE
+request-pipeline-elastic-cloud-default-01650   0/1     Completed   0          106s
+request-pipeline-elastic-cloud-default-99684   0/1     Completed   0          11s
 ```
 
 And once completed you will be able to watch for two sets of ECK resources being deployed to the Worker cluster:
@@ -304,11 +306,14 @@ And once completed you will be able to watch for two sets of ECK resources being
 kubectl --context $WORKER get pods --watch
 ```
 
-Once you see all 6 pods in the output similar to below, you can use `ctrl+c` to exit the watch:
+Once you see all 6 pods in the output similar to below, you can use <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode:
 ```shell-session
-
+NAME                                 READY   STATUS    RESTARTS   AGE
+example-es-default-0                 1/1     Running   0          2m21s
+example-kb-d97b489b-9twhq            1/1     Running   0          2m21s
+second-request-es-default-0          1/1     Running   0          42s
+second-request-kb-6cdc9594ff-7dnnm   1/1     Running   0          42s
 ```
-
 
 ## Summary {#summary}
 
