@@ -221,14 +221,6 @@ No difference in number of YAML resources will result in no output.
 
 <PartialVerifyKratixWithOutPromises />
 
-### Load the image
-
-Since the pipeline has been updated, you will need to rerun the build and make sure to load it into your KinD Cluster:
-
-```bash
-./scripts/build-pipeline
-```
-
 ### Install the Promise
 
 With the pipeline image available, you can now install the updated Promise:
