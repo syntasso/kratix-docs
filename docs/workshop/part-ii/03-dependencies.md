@@ -304,7 +304,6 @@ Once you see all 6 pods in the output similar to below, you can use <kbd>Ctrl</k
 NAME                                 READY   STATUS    RESTARTS   AGE
 example-es-default-0                 1/1     Running   0          2m21s
 example-kb-d97b489b-9twhq            1/1     Running   0          2m21s
-example-beat-metricbeat-frpv7        1/1     Running   0          2m21s
 second-request-es-default-0          1/1     Running   0          42s
 second-request-kb-6cdc9594ff-7dnnm   1/1     Running   0          42s
 ```

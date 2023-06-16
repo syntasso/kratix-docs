@@ -203,7 +203,7 @@ eck-kibana:
       service:
         spec:
           type: NodePort
-          ports: [{nodePort: NODEPORT, port: 5601, name: http}]
+          ports: [{nodePort: NODEPORT, port: 5601}]
 ```
 
 Next, populate the `beats-values.yaml` document. Paste the following into the
@@ -215,6 +215,7 @@ eck-beats:
   fullnameOverride: NAME
   spec:
     type: metricbeat
+    version: 8.9.0-SNAPSHOT
     elasticsearchRef:
       name: NAME
     kibanaRef:
@@ -647,8 +648,7 @@ The above command will give an output similar to (it may take a while for the
 pods to be ready):
 ```shell-session
 NAME                                     READY   STATUS    RESTARTS   AGE
-example-es-default-0                     1/1     Running   0          5m
-example-beat-metricbeat-frpv7            1/1     Running   0          5m
+elasticsearch-es-default-0               1/1     Running   0          5m
 example-eck-kibana-kb-6f4f95b787-4fqsr   1/1     Running   0          5m
 ```
 
