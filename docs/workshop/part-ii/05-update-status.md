@@ -130,8 +130,9 @@ Verify that the output shows only the following files:
 ├── input
 │   └── object.yaml
 ├── metadata
-#highlight-next-line
 │   └── cluster-selectors.yaml
+#highlight-next-line
+    └── status.yaml
 └── output
     ├── beats.yaml
     ├── elasticsearch.yaml

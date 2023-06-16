@@ -441,11 +441,6 @@ verify the `test/output` directory. You should see the following files:
 └── test
     ├── input
     │   └── object.yaml
-    ├── metadata
-    │   └── cluster-selectors.yaml
-#highlight-start
-    │   └── status.yaml
-#highlight-end
     └── output
         ├── beats.yaml
         ├── elastic-crds.yaml
