@@ -86,10 +86,11 @@ tree test
 
 Verify that the output shows only the following files:
 
-```
+```shell-session
 📂 test
 ├── input
 │   └── object.yaml
+├── metadata
 └── output
     ├── beats.yaml
     ├── elasticsearch.yaml

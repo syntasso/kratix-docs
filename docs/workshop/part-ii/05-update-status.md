@@ -117,12 +117,33 @@ steps used in previous workshop steps.
 <details>
     <summary>🤔 Not sure how to install the Promise and make a request?</summary>
 
-You will need to install the Promise before you can make a request:
+Don't forget to get started with a build, load and test of the pipeline image:
+
+```bash
+./scripts/test-pipeline
+```
+
+Verify that the output shows only the following files:
+
+```shell-session
+📂 test
+├── input
+│   └── object.yaml
+├── metadata
+#highlight-next-line
+│   └── cluster-selectors.yaml
+└── output
+    ├── beats.yaml
+    ├── elasticsearch.yaml
+    └── kibana.yaml
+```
+
+Next you can install the Promise before you can make a request:
 ```bash
 kubectl --context $PLATFORM create --filename promise.yaml
 ```
 
-Then you can make a request:
+Finally, you can act like an Application Developer and make a request for an instance of Elastic Cloud:
 ```bash
 kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```

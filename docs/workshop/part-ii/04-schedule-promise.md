@@ -185,13 +185,28 @@ if ${enableDataCollection}; then
 fi
 ```
 
-### Build the image
+### Build and test the image
 
 Since the pipeline script has changed you need to rebuild and load the docker
 image. Run:
 
 ```bash
-./scripts/build-pipeline
+./scripts/test-pipeline
+```
+
+Verify that the output now shows the cluster-selector file
+
+```shell-session
+📂 test
+├── input
+│   └── object.yaml
+├── metadata
+#highlight-next-line
+│   └── cluster-selectors.yaml
+└── output
+    ├── beats.yaml
+    ├── elasticsearch.yaml
+    └── kibana.yaml
 ```
 
 ### Send a Resource Request

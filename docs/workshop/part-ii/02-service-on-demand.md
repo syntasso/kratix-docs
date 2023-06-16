@@ -321,7 +321,7 @@ In order run a test you will need to:
 Start by creating the files and test structure:
 
 ```
-mkdir -p test/{input,output}
+mkdir -p test/{input,output,metadata}
 ```
 
 As an example input, copy the Resource Request as `object.yaml` into the `input`
@@ -331,7 +331,7 @@ directory:
 cp resource-request.yaml test/input/object.yaml
 ```
 
-At this stage, your direcory structure should look like this:
+At this stage, your directory structure should look like this:
 
 ```
 📂 elastic-cloud-promise
@@ -345,6 +345,7 @@ At this stage, your direcory structure should look like this:
 └── test
     ├── input
     │   └── object.yaml
+    ├── metadata
     └── output
 ```
 
@@ -387,11 +388,12 @@ scriptsdir=$(cd "$(dirname "$0")"; pwd)
 testdir=$(cd "$(dirname "$0")"/../test; pwd)
 inputDir="$testdir/input"
 outputDir="$testdir/output"
+metadataDir="$testdir/metadata"
 
 $scriptsdir/build-pipeline
 rm $outputDir/*
 
-docker run --rm --volume ${outputDir}:/output --volume ${inputDir}:/input kratix-workshop/elastic-pipeline:dev
+docker run --rm --volume ${outputDir}:/output --volume ${inputDir}:/input --volume ${metadataDir}:/metadata kratix-workshop/elastic-pipeline:dev
 ```
 
 These scripts do the following:
@@ -418,6 +420,7 @@ At this stage, your directory structure should look like this:
 └── test
     ├── input
     │   └── object.yaml
+    ├── metadata
     └── output
 ```
 
@@ -438,6 +441,11 @@ verify the `test/output` directory. You should see the following files:
 └── test
     ├── input
     │   └── object.yaml
+    ├── metadata
+    │   └── cluster-selectors.yaml
+#highlight-start
+    │   └── status.yaml
+#highlight-end
     └── output
         ├── beats.yaml
         ├── elastic-crds.yaml
