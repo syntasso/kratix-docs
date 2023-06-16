@@ -435,7 +435,7 @@ To execute the test, run the script with the following command:
 Which should build and run the Pipeline image. Once the execution completes,
 verify the `test/output` directory. You should see the following files:
 
-```
+```bash
 📂 elastic-cloud-promise
 ├── ...
 └── test
