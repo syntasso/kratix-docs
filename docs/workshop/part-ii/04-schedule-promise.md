@@ -53,7 +53,7 @@ kubectl --context $PLATFORM get clusters --show-labels
 You should see output like:
 ```
 NAME               AGE   LABELS
-worker-cluster-1    1h   -
+worker-cluster-1    1h   <none>
 ```
 
 The cluster currently has no labels applied. So far the Promise you have written has taken no opinion
