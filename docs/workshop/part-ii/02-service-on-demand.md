@@ -219,6 +219,25 @@ eck-beats:
       name: NAME
     kibanaRef:
       name: NAME
+    config:
+      filebeat.inputs: []
+      metricbeat:
+        modules:
+        - module: system
+          period: 10s
+          metricsets:
+          - cpu
+          - load
+          - memory
+          - network
+          - process
+          - process_summary
+          process:
+            include_top_n:
+              by_cpu: 5
+              by_memory: 5
+          processes:
+          - .*
     daemonSet:
       podTemplate:
         spec:
@@ -229,6 +248,27 @@ eck-beats:
                 - /etc/beat.yml
                 - -system.hostfs=/hostfs
               name: metricbeat
+          initContainers:
+            - name: elastic-internal-init-keystore
+              securityContext:
+                runAsNonRoot: false
+                runAsUser: 0
+              command:
+                - sh
+                - '-c'
+                - 'chown -R 1000:1000 /usr/share/beat/data'
+              image: 'docker.elastic.co/beats/filebeat:8.7.0'
+              name: permissions
+              securityContext:
+                runAsUser: 0
+              volumeMounts:
+                - mountPath: /usr/share/beat/data
+                  name: beat-data
+          securityContext:
+            fsGroup: 1000
+            runAsGroup: 1000
+            runAsUser: 1000
+
 ```
 
 <details>
