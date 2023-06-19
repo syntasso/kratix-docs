@@ -1,6 +1,6 @@
 ---
 id: setup
-title: Pre-requisites
+title: Prerequisites
 description: Find out what you need in installed before starting the workshop
 ---
 
