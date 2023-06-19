@@ -38,7 +38,7 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 
 ## Hands on: Installing Kratix {#install-kratix}
 
-Before continuing, make sure to go back to [pre-requisites](setup)
+Before continuing, make sure to go back to [prerequisites](setup)
 and follow the guide if you haven't done that already.
 
 This guide will go through the following steps:
