@@ -309,6 +309,49 @@ second-request-es-default-0          1/1     Running   0          42s
 second-request-kb-6cdc9594ff-7dnnm   1/1     Running   0          42s
 ```
 
+<details>
+  <summary>🤔 Want to see these Kibana's in the browser? </summary>
+
+The first Kibana has been set up with a unique node port which has been configured to be exposed as a part of the workshop cluster setup.
+
+You can visit http://localhost:30269 and check it out, and you can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
+
+```bash
+kubectl --context $WORKER \
+  get secret example-es-elastic-user \
+  --output go-template='{{.data.elastic | base64decode}}'
+```
+
+Any additional Kibana's will be given a random other port so you will need to use the following port forward command:
+
+```bash
+kubectl --context kind-worker port-forward deploy/second-request-kb :5601
+```
+
+This command will then give you the following output:
+```shell-session
+Forwarding from 127.0.0.1:51207 -> 5601
+Forwarding from [::1]:51207 -> 5601
+```
+
+The local port will be randomly generated, but in this output you would use the port 51207.
+
+This Kibana would need a different password which you can get from it's secret with this command:
+
+```bash
+kubectl --context $WORKER \
+  get secret second-request-es-elastic-user \
+  --output go-template='{{.data.elastic | base64decode}}'
+```
+
+:::caution
+If you gave your ECK instance a different name, you will nee to substitute the name in the above commands for the correct ones. For example, to port forward you would replace `NAME` with the name of your instance:
+
+kubectl --context $WORKER port-forward deploy/NAME-kb :5601
+:::
+
+</details>
+
 ## Summary {#summary}
 
 And with that, you have reduced duplication by delivering shared dependencies separately from the on-demand service! While this workshop only showcases two instances both deployed to the same cluster, this architecture can easily be used to support an unlimited number of instances across an unlimited number of clusters.
