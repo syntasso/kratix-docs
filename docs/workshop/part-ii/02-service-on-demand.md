@@ -690,6 +690,23 @@ example-eck-kibana-kb-6f4f95b787-4fqsr   1/1     Running   0          5m
 Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
+Go to http://localhost:30269 and check it out!
+
+You can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
+
+```bash
+kubectl --context $WORKER \
+  get secret example-es-elastic-user \
+  --output go-template='{{.data.elastic | base64decode}}'
+```
+
+:::caution
+If you gave your ECK instance a different name, you may need port-forwarding to access the running instance:
+
+kubectl --context $WORKER port-forward deploy/NAME-kb 8080:30269
+:::
+
+
 ### Trying to request a second instance
 
 The power of Kratix is the scalability of self-service, on-demand instances.
