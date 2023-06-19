@@ -20,6 +20,10 @@ tools:
    Kubernetes&mdash;allows you to run commands against Kubernetes clusters. <br
    /> See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
 
+1. `yq` / **YAML parsing command-line tool**: <br /> The CLI for
+   Kubernetes&mdash;allows you to run parse and transform YAML files. This is only used in Part II. <br
+   /> See [the install guide](https://github.com/mikefarah/yq#install).
+
 :::info
 
 You can run the workshop without KinD. Ideally, you will have access to two
