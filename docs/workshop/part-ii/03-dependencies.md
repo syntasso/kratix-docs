@@ -27,13 +27,24 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 ## Understanding Kratix Promise dependencies {#understanding-dependencies}
 
-## Splitting out Elastic Cloud Kubernetes (ECK) dependencies {#splitting-dependencies}
-
 After the previous tutorial step, the ECK Promise bundled all necessary provisioning
 steps into the Promise pipeline. This made it possible to only do a single Resource Request
 because of duplication across the requests.
 
-The pipeline `run` script followed the installation instructions in the ECK
+In this section we will focus on introducing the dependencies part of Promises to manage many requests from a single Promise.
+
+```mdx-code-block
+import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-extract-dependencies.svg"
+```
+<figure class="diagram">
+  <PromiseWayfinding className="small"/>
+
+  <figcaption>Promise dependencies provide a way to install and configure shared resources that enables the platform to provide self-service instances.</figcaption>
+</figure>
+
+## Splitting out Elastic Cloud Kubernetes (ECK) dependencies {#splitting-dependencies}
+
+The pipeline `run` script currently follows the installation instructions in the ECK
 documentation [here](https://www.elastic.co/guide/en/cloud-on-k8s/2.8/k8s-deploy-eck.html).
 Namely, the two separate files downloaded, the CRDs and the operator. Then creating
 the required instances of the CRDs.

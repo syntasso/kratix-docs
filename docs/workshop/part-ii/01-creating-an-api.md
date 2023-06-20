@@ -129,10 +129,10 @@ their monitoring system. This interface is the contract of what can be
 configured and within what parameters.
 
 ```mdx-code-block
-import PromiseAPI from "/img/docs/workshop/design-api-first.svg"
+import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-api-only.svg"
 ```
 <figure class="diagram">
-  <PromiseAPI className="small"/>
+  <PromiseWayfinding className="small"/>
 
   <figcaption>The Promise API is where you will define the interface</figcaption>
 </figure>

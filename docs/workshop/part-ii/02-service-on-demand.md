@@ -80,11 +80,6 @@ An idempotent container guarantees that running the same command multiple times
 will result in the same outcome. This is an important feature of these containers
 because they will be auto-reconciled on an on going basis.
 
-<!---
-do we want to talk to this now? We don't actually handle this at all atm, but we
-aspire to in the future.
--->
-
 Kubernetes controllers reconcile their objects in three scenarios:
 * Object change
 * Controller restart
@@ -100,7 +95,18 @@ them will not result in any adverse side effects.
 
 Now that you understand what you can do in a pipeline and some design principles
 for writing images, it is time to write your own pipeline to deliver on-demand
-Elastic Clouds!
+Elastic Clouds! At the end of this section you will have an API which calls a pipeline and results in declarative files being written to a state store.
+
+
+```mdx-code-block
+import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-pipeline-only.svg"
+```
+<figure class="diagram">
+  <PromiseWayfinding className="small"/>
+
+  <figcaption>The Promise pipeline allows you to run imperative commands when provisioning an instance for a user.</figcaption>
+</figure>
+
 
 ## Codify your delivery process in a Container {#write-docker-container}
 

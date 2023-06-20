@@ -30,14 +30,18 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 So far you have built an ECK Promise that will allow us to deliver ECK instances on-demand to the
 application developers.
 
-When developing locally you have been using a single worker cluster, which Kratix has been scheduling
-everything to by default. In reality, the likely hood is that an organisation will have multiple worker
-clusters, potentially spread out across multiple zones, regions, and cloud-providers. Each individual cluster
-might be designed for a particular purpose, e.g. clusters that contain GPUs for AI intensive workloads, or
-edge clusters that are designed to run particular applications close the intended consumers. However it is
-common to want some software deployed on many of these speciality clusters.
+When developing locally you have been using a single worker cluster, which Kratix has been scheduling everything to by default. In reality, the likely hood is that an organisation will have multiple worker clusters, potentially spread out across multiple zones, regions, and cloud-providers. Each individual cluster might be designed for a particular purpose, e.g. clusters that contain GPUs for AI intensive workloads, or edge clusters that are designed to run particular applications close the intended consumers. However it is common to want some software deployed on many of these speciality clusters.
 
 This section will focus on how Kratix has native support for flexible multi-cluster scheduling.
+
+```mdx-code-block
+import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-scheduling.svg"
+```
+<figure class="diagram">
+  <PromiseWayfinding className="small"/>
+
+  <figcaption>Using scheduling, you can either globally support or limit access to Promise resources.</figcaption>
+</figure>
 
 Kratix uses a label-based approach to scheduling what cluster resources go to, similar to how Kubernetes works
 when [scheduling pods](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/).
