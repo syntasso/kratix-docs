@@ -38,7 +38,7 @@ documentation [here](https://www.elastic.co/guide/en/cloud-on-k8s/2.8/k8s-deploy
 Namely, the two separate files downloaded, the CRDs and the operator. Then creating
 the required instances of the CRDs.
 
-The operator and CRDs are a set of resources that only need to (and can be)
+The operator and its CRDs are a set of resources that only need and can be
 installed once in a cluster. After they are installed they can serve as many
 requests as needed. Therefore, if you want to support provisioning multiple
 resource requests you will need to change how the CRDs and operator resources are installed
