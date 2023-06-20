@@ -742,7 +742,11 @@ However, when you go to check the status on the worker cluster, you will not see
 kubectl --context $WORKER get pods
 ```
 
-This is because the GitOps reconciliation has failed due to a duplication of documents across the two requests. You can see this failure by running:
+This is because our pipeline is not outputting resources that can be applied to the same cluster multiple times. Our pipeline outputs two sets of resources:
+- The operator and its CRDs
+- The request to the operator (helm output)
+
+Operators are only designed to be installed once per cluster, because each run of the pipeline is outputting we are getting a failure were the resources we are trying to schedule to the cluster aren't compatible. Take a look at the feedback our GitOps reconciler is giving back:
 ```bash
 kubectl --context $WORKER get kustomizations -n flux-system
 ```
@@ -754,8 +758,7 @@ kratix-workload-crds        9m15s   False   kustomize build failed: accumulating
 kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workload-crds' is not ready
 ```
 
-This is because the current Promise pipeline consists of both the instance specific resources, but also the shared dependencies like the ECK Operator. The next step in this workshop will showcase how to separate shared dependencies from instance specific provisioning.
-
+The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out dependencies from requests.
 ## Summary {#summary}
 
 And with that, you have transformed Elastic Cloud into an on-demand service!
