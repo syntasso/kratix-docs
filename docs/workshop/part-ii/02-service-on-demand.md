@@ -91,6 +91,23 @@ will run any time the controller is reset, as well as every 10 hours.
 This means you will need to write your pipeline images to make sure that rerunning
 them will not result in any adverse side effects.
 
+<details>
+  <summary>🤔 Wondering when to use pipelines images versus creating a new Promise?</summary>
+Platform design requires thinking about how to divide platform offerings into right sized Promises and evaluating options for reusability and composability.
+
+Each Promise is a the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
+
+Promises are not the only way to create reusable components when designing your platform with Kratix. You can also create reusable pipeline steps that can be run in a number of different Promise pipelines. For example, you may want to add default labels to certain types of resources. You can create a pipeline stage which evaluates the resources set to be declared at the end of the pipeline and apply consistent labelling before writing.
+
+Since both Promises and Pipelines can be reused, you may wonder when to use each. The best rule of thumb is to ask if you are describing a noun or a verb.
+
+Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide _something_ as-a-Service you should be thinking about creating a Promise.
+
+Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a pipeline step.
+
+Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
+</details>
+
 <hr />
 
 Now that you understand what you can do in a pipeline and some design principles
