@@ -538,9 +538,65 @@ The key should be `xaasRequestPipeline` and should contain a list of your
 pipelines containers which will be just one for now:
 
 ```yaml title="promise.yaml -- include it under the 'spec' key"
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: elastic-cloud
+  namespace: default
+spec:
+  #highlight-start
   xaasRequestPipeline:
   - kratix-workshop/elastic-pipeline:dev
+  #highlight-end
+  workerClusterResources:
+  ...
 ```
+
+<details>
+  <summary> 👉🏾 Prefer to copy the whole working Promise file? 👈🏾 </summary>
+
+```bash title="Complete promise.yaml"
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: elastic-cloud
+  namespace: default
+spec:
+  xaasRequestPipeline:
+  - kratix-workshop/elastic-pipeline:dev
+  xaasCrd:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: elastic-clouds.workshop.kratix.io
+    spec:
+      group: workshop.kratix.io
+      names:
+        kind: elastic-cloud
+        plural: elastic-clouds
+      scope: Namespaced
+      versions:
+      - name: v1alpha1
+        served: true
+        storage: true
+        schema:
+          openAPIV3Schema:
+            type: object
+            properties:
+              spec:
+                type: object
+                properties:
+                  enableDataCollection:
+                    type: boolean
+                    default: false
+                    description: |
+                        If enabled, you will receive tools for
+                        metric, log, and trace collection that
+                        can be used to populate the elastic
+                        cloud instance.
+```
+
+</details>
 
 ## Install the Promise {#install-promise}
 
@@ -714,6 +770,10 @@ Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
 Go to http://localhost:30269 and check it out!
+
+:::info
+If you are in Instruqt, you can just navigate to the `🔗 ECK Instance` tab and use the refresh button on the top left.
+:::
 
 You can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
 

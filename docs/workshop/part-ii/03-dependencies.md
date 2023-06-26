@@ -76,15 +76,57 @@ The following steps will refactor this Promise to instead separate shared depend
 
 #### Remove one-off files (i.e. dependencies) from pipeline
 
-First you will need to remove the Operator and CRD files from the pipeline `run` script in order in order
-to stop them from being created on all Resource Requests.
+First you will need to remove the Operator and CRD files from the pipeline `run` script in order in order to stop them from being created on all Resource Requests.
 
 Open the `pipeline/run` file and remove lines 9-16. This will remove both curl commands which download the CRDs and controller resources.
 
+<details>
+  <summary> 👉🏾 Prefer to copy the whole working pipeline/run file? 👈🏾 </summary>
+
+```bash title="Complete promise/run"
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+mkdir -p to-deploy
+export name="$(yq eval '.metadata.name' /input/object.yaml)"
+export enableDataCollection="$(yq eval '.spec.enableDataCollection' /input/object.yaml)"
+
+echo "Generate ECK requests..."
+# Only set the beats value file if data collection is enabled
+valuesFile=''
+if $enableDataCollection; then
+  sed "s/NAME/${name}/g" beats-values.yaml > beats-final-values.yaml
+  valuesFile='--values beats-final-values.yaml'
+fi
+
+nodePort="$(echo "${name}" | md5sum | grep -Eo "[[:digit:]]{3}" | head -n1)"
+nodePort=$(( 30000 + nodePort ))
+sed "s/NODEPORT/${nodePort}/g" default-config.yaml | sed "s/NAME/${name}/g" > default-config-final-values.yaml
+
+helm template $name eck-stack \
+  $valuesFile \
+  --values default-config-final-values.yaml \
+  --repo https://helm.elastic.co \
+  --output-dir to-deploy
+
+echo "Adding namespaces to all helm output files..."
+find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'select(.metadata | has("namespace") | not).metadata.namespace |= "default"' {} \;
+
+echo "Removing enterprise annotation..."
+find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'del(.metadata.annotations["eck.k8s.elastic.co/license"])' {} \;
+
+echo "Copying files to /output..."
+find /pipeline/to-deploy -name \*.yaml -exec cp {} /output \;
+
+echo "Done"
+```
+
+</details>
+
 #### Run the test suite, see it passing
 
-With the downloads removed, you can re-run the test suite and see that the resulting files no long include
-the Operator or the CRDs.
+With the downloads removed, you can re-run the test suite and see that the resulting files no long include the Operator or the CRDs.
 ```bash
 scripts/test-pipeline
 ```
