@@ -108,15 +108,30 @@ to the worker cluster. When you get the pods on the worker, you will not see the
 kubectl --context $WORKER get pods -n elastic-system
 ```
 
-Whats happening is that Kratix is querying what Clusters are available and is
-searching for a cluster with the matching labels, because no cluster is found the
-resource fails to get scheduled.
+Whats happening is that Kratix is querying what Clusters are available and is searching for a cluster with the matching labels, because no cluster is found the resource fails to get scheduled.
 ```mdx-code-block
 import SchedulingPromise from "/img/docs/workshop/scheduling-promise-dependencies.svg"
 ```
 <figure class="diagram">
   <SchedulingPromise className="small"/>
 </figure>
+
+You can see this in the Kratix controller logs as well. This query will show that Kratix was not
+able to find a matching cluster to schedule the request:
+```yaml
+kubectl --context $PLATFORM --namespace kratix-platform-system \
+  logs deployment/kratix-platform-controller-manager \
+  --container manager | grep --max-count 1 "no Clusters can be selected for clusterSelector"
+```
+
+The above command will give an output similar to:
+```shell-session
+# output formatted for readability
+ERROR   Reconciler error {
+  "Work": {"name":"elastic-cloud-default","namespace":"default"},
+  "error": "no Clusters can be selected for clusterSelector"
+}
+```
 
 ### Label the cluster
 It is time to update the Kratix cluster to have the matching `environment=dev` label which is required
@@ -256,19 +271,17 @@ able to find a matching cluster to schedule the request:
 ```yaml
 kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
-  --container manager | grep "Reconciler error"
+  --container manager | tac | grep --max-count 1 "no Clusters can be selected for clusterSelector"
 ```
 
 The above command will give an output similar to:
 ```shell-session
 # output formatted for readability
-ERROR	Reconciler error {
-    "Work": {"name":"eck-default","namespace":"default"},
-    "error": "no Clusters can be selected for clusterSelector"
-}
+INFO no Clusters can be selected for clusterSelector
+{"clusterSelectors": "environment=dev,pvCapacity=large"}
 ```
 
-Just as with the original `environment` label, Kratix queryed what Clusters matched _all_
+Just as with the original `environment` label, Kratix queried what Clusters matched _all_
 provided label selectors. Since no cluster was found the resource fails to schedule until
 a Kratix cluster does match.
 
