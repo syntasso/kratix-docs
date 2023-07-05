@@ -32,7 +32,7 @@ In the context of your Promise, an example of what you might want to convey back
 
 ## Status
 
-Similar to how the pipeline orchestrated scheduling by writing configuration code to `/metadata/cluster-selectors.yaml` Kratix exposes a `/metadata/status.yaml` file.
+Similar to how the pipeline orchestrated scheduling by writing configuration code to `/metadata/scheduling.yaml` Kratix exposes a `/metadata/status.yaml` file.
 
 The `status.yaml` file can contain arbitrary key values, with the `message` key being a special key that is communicated back to the user when running `kubectl get elastic-cloud`. The rest of the key values can be viewed by inspecting the full document. For example you could convey a brief description of the ECK instance back to the user in the `message` key, and provide more programmatic information like the location of credentials to access the instance in other fields.
 
@@ -67,7 +67,7 @@ Before installing and making a resource request, you can verify the local test b
 ├── input
 │   └── object.yaml
 ├── metadata
-│   └── cluster-selectors.yaml
+│   └── scheduling.yaml
 #highlight-next-line
     └── status.yaml
 └── output

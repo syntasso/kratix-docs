@@ -28,13 +28,22 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 ## What is a Promise pipeline? {#what-is-a-pipeline}
 
-A [Kratix Promise](../main/reference/promises/intro) is configured with a Request
-Pipeline, defined as `xaasRequestPipeline` in the Promise definition.
+A [Kratix Promise](../main/reference/promises/intro) is configured with a
+collection of workflows, defined as `workflows` in the Promise
+definition.
 
-This pipeline is an ordered list of OCI-compliant images. Each image runs as an
-init container within a single Kubernetes pod.
+It's possible to trigger workflows at different stages of the Promise and of the
+Request lifecycle. In this workshop, you will define only the workflow for
+`grapefruit.gummybear`. This workflow will be triggered on the creation and
+update of Elastic instances.
 
-This pipeline is run whenever a user makes a request to your Promise API. The
+Kratix provides a straightforward way to define workflows through Pipelines,
+You can use other technologies (such as Tekton) if you prefer.
+
+The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
+image runs as an init container within a single Kubernetes pod.
+
+This pipeline will  run whenever a user makes a request to your Promise API. The
 pipeline is limited only by what actions you can take inside a Pod in Kubernetes.
 This means you can download software, run imperative commands, wait for manual
 approvals and more.
@@ -48,14 +57,13 @@ In addition to running commands within the images, Kratix will manage a few key
 files when the defined pipeline completes:
 * `/output`: The files in this directory should be Kubernetes valid YAML as they
   will be scheduled to a matching Kratix Cluster.
-* `/metadata/cluster-selectors.yaml`: Any YAML key:value pairs in this file will
-  be appended to the `selector` values in the Promise before deciding where the
-  output files are scheduled.
+* `/metadata/scheduling.yaml`: A YAML containing the extra matchers to be used
+  by Kratix when determining which cluster should run this workload.
 * `metadata/status.yaml`: A YAML document that will be written to the Resource
   Request status section on pipeline completion.
 
 This step of the workshop will focus on the script run in an image and the output
-directory. Both cluster-selectors and status will be explored in an upcoming
+directory. Both scheduling and status will be explored in an upcoming
 section of this workshop.
 
 ### Design principles
@@ -93,6 +101,7 @@ them will not result in any adverse side effects.
 
 <details>
   <summary>🤔 Wondering when to use pipelines images versus creating a new Promise?</summary>
+
 Platform design requires thinking about how to divide platform offerings into right sized Promises and evaluating options for reusability and composability.
 
 Each Promise is a the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
@@ -532,9 +541,9 @@ images across their Promises.
 
 With your pipeline tested you are ready to add it to your Promise. To do this,
 you will add a new top level key in the Promise `spec` as a sibling to the
-`xaasCrd` key you created in the last section.
+`api` key you created in the last section.
 
-The key should be `xaasRequestPipeline` and should contain a list of your
+The key should be `workflows` and should contain a list of your
 pipelines containers which will be just one for now:
 
 ```yaml title="promise.yaml -- include it under the 'spec' key"
@@ -545,26 +554,46 @@ metadata:
   namespace: default
 spec:
   #highlight-start
-  xaasRequestPipeline:
-  - kratix-workshop/elastic-pipeline:dev
+  workflows:
+    grapefruit:
+      gummybear:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: grapefruit-gummybear
+            name: default
+          spec:
+            containers:
+            - name: xaas-request-pipeline-stage-0
+              image: kratix-workshop/elastic-pipeline:dev
   #highlight-end
-  workerClusterResources:
+  api:
   ...
 ```
 
 <details>
   <summary> 👉🏾 Prefer to copy the whole working Promise file? 👈🏾 </summary>
 
-```bash title="Complete promise.yaml"
+```yaml title="Complete promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
   name: elastic-cloud
   namespace: default
 spec:
-  xaasRequestPipeline:
-  - kratix-workshop/elastic-pipeline:dev
-  xaasCrd:
+  workflows:
+    grapefruit:
+      gummybear:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: grapefruit-gummybear
+            name: default
+          spec:
+            containers:
+            - name: xaas-request-pipeline-stage-0
+              image: kratix-workshop/elastic-pipeline:dev
+  api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
@@ -691,7 +720,7 @@ status-writer
 
 While you only provided a single image, you can see that there are four listed. Each has a job as follows:
 * `reader` makes sure that the Resource Request is available to the pipeline
-* `xaas-request-pipeline-stage-*` images are an ordered list from the provided containers in the Promise
+* `xaas-request-pipeline-stage-0` the container name you specified in the Kratix Pipeline
 * `work-writer` schedules the files in the `output` directory based on the labels provided
 * `status-writer` updates the Resource Request status
 

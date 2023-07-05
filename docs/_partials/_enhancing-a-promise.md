@@ -815,7 +815,7 @@ Now the Resource Requests have been deleted you can delete the Promise
 kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
-Verify the Worker Cluster Resources are deleted from the Worker Cluster
+Verify the Dependencies are deleted from the Worker Cluster
 ```console
 kubectl --context $WORKER get pods
 ```

@@ -43,7 +43,6 @@ Promises allow platform teams to:
 * Manage where services are deployed across the infrastructure (on and
   off-Kubernetes, on Cloud providers, etc)
 
-
 ### Promise Architecture
 
 Before jumping into writing a Promise, here is a quick review of the Promise
@@ -70,8 +69,7 @@ codify your Promise API.
 
 :::info
 
-In a Promise the API is stored in a key called `xaasCrd` which stands for
-anything-as-a-service Custom Resource Definition.
+In a Promise the API is stored in a key called `api`
 
 :::
 
@@ -97,7 +95,6 @@ for further details on the topic.
 <hr />
 
 ## Design an API for your service {#api-design}
-
 
 Imagine that your users have requested a monitoring system to use with their
 applications. You, as part of a platform team, have investigated potential
@@ -227,7 +224,7 @@ metadata:
   name: elastic-cloud
   namespace: default
 spec:
-  xaasCrd:
+  api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
@@ -259,7 +256,7 @@ spec:
                         cloud instance.
 ```
 
-Notice that in this file there is a single key called `xaasCrd` under the Promise spec.
+Notice that in this file there is a single key called `api` under the Promise spec.
 This is where a complete and valid Kubernetes CRD is provided that contains the data
 collection parameter as decided above along with a default value and description that
 can later be used for documentation (check highlighted block).
@@ -417,6 +414,7 @@ elastic-cloud   10s
 ```
 
 More importantly, you will also be able to see the `elastic-cloud` API you defined:
+
 ```bash
 kubectl --context kind-platform get crds | grep workshop
 ```

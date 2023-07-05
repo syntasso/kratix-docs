@@ -72,10 +72,10 @@ to clusters with these labels you need to update the Promise.
 
 ## Schedule Promises to specific clusters {#dependency-scheduling}
 Inside of a Promise you can define what clusters the Promise should schedule resources
-to by specifying the `clusterSelector` field.
+to by specifying the `scheduling` field.
 
 This field contains a map of key values that are all the labels that must be matched to
-a cluster. Update the Promise to contain the new `clusterSelector` field shown below:
+a cluster. Update the Promise to contain the new `scheduling` field shown below:
 
 ```yaml title=promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -85,8 +85,10 @@ metadata:
   namespace: default
 spec:
   #highlight-start
-  clusterSelector:
-    environment: dev
+  scheduling:
+  - target:
+      matchLabels:
+        environment: dev
   #highlight-end
   ...
 ```
@@ -101,6 +103,7 @@ kubectl --context $PLATFORM create --filename promise.yaml
 ```
 
 ### Verify the resource are not scheduled
+
 The cluster as it is right now does not contain the `environment: dev` label, so nothing will get scheduled
 to the worker cluster. When you get the pods on the worker, you will not see the requested ECK resources:
 
@@ -184,7 +187,8 @@ Kratix has a convention of using a [`/metadata`](../main/reference/resource-requ
 directory to manage important configurations generated in the pipeline that are independent of
 the resources you want stored in a GitOps state store.
 
-To set additional scheduling labels, you can add key:value pairs `/metadata/cluster-selectors.yaml` file.
+To set additional scheduling labels, you can add the a similar document as the
+Promise's `scheduling` field to the `/metadata/scheduling.yaml` file.
 
 Any selectors added in this file will be appended to the list provided by the Promise. This means means
 that you cannot override the Kratix cluster selectors set in the Promise definition. This enables clear
@@ -200,7 +204,7 @@ Add the following to the end of the `pipeline/run` script:
 ```bash title=pipeline/run -- add to the end
 if ${enableDataCollection}; then
   echo "Setting additional cluster selectors: pvCapacity=large"
-  echo "pvCapacity: large" > /metadata/cluster-selectors.yaml
+  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /metadata/scheduling.yaml
 fi
 ```
 
@@ -221,7 +225,7 @@ Verify that the output now shows the cluster-selector file
 │   └── object.yaml
 ├── metadata
 #highlight-next-line
-│   └── cluster-selectors.yaml
+│   └── scheduling.yaml
 └── output
     ├── beats.yaml
     ├── elasticsearch.yaml

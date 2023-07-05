@@ -57,16 +57,17 @@ into the cluster so that there is not a conflict.
 
 <img src={useBaseUrl('/img/docs/workshop/operator-as-shared-dependency.png')} />
 
-### Worker Cluster Resources
+### Dependencies
 
-Currently, both the operator and the request for an instance from the operator are generated in the pipeline.
-Kratix has the concept of `workerClusterResources` which can be useful to manage different
-types of resources. While a pipeline runs on every request for a resource, the Worker Cluster
-Resources are a set of resources that only need to be installed once per cluster for the given Promise.
+Currently, both the operator and the request for an instance from the operator
+are generated in the pipeline. Kratix has the concept of `dependencies` which
+can be useful to manage different types of resources. While a pipeline runs on
+every request for a resource, the Dependencies are a set of resources that only
+need to be installed once per cluster for the given Promise.
 
 A simple use cases may be to create a shared namespace that all subsequent
 resource requests send there output to. In the case of this ECK Promise, you can
-install the Operator and CRDs as a Worker Cluster Resources.
+install the Operator and CRDs as a Dependencies.
 
 ### Remove shared dependencies from the pipeline
 
@@ -83,7 +84,7 @@ Open the `pipeline/run` file and remove lines 9-16. This will remove both curl c
 <details>
   <summary> 👉🏾 Prefer to copy the whole working pipeline/run file? 👈🏾 </summary>
 
-```bash title="Complete promise/run"
+```bash title="Complete pipeline/run"
 #!/usr/bin/env bash
 
 set -eu -o pipefail
@@ -127,6 +128,7 @@ echo "Done"
 #### Run the test suite, see it passing
 
 With the downloads removed, you can re-run the test suite and see that the resulting files no long include the Operator or the CRDs.
+
 ```bash
 scripts/test-pipeline
 ```
@@ -150,13 +152,13 @@ Verify that the output shows only the following files:
     └── kibana.yaml
 ```
 
-### Add shared dependencies as Worker Cluster Resources
+### Add shared dependencies to the Promise
 
-Removing the files from the pipeline is not enough. You must now also add them to the Promise as Worker Cluster Resources.
+Removing the files from the pipeline is not enough. You must now also add them to the Promise as Dependencies.
 
 #### Download the WorkerResourcesBuilder
 
-Run the following command to create a `resources` directory where you can store these files and any others that you may want to depend on for the Promise installation:
+Run the following command to create a `dependencies` directory where you can store these files and any others that you may want to depend on for the Promise installation:
 ```bash
 mkdir -p resources
 
@@ -165,12 +167,12 @@ curl --silent --location --output resources/elastic-operator.yaml https://downlo
 ```
 
 Once stored locally, you will need to add these resources to the Promise file. The resources are added
-as a list under `workerClusterResources` which can tricky with formatting and require some subtle white
+as a list under `dependencies` which can tricky with formatting and require some subtle white
 space changes.
 
 To make this step simpler there is a _very basic_ tool which grabs all YAML
-documents from a single directory and injects them correctly into the `workerClusterResources`
-field in the `promise.yaml`.
+documents from a single directory and injects them correctly into the
+`dependencies` field in the `promise.yaml`.
 
 To use this tool, you will need to download the correct binary for your computer
 from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.4):
@@ -235,16 +237,16 @@ The above command will give an output similar to:
 ```shell-session
 Usage of ./bin/worker-resource-builder:
   -resources-dir string
-        Absolute Path of k8s resources to build workerClusterResources from
+        Absolute Path of k8s resources to build dependencies from
   -promise string
-        Absolute path of Promise to insert workerClusterResources into
+        Absolute path of Promise to insert dependencies into
 ```
 
 Given this usage instructions, you can run the following command to overwrite the current Promise file to include the CRD and controller resources:
 
 ```bash
 echo "current promise length is: $(wc -l promise.yaml)"
-./bin/worker-resource-builder -resources-dir ./resources -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
+./bin/worker-resource-builder -dependencies-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
 echo "new promise length is: $(wc -l promise.yaml)"
 ```
 
@@ -255,15 +257,15 @@ current promise length is: 35 promise.yaml
 new promise length is: 11398 promise.yaml
 ```
 
-In this output, you can see that the the files in the `resources` directory have now been added to the `promise.yaml` file. You can also check the top of the newly edited `promise.yaml` and see that these resources have been added as list items under the `workerClusterResources` key.
+In this output, you can see that the the files in the `dependencies` directory have now been added to the `promise.yaml` file. You can also check the top of the newly edited `promise.yaml` and see that these resources have been added as list items under the `dependencies` key.
 
 :::info
 
-You may notice that the length of the files in `resources` is shorter than what was added to the `promise.yaml` file. This is because the `worker-resources-builder` binary reformatted long lines into more readable lines with a max length of 90.
+You may notice that the length of the files in `dependencies` is shorter than what was added to the `promise.yaml` file. This is because the `worker-resources-builder` binary reformatted long lines into more readable lines with a max length of 90.
 
 If you have [yq](https://mikefarah.gitbook.io/yq/) installed you can verify the total number of documents in both matches with the following command:
 ```bash
-diff <(yq ea '[.] | length' resources/*) <(yq '.spec.workerClusterResources | length' promise.yaml)
+diff <(yq ea '[.] | length' resources/*) <(yq '.spec.dependencies | length' promise.yaml)
 ```
 
 No difference in number of YAML resources will result in no output.
@@ -411,7 +413,7 @@ And with that, you have reduced duplication by delivering shared dependencies se
 
 To recap the steps you took:
 1. ✅&nbsp;&nbsp;Evaluated what resources are shared dependencies
-1. ✅&nbsp;&nbsp;Moved any shared dependencies from pipeline resources to worker cluster resources
+1. ✅&nbsp;&nbsp;Moved any shared dependencies from pipeline resources to the dependencies
 1. ✅&nbsp;&nbsp;Viewed the dependency set up on Promise install
 1. ✅&nbsp;&nbsp;Successfully request more than one instance of ECK
 
