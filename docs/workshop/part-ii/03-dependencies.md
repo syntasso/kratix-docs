@@ -120,7 +120,7 @@ documents from a single directory and injects them correctly into the `workerClu
 field in the `promise.yaml`.
 
 To use this tool, you will need to download the correct binary for your computer
-from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.3):
+from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.4):
 
 :::info
 
@@ -138,7 +138,7 @@ cp /root/bin/worker-resource-builder ./bin
   <TabItem value="darwin-amd64" label="Intel Mac" default>
 
     mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_darwin_amd64.tar.gz
+    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.4/worker-resource-builder_0.0.4_darwin_amd64.tar.gz
     tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
     mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
     chmod +x ./bin/worker-resource-builder
@@ -147,7 +147,7 @@ cp /root/bin/worker-resource-builder ./bin
   <TabItem value="darwin-arm64" label="Apple Silicon Mac">
 
     mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_darwin_arm64.tar.gz
+    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.4/worker-resource-builder_0.0.4_darwin_arm64.tar.gz
     tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
     mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
     chmod +x ./bin/worker-resource-builder
@@ -156,7 +156,7 @@ cp /root/bin/worker-resource-builder ./bin
   <TabItem value="linux-arm64" label="Linux ARM64">
 
     mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_linux_arm64.tar.gz
+    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.4/worker-resource-builder_0.0.4_linux_arm64.tar.gz
     tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
     mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
     chmod +x ./bin/worker-resource-builder
@@ -165,7 +165,7 @@ cp /root/bin/worker-resource-builder ./bin
     <TabItem value="linux-amd64" label="Linux AMD64">
 
     mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_linux_amd64.tar.gz
+    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.4/worker-resource-builder_0.0.4_linux_amd64.tar.gz
     tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
     mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
     chmod +x ./bin/worker-resource-builder
@@ -181,7 +181,7 @@ Once installed, you can see how to use the binary by running the following help 
 The above command will give an output similar to:
 ```shell-session
 Usage of ./bin/worker-resource-builder:
-  -k8s-resources-directory string
+  -resources-dir string
         Absolute Path of k8s resources to build workerClusterResources from
   -promise string
         Absolute path of Promise to insert workerClusterResources into
@@ -191,7 +191,7 @@ Given this usage instructions, you can run the following command to overwrite th
 
 ```bash
 echo "current promise length is: $(wc -l promise.yaml)"
-./bin/worker-resource-builder -k8s-resources-directory ./resources -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
+./bin/worker-resource-builder -resources-dir ./resources -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
 echo "new promise length is: $(wc -l promise.yaml)"
 ```
 
