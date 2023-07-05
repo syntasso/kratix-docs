@@ -80,7 +80,7 @@ provide anything-as-a-Service, and are composed of mainly three pieces:
   intending to run the Promise workload.
 - An API exposing to the user of the Platform the configuration options they
   have when requesting the service provided by the Promise.
-- A series of steps that need to be executed to fulfill the Promise and create
+- A series of workflows that need to be executed to fulfill the Promise and create
   the service.
 
 <details>
@@ -133,6 +133,7 @@ hide complexity, making it easy for users to request new services.
 Alternatively, they can offer users greater flexibility, allowing them to
 fine-tune lower-level details of the Service or select the specific cluster
 where the workload should run.
+
 </details>
 
 
@@ -199,6 +200,7 @@ kubectl --context $PLATFORM get clusters.platform.kratix.io --all-namespaces
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 No resources found
 ```
@@ -560,8 +562,7 @@ to exit the watch mode.
 
 If at this stage you create another Kubernetes cluster and follow similar steps
 as the above, the Jenkins Promise dependencies would also be installed on the
-new Worker cluster. 
-
+new Worker cluster.
 
 Later in this tutorial you will learn how to make certain Promises available in
 certain clusters based on Promise configurations.
@@ -657,6 +658,8 @@ Verify the Jenkins Pipeline execution:
 ```bash
 kubectl --context $PLATFORM get pods
 ```
+
+<!-- TODO: (promising future) verify pipeline pod name -->
 
 The above command will give an output similar to:
 ```shell-session

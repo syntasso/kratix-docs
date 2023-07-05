@@ -216,15 +216,17 @@ suitable clusters for hosting dependencies and workloads. Check the Cluster
 Selector defined for the EasyApp Promise:
 
 ```bash
-kubectl --context $PLATFORM describe promise easyapp | \
-  grep "Spec" --after-context 2 --max-count 1
+kubectl --context $PLATFORM describe promise easyapp | tail -n 20 | \
+  grep "Scheduling:" --after-context 3 --max-count 1
 ```
 
 The above command will give an output similar to:
 ```shell-session
 Spec:
-  Cluster Selector:
-    Environment:  platform
+  Scheduling:
+    Target:
+      Match Labels:
+        Environment: platform
 ```
 
 This means the EasyApp Promise is telling Kratix:
@@ -282,18 +284,20 @@ Cluster. The EasyApp sub-Promises are also declaring a Cluster Selector.
 Verify:
 
 ```bash
-kubectl --context $PLATFORM describe promise nginx-ingress | grep "Spec" -A 2 -m 1
-kubectl --context $PLATFORM describe promise postgresql | grep "Spec" -A 2 -m 1
+kubectl --context $PLATFORM describe promise nginx-ingress |  grep "Scheduling:" -A 3 -m 1
+kubectl --context $PLATFORM describe promise postgresql | grep "Scheduling:" -A 3 -m 1
 ```
 
 The above command will give an output similar to:
 ```shell-session
-Spec:
-  Cluster Selector:
-    Environment:  dev
-Spec:
-  Cluster Selector:
-    Environment:  dev
+  Scheduling:
+    Target:
+      Match Labels:
+        Environment:  dev
+  Scheduling:
+    Target:
+      Match Labels:
+        Environment:  dev
 ```
 
 The NGINX and the PosgreSQL promises are telling Kratix:
@@ -421,6 +425,8 @@ Verify the Pipelines running on the Platform cluster:
 ```bash
 kubectl --context $PLATFORM get pods --watch
 ```
+
+<!-- TODO: (promising future) pipeline pod name -->
 
 The above command will give an output similar to:
 ```shell-session

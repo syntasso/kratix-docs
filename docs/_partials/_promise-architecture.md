@@ -12,7 +12,7 @@ At a very high-level, a Promise is made up of four parts:
 
 1. **The Promise API:** The Promise API is what the users of the Platform will
    interact with when requesting a new instance of the Promised Service
-2. **The Imperative Pipeline:** A series of containers where Platform teams can
+2. **The Imperative Pipeline:** A series of workflows where Platform teams can
    codify all of their business requirements.
 3. **The Declarative State:** The pipeline executes a series of *imperative*
    steps top generate a *declarative state* that's then persisted into the State
