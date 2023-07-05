@@ -33,7 +33,7 @@ For more on the Platform Gap, check out [_Crossing the Platform Gap_ article on 
 
 Kubernetes Operators work hand-in-hand with Kratix. In nearly all cases
 Operators will need to be deployed to Worker Cluster as part of the Promise's
-in the `workerClusterResources` part of a Promise, to ensure they are able to
+in the `dependencies` part of a Promise, to ensure they are able to
 manage requested instances.
 
 ### Helm

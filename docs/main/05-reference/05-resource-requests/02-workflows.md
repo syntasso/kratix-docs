@@ -1,19 +1,54 @@
 ---
-description: Documentation for writing Promise Pipelines, covering how Kratix internally execute the Pipeline containers
-title: Promise Pipelines
-sidebar_label: Pipelines
+description: Documentation for writing Promise Workflows and Pipelines, covering how Kratix internally execute the Pipeline containers
+title: Promise Workflows
+sidebar_label: Workflows
 ---
 
-# Resource Request Pipelines
+# Workflows
 
-A [Kratix Promise](../promises/intro) is configured with a Request Pipeline,
-defined as `xaasRequestPipeline` in the Promise definition. This pipeline is an
-ordered list of OCI-compliant images. Each image runs as an init container
-within a single Kubernetes pod. 
+A [Kratix Promise](../promises/intro) is configured with a series of workflows
+defined in the Promise's `workflows` key. Within the workflows, promise writers
+can trigger a series of actions (pipelines) that must be executed when certain
+conditions are met in the system. The `workflows` is defined as follows:
 
-## Pipeline Volumes
+```yaml
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  # ...
+spec:
+  # ...
+  workflows:
+    # lifecycle hook for resource requests
+    grapefruit:
+      # lifecycle hook for creates/updates of resource requests
+      gummybear:
+      - # Pipeline definition
+```
 
-Each container is given access to three directories:
+To define the pipeline, promise writers can use any technology they want (i.e.
+Tekton, plain Pods, etc). Kratix provide a handy `kind` to make the process of
+writing pipelines simpler.
+
+## Kratix Pipelines
+
+Kratix `Pipeline` is defined as follows:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Pipeline
+metadata:
+  name: # name
+  namespace: # namespace
+spec:
+  containers:
+  - name: # container name
+    image: # container image
+  - # ...
+```
+
+Kratix will run each container in the `spec.containers` list in order, providing
+the following volumes:
 
 ### `/input`
 
@@ -42,10 +77,12 @@ All files present in `/output` directory of the final container will be written
 to your GitOps repository.
 
 :::note
+
 At this time, all files must be written to the root directory of `/output` (i.e.
 there should not be any subdirectories within `/output`), and every file must
 contain only valid Kubernetes documents that can be applied to a cluster. Each
 document will be scheduled per the [scheduling docs](../multicluster-management).
+
 :::
 
 ### `/metadata`
@@ -54,7 +91,7 @@ All containers in the pipeline have access to this directory.
 
 Pipeline containers can control aspects of how Kratix behaves by creating special files in this
 directory:
-   - `cluster-selectors.yaml` can be added to any Promise to
+   - `scheduling.yaml` can be added to any Promise to
      further refine where the resources in `/output` will be
      [scheduled](../04-multicluster-management.md#pipeline).
    - `status.yaml` allows the pipeline to communicate information about the
@@ -66,14 +103,16 @@ directory:
 Kratix scans for these files and ignores all other files in the `/metadata`
 directory.
 
-## Pipeline runs
+## Running Workflows
 
-A pipeline is run on each Resource Request reconciliation loop. Kubernetes
-reconciles on a number of different actions including, but not limited to:
+The workflows are executed on each reconciliation loop for a Resource Request.
+Kubernetes reconciles on a number of different actions including, but not
+limited to:
 
+- On the creation of a new Resource
 - Regular interval (default: 10 hours, not currently configurable)
 - Recreating or restarting the Kratix Controller
-- A change to the Resource Request (not yet supported)
+- A change to the Resource Request
 
 <br/>
 All pipelines should be idempotent as there is a guarantee that

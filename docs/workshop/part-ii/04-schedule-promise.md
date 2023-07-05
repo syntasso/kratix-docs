@@ -161,7 +161,7 @@ be used.
 To achieve this with Kratix, you can optionally set additional labels at request time by
 outputting them from the pipeline.
 
-Kratix has a convention of using a [`/metadata`](../../../docs/main/reference/resource-requests/pipelines#metadata)
+Kratix has a convention of using a [`/metadata`](../main/reference/resource-requests/workflows#metadata)
 directory to manage important configurations generated in the pipeline that are independent of
 the resources you want stored in a GitOps state store.
 

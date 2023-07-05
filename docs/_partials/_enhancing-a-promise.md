@@ -46,9 +46,9 @@ _In this guide, you only need create a new Postgres Promise that creates Postgre
 **The steps:**
 
 1. [Get a base Promise](#base-promise)
-1. [Change the Promise so that _the user who wants an instance_ knows they need to include their `costCentre` name when they make their request to the platform](#xaas-crd)
-1. [Change the Promise so that _the Worker Cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`](#worker-cluster-resources)
-1. [Change the Promise so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance](#xaas-request-pipeline)
+1. [Change the Promise so that _the user who wants an instance_ knows they need to include their `costCentre` name when they make their request to the platform](#api)
+1. [Change the Promise so that _the Worker Cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`](#dependencies)
+1. [Change the Promise so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance](#workflow)
 1. [Install the modified Promise on your platform](#install-promise)
 1. [Check it works: make a request to your platform for a Postgres instance](#verify-resource)
 
@@ -69,6 +69,8 @@ ls
 
 You should see something a structure similar to the one below:
 
+<!-- TODO: (promising future) revisit directory strucutre after promise updates -->
+
 ```bash
 . 📂 promise-postgresql
 #highlight-next-line
@@ -81,7 +83,7 @@ You should see something a structure similar to the one below:
       │   │   └── minimal-postgres-manifest.yaml
       │   ├── Dockerfile
       │   ├── execute-pipeline.sh
-      ├── 📂 resources
+      ├── 📂 dependencies
       │   ├── operator.yaml
       │   └── ...
       ├── 📂 scripts
@@ -95,26 +97,28 @@ You should see the `promise.yaml` file. This is the Promise definition
 that you'll modify and install on your platform. Ignore everything else in the
 folder for now.
 
-### Step two: `xaasCrd` {#xaas-crd}
+### Step two: `api` {#api}
 > Change the Promise so that _the user who wants an instance_ knows they need to include their `costCentre` name when they make their request to the platform
 
-#### About `xaasCrd`
+#### About `api`
+
+<!-- TODO: (promising-future) update image -->
 
 <img
   align="right"
   src={useBaseUrl('/img/docs/xaasCrd.png')}
-  alt="screenshot of a YAML file, highlighting the presence of the xaasCrd key"
+  alt="screenshot of a YAML file, highlighting the presence of the api key"
 />
 
-`xaasCrd` is the CRD exposed to the users of the [Promise](writing-a-promise).
-To see `xaasCrd` in the Promise definition file, open `promise.yaml`
+`api` is the CRD exposed to the users of the [Promise](writing-a-promise).
+To see `api` in the Promise definition file, open `promise.yaml`
 and look under the `spec` section.
 
-`xaasCrd` is the contract with the user who wants an instance. It's where you get to define the required and optional configuration options exposed to your users.
+`api` is the contract with the user who wants an instance. It's where you get to define the required and optional configuration options exposed to your users.
 
 You can already see a number of properties in this section of the `promise.yaml` file. These properties are defined within a versioned schema and can have different types and validations.
 
-#### Update `xaasCrd`
+#### Update `api`
 
 To add the required cost centre configuration, add the following to the `promise.yaml`:
 
@@ -125,16 +129,16 @@ costCentre:
 ```
 From the top of the file, navigate to
 
-`spec` > `xaasCrd` > `spec` > `versions[0]` > `schema` > <br /> `openAPIV3Schema` > `properties` > `spec` > `properties`
+`spec` > `api` > `spec` > `versions[0]` > `schema` > <br /> `openAPIV3Schema` > `properties` > `spec` > `properties`
 
 Here, add your `costCentre` YAML from above as a sibling to the existing `dbName` property.
 
 
 <details>
-  <summary>👀&nbsp;&nbsp;Click here to view a final version of the extended <code>xaasCrd</code> which should be indented so as to nest under the <code>spec</code> header</summary>
+  <summary>👀&nbsp;&nbsp;Click here to view a final version of the extended <code>api</code> which should be indented so as to nest under the <code>spec</code> header</summary>
 
 ```yaml
-xaasCrd:
+api:
   apiVersion: apiextensions.k8s.io/v1
   kind: CustomResourceDefinition
   metadata:
@@ -181,11 +185,13 @@ xaasCrd:
 ```
 </details>
 
-### Step three: `workerClusterResources` {#worker-cluster-resources}
+### Step three: `dependencies` {#dependencies}
 
 > Change the Promise so that _the Worker Cluster_ Operator that creates the instance knows to apply your new `costCentre` label `costCentre`
 
-#### About `workerClusterResources`
+#### About `dependencies`
+
+<!-- TODO: (promising future) update diagram -->
 
 <img
   align="right"
@@ -193,21 +199,21 @@ xaasCrd:
   alt="screenshot of a YAML file, highlighting the presence of the workerClusterResources key"
 />
 
-`workerClusterResources` is the description of all of the Kubernetes resources required to create an instance of the Promise, such as CRDs, Operators and Deployments.
+`dependencies` is the description of all of the Kubernetes resources required to create an instance of the Promise, such as CRDs, Operators and Deployments.
 
 In the Promise definition, you divide resources based on the idea of _prerequisite resources_ and _per-instance resources_. Prerequisite resources are resources that we create before any application team requests an instance. This can be helpful for two scenarios:
 1. Any CRDs or dependency resources are ready when an instance is requested which speeds up response time to application teams.
 1. Resources that can be shared across instances are only deployed once. This can reduce load on the cluster, and it can also allow defining a Kratix Resource Request as a portion of an existing resource (e.g. you could provide a whole database instance on each Resource Request, or you could provide a database within an existing instance on each Resource Request)
 
-The `workerClusterResources` section of the Kratix Promise defines the _prerequisite capabilities_.
+The `dependencies` section of the Kratix Promise defines the _prerequisite capabilities_.
 
 These capabilities are:
 * created once per cluster.
-* complete Kubernetes YAML documents stored in the `workerClusterResources` section of the Promise.
+* complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
 
 For the Postgres Promise you're defining, the only cluster resources (prerequisite capabilities) you need are conveniently packaged in a [Kubernetes Operator](https://github.com/zalando/postgres-operator) that is maintained by Zalando. The Operator turns the complexities of configuring Postgres into a manageable configuration format.
 
-#### Update `workerClusterResources`
+#### Update `dependencies`
 
 To make sure each Postgres instance includes `costCentre`, you need to make the Operator aware of the label.
 
@@ -224,7 +230,7 @@ Following the Zalando [`docs`](https://github.com/zalando/postgres-operator/blob
 
 From the top of the file, navigate to
 
-`spec` > `workerClusterResources[7]` > `configuration` > `kubernetes`
+`spec` > `dependencies[7]` > `configuration` > `kubernetes`
 
 To verify you're in the right place, the object should be `kind: OperatorConfiguration` with `name: postgres-operator`.
 
@@ -372,10 +378,13 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
 ```
 </details>
 
-### Step four: `xaasRequestPipeline` {#xaas-request-pipeline}
-> Change the Promise so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance
+### Step four: `workflows` {#workflows}
 
-#### About `xaasRequestPipeline`
+> Change the Promise `grapefruit.gummybear` workflow so that _the pipeline_ knows how to add the user's `costCentre` to the request for the instance
+
+#### About `workflows`
+
+<!-- TODO: (promising future) update diagram -->
 
 <img
   align="right"
@@ -383,14 +392,13 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
   alt="Kratix logo"
 />
 
-`xaasRequestPipeline` is the pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
+`workflows.grapefruit.gummybear` contains the pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
 
 Conceptually, a pipeline is the manipulation of an input value to generate an output value. There are three parts to the PostgreSQL request pipeline.
 
 * `resources/minimal-postgres-manifest.yaml`
 * `execute-pipeline.sh`
 * `Dockerfile`
-
 
 <br />
 
@@ -586,17 +594,14 @@ kind load docker-image kratix-workshop/postgres-request-pipeline:dev --name plat
   </ul>
 </details>
 
-#### Update the Promise's `xaasRequestPipeline` value
+#### Update the Promise's `workflows` value
 
 The new image is built and available on your Platform Cluster. Update your Promise to use the new image.
 
-Open the Promise definition file (`promise-postgresql/promise.yaml`). From the
-top of the file, navigate to `spec` > `xaasRequestPipeline` and replace the
-current value image with the newly created
-`kratix-workshop/postgres-request-pipeline:dev` image.
+Open the Promise definition file (`promise-postgresql/promise.yaml`). From the top of the file, navigate to `spec` > `workflows` > `grapefruit` > `gummybear[0]` > `spec` > `containers[0]` > `image` and replace the current value image with the newly created `kratix-workshop/postgres-request-pipeline:dev` image.
 
 <details>
-  <summary>👀&nbsp;&nbsp;Click here to see the resulting xaasRequestPipeline section which should be indented under <code>spec</code> in the Promise yaml</summary>
+  <summary>👀&nbsp;&nbsp;Click here to see the resulting workflows section which should be indented under <code>spec</code> in the Promise yaml</summary>
 
 ```yaml jsx title="promise-postgresql/promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
@@ -604,12 +609,22 @@ kind: Promise
 metadata:
   name: postgresql
 spec:
-  xaasCrd:
+  api:
   # ...
-  xaasRequestPipeline:
-  #highlight-next-line
-  - kratix-workshop/postgres-request-pipeline:dev
-  workerClusterResources:
+  workflows:
+    grapefruit:
+      gummybear:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: configure-instance
+            namespace: default
+          spec:
+            containers:
+              - name: xaas-request-pipeline-stage-0
+                #highlight-next-line
+                image: kratix-workshop/postgres-request-pipeline:dev
+  dependencies:
   # ...
 ```
 </details>
@@ -642,7 +657,7 @@ works.platform.kratix.io                 2022-08-09T14:35:55Z
 ```
 <br />
 
-<p>Check that the `workerClusterResources` have been installed on the
+<p>Check that the `dependencies` have been installed on the
 worker:<br/>
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
@@ -679,9 +694,9 @@ You need to create a Kratix Resource Request, which is a valid Kubernetes
 resource. Like all Kubernetes resources, this  must include all [required
 fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/#required-fields):
 
-1. `apiVersion` where the resource can be found. This is `marketplace.kratix.io/v1alpha1` in your Postgres Promise (from `spec.xaasCrd.spec.group` in `promise.yaml`).
-1. `kind`. This is `postgresql` in your Postgres Promise (from `spec.xaasCrd.spec.name` in `promise.yaml`).
-1. Values for required fields. Fields are `teamId`, `env`, `dbName` and `costCentre` in your Postgres Promise (from `spec` > `xaasCrd` > `spec` > `versions`[0] > `schema` > `openAPIV3Schema` > `properties` > `spec` > `properties` in `promise.yaml`).
+1. `apiVersion` where the resource can be found. This is `marketplace.kratix.io/v1alpha1` in your Postgres Promise (from `spec.api.spec.group` in `promise.yaml`).
+1. `kind`. This is `postgresql` in your Postgres Promise (from `spec.api.spec.name` in `promise.yaml`).
+1. Values for required fields. Fields are `teamId`, `env`, `dbName` and `costCentre` in your Postgres Promise (from `spec` > `api` > `spec` > `versions`[0] > `schema` > `openAPIV3Schema` > `properties` > `spec` > `properties` in `promise.yaml`).
 1. A unique name and namespace combination.
 
 In the sample Resource Request (`promise-postgresql/resource-request.yaml`) add
@@ -740,7 +755,7 @@ request-pipeline-postgresql-default-SHA     0/1     Completed   0          1h
 Then view the pipeline logs by running _(replace SHA with the value from the output of `get pods` above)_:
 
 ```console
-kubectl --context $PLATFORM logs --container xaas-request-pipeline-stage-1 pods/request-pipeline-postgresql-default-SHA
+kubectl --context $PLATFORM logs --container xaas-request-pipeline-stage-0 pods/request-pipeline-postgresql-default-SHA
 ```
 
 <p>On the Worker Cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined in the request (<code>postgres-resource-request.yaml</code>).<br />

@@ -52,13 +52,15 @@ metadata:
   # Name of the Promise; what user will see in the Platform Cluster
   name: promise-name
 spec:
-  # Arbitrary key/value pairs that will be used for scheduling
   # Check the Scheduling docs for details
-  clusterSelectors:
-    key: value
+  sheduling:
+    - target:
+        matchLabels:
+          # Arbitrary key/value pairs that will be used for scheduling
+          key: value
 
   # Array of Kubernetes resources to be installed in the Worker Clusters
-  workerClusterResources:
+  dependencies:
     - apiVersion: apps/v1
       kind: Deployment
       metadata:
@@ -67,15 +69,26 @@ spec:
     -  #...
 
   # CRD that a Platform User uses to request an instance of this Promise
-  xaasCrd:
+  api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     # ...
 
   # Ordered list of Docker containers
   # Executed in response to a Resource Request
-  xaasRequestPipeline:
-    - myorg/pipeline-image-1 # Kubernetes defaults to docker.io
-    - ghcr.io/myorg/pipeline-image-2
-    -  #...
+  workflows:
+    grapefruit:
+      gummybear:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: configure-instance
+            namespace: default
+          spec:
+            containers:
+              - name: xaas-request-pipeline-stage-0
+                image: myorg/pipeline-image-1 # Kubernetes defaults to docker.io
+              - name: xaas-request-pipeline-stage-1
+                image: ghcr.io/myorg/pipeline-image-2
+              -  #...
 ```

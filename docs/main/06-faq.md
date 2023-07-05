@@ -29,10 +29,6 @@ application versus platform teams is that cognitive load for operational concern
 should be as low as possible for application teams. Application teams should
 only 'own' operations for aspects core to essential day-to-day delivery.
 
-### How do I scan/validate/sign-off/log a request from a user before deploying the resources associated with their requested instance from a Promise?
-
-Add images to the `xaasRequestPipeline` array inside the Promise definition to ensure all relevant steps are fulfilled prior to scheduling an instance. See [Writing a Promise](./guides/writing-a-promise)
-
 ### Is Kratix only useful for deploying simple services?
 
 Quite the opposite. Kratix is at its most powerful when deploying complex

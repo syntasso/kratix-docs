@@ -43,9 +43,9 @@ function HomepagePromises() {
         <div className="col">
           A Promise is comprised of three elements:
           <ul>
-            <li><strong>Custom Resource Definition:</strong> input from an app team to create instances of a capability.</li>
-            <li><strong>Worker Cluster Resources:</strong> dependencies necessary for any created Workloads.</li>
-            <li><strong>Request Pipeline:</strong> business logic required when an instance of a capability is requested.</li>
+            <li><strong>An API:</strong> input from an app team to create instances of a capability.</li>
+            <li><strong>A set of Dependencies:</strong> dependencies necessary for any created Workloads.</li>
+            <li><strong>Workflows:</strong> business logic required when an instance of a capability is requested.</li>
           </ul>
         </div>
       </div>
@@ -65,7 +65,7 @@ function HomepagePromises() {
 
             <li>can be shared and reused between platforms, teams, business units, even other organisations.</li>
 
-            <li>are easy to build, deploy, and update. Bespoke business logic can be added to each Promise's pipeline.</li>
+            <li>are easy to build, deploy, and update. Bespoke business logic can be added to each Promise's workflows.</li>
 
             <li>can create "Workloads", which are deployed, via the GitOps Toolkit, across fleets of Kubernetes clusters.</li>
           </ul>

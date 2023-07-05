@@ -36,7 +36,7 @@ The primary role for these Worker clusters is to run workloads requested by cons
 
 For example, the _EKS_ Worker cluster has a number of workloads that were requested by _Team 2_ via the _Web App Golden Path_ Promise: two instances of Jenkins, two instances of PostgreSQL, and three instances of Nginx.
 
-### Worker Resources
+### Worker Resources (Promise Dependencies)
 
 To run these workloads, each Worker cluster also has a set of Worker Resources. These resources are baseline capabilities installed on the Worker cluster at the time the Promise is installed on the Platform, and they represent the software that needs to be running prior to any requested workload.
 
@@ -52,8 +52,10 @@ The _Web App Golden Path_ Promise is a Compound Promise because it is composed o
 
 In order to populate the lower-level offerings in a Platform, Kratix has provided a number of pre-written Promises ready for use. These Promises can be installed on a Platform and configured to meet organisational needs. For example, Kratix offers an off-the-shelf Promise for Jenkins, and the Platform team installed this Promise after configuring properties that are specific to the EasyEaty organisation.
 
-## Pipelines and Off Cluster Resources
+## Workflows and Off Cluster Resources
 
-Kratix Promises include a concept called [Pipelines](./resource-requests/pipelines). These pipelines are defined by the Promise author and are executed in the Platform when a consumer makes a request for a Promise. Pipelines specify a set of containers that will run prior to the instantiation of workloads, and they encapsulate a number of organisational requirements.
+Kratix Promises include a concept called [Workflows](./resource-requests/workflows). The workflows are defined by the Promise author and are executed in the Platform during the Promise lifecycly (for example, when a new instance of the promise is requested). Workflows specify a set of containers that should run to fullfil the lifecycle operation, and they encapsulate a number of organisational requirements.
 
-For example, when _Team 2_ requested the _Web App Golden Path_ Promise, the Request Pipeline executed and sent notifications via Slack, set up an on-call rota on PagerDuty, and created the appropriate tickets in Zendesk.
+<!-- TODO: (promising future) review text below (GRAPEFRUIT GUMMYBEAR) -->
+
+For example, when _Team 2_ requested the _Web App Golden Path_ Promise, the workflow for new instances was executed and sent notifications via Slack, set up an on-call rota on PagerDuty, and created the appropriate tickets in Zendesk.

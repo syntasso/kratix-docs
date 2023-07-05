@@ -6,7 +6,7 @@ sidebar_label: Deleting
 
 :::caution
 
-Deleting a Promise will cascade delete all the associated Resource Requests and Worker Cluster Resources.
+Deleting a Promise will cascade delete all the associated Resource Requests and Dependencies.
 
 :::
 
@@ -25,7 +25,7 @@ $ kubectl delete --filename promise.yaml
 
 Deleting a Promise will take a few minutes to complete while Kratix deletes all the
 resources associated with Promise. This includes any Resource Requests and all the
-Worker Cluster Resources.
+Promise's dependencies.
 
 All resources created by the Promise are applied to the work clusters using GitOps.
 This mean that when Kratix deletes the resources its removing them from the GitOps Repository and

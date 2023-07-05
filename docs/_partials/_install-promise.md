@@ -235,4 +235,4 @@ reference docs](/docs/main/reference/promises/deleting-a-promise)
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp; You have installed a Kratix Promise and used it to create on-demand instances of a service. <br />
-👉🏾&nbsp;&nbsp; Now you will [deploy a web app that uses multiple Kratix Promises](multiple-promises).
+👉&nbsp;&nbsp; Now you will [write your own Promise](writing-a-promise).

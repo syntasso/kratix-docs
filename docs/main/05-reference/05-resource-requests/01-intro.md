@@ -7,11 +7,11 @@ id: intro
 
 # Resource Requests
 
-One of the components of a [Kratix Promise](../promises/intro) is the `xaasCrd`. `xaasCrd` sets the contract between the Platform and its users, and it defines what properties the user can configure in the Promised service.
+One of the components of a [Kratix Promise](../promises/intro) is the `api`. `api` sets the contract between the Platform and its users, and it defines what properties the user can configure in the Promised service.
 
-The Resource Request is the document Platform Users write, following the `xaasCrd` contract, to request instances of the Promised service. Each Promise has its own contract, so each Promise will have its own Resource Request format.
+The Resource Request is the document Platform Users write, following the `api` contract, to request instances of the Promised service. Each Promise has its own contract, so each Promise will have its own Resource Request format.
 
-Consider a Promise with the following `xaasCrd`, paying special attention to the highlighted fields:
+Consider a Promise with the following `api`, paying special attention to the highlighted fields:
 
 ```yaml showLineNumbers
 apiVersion: apiextensions.k8s.io/v1
@@ -67,6 +67,6 @@ spec:
   storageGB: 10
 ```
 
-When applied to the Platform Cluster, Kratix will trigger the Pipeline. For more details on the Pipeline, see the [Pipeline reference](./02-pipelines.md).
+When applied to the Platform Cluster, Kratix will trigger the associated Workflow. For more details on the Workflows, see the [Workflow reference](./workflows).
 
 For a in-depth exploration of the Resource Request and Pipelines, check the [Writing a Promise](../../guides/writing-a-promise) and [Enhancing a Promise](../../guides/enhancing-a-promise) guides.

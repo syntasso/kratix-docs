@@ -186,7 +186,7 @@ Flux will eventually reconcile the clusters state, making the `worker` cluster r
 to receive workloads. You can verify its readiness by observing the `kratix-worker-system`
 namespace appearing in the `worker` cluster:
 
-```bash
+```shell-session
 $ kubectl --context $WORKER get namespaces
 NAME                   STATUS   AGE
 ...

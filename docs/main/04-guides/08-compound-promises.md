@@ -108,6 +108,8 @@ kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/s
 You can see the pipeline for the Paved Path Promise running, which will in turn trigger
 the Knative and Postgres pipelines:
 
+<!-- TODO: (promising future) check if the pipeline pod names have changed -->
+
 ```shell-session
 $ kubectl --context $PLATFORM get pods
 NAME                                                     READY   STATUS      RESTARTS   AGE
@@ -135,7 +137,7 @@ knative-serving      default-domain-dl972          0/1     Completed   0        
 
 ## A closer look in the Promise
 
-Start by noticing the `workerClusterResources` for the Paved Path Promise:
+Start by noticing the `dependencies` for the Paved Path Promise:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -143,9 +145,11 @@ kind: Promise
 metadata:
   name: paved-path-demo-promise
 spec:
-  clusterSelector:
-    environment: platform
-  workerClusterResources:
+  sheduling:
+    - target:
+        matchLabels:
+          environment: platform
+  dependencies:
     #highlight-start
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
@@ -153,9 +157,11 @@ spec:
       metadata:
         name: knative-serving-promise
       spec:
-        clusterSelector:
-          environment: dev
-        workerClusterResources:
+        sheduling:
+          - target:
+              matchLabels:
+                environment: dev
+        dependencies:
         # remainder of the knative Promise
     #highlight-start
     - apiVersion: platform.kratix.io/v1alpha1
@@ -164,9 +170,11 @@ spec:
       metadata:
         name: ha-postgres-promise
       spec:
-        clusterSelector:
-          environment: dev
-        workerClusterResources:
+        sheduling:
+          - target:
+              matchLabels:
+                environment: dev
+        dependencies:
         # remainder of the postgres Promise ...
   # remainder of the paved path Promise...
 ```
@@ -175,7 +183,7 @@ Since Paved Path Promise WCRs are Promises, and considering that Kratix (and
 its CRDs) is only installed in the Platform Cluster, you need to ensure the WCR is
 applied exclusively to the Platform Cluster.
 
-That is controlled by the `clusterSelector`:
+That is controlled by the `scheduling`:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -184,18 +192,20 @@ metadata:
   name: paved-path-demo-promise
 spec:
   #highlight-start
-  clusterSelector:
-    environment: platform
+  sheduling:
+    - target:
+        matchLabels:
+          environment: platform
   #highlight-end
-  workerClusterResources:
+  dependencies:
     -  # knative Promise
     -  # postgresPromise
   # remainder of the paved path Promise
 ```
 
-The Paved Path Promise `clusterSelector` is set to `environment: platform`. That is
-telling Kratix to install the sub-Promises into Clusters with a
-`environment: platform` label.
+The Paved Path Promise `scheduling` is set to target clusters with `matchLabel`
+equal to `environment: platform`. In other words, that is telling Kratix to
+install the sub-Promises into Clusters with a `environment: platform` label.
 
 You may have noticed that, when registering the Platform Cluster, the Cluster definition
 included exactly that label. You can verify the applied labels with:
@@ -212,8 +222,8 @@ worker-cluster-1     1hr    environment=dev
 However, the sub-Promises WCR (i.e. the Knative and Postgres WCR) should not be installed
 in the Platform Cluster, but in the Worker Cluster. When you executed the quick start
 script, it registered the Worker Cluster with a label `environment: dev` (as
-per output above). The `clusterSelector` field in the sub-Promises are set to
-exactly that:
+per output above). The `scheduling` field in the sub-Promises are set to target
+those clusters:
 
 ```yaml showLineNumbers
 apiVersion: platform.kratix.io/v1alpha1
@@ -221,19 +231,23 @@ kind: Promise
 metadata:
   name: paved-path-demo-promise
 spec:
-  clusterSelector:
-    environment: platform
-  workerClusterResources:
+  sheduling:
+    - target:
+        matchLabels:
+          environment: platform
+  dependencies:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
       metadata:
         name: knative-serving-promise
       spec:
         #highlight-start
-        clusterSelector:
-          environment: dev
+        sheduling:
+          - target:
+              matchLabels:
+                environment: dev
         #highlight-end
-        workerClusterResources:
+        dependencies:
         # remainder of the knative Promise
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
@@ -241,10 +255,12 @@ spec:
         name: ha-postgres-promise
       spec:
         #highlight-start
-        clusterSelector:
-          environment: dev
+        sheduling:
+          - target:
+              matchLabels:
+                environment: dev
         #highlight-end
-        workerClusterResources:
+        dependencies:
         # remainder of the postgres Promise ...
   # remainder of the paved path Promise...
 ```

@@ -71,6 +71,8 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-post
 
 You can verify the pipeline pod by running:
 
+<!-- TODO: Verify pipeline pod name -->
+
 ```shell-session
 $ kubectl get pods
 NAME                                          READY   STATUS      RESTARTS   AGE
