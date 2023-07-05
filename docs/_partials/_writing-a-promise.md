@@ -103,7 +103,7 @@ This guide will follow the steps below:
 1. [Set up your directories](#directory-setup)
 
 **Promise definition: api**
-1. [X as-a-Service Custom Resource Definition: define your Promise API](#promise-api)
+1. [Custom Resource Definition: define your Promise API](#promise-api)
 
 **Promise definition: workflows**
 1. [Create your Promise instance base manifest](#base-instance)
@@ -450,7 +450,7 @@ spec:
             namespace: default
           spec:
             containers:
-            - name: xaas-request-pipeline-stage-0
+            - name: create-jenkins-instance
               # update the image if you are using a custom name
               image: kratix-workshop/jenkins-request-pipeline:dev
   #highlight-end
@@ -549,7 +549,7 @@ Once you have downloaded the correct binary, run:
 
 
 ```bash
-./internal/scripts/inject-wcr
+./internal/scripts/inject-deps
 ```
 
 The `promise.yaml` file is now updated with the `dependencies` and you
@@ -578,7 +578,7 @@ At this point, your Promise directory structure should look like:
 │   │   ├── all-in-one-v1alpha2.yaml
 │   │   └── jenkins.io_jenkins.yaml
 │   └── 📂 scripts
-│       ├── inject-wcr
+│       ├── inject-deps
 │       ├── pipeline-image
 │       └── worker-resource-builder
 ├── promise.yaml
@@ -686,7 +686,7 @@ For more details, you can view the pipeline logs with
 kubectl logs \
   --context $PLATFORM \
   --selector kratix-promise-id=jenkins-default \
-  --container xaas-request-pipeline-stage-0
+  --container create-jenkins-instance
 ```
 
 This should result in something like

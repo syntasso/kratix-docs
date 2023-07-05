@@ -106,7 +106,7 @@ folder for now.
 
 <img
   align="right"
-  src={useBaseUrl('/img/docs/xaasCrd.png')}
+  src={useBaseUrl('/img/docs/api.png')}
   alt="screenshot of a YAML file, highlighting the presence of the api key"
 />
 
@@ -191,12 +191,10 @@ api:
 
 #### About `dependencies`
 
-<!-- TODO: (promising future) update diagram -->
-
 <img
   align="right"
-  src={useBaseUrl('/img/docs/workerClusterResources.png')}
-  alt="screenshot of a YAML file, highlighting the presence of the workerClusterResources key"
+  src={useBaseUrl('/img/docs/dependencies.png')}
+  alt="screenshot of a YAML file, highlighting the presence of the dependencies key"
 />
 
 `dependencies` is the description of all of the Kubernetes resources required to create an instance of the Promise, such as CRDs, Operators and Deployments.
@@ -389,7 +387,7 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
 <img
   align="right"
   src={useBaseUrl('img/docs/xaasRequestPipeline.png')}
-  alt="Kratix logo"
+  alt="screenshot of a YAML file, highlighting the presence of the workflow key"
 />
 
 `workflows.grapefruit.gummybear` contains the pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
