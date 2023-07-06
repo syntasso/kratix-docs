@@ -252,7 +252,7 @@ Once the pipeline has complete take a look at the logs for the request:
 ```bash
 kubectl --context $PLATFORM logs \
   --selector kratix-promise-id=elastic-cloud-default \
-  --container xaas-request-pipeline-stage-0
+  --container pipeline-stage-0
 ```
 
 You should see the following at the end of the output:

@@ -619,7 +619,7 @@ spec:
             namespace: default
           spec:
             containers:
-              - name: xaas-request-pipeline-stage-0
+              - name: pipeline-stage-0
                 #highlight-next-line
                 image: kratix-workshop/postgres-request-pipeline:dev
   dependencies:

@@ -564,7 +564,7 @@ spec:
             name: default
           spec:
             containers:
-            - name: xaas-request-pipeline-stage-0
+            - name: pipeline-stage-0
               image: kratix-workshop/elastic-pipeline:dev
   #highlight-end
   api:
@@ -591,7 +591,7 @@ spec:
             name: default
           spec:
             containers:
-            - name: xaas-request-pipeline-stage-0
+            - name: pipeline-stage-0
               image: kratix-workshop/elastic-pipeline:dev
   api:
     apiVersion: apiextensions.k8s.io/v1
@@ -713,23 +713,23 @@ kubectl --context $PLATFORM \
 Each container is listed in a row, in order that they occur so you should see:
 ```shell-session
 reader
-xaas-request-pipeline-stage-0
+pipeline-stage-0
 work-writer
 status-writer
 ```
 
 While you only provided a single image, you can see that there are four listed. Each has a job as follows:
 * `reader` makes sure that the Resource Request is available to the pipeline
-* `xaas-request-pipeline-stage-0` the container name you specified in the Kratix Pipeline
+* `elastic-pipeline-stage-0` the container name you specified in the Kratix Pipeline
 * `work-writer` schedules the files in the `output` directory based on the labels provided
 * `status-writer` updates the Resource Request status
 
-The most interesting container for you will be the one you created, the `xaas-request-pipeline-stage-0` container. To see the logs from this specific container you can run:
+The most interesting container for you will be the one you created, the `elastic-pipeline-stage-0` container. To see the logs from this specific container you can run:
 
 ```bash
 kubectl --context $PLATFORM logs \
   --selector kratix-promise-id=elastic-cloud-default \
-  --container xaas-request-pipeline-stage-0
+  --container elastic-pipeline-stage-0
 ```
 
 The logs will look something like this:

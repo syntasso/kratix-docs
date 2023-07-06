@@ -59,7 +59,7 @@ spec:
           # Arbitrary key/value pairs that will be used for scheduling
           key: value
 
-  # Array of Kubernetes resources to be installed in the Worker Clusters
+  # Array of Kubernetes resources to be scheduled to the Workers
   dependencies:
     - apiVersion: apps/v1
       kind: Deployment
@@ -75,7 +75,7 @@ spec:
     # ...
 
   # Ordered list of Docker containers
-  # Executed in response to a Resource Request
+  # Executed in response to a request
   workflows:
     grapefruit:
       gummybear:
@@ -86,9 +86,9 @@ spec:
             namespace: default
           spec:
             containers:
-              - name: xaas-request-pipeline-stage-0
+              - name: pipeline-stage-0
                 image: myorg/pipeline-image-1 # Kubernetes defaults to docker.io
-              - name: xaas-request-pipeline-stage-1
+              - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
 ```
