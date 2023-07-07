@@ -158,13 +158,13 @@ Removing the files from the Pipeline is not enough. You must now also add them t
 
 Run the following command to create a `dependencies` directory where you can store these files and any others that you may want to depend on for the Promise installation:
 ```bash
-mkdir -p resources
+mkdir -p dependencies
 
-curl --silent --location --output resources/elastic-crds.yaml https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
-curl --silent --location --output resources/elastic-operator.yaml https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
+curl --silent --location --output dependencies/elastic-crds.yaml https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
+curl --silent --location --output dependencies/elastic-operator.yaml https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
 ```
 
-Once stored locally, you will need to add these resources to the Promise file. The resources are added as a list under `dependencies` which can tricky with formatting and require some subtle white space changes.
+Once stored locally, you will need to add these dependencies to the Promise file. The dependencies are added as a list under `dependencies` which can tricky with formatting and require some subtle white space changes.
 
 #### Download the WorkerResourcesBuilder
 
@@ -187,7 +187,7 @@ Per the usage instructions you have now seen, you can use the provided binary to
 
 ```bash
 echo "current Promise length is: $(wc -l promise.yaml)"
-./bin/worker-resource-builder -dependencies-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
+./bin/worker-resource-builder -resources-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
 echo "new Promise length is: $(wc -l promise.yaml)"
 ```
 
@@ -206,7 +206,7 @@ You may notice that the length of the files in `dependencies` is shorter than wh
 
 If you have [yq](https://mikefarah.gitbook.io/yq/) installed you can verify the total number of documents in both matches with the following command:
 ```bash
-diff <(yq ea '[.] | length' resources/*) <(yq '.spec.dependencies | length' promise.yaml)
+diff <(yq ea '[.] | length' dependencies/*) <(yq '.spec.dependencies | length' promise.yaml)
 ```
 
 No difference in number of YAML resources will result in no output.
