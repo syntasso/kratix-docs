@@ -687,16 +687,16 @@ status-writer
 
 While you only provided a single image, you can see that there are four listed. Each has a job as follows:
 * `reader` makes sure that the Resource definition is available to the pipeline
-* `elastic-pipeline-stage-0` the container name you specified in the Kratix Pipeline
+* `pipeline-stage-0` the container name you specified in the Kratix Pipeline
 * `work-writer` schedules the files in the `output` directory based on the labels provided
 * `status-writer` updates the Resource status
 
-The most interesting container for you will be the one you created, the `elastic-pipeline-stage-0` container. To see the logs from this specific container you can run:
+The most interesting container for you will be the one you created, the `pipeline-stage-0` container. To see the logs from this specific container you can run:
 
 ```bash
 kubectl --context $PLATFORM logs \
   --selector kratix-promise-id=elastic-cloud-default \
-  --container elastic-pipeline-stage-0
+  --container pipeline-stage-0
 ```
 
 The logs will look something like this:
