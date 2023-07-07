@@ -20,7 +20,7 @@ This is Part 1 of [a series](intro) illustrating how Kratix works.
 * [Design an API for your service](#api-design)
 * [Implement the design with validations and versioning](#api-implementation)
 * [Deploy your API using Kratix](#deploy-api)
-* [Experience requesting an instance of your service](#request-via-api)
+* [Experience requesting a Resource](#request-via-api)
 * [Summary](#summary)
 * [Clean up environment](#cleanup)
 
@@ -31,8 +31,8 @@ platform teams to build the platforms tailored to their organisation.
 
 Promises are the encapsulation of platform offerings. They provide a structure
 to manage the complexities of providing _something-as-a-service_, including the
-definition of how a user can request the service, the steps to provision the
-requested service, and how to provide access to the service instance.
+definition of how a user can request the Resource, the steps to provision the
+requested Resource, and how to provide access to the Resource.
 
 Promises allow platform teams to:
 
@@ -42,7 +42,6 @@ Promises allow platform teams to:
 * Install and configure (or verify) dependencies for delivering a service
 * Manage where services are deployed across the infrastructure (on and
   off-Kubernetes, on Cloud providers, etc)
-
 
 ### Promise Architecture
 
@@ -70,8 +69,7 @@ codify your Promise API.
 
 :::info
 
-In a Promise the API is stored in a key called `xaasCrd` which stands for
-anything-as-a-service Custom Resource Definition.
+In a Promise the API is stored in a key called `api`
 
 :::
 
@@ -98,7 +96,6 @@ for further details on the topic.
 
 ## Design an API for your service {#api-design}
 
-
 Imagine that your users have requested a monitoring system to use with their
 applications. You, as part of a platform team, have investigated potential
 options and determined that [Elastic Cloud on Kubernetes
@@ -110,10 +107,10 @@ In addition, you have found that ECK provides an
 help your team manage the configuration of different deployments. There's also a
 [Helm
 Chart](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-stack-helm-chart.html),
-which can be used to request fully configured instances.
+which can be used to request fully configured Resources.
 
 You have a few concerns though about how to expose the operator to your users.
-While some of your users have a deep knowledge of monitoring, the marjority of them
+While some of your users have a deep knowledge of monitoring, the majority of them
 are not bothered by the details and just want access to the Kibana interface.
 
 Your first job is to decide what options to expose to the Application teams.
@@ -146,9 +143,9 @@ autonomy and configurability. However, it is a lot to understand and misconfigur
 of services can cause both cost and security issues in the future.
 
 You could go to the other end of the spectrum, hiding all the options, making it
-impossible for users to change anything on the deployed ECK instance. You could
+impossible for users to change anything on the deployed ECK Resource. You could
 have, for example, a set of strict business rules for how to configure a secure
-and reliable ECK instance. However, this API design would likely cause a lot of
+and reliable ECK. However, this API design would likely cause a lot of
 support requests from users who need slight variations to the stock deployment.
 
 ```mdx-code-block
@@ -227,7 +224,7 @@ metadata:
   name: elastic-cloud
   namespace: default
 spec:
-  xaasCrd:
+  api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
@@ -259,7 +256,7 @@ spec:
                         cloud instance.
 ```
 
-Notice that in this file there is a single key called `xaasCrd` under the Promise spec.
+Notice that in this file there is a single key called `api` under the Promise spec.
 This is where a complete and valid Kubernetes CRD is provided that contains the data
 collection parameter as decided above along with a default value and description that
 can later be used for documentation (check highlighted block).
@@ -417,6 +414,7 @@ elastic-cloud   10s
 ```
 
 More importantly, you will also be able to see the `elastic-cloud` API you defined:
+
 ```bash
 kubectl --context kind-platform get crds | grep workshop
 ```
@@ -426,15 +424,15 @@ The above command will give an output similar to:
 elastic-cloud.workshop.kratix.io            2023-01-01T12:00:00Z
 ```
 
-## Experience requesting an instance of your service {#request-via-api}
+## Experience requesting a Resource {#request-via-api}
 
 Now that your platform is offering ECK, you will switch hats for a minute and
-become a user who will request an on-demand instance of elastic-cloud.
+become a user who will request an on-demand elastic-cloud Resource.
 
 To do this, you will create a Kubernetes resource that matches the API defined
 in the Promise.
 
-Create a file at the root of your promise directory, called
+Create a file at the root of your `promise` directory, called
 `resource-request.yaml`:
 
 ```bash
@@ -465,7 +463,7 @@ schema.
 
 </details>
 
-You can now use this resource to make a request for an instance of Elastic Cloud:
+You can now use this resource to make a request for an Elastic Cloud Resource:
 ```bash
 kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```
@@ -475,8 +473,8 @@ You should get the following output:
 elastic-cloud.workshop.kratix.io/example created
 ```
 
-Just as Promises are resources, so are the instances of a Promise. You can
-list all the requests for elastic cloud using the following command:
+Just as Promises are Kubernetes resources, so are the Resources that are requested of a Promise. You can
+list all the elastic cloud Resources using the following command:
 ```bash
 kubectl --context $PLATFORM get elastic-cloud
 ```
@@ -509,7 +507,7 @@ These are just a few examples of simple validations that are being applied to ea
 
 You have delivered your first Kratix Promise!
 
-However, while Kratix has received and accepted the Request, there's no defined
+However, while Kratix has received and accepted the request, there's no defined
 provisioning process for your Promise just yet. That means Elastic Stack
 will not be delivered until you codify the provisioning process.
 
@@ -526,7 +524,7 @@ To recap the steps you took:
 1. ✅&nbsp;&nbsp;Design a user experience for requesting the service
 1. ✅&nbsp;&nbsp;Define an API to match the user experience
 1. ✅&nbsp;&nbsp;Install a Kratix Promise with that API definition
-1. ✅&nbsp;&nbsp;Request an on-demand instance of the service from Kratix
+1. ✅&nbsp;&nbsp;Request an on-demand Resource from a Promise
 
 ## Clean up environment {#cleanup}
 

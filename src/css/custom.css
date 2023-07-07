@@ -96,9 +96,9 @@
 
 figure.diagram {
   text-align: center;
+
   &.right {
     float: right;
-
     margin: 0 auto;
   }
 

@@ -36,7 +36,7 @@ Promises:
   delivery of a specific service, e.g. a database, an identity service, a
   supply chain, or a complete development pipeline of patterns and tools.
 - are easy to build, deploy, and update.
-- are sharable and reusable between platforms, teams, business units, and other
+- are shareable and reusable between platforms, teams, business units, and other
   organisations.
 - add up to a frictionless experience when platform users want to create
   services that they need to deliver value.
@@ -49,16 +49,18 @@ To see Promises in-action, check out the guides: [Installing a Promise](../../gu
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  # Name of the Promise; what user will see in the Platform Cluster
+  # Name of the Promise; what the platform team will manage in the Platform Cluster
   name: promise-name
 spec:
-  # Arbitrary key/value pairs that will be used for scheduling
   # Check the Scheduling docs for details
-  clusterSelectors:
-    key: value
+  scheduling:
+    - target:
+        matchLabels:
+          # Arbitrary key/value pairs that will be used for scheduling
+          key: value
 
-  # Array of Kubernetes resources to be installed in the Worker Clusters
-  workerClusterResources:
+  # Array of Kubernetes resources to be scheduled to matching Workers
+  dependencies:
     - apiVersion: apps/v1
       kind: Deployment
       metadata:
@@ -66,16 +68,29 @@ spec:
     -  #...
     -  #...
 
-  # CRD that a Platform User uses to request an instance of this Promise
-  xaasCrd:
+  # API that a Platform User will use to request an Resource from this Promise
+  api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     # ...
 
-  # Ordered list of Docker containers
-  # Executed in response to a Resource Request
-  xaasRequestPipeline:
-    - myorg/pipeline-image-1 # Kubernetes defaults to docker.io
-    - ghcr.io/myorg/pipeline-image-2
-    -  #...
+  # Ordered set of tasks to run during a Promise and Resource lifecycle
+  workflows:
+    # Tasks to be run only during the Resource lifecycle
+    resource:
+      # Tasks to be run only on creation, maintenance, or update of a Resource
+      configure:
+        # A Kratix provided Pipeline that runs an ordered set of OCI compliant images
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: configure-resource
+            namespace: default
+          spec:
+            containers:
+              - name: pipeline-stage-0
+                image: myorg/pipeline-image-1 # Kubernetes defaults to docker.io
+              - name: pipeline-stage-1
+                image: ghcr.io/myorg/pipeline-image-2
+              -  #...
 ```

@@ -9,11 +9,11 @@ import PartialConfigure from '../../../_partials/installation/_single-cluster-co
 ```
 
 One of the most powerful features of Kratix is its ability to handle requests
-for resources, and deploy them to a remote specific cluster. However, Kratix
+for Resources, and deploy them to a remote specific cluster. However, Kratix
 also works well in a single cluster environment. This guide will walk you
 through the steps to install Kratix on a single cluster.
 
-## Bootstap the cluster
+## Bootstrap the cluster
 
 You will need access to a Kubernetes cluster to deploy Kratix. If you'd like to test Kratix in your local machine, you can create a cluster with [minikube](https://minikube.sigs.k8s.io/docs/start/).
 
@@ -55,7 +55,7 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
 ```
 
-You can then install and conigure Flux with the commands below:
+You can then install and configure Flux with the commands below:
 
 ```bash
 # Install the GitOps toolkit
@@ -72,4 +72,4 @@ NAME                   STATUS   AGE
 kratix-worker-system   Active   1m
 ```
 
-🎉   **Congratulations!** Kratix is now ready to receive workloads. Jump to [Installing and using a Promise](../installing-a-promise) to spin up your first as-a-service workload.
+🎉   **Congratulations!** Kratix is now ready to receive Promises requests for Resources. Jump to [Installing and using a Promise](../installing-a-promise) to spin up your first as-a-service offering.

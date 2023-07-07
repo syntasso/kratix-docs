@@ -10,14 +10,14 @@ import PartialVerifyKratixWithOutPromises from '../../_partials/workshop/_verify
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Extract shared dependencies](shared-dependencies)<br />
-👉🏾&nbsp;&nbsp; Next: [Update the Resource Request status](update-status)
+👉🏾&nbsp;&nbsp; Next: [Update the Resource status](update-status)
 
 <hr />
 
 **In this tutorial, you will**
 * [Understand Promise scheduling](#understand-scheduling)
 * [Schedule Promises to specific clusters](#dependency-scheduling)
-* [Schedule Promise Resource Requests to specific clusters](#rr-scheduling)
+* [Schedule Promise Resource to specific clusters](#rr-scheduling)
 * [Clean up environment](#cleanup)
 * [Summary](#summary)
 
@@ -27,7 +27,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 
 ## Promise scheduling {#understand-scheduling}
-So far you have built an ECK Promise that will allow us to deliver ECK instances on-demand to the
+So far you have built an ECK Promise that will allow us to deliver ECK Resources on-demand to the
 application developers.
 
 When developing locally you have been using a single worker cluster, which Kratix has been scheduling everything to by default. In reality, the likely hood is that an organisation will have multiple worker clusters, potentially spread out across multiple zones, regions, and cloud-providers. Each individual cluster might be designed for a particular purpose, e.g. clusters that contain GPUs for AI intensive workloads, or edge clusters that are designed to run particular applications close the intended consumers. However it is common to want some software deployed on many of these speciality clusters.
@@ -65,17 +65,17 @@ about what sort of clusters it should schedule work to, meaning that a Cluster w
 acceptable place to schedule work to.
 
 Imagine you have decided that it is not appropriate for ECK resources to be deployed to certain
-clusters, so you have decided to restrict the ECK Promise and its Resource Requests to only
+clusters, so you have decided to restrict the ECK Promise and its Resource to only
 development clusters. You have also decided that development clusters will be labelled in
 Kratix with the `environment=dev` label. In order to get the ECK Promise to only schedule
 to clusters with these labels you need to update the Promise.
 
 ## Schedule Promises to specific clusters {#dependency-scheduling}
 Inside of a Promise you can define what clusters the Promise should schedule resources
-to by specifying the `clusterSelector` field.
+to by specifying the `scheduling` field.
 
 This field contains a map of key values that are all the labels that must be matched to
-a cluster. Update the Promise to contain the new `clusterSelector` field shown below:
+a cluster. Update the Promise to contain the new `scheduling` field shown below:
 
 ```yaml title=promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -85,8 +85,10 @@ metadata:
   namespace: default
 spec:
   #highlight-start
-  clusterSelector:
-    environment: dev
+  scheduling:
+  - target:
+      matchLabels:
+        environment: dev
   #highlight-end
   ...
 ```
@@ -101,6 +103,7 @@ kubectl --context $PLATFORM create --filename promise.yaml
 ```
 
 ### Verify the resource are not scheduled
+
 The cluster as it is right now does not contain the `environment: dev` label, so nothing will get scheduled
 to the worker cluster. When you get the pods on the worker, you will not see the requested ECK resources:
 
@@ -164,49 +167,47 @@ You have now successfully updated the Promise to only schedule to clusters with 
 `environment=dev` label. If you were to create a new worker cluster that didn't have
 the `environment=dev` label the Promise wouldn't schedule any work to it.
 
-## Schedule Resource Requests to specific clusters {#rr-scheduling}
+## Schedule Resource to specific clusters {#rr-scheduling}
 
 Being able to define inside the Promise what types of clusters the resources can
 be scheduled to enables a lot control for operators. But in the event a Promise matches more than
 one cluster, it does not enable the Promise author to decide which of the matching Kratix clusters
 receives the resources from a user request.
 
-Imagine that you have additional requirements for any Resource Requests that sets
+Imagine that you have additional requirements for any Resource that set
 `enableDataCollection: true`. For example, these resources requests require a Kubernetes cluster with
 a persistent volume storage of adequate size to handle the data collected. When false you might
 want a different type of cluster or might decide that it has no opinion at all on what cluster should
 be used.
 
 To achieve this with Kratix, you can optionally set additional labels at request time by
-outputting them from the pipeline.
+outputting them from the Pipeline.
 
-Kratix has a convention of using a [`/metadata`](../../../docs/main/reference/resource-requests/pipelines#metadata)
-directory to manage important configurations generated in the pipeline that are independent of
-the resources you want stored in a GitOps state store.
+Kratix has a convention of using a [`/metadata`](../main/reference/resources/workflows#metadata) directory to manage important configurations generated in the Pipeline that are independent of the resources you want stored in a GitOps state store.
 
-To set additional scheduling labels, you can add key:value pairs `/metadata/cluster-selectors.yaml` file.
+To set additional scheduling labels, you can add the a similar document as the
+Promise's `scheduling` field to the `/metadata/scheduling.yaml` file.
 
 Any selectors added in this file will be appended to the list provided by the Promise. This means means
 that you cannot override the Kratix cluster selectors set in the Promise definition. This enables clear
-security controls defined by the Promise author, and also guarantees that a Resource Request
-will always be scheduled to a Kratix cluster that has already received the Promise dependencies.
+security controls defined by the Promise author, and also guarantees that a Resource will always be scheduled to a Kratix cluster that has already received the Promise dependencies.
 
-Given the new requirements for a persistent volume, you can update the Resource Request pipeline to add
+Given the new requirements for a persistent volume, you can update the Resource Configure Workflow to add
 the `pvCapacity=large` selector when `enableDataCollection` is set to `true`. This will indicate that
-Kratix should only schedule these Resource Requests to clusters with a large pool of persistent volumes.
+Kratix should only schedule these Resources to clusters with a large pool of persistent volumes.
 
 Add the following to the end of the `pipeline/run` script:
 
 ```bash title=pipeline/run -- add to the end
 if ${enableDataCollection}; then
   echo "Setting additional cluster selectors: pvCapacity=large"
-  echo "pvCapacity: large" > /metadata/cluster-selectors.yaml
+  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /metadata/scheduling.yaml
 fi
 ```
 
 ### Build and test the image
 
-Since the pipeline script has changed you need to rebuild and load the docker
+Since the script has changed you need to rebuild and load the docker
 image. Run:
 
 ```bash
@@ -221,34 +222,34 @@ Verify that the output now shows the cluster-selector file
 │   └── object.yaml
 ├── metadata
 #highlight-next-line
-│   └── cluster-selectors.yaml
+│   └── scheduling.yaml
 └── output
     ├── beats.yaml
     ├── elasticsearch.yaml
     └── kibana.yaml
 ```
 
-### Send a Resource Request
-Finally, make a Resource Request with the `enableDataCollection` set to `true`.
+### Send a request for a Resource
+Finally, make a request with the `enableDataCollection` set to `true`.
 Open the `resource-request.yaml` and update the config.
 
 ```bash
 kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```
 
-You can see that Kratix accepts this request and triggers the pipeline:
+You can see that Kratix accepts this request and triggers the Workflow:
 
 ```bash
 kubectl --context $PLATFORM get pods -w
 ```
 
-### Verify the pipeline
-Once the pipeline has complete take a look at the logs for the request:
+### Verify the Workflow Pipeline
+Once the Pipeline has complete take a look at the logs for the request:
 
 ```bash
 kubectl --context $PLATFORM logs \
   --selector kratix-promise-id=elastic-cloud-default \
-  --container xaas-request-pipeline-stage-0
+  --container pipeline-stage-0
 ```
 
 You should see the following at the end of the output:
@@ -257,8 +258,8 @@ You should see the following at the end of the output:
 Setting additional cluster selectors: pvCapacity=large
 ```
 
-### Verify the Resource Request has not been scheduled
-You can see that Kratix has successfully handle the incoming request in the pipeline.
+### Verify the Resource has not been scheduled
+You can see that Kratix has successfully handle the incoming request in the Workflow.
 
 But looking deeper, the worker cluster does not have the expected ECK pods:
 
@@ -301,9 +302,9 @@ kubectl --context $PLATFORM label cluster worker-cluster-1 pvCapacity=large
 ```
 
 
-### Verify the Resource Request is scheduled
+### Verify the Resource is scheduled
 Kratix detects this change to the cluster labels and identifies that the Resource
-Request matches a Kratix Cluster so begins the scheduling process:
+matches a Kratix Cluster so begins the scheduling process:
 ```bash
 kubectl --context $WORKER get pods -w
 ```
@@ -320,11 +321,11 @@ exit the watch mode.
 ## Summary {#summary}
 
 And with that, you have successfully managed the scheduling of both Promises and
-their Resource Requests!
+their Resources!
 
 To recap what you achieved:
 1. ✅&nbsp;&nbsp; Your Promise is scheduled to desired clusters
-1. ✅&nbsp;&nbsp; Resource requests are dynamically scheduled depending on user input
+1. ✅&nbsp;&nbsp; Requests for Resource are dynamically scheduled depending on user input
 
 ## Clean up environment {#cleanup}
 
@@ -337,4 +338,4 @@ kubectl --context $PLATFORM delete promises --all
 
 ## 🎉 &nbsp; Congratulations!
 ✅&nbsp;&nbsp;Your Promise can now schedule to a multi-cluster infrastructure. <br />
-👉🏾&nbsp;&nbsp;Next you will [update the Resource Request status](update-status) with useful information.
+👉🏾&nbsp;&nbsp;Next you will [update the Resource status](update-status) with useful information.

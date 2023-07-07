@@ -23,7 +23,7 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 
 ### Using Kratix to build your platform you can:
 
-* use GitOps workflow with Flux and familiar Kubernetes-native constructs.
+* use GitOps workflow and familiar Kubernetes-native constructs.
 * co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”.This tutorial will talk more about Kratix Promises in [the next step](installing-a-promise).
 * create a flexible platform with your paved paths as Promises.
 * evolve your platform easily as your business needs change.
@@ -51,7 +51,7 @@ This guide will go through the following steps:
 
 ### Clone Kratix {#clone-kratix}
 
-You will need the Kratix source code to complete this workhshop. Clone the
+You will need the Kratix source code to complete this workshop. Clone the
 State Store to your local machine and change into the directory:
 
 ```bash

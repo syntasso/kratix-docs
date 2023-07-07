@@ -17,79 +17,79 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 
 **In this tutorial, you will**
-* [Learn about a Promise pipeline](#what-is-a-pipeline)
+* [Learn about a Promise Workflows](#what-is-a-workflow)
 * [Write a Docker container to codify the delivery process](#write-docker-container)
-* [Test the pipeline](#test-the-pipeline)
-* [Include this container in your Promise pipeline](#add-container-to-pipeline)
+* [Test the Pipeline container](#test-the-pipeline)
+* [Include this container in your Promise Workflow](#add-container-to-workflow)
 * [Install the Promise](#install-promise)
-* [Request an on-demand instance of your Promise](#request-instance)
+* [Request an on-demand Resource](#request-resource)
 * [Summary](#summary)
 * [Clean up environment](#cleanup)
 
-## What is a Promise pipeline? {#what-is-a-pipeline}
+## What is a Promise Workflow? {#what-is-a-workflow}
 
-A [Kratix Promise](../main/reference/promises/intro) is configured with a Request
-Pipeline, defined as `xaasRequestPipeline` in the Promise definition.
+A [Kratix Promise](../main/reference/promises/intro) is configured with a collection of Workflows, defined as `workflows` in the Promise definition.
 
-This pipeline is an ordered list of OCI-compliant images. Each image runs as an
-init container within a single Kubernetes pod.
+It's possible to trigger Workflows at different stages of the Promise and of the Resource lifecycle. In this workshop, you will focus on the Workflow for `resource.configure`. This Workflow will run whenever a user makes a request to your Promise API, for example when someone requests an Elastic Cloud Kubernetes (ECK) Resource.
 
-This pipeline is run whenever a user makes a request to your Promise API. The
-pipeline is limited only by what actions you can take inside a Pod in Kubernetes.
-This means you can download software, run imperative commands, wait for manual
-approvals and more.
+Kratix provides a straightforward way to define Workflows as Pipelines, though you can use other technologies (such as Tekton) if you prefer.
+
+The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each image runs as an init container within a single Kubernetes pod and therefore is limited only by what actions you can take inside a Pod in Kubernetes. This means you can download software, run imperative commands, wait for manual approvals and more.
 
 <figure class="diagram">
   <PipelineDiagram className="large"/>
   <figcaption>An example multi-stage Pipeline</figcaption>
 </figure>
 
-In addition to running commands within the images, Kratix will manage a few key
-files when the defined pipeline completes:
-* `/output`: The files in this directory should be Kubernetes valid YAML as they
-  will be scheduled to a matching Kratix Cluster.
-* `/metadata/cluster-selectors.yaml`: Any YAML key:value pairs in this file will
-  be appended to the `selector` values in the Promise before deciding where the
-  output files are scheduled.
-* `metadata/status.yaml`: A YAML document that will be written to the Resource
-  Request status section on pipeline completion.
+In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
+* `/output`: The files in this directory will be scheduled to a matching Kratix Cluster.
+* `/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
+* `metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
 
-This step of the workshop will focus on the script run in an image and the output
-directory. Both cluster-selectors and status will be explored in an upcoming
-section of this workshop.
+This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both scheduling and status will be explored in an upcoming section of this workshop.
 
 ### Design principles
 
-While the pipeline enables flexibility, you will benefit from keeping in mind
-a few key principles while writing your pipeline images.
+A Workflow, and more specifically a Kratix Pipeline, enables flexibility that can be best leveraged by keeping in mind a few key principles.
 
 #### Reusability
 
-Pipelines are a great place to validate and enforce common requirements. For
-example, if you write an image that can check for necessary compliance
-requirements, that image can be used by all applicable pipelines. In addition,
-you can write images to check for excess costs, labeling conventions, security
-risks, and more.
+Workflows are a great place to validate and enforce common requirements. For
+example, if you write a stage that can check for necessary compliance
+requirements, that stage can be used by all applicable Pipelines. In addition, you can write stages to check for excess costs, labeling conventions, security risks, and more.
 
-While most pipelines will have at least one image with unique logic, building these
-images with reusability in mind is a great way to make your platform extensible.
+While most Workflows will have at least one stage with logic unique to that Promise, building the Kratix Pipeline stages with reusability in mind is a great way to make your platform extensible.
 
 #### Idempotency
 
-An idempotent container guarantees that running the same command multiple times
-will result in the same outcome. This is an important feature of these containers
-because they will be auto-reconciled on an on going basis.
+An idempotent Workflow guarantees that running the same command multiple times will result in the same outcome. This is an important feature because they will be auto-reconciled on an on going basis.
 
 Kubernetes controllers reconcile their objects in three scenarios:
 * Object change
 * Controller restart
 * Default cadence
 
-This means that yes, on every Resource Request the pipeline will run. But also, it
-will run any time the controller is reset, as well as every 10 hours.
+This means that yes, on every request for a Resource the Workflow will run. But also, it will run any time the controller is reset, as well as every 10 hours.
 
-This means you will need to write your pipeline images to make sure that rerunning
-them will not result in any adverse side effects.
+This means you will need to write your Workflows to make sure that rerunning them will not result in any adverse side effects.
+
+<details>
+  <summary>🤔 Wondering when to use Workflows versus creating a new Promise?</summary>
+
+Platform design requires thinking about how to divide platform offerings into right sized Promises and evaluating options for reusability and composability.
+
+Each Promise is a the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
+
+Promises are not the only way to create reusable components when designing your platform with Kratix. You can also create reusable Pipeline stages that can be run in a number of different Promise Workflows. For example, you may want to add default labels to certain types of resources. You can create a Pipeline stage which evaluates the resources set to be declared at the end of the Workflow and apply consistent labelling before writing.
+
+Since both Promises and Workflows can be reused, you may wonder when to use each. The best rule of thumb is to ask if you are describing a noun or a verb.
+
+Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide _something_ as-a-Service you should be thinking about creating a Promise.
+
+Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a Workflow step.
+
+Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
+</details>
 
 <details>
   <summary>🤔 Wondering when to use pipelines images versus creating a new Promise?</summary>
@@ -110,18 +110,17 @@ Like all rules of thumb, this should be treated as a guide. When it comes to sys
 
 <hr />
 
-Now that you understand what you can do in a pipeline and some design principles
-for writing images, it is time to write your own pipeline to deliver on-demand
-Elastic Clouds! At the end of this section you will have an API which calls a pipeline and results in declarative files being written to a state store.
+Now that you understand what you can do in a Workflow and some design principles for writing images, it is time to write your own Workflow to deliver on-demand Elastic Clouds! At the end of this section you will have an API which calls a Workflow and results in declarative files being written to a state store.
 
 
+<!-- TODO: (promising future) "imperative pipeline"? or should be workflow -->
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-pipeline-only.svg"
 ```
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
-  <figcaption>The Promise pipeline allows you to run imperative commands when provisioning an instance for a user.</figcaption>
+  <figcaption>The Promise Workflow allows you to run imperative commands when provisioning an Resource for a user.</figcaption>
 </figure>
 
 
@@ -132,19 +131,15 @@ operator and use the ECK-stack Helm chart to make requests to the operator. By
 encapsulating the process in a Container you are able to manage quite complex
 actions while also having access to a testable interface.
 
-### Write the pipeline script
+### Write the script to run your Kratix Pipeline
 
-The pipeline requires a number of files and scripts. For that reason it is
-best to create a subfolder to organise these specific items.
+Defining a Pipeline requires a number of files and scripts. For that reason it is best to create a subfolder to organise these specific items.
 
 More specifically, the first two files you will need are:
 
-* `run`: a script containing the code that will be executed when the pipeline
-  runs.
-* `default-config.yaml`: a values document containing configuration options for the
-  default ElasticSearch and Kibana.
-* `beats-values.yaml`: a values document containing configuration options for when the
-  Data Collection is enabled.
+* `run`: a script containing the code that will be executed when the Workflow runs.
+* `default-config.yaml`: a values document containing configuration options for the  default ElasticSearch and Kibana.
+* `beats-values.yaml`: a values document containing configuration options for when the Data Collection is enabled.
 
 To create the subfolder and these two executable files, you can run the following command:
 ```bash
@@ -302,10 +297,10 @@ On line 11 and 15 the script is downloading a specific version of ECK rather tha
 
 In addition, on line 34 the files that should be deployed to the cluster are copied to `/output`. You may wonder why these files were not downloaded and created directly to the `output` directory. This is an good practice that allows you to use a temporary directory to download and possibly manipulate files before finalising them in the `output` directory.
 
-Finally, you can see that on lines 6 and 7 the script is capturing values from the Resource Request and using those values to customise the outputs. Specifically, it is using the Resource Request name to make sure that the resources have unique names, and using the user provided API value to decide on line 45 if Beats should be installed.
+Finally, you can see that on lines 6 and 7 the script is capturing values from the Resource definition and using those values to customise the outputs. Specifically, it is using the Resource name to make sure that the resources have unique names, and using the user provided API value to decide on line 45 if Beats should be installed.
 </details>
 
-Your shell script is nearly testable as is. However one complication is the manipulation of the root file system. Therefore, the next step will be to package this script into a Dockerfile which will enable testing and also make it ready for use in your Kratix pipeline.
+Your shell script is nearly testable as is. However one complication is the manipulation of the root file system. Therefore, the next step will be to package this script into a Dockerfile which will enable testing and also make it ready for use in your Kratix Pipeline.
 
 :::tip
 
@@ -317,7 +312,7 @@ Remember there is no limitation to the languages you use in this script. You may
 
 A [Dockerfile](https://docs.docker.com/engine/reference/builder/) manages both build and runtime requirements for your container.
 
-To create your Dockerfile in the pipeline directory run the following command:
+To create your Dockerfile in the `pipeline` directory run the following command:
 
 ```bash
 touch pipeline/Dockerfile
@@ -369,13 +364,13 @@ each run via the `CMD` declaration on line 14 after adding to the image on line
 
 </details>
 
-## Test the pipeline {#test-the-pipeline}
+## Test the Pipeline container {#test-the-pipeline}
 
 Now that the script is packaged as a Dockerfile, you are able to run the script without impacting your local root directory.
 
 In order run a test you will need to:
 * Mimic the `/output` directory locally
-* Provide the expected input files (the Resource Request)
+* Provide the expected input files (the Resource definition)
 * Build the image
 * Run the container
 * Validate the files in the `output` directory
@@ -386,7 +381,7 @@ Start by creating the files and test structure:
 mkdir -p test/{input,output,metadata}
 ```
 
-As an example input, copy the Resource Request as `object.yaml` into the `input`
+As an example input, copy the Resource definition as `object.yaml` into the `input`
 directory:
 
 ```bash
@@ -460,10 +455,8 @@ docker run --rm --volume ${outputDir}:/output --volume ${inputDir}:/input --volu
 
 These scripts do the following:
 
-* `build-pipeline` codifies the dev tag for the image and how to build it. It
-  will also load the container image on the KinD cluster.
-* `test-pipeline` calls build-pipeline and also runs the pipeline image,
-  allowing you to verify the created files in the `test/output` directory.
+* `build-pipeline` codifies the dev tag for the image and how to build it. It will also load the container image on the KinD cluster.
+* `test-pipeline` calls build-pipeline and also runs the image, allowing you to verify the created files in the `test/output` directory.
 
 At this stage, your directory structure should look like this:
 
@@ -494,7 +487,7 @@ To execute the test, run the script with the following command:
 ./scripts/test-pipeline
 ```
 
-Which should build and run the Pipeline image. Once the execution completes,
+Which should build and run the image. Once the execution completes,
 verify the `test/output` directory. You should see the following files:
 
 ```bash
@@ -512,29 +505,29 @@ verify the `test/output` directory. You should see the following files:
 ```
 
 You can take a look at the files and verify their contents. If everything looks
-good, your pipeline image is ready to be included in your promise.
+good, your image is ready to be included in your Promise.
 
 
-:::tip Testing pipeline images
+:::tip Testing Pipeline images
 
-As you just experience, testing pipeline images is really simple. You can
-quickly validate that the pipeline is outputting exactly what you want, without
+As you just experience, testing images is really simple. You can
+quickly validate that the stage is outputting exactly what you want, without
 even touching Kubernetes.
 
-The ability to treat pipeline image as independent pieces of software that can
+The ability to treat images as independent pieces of software that can
 have their own development lifecycle (fully testable, easy to execute locally,
 release independent) allows platform teams to move faster, sharing and reusing
 images across their Promises.
 
 :::
 
-## Include this container in your Promise pipeline {#add-container-to-pipeline}
+## Include this container in your Promise Workflow {#add-container-to-workflow}
 
-With your pipeline tested you are ready to add it to your Promise. To do this,
+With your Pipeline tested you are ready to add it to your Promise. To do this,
 you will add a new top level key in the Promise `spec` as a sibling to the
-`xaasCrd` key you created in the last section.
+`api` key you created in the last section.
 
-The key should be `xaasRequestPipeline` and should contain a list of your
+The key should be `workflows` and should contain a list of your
 pipelines containers which will be just one for now:
 
 ```yaml title="promise.yaml -- include it under the 'spec' key"
@@ -545,26 +538,46 @@ metadata:
   namespace: default
 spec:
   #highlight-start
-  xaasRequestPipeline:
-  - kratix-workshop/elastic-pipeline:dev
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: resource-configure
+            name: default
+          spec:
+            containers:
+            - name: pipeline-stage-0
+              image: kratix-workshop/elastic-pipeline:dev
   #highlight-end
-  workerClusterResources:
+  api:
   ...
 ```
 
 <details>
   <summary> 👉🏾 Prefer to copy the whole working Promise file? 👈🏾 </summary>
 
-```bash title="Complete promise.yaml"
+```yaml title="Complete promise.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
   name: elastic-cloud
   namespace: default
 spec:
-  xaasRequestPipeline:
-  - kratix-workshop/elastic-pipeline:dev
-  xaasCrd:
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: resource-configure
+            name: default
+          spec:
+            containers:
+            - name: pipeline-stage-0
+              image: kratix-workshop/elastic-pipeline:dev
+  api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
@@ -623,9 +636,9 @@ NAME            AGE
 elastic-cloud   10s
 ```
 
-## Request an on-demand instance of your Promise {#request-instance}
+## Request an on-demand Resource {#request-resource}
 
-Now that the Promise is installed and includes a pipeline to provision the ECK resources, you can switch hats to act like an application engineer who wants to request an instance of a monitoring stack.
+Now that the Promise is installed and includes a pipeline to provision the ECK Resources, you can switch hats to act like an application engineer who wants to request an monitoring stack Resource.
 
 The request will result in the pipeline's output being installed on the worker cluster:
 
@@ -637,9 +650,9 @@ import PipelineDiagram from "/img/docs/workshop/install-a-promise-pipeline.svg"
   <figcaption>An example multi-stage Pipeline</figcaption>
 </figure>
 
-### Send a Resource Request
+### Send a request for a Resource
 
-You can use the same Resource Request as in the last section by running:
+You can use the same Resource definition as in the last section by running:
 
 ```bash
 kubectl --context $PLATFORM apply --filename resource-request.yaml
@@ -660,7 +673,7 @@ As an application engineer, you can see the Status as either `Pending` meaning t
 
 ### Verify the pipeline
 
-As a platform engineer you can continue on to verify some of the processes behind the scenes. First of all, you can verify that the pipeline has been triggered by the creation of a Resource Request. To see the pod run:
+As a platform engineer you can continue on to verify some of the processes behind the scenes. First of all, you can verify that the pipeline has been triggered by the request for a Resource. To see the pod run:
 ```bash
 kubectl --context $PLATFORM get pods --show-labels
 ```
@@ -668,7 +681,7 @@ kubectl --context $PLATFORM get pods --show-labels
 The output should look something like this:
 ```shell-session
 NAME                                           READY   STATUS      RESTARTS   AGE     LABELS
-request-pipeline-elastic-cloud-default-33029   0/1     Completed   0          1m   kratix-promise-id=elastic-cloud-default...
+configure-pipeline-elastic-cloud-default-33029   0/1     Completed   0          1m   kratix-promise-id=elastic-cloud-default...
 ```
 
 Within this pod there will be a number of containers including Kratix utility actions and the list of images you provided in the Promise.
@@ -684,23 +697,23 @@ kubectl --context $PLATFORM \
 Each container is listed in a row, in order that they occur so you should see:
 ```shell-session
 reader
-xaas-request-pipeline-stage-0
+pipeline-stage-0
 work-writer
 status-writer
 ```
 
 While you only provided a single image, you can see that there are four listed. Each has a job as follows:
-* `reader` makes sure that the Resource Request is available to the pipeline
-* `xaas-request-pipeline-stage-*` images are an ordered list from the provided containers in the Promise
+* `reader` makes sure that the Resource definition is available to the pipeline
+* `pipeline-stage-0` the container name you specified in the Kratix Pipeline
 * `work-writer` schedules the files in the `output` directory based on the labels provided
-* `status-writer` updates the Resource Request status
+* `status-writer` updates the Resource status
 
-The most interesting container for you will be the one you created, the `xaas-request-pipeline-stage-0` container. To see the logs from this specific container you can run:
+The most interesting container for you will be the one you created, the `pipeline-stage-0` container. To see the logs from this specific container you can run:
 
 ```bash
 kubectl --context $PLATFORM logs \
   --selector kratix-promise-id=elastic-cloud-default \
-  --container xaas-request-pipeline-stage-0
+  --container pipeline-stage-0
 ```
 
 The logs will look something like this:
@@ -719,7 +732,7 @@ Done
 
 ### Verify the worker
 
-While it is useful to verify the container has run by viewing the logs, the outcome you most want to verify is the scheduling and creation of an ECK instance.
+While it is useful to verify the container has run by viewing the logs, the outcome you most want to verify is the scheduling and creation of an ECK Resource.
 
 To see this you will need to check the worker cluster where the ECK server was scheduled. First you may want to verify that the operator is running:
 
@@ -752,7 +765,7 @@ logstashes.logstash.k8s.elastic.co                     2023-01-01T12:00:00Z
 stackconfigpolicies.stackconfigpolicy.k8s.elastic.co   2023-01-01T12:00:00Z
 ```
 
-Finally, you will want to see the provisioned instance by running:
+Finally, you will want to see the provisioned Resource by running:
 ```bash
 kubectl --context $WORKER get pods --watch
 ```
@@ -784,16 +797,16 @@ kubectl --context $WORKER \
 ```
 
 :::caution
-If you gave your ECK instance a different name, you may need port-forwarding to access the running instance:
+If you gave your ECK Resource a different name, you may need port-forwarding to access the running instance:
 
 kubectl --context $WORKER port-forward deploy/NAME-kb 8080:30269
 :::
 
 
-### Trying to request a second instance
+### Trying to request a second resource
 
-The power of Kratix is the scalability of self-service, on-demand instances.
-Therefore, it is expected that any Promise will have more than one Resource Request made to it.
+The power of Kratix is the scalability of self-service, on-demand Resources.
+Therefore, it is expected that any Promise will have more than one request for Resources made to it.
 
 To see how the current Promise responds to a second request, you will need to
 make a second request with the a new name:
@@ -808,7 +821,7 @@ Once again, you can verify this request by listing elastic-clouds:
 kubectl --context $PLATFORM get elastic-clouds
 ```
 
-Which should now show a second instance in the list:
+Which should now show a second Resource in the list:
 ```shell-session
 NAME             STATUS
 example          Resource requested
@@ -820,7 +833,7 @@ You can also see that a second pipeline has run by checking the pods:
 kubectl --context $PLATFORM get pods
 ```
 
-However, when you go to check the status on the worker cluster, you will not see a second elastic cloud instance:
+However, when you go to check the status on the worker cluster, you will not see a second elastic cloud Resource:
 ```bash
 kubectl --context $WORKER get pods
 ```
@@ -847,11 +860,11 @@ The key part being `may not add resource with an already registered id: CustomRe
 And with that, you have transformed Elastic Cloud into an on-demand service!
 
 To recap the steps you took:
-1. ✅&nbsp;&nbsp;Codified the steps to provision an ECK instance
+1. ✅&nbsp;&nbsp;Codified the steps to provision an ECK Resource
 1. ✅&nbsp;&nbsp;Packaged this script into a Docker container
 1. ✅&nbsp;&nbsp;Validated the containers behaviour with a reusable test script
 1. ✅&nbsp;&nbsp;Added the container to the Kratix Promise pipeline
-1. ✅&nbsp;&nbsp;Installed the Promise and validated the created instance
+1. ✅&nbsp;&nbsp;Installed the Promise and validated the created Resource
 1. ✅&nbsp;&nbsp;Explored the limitations of all logic living in the pipeline
 
 ## Clean up environment {#cleanup}

@@ -55,8 +55,8 @@ const UseCaseList: UseCaseItem[] = [
     Svg: require('@site/static/img/home/usecase5.svg').default,
     description: (
       <>
-       A Promise to deliver a combined metrics, monitoring, and logging solution based on open-source software but bespoke to the organisation's needs.
-       The Promise delivers an on-demand solution to the game teams that's ready to use in production.
+        A Promise to deliver a combined metrics, monitoring, and logging solution based on open-source software but bespoke to the organisation's needs.
+        The Promise delivers an on-demand solution to the game teams that's ready to use in production.
       </>
     ),
   },
@@ -74,7 +74,7 @@ const UseCaseList: UseCaseItem[] = [
   },
 ];
 
-function UseCase({title, Svg, description}: UseCaseItem) {
+function UseCase({ title, Svg, description }: UseCaseItem) {
   return (
     <div className="row">
       <div className={clsx('col col--1 col--offset-2 text--right', styles.iconCol)} >
@@ -97,9 +97,9 @@ export default function UseCases(): JSX.Element {
       <div className="container">
         <h2 className={clsx('text--center', styles.title)}>Kratix Promise Use Cases</h2>
         <hr />
-          {UseCaseList.map((props, idx) => (
-            <UseCase key={idx} {...props} />
-          ))}
+        {UseCaseList.map((props, idx) => (
+          <UseCase key={idx} {...props} />
+        ))}
       </div>
     </section>
   );

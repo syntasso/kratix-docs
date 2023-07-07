@@ -9,6 +9,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import PartialVerifyKratixWithOutPromises from '../../_partials/workshop/_verify-kratix-without-promises.md';
+import PartialWcrBinaryDownload from '../../_partials/_wcr-binary-download.md';
 ```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
@@ -21,15 +22,14 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 * [Understanding Kratix Promise dependencies](#understanding-dependencies)
 * [Splitting out Elastic Cloud Kubernetes (ECK) dependencies](#splitting-dependencies)
 * [Install the Promise with separate dependencies](#install-promise)
-* [Make multiple Resource Requests ](#resource-requests)
+* [Make multiple requests](#resource-requests)
 * [Summary](#summary)
 * [Clean up environment](#cleanup)
 
 ## Understanding Kratix Promise dependencies {#understanding-dependencies}
 
 After the previous tutorial step, the ECK Promise bundled all necessary provisioning
-steps into the Promise pipeline. This made it possible to only do a single Resource Request
-because of duplication across the requests.
+steps into the Resource Workflow. This made it possible to only do a single request because of duplication across the requests.
 
 In this section we will focus on introducing the dependencies part of Promises to manage many requests from a single Promise.
 
@@ -39,51 +39,52 @@ import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-extract-dep
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
-  <figcaption>Promise dependencies provide a way to install and configure shared resources that enables the platform to provide self-service instances.</figcaption>
+  <figcaption>Promise dependencies provide a way to install and configure shared resources that enables the platform to provide self-service Resources.</figcaption>
 </figure>
 
 ## Splitting out Elastic Cloud Kubernetes (ECK) dependencies {#splitting-dependencies}
 
-The pipeline `run` script currently follows the installation instructions in the ECK
+The Pipeline `run` script currently follows the installation instructions in the ECK
 documentation [here](https://www.elastic.co/guide/en/cloud-on-k8s/2.8/k8s-deploy-eck.html).
 Namely, the two separate files downloaded, the CRDs and the operator. Then creating
-the required instances of the CRDs.
+the required Resources from the CRDs.
 
 The operator and its CRDs are a set of resources that only need and can be
 installed once in a cluster. After they are installed they can serve as many
-requests as needed. Therefore, if you want to support provisioning multiple
-resource requests you will need to change how the CRDs and operator resources are installed
+Resources as needed. Therefore, if you want to support provisioning multiple
+Resources you will need to change how the CRDs and operator resources are installed
 into the cluster so that there is not a conflict.
 
 <img src={useBaseUrl('/img/docs/workshop/operator-as-shared-dependency.png')} />
 
-### Worker Cluster Resources
+### Dependencies
 
-Currently, both the operator and the request for an instance from the operator are generated in the pipeline.
-Kratix has the concept of `workerClusterResources` which can be useful to manage different
-types of resources. While a pipeline runs on every request for a resource, the Worker Cluster
-Resources are a set of resources that only need to be installed once per cluster for the given Promise.
+Currently, both the operator and the request for an Resource from the operator
+are generated in the Workflow. Kratix has the concept of `dependencies` which
+can be useful to manage different types of resources. While a Configure Workflow runs on
+every request for a resource, the dependencies are a set of resources that only
+need to be installed once per cluster for the given Promise.
 
 A simple use cases may be to create a shared namespace that all subsequent
-resource requests send there output to. In the case of this ECK Promise, you can
-install the Operator and CRDs as a Worker Cluster Resources.
+Resources get scheduled to. In the case of this ECK Promise, you can
+install the Operator and CRDs as a dependencies.
 
-### Remove shared dependencies from the pipeline
+### Remove shared dependencies from the Pipeline
 
 The following steps will refactor this Promise to instead separate shared dependencies from individual request resources:
 
 <img src={useBaseUrl('/img/docs/workshop/promise-with-dependencies.png')} />
 
-#### Remove one-off files (i.e. dependencies) from pipeline
+#### Remove one-off files (i.e. dependencies) from Pipeline
 
-First you will need to remove the Operator and CRD files from the pipeline `run` script in order in order to stop them from being created on all Resource Requests.
+First you will need to remove the Operator and CRD files from the Pipeline `run` script in order in order to stop them from being created on each request for a Resource.
 
 Open the `pipeline/run` file and remove lines 9-16. This will remove both curl commands which download the CRDs and controller resources.
 
 <details>
   <summary> 👉🏾 Prefer to copy the whole working pipeline/run file? 👈🏾 </summary>
 
-```bash title="Complete promise/run"
+```bash title="Complete pipeline/run"
 #!/usr/bin/env bash
 
 set -eu -o pipefail
@@ -131,7 +132,7 @@ With the downloads removed, you can re-run the test suite and see that the resul
 scripts/test-pipeline
 ```
 
-Once the execution completes, use the following command to check the files generated by the pipeline:
+Once the execution completes, use the following command to check the files generated by the Pipeline:
 
 ```bash
 tree test
@@ -150,35 +151,25 @@ Verify that the output shows only the following files:
     └── kibana.yaml
 ```
 
-### Add shared dependencies as Worker Cluster Resources
+### Add shared dependencies to the Promise
 
-Removing the files from the pipeline is not enough. You must now also add them to the Promise as Worker Cluster Resources.
+Removing the files from the Pipeline is not enough. You must now also add them to the Promise as dependencies.
+
+Run the following command to create a `dependencies` directory where you can store these files and any others that you may want to depend on for the Promise installation:
+```bash
+mkdir -p dependencies
+
+curl --silent --location --output dependencies/elastic-crds.yaml https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
+curl --silent --location --output dependencies/elastic-operator.yaml https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
+```
+
+Once stored locally, you will need to add these dependencies to the Promise file. The dependencies are added as a list under `dependencies` which can tricky with formatting and require some subtle white space changes.
 
 #### Download the WorkerResourcesBuilder
 
-Run the following command to create a `resources` directory where you can store these files and any others that you may want to depend on for the Promise installation:
-```bash
-mkdir -p resources
-
-curl --silent --location --output resources/elastic-crds.yaml https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
-curl --silent --location --output resources/elastic-operator.yaml https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
-```
-
-Once stored locally, you will need to add these resources to the Promise file. The resources are added
-as a list under `workerClusterResources` which can tricky with formatting and require some subtle white
-space changes.
-
-To make this step simpler there is a _very basic_ tool which grabs all YAML
-documents from a single directory and injects them correctly into the `workerClusterResources`
-field in the `promise.yaml`.
-
-To use this tool, you will need to download the correct binary for your computer
-from [GitHub releases](https://github.com/syntasso/kratix/releases/tag/v0.0.3):
-
 :::info
 
-If you are using Instruqt, this binary has already been made available to you.
-All you need is:
+If you are using Instruqt, you can use the binary provided rather than downloading. When prompted, instead of downloading use the following command to move the binary into the right location:
 
 ```bash
 mkdir -p bin
@@ -187,83 +178,34 @@ cp /root/bin/worker-resource-builder ./bin
 
 :::
 
-<Tabs>
-  <TabItem value="darwin-amd64" label="Intel Mac" default>
+<PartialWcrBinaryDownload />
 
-    mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_darwin_amd64.tar.gz
-    tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
-    mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
-    chmod +x ./bin/worker-resource-builder
+#### Add all dependencies to the Promise
 
-  </TabItem>
-  <TabItem value="darwin-arm64" label="Apple Silicon Mac">
-
-    mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_darwin_arm64.tar.gz
-    tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
-    mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
-    chmod +x ./bin/worker-resource-builder
-
-  </TabItem>
-  <TabItem value="linux-arm64" label="Linux ARM64">
-
-    mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_linux_arm64.tar.gz
-    tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
-    mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
-    chmod +x ./bin/worker-resource-builder
-
-  </TabItem>
-    <TabItem value="linux-amd64" label="Linux AMD64">
-
-    mkdir -p bin
-    curl -sLo ./bin/worker-resource-builder.tar.gz https://github.com/syntasso/kratix/releases/download/v0.0.3/worker-resource-builder_0.0.3_linux_amd64.tar.gz
-    tar -xvf ./bin/worker-resource-builder.tar.gz -C ./bin
-    mv ./bin/worker-resource-builder-v* ./bin/worker-resource-builder
-    chmod +x ./bin/worker-resource-builder
-
-  </TabItem>
-</Tabs>
-
-Once installed, you can see how to use the binary by running the following help command:
-```bash
-./bin/worker-resource-builder --help
-```
-
-The above command will give an output similar to:
-```shell-session
-Usage of ./bin/worker-resource-builder:
-  -k8s-resources-directory string
-        Absolute Path of k8s resources to build workerClusterResources from
-  -promise string
-        Absolute path of Promise to insert workerClusterResources into
-```
-
-Given this usage instructions, you can run the following command to overwrite the current Promise file to include the CRD and controller resources:
+Per the usage instructions you have now seen, you can use the provided binary to add dependencies to an existing Promise. Run the following command to overwrite the current Promise file to add the dependencies to the existing API and Workflows sections:
 
 ```bash
-echo "current promise length is: $(wc -l promise.yaml)"
-./bin/worker-resource-builder -k8s-resources-directory ./resources -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
-echo "new promise length is: $(wc -l promise.yaml)"
+echo "current Promise length is: $(wc -l promise.yaml)"
+./bin/worker-resource-builder -resources-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
+echo "new Promise length is: $(wc -l promise.yaml)"
 ```
 
 
 The above command will give an output similar to:
 ```shell-session
-current promise length is: 35 promise.yaml
-new promise length is: 11398 promise.yaml
+current Promise length is: 35 promise.yaml
+new Promise length is: 11398 promise.yaml
 ```
 
-In this output, you can see that the the files in the `resources` directory have now been added to the `promise.yaml` file. You can also check the top of the newly edited `promise.yaml` and see that these resources have been added as list items under the `workerClusterResources` key.
+In this output, you can see that the the files in the `dependencies` directory have now been added to the `promise.yaml` file. You can also check the top of the newly edited `promise.yaml` and see that these resources have been added as list items under the `dependencies` key.
 
 :::info
 
-You may notice that the length of the files in `resources` is shorter than what was added to the `promise.yaml` file. This is because the `worker-resources-builder` binary reformatted long lines into more readable lines with a max length of 90.
+You may notice that the length of the files in `dependencies` is shorter than what was added to the `promise.yaml` file. This is because the `worker-resources-builder` binary reformatted long lines into more readable lines with a max length of 90.
 
 If you have [yq](https://mikefarah.gitbook.io/yq/) installed you can verify the total number of documents in both matches with the following command:
 ```bash
-diff <(yq ea '[.] | length' resources/*) <(yq '.spec.workerClusterResources | length' promise.yaml)
+diff <(yq ea '[.] | length' dependencies/*) <(yq '.spec.dependencies | length' promise.yaml)
 ```
 
 No difference in number of YAML resources will result in no output.
@@ -277,7 +219,7 @@ No difference in number of YAML resources will result in no output.
 
 ### Install the Promise
 
-With the pipeline image available, you can now install the updated Promise:
+With the Pipeline image available, you can now install the updated Promise:
 
 ```bash
 kubectl --context ${PLATFORM} create --filename promise.yaml
@@ -318,13 +260,13 @@ NAME                 READY   STATUS    RESTARTS   AGE
 elastic-operator-0   1/1     Running   0          1m
 ```
 
-## Make multiple Resource Requests {#resource-requests}
+## Make multiple requests {#resource-requests}
 
 Now that you have installed the operator and CRDs as a part of Promise installation,
 you can once again don the Application Engineer hat and return to the original goal of
-making more than one Resource Request to the single ECK Promise.
+requesting more than one Resource from the single ECK Promise.
 
-Just as you did in the last step, you will need to make two Resource Requests with
+Just as you did in the last step, you will need to make two requests with
 two different resource names:
 
 ```bash
@@ -334,7 +276,7 @@ cat resource-request.yaml | \
   kubectl --context $PLATFORM apply --filename -
 ```
 
-With these two requests made, you can see both pipelines running simultaneously:
+With these two requests made, you can see both Workflows running simultaneously:
 
 ```bash
 kubectl --context $PLATFORM get pods
@@ -343,8 +285,8 @@ kubectl --context $PLATFORM get pods
 The above command will give an output similar to:
 ```shell-session
 NAME                                           READY   STATUS      RESTARTS   AGE
-request-pipeline-elastic-cloud-default-01650   0/1     Completed   0          106s
-request-pipeline-elastic-cloud-default-99684   0/1     Completed   0          11s
+configure-pipeline-elastic-cloud-default-01650   0/1     Completed   0          106s
+configure-pipeline-elastic-cloud-default-99684   0/1     Completed   0          11s
 ```
 
 And once completed you will be able to watch for two sets of ECK resources being deployed to the Worker cluster:
@@ -398,7 +340,7 @@ kubectl --context $WORKER \
 ```
 
 :::caution
-If you gave your ECK instance a different name, you will nee to substitute the name in the above commands for the correct ones. For example, to port forward you would replace `NAME` with the name of your instance:
+If you gave your ECK Resource a different name, you will nee to substitute the name in the above commands for the correct ones. For example, to port forward you would replace `NAME` with the name of your Resource:
 
 kubectl --context $WORKER port-forward deploy/NAME-kb :5601
 :::
@@ -407,13 +349,13 @@ kubectl --context $WORKER port-forward deploy/NAME-kb :5601
 
 ## Summary {#summary}
 
-And with that, you have reduced duplication by delivering shared dependencies separately from the on-demand service! While this workshop only showcases two instances both deployed to the same cluster, this architecture can easily be used to support an unlimited number of instances across an unlimited number of clusters.
+And with that, you have reduced duplication by delivering shared dependencies separately from the on-demand service! While this workshop only showcases two Resources both deployed to the same cluster, this architecture can easily be used to support an unlimited number of Resources across an unlimited number of clusters.
 
 To recap the steps you took:
 1. ✅&nbsp;&nbsp;Evaluated what resources are shared dependencies
-1. ✅&nbsp;&nbsp;Moved any shared dependencies from pipeline resources to worker cluster resources
+1. ✅&nbsp;&nbsp;Moved any shared dependencies from Workflows to the dependencies
 1. ✅&nbsp;&nbsp;Viewed the dependency set up on Promise install
-1. ✅&nbsp;&nbsp;Successfully request more than one instance of ECK
+1. ✅&nbsp;&nbsp;Successfully request more than one ECK Resources
 
 ## Clean up environment {#cleanup}
 

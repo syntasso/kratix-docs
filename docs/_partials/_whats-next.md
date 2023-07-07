@@ -29,18 +29,18 @@ However after learning about the four 'shadow IT' Postgres databases, you poll a
 
 ### ...pre-configured to meet your business requirements...
 
-Requirements are fixed, but you have to deal with the nuance in each type of Postgres. So you have to manually enforce quotas via your audits at the end of each month; manually reconcile service instances, teams, and billed cost centres; and manually inform interested stakeholders when costs change.
+Requirements are fixed, but you have to deal with the nuance in each type of Postgres. So you have to manually enforce quotas via your audits at the end of each month; manually reconcile resources, teams, and billed cost centres; and manually inform interested stakeholders when costs change.
 
 ### ...and automatically secured according to your policies.
 
-Security is complex, and each Postgres defines their security details in different places. So you need to manually verify that each Postgres configuration is acceptable according to the broader security protocols; manually make sure proper signoff has happened before deployments move forward; and manually run third-party software against code that is being shipped to make sure dependecies don't have vulnerabilities.
+Security is complex, and each Postgres defines their security details in different places. So you need to manually verify that each Postgres configuration is acceptable according to the broader security protocols; manually make sure proper sign-off has happened before deployments move forward; and manually run third-party software against code that is being shipped to make sure dependencies don't have vulnerabilities.
 <br/>
 
 This example has _a lot_ of platform concerns, and we've only listed a few.
 
 With Kratix you can develop a platform that will easily _offer standardised development tools_, _optimised for scale_, that is _pre-configured to meet your business requirements_ and _secured according to your policies_.
 
-Stepping back, the beauty of Kratix is in its flexibility. It allows you to encapsulate a service in a Promise with a robust Request Pipeline. Our example above highlights some of the most common challenges where Kratix has helped platform teams we've worked with move past toil toward higher-value enablement. But we know your organisational challenges are unique, and Kratix is built so that you can adapt it to your context.
+Stepping back, the beauty of Kratix is in its flexibility. It allows you to encapsulate a service in a Promise with a robust Workflow. Our example above highlights some of the most common challenges where Kratix has helped platform teams we've worked with move past toil toward higher-value enablement. But we know your organisational challenges are unique, and Kratix is built so that you can adapt it to your context.
 
 ## Designing the right Golden Paths with multiple Promises
 
@@ -55,7 +55,7 @@ The value of your platform increases dramatically when you offer application tea
 
 Creating a Golden Path on Kratix is easy: decide on, define, and install the individual Promises that are required, then define a higher-level Promise that brings those individual Promises together.
 
-An application developer goes from making separate Kratix Resource Requests to get access to separate service instances to being able to make one single Resource Request to get pre-configured, ready-to-go instances of everything they need.
+An application developer goes from making separate requests to get access to each individual Resource to being able to make one single request to get a higher level Resource that is pre-configured, ready-to-go instances of everything they need.
 
 We believe composable Promises are at the core of the value that Kratix provides to platform teams.
 

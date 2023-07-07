@@ -10,7 +10,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl'
 import GettingStarted from '@site/src/components/GettingStarted'
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className={clsx('container', styles.heroContainer)}>
@@ -32,7 +32,7 @@ function HomepageHeader() {
 }
 
 function HomepagePromises() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <div className={clsx('container padding--lg', styles.promises)}>
       <h2 className="text--center">What's a Kratix Promise?</h2>
@@ -43,9 +43,9 @@ function HomepagePromises() {
         <div className="col">
           A Promise is comprised of three elements:
           <ul>
-            <li><strong>Custom Resource Definition:</strong> input from an app team to create instances of a capability.</li>
-            <li><strong>Worker Cluster Resources:</strong> dependencies necessary for any created Workloads.</li>
-            <li><strong>Request Pipeline:</strong> business logic required when an instance of a capability is requested.</li>
+            <li><strong>An API:</strong> input from an app team to create Resources from a capability.</li>
+            <li><strong>A set of dependencies:</strong> dependencies necessary for any created Workloads.</li>
+            <li><strong>Workflows:</strong> business logic required when an Resource is requested.</li>
           </ul>
         </div>
       </div>
@@ -60,12 +60,12 @@ function HomepagePromises() {
             </li>
 
             <li>codify the contract between platform teams and application teams for the delivery of a specific service,
-              e.g. a database, an identity service, a supply chain, or a complete development pipeline of patterns and tools.
+              e.g. a database, an identity service, a supply chain, or a complete development workflow of patterns and tools.
             </li>
 
             <li>can be shared and reused between platforms, teams, business units, even other organisations.</li>
 
-            <li>are easy to build, deploy, and update. Bespoke business logic can be added to each Promise's pipeline.</li>
+            <li>are easy to build, deploy, and update. Bespoke business logic can be added to each Promise's Workflows.</li>
 
             <li>can create "Workloads", which are deployed, via the GitOps Toolkit, across fleets of Kubernetes clusters.</li>
           </ul>
@@ -73,7 +73,7 @@ function HomepagePromises() {
       </div>
       <div className="row margin-top--xl">
         <div className="col text--center">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
         </div>
       </div>
     </div>
@@ -84,14 +84,14 @@ function ActionButtonFrame(): JSX.Element {
   return (
     <section className={clsx('background-color--dark color--light', styles.actionButtons)}>
       <div className="container">
-          <ActionButtons />
+        <ActionButtons />
       </div>
     </section>
   );
 }
 
 export default function Home(): JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
 
   return (
     <Layout

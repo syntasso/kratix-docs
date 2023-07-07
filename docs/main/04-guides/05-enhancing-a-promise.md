@@ -1,5 +1,5 @@
 ---
-description: Learn how to extend an existing Promise, from updating the API to changing the Pipeline behaviour
+description: Learn how to extend an existing Promise, from updating the API to changing the Workflow behaviour
 title: Enhancing a Promise
 ---
 import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
