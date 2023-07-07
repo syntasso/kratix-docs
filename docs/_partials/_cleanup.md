@@ -1,5 +1,5 @@
-Before moving on, please clean up your environment by deleting the current Promises and Resource Requests.
-Kratix will, by default, clean up any Resource Requests when the parent Promise is deleted.
+Before moving on, please clean up your environment by deleting the current Promises and Resources.
+Kratix will, by default, clean up any Resources when the parent Promise is deleted.
 
 To delete all the Promises, run:
 

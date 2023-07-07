@@ -300,7 +300,7 @@ The above command will give an output similar to:
         Environment:  dev
 ```
 
-The NGINX and the PosgreSQL promises are telling Kratix:
+The NGINX and the PosgreSQL Promises are telling Kratix:
 
 > Only install my dependencies (which include, the NGINX Ingress Controller and the
 > PostgreSQL operator) in Clusters with the **label environment=dev**.
@@ -386,7 +386,7 @@ EasyApp Promise to get an opinionated deployment of each of those. In this
 example, don't really care about the details; all you want is to run your
 application.
 
-Create a Resource Request for a new EasyApp offering:
+Create a request for a new EasyApp Resource:
 
 ```yaml
 cat <<EOF | kubectl --context $PLATFORM apply --filename -
@@ -416,30 +416,28 @@ service.
 <figure class="diagram">
   <PipelineDiagram className="large"/>
 
-  <figcaption>EasyApp Pipeline execution; NGINX omitted from brevity</figcaption>
+  <figcaption>EasyApp Workflow execution; NGINX omitted from brevity</figcaption>
 </figure>
 
-Verify the Pipelines running on the Platform cluster:
+Verify the Workflows running on the Platform cluster:
 
 
 ```bash
 kubectl --context $PLATFORM get pods --watch
 ```
 
-<!-- TODO: (promising future) pipeline pod name -->
-
 The above command will give an output similar to:
 ```shell-session
 NAME                                        READY   STATUS      RESTARTS   AGE
-request-pipeline-nginx-default-22ee9        0/1     Completed   0          18s
-request-pipeline-easyapp-default-8769b      0/1     Completed   0          40s
-request-pipeline-postgresql-default-c3516   0/1     Completed   0          18s
+configure-pipeline-nginx-default-22ee9        0/1     Completed   0          18s
+configure-pipeline-easyapp-default-8769b      0/1     Completed   0          40s
+configure-pipeline-postgresql-default-c3516   0/1     Completed   0          18s
 ```
 
 Once the Status column reports `Complete`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-Similar to last time, Kratix will store the pipelines outputs (i.e. the desired
+Similar to last time, Kratix will store the Pipeline outputs (i.e. the desired
 state) in the State Store for the Worker cluster, and that will be picked up by
 the GitOps toolkit running on the Worker.
 
@@ -469,7 +467,7 @@ The app is now fully deployed! You can now access it on
 
 ## 🎉 Congratulations
 
-You have installed a Compound Promise and created an instance of the _EasyApp_!
+You have installed a Compound Promise and created an _EasyApp_ Resource!
 
 ✅&nbsp;&nbsp;This tutorial concludes the Introduction to Kratix. <br />
 👉🏾&nbsp;&nbsp;You can go ahead and start the next module to learn [how to write your own

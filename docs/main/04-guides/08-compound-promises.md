@@ -7,30 +7,25 @@ title: Compound Promise
 import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 ```
 <!-- remark-abbr terms -->
-*[WCR]: Worker Cluster Resources
-*[WCRs]: Worker Cluster Resources
+*[Dep]: Dependency
+*[Deps]: Dependencies
 *[CRD]: Custom Resource Definition
-*[CRDs]: Custom Resource Definition
+*[CRDs]: Custom Resource Definitions
 
-Compound Promises are Promises that, in its WCR, contain other Promises. That
-ability allows Platform teams deliver entire stacks on demand, instead of
-simple databases or services.
+Compound Promises are Promises that, in its dependencies, contain other Promises. That ability allows Platform teams deliver entire stacks on demand, instead of simple databases or services.
 
 **In this tutorial, you will**
 
 1. encapsulate multiple Promises into a Compound Promise
-1. request a complete development environment through a Compound Promise
+1. request a complete development environment Resource through a Compound Promise
 
 <PartialPreRequisites />
 
 ## Register the Platform as a Worker
 
-To install a Compound Promises, the first step is to register the Platform cluster itself
-as an available Worker Cluster. That's because the WCR for the Compound Promises are
-Promises themselves, hence need to be scheduled to the Platform cluster.
+To install a Compound Promises, the first step is to register the Platform cluster itself as an available Worker Cluster. That's because the dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the Platform cluster.
 
-Create a new [Cluster document](../reference/clusters/intro) `platform-cluster.yaml` with the
-following contents:
+Create a new [Cluster document](../reference/clusters/intro) platform-cluster.yaml` with the following contents:
 
 ```yaml title="platform-cluster.yaml"
 apiVersion: platform.kratix.io/v1alpha1
@@ -54,9 +49,7 @@ kubectl --context $PLATFORM apply --filename platform-cluster.yaml
 
 ## Install and configure GitOps
 
-For the Platform Cluster to behave like a Worker Cluster, you will need to install the
-GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops`
-script from the Kratix root directory:
+For the Platform Cluster to behave like a Worker Cluster, you will need to install the GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
@@ -71,11 +64,10 @@ You can now install a "Paved Path" Promise:
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-promise.yaml
 ```
 
-This Promise is composed of a Knative and Postgres. Installing the Promise on the Platform
-will have the following side-effects:
+This Promise is composed of a Knative and Postgres. Installing the Promise on the Platform will have the following side-effects:
 
 - Three Promises will be installed in the Platform Cluster: Paved Path, Knative and Postgres.
-- The Knative and Postgres's WCR will be installed on the Worker Cluster.
+- The Knative and Postgres's dependencies will be installed on the Worker Cluster.
 
 To verify the installation was successful, run:
 
@@ -96,26 +88,22 @@ clusterdomainclaims.networking.internal.knative.dev   2022-11-25T12:24:20Z
 ...
 ```
 
-## Send a Resource Request
+## Send a request for a Resource
 
-Platform users can now send Resource Requests for a new "Paved Path". That will create a
-new Knative Serving and a new Postgres database in the Worker Cluster:
+Platform users can now send requests for a new "Paved Path" Resource. That will create a new Knative Serving and a new Postgres database in the Worker Cluster:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-resource-request.yaml
 ```
 
-You can see the pipeline for the Paved Path Promise running, which will in turn trigger
-the Knative and Postgres pipelines:
-
-<!-- TODO: (promising future) check if the pipeline pod names have changed -->
+You can see the Workflow for the Paved Path Promise running, which will in turn trigger the Knative and Postgres Workflows:
 
 ```shell-session
 $ kubectl --context $PLATFORM get pods
 NAME                                                     READY   STATUS      RESTARTS   AGE
-request-pipeline-ha-postgres-promise-default-617a3       0/1     Completed   0          64s
-request-pipeline-knative-serving-promise-default-e0157   0/1     Completed   0          64s
-request-pipeline-paved-path-demo-promise-default-d3a89   0/1     Completed   0          87s
+configure-pipeline-ha-postgres-promise-default-617a3       0/1     Completed   0          64s
+configure-pipeline-knative-serving-promise-default-e0157   0/1     Completed   0          64s
+configure-pipeline-paved-path-demo-promise-default-d3a89   0/1     Completed   0          87s
 ```
 
 Eventually, the resources will be ready to be used:
@@ -133,7 +121,7 @@ knative-serving      default-domain-dl972          0/1     Completed   0        
 ...
 ```
 
-🎉 **Congratulations**: you have installed a Compound Promise and created an instance of the Paved Path!
+🎉 **Congratulations**: you have installed a Compound Promise and requested a Paved Path Resource!
 
 ## A closer look in the Promise
 
@@ -145,7 +133,7 @@ kind: Promise
 metadata:
   name: paved-path-demo-promise
 spec:
-  sheduling:
+  scheduling:
     - target:
         matchLabels:
           environment: platform
@@ -157,12 +145,12 @@ spec:
       metadata:
         name: knative-serving-promise
       spec:
-        sheduling:
+        scheduling:
           - target:
               matchLabels:
                 environment: dev
         dependencies:
-        # remainder of the knative Promise
+        ... # remainder of the knative Promise
     #highlight-start
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
@@ -170,20 +158,18 @@ spec:
       metadata:
         name: ha-postgres-promise
       spec:
-        sheduling:
+        scheduling:
           - target:
               matchLabels:
                 environment: dev
         dependencies:
-        # remainder of the postgres Promise ...
-  # remainder of the paved path Promise...
+        ... # remainder of the postgres Promise
+  ... # remainder of the paved path Promise...
 ```
 
-Since Paved Path Promise WCRs are Promises, and considering that Kratix (and
-its CRDs) is only installed in the Platform Cluster, you need to ensure the WCR is
-applied exclusively to the Platform Cluster.
+Since Paved Path Promise dependencies are Promises, and considering that Kratix and its CRDs are only installed in the Platform Cluster, you need to ensure the dependencies are applied exclusively to the Platform Cluster.
 
-That is controlled by the `scheduling`:
+That is controlled by the `scheduling` key:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -192,7 +178,7 @@ metadata:
   name: paved-path-demo-promise
 spec:
   #highlight-start
-  sheduling:
+  scheduling:
     - target:
         matchLabels:
           environment: platform
@@ -200,12 +186,12 @@ spec:
   dependencies:
     -  # knative Promise
     -  # postgresPromise
-  # remainder of the paved path Promise
+  ... # remainder of the paved path Promise
 ```
 
 The Paved Path Promise `scheduling` is set to target clusters with `matchLabel`
 equal to `environment: platform`. In other words, that is telling Kratix to
-install the sub-Promises into Clusters with a `environment: platform` label.
+install the sub-Promises into Clusters with an `environment: platform` label.
 
 You may have noticed that, when registering the Platform Cluster, the Cluster definition
 included exactly that label. You can verify the applied labels with:
@@ -219,7 +205,7 @@ platform-cluster     1hr    environment=platform
 worker-cluster-1     1hr    environment=dev
 ```
 
-However, the sub-Promises WCR (i.e. the Knative and Postgres WCR) should not be installed
+However, the sub-Promises' dependencies (i.e. the Knative and Postgres dependencies) should not be installed
 in the Platform Cluster, but in the Worker Cluster. When you executed the quick start
 script, it registered the Worker Cluster with a label `environment: dev` (as
 per output above). The `scheduling` field in the sub-Promises are set to target
@@ -231,7 +217,7 @@ kind: Promise
 metadata:
   name: paved-path-demo-promise
 spec:
-  sheduling:
+  scheduling:
     - target:
         matchLabels:
           environment: platform
@@ -242,44 +228,43 @@ spec:
         name: knative-serving-promise
       spec:
         #highlight-start
-        sheduling:
+        scheduling:
           - target:
               matchLabels:
                 environment: dev
         #highlight-end
         dependencies:
-        # remainder of the knative Promise
+        ... # remainder of the knative Promise
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
       metadata:
         name: ha-postgres-promise
       spec:
         #highlight-start
-        sheduling:
+        scheduling:
           - target:
               matchLabels:
                 environment: dev
         #highlight-end
         dependencies:
-        # remainder of the postgres Promise ...
-  # remainder of the paved path Promise...
+        ... # remainder of the postgres Promise ...
+  ... # remainder of the paved path Promise...
 ```
 
 This configuration ensures the Knative CRDs and the Postgres Operator are installed
 exclusively in the Worker Cluster. This is how, when installing the Paved Path Promise,
 Kratix knew it should install the sub-Promises in the Platform Cluster and the
-sub-Promises dependencies in the Worker Cluster.
+sub-Promises' dependencies in the Worker Cluster.
 
-## A closer look in the Pipeline
+## A closer look in the Workflow
 
-When a Resource Request is created, the Paved Path Pipeline is triggered. Usually, the
-output of the pipeline is a set of Kubernetes Resources that need to be created. For
-Compound Promises, that's usually a set of Resource Requests to be applied in the
-Platform itself.
+When a request for a Resource is created, the Paved Path Workflow is triggered. Usually, the
+output of the Workflow is a set of Kubernetes Resources that need to be created. For
+Compound Promises, that's usually a set of requests for other promised Resources to be applied in the Platform itself.
 
 The Paved Path Promise is a very basic example, but you can see that's exactly what the
-pipeline is doing in its
-[Dockerfile](https://github.com/syntasso/kratix/blob/main/samples/paved-path-demo/request-pipeline-image/Dockerfile#L6-L11).
+Workflow Pipeline is doing in its
+[Dockerfile](https://github.com/syntasso/kratix/blob/main/samples/paved-path-demo/configure-pipeline-image/Dockerfile#L6-L11).
 
 ## 🎉 Congratulations
 

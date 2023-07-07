@@ -23,7 +23,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 - [learn what Promises are](#promise-definition)
 - [install your first Kratix Promise](#install-jenkins)
 - [learn about configuring a Worker cluster](#configure-worker)
-- [request an instance of the Promised service](#request-jenkins)
+- [request a Resource from a promised service](#request-jenkins)
 
 Following the [Installing Kratix](installing-kratix) tutorial, you should now
 have a deployment of both Kratix and MinIO running on your Platform cluster.
@@ -80,7 +80,7 @@ provide anything-as-a-Service, and are composed of mainly three pieces:
   intending to run the Promise workload.
 - An API exposing to the user of the Platform the configuration options they
   have when requesting the service provided by the Promise.
-- A series of workflows that need to be executed to fulfill the Promise and create
+- A series of Workflows that need to be executed to fulfil the Promise and create
   the service.
 
 <details>
@@ -123,7 +123,7 @@ And that's it! Promise installed!
 
 Once the Promise is installed, the Platform cluster is extended with a new API:
 the Jenkins Promise API. This API teaches the Platform cluster how to deal with
-requests for Jenkins instances.
+requests for Jenkins.
 
 <details>
 <summary>🤔 How's the Promise API determined?</summary>
@@ -300,7 +300,7 @@ You may notice that the value of the Bucket `endpoint` on the document below is
 set to `172.18.0.2:31337`.
 
 In the previous tutorial you were able to access the server with in-cluster Kubernetes
-DNS. Since Flux now  need to access MinIO _across_ clusters you will neeed to use
+DNS. Since Flux now  need to access MinIO _across_ clusters you will need to use
 an externally available endpoint.
 
 `172.18.0.2` will often be the address of the Platform cluster running on KinD.
@@ -568,9 +568,9 @@ Later in this tutorial you will learn how to make certain Promises available in
 certain clusters based on Promise configurations.
 
 Great! The Jenkins Promise installation is now complete. It is time to switch roles for
-a moment and become the developer requesting a new Jenkins instance.
+a moment and become the developer requesting a new Jenkins Resource.
 
-## Request a Jenkins Instance {#request-jenkins}
+## Request a Resource from a Promised service {#request-jenkins}
 
 As a user of the Platform, you can find out what's available by checking the
 installed Promises:
@@ -585,10 +585,9 @@ NAME      AGE
 jenkins   1h
 ```
 
-To request a Jenkins instance, all you need is to send a new Jenkins Resource
-Request to the Platform.
+To request a Jenkins, all you need is to send a request for a new Jenkins Resource to the Platform.
 
-Create a Jenkins Instance:
+Create a Jenkins Resource:
 
 ```yaml
 cat <<EOF | kubectl --context $PLATFORM apply --filename -
@@ -613,35 +612,34 @@ jenkins.marketplace.kratix.io/example created
 In this example, users are interacting with the API using the `kubectl`
 directly. However, how users of your platform will, it's up to you.
 
-For example, you could have a
-[Backstage](https://www.syntasso.io/post/kratix-and-backstage-a-perfect-pair)
-instance on top of the API to facilitate the creation of services. Similarly,
+For example, you could have [Backstage](https://www.syntasso.io/post/kratix-and-backstage-a-perfect-pair)
+on top of the API to facilitate the creation of services. Similarly,
 you can employ [Compass](https://www.syntasso.io/post/kratix-and-compass) as a
 driving force for your Platform. Kratix can seamlessly integrate with various
 systems such as GitOps Repositories, ticketing systems, or CI/CD tools.
 </details>
 
-When writing the Resource Request, the Platform user will have all the
+When writing a request for a Resource, the Platform user will have all the
 configuration options exposed to them as part of the Promise API, as defined by
 the Platform team. The Jenkins Promise exposes a single
 configuration option: `spec.env` (see the [Jenkins Promise
 documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
-When set to `prod`, the resulting instance will have backups enabled.
+When set to `prod`, the resulting Resources will have backups enabled.
 
-Once the request is created, Kratix will kick-off the Imperative Pipeline of the
-Promise. The Jenkins Promise Pipeline is a very basic pipeline that transforms
-the user's request into a Jenkins instance manifest.
+Once the request is created, Kratix will kick-off the imperative Workflow for the
+Configure. The Jenkins Configure Workflow is a very basic Kratix Pipeline that transforms
+the user's request into a Jenkins manifest.
 
-However, Pipelines can do much more. It is within the Pipeline that you define
+However, Workflows can do much more. It is within the Workflow that you define
 the business processes of your organisation, encapsulating the steps required to
-deliver the promised service on-demand. Through Pipelines, Platform teams have the
+deliver the promised service on-demand. Through Workflows, Platform teams have the
 flexibility to customise the Promise according to their specific business and
-compliance requirements.
+compliance requirements in either simple Kratix Pipelines or other popular pipeline technologies (e.g. Tekton).
 
 
 <figure class="diagram">
   <PipelineDiagram className="large"/>
-  <figcaption>An example multi-stage Pipeline</figcaption>
+  <figcaption>An example multi-stage Kratix Pipeline</figcaption>
 </figure>
 
 For instance, in an organization where all container images must undergo
@@ -649,34 +647,27 @@ vulnerability scanning, you can include a Snyk image in your Promise. Similarly,
 if you wish to receive alerts for specific events, you can include a Slack
 image.
 
-Furthermore, the containers utilised in a pipeline are designed to be reusable.
-This allows Platform teams to encode specific rules once and apply them
-consistently across all services within the platform.
+Furthermore, the stages of a Workflow and within a Kratix Pipeline are designed to be reusable. This allows Platform teams to encode specific rules once and apply them consistently across all services within the platform.
 
-Verify the Jenkins Pipeline execution:
+Verify the Jenkins Workflow execution:
 
 ```bash
 kubectl --context $PLATFORM get pods
 ```
 
-<!-- TODO: (promising future) verify pipeline pod name -->
-
 The above command will give an output similar to:
 ```shell-session
 NAME                                     READY   STATUS      RESTARTS   AGE
-request-pipeline-jenkins-default-c726b   0/1     Completed   0          71s
+configure-pipeline-jenkins-default-c726b   0/1     Completed   0          71s
 ```
 
-Once the pipeline completes, Kratix will write the documents it outputted (i.e.
-the declaration of state) to the directory within the bucket that the Worker
-cluster is watching. You will soon see the Jenkins instance pod starting up on
-the Worker cluster.
+Once the Workflow completes, Kratix will write the documents it outputted (i.e. the declaration of state) to the directory within the bucket that the Worker cluster is watching. You will soon see the requested Jenkins resources starting up on the Worker cluster.
 
 <figure class="diagram">
   <ResourceRequestDiagram className="large"/>
 </figure>
 
-Verify the Jenkins instance is booting up:
+Verify Jenkins is booting up:
 
 ```bash
 kubectl --context $WORKER get pods --watch
@@ -699,7 +690,7 @@ jenkins-operator-7f58798d5c-sr825   1/1     Running   0          1h
 ```
 
 When the `Ready` column reports `1/1` for `jenkins-dev-example`, your Jenkins
-instance is fully deployed and ready to be accessed! Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
+is fully deployed and ready to be accessed! Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
 Go to [http://localhost:30269](http://localhost:30269) and check it out!
@@ -707,7 +698,7 @@ Go to [http://localhost:30269](http://localhost:30269) and check it out!
 :::caution
 
 If you gave your Jenkins a different name, you may need port-forwarding to
-access the running instance:
+access the running Jenkins:
 
 ```shell-session
 kubectl --context $WORKER port-forward pod/jenkins-dev-<NAME> 8080:30269
@@ -729,7 +720,7 @@ kubectl --context $WORKER get secrets --selector app=jenkins-operator -o go-temp
 
 ## Clean up
 
-The next steps of the tutorial will not require on this Jenkins promise. Go ahead
+The next steps of the tutorial will not require on this Jenkins Promise. Go ahead
 and delete the resource to minimise the compute required to run this tutorial.
 
 Delete the Jenkins Promise:
@@ -746,7 +737,7 @@ promise.platform.kratix.io "jenkins" deleted
 The delete command will also cascade-delete all traces of Jenkins from the
 Platform, including the deployed Jenkins on the Worker cluster.
 
-Verify that the Jenkins instance gets deleted:
+Verify that the Jenkins Resource gets deleted:
 
 ```bash
 kubectl --context $WORKER get pods
@@ -765,7 +756,7 @@ To recap the steps you took:
 1. ✅&nbsp;&nbsp;Installed the Jenkins Promise
 1. ✅&nbsp;&nbsp;Created and configured a Worker cluster
 1. ✅&nbsp;&nbsp;Registered the Worker cluster with the Platform
-1. ✅&nbsp;&nbsp;Requested a Jenkins instance
+1. ✅&nbsp;&nbsp;Requested a Jenkins Resource
 
 ## 🎉 &nbsp; Congratulations!
 

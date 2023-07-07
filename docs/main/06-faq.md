@@ -10,16 +10,16 @@ description: Common questions about Kratix and how it fits in the Kubernetes eco
 Kratix is intended to help platform teams deliver platforms in a sustainable way. Products are never "done", so a Platform-as-a-Product is never done. Instead, a platform is an opportunity to continuously learn about the best way to accelerate delivery in your organisation. Day two, three, four, etc. are equally as important as day one.
 
 In the future, Kratix will:
-- Add testing to Promises, so that:
-    - The capability of the platform to deploy promised instances on-demand is continuously asserted, with Service-Level Objective(s) assigned against relevant Service-Level Indicator(s)
-    - The capability of each promised instance to deliver its Service-Level Objective(s) against relevant Service-Level indicator(s) is continuously asserted
-- Converge all deployed resources (cluster or instance) when a Promise is updated
-- Converge individual instance resources when a user's request is updated
+- Add health checks and testing to Promises, so that:
+    - The capability of the platform to deploy promised resources on-demand is continuously asserted, with Service-Level Objective(s) assigned against relevant Service-Level Indicator(s)
+    - The capability of each promised resource to deliver its Service-Level Objective(s) against relevant Service-Level indicator(s) is continuously asserted
+- Converge all deployed resources (dependency or resource) when a Promise is updated
+- Converge individual resources when a user's Resource is updated
 
-### Should the platform team or the application team be responsible for updating the version of a deployed instance? Who should be responsible for storage/network/other configuration?
+### Should the platform team or the application team be responsible for updating the version of a deployed Resource? Who should be responsible for storage/network/other configuration?
 
 The platform team should collaborate with the application teams when building
-Promises. The Promises should encapsulate the contract between the teams&em;the
+Promises. The Promises should encapsulate the contract between the teams; the
 elements that application teams care about should be exposed via the API, and
 the other elements should be configured by the platform team. The responsibility
 for configuration, like storage settings, and lifecycle management, like whether

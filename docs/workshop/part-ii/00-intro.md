@@ -10,4 +10,4 @@ Part II of this workshop focus the structure and design of a Kratix Promise. You
 1. [Deliver a service on each user request](../service-on-demand)
 1. [Extracting shared dependencies](../shared-dependencies)
 1. [Intentionally schedule Promise resources](../schedule-promise)
-1. [Update the status of a Resource Request](../update-status)
+1. [Update the status of a Resource](../update-status)

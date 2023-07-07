@@ -52,19 +52,18 @@ more compelling developer experiences.
 Learn more about how to design and implement an API using Kratix Promises.
 
 1. [Deliver a service on each user request](service-on-demand) <br />
-Learn more about the Promise pipeline and how it can provision an on-demand request.
+Learn more about the Promise Workflows and how it can provision an on-demand Resource.
 
 1. [Extracting shared dependencies](shared-dependencies) <br />
-Learn more about how a Promise can pre-install shared dependencies to make vending
-instances easier and faster.
+Learn more about how a Promise can pre-install shared dependencies to make vending Resources easier and faster.
 
 1. [Intentionally schedule Promise resources](schedule-promise) <br />
-Learn more about how you, as the platform team, can manage where resources are
+Learn more about how you, as the platform team, can manage where Resources are
 installed to manage capacity, security, and other business requirements.
 
-1. [Update the Resource Request status](update-status) <br />
+1. [Update the Resource status](update-status) <br />
 Use what you have learned so far to make one more update to your Promise
-which provides Application Developers context on the status of their Request.
+which provides Application Developers context on the status of their Resource.
 
 ### Conclusion
 

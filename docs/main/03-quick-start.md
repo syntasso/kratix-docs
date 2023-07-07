@@ -10,8 +10,8 @@ import PartialConfigure from '../_partials/installation/_single-cluster-configur
 ```
 
 One of the most powerful features of Kratix is its ability to handle requests for
-resources, and deploy them to a remote specific cluster. However, Kratix also works well
-in a single cluster environment. This quick-start guide will walk you through the steps to
+Resources, and deploy them to a specific remote location, Kubernetes or otherwise. However, Kratix also works well
+in a single Kubernetes cluster environment. This quick-start guide will walk you through the steps to
 install Kratix on a single cluster.
 
 ## Prerequisite: Kubernetes Cluster
@@ -62,14 +62,14 @@ postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
 
 ## 3. Self serve a Postgres
 
-Once the Postgres Operator is up and running, you can request a new Postgres instance with
+Once the Postgres Operator is up and running, you can request a new Postgres Resource with
 the command below:
 
 ```console
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/resource-request.yaml
 ```
 
-You can verify the pipeline pod by running:
+You can verify the Pipeline pod by running:
 
 <!-- TODO: Verify pipeline pod name -->
 
@@ -77,11 +77,11 @@ You can verify the pipeline pod by running:
 $ kubectl get pods
 NAME                                          READY   STATUS      RESTARTS   AGE
 //highlight-next-line
-request-pipeline-postgresql-default-8f012     0/1     Completed   0          72s
+configure-pipeline-postgresql-default-8f012     0/1     Completed   0          72s
 postgres-operator-6c6dbd4459-pbcjp            1/1     Running     0          6m55s
 ```
 
-Eventually, the Postgres instance pods will come up as well:
+Eventually, the Postgres pods will come up as well:
 
 ```shell-session
 $ kubectl get pods
@@ -90,11 +90,11 @@ NAME                                         READY   STATUS      RESTARTS   AGE
 acid-example-postgresql-0                    1/1     Running     0          113s
 //highlight-end
 postgres-operator-6c6dbd4459-pbcjp           1/1     Running     0          6m55s
-request-pipeline-postgresql-default-8f012    0/1     Completed   0          2m17s
+configure-pipeline-postgresql-default-8f012    0/1     Completed   0          2m17s
 ```
 
 
-You are now ready to use your Postgres instance! To validate, you can run:
+You are now ready to use your Postgres Resources! To validate, you can run:
 
 ```
 kubectl exec -it acid-example-postgresql-0 -- sh -c "
@@ -117,4 +117,3 @@ kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main
 You have successfully installed Kratix and used it to deliver Postgres-as-a-Service to
 your platform. Check out our [guides](/docs/category/guides) to learn more about Kratix
 capabilities.
-

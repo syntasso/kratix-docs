@@ -1,11 +1,9 @@
 ---
-description: Guide on how to register a new Worker Cluster with Kratix
-title: Adding a new Worker Cluster
+description: Guide on how to register a new Worker with Kratix
+title: Adding a new Worker
 ---
 
-One of the most powerful features of Kratix is its ability to react when new Kubernetes
-Clusters are added to the platform. By default, any Promise installed in the Platform
-cluster will be automatically installed in the clusters joining the platform.
+One of the most powerful features of Kratix is its ability to react when new Workers are added to the platform. By default, any Promise installed into Kratix will schedule it's dependencies to new clusters joining the platform.
 
 ## Pre-requisites
 
@@ -52,7 +50,7 @@ If your setup is different, update the commands accordingly.
 
 ## Preparing the new Cluster
 
-You will now add a new Cluster to the Platform Cluster and watch Kratix reconciling the
+You will now add a new Cluster to the Platform Cluster and watch Kratix reconcile the
 system. For that, you need to first create the new Kubernetes cluster:
 
 ```bash
@@ -60,7 +58,7 @@ kind create cluster --image kindest/node:v1.24.0 --name worker-cluster-2
 export WORKER_2="kind-worker-cluster-2"
 ```
 
-Next, install the GitOps toolkit and create the necessary GitOps resources. The quickest
+Next, install the GitOps toolkit and create the necessary GitOps resources on the new Worker cluster. The quickest
 way to do that is to run the `./scripts/install-gitops` script from the Kratix root
 directory:
 
@@ -71,7 +69,7 @@ cd /path/to/kratix
 
 ## Registering the Cluster
 
-You can now register your cluster. Create a file called `worker-cluster-2.yaml` with the
+You can now register your cluster with Kratix. Create a file called `worker-cluster-2.yaml` with the
 following contents:
 
 ```yaml title="worker-cluster-2.yaml"
@@ -113,11 +111,15 @@ NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h
 ```
 
-When you request a new Jenkins, the instance will be created in one of the available
-Clusters, in a non-deterministic way.
+When you request a new Jenkins, the Resources will be created in one of the available Clusters, by default this is selected in a non-deterministic way.
 
 For further documentation on Cluster Scheduling, check the [Cluster Reference
 documentation](../reference/clusters/intro)
+
+:::info 
+If you are specifically interested in making a Resource location deterministic, you can check out the [scheduling workloads](../05-reference/04-multicluster-management.md#workloads) reference.
+:::
+
 
 ## 🎉 Congratulations
 

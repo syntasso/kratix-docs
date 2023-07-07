@@ -1,18 +1,18 @@
 ---
 title: Multi-cluster management
 sidebar_label: Multi-cluster management
-description: Learn more about how Kratix schedules Promises and Workloads, and how you can control the scheduling process.
+description: Learn more about how Kratix schedules Promises and Resources, and how you can control the scheduling process.
 ---
 
 One of the most powerful Kratix features is the ability Platform teams have to
-fully control the scheduling of work across Kubernetes Cluster, i.e., to
-determine in which cluster a certain workload should be deployed to.
+fully control the scheduling of work across extensive and diverse infrastructure, i.e., to
+determine in which Kubernetes cluster (or other infrastructure) a certain workload should be deployed to.
 
 In Kratix, scheduling happens in two stages:
 
-1. Determining which Promises are installed in which Clusters ([Scheduling
+1. Determining Clusters should be available to a given Promise ([Scheduling
    Promises](#promises))
-1. Determining where the workloads will run following a Resource Requests ([Scheduling Workloads](#workloads))
+1. Determining where the Resources will run following a request for a Promise Resource ([Scheduling Workloads](#resources))
 
 The following sections in this page document those stages. For hands-on scheduling guides,
 check the [Adding a new Worker Cluster](../guides/scheduling-clusters) and [Compound
@@ -20,9 +20,9 @@ Promise](../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
 
-When a Promise is installed, Kratix will deploy the Promise's dependencies into
+When a Promise is installed, Kratix will deploy the Promise dependencies into
 all Clusters registered with the Platform. When a new Cluster is registered,
-Kratix will also deploy any Promise's dependencies into this new Cluster.
+Kratix will also deploy all Promise dependencies into this new Cluster.
 
 Platform teams can, however, control which Clusters receive which Promises by
 using a combination of Cluster labels and Promise selectors.
@@ -59,7 +59,7 @@ spec:
 
 By setting the `matchLabels` with a `key: value` pair, Platform teams can
 control to which Clusters (i.e. `target`) the Promise's dependencies should be
-scheduled to. `matchLabels` is a _equality-based_ selector, i.e., it will only
+scheduled. `matchLabels` is a _equality-based_ selector. This means it will only
 match Clusters that have keys/values that match. You can add multiple key/value
 pairs to the `matchLabels`, but note that it will only match when the Cluster
 has a matching label for _all_ the selectors.
@@ -81,7 +81,7 @@ spec:
 ```
 
 If a Promise has no `scheduling`, it will be applied to all Clusters. If a
-Cluster has no `labels`, only Promises with no `scheduling` will be applied.
+Cluster has no `labels`, only Promises with no `scheduling` set will be applied.
 
 The table below contains a few examples:
 
@@ -96,24 +96,21 @@ The table below contains a few examples:
 | `env: dev`                  | `env: dev` <br /> `zone:eu` | ⛔️    |
 | _no label_                  | `env: dev`                  | ⛔️    |
 
-## Scheduling Workloads {#workloads}
+## Scheduling Resources {#resources}
 
-When a new Resource Request comes in, Kratix reacts by triggering the
-`grapefruit.gummybear` workflow, as defined in the Promise's `spec.workflows`.
-The output of the pipeline will be then written to the Repository, which will in
-turn be applied to one of the registered Worker Clusters.
+When a new request for a Resource comes in, Kratix reacts by triggering the
+`resource.configure` Workflow, as defined in the Promise `spec.workflows`.
+If the Workflow contains a Kratix Pipeline, the outputs of the Pipeline will then use the labels to identify one matching Kratix Clusters which will be the target Cluster.
 
-By default, Kratix will randomly select a registered Cluster to instantiate the workload.
-If the Promise has `spec.scheduling` set, the workload will be scheduled to a Cluster
-that has matching labels.
+By default, Kratix will randomly select a registered Cluster to schedule the Resource.
+If the Promise has `spec.scheduling` set, the workload can only be scheduled to a Cluster that has matching labels for the Promise.
 
-It is possible to dynamically determine where workloads will go at the Pipeline stage. The
-section below documents the process.
+It is possible to dynamically determine where Resources will go during the Kratix Pipeline. The section below documents the process.
 
 ### Dynamic Scheduling {#pipeline}
 
-Kratix mounts a `metadata` directory at the root of the pipeline's container when
-instantiating the Request Pipeline. At scheduling time, Kratix will look for a
+Kratix mounts a `metadata` directory at the root of the Pipeline's container when
+instantiating the Configure Pipeline. At scheduling time, Kratix will look for a
 `scheduling.yaml` file in that directory with the following format:
 
 ```yaml
@@ -122,14 +119,12 @@ instantiating the Request Pipeline. At scheduling time, Kratix will look for a
       key: value
 ```
 
-Kratix will then **add** those to what is already present in the Promise's
-`spec.scheduling` when filtering Clusters.
+Kratix will then **add** those to what is already present in the Promise
+`spec.scheduling` field when identifying a target Cluster.
 
-That means there's no overwrite of keys. For example, if the Promise defines
+There is no way to overwrite keys. For example, if the Promise defines
 `matchLabels` with `env: dev` and the Pipeline defines it with `env: prod`,
-Kratix will look for Clusters with labels: `env=dev && env=prod` [^1].
-
-[^1]: This will always return empty, since a label `key` can only hold a single value.
+Kratix will only ever look for Clusters with the `env: dev` label.
 
 The table below contains a few examples:
 
@@ -140,10 +135,10 @@ The table below contains a few examples:
 | `env: dev`                   | `env: dev`                   | _no_selector_          | ✅     |
 | `env: dev` <br /> `zone: eu` | `env: dev`                   | `zone: eu`             | ✅     |
 | `env: dev` <br /> `zone: eu` | _no selector_                | `zone: eu`             | ✅     |
-| `env: dev`                   | `env: dev`                   | `env: prod`            | ⛔️    |
-| `env: dev`                   | `env: prod`                  | `env: dev`             | ⛔️    |
-| `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_          | ⛔️    |
-| _no label_                   | _no_selector_                | `env: dev`             | ⛔️    |
+| `env: dev`                   | `env: dev`                   | `env: prod`            | ✅     |
+| `env: dev`                   | `env: prod`                  | `env: dev`             | ⛔️     |
+| `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_          | ⛔️     |
+| _no label_                   | _no_selector_                | `env: dev`             | ⛔️     |
 
 In the event that more than one cluster matches the resulting labels, Kratix
 will randomly select within the available matching registered Clusters. If you
@@ -153,7 +148,7 @@ ever be a single match.
 
 ## Compound Promises
 
-Compound Promises are Promises that, in its Dependencies, contain other
+Compound Promises are Promises that, in their dependencies, contain other
 Promises. That ability allows Platform teams deliver entire stacks on demand,
 instead of simple databases or services.
 

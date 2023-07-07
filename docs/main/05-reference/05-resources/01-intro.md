@@ -1,15 +1,15 @@
 ---
-description: Documentation for the lifecycle of Resource Requests
-title: Promise Resource Requests
+description: Documentation for the lifecycle of Resources
+title: Promise Resources
 sidebar_label: Introduction
 id: intro
 ---
 
-# Resource Requests
+# Requesting a Resource
 
 One of the components of a [Kratix Promise](../promises/intro) is the `api`. `api` sets the contract between the Platform and its users, and it defines what properties the user can configure in the Promised service.
 
-The Resource Request is the document Platform Users write, following the `api` contract, to request instances of the Promised service. Each Promise has its own contract, so each Promise will have its own Resource Request format.
+The request is a document Platform Users write, following the `api` contract, to request Resources from the Promised service. Each Promise has its own contract, so each Promise will have its own format.
 
 Consider a Promise with the following `api`, paying special attention to the highlighted fields:
 
@@ -48,7 +48,7 @@ spec:
 The Schema in this Promise defines, as the contract, two properties under `spec`: a
 string `region` and a integer `storageGB`.
 
-A example Resource Request to get an instance of this Promised service would look like:
+An example request to get a Resource from this Promise would look like:
 
 ```yaml
 # Promise spec.group and versions
@@ -57,7 +57,7 @@ apiVersion: example.promise.syntasso.io/v1
 # Promise spec.names.kind
 kind: someservice
 
-# Name of this Resource Request
+# Name of this Resource
 metadata:
   name: some-name
 
@@ -67,6 +67,6 @@ spec:
   storageGB: 10
 ```
 
-When applied to the Platform Cluster, Kratix will trigger the associated Workflow. For more details on the Workflows, see the [Workflow reference](./workflows).
+When applied to the Platform Cluster, Kratix will trigger the associated Workflows. For more details on the Workflows, see the [Workflow reference](./workflows).
 
-For a in-depth exploration of the Resource Request and Pipelines, check the [Writing a Promise](../../guides/writing-a-promise) and [Enhancing a Promise](../../guides/enhancing-a-promise) guides.
+For a in-depth exploration of requesting a Resource and Kratix Workflows, check the [Writing a Promise](../../guides/writing-a-promise) and [Enhancing a Promise](../../guides/enhancing-a-promise) guides.

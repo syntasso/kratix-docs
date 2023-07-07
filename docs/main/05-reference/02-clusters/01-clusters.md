@@ -5,8 +5,8 @@ sidebar_label: Clusters
 id: intro
 ---
 
-The Kratix Cluster Resource is the representation of a system where workloads
-can be scheduled to, which are usually Kubernetes clusters.
+The Kratix Cluster Custom Resource Definition (CRD) is the representation of a system where workloads
+can be scheduled to. These can be Kubernetes clusters or any other infrastructure that can be deployed to using GitOps.
 See below for the API documentation:
 
 ```yaml
@@ -16,7 +16,7 @@ metadata:
   # The Cluster name is an arbitrary name that represent the cluster in the platform
   name: cluster-name
   # The Cluster labels are arbitrary key/value pairs that can be used for scheduling
-  #   the installation of Promises and the workloads
+  #   the installation of Promises and the Resources
   labels:
     environment: dev
 spec:
@@ -77,3 +77,9 @@ The above configuration would result in the following paths being written to:
 
 The paths should be used when setting up the worker clusters to pull
 down from the `StateStore`.
+
+:::info
+
+The reason for two directories is that GitOps applies require any prerequisite workloads like CRDs to be ready before any dependent workloads are applied. By dividing the two directories you can configure your GitOps tool to manage this for you.
+
+:::

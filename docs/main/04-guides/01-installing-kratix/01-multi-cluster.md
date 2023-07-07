@@ -99,7 +99,7 @@ kind create cluster --image kindest/node:v1.24.0 --name worker
 export WORKER="kind-worker"
 ```
 
-If your are using your own pre-existing cluster, set the `WORKER` environment
+If you are using your own pre-existing cluster, set the `WORKER` environment
 variable to the name of the kubectl context used to communicate to it.
 
 ### Install Flux
@@ -194,4 +194,4 @@ kratix-worker-system   Active   1m
 ...
 ```
 
-🎉   **Congratulations!** Kratix is now installed! Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service workload.
+🎉   **Congratulations!** Kratix is now installed! Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service offering.

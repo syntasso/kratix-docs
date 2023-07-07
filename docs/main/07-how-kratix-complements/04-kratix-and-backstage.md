@@ -36,13 +36,13 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 
 ## How
 
-Integrating Backstage with Kratix is simple. We point Backstage at the Kratix Platform cluster and that's it. Kratix will then build the Backstage views as Promises are loaded into to Kratix, and instances of those Promises are requested by users of the platform.
+Integrating Backstage with Kratix is simple. Point Backstage at the Kratix Platform cluster and that's it. Kratix will then build the Backstage views as Promises are loaded into Kratix, and Resources are requested by users of the platform.
 
 Declarative UIs by default with Kratix:
 
 - The Backstage Catalog is automatically populated when Kratix Promises are applied.
-- Templates for Promises are automatically created when Promises are loaded. Giving consumers of the platform simple, predictable UX to create the instance of the Promises they require. This could be entire paved-path environments, or simply instances of services developers need. See the [Marketplace](https://www.kratix.io/marketplace) our Promises.
-- Due to Kratix's powerful GitOps abstractions, the Backstage configuration data lives outside of Backstage, leaving your Kratix-driven Backstage ephemeral in nature. If your Backstage dies, no problem, redepoly it and your views will be automatically brought back to life by Kratix.
+- Templates for Promises are automatically created when Promises are loaded. Giving consumers of the platform simple, predictable UX to create Resources from the Promises they require. This could be entire paved-path environments, or simply instances of services developers need. See the [Marketplace](https://www.kratix.io/marketplace) our Promises.
+- Due to Kratix's powerful GitOps abstractions, the Backstage configuration data lives outside of Backstage, leaving your Kratix-driven Backstage ephemeral in nature. If your Backstage dies, no problem, redeploy it and your views will be automatically brought back to life by Kratix.
 
 <br />
 <div style={{"text-align":"center"}}>

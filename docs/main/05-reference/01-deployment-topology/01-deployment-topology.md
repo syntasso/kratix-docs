@@ -14,15 +14,15 @@ The cluster where Kratix is installed is the Platform cluster, which is in the c
 
 The Platform contains three important elements:
 
-- **Platform API:** the API for consumers of the platform. In the diagram, the API includes three "internal" CRDs and a number of installed CRDs.
+- **Platform API:** the API for consumers of the platform. In the diagram, the API includes three "internal" APIs and a number of installed APIs.
 - **Promises:** the components authored and/or installed by the platform team to drive the set of services available in the Platform API. See more about [Kratix Promises](./promises/intro).
 - **Clusters:** a registry of Kratix Worker Clusters. See more about [Kratix Clusters](./clusters/intro).
 
 ## GitOps Repository
 
-When a [Kratix Promise](./promises/intro) is installed, or when a new [Resource Request](./resource-requests/intro) comes in to the Platform, Kratix will react by writing documents to the Repository.
+When a [Kratix Promise](./promises/intro) is installed, or when a request for a new [Resource](./resources/intro) comes in to the Platform, Kratix will react by writing workloads to the Repository.
 
-For example, the Repository in EasyEaty's topology is pictured to the right of the Platform cluster. When the _Web App Golden Path_ Promise was installed on the Platform, a set of documents required to fulfil the Promise was written to that Repository.
+For example, the Repository in EasyEaty's topology is pictured to the right of the Platform cluster. When the _Web App Golden Path_ Promise was installed on the Platform, a set of workloads required to fulfil the Promise was written to that Repository.
 
 ## Worker Clusters
 
@@ -30,17 +30,17 @@ Kratix Worker Clusters watch and react to changes in the Repository via a GitOps
 
 For example, in the diagram there are three clusters that are exclusively Worker clusters: _EKS_, _GKE_, and _On Prem / Edge_.
 
-### Kratix Workloads
+### Resources
 
-The primary role for these Worker clusters is to run workloads requested by consumers of the platform.
+The primary role for these Worker clusters is to run Resources requested by consumers of the platform.
 
-For example, the _EKS_ Worker cluster has a number of workloads that were requested by _Team 2_ via the _Web App Golden Path_ Promise: two instances of Jenkins, two instances of PostgreSQL, and three instances of Nginx.
+For example, the _EKS_ Worker cluster has a number of Resources that were requested by _Team 2_ via the _Web App Golden Path_ Promise: two Resources will be created each with an instance of Jenkins, two instance of PostgreSQL, and three instance of Nginx.
 
-### Worker Resources (Promise Dependencies)
+### Promise dependencies
 
-To run these workloads, each Worker cluster also has a set of Worker Resources. These resources are baseline capabilities installed on the Worker cluster at the time the Promise is installed on the Platform, and they represent the software that needs to be running prior to any requested workload.
+To enable these Resources, each Worker cluster also has a set of dependencies installed. These dependencies are baseline capabilities installed on the Worker cluster at the time the Promise is installed on the Platform, and they represent the software that needs to be running prior to any requested Resource.
 
-For example, when the _Web App Golden Path_ Promise was installed on the Platform cluster, one of the Worker Resources that was immediately installed on the _EKS_ Worker cluster was the Jenkins Operator, which is required before a request for an instance of Jenkins can be fulfilled.
+For example, when the _Web App Golden Path_ Promise was installed on the Platform cluster, one of the dependencies that was immediately installed on the _EKS_ Worker cluster was the Jenkins Operator, which is required before a request for a Jenkins Resource can be fulfilled.
 
 ### Platform as a Worker
 
@@ -54,8 +54,6 @@ In order to populate the lower-level offerings in a Platform, Kratix has provide
 
 ## Workflows and Off Cluster Resources
 
-Kratix Promises include a concept called [Workflows](./resource-requests/workflows). The workflows are defined by the Promise author and are executed in the Platform during the Promise lifecycly (for example, when a new instance of the promise is requested). Workflows specify a set of containers that should run to fullfil the lifecycle operation, and they encapsulate a number of organisational requirements.
+Kratix Promises include a concept called [Workflows](./resources/workflows). The Workflows are defined by the Promise author and are executed in the Platform during the Promise lifecycle (for example, when a new Resources is requested from a Promise). Workflows specify a set of actions that should run to fulfil the lifecycle operation, and they encapsulate a number of organisational requirements.
 
-<!-- TODO: (promising future) review text below (GRAPEFRUIT GUMMYBEAR) -->
-
-For example, when _Team 2_ requested the _Web App Golden Path_ Promise, the workflow for new instances was executed and sent notifications via Slack, set up an on-call rota on PagerDuty, and created the appropriate tickets in Zendesk.
+For example, when _Team 2_ requested the _Web App Golden Path_ Promise, the configure resource Workflow was executed and sent notifications via Slack, set up an on-call rota on PagerDuty, and created the appropriate tickets in Zendesk.
