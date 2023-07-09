@@ -218,7 +218,7 @@ From the `kratix` directory, create a new cluster:
 
 ```bash
 kind create cluster --name worker \
-    --image kindest/node:v1.24.0 \
+    --image kindest/node:v1.27.3 \
      --config config/samples/kind-worker-config.yaml
 ```
 

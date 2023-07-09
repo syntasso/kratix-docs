@@ -71,7 +71,7 @@ following command to create the Platform cluster:
 
 ```bash
 kind create cluster --name platform \
-    --image kindest/node:v1.24.0 \
+    --image kindest/node:v1.27.3 \
     --config config/samples/kind-platform-config.yaml
 ```
 
@@ -260,7 +260,7 @@ bucketstatestore.platform.kratix.io/minio-store created
 The StateStore document contains the configuration needed to access the actual
 backing storage.
 
-On the example above, you created a new `BucketStateStore`, since a MinIO bucket 
+On the example above, you created a new `BucketStateStore`, since a MinIO bucket
 has been provisioned for storage, but you could use any other S3-compatible
 storage like Amazon S3 and Google Cloud Storage.
 
