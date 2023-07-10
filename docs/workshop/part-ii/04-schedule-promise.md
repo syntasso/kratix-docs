@@ -124,15 +124,18 @@ able to find a matching cluster to schedule the request:
 ```yaml
 kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
-  --container manager | grep --max-count 1 "no Clusters can be selected for clusterSelector"
+  --container manager | grep --max-count 1 "no Clusters can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
 ```shell-session
 # output formatted for readability
-ERROR   Reconciler error {
-  "Work": {"name":"elastic-cloud-default","namespace":"default"},
-  "error": "no Clusters can be selected for clusterSelector"
+INFO no Clusters can be selected for scheduling
+{
+  "scheduling":
+    {
+      "promise":[{"target":{"matchLabels":{"environment":"dev"}}}]
+    }
 }
 ```
 
@@ -272,14 +275,18 @@ able to find a matching cluster to schedule the request:
 ```yaml
 kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
-  --container manager | tac | grep --max-count 1 "no Clusters can be selected for clusterSelector"
+  --container manager | tac | grep --max-count 1 "no Clusters can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
 ```shell-session
 # output formatted for readability
-INFO no Clusters can be selected for clusterSelector
-{"clusterSelectors": "environment=dev,pvCapacity=large"}
+INFO no Clusters can be selected for scheduling
+{"scheduling":
+  {
+    "promise":[{"target":{"matchLabels":{"environment":"dev"}}}],
+    "resource":[{"target":{"matchLabels":{"pvCapacity":"large"}}}]}
+  }
 ```
 
 Just as with the original `environment` label, Kratix queried what Clusters matched _all_
