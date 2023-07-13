@@ -24,6 +24,9 @@ spec:
       # lifecycle hook for creates/updates/ongoing reconciliation of Resources
       configure:
       - # Pipeline definition
+      # lifecycle hook for deletion of Resources
+      delete:
+      - # Pipeline definition
 ```
 
 To define a Workflow, promise writers can use any technology they want (i.e.
@@ -46,8 +49,12 @@ spec:
   - # ...
 ```
 
-Kratix will run each container in the `spec.containers` list in order, providing
-the following volumes:
+Kratix will run each container in the `spec.containers` list in order,
+providing a set of common volumes. The behaviour of these volumes differ
+slightly for `configure` and `delete`. In order to allow re-use of the same
+image in both `configure` and `delete` Kratix sets the `KRATIX_OPERATION`
+environment variable to `delete`/`configure` depending on what context the
+image is being called in.
 
 ### `/input`
 
@@ -62,17 +69,25 @@ container's `/output` directory.
 This directory is an empty directory provided to the container for writing files
 for future use.
 
-Containers must ensure that the files required in future containers or that need
-to be scheduled are written to this directory at the end of the container's
-execution. In general, containers should copy all files from `/input` to
-`/output` unless the container knows the file is no longer required.
+Containers must ensure that the files required in future containers are written
+to this directory at the end of the container's execution. In general, containers
+should copy all files from `/input` to `/output` unless the container knows the
+file is no longer required.
+
+In the `configure` pipeline any resources that need to be scheduled should also
+be written to this directory at the end of the container's execution.
 
 #### Intermediary containers
-If the container is not the last container its `/output` directory will become the next container's `/input` directory.
+
+If the container is not the last container its `/output` directory will become
+the next container's `/input` directory.
 
 #### Final container
-All files present in `/output` directory of the final container will be written
-to your GitOps repository.
+
+In the `configure` pipeline all files present in `/output` directory of the
+final container will be written to your GitOps repository. In the `delete`
+pipeline no action occurs in the final container as nothing should be scheduled
+as part of `delete`
 
 :::note
 
@@ -85,9 +100,9 @@ This is actively being prioritised so should you require this feature please [re
 
 :::
 
-### `/metadata`
+### `/metadata` (`configure` only)
 
-All containers in the Pipeline have access to this directory.
+All containers in the `configure` Pipeline have access to this directory.
 
 Pipeline containers can control aspects of how Kratix behaves by creating special files in this directory:
    - `scheduling.yaml` can be added to any Promise to

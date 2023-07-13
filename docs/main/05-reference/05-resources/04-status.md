@@ -6,7 +6,7 @@ description: Documentation on how to expose information from the Pipeline to the
 
 # Status
 
-As part of your Kratix Pipeline you can optionally send information about the Resource
+As part of your `configure` Pipeline you can optionally send information about the Resource
 back to the resource requester by writing information to
 `/metadata/status.yaml`. The file can contain arbitrary key values, with the
 `message` key being a special key that is communicated back to the user when
@@ -42,7 +42,13 @@ status:
    dbName: root
 ```
 
-Status provides a simple way to communicate information back to the resource requester. Kratix will automatically inject the required fields for status into the `api`, you do not have to manually add these fields.
+Status provides a simple way to communicate information back to the resource
+requester. Kratix will automatically inject the required fields for status into
+the `api`, you do not have to manually add these fields.
+
+Status can also be used as a method of communicating information back to the
+`delete` pipeline, such as the name of any external resources imperatively
+created in the pipeline that need to be deleted as part of the delete pipeline
 
 ## Conditions
 
