@@ -51,9 +51,9 @@ spec:
 
 Kratix will run each container in the `spec.containers` list in order,
 providing a set of common volumes. The behaviour of these volumes differ
-slightly for `configure` and `delete`. In order to allow re-use of the same
+slightly for `configure` and `delete` (see blow). In order to allow re-use of the same
 image in both `configure` and `delete` Kratix sets the `KRATIX_OPERATION`
-environment variable to `delete`/`configure` depending on what context the
+environment variable to `configure`/`delete` depending on what context the
 image is being called in.
 
 ### `/input`
@@ -75,7 +75,9 @@ should copy all files from `/input` to `/output` unless the container knows the
 file is no longer required.
 
 In the `configure` pipeline any resources that need to be scheduled should also
-be written to this directory at the end of the container's execution.
+be written to this directory at the end of the container's execution. The
+`delete` pipeline can not schedule resources, so `/output` is just used to
+communicate information between containers.
 
 #### Intermediary containers
 
