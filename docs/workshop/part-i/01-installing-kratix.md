@@ -239,13 +239,13 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
 metadata:
   name: minio-store
-  namespace: default
 spec:
   endpoint: minio.kratix-platform-system.svc.cluster.local
   insecure: true
   bucketName: kratix
   secretRef:
     name: minio-credentials
+    namespace: default
 EOF
 ```
 

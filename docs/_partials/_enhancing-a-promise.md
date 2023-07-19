@@ -610,7 +610,6 @@ spec:
           kind: Pipeline
           metadata:
             name: configure-instance
-            namespace: default
           spec:
             containers:
               - name: pipeline-stage-0

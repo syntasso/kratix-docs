@@ -14,7 +14,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
 metadata:
   name: default
-  namespace: default
 spec:
   # Bucket name: required
   bucketName: kratix
@@ -26,8 +25,9 @@ spec:
   path: clusters/
   # Required
   secretRef:
-    # The name of the secret to use to authenticate: required
+    # The name and namespace of the secret to use to authenticate: required
     name: s3-credentials
+    namespace: default
 ```
 
 ## Auth

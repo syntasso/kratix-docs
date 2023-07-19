@@ -82,7 +82,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
   name: elastic-cloud
-  namespace: default
 spec:
   #highlight-start
   scheduling:

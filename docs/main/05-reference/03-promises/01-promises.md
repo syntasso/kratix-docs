@@ -85,7 +85,6 @@ spec:
           kind: Pipeline
           metadata:
             name: configure-resource
-            namespace: default
           spec:
             containers:
               - name: pipeline-stage-0

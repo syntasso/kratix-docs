@@ -41,7 +41,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Pipeline
 metadata:
   name: # name
-  namespace: # namespace
 spec:
   containers:
   - name: # container name

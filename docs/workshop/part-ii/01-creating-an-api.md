@@ -222,7 +222,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
   name: elastic-cloud
-  namespace: default
 spec:
   api:
     apiVersion: apiextensions.k8s.io/v1

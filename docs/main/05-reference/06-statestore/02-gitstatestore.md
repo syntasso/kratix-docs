@@ -13,7 +13,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: GitStateStore
 metadata:
   name: default
-  namespace: default
 spec:
   # The branch to write to: optional, defaults to main
   branch: main
@@ -21,8 +20,9 @@ spec:
   path: clusters/
   # Required
   secretRef:
-    # The name of the secret to use to authenticate: required
+    # The name and namespace of the secret to use to authenticate: required
     name: gitea-credentials
+    namespace: default
   # The address of the git repository. If auth method is basic auth, use `http`/`https` format: required
   url: https://github.com/syntasso/kratix-repo
 ```

@@ -535,7 +535,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
   name: elastic-cloud
-  namespace: default
 spec:
   #highlight-start
   workflows:
@@ -545,7 +544,6 @@ spec:
           kind: Pipeline
           metadata:
             name: resource-configure
-            name: default
           spec:
             containers:
             - name: pipeline-stage-0
@@ -563,7 +561,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
   name: elastic-cloud
-  namespace: default
 spec:
   workflows:
     resource:
@@ -572,7 +569,6 @@ spec:
           kind: Pipeline
           metadata:
             name: resource-configure
-            name: default
           spec:
             containers:
             - name: pipeline-stage-0

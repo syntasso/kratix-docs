@@ -205,7 +205,7 @@ The above command will give an output similar to:
 ```yaml
 # output formatted for readability
 ERROR    Reconciler error {
-  "Work": {"name":"easyapp-default","namespace":"default"},
+  "Work": {"name":"easyapp","namespace":"kratix-platform-system"},
   "error": "no Clusters can be selected for clusterSelector"
 }
 ```

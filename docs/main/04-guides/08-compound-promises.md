@@ -32,7 +32,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Cluster
 metadata:
   name: platform-cluster
-  namespace: default
   labels:
     environment: platform
 spec:

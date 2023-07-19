@@ -181,7 +181,7 @@ The above command will give an output similar to:
 ```shell-session
 # output formatted for readability
 ERROR	Reconciler error {
-    "Work": {"name":"jenkins-default","namespace":"default"},
+    "Work": {"name":"jenkins","namespace":"kratix-platform-system"},
     "error": "no Clusters can be selected for clusterSelector"
 }
 ```
@@ -493,7 +493,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Cluster
 metadata:
    name: worker-cluster
-   namespace: default
    labels:
     environment: dev
 spec:

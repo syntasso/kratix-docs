@@ -443,7 +443,6 @@ spec:
           kind: Pipeline
           metadata:
             name: instance-configure
-            namespace: default
           spec:
             containers:
             - name: create-jenkins-instance

@@ -47,7 +47,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
 metadata:
   name: default
-  namespace: default
 spec:
   path: clusters
   endpoint: s3.amazonaws.com
@@ -55,6 +54,7 @@ spec:
   bucketName: kratix
   secretRef:
     name: aws-credentials
+    namespace: default
 ---
 apiVersion: platform.kratix.io/v1alpha1
 kind: Cluster
