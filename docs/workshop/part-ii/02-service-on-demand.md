@@ -4,6 +4,7 @@ title: Delivering your service on demand
 id: service-on-demand
 slug: ../service-on-demand
 ---
+
 ```mdx-code-block
 import PartialVerifyKratixWithOutPromises from '../../_partials/workshop/_verify-kratix-without-promises.md';
 import PartialCleanup from '../../_partials/_cleanup.md';
@@ -15,16 +16,16 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 <hr />
 
-
 **In this tutorial, you will**
-* [Learn about a Promise Workflows](#what-is-a-workflow)
-* [Write a Docker container to codify the delivery process](#write-docker-container)
-* [Test the Pipeline container](#test-the-pipeline)
-* [Include this container in your Promise Workflow](#add-container-to-workflow)
-* [Install the Promise](#install-promise)
-* [Request an on-demand Resource](#request-resource)
-* [Summary](#summary)
-* [Clean up environment](#cleanup)
+
+- [Learn about a Promise Workflows](#what-is-a-workflow)
+- [Write a Docker container to codify the delivery process](#write-docker-container)
+- [Test the Pipeline container](#test-the-pipeline)
+- [Include this container in your Promise Workflow](#add-container-to-workflow)
+- [Install the Promise](#install-promise)
+- [Request an on-demand Resource](#request-resource)
+- [Summary](#summary)
+- [Clean up environment](#cleanup)
 
 ## What is a Promise Workflow? {#what-is-a-workflow}
 
@@ -42,9 +43,10 @@ The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
 </figure>
 
 In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
-* `/output`: The files in this directory will be scheduled to a matching Kratix Cluster.
-* `/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
-* `metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
+
+- `/kratix/output`: The files in this directory will be scheduled to a matching Kratix Cluster.
+- `/kratix/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
+- `/kratix/metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
 
 This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both scheduling and status will be explored in an upcoming section of this workshop.
 
@@ -65,9 +67,10 @@ While most Workflows will have at least one stage with logic unique to that Prom
 An idempotent Workflow guarantees that running the same command multiple times will result in the same outcome. This is an important feature because they will be auto-reconciled on an on going basis.
 
 Kubernetes controllers reconcile their objects in three scenarios:
-* Object change
-* Controller restart
-* Default cadence
+
+- Object change
+- Controller restart
+- Default cadence
 
 This means that yes, on every request for a Resource the Workflow will run. But also, it will run any time the controller is reset, as well as every 10 hours.
 
@@ -89,6 +92,7 @@ Nouns are most easily described as _things_. A database is a thing, so is a clus
 Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a Workflow step.
 
 Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
+
 </details>
 
 <details>
@@ -106,23 +110,24 @@ Nouns are most easily described as _things_. A database is a thing, so is a clus
 Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a pipeline step.
 
 Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
+
 </details>
 
 <hr />
 
 Now that you understand what you can do in a Workflow and some design principles for writing images, it is time to write your own Workflow to deliver on-demand Elastic Clouds! At the end of this section you will have an API which calls a Workflow and results in declarative files being written to a state store.
 
-
 <!-- TODO: (promising future) "imperative pipeline"? or should be workflow -->
+
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-pipeline-only.svg"
 ```
+
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
   <figcaption>The Promise Workflow allows you to run imperative commands when provisioning an Resource for a user.</figcaption>
 </figure>
-
 
 ## Codify your delivery process in a Container {#write-docker-container}
 
@@ -137,11 +142,12 @@ Defining a Pipeline requires a number of files and scripts. For that reason it i
 
 More specifically, the first two files you will need are:
 
-* `run`: a script containing the code that will be executed when the Workflow runs.
-* `default-config.yaml`: a values document containing configuration options for the  default ElasticSearch and Kibana.
-* `beats-values.yaml`: a values document containing configuration options for when the Data Collection is enabled.
+- `run`: a script containing the code that will be executed when the Workflow runs.
+- `default-config.yaml`: a values document containing configuration options for the default ElasticSearch and Kibana.
+- `beats-values.yaml`: a values document containing configuration options for when the Data Collection is enabled.
 
 To create the subfolder and these two executable files, you can run the following command:
+
 ```bash
 mkdir -p pipeline
 touch pipeline/{run,default-config.yaml,beats-values.yaml}
@@ -157,8 +163,8 @@ script. Paste the contents below in the `pipeline/run` script:
 set -eu -o pipefail
 
 mkdir -p to-deploy
-export name="$(yq eval '.metadata.name' /input/object.yaml)"
-export enableDataCollection="$(yq eval '.spec.enableDataCollection' /input/object.yaml)"
+export name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
+export enableDataCollection="$(yq eval '.spec.enableDataCollection' /kratix/input/object.yaml)"
 
 echo "Downloading CRDS..."
 curl --silent --location --output to-deploy/elastic-crds.yaml \
@@ -192,8 +198,8 @@ find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'select(.metadata
 echo "Removing enterprise annotation..."
 find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'del(.metadata.annotations["eck.k8s.elastic.co/license"])' {} \;
 
-echo "Copying files to /output..."
-find /pipeline/to-deploy -name \*.yaml -exec cp {} /output \;
+echo "Copying files to /kratix/output..."
+find /pipeline/to-deploy -name \*.yaml -exec cp {} /kratix/output \;
 
 echo "Done"
 ```
@@ -221,7 +227,7 @@ eck-kibana:
       service:
         spec:
           type: NodePort
-          ports: [{nodePort: NODEPORT, port: 5601, name: http}]
+          ports: [{ nodePort: NODEPORT, port: 5601, name: http }]
 ```
 
 Next, populate the `beats-values.yaml` document. Paste the following into the
@@ -295,9 +301,10 @@ Take a look at the file you have just created and see how the principles and str
 
 On line 11 and 15 the script is downloading a specific version of ECK rather than using a mutable tag like `latest`. This means that no matter how frequently this image runs, it will always generate the same output.
 
-In addition, on line 34 the files that should be deployed to the cluster are copied to `/output`. You may wonder why these files were not downloaded and created directly to the `output` directory. This is an good practice that allows you to use a temporary directory to download and possibly manipulate files before finalising them in the `output` directory.
+In addition, on line 34 the files that should be deployed to the cluster are copied to `/kratix/output`. You may wonder why these files were not downloaded and created directly to the `output` directory. This is an good practice that allows you to use a temporary directory to download and possibly manipulate files before finalising them in the `output` directory.
 
 Finally, you can see that on lines 6 and 7 the script is capturing values from the Resource definition and using those values to customise the outputs. Specifically, it is using the Resource name to make sure that the resources have unique names, and using the user provided API value to decide on line 45 if Beats should be installed.
+
 </details>
 
 Your shell script is nearly testable as is. However one complication is the manipulation of the root file system. Therefore, the next step will be to package this script into a Dockerfile which will enable testing and also make it ready for use in your Kratix Pipeline.
@@ -317,7 +324,6 @@ To create your Dockerfile in the `pipeline` directory run the following command:
 ```bash
 touch pipeline/Dockerfile
 ```
-
 
 Next, paste the contents below into the newly created `pipeline/Dockerfile`:
 
@@ -352,15 +358,13 @@ At this stage, your `elastic-cloud-promise` directory should look like this:
 └── resource-request.yaml
 ```
 
-
 <details>
 <summary>🤔 How does the Dockerfile work?</summary>
 
 Take a look at the created file and you can see on line 1 that this is an Alpine
 Linux container that requires `bash`, `curl` and `yq` to be installed on line 4.
 This allows you to install Helm on line 5 before calling your `run` script on
-each run via the `CMD` declaration on line 14 after adding to the image on line
-9.
+each run via the `CMD` declaration on line 14 after adding to the image on line 9.
 
 </details>
 
@@ -369,11 +373,12 @@ each run via the `CMD` declaration on line 14 after adding to the image on line
 Now that the script is packaged as a Dockerfile, you are able to run the script without impacting your local root directory.
 
 In order run a test you will need to:
-* Mimic the `/output` directory locally
-* Provide the expected input files (the Resource definition)
-* Build the image
-* Run the container
-* Validate the files in the `output` directory
+
+- Mimic the `/kratix/output` directory locally
+- Provide the expected input files (the Resource definition)
+- Build the image
+- Run the container
+- Validate the files in the `output` directory
 
 Start by creating the files and test structure:
 
@@ -385,7 +390,7 @@ As an example input, copy the Resource definition as `object.yaml` into the `inp
 directory:
 
 ```bash
-cp resource-request.yaml test/input/object.yaml
+cp resource-request.yaml test/kratix/input/object.yaml
 ```
 
 At this stage, your directory structure should look like this:
@@ -443,20 +448,20 @@ Paste the following in `scripts/test-pipeline`
 
 scriptsdir=$(cd "$(dirname "$0")"; pwd)
 testdir=$(cd "$(dirname "$0")"/../test; pwd)
-inputDir="$testdir/input"
-outputDir="$testdir/output"
-metadataDir="$testdir/metadata"
+inputDir="$testdir/kratix/input"
+outputDir="$testdir/kratix/output"
+metadataDir="$testdir/kratix/metadata"
 
 $scriptsdir/build-pipeline
 rm $outputDir/*
 
-docker run --rm --volume ${outputDir}:/output --volume ${inputDir}:/input --volume ${metadataDir}:/metadata kratix-workshop/elastic-pipeline:dev
+docker run --rm --volume ${outputDir}:/kratix/output --volume ${inputDir}:/kratix/input --volume ${metadataDir}:/kratix/metadata kratix-workshop/elastic-pipeline:dev
 ```
 
 These scripts do the following:
 
-* `build-pipeline` codifies the dev tag for the image and how to build it. It will also load the container image on the KinD cluster.
-* `test-pipeline` calls build-pipeline and also runs the image, allowing you to verify the created files in the `test/output` directory.
+- `build-pipeline` codifies the dev tag for the image and how to build it. It will also load the container image on the KinD cluster.
+- `test-pipeline` calls build-pipeline and also runs the image, allowing you to verify the created files in the `test/kratix/output` directory.
 
 At this stage, your directory structure should look like this:
 
@@ -488,7 +493,7 @@ To execute the test, run the script with the following command:
 ```
 
 Which should build and run the image. Once the execution completes,
-verify the `test/output` directory. You should see the following files:
+verify the `test/kratix/output` directory. You should see the following files:
 
 ```bash
 📂 elastic-cloud-promise
@@ -506,7 +511,6 @@ verify the `test/output` directory. You should see the following files:
 
 You can take a look at the files and verify their contents. If everything looks
 good, your image is ready to be included in your Promise.
-
 
 :::tip Testing Pipeline images
 
@@ -571,8 +575,8 @@ spec:
             name: resource-configure
           spec:
             containers:
-            - name: pipeline-stage-0
-              image: kratix-workshop/elastic-pipeline:dev
+              - name: pipeline-stage-0
+                image: kratix-workshop/elastic-pipeline:dev
   api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
@@ -585,20 +589,20 @@ spec:
         plural: elastic-clouds
       scope: Namespaced
       versions:
-      - name: v1alpha1
-        served: true
-        storage: true
-        schema:
-          openAPIV3Schema:
-            type: object
-            properties:
-              spec:
-                type: object
-                properties:
-                  enableDataCollection:
-                    type: boolean
-                    default: false
-                    description: |
+        - name: v1alpha1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  properties:
+                    enableDataCollection:
+                      type: boolean
+                      default: false
+                      description: |
                         If enabled, you will receive tools for
                         metric, log, and trace collection that
                         can be used to populate the elastic
@@ -622,11 +626,13 @@ kubectl --context $PLATFORM create --filename promise.yaml
 ```
 
 To validate the Promise has been installed, you can list all Promises by running:
+
 ```bash
 kubectl --context kind-platform get promises
 ```
 
 Your output will show the `elastic-cloud` Promise:
+
 ```shell-session
 NAME            AGE
 elastic-cloud   10s
@@ -641,6 +647,7 @@ The request will result in the pipeline's output being installed on the worker c
 ```mdx-code-block
 import PipelineDiagram from "/img/docs/workshop/install-a-promise-pipeline.svg"
 ```
+
 <figure class="diagram">
   <PipelineDiagram className="large"/>
   <figcaption>An example multi-stage Pipeline</figcaption>
@@ -655,11 +662,13 @@ kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```
 
 You can once again see this request by listing all the request for elastic clouds using the following command:
+
 ```bash
 kubectl --context $PLATFORM get elastic-cloud
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME      STATUS
 example   Pending
@@ -670,11 +679,13 @@ As an application engineer, you can see the Status as either `Pending` meaning t
 ### Verify the pipeline
 
 As a platform engineer you can continue on to verify some of the processes behind the scenes. First of all, you can verify that the pipeline has been triggered by the request for a Resource. To see the pod run:
+
 ```bash
 kubectl --context $PLATFORM get pods --show-labels
 ```
 
 The output should look something like this:
+
 ```shell-session
 NAME                                           READY   STATUS      RESTARTS   AGE     LABELS
 configure-pipeline-elastic-cloud-default-33029   0/1     Completed   0          1m   kratix-promise-id=elastic-cloud-default...
@@ -683,6 +694,7 @@ configure-pipeline-elastic-cloud-default-33029   0/1     Completed   0          
 Within this pod there will be a number of containers including Kratix utility actions and the list of images you provided in the Promise.
 
 To see the list of these containers in order of execution you can run:
+
 ```bash
 kubectl --context $PLATFORM \
   get pods \
@@ -691,6 +703,7 @@ kubectl --context $PLATFORM \
 ```
 
 Each container is listed in a row, in order that they occur so you should see:
+
 ```shell-session
 reader
 pipeline-stage-0
@@ -699,10 +712,11 @@ status-writer
 ```
 
 While you only provided a single image, you can see that there are four listed. Each has a job as follows:
-* `reader` makes sure that the Resource definition is available to the pipeline
-* `pipeline-stage-0` the container name you specified in the Kratix Pipeline
-* `work-writer` schedules the files in the `output` directory based on the labels provided
-* `status-writer` updates the Resource status
+
+- `reader` makes sure that the Resource definition is available to the pipeline
+- `pipeline-stage-0` the container name you specified in the Kratix Pipeline
+- `work-writer` schedules the files in the `output` directory based on the labels provided
+- `status-writer` updates the Resource status
 
 The most interesting container for you will be the one you created, the `pipeline-stage-0` container. To see the logs from this specific container you can run:
 
@@ -713,6 +727,7 @@ kubectl --context $PLATFORM logs \
 ```
 
 The logs will look something like this:
+
 ```shell-session
 Downloading Operator...
 Generate ECK requests...
@@ -722,7 +737,7 @@ wrote to-deploy/eck-stack/charts/eck-kibana/templates/kibana.yaml
 
 Adding namespaces to all helm output files...
 Removing enterprise annotation...
-Copying files to /output...
+Copying files to /kratix/output...
 Done
 ```
 
@@ -737,17 +752,20 @@ kubectl --context $WORKER get pods -n elastic-system
 ```
 
 With the following output:
+
 ```shell-session
 NAME                 READY   STATUS    RESTARTS   AGE
 elastic-operator-0   1/1     Running   0          1m
 ```
 
 With all the necessary CRDs installed:
+
 ```bash
 kubectl --context $WORKER get crds | grep elastic
 ```
 
 which will result in something like:
+
 ```shell-session
 agents.agent.k8s.elastic.co                            2023-01-01T12:00:00Z
 apmservers.apm.k8s.elastic.co                          2023-01-01T12:00:00Z
@@ -762,12 +780,14 @@ stackconfigpolicies.stackconfigpolicy.k8s.elastic.co   2023-01-01T12:00:00Z
 ```
 
 Finally, you will want to see the provisioned Resource by running:
+
 ```bash
 kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to (it may take a while for the
 pods to be ready):
+
 ```shell-session
 NAME                                     READY   STATUS    RESTARTS   AGE
 example-es-default-0                     1/1     Running   0          5m
@@ -798,7 +818,6 @@ If you gave your ECK Resource a different name, you may need port-forwarding to 
 kubectl --context $WORKER port-forward deploy/NAME-kb 8080:30269
 :::
 
-
 ### Trying to request a second resource
 
 The power of Kratix is the scalability of self-service, on-demand Resources.
@@ -806,6 +825,7 @@ Therefore, it is expected that any Promise will have more than one request for R
 
 To see how the current Promise responds to a second request, you will need to
 make a second request with the a new name:
+
 ```bash
 cat resource-request.yaml | \
   sed 's/name: example/name: second-request/' | \
@@ -813,11 +833,13 @@ cat resource-request.yaml | \
 ```
 
 Once again, you can verify this request by listing elastic-clouds:
+
 ```bash
 kubectl --context $PLATFORM get elastic-clouds
 ```
 
 Which should now show a second Resource in the list:
+
 ```shell-session
 NAME             STATUS
 example          Resource requested
@@ -825,25 +847,30 @@ second-request   Resource requested
 ```
 
 You can also see that a second pipeline has run by checking the pods:
+
 ```bash
 kubectl --context $PLATFORM get pods
 ```
 
 However, when you go to check the status on the worker cluster, you will not see a second elastic cloud Resource:
+
 ```bash
 kubectl --context $WORKER get pods
 ```
 
 This is because our pipeline is not outputting resources that can be applied to the same cluster multiple times. Our pipeline outputs two sets of resources:
+
 - The operator and its CRDs
 - The request to the operator (helm output)
 
 Operators are only designed to be installed once per cluster, because each run of the pipeline is outputting we are getting a failure were the resources we are trying to schedule to the cluster aren't compatible. Take a look at the feedback our GitOps reconciler is giving back:
+
 ```bash
 kubectl --context $WORKER get kustomizations -n flux-system
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME                        AGE     READY   STATUS
 kratix-workload-crds        9m15s   False   kustomize build failed: accumulating resources: accumulation err='merging resources from './00-default-elastic-cloud-default-default-second-request-crds.yaml': may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]': must build at directory: '/tmp/kustomization-1131766306/default/worker-cluster-1/crds/00-default-elastic-cloud-default-default-second-request-crds.yaml': file is not directory
@@ -851,11 +878,13 @@ kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workl
 ```
 
 The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out dependencies from requests.
+
 ## Summary {#summary}
 
 And with that, you have transformed Elastic Cloud into an on-demand service!
 
 To recap the steps you took:
+
 1. ✅&nbsp;&nbsp;Codified the steps to provision an ECK Resource
 1. ✅&nbsp;&nbsp;Packaged this script into a Docker container
 1. ✅&nbsp;&nbsp;Validated the containers behaviour with a reusable test script
@@ -868,5 +897,6 @@ To recap the steps you took:
 <PartialCleanup />
 
 ## 🎉 &nbsp; Congratulations!
+
 ✅&nbsp;&nbsp;Your Promise can deliver on-demand services. <br />
 👉🏾&nbsp;&nbsp;Next you will [Extract shared dependencies](shared-dependencies).

@@ -1,7 +1,8 @@
-import PartialCleanupAllPromises from './_cleanup.md';
+import PartialCleanupAllPromises from './\_cleanup.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
 **In this tutorial, you will**
+
 1. experience the power of leveraging customised Kratix Promises
 1. gain confidence with the components of a Promise
 1. enhance an sample Postgres Promise
@@ -42,7 +43,6 @@ For the purposes of this exercise, you know that all of the underlying functiona
 
 _In this guide, you only need create a new Postgres Promise that creates Postgres Resources with a `costCentre` label._
 
-
 **The steps:**
 
 1. [Get a base Promise](#base-promise)
@@ -51,7 +51,6 @@ _In this guide, you only need create a new Postgres Promise that creates Postgre
 1. [Change the Promise so that _the Workflow_ knows how to add the user's `costCentre` to the request for a Resource](#workflow)
 1. [Install the modified Promise on your platform](#install-promise)
 1. [Check it works: make a request to your platform for a Postgres Resource](#verify-resource)
-
 
 ### Step one: Get a base Promise {#base-promise}
 
@@ -62,6 +61,7 @@ git clone https://github.com/syntasso/promise-postgresql.git
 ```
 
 Take a look
+
 ```console
 cd promise-postgresql
 ls
@@ -90,12 +90,12 @@ You should see something a structure similar to the one below:
       └── README.md
 ```
 
-
 You should see the `promise.yaml` file. This is the Promise definition
 that you'll modify and install on your platform. Ignore everything else in the
 folder for now.
 
 ### Step two: `api` {#api}
+
 > Change the Promise so that _the user who wants a Postgres_ knows they need to include their `costCentre` name when they make their request to the platform
 
 #### About `api`
@@ -103,9 +103,9 @@ folder for now.
 <!-- TODO: (promising-future) update image -->
 
 <img
-  align="right"
-  src={useBaseUrl('/img/docs/api.png')}
-  alt="screenshot of a YAML file, highlighting the presence of the api key"
+align="right"
+src={useBaseUrl('/img/docs/api.png')}
+alt="screenshot of a YAML file, highlighting the presence of the api key"
 />
 
 `api` is the API exposed to the users of the [Promise](writing-a-promise).
@@ -125,12 +125,12 @@ costCentre:
   pattern: "^[a-zA-Z0-9_.-]*$"
   type: string
 ```
+
 From the top of the file, navigate to
 
 `spec` > `api` > `spec` > `versions[0]` > `schema` > <br /> `openAPIV3Schema` > `properties` > `spec` > `properties`
 
 Here, add your `costCentre` YAML from above as a sibling to the existing `dbName` property.
-
 
 <details>
   <summary>👀&nbsp;&nbsp;Click here to view a final version of the extended <code>api</code> which should be indented so as to nest under the <code>spec</code> header</summary>
@@ -149,38 +149,39 @@ api:
       singular: postgresql
     scope: Namespaced
     versions:
-    - name: v1alpha1
-      schema:
-        openAPIV3Schema:
-          properties:
-            spec:
-              properties:
-                #highlight-start
-                costCentre:
-                  pattern: "^[a-zA-Z0-9_.-]*$"
-                  type: string
-                #highlight-end
-                dbName:
-                  default: postgres
-                  description: |
-                    Database name. A database will be created with this name. The owner of the database will be the teamId.
-                  type: string
-                env:
-                  default: dev
-                  description: |
-                    Configures and deploys this PostgreSQL with environment specific configuration. Prod PostgreSQL are configured with backups and more resources.
-                  pattern: ^(dev|prod)$
-                  type: string
-                teamId:
-                  default: acid
-                  description: |
-                    Team ID. A superuser role will be created with this name.
-                  type: string
-              type: object
-          type: object
-      served: true
-      storage: true
+      - name: v1alpha1
+        schema:
+          openAPIV3Schema:
+            properties:
+              spec:
+                properties:
+                  #highlight-start
+                  costCentre:
+                    pattern: "^[a-zA-Z0-9_.-]*$"
+                    type: string
+                  #highlight-end
+                  dbName:
+                    default: postgres
+                    description: |
+                      Database name. A database will be created with this name. The owner of the database will be the teamId.
+                    type: string
+                  env:
+                    default: dev
+                    description: |
+                      Configures and deploys this PostgreSQL with environment specific configuration. Prod PostgreSQL are configured with backups and more resources.
+                    pattern: ^(dev|prod)$
+                    type: string
+                  teamId:
+                    default: acid
+                    description: |
+                      Team ID. A superuser role will be created with this name.
+                    type: string
+                type: object
+            type: object
+        served: true
+        storage: true
 ```
+
 </details>
 
 ### Step three: `dependencies` {#dependencies}
@@ -190,22 +191,24 @@ api:
 #### About `dependencies`
 
 <img
-  align="right"
-  src={useBaseUrl('/img/docs/dependencies.png')}
-  alt="screenshot of a YAML file, highlighting the presence of the dependencies key"
+align="right"
+src={useBaseUrl('/img/docs/dependencies.png')}
+alt="screenshot of a YAML file, highlighting the presence of the dependencies key"
 />
 
 `dependencies` is the description of all of the Kubernetes resources required to create a promised Resource, such as CRDs, Operators and Deployments.
 
 In the Promise definition, you divide resources based on the idea of _prerequisite_ and _per-resource_ items. Prerequisite resources are resources that we create before any application team requests a Resource. This can be helpful for two scenarios:
+
 1. Any CRDs or dependencies are ready when an Resource is requested which speeds up response time to application teams.
 1. Resources that can be shared across Resources are only deployed once. This can reduce load on the cluster, and it can also allow delivering a Resource as a portion of an existing Resource (e.g. you could provide a whole database instance on each request, or you could provide a database within an existing instance on each request)
 
 The `dependencies` section of the Kratix Promise defines the _prerequisite capabilities_.
 
 These capabilities are:
-* created once per cluster.
-* complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
+
+- created once per cluster.
+- complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
 
 For the Postgres Promise you're defining, the only cluster resources (prerequisite capabilities) you need are conveniently packaged in a [Kubernetes Operator](https://github.com/zalando/postgres-operator) that is maintained by Zalando. The Operator turns the complexities of configuring Postgres into a manageable configuration format.
 
@@ -214,7 +217,6 @@ For the Postgres Promise you're defining, the only cluster resources (prerequisi
 To make sure all Postgres Resources includes `costCentre`, you need to make the Operator aware of the label.
 
 To ensure Zalando's Postgres Operator is aware of the label, you need to add configuration when installing the Operator. The configuration the Operator needs will be under a new key: [`inherited_labels`](https://github.com/zalando/postgres-operator/blob/master/docs/reference/operator_parameters.md#kubernetes-resources?:=inherited_labels).
-
 
 :::info
 
@@ -254,7 +256,7 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
       connection_pooler_schema: pooler
       connection_pooler_user: pooler
     crd_categories:
-    - all
+      - all
     debug:
       debug_logging: true
       enable_database_access: true
@@ -284,11 +286,11 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
       pod_role_label: spilo-role
       pod_service_account_name: postgres-pod
       pod_terminate_grace_period: 5m
-      secret_name_template: '{username}.{cluster}.credentials.{tprkind}.{tprgroup}'
+      secret_name_template: "{username}.{cluster}.credentials.{tprkind}.{tprgroup}"
       spilo_allow_privilege_escalation: true
       spilo_privileged: false
       storage_resize_mode: pvc
-      watched_namespace: '*'
+      watched_namespace: "*"
     load_balancer:
       db_hosted_zone: db.example.com
       enable_master_load_balancer: false
@@ -296,8 +298,8 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
       enable_replica_load_balancer: false
       enable_replica_pooler_load_balancer: false
       external_traffic_policy: Cluster
-      master_dns_name_format: '{cluster}.{team}.{hostedzone}'
-      replica_dns_name_format: '{cluster}-repl.{team}.{hostedzone}'
+      master_dns_name_format: "{cluster}.{team}.{hostedzone}"
+      replica_dns_name_format: "{cluster}-repl.{team}.{hostedzone}"
     logging_rest_api:
       api_port: 8080
       cluster_history_entries: 1000
@@ -338,10 +340,10 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
       enable_teams_api: false
       pam_role_name: zalandos
       postgres_superuser_teams:
-      - postgres_superusers
+        - postgres_superusers
       protected_role_names:
-      - admin
-      - cron_admin
+        - admin
+        - cron_admin
       role_deletion_suffix: _deleted
       team_admin_role: admin
       team_api_role_configuration:
@@ -372,6 +374,7 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
     name: postgres-operator
     namespace: default
 ```
+
 </details>
 
 ### Step four: `workflows` {#workflows}
@@ -383,18 +386,18 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
 <!-- TODO: (promising future) update diagram -->
 
 <img
-  align="right"
-  src={useBaseUrl('img/docs/xaasRequestPipeline.png')}
-  alt="screenshot of a YAML file, highlighting the presence of the Workflow key"
+align="right"
+src={useBaseUrl('img/docs/xaasRequestPipeline.png')}
+alt="screenshot of a YAML file, highlighting the presence of the Workflow key"
 />
 
 `workflows.resource.configure` contains a Kratix Pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
 
 Conceptually, a configure Pipeline is a sequential set of steps that transforms an input value to generate an output value. There are three parts to the PostgreSQL Pipeline.
 
-* `resources/minimal-postgres-manifest.yaml`
-* `execute-pipeline.sh`
-* `Dockerfile`
+- `resources/minimal-postgres-manifest.yaml`
+- `execute-pipeline.sh`
+- `Dockerfile`
 
 <br />
 
@@ -427,6 +430,7 @@ metadata:
   labels:
     costCentre: TBD
 ```
+
 </details>
 
 #### Update the `execute-pipeline.sh` to add in the user's value
@@ -441,14 +445,15 @@ user-provided values to the output document. You can do the same to process the
 user's `costCentre`.
 
 In the `execute-pipeline.sh`
+
 1. Export another environment variable to store the value
-    ```bash
-    export COST_CENTRE=$(yq eval '.spec.costCentre' /input/object.yaml)
-    ```
+   ```bash
+   export COST_CENTRE=$(yq eval '.spec.costCentre' /kratix/input/object.yaml)
+   ```
 1. Add a new line for `yq` process the label replacement
-    ```bash
-    .metadata.labels.costCentre = env(COST_CENTRE) |
-    ```
+   ```bash
+   .metadata.labels.costCentre = env(COST_CENTRE) |
+   ```
 
 <details>
   <summary>👀&nbsp;&nbsp;Click here to view an example of the final script</summary>
@@ -461,11 +466,11 @@ set -x
 base_instance="/tmp/transfer/minimal-postgres-manifest.yaml"
 
 # Read current values from the provided request
-name="$(yq eval '.metadata.name' /input/object.yaml)"
+name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 
-env_type="$(yq eval '.spec.env // "dev"' /input/object.yaml)"
-team="$(yq eval '.spec.teamId // "acid"' /input/object.yaml)"
-dbname="$(yq eval '.spec.dbName // "postgres"' /input/object.yaml)"
+env_type="$(yq eval '.spec.env // "dev"' /kratix/input/object.yaml)"
+team="$(yq eval '.spec.teamId // "acid"' /kratix/input/object.yaml)"
+dbname="$(yq eval '.spec.dbName // "postgres"' /kratix/input/object.yaml)"
 
 instance_name="${team}-${name}-postgresql"
 
@@ -479,7 +484,7 @@ if [ $env_type = "prod" ]; then
 fi
 
 #highlight-next-line
-export COST_CENTRE=$(yq eval '.spec.costCentre' /input/object.yaml)
+export COST_CENTRE=$(yq eval '.spec.costCentre' /kratix/input/object.yaml)
 
 # Replace defaults with user provided values
 cat ${base_instance} |
@@ -495,8 +500,9 @@ cat ${base_instance} |
     .spec.users = {\"${team}\": [\"superuser\", \"createdb\"]} |
     .spec.databases = {\"$dbname\": \"$team\"} |
     del(.spec.preparedDatabases)
-  " - > /output/postgres-instance.yaml
+  " - > /kratix/output/postgres-instance.yaml
 ```
+
 </details>
 
 #### Test the pipeline locally
@@ -530,7 +536,7 @@ Now test the pipeline by doing a Docker build and run. _Check that, per the step
 
 ```console
 docker build . --tag kratix-workshop/postgres-configure-pipeline:dev
-docker run -v ${PWD}/input:/input -v ${PWD}/output:/output kratix-workshop/postgres-configure-pipeline:dev
+docker run -v ${PWD}/kratix/input:/kratix/input -v ${PWD}/kratix/output:/kratix/output kratix-workshop/postgres-configure-pipeline:dev
 ```
 
 Now you can validate the `output/postgres-instance.yaml` file.
@@ -540,7 +546,7 @@ It should be the base manifest with all the custom values inserted and look like
 <details>
     <summary>👀&nbsp;&nbsp;Click here to view an example of expected output YAML</summary>
 
-```yaml jsx title="expected promise-postgresql/internal/configure-pipeline/output/postgres-instance.yaml"
+```yaml jsx title="expected promise-postgresql/internal/configure-pipeline/kratix/output/postgres-instance.yaml"
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
@@ -562,6 +568,7 @@ spec:
     version: "15"
   enableLogicalBackup: false
 ```
+
 </details>
 
 #### Give the platform access to your image
@@ -618,9 +625,11 @@ spec:
   dependencies:
   # ...
 ```
+
 </details>
 
 ### Step five: Install {#install-promise}
+
 > Install the modified Promise on your platform
 
 You can now install your enhanced Postgres Promise on your platform. Make sure you're in the `promise-postgresql/` directory.
@@ -628,15 +637,19 @@ You can now install your enhanced Postgres Promise on your platform. Make sure y
 ```console
 kubectl --context $PLATFORM apply --filename promise.yaml
 ```
+
 <br />
 
 Check that your Promise's resource is available.
+
 ```console
 kubectl --context $PLATFORM get crds
 ```
+
 <br />
 
 You should see something similar to
+
 ```console
 NAME                                     CREATED AT
 clusters.platform.kratix.io              2022-08-09T14:35:54Z
@@ -646,6 +659,7 @@ promises.platform.kratix.io              2022-08-09T14:35:54Z
 workplacements.platform.kratix.io        2022-08-09T14:35:54Z
 works.platform.kratix.io                 2022-08-09T14:35:55Z
 ```
+
 <br />
 
 <p>Check that the `dependencies` have been installed on the
@@ -662,27 +676,30 @@ an indication that the Operator is ready to provision a new Postgres.
 ```console
 kubectl --context $WORKER --namespace default get pods
 ```
+
 <br />
 
 You should see something similar to
+
 ```console
 NAME                                 READY   STATUS    RESTARTS   AGE
 postgres-operator-6c6dbd4459-hcsg2   1/1     Running   0          1m
 ```
+
 <br />
 
 You have successfully released a new platform capability! Your users can request a Postgres Resource, and that Postgres will include their `costCentre`.
 
-
 ### Step six: Verify {#verify-resource}
-> Check it works: make a request to your platform for a  Postgres Resource
+
+> Check it works: make a request to your platform for a Postgres Resource
 
 #### Verifying your Kratix Promise can be fulfilled
 
 Switching hats to test your release, now act as one of your users to make sure the Promise creates working Resource.
 
 You need to create a request for a Resource, which is a valid Kubernetes
-resource. Like all Kubernetes resources, this  must include all [required
+resource. Like all Kubernetes resources, this must include all [required
 fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/#required-fields):
 
 1. `apiVersion` where the resource can be found. This is `marketplace.kratix.io/v1alpha1` in your Postgres Promise (from `spec.api.spec.group` in `promise.yaml`).
@@ -709,6 +726,7 @@ spec:
   teamId: acid
   dbName: bestdb
 ```
+
 </details>
 
 Then apply the request file to the Platform Cluster:
@@ -738,6 +756,7 @@ kubectl --context $PLATFORM get pods --watch
 ```
 
 You should see something similar to
+
 ```console
 NAME                                          READY   STATUS      RESTARTS   AGE
 configure-pipeline-postgresql-default-SHA     0/1     Completed   0          1h
@@ -758,6 +777,7 @@ kubectl --context $WORKER get pods --watch
 ```
 
 You should see something similar to
+
 ```
 NAME                             READY   STATUS    RESTARTS   AGE
 acid-example-postgresql-0        1/1     Running   0          1h
@@ -771,17 +791,20 @@ kubectl --context $WORKER get pods --selector costCentre=rnd-10002
 ```
 
 You should see something similar to
+
 ```
 NAME                          READY   STATUS    RESTARTS   AGE
 acid-example-postgresql-0     1/1     Running   0          1h
 ```
 
 ## Summary
+
 Your platform has a new Promise. Your users have access to a new service from
 the Promise. Your finance team has the ability to track service usage. Well
 done!
 
 To recap the steps we took:
+
 1. ✅&nbsp;&nbsp;Acquired a base Promise
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the user who wants a Postgres_ knows they need to include their `costCentre` name when they make their request to the platform
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the Worker Cluster_ Operator that creates the Resource knows to apply the new `costCentre` label `costCentre`
@@ -792,6 +815,7 @@ To recap the steps we took:
 <br />
 
 ## Clean up environment {#cleanup}
+
 To clean up your environment first delete your request for the Postgres Resource
 
 ```bash
@@ -799,16 +823,19 @@ kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
 Verify the workloads belonging to the request have been deleted in the Worker Cluster
+
 ```console
 kubectl --context $WORKER get pods
 ```
 
 Now that the Resource has been deleted you can delete the Promise
+
 ```bash
 kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
 Verify the Dependencies are deleted from the Worker Cluster
+
 ```console
 kubectl --context $WORKER get pods
 ```

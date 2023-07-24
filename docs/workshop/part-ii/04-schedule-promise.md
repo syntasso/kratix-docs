@@ -4,6 +4,7 @@ title: Schedule Promises
 id: schedule-promise
 slug: ../schedule-promise
 ---
+
 ```mdx-code-block
 import PartialVerifyKratixWithOutPromises from '../../_partials/workshop/_verify-kratix-without-promises.md';
 ```
@@ -15,18 +16,19 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 <hr />
 
 **In this tutorial, you will**
-* [Understand Promise scheduling](#understand-scheduling)
-* [Schedule Promises to specific clusters](#dependency-scheduling)
-* [Schedule Promise Resource to specific clusters](#rr-scheduling)
-* [Clean up environment](#cleanup)
-* [Summary](#summary)
+
+- [Understand Promise scheduling](#understand-scheduling)
+- [Schedule Promises to specific clusters](#dependency-scheduling)
+- [Schedule Promise Resource to specific clusters](#rr-scheduling)
+- [Clean up environment](#cleanup)
+- [Summary](#summary)
 
 ### Prerequisite setup
 
 <PartialVerifyKratixWithOutPromises />
 
-
 ## Promise scheduling {#understand-scheduling}
+
 So far you have built an ECK Promise that will allow us to deliver ECK Resources on-demand to the
 application developers.
 
@@ -37,6 +39,7 @@ This section will focus on how Kratix has native support for flexible multi-clus
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-scheduling.svg"
 ```
+
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
@@ -55,6 +58,7 @@ kubectl --context $PLATFORM get clusters --show-labels
 ```
 
 You should see output like:
+
 ```
 NAME               AGE   LABELS
 worker-cluster-1    1h   <none>
@@ -71,6 +75,7 @@ Kratix with the `environment=dev` label. In order to get the ECK Promise to only
 to clusters with these labels you need to update the Promise.
 
 ## Schedule Promises to specific clusters {#dependency-scheduling}
+
 Inside of a Promise you can define what clusters the Promise should schedule resources
 to by specifying the `scheduling` field.
 
@@ -111,22 +116,26 @@ kubectl --context $WORKER get pods -n elastic-system
 ```
 
 Whats happening is that Kratix is querying what Clusters are available and is searching for a cluster with the matching labels, because no cluster is found the resource fails to get scheduled.
+
 ```mdx-code-block
 import SchedulingPromise from "/img/docs/workshop/scheduling-promise-dependencies.svg"
 ```
+
 <figure class="diagram">
   <SchedulingPromise className="small"/>
 </figure>
 
 You can see this in the Kratix controller logs as well. This query will show that Kratix was not
 able to find a matching cluster to schedule the request:
+
 ```yaml
 kubectl --context $PLATFORM --namespace kratix-platform-system \
-  logs deployment/kratix-platform-controller-manager \
-  --container manager | grep --max-count 1 "no Clusters can be selected for scheduling"
+logs deployment/kratix-platform-controller-manager \
+--container manager | grep --max-count 1 "no Clusters can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 # output formatted for readability
 INFO no Clusters can be selected for scheduling
@@ -139,6 +148,7 @@ INFO no Clusters can be selected for scheduling
 ```
 
 ### Label the cluster
+
 It is time to update the Kratix cluster to have the matching `environment=dev` label which is required
 to receive the ECK resources:
 
@@ -147,6 +157,7 @@ kubectl --context $PLATFORM label cluster worker-cluster-1 environment=dev
 ```
 
 ### Verify the worker
+
 Kratix is going to detect this change to the cluster and start to schedule resources
 to it:
 
@@ -155,12 +166,14 @@ kubectl --context $WORKER get pods -n elastic-system -w
 ```
 
 You should eventually see the following output:
+
 ```shell-session
 NAME                 READY   STATUS    RESTARTS   AGE
 elastic-operator-0   1/1     Running   0          1m
 ```
 
 With all the necessary CRDs installed:
+
 ```bash
 kubectl --context $WORKER get crds | grep elastic
 ```
@@ -185,10 +198,10 @@ be used.
 To achieve this with Kratix, you can optionally set additional labels at request time by
 outputting them from the Pipeline.
 
-Kratix has a convention of using a [`/metadata`](../main/reference/resources/workflows#metadata) directory to manage important configurations generated in the Pipeline that are independent of the resources you want stored in a GitOps state store.
+Kratix has a convention of using a [`/kratix/metadata`](../main/reference/resources/workflows#metadata) directory to manage important configurations generated in the Pipeline that are independent of the resources you want stored in a GitOps state store.
 
 To set additional scheduling labels, you can add the a similar document as the
-Promise's `scheduling` field to the `/metadata/scheduling.yaml` file.
+Promise's `scheduling` field to the `/kratix/metadata/scheduling.yaml` file.
 
 Any selectors added in this file will be appended to the list provided by the Promise. This means means
 that you cannot override the Kratix cluster selectors set in the Promise definition. This enables clear
@@ -203,7 +216,7 @@ Add the following to the end of the `pipeline/run` script:
 ```bash title=pipeline/run -- add to the end
 if ${enableDataCollection}; then
   echo "Setting additional cluster selectors: pvCapacity=large"
-  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /metadata/scheduling.yaml
+  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /kratix/metadata/scheduling.yaml
 fi
 ```
 
@@ -232,6 +245,7 @@ Verify that the output now shows the cluster-selector file
 ```
 
 ### Send a request for a Resource
+
 Finally, make a request with the `enableDataCollection` set to `true`.
 Open the `resource-request.yaml` and update the config.
 
@@ -246,6 +260,7 @@ kubectl --context $PLATFORM get pods -w
 ```
 
 ### Verify the Workflow Pipeline
+
 Once the Pipeline has complete take a look at the logs for the request:
 
 ```bash
@@ -255,12 +270,14 @@ kubectl --context $PLATFORM logs \
 ```
 
 You should see the following at the end of the output:
+
 ```
 ...
 Setting additional cluster selectors: pvCapacity=large
 ```
 
 ### Verify the Resource has not been scheduled
+
 You can see that Kratix has successfully handle the incoming request in the Workflow.
 
 But looking deeper, the worker cluster does not have the expected ECK pods:
@@ -271,13 +288,15 @@ kubectl --context $WORKER get pods
 
 Next inspect the Kratix controller logs. This query will surface that Kratix was not
 able to find a matching cluster to schedule the request:
+
 ```yaml
 kubectl --context $PLATFORM --namespace kratix-platform-system \
-  logs deployment/kratix-platform-controller-manager \
-  --container manager | tac | grep --max-count 1 "no Clusters can be selected for scheduling"
+logs deployment/kratix-platform-controller-manager \
+--container manager | tac | grep --max-count 1 "no Clusters can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 # output formatted for readability
 INFO no Clusters can be selected for scheduling
@@ -295,27 +314,30 @@ a Kratix cluster does match.
 ```mdx-code-block
 import SchedulingRR from "/img/docs/workshop/scheduling-resource-requests.svg"
 ```
+
 <figure class="diagram">
   <SchedulingRR className="small"/>
 </figure>
 
-
 ### Label the cluster
+
 Next add the `pvCapacity=large` label to the cluster:
 
 ```
 kubectl --context $PLATFORM label cluster worker-cluster-1 pvCapacity=large
 ```
 
-
 ### Verify the Resource is scheduled
+
 Kratix detects this change to the cluster labels and identifies that the Resource
 matches a Kratix Cluster so begins the scheduling process:
+
 ```bash
 kubectl --context $WORKER get pods -w
 ```
 
 The above command will give an output similar to (it may take a few minutes):
+
 ```shell-session
 NAME                            READY   STATUS    RESTARTS   AGE
 elastic-instance-es-default-0   1/1     Running   0          5m
@@ -330,6 +352,7 @@ And with that, you have successfully managed the scheduling of both Promises and
 their Resources!
 
 To recap what you achieved:
+
 1. ✅&nbsp;&nbsp; Your Promise is scheduled to desired clusters
 1. ✅&nbsp;&nbsp; Requests for Resource are dynamically scheduled depending on user input
 
@@ -338,10 +361,12 @@ To recap what you achieved:
 Before moving on, please remove the ECK Promise from your cluster.
 
 To delete all the Promises:
+
 ```bash
 kubectl --context $PLATFORM delete promises --all
 ```
 
 ## 🎉 &nbsp; Congratulations!
+
 ✅&nbsp;&nbsp;Your Promise can now schedule to a multi-cluster infrastructure. <br />
 👉🏾&nbsp;&nbsp;Next you will [update the Resource status](update-status) with useful information.

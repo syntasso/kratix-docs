@@ -4,6 +4,7 @@ title: Update the Resource status
 id: update-status
 slug: ../update-status
 ---
+
 ```mdx-code-block
 import PartialVerifyKratixWithOutPromises from '../../_partials/workshop/_verify-kratix-without-promises.md';
 ```
@@ -15,10 +16,11 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 <hr />
 
 **In this tutorial, you will**
-* [Revisit Pipeline metadata](#understand-metadata)
-* [Customise the Resource status](#customise-status)
-* [Request a resource and check its status](#rr-status)
-* [Summary](#summary)
+
+- [Revisit Pipeline metadata](#understand-metadata)
+- [Customise the Resource status](#customise-status)
+- [Request a resource and check its status](#rr-status)
+- [Summary](#summary)
 
 ## Conveying information back to the application developers {#understand-metadata}
 
@@ -32,7 +34,7 @@ In the context of your Promise, an example of what you might want to convey back
 
 ## Status
 
-Similar to how the Pipeline orchestrated scheduling by writing configuration code to `/metadata/scheduling.yaml` Kratix exposes a `/metadata/status.yaml` file.
+Similar to how the Pipeline orchestrated scheduling by writing configuration code to `/kratix/metadata/scheduling.yaml` Kratix exposes a `/kratix/metadata/status.yaml` file.
 
 The `status.yaml` file can contain arbitrary key values, with the `message` key being a special key that is communicated back to the user when running `kubectl get elastic-cloud`. The rest of the key values can be viewed by inspecting the full document. For example you could convey a brief description of the ECK Resource back to the user in the `message` key, and provide more programmatic information like the location of credentials to access the Resource in other fields.
 
@@ -45,7 +47,7 @@ In addition, you are providing Kibana as a user interface. Your users need a way
 Putting these two things together, you can add the following to the end of the `pipeline/run` script:
 
 ```bash title=pipeline/run -- add to the end
-cat <<EOF > /metadata/status.yaml
+cat <<EOF > /kratix/metadata/status.yaml
 message: "Instance ${name} provisioned with preconfigured system metrics"
 initialLoginDetails:
     username: "elastic"
@@ -56,6 +58,7 @@ EOF
 ## Request a resource and check its status {#rr-status}
 
 In order to see these changes when making a new request you need to rebuild the image and load it into the cluster. Run the following script to build, load and test the Pipeline:
+
 ```bash
 ./scripts/test-pipeline
 ```
@@ -77,6 +80,7 @@ Before installing and making a request for a Resource, you can verify the local 
 ```
 
 Next, install the Promise:
+
 ```bash
 kubectl --context $PLATFORM create --filename promise.yaml
 ```
@@ -96,6 +100,7 @@ kubectl --context $PLATFORM get elastic-clouds
 ```
 
 The above command will return something close to the following:
+
 ```
 NAME      STATUS
 example   Instance example provisioned with preconfigured system metrics
@@ -124,6 +129,7 @@ initialLoginDetails:
   <summary>🤔 Curious about the conditions fields?</summary>
 
 ### The conditions field
+
 [Conditions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties) are a core Kubernetes concept and standard to convey information about a resources status. For example, Pods report back various conditions:
 
 ```
@@ -161,15 +167,15 @@ kubectl --context $PLATFORM wait elastic-cloud/example \
 ```
 
 Kratix supports this by default for all Resources.
+
 </details>
-
-
 
 ## Summary {#summary}
 
 And with that, you have successfully improved the Promise, allowing the author to provide useful details to the Application Developers who will be your platform users.
 
 To recap what you achieved:
+
 1. ✅&nbsp;&nbsp; Use metadata to set a custom Resource status
 
 ✅&nbsp;&nbsp;This tutorial concludes an Introduction to writing a Promise. <br />
