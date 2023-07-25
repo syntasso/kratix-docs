@@ -536,7 +536,7 @@ Now test the pipeline by doing a Docker build and run. _Check that, per the step
 
 ```console
 docker build . --tag kratix-workshop/postgres-configure-pipeline:dev
-docker run -v ${PWD}/kratix/input:/kratix/input -v ${PWD}/kratix/output:/kratix/output kratix-workshop/postgres-configure-pipeline:dev
+docker run -v ${PWD}/input:/kratix/input -v ${PWD}/output:/kratix/output kratix-workshop/postgres-configure-pipeline:dev
 ```
 
 Now you can validate the `output/postgres-instance.yaml` file.

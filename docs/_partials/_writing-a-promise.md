@@ -167,31 +167,31 @@ Replace the `api` field in `promise.yaml` with the complete field details
 below. Ensure the indentation is correct (`api` is nested under `spec`).
 
 ```yaml jsx title="api in promise.yaml"
-api:
-  apiVersion: apiextensions.k8s.io/v1
-  kind: CustomResourceDefinition
-  metadata:
-    name: jenkins.example.promise.syntasso.io
-  spec:
-    group: example.promise.syntasso.io
-    scope: Namespaced
-    names:
-      plural: jenkins
-      singular: jenkins
-      kind: jenkins
-    versions:
-      - name: v1
-        served: true
-        storage: true
-        schema:
-          openAPIV3Schema:
-            type: object
-            properties:
-              spec:
-                type: object
-                properties:
-                  name:
-                    type: string
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: jenkins.example.promise.syntasso.io
+    spec:
+      group: example.promise.syntasso.io
+      scope: Namespaced
+      names:
+        plural: jenkins
+        singular: jenkins
+        kind: jenkins
+      versions:
+        - name: v1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  properties:
+                    name:
+                      type: string
 ```
 
 You have now defined the as-a-Service API.

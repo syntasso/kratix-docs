@@ -134,35 +134,34 @@ Make sure to target the Platform Cluster and do the following:
 
 1. Create the Secret you'd like to access. For example:
 
-```bash
-kubectl create secret generic promise-secret \
-    --from-literal=apikey=topsecret
-```
+  ```bash
+  kubectl create secret generic promise-secret \
+      --from-literal=apikey=topsecret
+  ```
 
 1. Create a ClusterRole giving `get` permissions to the `promise-secret` created above:
 
-```bash
-kubectl create clusterrole promise-secret-cr \
-    --verb=get \
-    --resource=secrets \
-    --resource-name=promise-secret
-```
+  ```bash
+  kubectl create clusterrole promise-secret-cr \
+      --verb=get \
+      --resource=secrets \
+      --resource-name=promise-secret
+  ```
 
 1. Create a ClusterRoleBinding to associate the Pipeline ServiceAccount
    (created by Kratix, on Promise install) with the ClusterRole. Reference
    the ClusterRole created above:
 
-```bash
-# Replace PROMISE with the name of your Promise
-kubectl create clusterrolebinding promise-secret \
-    --clusterrole=promise-secret-cr \
-    --serviceaccount=default:PROMISE-default-promise-pipeline
-```
+  ```bash
+  # Replace PROMISE with the name of your Promise
+  kubectl create clusterrolebinding promise-secret \
+      --clusterrole=promise-secret-cr \
+      --serviceaccount=default:PROMISE-default-promise-pipeline
+  ```
 
 1. Access the Base64 enconded Secret in the Pipeline with the `kubectl` CLI
-
-```
-kubectl get secret promise-secret -o=jsonpath='{.data.apikey}'
-```
+  ```
+  kubectl get secret promise-secret -o=jsonpath='{.data.apikey}'
+  ```
 
 For a working example, check the [Slack Promise](https://github.com/syntasso/kratix-marketplace/tree/main/slack) available in the Marketplace.

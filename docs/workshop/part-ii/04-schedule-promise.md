@@ -94,7 +94,7 @@ spec:
       matchLabels:
         environment: dev
   #highlight-end
-  ...
+  #...
 ```
 
 ### Apply the Promise
@@ -128,10 +128,10 @@ import SchedulingPromise from "/img/docs/workshop/scheduling-promise-dependencie
 You can see this in the Kratix controller logs as well. This query will show that Kratix was not
 able to find a matching cluster to schedule the request:
 
-```yaml
+```bash
 kubectl --context $PLATFORM --namespace kratix-platform-system \
-logs deployment/kratix-platform-controller-manager \
---container manager | grep --max-count 1 "no Clusters can be selected for scheduling"
+  logs deployment/kratix-platform-controller-manager \
+  --container manager | grep --max-count 1 "no Clusters can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
@@ -289,10 +289,10 @@ kubectl --context $WORKER get pods
 Next inspect the Kratix controller logs. This query will surface that Kratix was not
 able to find a matching cluster to schedule the request:
 
-```yaml
+```bash
 kubectl --context $PLATFORM --namespace kratix-platform-system \
-logs deployment/kratix-platform-controller-manager \
---container manager | tac | grep --max-count 1 "no Clusters can be selected for scheduling"
+  logs deployment/kratix-platform-controller-manager \
+  --container manager | tac | grep --max-count 1 "no Clusters can be selected for scheduling"
 ```
 
 The above command will give an output similar to:

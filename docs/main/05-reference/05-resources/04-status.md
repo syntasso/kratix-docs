@@ -34,7 +34,7 @@ And if the requester inspected the full status output using `kubectl get databas
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
 kind: Database
----
+# ...
 status:
   message: Resource provisioned with database size 10Gb
   connectionDetails:
