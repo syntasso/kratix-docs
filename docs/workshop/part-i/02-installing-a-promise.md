@@ -407,7 +407,7 @@ spec:
   sourceRef:
     kind: Bucket
     name: kratix-bucket
-  path: ./default/worker-cluster/crds
+  path: ./worker-cluster/crds
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -422,7 +422,7 @@ spec:
   sourceRef:
     kind: Bucket
     name: kratix-bucket
-  path: ./default/worker-cluster/resources
+  path: ./worker-cluster/resources
 EOF
 ```
 
@@ -656,8 +656,8 @@ kubectl --context $PLATFORM get pods
 
 The above command will give an output similar to:
 ```shell-session
-NAME                                     READY   STATUS      RESTARTS   AGE
-configure-pipeline-jenkins-default-c726b   0/1     Completed   0          71s
+NAME                               READY   STATUS      RESTARTS   AGE
+configure-pipeline-jenkins-c726b   0/1     Completed   0          71s
 ```
 
 Once the Workflow completes, Kratix will write the documents it outputted (i.e. the declaration of state) to the directory within the bucket that the Worker cluster is watching. You will soon see the requested Jenkins resources starting up on the Worker cluster.
