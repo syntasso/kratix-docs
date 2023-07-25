@@ -8,17 +8,17 @@ description: Documentation on how to expose information from the Pipeline to the
 
 As part of your `configure` Pipeline you can optionally send information about the Resource
 back to the resource requester by writing information to
-`/metadata/status.yaml`. The file can contain arbitrary key values, with the
+`/kratix/metadata/status.yaml`. The file can contain arbitrary key values, with the
 `message` key being a special key that is communicated back to the user when
 running `kubectl get <resource-request>`. For example if the Pipeline container wrote the
-following to the `/metadata/status.yaml` file:
+following to the `/kratix/metadata/status.yaml` file:
 
- ```yaml
- message: Resource provisioned with database size 10Gb
- connectionDetails:
-   host: example.com
-   dbName: root
- ```
+```yaml
+message: Resource provisioned with database size 10Gb
+connectionDetails:
+  host: example.com
+  dbName: root
+```
 
 Kratix would pickup the status and apply it back to the Resource. The
 user would see the following when using `kubectl` to `get` the Resource details:
@@ -34,12 +34,12 @@ And if the requester inspected the full status output using `kubectl get databas
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
 kind: Database
-...
+# ...
 status:
- message: Resource provisioned with database size 10Gb
- connectionDetails:
-   host: example.com
-   dbName: root
+  message: Resource provisioned with database size 10Gb
+  connectionDetails:
+    host: example.com
+    dbName: root
 ```
 
 Status provides a simple way to communicate information back to the resource
@@ -63,11 +63,11 @@ look like:
 ```yaml
 status:
   conditions:
-  - lastTransitionTime: "2023-03-07T15:50:22Z"
-    message: Pipeline has not completed
-    reason: PipelineNotCompleted
-    status: "False"
-    type: PipelineCompleted
+    - lastTransitionTime: "2023-03-07T15:50:22Z"
+      message: Pipeline has not completed
+      reason: PipelineNotCompleted
+      status: "False"
+      type: PipelineCompleted
 ```
 
 once the Pipeline has been completed it will look like:
@@ -75,11 +75,11 @@ once the Pipeline has been completed it will look like:
 ```yaml
 status:
   conditions:
-  - lastTransitionTime: "2023-03-07T15:50:30Z"
-    message: Pipeline completed
-    reason: PipelineExecutedSuccessfully
-    status: "True"
-    type: PipelineCompleted
+    - lastTransitionTime: "2023-03-07T15:50:30Z"
+      message: Pipeline completed
+      reason: PipelineExecutedSuccessfully
+      status: "True"
+      type: PipelineCompleted
 ```
 
 Conditions can be used by external systems to programmatically check when a
@@ -87,6 +87,7 @@ Resource Workflow has been completed. `kubectl` also has built-in support
 for waiting for a condition to be met. For example after requesting a Resource
 a user can run the following to have the CLI wait for the Workflow to be
 completed:
+
 ```
 kubectl wait redis/example --for=condition=PipelineCompleted --timeout=60s
 ```

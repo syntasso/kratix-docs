@@ -1,11 +1,12 @@
-import PartialCleanupAllPromises from './_cleanup.md';
-import PartialPreRequisites from './_clean-kratix-or-rebuild.md';
+import PartialCleanupAllPromises from './\_cleanup.md';
+import PartialPreRequisites from './\_clean-kratix-or-rebuild.md';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import PartialWcrBinaryDownload from './_wcr-binary-download.md';
+import PartialWcrBinaryDownload from './\_wcr-binary-download.md';
 
 **In this tutorial, you will**
+
 1. [learn more about what's inside a Kratix Promise](#whats-inside-a-kratix-promise)
 1. [write and install your own Kratix Promise](#writing-your-own-kratix-promise)
 
@@ -20,13 +21,14 @@ and its users. It is what allows platforms to be built incrementally.
 It consists of three parts:
 
 <!-- TODO: (promising future) update Promise image -->
+
 <img
-  align="right"
-  src={useBaseUrl('/img/docs/base-promise-structure.png')}
-  alt="Kratix logo"
+align="right"
+src={useBaseUrl('/img/docs/base-promise-structure.png')}
+alt="Kratix logo"
 />
 
-1. `api`: the API (in Kubernetes terms, the CRD) that  application developers
+1. `api`: the API (in Kubernetes terms, the CRD) that application developers
    use to request a Resource from the Kratix Promise.
 1. `dependencies`: a collection of prerequisites that enable the creation of a Resource that must be pre-installed in the Workers.
 1. `workflows`: a list of pipelines to be executed at different stages of the
@@ -38,48 +40,46 @@ It consists of three parts:
 
 Thinking of your platform as-a-Product, steps to write a Promise are:
 
-* Talk to users of your platform to find out what they're using and what they
+- Talk to users of your platform to find out what they're using and what they
   need.
-* Determine what the API of the Promise should be.
-    * What are the configuration options you want to expose to your users?
-    * Do you need to provide low-level options or will the users be happy with
-      higher-level abstractions?
-* In the Promise, write the `api` with the desired fields and validations.
-* Next, determine what the software dependencies are that you need to fulfils
+- Determine what the API of the Promise should be.
+  - What are the configuration options you want to expose to your users?
+  - Do you need to provide low-level options or will the users be happy with
+    higher-level abstractions?
+- In the Promise, write the `api` with the desired fields and validations.
+- Next, determine what the software dependencies are that you need to fulfils
   the Promise. You may find out you need a [Kubernetes
   Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
   running on the Worker, for example.
-* In the Promise, add your dependencies in the `dependencies`.
-* Finally, determine the steps that need to be executed during the Promise's
+- In the Promise, add your dependencies in the `dependencies`.
+- Finally, determine the steps that need to be executed during the Promise's
   lifecycle. The minimum you'll need is a Workflow to configure your Resource which will run on creation. These may include translating the user's request into the Operator's expected document, injecting custom configuration, sending requests to internal APIs to
   verify permissions, scanning images for vulnerabilities, etc.
-* In the Promise, list those Workflows in the `workflows`.
-* Install the Promise on your Platform Cluster, where Kratix is installed.
+- In the Promise, list those Workflows in the `workflows`.
+- Install the Promise on your Platform Cluster, where Kratix is installed.
 
 ### Platform User Journey
 
 To use the Promise once it is installed on the platform, a platform user will:
 
-* List the available Promises in the platform cluster to find what they want.
-* Write a request for the Resource, as defined by the `api` in the Promise.
-* Send the request to the Platform.
-
+- List the available Promises in the platform cluster to find what they want.
+- Write a request for the Resource, as defined by the `api` in the Promise.
+- Send the request to the Platform.
 
 ### Fulfilling the Promise
 
 At this point, Kratix will execute the following steps:
 
-* Kratix fires off the Workflows defined in `workflows.resource.configure`
+- Kratix fires off the Workflows defined in `workflows.resource.configure`
   passing, the Resource definition as an input. This will be a Kratix
   `Pipeline`, responsible for running the necessary business processes to create
   the Resource. For further details on Pipelines, check the [Pipeline reference
   documentation](/docs/main/reference/resources/workflows).
-* Once all Workflows are executed, a series of documents are outputted,
+- Once all Workflows are executed, a series of documents are outputted,
   encapsulating the user's request into valid Kubernetes objects.
-* Those documents are schedule to an available Worker Cluster, which in turn has
+- Those documents are schedule to an available Worker Cluster, which in turn has
   the necessary dependencies installed (via the Promise's `dependencies` field)
-* The necessary infrastructure is created and configured, and the user can reference any necessary details in the Resource status field (e.g. how to connect to a service).
-
+- The necessary infrastructure is created and configured, and the user can reference any necessary details in the Resource status field (e.g. how to connect to a service).
 
 <hr />
 
@@ -94,35 +94,37 @@ four teams get Jenkins; and you get time back for more valuable work.
 
 This guide will follow the steps below:
 
-
 **Define Promise**
+
 1. [Prepare your environment](#prepare-your-environment), if required
 1. [Set up your directories](#directory-setup)
 
 **Promise definition: api**
+
 1. [Custom Resource Definition: define your Promise API](#promise-api)
 
 **Promise definition: workflows**
+
 1. [Create your base manifest](#base-instance)
 1. [Build a simple request pipeline](#pipeline-script)
 1. [Package your pipeline step as a Docker image](#dockerfile)
 1. [Test your container image](#test-image)
 
 **Promise definition: dependencies**
+
 1. [Define your `dependencies` in your Promise definition](#dependencies)
 
 <!-- TODO: Resource Request -->
 
 **Test Promise**
+
 1. [Install your Promise](#install-promise)
 1. [Create and submit a Kratix request for a Resource](#create-resource-request)
 1. [Review of a Kratix Promise parts (in detail)](#promise-review)
 1. [Summary](#summary)
 1. [Clean up environment](#cleanup)
 
-
 <hr />
-
 
 ### Prepare your environment {#prepare-your-environment}
 
@@ -178,18 +180,18 @@ below. Ensure the indentation is correct (`api` is nested under `spec`).
         singular: jenkins
         kind: jenkins
       versions:
-      - name: v1
-        served: true
-        storage: true
-        schema:
-          openAPIV3Schema:
-            type: object
-            properties:
-              spec:
-                type: object
-                properties:
-                  name:
-                    type: string
+        - name: v1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  properties:
+                    name:
+                      type: string
 ```
 
 You have now defined the as-a-Service API.
@@ -298,6 +300,7 @@ spec:
       - name: kubernetes-credentials-provider
         version: 1.208.v128ee9800c04
 ```
+
 </details>
 
 #### Build a simple configure pipeline {#pipeline-script}
@@ -321,14 +324,14 @@ with the contents below:
 set -x
 
 #Get the name from the Promise Custom resource
-instanceName=$(yq eval '.spec.name' /input/object.yaml)
+instanceName=$(yq eval '.spec.name' /kratix/input/object.yaml)
 
 # Inject the name into the Jenkins resources
 find /tmp/transfer -type f -exec sed -i \
   -e "s/<tbr-name>/${instanceName}/g" \
   {} \;
 
-cp /tmp/transfer/* /output/
+cp /tmp/transfer/* /kratix/output/
 ```
 
 Pipeline images also have the capability to write back information to the
@@ -349,6 +352,7 @@ ADD execute-pipeline execute-pipeline
 CMD [ "sh", "-c", "./execute-pipeline"]
 ENTRYPOINT []
 ```
+
 <br />
 
 Next build your Docker image. First lets give it a name. If you are not using
@@ -361,6 +365,7 @@ export PIPELINE_NAME=kratix-workshop/jenkins-configure-pipeline:dev
 ```
 
 Then we can build the image
+
 ```bash
 ./internal/scripts/pipeline-image build
 ```
@@ -368,11 +373,11 @@ Then we can build the image
 ### Test your image {#test-image}
 
 Since the Pipeline contains a series of containers, we can easily test
-individual images in isolation. We can provide an example `/input` to mimic what
+individual images in isolation. We can provide an example `/kratix/input` to mimic what
 Kratix would do when it executes the pipeline and assert that the correct
-`/output` is written.
+`/kratix/output` is written.
 
-To test this lets create a sample `/input/object.yaml` Resource definition in the
+To test this lets create a sample `/kratix/input/object.yaml` Resource definition in the
 `internal/configure-pipeline/test-input/` directory with the contents below
 
 ```yaml jsx title="internal/configure-pipeline/test-input/object.yaml"
@@ -385,12 +390,14 @@ spec:
 ```
 
 Run the container, mounting the volumes
+
 ```bash
 chmod 777 ./internal/configure-pipeline/test-output
 docker run \
-  -v ${PWD}/internal/configure-pipeline/test-input:/input \
-  -v ${PWD}/internal/configure-pipeline/test-output:/output $PIPELINE_NAME
+  -v ${PWD}/internal/configure-pipeline/test-input:/kratix/input \
+  -v ${PWD}/internal/configure-pipeline/test-output:/kratix/output $PIPELINE_NAME
 ```
+
 <br />
 
 Verify the contents in the `internal/configure-pipeline/test-output` directory
@@ -410,6 +417,7 @@ you are using KinD you can load it in by running:
 ```bash
 ./internal/scripts/pipeline-image load
 ```
+
 <details>
   <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
   If you have not created your Kubernetes clusters with KinD, you will need to either:
@@ -445,12 +453,11 @@ spec:
             name: instance-configure
           spec:
             containers:
-            - name: create-jenkins-instance
-              # update the image if you are using a custom name
-              image: kratix-workshop/jenkins-configure-pipeline:dev
+              - name: create-jenkins-instance
+                # update the image if you are using a custom name
+                image: kratix-workshop/jenkins-configure-pipeline:dev
   #highlight-end
-  api:
-    ...
+  api: ...
 ```
 
 :::tip About Workflows
@@ -473,15 +480,14 @@ be reused across many Promises, reducing duplication.
 In summary, you have:
 
 - Created a container image containing:
-    - A template file to be injected with per-Resource details
-      (`jenkins-instance.yaml`)
-    - A shell script to retrieve the per-Resource details from the user's
-      request, and inject them into the template (`execute-pipeline`)
+  - A template file to be injected with per-Resource details
+    (`jenkins-instance.yaml`)
+  - A shell script to retrieve the per-Resource details from the user's
+    request, and inject them into the template (`execute-pipeline`)
 - Executed the image locally to validate its output
 - Loaded the image into the Platform Cluster (or pushed it to the registry)
 - Wrapped the image in a Kratix Pipeline and added it to the
   `resource.configure` Workflow.
-
 
 ### Define the `dependencies` in your Promise definition {#dependencies}
 
@@ -497,6 +503,7 @@ Run the following commands to download the resource files
 curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/resources/jenkins.io_jenkins.yaml --output internal/dependencies/jenkins.io_jenkins.yaml --silent
 curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/resources/all-in-one-v1alpha2.yaml --output internal/dependencies/all-in-one-v1alpha2.yaml --silent
 ```
+
 <br />
 
 The commands above will download the necessary files in the
@@ -509,11 +516,9 @@ into the `promise.yaml`.
 
 Once you have downloaded and verified the correct binary, run:
 
-
 ```bash
 ./internal/scripts/inject-deps
 ```
-
 
 ### Install your Promise {#install-promise}
 
@@ -580,10 +585,12 @@ kubectl --context $PLATFORM get crds --watch
 ```
 
 The above command will give an output similar to
+
 ```console
 NAME                                  CREATED AT
 jenkins.example.promise.syntasso.io   2021-09-09T11:21:10Z
 ```
+
 <br />
 
 <p>Verify the Jenkins Operator is running<br /> <sub>(This may take a few
@@ -595,6 +602,7 @@ kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to
+
 ```console
 NAME                                 READY   STATUS    RESTARTS   AGE
 jenkins-operator-6c89d97d4f-r474w    1/1     Running   0          1m
@@ -623,18 +631,22 @@ kubectl apply --context $PLATFORM --filename resource-request.yaml
 Applying the Kratix Promise will trigger your configure Workflow steps which in turn requests a Jenkins instance from the operator. While the pipeline can run quite quickly, Jenkins requires quite a few resources to be installed including a deployment and a runner which means the full install may take a few minutes.
 
 You can see a bit of what is happening by first looking for your pipeline completion
+
 ```bash
 kubectl --context $PLATFORM get pods
 ```
 
 This should result in something similar to
+
 ```console
 NAME                                             READY   STATUS      RESTARTS   AGE
 configure-pipeline-promise-default-9d40b   0/1     Completed   0          1m
 ```
+
 <br />
 
 For more details, you can view the Pipeline logs with
+
 ```bash
 kubectl logs \
   --context $PLATFORM \
@@ -643,11 +655,12 @@ kubectl logs \
 ```
 
 This should result in something like
+
 ```console
-+ yq eval .spec.name /input/object.yaml
++ yq eval .spec.name /kratix/input/object.yaml
 + instanceName=my-amazing-jenkins
 + find /tmp/transfer -type f -exec sed -i -e 's/<tbr-name>/my-amazing-jenkins/g' '{}' ';'
-+ cp /tmp/transfer/jenkins-instance.yaml /output/
++ cp /tmp/transfer/jenkins-instance.yaml /kratix/output/
 ```
 
 <p>Then you can watch for the creation of your Jenkins by targeting the
@@ -660,19 +673,19 @@ kubectl --context $WORKER get pods --all-namespaces --watch
 ```
 
 The above command will eventually give an output similar to
+
 ```console
 NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-my-amazing-jenkins          1/1     Running   0          1m
 ...
 ```
+
 <br />
 
 For verification, access the Jenkins UI in a browser, as in [previous
 steps](./installing-a-promise#use-your-jenkins-instance).
 
-
 Let's now take a look at what you have done in more details.
-
 
 ### Kratix Promise parts: in details {#promise-review}
 
@@ -701,9 +714,11 @@ Once all images are executed, Kratix will schedule any document outputted by the
 pipeline to a Worker cluster.
 
 ## Recap {#summary}
+
 You have now authored your first Promise. Congratulations 🎉
 
 To recap the steps we took:
+
 1. ✅&nbsp;&nbsp;`api`: Defined your Promise API as a Custom Resource Definition
 1. ✅&nbsp;&nbsp;Created your Resource base manifest
 1. ✅&nbsp;&nbsp;`workflows`: Built a simple pipeline step for Resource configuration
@@ -745,5 +760,6 @@ kubectl --context $WORKER get pods
 ---
 
 ## 🎉 &nbsp; Congratulations!
+
 ✅&nbsp;&nbsp; You have written a Kratix Promise. <br />
 👉🏾&nbsp;&nbsp; Let's [see how to tailor Kratix Promises based on organisational context](./enhancing-a-promise).

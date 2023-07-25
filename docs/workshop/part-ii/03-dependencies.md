@@ -4,6 +4,7 @@ title: Extracting shared dependencies
 id: shared-dependencies
 slug: ../shared-dependencies
 ---
+
 ```mdx-code-block
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Tabs from '@theme/Tabs';
@@ -19,12 +20,13 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 <hr />
 
 **In this tutorial, you will**
-* [Understanding Kratix Promise dependencies](#understanding-dependencies)
-* [Splitting out Elastic Cloud Kubernetes (ECK) dependencies](#splitting-dependencies)
-* [Install the Promise with separate dependencies](#install-promise)
-* [Make multiple requests](#resource-requests)
-* [Summary](#summary)
-* [Clean up environment](#cleanup)
+
+- [Understanding Kratix Promise dependencies](#understanding-dependencies)
+- [Splitting out Elastic Cloud Kubernetes (ECK) dependencies](#splitting-dependencies)
+- [Install the Promise with separate dependencies](#install-promise)
+- [Make multiple requests](#resource-requests)
+- [Summary](#summary)
+- [Clean up environment](#cleanup)
 
 ## Understanding Kratix Promise dependencies {#understanding-dependencies}
 
@@ -36,6 +38,7 @@ In this section we will focus on introducing the dependencies part of Promises t
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-extract-dependencies.svg"
 ```
+
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
@@ -90,8 +93,8 @@ Open the `pipeline/run` file and remove lines 9-16. This will remove both curl c
 set -eu -o pipefail
 
 mkdir -p to-deploy
-export name="$(yq eval '.metadata.name' /input/object.yaml)"
-export enableDataCollection="$(yq eval '.spec.enableDataCollection' /input/object.yaml)"
+export name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
+export enableDataCollection="$(yq eval '.spec.enableDataCollection' /kratix/input/object.yaml)"
 
 echo "Generate ECK requests..."
 # Only set the beats value file if data collection is enabled
@@ -117,8 +120,8 @@ find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'select(.metadata
 echo "Removing enterprise annotation..."
 find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'del(.metadata.annotations["eck.k8s.elastic.co/license"])' {} \;
 
-echo "Copying files to /output..."
-find /pipeline/to-deploy -name \*.yaml -exec cp {} /output \;
+echo "Copying files to /kratix/output..."
+find /pipeline/to-deploy -name \*.yaml -exec cp {} /kratix/output \;
 
 echo "Done"
 ```
@@ -128,6 +131,7 @@ echo "Done"
 #### Run the test suite, see it passing
 
 With the downloads removed, you can re-run the test suite and see that the resulting files no long include the Operator or the CRDs.
+
 ```bash
 scripts/test-pipeline
 ```
@@ -156,6 +160,7 @@ Verify that the output shows only the following files:
 Removing the files from the Pipeline is not enough. You must now also add them to the Promise as dependencies.
 
 Run the following command to create a `dependencies` directory where you can store these files and any others that you may want to depend on for the Promise installation:
+
 ```bash
 mkdir -p dependencies
 
@@ -190,8 +195,8 @@ echo "current Promise length is: $(wc -l promise.yaml)"
 echo "new Promise length is: $(wc -l promise.yaml)"
 ```
 
-
 The above command will give an output similar to:
+
 ```shell-session
 current Promise length is: 35 promise.yaml
 new Promise length is: 11398 promise.yaml
@@ -204,6 +209,7 @@ In this output, you can see that the the files in the `dependencies` directory h
 You may notice that the length of the files in `dependencies` is shorter than what was added to the `promise.yaml` file. This is because the `worker-resources-builder` binary reformatted long lines into more readable lines with a max length of 90.
 
 If you have [yq](https://mikefarah.gitbook.io/yq/) installed you can verify the total number of documents in both matches with the following command:
+
 ```bash
 diff <(yq ea '[.] | length' dependencies/*) <(yq '.spec.dependencies | length' promise.yaml)
 ```
@@ -226,11 +232,13 @@ kubectl --context ${PLATFORM} create --filename promise.yaml
 ```
 
 To validate the Promise has been installed, you can list all Promises by running:
+
 ```bash
 kubectl --context kind-platform get promises
 ```
 
 Your output will show the `elastic-cloud` Promise:
+
 ```shell-session
 NAME            AGE
 elastic-cloud   10s
@@ -244,6 +252,7 @@ kubectl --context ${WORKER} get pods -n elastic-system
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 agents.agent.k8s.elastic.co                            2023-02-01T12:00:00Z
 apmservers.apm.k8s.elastic.co                          2023-02-01T12:00:00Z
@@ -283,6 +292,7 @@ kubectl --context $PLATFORM get pods
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME                                           READY   STATUS      RESTARTS   AGE
 configure-pipeline-elastic-cloud-default-01650   0/1     Completed   0          106s
@@ -290,11 +300,13 @@ configure-pipeline-elastic-cloud-default-99684   0/1     Completed   0          
 ```
 
 And once completed you will be able to watch for two sets of ECK resources being deployed to the Worker cluster:
+
 ```bash
 kubectl --context $WORKER get pods --watch
 ```
 
 Once you see all 6 pods in the output similar to below, you can use <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode:
+
 ```shell-session
 NAME                                 READY   STATUS    RESTARTS   AGE
 example-es-default-0                 1/1     Running   0          2m21s
@@ -324,6 +336,7 @@ kubectl --context kind-worker port-forward deploy/second-request-kb :5601
 ```
 
 This command will then give you the following output:
+
 ```shell-session
 Forwarding from 127.0.0.1:51207 -> 5601
 Forwarding from [::1]:51207 -> 5601
@@ -352,6 +365,7 @@ kubectl --context $WORKER port-forward deploy/NAME-kb :5601
 And with that, you have reduced duplication by delivering shared dependencies separately from the on-demand service! While this workshop only showcases two Resources both deployed to the same cluster, this architecture can easily be used to support an unlimited number of Resources across an unlimited number of clusters.
 
 To recap the steps you took:
+
 1. ✅&nbsp;&nbsp;Evaluated what resources are shared dependencies
 1. ✅&nbsp;&nbsp;Moved any shared dependencies from Workflows to the dependencies
 1. ✅&nbsp;&nbsp;Viewed the dependency set up on Promise install
@@ -362,10 +376,12 @@ To recap the steps you took:
 Before moving on, please remove the ECK Promise from your cluster.
 
 To delete all the Promises:
+
 ```bash
 kubectl --context $PLATFORM delete promises --all
 ```
 
 ## 🎉 &nbsp; Congratulations!
+
 ✅&nbsp;&nbsp;Your Promise can deliver on-demand services that have shared dependencies.<br />
 👉🏾&nbsp;&nbsp;Next you will [Intentionally schedule Promise resources](schedule-promise).
