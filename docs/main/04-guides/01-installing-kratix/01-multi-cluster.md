@@ -61,7 +61,7 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 
   ```bash
   # Install MinIO and register it as a BucketStateStore
-  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
+  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/minio-install.yaml
   kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
   ```
 
