@@ -39,7 +39,7 @@ Promises allow platform teams to:
 * Define an API, including versioning and validation
 * Execute imperative commands per user request
 * Use GitOps to continuously reconcile delivered services
-* Install and configure (or verify) dependencies for delivering a service
+* Install and configure (or verify) Dependencies for delivering a service
 * Manage where services are deployed across the infrastructure (on and
   off-Kubernetes, on Cloud providers, etc)
 
@@ -359,7 +359,7 @@ minio                                1/1     1            1           1h
 You will also have a single worker cluster which you can verify:
 
 ```bash
-kubectl --context $PLATFORM get clusters.platform.kratix.io
+kubectl --context $PLATFORM get destinations.platform.kratix.io
 ```
 
 The above command will give an output similar to:

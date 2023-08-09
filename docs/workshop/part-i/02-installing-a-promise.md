@@ -76,7 +76,7 @@ A Promise is the building block that Kratix provides to enable Platform teams to
 build their platforms incrementally. Promises are what allow the Platform to
 provide anything-as-a-Service, and are composed of mainly three pieces:
 
-- A set of dependencies that needs to be installed on any Worker cluster
+- A set of Dependencies that needs to be installed on any Worker cluster
   intending to run the Promise workload.
 - An API exposing to the user of the Platform the configuration options they
   have when requesting the service provided by the Promise.
@@ -148,23 +148,23 @@ jenkins.marketplace.kratix.io          2023-01-01T01:01:01Z
 ```
 
 Kratix will also write to the State Store a declaration of state, informing any
-Worker clusters they should install the Promise dependencies. For the Jenkins
-Promise, the dependencies include the Jenkins Operator.
+Worker clusters they should install the Promise Dependencies. For the Jenkins
+Promise, the Dependencies include the Jenkins Operator.
 
 However, at this state, there are no Worker clusters.
 
 <details>
-<summary>🤔 What's a Worker Cluster?</summary>
+<summary>🤔 What's a Destination?</summary>
 
-In Kratix terms, a _Worker Cluster_ is any system _converging_ on the state
+In Kratix terms, a _Destination_ is any system _converging_ on the state
 declared by Kratix.
 
-It's important to note that Kratix makes no assumptions about the Worker cluster
-themselves. Although Worker clusters are often Kubernetes clusters, they may be
+It's important to note that Kratix makes no assumptions about the Destinations
+themselves. Although Destinations are often Kubernetes clusters, they may be
 any system that can interpret whatever state is being declared as desired.
 
 For example, you may write a Promise that tells Kratix to declare Terraform
-plans as desired state, and a Worker cluster may be a system applying these
+plans as desired state, and a Destination may be a system applying these
 plans as they are written to the State Store.
 
 </details>
@@ -182,12 +182,12 @@ The above command will give an output similar to:
 # output formatted for readability
 ERROR	Reconciler error {
     "Work": {"name":"jenkins","namespace":"kratix-platform-system"},
-    "error": "no Clusters can be selected for clusterSelector"
+    "error": "no Destinations can be selected for scheduling"
 }
 ```
 
-This is Kratix telling you that it cannot find any Clusters that can get the
-Jenkins Promise dependencies installed.
+This is Kratix telling you that it cannot find any Destinations that can get the
+Jenkins Promise Dependencies installed.
 
 <figure class="diagram">
   <InstallErrorDiagram className="large"/>
@@ -196,7 +196,7 @@ Jenkins Promise dependencies installed.
 You can also verify the registered clusters:
 
 ```bash
-kubectl --context $PLATFORM get clusters.platform.kratix.io --all-namespaces
+kubectl --context $PLATFORM get destinations.platform.kratix.io --all-namespaces
 ```
 
 The above command will give an output similar to:
@@ -205,11 +205,11 @@ The above command will give an output similar to:
 No resources found
 ```
 
-So, to fix the error, you must create and register a new Worker Cluster.
+So, to fix the error, you must create and register a new worker Destination.
 
-## Set up a Worker Cluster {#configure-worker}
+## Set up a worker cluster {#configure-worker}
 
-### Create the cluster
+### Create the Kubernetes cluster
 
 You will create a second Kubernetes cluster with `kind`, and this cluster will be
 dedicated to running the Kratix workloads.
@@ -278,7 +278,7 @@ The Flux `Kustomizations` are responsible for continuously reconciling with the 
 declared in the `Source`.
 
 <details>
-<summary>Configuring the Worker Cluster: the manual way</summary>
+<summary>Configuring the cluster: the manual way</summary>
 
 If you prefer to configure the Worker cluster manually, follow the steps below.
 
@@ -442,7 +442,7 @@ Kind):
 - All other documents will be written to a specific `resources` path within the
   State Store.
 
-Later when you register the Cluster, Kratix will use the cluster's `namespace`
+Later when you register the cluster as a Destination, Kratix will use the cluster's `namespace`
 and `name` to build the full path for that cluster within the State Store.
 
 The first Kustomization above is for the CRDs, while the second is for the other
@@ -485,12 +485,12 @@ first and then followed th steps above. Kratix would have scheduled to the State
 Store path representing the Worker cluster, and the state would eventually be
 applied to a Worker.
 
-To register a cluster, create a `Cluster` object on your Platform cluster:
+To register a cluster, create a `Destination` object on your Platform cluster:
 
 ```yaml
 cat <<EOF | kubectl --context $PLATFORM apply --filename -
 apiVersion: platform.kratix.io/v1alpha1
-kind: Cluster
+kind: Destination
 metadata:
    name: worker-cluster
    labels:
@@ -508,26 +508,26 @@ cluster.platform.kratix.io/worker-cluster created
 ```
 
 <details>
-<summary>Cluster in detail</summary>
+<summary>Destination in detail</summary>
 
-The Kratix Cluster Resource is the representation of a system where workloads
+The Kratix Destination resource is the representation of a system where workloads
 can be scheduled to. Those system are usually other Kubernetes clusters.
 
 The only required field is `spec.stateStoreRef`. It contains a reference to a State
 Store present in the Platform. In this example, it points to the `minio-store`
 object you created on the previous step. The `spec.StateStoreRef.kind` determines
-what is the kind of State Store being used by this Cluster.
+what is the kind of State Store being used by this Destination.
 
-That means different Clusters can use different backing storage. For example,
-you can have a set of Clusters backed by Git, while another set of Clusters can
+That means different Destinations can use different backing storage. For example,
+you can have a set of Destinations backed by Git, while another set of Destinations can
 be backed by a Bucket. Further configuration options pertaining paths are also
 available both in the [State Store](../main/reference/statestore/intro) and the
-[Cluster object](../main/reference/clusters/intro).
+[Destination object](../main/reference/destinations/intro).
 </details>
 
-With the Cluster registered, Kratix now have a place where it can run workloads.
-That means that the Jenkins Promise dependencies will now be scheduled to the
-Worker cluster. As previously mentioned, one of those dependencies is the
+With the Destinations registered, Kratix now have a place where it can run workloads.
+That means that the Jenkins Promise Dependencies will now be scheduled to the
+Worker cluster. As previously mentioned, one of those Dependencies is the
 Jenkins Operator.
 
 
@@ -560,7 +560,7 @@ Once the jenkins-operator deployment is ready, press <kbd>Ctrl</kbd>+<kbd>C</kbd
 to exit the watch mode.
 
 If at this stage you create another Kubernetes cluster and follow similar steps
-as the above, the Jenkins Promise dependencies would also be installed on the
+as the above, the Jenkins Promise Dependencies would also be installed on the
 new Worker cluster.
 
 Later in this tutorial you will learn how to make certain Promises available in

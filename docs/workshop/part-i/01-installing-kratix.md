@@ -1,5 +1,5 @@
 ---
-description: Create a Platform Cluster, install and configure Kratix
+description: Create a Platform cluster, install and configure Kratix
 title: Installing Kratix
 id: installing-kratix
 slug: ../installing-kratix
@@ -257,7 +257,7 @@ bucketstatestore.platform.kratix.io/minio-store created
 <details>
 <summary>More on the Kratix State Store</summary>
 
-The StateStore document contains the configuration needed to access the actual
+The State Store document contains the configuration needed to access the actual
 backing storage.
 
 On the example above, you created a new `BucketStateStore`, since a MinIO bucket

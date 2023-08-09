@@ -1,19 +1,19 @@
 ---
-description: Documentation for the Kratix StateStore Custom Resources
-title: StateStores
-sidebar_label: StateStores
+description: Documentation for the Kratix State Store Custom Resources
+title: State Stores
+sidebar_label: State Stores
 id: intro
 ---
-# StateStores
+# State Stores
 
 The Kratix `StateStore` resources represent the different backing storage options
-for Kratix to write to. Kratix supports both [GitStateStore](./gitstatestore) for writing to Git repositories,
-and [BucketStateStores](./bucketstatestore) for writing to S3-compatible buckets. When registering a
-[Cluster](../02-clusters/01-clusters.md) you specify which `StateStore` it should
-write to. Checkout the docs for the supported StateStores:
+for Kratix to write to. Kratix supports both [Git State Store](./gitstatestore) for writing to Git repositories,
+and [Bucket State Store](./bucketstatestore) for writing to S3-compatible buckets. When registering a
+[Destination](../02-destinations/01-destinations.md) you specify which `StateStore` it should
+write to. Checkout the docs for the supported State Stores:
 
 - [GitStateStore](./gitstatestore)
-- [BucketStateStores](./bucketstatestore)
+- [BucketState Stores](./bucketstatestore)
 
 
 <br />

@@ -12,7 +12,7 @@ import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
 *[CRD]: Custom Resource Definition
 *[CRDs]: Custom Resource Definitions
 
-Compound Promises are Promises that, in its dependencies, contain other Promises. That ability allows Platform teams deliver entire stacks on demand, instead of simple databases or services.
+Compound Promises are Promises that, in its Dependencies, contain other Promises. That ability allows Platform teams deliver entire stacks on demand, instead of simple databases or services.
 
 **In this tutorial, you will**
 
@@ -23,13 +23,13 @@ Compound Promises are Promises that, in its dependencies, contain other Promises
 
 ## Register the Platform as a Worker
 
-To install a Compound Promises, the first step is to register the Platform cluster itself as an available Worker Cluster. That's because the dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the Platform cluster.
+To install a Compound Promises, the first step is to register the Platform cluster itself as an available Destination. That's because the Dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the Platform cluster.
 
-Create a new [Cluster document](../reference/clusters/intro) platform-cluster.yaml` with the following contents:
+Create a new [Destination document](../reference/destinations/intro) platform-cluster.yaml` with the following contents:
 
 ```yaml title="platform-cluster.yaml"
 apiVersion: platform.kratix.io/v1alpha1
-kind: Cluster
+kind: Destination
 metadata:
   name: platform-cluster
   labels:
@@ -40,7 +40,7 @@ spec:
     kind: BucketStateStore
 ```
 
-Register the Cluster:
+Register the Destination:
 
 ```bash
 kubectl --context $PLATFORM apply --filename platform-cluster.yaml
@@ -48,7 +48,7 @@ kubectl --context $PLATFORM apply --filename platform-cluster.yaml
 
 ## Install and configure GitOps
 
-For the Platform Cluster to behave like a Worker Cluster, you will need to install the GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
+For the Platform cluster to sync as a worker, you will need to install the GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
@@ -65,8 +65,8 @@ kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/s
 
 This Promise is composed of a Knative and Postgres. Installing the Promise on the Platform will have the following side-effects:
 
-- Three Promises will be installed in the Platform Cluster: Paved Path, Knative and Postgres.
-- The Knative and Postgres's dependencies will be installed on the Worker Cluster.
+- Three Promises will be scheduled to the platform Destination: Paved Path, Knative and Postgres.
+- The Knative and Postgres's Dependencies will be scheduled to the worker Destination
 
 To verify the installation was successful, run:
 
@@ -89,7 +89,7 @@ clusterdomainclaims.networking.internal.knative.dev   2022-11-25T12:24:20Z
 
 ## Send a request for a Resource
 
-Platform users can now send requests for a new "Paved Path" Resource. That will create a new Knative Serving and a new Postgres database in the Worker Cluster:
+Platform users can now send requests for a new "Paved Path" Resource. That will create a new Knative Serving and a new Postgres database in the worker cluster:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-resource-request.yaml
@@ -166,7 +166,7 @@ spec:
   ... # remainder of the paved path Promise...
 ```
 
-Since Paved Path Promise dependencies are Promises, and considering that Kratix and its CRDs are only installed in the Platform Cluster, you need to ensure the dependencies are applied exclusively to the Platform Cluster.
+Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its CRDs are only installed in the Platform cluster, you need to ensure the Dependencies are applied exclusively to the Platform cluster.
 
 That is controlled by the `scheduling` key:
 
@@ -190,13 +190,13 @@ spec:
 
 The Paved Path Promise `scheduling` is set to target clusters with `matchLabel`
 equal to `environment: platform`. In other words, that is telling Kratix to
-install the sub-Promises into Clusters with an `environment: platform` label.
+install the sub-Promises into Destinations with an `environment: platform` label.
 
-You may have noticed that, when registering the Platform Cluster, the Cluster definition
+You may have noticed that, when registering the Platform Destination, the Destination definition
 included exactly that label. You can verify the applied labels with:
 
 ```shell-session
-$ kubectl --context $PLATFORM get clusters.platform.kratix.io --show-labels
+$ kubectl --context $PLATFORM get destinations.platform.kratix.io --show-labels
 NAME                 AGE    LABELS
 #highlight-start
 platform-cluster     1hr    environment=platform
@@ -204,9 +204,9 @@ platform-cluster     1hr    environment=platform
 worker-cluster-1     1hr    environment=dev
 ```
 
-However, the sub-Promises' dependencies (i.e. the Knative and Postgres dependencies) should not be installed
-in the Platform Cluster, but in the Worker Cluster. When you executed the quick start
-script, it registered the Worker Cluster with a label `environment: dev` (as
+However, the sub-Promises' Dependencies (i.e. the Knative and Postgres Dependencies) should not be installed
+in the Platform cluster, but in the worker cluster. When you executed the quick start
+script, it registered the worker cluster as a Destination with a label `environment: dev` (as
 per output above). The `scheduling` field in the sub-Promises are set to target
 those clusters:
 
@@ -251,9 +251,9 @@ spec:
 ```
 
 This configuration ensures the Knative CRDs and the Postgres Operator are installed
-exclusively in the Worker Cluster. This is how, when installing the Paved Path Promise,
-Kratix knew it should install the sub-Promises in the Platform Cluster and the
-sub-Promises' dependencies in the Worker Cluster.
+exclusively in the worker. This is how, when installing the Paved Path Promise,
+Kratix knew it should install the sub-Promises in the Platform cluster and the
+sub-Promises' Dependencies in the worker.
 
 ## A closer look in the Workflow
 

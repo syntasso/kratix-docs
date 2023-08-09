@@ -14,7 +14,7 @@ Resources, and deploy them to a specific remote location, Kubernetes or otherwis
 in a single Kubernetes cluster environment. This quick-start guide will walk you through the steps to
 install Kratix on a single cluster.
 
-## Prerequisite: Kubernetes Cluster
+## Prerequisite: Kubernetes cluster
 
 Kratix requires a Kubernetes cluster to run. If you don't already have a cluster, we
 recommend starting with a local cluster tool like

@@ -15,9 +15,10 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Kratix supports platform teams to easily deliver a curated
-        Kubernetes-native platform API, over fleets of Kubernetes clusters,
+        Kubernetes-native platform API, over fleets of infrastructure
+        including but not limited to multi-cluster Kubernetes,
         to increase flow across your organisation.
-      <br /><br />
+        <br /><br />
         Unlike other frameworks and tooling which focus exclusively on
         application-developer experience, Kratix focuses on empowering
         platform engineers to build better platforms.
@@ -60,7 +61,7 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({ title, Svg, description }: FeatureItem) {
   return (
     <div className={clsx('col col--6', styles.feature)}>
       <div className={clsx('padding--lg', styles.featureContent)}>

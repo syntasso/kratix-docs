@@ -130,7 +130,7 @@ We're currently working on providing alternative ways to read secrets from both 
 
 To allow the Pipeline to access in-cluster secrets, you will need to use Kubernetes RBAC.
 
-Make sure to target the Platform Cluster and do the following:
+Make sure to target the Platform cluster and do the following:
 
 1. Create the Secret you'd like to access. For example:
 

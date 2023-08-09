@@ -49,7 +49,7 @@ To see Promises in-action, check out the guides: [Installing a Promise](../../gu
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  # Name of the Promise; what the platform team will manage in the Platform Cluster
+  # Name of the Promise; what the platform team will manage in the Platform cluster
   name: promise-name
 spec:
   # Check the Scheduling docs for details

@@ -20,20 +20,19 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 <hr />
 
 **In this tutorial, you will**
+* [Understanding Kratix Promise Dependencies](#understanding-dependencies)
+* [Splitting out Elastic Cloud Kubernetes (ECK) Dependencies](#splitting-dependencies)
+* [Install the Promise with separate Dependencies](#install-promise)
+* [Make multiple requests](#resource-requests)
+* [Summary](#summary)
+* [Clean up environment](#cleanup)
 
-- [Understanding Kratix Promise dependencies](#understanding-dependencies)
-- [Splitting out Elastic Cloud Kubernetes (ECK) dependencies](#splitting-dependencies)
-- [Install the Promise with separate dependencies](#install-promise)
-- [Make multiple requests](#resource-requests)
-- [Summary](#summary)
-- [Clean up environment](#cleanup)
-
-## Understanding Kratix Promise dependencies {#understanding-dependencies}
+## Understanding Kratix Promise Dependencies {#understanding-dependencies}
 
 After the previous tutorial step, the ECK Promise bundled all necessary provisioning
 steps into the Resource Workflow. This made it possible to only do a single request because of duplication across the requests.
 
-In this section we will focus on introducing the dependencies part of Promises to manage many requests from a single Promise.
+In this section we will focus on introducing the Dependencies part of Promises to manage many requests from a single Promise.
 
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-extract-dependencies.svg"
@@ -42,10 +41,10 @@ import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-extract-dep
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
-  <figcaption>Promise dependencies provide a way to install and configure shared resources that enables the platform to provide self-service Resources.</figcaption>
+  <figcaption>Promise Dependencies provide a way to install and configure shared resources that enables the platform to provide self-service Resources.</figcaption>
 </figure>
 
-## Splitting out Elastic Cloud Kubernetes (ECK) dependencies {#splitting-dependencies}
+## Splitting out Elastic Cloud Kubernetes (ECK) Dependencies {#splitting-dependencies}
 
 The Pipeline `run` script currently follows the installation instructions in the ECK
 documentation [here](https://www.elastic.co/guide/en/cloud-on-k8s/2.8/k8s-deploy-eck.html).
@@ -65,12 +64,12 @@ into the cluster so that there is not a conflict.
 Currently, both the operator and the request for an Resource from the operator
 are generated in the Workflow. Kratix has the concept of `dependencies` which
 can be useful to manage different types of resources. While a Configure Workflow runs on
-every request for a resource, the dependencies are a set of resources that only
+every request for a resource, the Dependencies are a set of resources that only
 need to be installed once per cluster for the given Promise.
 
 A simple use cases may be to create a shared namespace that all subsequent
 Resources get scheduled to. In the case of this ECK Promise, you can
-install the Operator and CRDs as a dependencies.
+install the Operator and CRDs as Dependencies.
 
 ### Remove shared dependencies from the Pipeline
 
@@ -78,7 +77,7 @@ The following steps will refactor this Promise to instead separate shared depend
 
 <img src={useBaseUrl('/img/docs/workshop/promise-with-dependencies.png')} />
 
-#### Remove one-off files (i.e. dependencies) from Pipeline
+#### Remove one-off files (i.e. Dependencies) from Pipeline
 
 First you will need to remove the Operator and CRD files from the Pipeline `run` script in order in order to stop them from being created on each request for a Resource.
 
@@ -157,7 +156,7 @@ Verify that the output shows only the following files:
 
 ### Add shared dependencies to the Promise
 
-Removing the files from the Pipeline is not enough. You must now also add them to the Promise as dependencies.
+Removing the files from the Pipeline is not enough. You must now also add them to the Promise as Dependencies.
 
 Run the following command to create a `dependencies` directory where you can store these files and any others that you may want to depend on for the Promise installation:
 
@@ -168,7 +167,7 @@ curl --silent --location --output dependencies/elastic-crds.yaml https://downloa
 curl --silent --location --output dependencies/elastic-operator.yaml https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
 ```
 
-Once stored locally, you will need to add these dependencies to the Promise file. The dependencies are added as a list under `dependencies` which can tricky with formatting and require some subtle white space changes.
+Once stored locally, you will need to add these Dependencies to the Promise file. The Dependencies are added as a list under `dependencies` which can tricky with formatting and require some subtle white space changes.
 
 #### Download the WorkerResourcesBuilder
 
@@ -185,9 +184,9 @@ cp /root/bin/worker-resource-builder ./bin
 
 <PartialWcrBinaryDownload />
 
-#### Add all dependencies to the Promise
+#### Add all Dependencies to the Promise
 
-Per the usage instructions you have now seen, you can use the provided binary to add dependencies to an existing Promise. Run the following command to overwrite the current Promise file to add the dependencies to the existing API and Workflows sections:
+Per the usage instructions you have now seen, you can use the provided binary to add Dependencies to an existing Promise. Run the following command to overwrite the current Promise file to add the Dependencies to the existing API and Workflows sections:
 
 ```bash
 echo "current Promise length is: $(wc -l promise.yaml)"
@@ -244,7 +243,7 @@ NAME            AGE
 elastic-cloud   10s
 ```
 
-In addition, you can now verify that the dependencies have been installed on the worker cluster:
+In addition, you can now verify that the Dependencies have been installed on the worker cluster:
 
 ```bash
 kubectl --context ${WORKER} get crds | grep elastic
@@ -367,7 +366,7 @@ And with that, you have reduced duplication by delivering shared dependencies se
 To recap the steps you took:
 
 1. ✅&nbsp;&nbsp;Evaluated what resources are shared dependencies
-1. ✅&nbsp;&nbsp;Moved any shared dependencies from Workflows to the dependencies
+1. ✅&nbsp;&nbsp;Moved any shared dependencies from Workflows to the Dependencies
 1. ✅&nbsp;&nbsp;Viewed the dependency set up on Promise install
 1. ✅&nbsp;&nbsp;Successfully request more than one ECK Resources
 

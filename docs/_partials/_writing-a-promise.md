@@ -55,8 +55,8 @@ Thinking of your platform as-a-Product, steps to write a Promise are:
 - Finally, determine the steps that need to be executed during the Promise's
   lifecycle. The minimum you'll need is a Workflow to configure your Resource which will run on creation. These may include translating the user's request into the Operator's expected document, injecting custom configuration, sending requests to internal APIs to
   verify permissions, scanning images for vulnerabilities, etc.
-- In the Promise, list those Workflows in the `workflows`.
-- Install the Promise on your Platform Cluster, where Kratix is installed.
+* In the Promise, list those Workflows in the `workflows`.
+* Install the Promise on your Platform cluster, where Kratix is installed.
 
 ### Platform User Journey
 
@@ -77,7 +77,7 @@ At this point, Kratix will execute the following steps:
   documentation](/docs/main/reference/resources/workflows).
 - Once all Workflows are executed, a series of documents are outputted,
   encapsulating the user's request into valid Kubernetes objects.
-- Those documents are schedule to an available Worker Cluster, which in turn has
+* Those documents are schedule to an available Worker Cluster, which in turn has
   the necessary dependencies installed (via the Promise's `dependencies` field)
 - The necessary infrastructure is created and configured, and the user can reference any necessary details in the Resource status field (e.g. how to connect to a service).
 
@@ -111,7 +111,6 @@ This guide will follow the steps below:
 1. [Test your container image](#test-image)
 
 **Promise definition: dependencies**
-
 1. [Define your `dependencies` in your Promise definition](#dependencies)
 
 <!-- TODO: Resource Request -->
@@ -405,10 +404,7 @@ match the desired outcome. Note how the Jenkins `metadata.name` correspond to
 the name on the Resource definition. This is exactly what we setup our pipeline to
 do!
 
-The documents you see in the directory will be scheduled and deployed by Kratix
-to a Worker Cluster once the pipeline is executed. They need to be valid
-Kubernetes resources that can be applied to any cluster with the Promise's
-`dependencies` installed (see below).
+The documents you see in the directory will be scheduled by Kratix to a Destination and deployed by the GitOps agent on the worker cluster once the pipeline is executed. They need to be valid Kubernetes resources that can be applied to any cluster with the Promise's `dependencies` installed (see below).
 
 Once you are satisfied that your Pipeline is producing the expected result, you
 will need to make the container image available to your Kubernetes cluster. If
@@ -485,7 +481,7 @@ In summary, you have:
   - A shell script to retrieve the per-Resource details from the user's
     request, and inject them into the template (`execute-pipeline`)
 - Executed the image locally to validate its output
-- Loaded the image into the Platform Cluster (or pushed it to the registry)
+- Loaded the image into the Platform cluster (or pushed it to the registry)
 - Wrapped the image in a Kratix Pipeline and added it to the
   `resource.configure` Workflow.
 
@@ -664,7 +660,7 @@ This should result in something like
 ```
 
 <p>Then you can watch for the creation of your Jenkins by targeting the
-Worker Cluster:<br /> <sub>(This may take a few minutes so <code>--watch</code>
+worker cluster:<br /> <sub>(This may take a few minutes so <code>--watch</code>
 will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop
 watching)</sub> </p>
 
@@ -738,8 +734,7 @@ To clean up your environment first delete the requests for the Jenkins
 kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
-Verify the resources belonging to the Resources have been deleted in the
-Worker Cluster
+Verify the resources belonging to the Resources have been deleted in the worker
 
 ```console
 kubectl --context $WORKER get pods
@@ -751,7 +746,7 @@ Now the Resources have been deleted you can delete the Promises
 kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
-Verify that the dependencies are deleted from the Worker Cluster
+Verify that the Dependencies are deleted from the worker
 
 ```console
 kubectl --context $WORKER get pods

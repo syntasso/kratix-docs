@@ -8,7 +8,7 @@ Kratix documentation is built using [Docusaurus 2](https://docusaurus.io/). The 
 $ yarn install
 ```
 
-This command will install all the dependencies required to build the website. If you don't have `yarn` installed, check out the [installation guide](https://yarnpkg.com/getting-started/install).
+This command will install all the Dependencies required to build the website. If you don't have `yarn` installed, check out the [installation guide](https://yarnpkg.com/getting-started/install).
 
 ## Local Development
 

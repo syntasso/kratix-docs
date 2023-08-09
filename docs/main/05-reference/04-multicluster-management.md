@@ -10,31 +10,30 @@ determine in which Kubernetes cluster (or other infrastructure) a certain worklo
 
 In Kratix, scheduling happens in two stages:
 
-1. Determining Clusters should be available to a given Promise ([Scheduling
+1. Determining Destinations that should be available to a given Promise ([Scheduling
    Promises](#promises))
 1. Determining where the Resources will run following a request for a Promise Resource ([Scheduling Workloads](#resources))
 
 The following sections in this page document those stages. For hands-on scheduling guides,
-check the [Adding a new Worker Cluster](../guides/scheduling-clusters) and [Compound
+check the [Adding a new Worker Destination](../guides/scheduling) and [Compound
 Promise](../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
 
-When a Promise is installed, Kratix will deploy the Promise dependencies into
-all Clusters registered with the Platform. When a new Cluster is registered,
-Kratix will also deploy all Promise dependencies into this new Cluster.
+When a Promise is installed, Kratix will schedule the Promise Dependencies onto
+all Destinations registered with the Platform. When a new Destination is registered, Kratix will also schedule all Promise Dependencies onto this new Destination.
 
-Platform teams can, however, control which Clusters receive which Promises by
-using a combination of Cluster labels and Promise selectors.
+Platform teams can, however, control which Destinations receive which Promises by
+using a combination of Destination labels and Promise target selectors.
 
-The `labels` in the Cluster document are the standard Kubernetes
+The `labels` in the Destination document are the standard Kubernetes
 [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/):
-simple, arbitrary, key/value pairs. In the example below, the Cluster object is
+simple, arbitrary, key/value pairs. In the example below, the Destination object is
 being created with a label `environment` with value `dev`:
 
-```yaml title="worker-cluster-2.yaml"
+```yaml title="worker-2.yaml"
 apiVersion: platform.kratix.io/v1alpha1
-kind: Cluster
+kind: Destination
 metadata:
   # highlight-start
   labels:
@@ -58,11 +57,9 @@ spec:
 ```
 
 By setting the `matchLabels` with a `key: value` pair, Platform teams can
-control to which Clusters (i.e. `target`) the Promise's dependencies should be
+control to which Destinations (i.e. `target`) the Promise's Dependencies should be
 scheduled. `matchLabels` is a _equality-based_ selector. This means it will only
-match Clusters that have keys/values that match. You can add multiple key/value
-pairs to the `matchLabels`, but note that it will only match when the Cluster
-has a matching label for _all_ the selectors.
+match Destinations that have keys/values that match. You can add multiple key/value pairs to the `matchLabels`, but note that it will only match when the Destination has a matching label for _all_ the selectors.
 
 ```yaml title=jenkins-promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -80,12 +77,12 @@ spec:
   # ...
 ```
 
-If a Promise has no `scheduling`, it will be applied to all Clusters. If a
-Cluster has no `labels`, only Promises with no `scheduling` set will be applied.
+If a Promise has no `scheduling`, it will be applied to all Destinations. If a
+Destination has no `labels`, only Promises with no `scheduling` set will be applied.
 
 The table below contains a few examples:
 
-| Cluster Label               | Promise Selector            | Match? |
+| Destination Label           | Promise Selector            | Match? |
 | --------------------------- | --------------------------- | ------ |
 | _no label_                  | _no selector_               | ✅     |
 | `env: dev`                  | _no selector_               | ✅     |
@@ -98,12 +95,9 @@ The table below contains a few examples:
 
 ## Scheduling Resources {#resources}
 
-When a new request for a Resource comes in, Kratix reacts by triggering the
-`resource.configure` Workflow, as defined in the Promise `spec.workflows`.
-If the Workflow contains a Kratix Pipeline, the outputs of the Pipeline will then use the labels to identify one matching Kratix Clusters which will be the target Cluster.
+When a new request for a Resource comes in, Kratix reacts by triggering the `resource.configure` Workflow, as defined in the Promise `spec.workflows`. If the Workflow contains a Kratix Pipeline, the outputs of the Pipeline will then use the labels to identify one matching Kratix Destination which will be the target Destination.
 
-By default, Kratix will randomly select a registered Cluster to schedule the Resource.
-If the Promise has `spec.scheduling` set, the workload can only be scheduled to a Cluster that has matching labels for the Promise.
+When multiple Destinations match, Kratix will by default randomly select a registered Destination to schedule the Resource. If the Promise has `spec.scheduling` set, the workload can only be scheduled to a Destination that has matching labels for the Promise.
 
 It is possible to dynamically determine where Resources will go during the Kratix Pipeline. The section below documents the process.
 
@@ -120,15 +114,15 @@ instantiating the Configure Pipeline. At scheduling time, Kratix will look for a
 ```
 
 Kratix will then **add** those to what is already present in the Promise
-`spec.scheduling` field when identifying a target Cluster.
+`spec.scheduling` field when identifying a target Destination.
 
 There is no way to overwrite keys. For example, if the Promise defines
 `matchLabels` with `env: dev` and the Pipeline defines it with `env: prod`,
-Kratix will only ever look for Clusters with the `env: dev` label.
+Kratix will only ever look for Destinations with the `env: dev` label.
 
 The table below contains a few examples:
 
-| Cluster Label                | Promise Selector             | cluster-selectors.yaml | Match? |
+| Destination Label            | Promise Selector             | scheduling.yaml | Match? |
 | ---------------------------- | ---------------------------- | ---------------------- | ------ |
 | _no label_                   | _no selector_                | _no_selector_          | ✅     |
 | `env: dev`                   | _no selector_                | _no_selector_          | ✅     |
@@ -140,15 +134,15 @@ The table below contains a few examples:
 | `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_          | ⛔️     |
 | _no label_                   | _no_selector_                | `env: dev`             | ⛔️     |
 
-In the event that more than one cluster matches the resulting labels, Kratix
-will randomly select within the available matching registered Clusters. If you
-prefer to be certain of a single cluster match, it is suggested that you add a
-unique identifier to all clusters (e.g. `clusterName`) so that there can only
+In the event that more than one Destination matches the resulting labels, Kratix
+will randomly select within the available matching registered Destinations. If you
+prefer to be certain of a single Destination match, it is suggested that you add a
+unique identifier to all Destinations (e.g. `destinationName`) so that there can only
 ever be a single match.
 
 ## Compound Promises
 
-Compound Promises are Promises that, in their dependencies, contain other
+Compound Promises are Promises that, in their Dependencies, contain other
 Promises. That ability allows Platform teams deliver entire stacks on demand,
 instead of simple databases or services.
 
@@ -156,9 +150,9 @@ To enable this functionality, the following needs to be true:
 
 - The Platform cluster must register itself as a Worker cluster
 - The GitOps toolkit must be installed in the Platform cluster
-- The Compound Promise must instruct Kratix to install its dependencies (i.e. the other Promises)
+- The Compound Promise must instruct Kratix to install its Dependencies (i.e. the other Promises)
   in the Platform cluster
-- Optionally, the sub-Promises may instruct Kratix to install their dependencies outside the
+- Optionally, the sub-Promises may instruct Kratix to install their Dependencies outside the
   Platform cluster
 
 For detailed instruction on the above, please check the [Compound

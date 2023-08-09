@@ -32,7 +32,7 @@ For more on the Platform Gap, check out [_Crossing the Platform Gap_ article on 
 ### Kubernetes Operators
 
 Kubernetes Operators work hand-in-hand with Kratix. In nearly all cases
-Operators are required on many clusters across a single organisation. Kratix helps you manage the installation and maintenance of these Operators across clusters and can then schedule requests to the correct Operator in the correct Cluster when a user makes a request.
+Operators are required on many clusters across a single organisation. Kratix helps you manage the installation and maintenance of these Operators across clusters and can then schedule requests to the correct Operator in the correct cluster when a user makes a request.
 
 ### Helm
 
@@ -58,4 +58,4 @@ RedHat's Operator Lifecycle Manager (OLM) is an ideal candidate for a Promise. O
 
 ### Open Cluster Management
 
-Open Cluster Management (OCM) shares many ideas with Kratix, in particular the "Work" resource across multiple clusters, but takes a different direction in some areas. OCM philosophically appears to treat multiple clusters as one big cluster, with tight coupling between managed clusters via the klusterlet agent. Kratix decouples managed clusters, orchestrating the distributed platform via the GitOps Toolkit, enabling greater scale and resiliency of the platform as a whole. The enables the platform team to readily debug, audit, and control what's being deployed to managed clusters. This also enables the platform team to pause updates from the Platform Cluster to Worker Clusters, or add additional resources to the GitOps repositories directly.
+Open Cluster Management (OCM) shares many ideas with Kratix, in particular the "Work" resource across multiple clusters, but takes a different direction in some areas. OCM philosophically appears to treat multiple clusters as one big cluster, with tight coupling between managed clusters via the klusterlet agent. Kratix decouples managed clusters, orchestrating the distributed platform via the GitOps Toolkit, enabling greater scale and resiliency of the platform as a whole. The enables the platform team to readily debug, audit, and control what's being deployed to managed clusters. This also enables the platform team to pause updates from the Platform cluster to any number of workers, or add additional resources to the GitOps repositories directly.

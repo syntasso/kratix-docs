@@ -43,10 +43,16 @@ The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
 </figure>
 
 In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
+<<<<<<< HEAD
 
 - `/kratix/output`: The files in this directory will be scheduled to a matching Kratix Cluster.
 - `/kratix/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
 - `/kratix/metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
+=======
+* `/output`: The files in this directory will be scheduled to a matching Kratix Destination.
+* `/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
+* `metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
+>>>>>>> 9ca71029 (first pass on cluster rename)
 
 This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both scheduling and status will be explored in an upcoming section of this workshop.
 
@@ -877,8 +883,7 @@ kratix-workload-crds        9m15s   False   kustomize build failed: accumulating
 kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workload-crds' is not ready
 ```
 
-The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out dependencies from requests.
-
+The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out Dependencies from requests.
 ## Summary {#summary}
 
 And with that, you have transformed Elastic Cloud into an on-demand service!

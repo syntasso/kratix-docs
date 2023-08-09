@@ -54,7 +54,7 @@ to these labels as your platform may evolve.
 Use the following command to inspect at what labels the worker cluster currently has:
 
 ```bash
-kubectl --context $PLATFORM get clusters --show-labels
+kubectl --context $PLATFORM get destinations --show-labels
 ```
 
 You should see output like:
@@ -65,7 +65,7 @@ worker-cluster-1    1h   <none>
 ```
 
 The cluster currently has no labels applied. So far the Promise you have written has taken no opinion
-about what sort of clusters it should schedule work to, meaning that a Cluster with no labels is
+about what sort of clusters it should schedule work to, meaning that a Destination with no labels is
 acceptable place to schedule work to.
 
 Imagine you have decided that it is not appropriate for ECK resources to be deployed to certain
@@ -115,8 +115,7 @@ to the worker cluster. When you get the pods on the worker, you will not see the
 kubectl --context $WORKER get pods -n elastic-system
 ```
 
-Whats happening is that Kratix is querying what Clusters are available and is searching for a cluster with the matching labels, because no cluster is found the resource fails to get scheduled.
-
+Whats happening is that Kratix is querying what Destinations are available and is searching for a cluster with the matching labels, because no cluster is found the resource fails to get scheduled.
 ```mdx-code-block
 import SchedulingPromise from "/img/docs/workshop/scheduling-promise-dependencies.svg"
 ```
@@ -131,14 +130,14 @@ able to find a matching cluster to schedule the request:
 ```bash
 kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
-  --container manager | grep --max-count 1 "no Clusters can be selected for scheduling"
+  --container manager | grep --max-count 1 "no destinations can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
 # output formatted for readability
-INFO no Clusters can be selected for scheduling
+INFO no destinations can be selected for scheduling
 {
   "scheduling":
     {
@@ -153,7 +152,7 @@ It is time to update the Kratix cluster to have the matching `environment=dev` l
 to receive the ECK resources:
 
 ```
-kubectl --context $PLATFORM label cluster worker-cluster-1 environment=dev
+kubectl --context $PLATFORM label destination worker-cluster-1 environment=dev
 ```
 
 ### Verify the worker
@@ -205,7 +204,7 @@ Promise's `scheduling` field to the `/kratix/metadata/scheduling.yaml` file.
 
 Any selectors added in this file will be appended to the list provided by the Promise. This means means
 that you cannot override the Kratix cluster selectors set in the Promise definition. This enables clear
-security controls defined by the Promise author, and also guarantees that a Resource will always be scheduled to a Kratix cluster that has already received the Promise dependencies.
+security controls defined by the Promise author, and also guarantees that a Resource will always be scheduled to a Kratix cluster that has already received the Promise Dependencies.
 
 Given the new requirements for a persistent volume, you can update the Resource Configure Workflow to add
 the `pvCapacity=large` selector when `enableDataCollection` is set to `true`. This will indicate that
@@ -229,7 +228,7 @@ image. Run:
 ./scripts/test-pipeline
 ```
 
-Verify that the output now shows the cluster-selector file
+Verify that the output now shows the scheduling file
 
 ```shell-session
 📂 test
@@ -292,14 +291,14 @@ able to find a matching cluster to schedule the request:
 ```bash
 kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
-  --container manager | tac | grep --max-count 1 "no Clusters can be selected for scheduling"
+  --container manager | tac | grep --max-count 1 "no Destinations can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
 # output formatted for readability
-INFO no Clusters can be selected for scheduling
+INFO no Destinations can be selected for scheduling
 {"scheduling":
   {
     "promise":[{"target":{"matchLabels":{"environment":"dev"}}}],
@@ -307,7 +306,7 @@ INFO no Clusters can be selected for scheduling
   }
 ```
 
-Just as with the original `environment` label, Kratix queried what Clusters matched _all_
+Just as with the original `environment` label, Kratix queried what Destinations matched _all_
 provided label selectors. Since no cluster was found the resource fails to schedule until
 a Kratix cluster does match.
 
@@ -324,14 +323,13 @@ import SchedulingRR from "/img/docs/workshop/scheduling-resource-requests.svg"
 Next add the `pvCapacity=large` label to the cluster:
 
 ```
-kubectl --context $PLATFORM label cluster worker-cluster-1 pvCapacity=large
+kubectl --context $PLATFORM label destination worker-cluster-1 pvCapacity=large
 ```
 
 ### Verify the Resource is scheduled
 
 Kratix detects this change to the cluster labels and identifies that the Resource
-matches a Kratix Cluster so begins the scheduling process:
-
+matches a Kratix Destination so begins the scheduling process:
 ```bash
 kubectl --context $WORKER get pods -w
 ```

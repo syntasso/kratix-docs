@@ -74,7 +74,7 @@ jenkins.marketplace.kratix.io   2021-05-10T12:00:00Z
 
 <br />
 
-<p>The Jenkins Promise requires the Jenkins Operator to be deployed to the <code>worker</code> clusters. Kratix will deploy the operator when you apply the Promise. You can verify that the Jenkins Operator is now installed<br />
+<p>The Jenkins Promise requires the Jenkins Operator to be deployed to the <code>worker</code> Destination clusters. Kratix will deploy the operator when you apply the Promise. You can verify that the Jenkins Operator is now installed<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -120,7 +120,7 @@ NAME      STATUS
 example   Resource requested
 ```
 
-Eventually (it can take a couple of minutes), a new Jenkins should spin up on your `worker` cluster. You can verify this by running the following command:
+Eventually (it can take a couple of minutes), a new Jenkins should spin up on your `worker` Destination cluster. You can verify this by running the following command:
 
 <p>Verify the Jenkins was created on the worker cluster<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>

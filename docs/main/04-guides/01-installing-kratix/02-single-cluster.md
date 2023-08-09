@@ -1,6 +1,6 @@
 ---
-description: Run Kratix on a Single Cluster setup
-title: Single Cluster
+description: Run Kratix on a Single cluster setup
+title: Single cluster
 ---
 
 ```mdx-code-block
@@ -48,11 +48,11 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/
 <details>
   <summary>Alternative install instructions</summary>
 
-To register the minikube cluster as a Kratix Worker Cluster, run the command below:
+To register the minikube cluster as a Kratix Destination, run the command below:
 
 ```bash
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker_cluster.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml
 ```
 
 You can then install and configure Flux with the commands below:

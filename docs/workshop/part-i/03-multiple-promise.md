@@ -45,7 +45,7 @@ use the API to get the exact service they need.
 
 To deliver the simpler experience though, you want to orchestrate those Promises
 in a higher-level Promise. In Kratix terms, this is a Compound Promise: a
-Promise that define other Promises as its dependencies.
+Promise that define other Promises as its Dependencies.
 
 <figure class="diagram">
   <CompoundPromiseDiagram className="small"/>
@@ -62,12 +62,12 @@ The Compound Promise you will install can be found on the Kratix repository,
 under `samples/easy-app`. This Compound Promise encapsulate the Nginx
 and the Postgres Promises.
 
-Compound Promises work by including, in their list of dependencies, other
+Compound Promises work by including, in their list of Dependencies, other
 Promises. Those Promises need to be scheduled to the Platform cluster itself.
 That means you will need to include the Platform cluster to the list of clusters
 where workloads can be scheduled to.
 
-### Validate the Cluster state
+### Validate the state of your Platform cluster
 
 Before jumping in, verify that Kratix is still up and running on your Platform cluster:
 
@@ -105,7 +105,7 @@ The Platform cluster should now be registered with Kratix and ready to receive
 the workloads. Verify:
 
 ```bash
-kubectl --context $PLATFORM get clusters
+kubectl --context $PLATFORM get destinations
 ```
 
 The above command will give an output similar to:
@@ -167,11 +167,11 @@ kubectl --context $PLATFORM delete promise jenkins
   <figcaption>EasyApp Promise</figcaption>
 </figure>
 
-Since the EasyApp Promise declares two other Promises as its dependencies,
+Since the EasyApp Promise declares two other Promises as its Dependencies,
 installing it will add a total of three Promises to the platform:
 
 * The EasyApp Promise itself
-* Its dependencies: NGINX and PostgreSQL
+* Its Dependencies: NGINX and PostgreSQL
 
 From the Kratix directory, install the EasyApp Promise:
 
@@ -206,14 +206,14 @@ The above command will give an output similar to:
 # output formatted for readability
 ERROR    Reconciler error {
   "Work": {"name":"easyapp","namespace":"kratix-platform-system"},
-  "error": "no Clusters can be selected for clusterSelector"
+  "error": "no Destinations can be selected for scheduling"
 }
 ```
 
-Kratix is failing to reconcile since _no cluster can be selected for
-clusterSelector_. Promises can specify a Cluster Selector to determine the
-suitable clusters for hosting dependencies and workloads. Check the Cluster
-Selector defined for the EasyApp Promise:
+Kratix is failing to reconcile since _no Destination can be selected for
+scheduling_. Promises can specify scheduling logic to determine the
+suitable Destinations for hosting Dependencies and workloads. Check the scheduling
+logic defined for the EasyApp Promise:
 
 ```bash
 kubectl --context $PLATFORM describe promise easyapp | tail -n 20 | \
@@ -231,14 +231,14 @@ Spec:
 
 This means the EasyApp Promise is telling Kratix:
 
-> Only install my dependencies (i.e., the NGINX and the PostgreSQL Promises) in
-> Clusters with the **label environment=platform**.
+> Only install my Dependencies (i.e., the NGINX and the PostgreSQL Promises) in
+> Destinations with the **label environment=platform**.
 
-Check the registered Clusters again, but this time ask `kubectl` to also show
-the Cluster labels:
+Check the registered Destinations again, but this time ask `kubectl` to also show
+the Destination labels:
 
 ```bash
-kubectl --context $PLATFORM get clusters --show-labels
+kubectl --context $PLATFORM get destinations --show-labels
 ```
 
 The above command will give an output similar to:
@@ -257,7 +257,7 @@ Note that the Platform cluster is missing the required label. Adding the missing
 label should cause the system to converge to the desired state:
 
 ```bash
-kubectl --context $PLATFORM label cluster platform-cluster environment=platform; \
+kubectl --context $PLATFORM label destination platform-cluster environment=platform; \
 kubectl --context $PLATFORM get promises --watch
 ```
 
@@ -279,8 +279,8 @@ exit the watch mode.
   <figcaption>Sequence of events during the installation of a Compound Promise</figcaption>
 </figure>
 
-Once the sub-Promises are installed, their dependencies will be scheduled to a
-Cluster. The EasyApp sub-Promises are also declaring a Cluster Selector.
+Once the sub-Promises are installed, their Dependencies will be scheduled to a
+Destination. The EasyApp sub-Promises are also declaring a cluster Selector.
 Verify:
 
 ```bash
@@ -302,14 +302,14 @@ The above command will give an output similar to:
 
 The NGINX and the PosgreSQL Promises are telling Kratix:
 
-> Only install my dependencies (which include, the NGINX Ingress Controller and the
-> PostgreSQL operator) in Clusters with the **label environment=dev**.
+> Only install my Dependencies (which include, the NGINX Ingress Controller and the
+> PostgreSQL operator) in Destinations with the **label environment=dev**.
 
 As you may have noted before, the Worker cluster is already labelled correctly.
 Verify:
 
 ```bash
-kubectl --context $PLATFORM get cluster worker-cluster --show-labels
+kubectl --context $PLATFORM get destination worker-cluster --show-labels
 ```
 
 The above command will give an output similar to:
@@ -318,8 +318,8 @@ NAME               AGE   LABELS
 worker-cluster      1h   environment=dev
 ```
 
-Since the Worker Cluster include the label, the NGINX and PostgreSQL Promise
-dependencies should be getting installed into the Worker cluster. Verify:
+Since the Worker Destination include the label, the NGINX and PostgreSQL Promise
+Dependencies should be getting installed into the Worker cluster. Verify:
 
 ```bash
 kubectl --context $WORKER get deployments --watch
@@ -345,16 +345,16 @@ exit.
 
 Platform users can go ahead and start using the Promises!
 
-:::info Managing a Fleet of Clusters
+:::info Managing a Fleet of Destinations
 
 The mechanism described above is one of the most powerful features in Kratix:
 the ability Platform teams have to fully control the scheduling of works across
-Clusters.
+Destinations.
 
-When a Cluster is registered, Kratix will execute its scheduling tasks and
-determine what should be immediately installed on the new Cluster. When a
-Promise gets updated or upgraded, its dependencies are seamlessly propagated
-across the fleet. If a Cluster labels change, Kratix will automatically converge
+When a Destination is registered, Kratix will execute its scheduling tasks and
+determine what should be immediately installed on the new Destination. When a
+Promise gets updated or upgraded, its Dependencies are seamlessly propagated
+across the fleet. If a Destination labels change, Kratix will automatically converge
 on the expected system state.
 
 If you are curious to learn more about Kratix Scheduling, check the

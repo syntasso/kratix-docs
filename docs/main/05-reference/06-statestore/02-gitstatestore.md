@@ -1,5 +1,5 @@
 ---
-description: Documentation for the Kratix GitStateStore Custom Resource
+description: Documentation for the Kratix `GitStateStore`` Custom Resource
 title: GitStateStore
 sidebar_label: GitStateStore
 id: gitstatestore
@@ -17,7 +17,7 @@ spec:
   # The branch to write to: optional, defaults to main
   branch: main
   # The top-level path in the git repository to write to: optional
-  path: clusters/
+  path: destinations/
   # Required
   secretRef:
     # The name and namespace of the secret to use to authenticate: required
@@ -65,4 +65,3 @@ the `password` field with the token value.
 Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
-

@@ -47,7 +47,7 @@ _In this guide, you only need create a new Postgres Promise that creates Postgre
 
 1. [Get a base Promise](#base-promise)
 1. [Change the Promise so that _the user who wants an Resource_ knows they need to include their `costCentre` name when they make their request to the platform](#api)
-1. [Change the Promise so that _the Worker Cluster_ Operator that creates the Resource knows to apply your new `costCentre` label `costCentre`](#dependencies)
+1. [Change the Promise so that _the operator Dependency_ that creates the Resource knows to apply your new `costCentre` label `costCentre`](#dependencies)
 1. [Change the Promise so that _the Workflow_ knows how to add the user's `costCentre` to the request for a Resource](#workflow)
 1. [Install the modified Promise on your platform](#install-promise)
 1. [Check it works: make a request to your platform for a Postgres Resource](#verify-resource)
@@ -186,31 +186,29 @@ api:
 
 ### Step three: `dependencies` {#dependencies}
 
-> Change the Promise so that _the Worker_ that can host the Postgres knows to apply your new `costCentre` label `costCentre`
+> Change the Promise so that _the worker Destination_ that can host the Postgres knows to apply your new `costCentre` label `costCentre`
 
 #### About `dependencies`
 
 <img
 align="right"
 src={useBaseUrl('/img/docs/dependencies.png')}
-alt="screenshot of a YAML file, highlighting the presence of the dependencies key"
+alt="screenshot of a YAML file, highlighting the presence of the Dependencies key"
 />
 
 `dependencies` is the description of all of the Kubernetes resources required to create a promised Resource, such as CRDs, Operators and Deployments.
 
 In the Promise definition, you divide resources based on the idea of _prerequisite_ and _per-resource_ items. Prerequisite resources are resources that we create before any application team requests a Resource. This can be helpful for two scenarios:
-
-1. Any CRDs or dependencies are ready when an Resource is requested which speeds up response time to application teams.
+1. Any CRDs or Dependencies are ready when an Resource is requested which speeds up response time to application teams.
 1. Resources that can be shared across Resources are only deployed once. This can reduce load on the cluster, and it can also allow delivering a Resource as a portion of an existing Resource (e.g. you could provide a whole database instance on each request, or you could provide a database within an existing instance on each request)
 
 The `dependencies` section of the Kratix Promise defines the _prerequisite capabilities_.
 
 These capabilities are:
+* created once per Destination.
+* complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
 
-- created once per cluster.
-- complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
-
-For the Postgres Promise you're defining, the only cluster resources (prerequisite capabilities) you need are conveniently packaged in a [Kubernetes Operator](https://github.com/zalando/postgres-operator) that is maintained by Zalando. The Operator turns the complexities of configuring Postgres into a manageable configuration format.
+For the Postgres Promise you're defining, the only Dependency workloads you need are conveniently packaged in a [Kubernetes Operator](https://github.com/zalando/postgres-operator) that is maintained by Zalando. The Operator turns the complexities of configuring Postgres into a manageable configuration format.
 
 #### Update `dependencies`
 
@@ -391,7 +389,7 @@ src={useBaseUrl('img/docs/xaasRequestPipeline.png')}
 alt="screenshot of a YAML file, highlighting the presence of the Workflow key"
 />
 
-`workflows.resource.configure` contains a Kratix Pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Worker Cluster.
+`workflows.resource.configure` contains a Kratix Pipeline that will take your user's request, apply rules from your organisation (including adding the `costCentre` name), and output valid Kubernetes documents for the Operator to run on a Destination cluster.
 
 Conceptually, a configure Pipeline is a sequential set of steps that transforms an input value to generate an output value. There are three parts to the PostgreSQL Pipeline.
 
@@ -595,7 +593,7 @@ kind load docker-image kratix-workshop/postgres-configure-pipeline:dev --name pl
 
 #### Update the Promise's `workflows` value
 
-The new image is built and available on your Platform Cluster. Update your Promise to use the new image.
+The new image is built and available on your Platform cluster. Update your Promise to use the new image.
 
 Open the Promise definition file (`promise-postgresql/promise.yaml`). From the top of the file, navigate to `spec` > `workflows` > `resource` > `configure[0]` > `spec` > `containers[0]` > `image` and replace the current value image with the newly created `kratix-workshop/postgres-configure-pipeline:dev` image.
 
@@ -669,8 +667,8 @@ worker:<br/>
 
 For Postgres, you can see in the Promise file that there are a number of RBAC
 resources, as well as a deployment that installs the Postgres Operator in the
-Worker Cluster. That means that when the Promise is successfully applied you
-will see the `postgres-operator` deployment in the Worker Cluster. That's also
+worker cluster. That means that when the Promise is successfully applied you
+will see the `postgres-operator` deployment in the worker cluster. That's also
 an indication that the Operator is ready to provision a new Postgres.
 
 ```console
@@ -729,7 +727,7 @@ spec:
 
 </details>
 
-Then apply the request file to the Platform Cluster:
+Then apply the request file to the Platform cluster:
 
 ```console
 kubectl --context $PLATFORM apply --filename resource-request.yaml
@@ -768,7 +766,7 @@ Then view the Pipeline logs by running _(replace SHA with the value from the out
 kubectl --context $PLATFORM logs --container xaas-configure-pipeline-stage-0 pods/configure-pipeline-postgresql-default-SHA
 ```
 
-<p>On the Worker Cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined by the Resource definition (<code>postgres-resource-request.yaml</code>).<br />
+<p>On the worker cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined by the Resource definition (<code>postgres-resource-request.yaml</code>).<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -807,7 +805,7 @@ To recap the steps we took:
 
 1. ✅&nbsp;&nbsp;Acquired a base Promise
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the user who wants a Postgres_ knows they need to include their `costCentre` name when they make their request to the platform
-1. ✅&nbsp;&nbsp;Changed the Promise so that _the Worker Cluster_ Operator that creates the Resource knows to apply the new `costCentre` label `costCentre`
+1. ✅&nbsp;&nbsp;Changed the Promise so that _the operator dependency_ that creates the Resource knows to apply the new `costCentre` label `costCentre`
 1. ✅&nbsp;&nbsp;Changed the Promise so that _the Workflow_ knows how to add the user's `costCentre` to the request for the Postgres
 1. ✅&nbsp;&nbsp;Installed the modified Promise on your platform
 1. ✅&nbsp;&nbsp;Checked it works: make a request to your platform for a Postgres Resource
@@ -822,8 +820,7 @@ To clean up your environment first delete your request for the Postgres Resource
 kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
-Verify the workloads belonging to the request have been deleted in the Worker Cluster
-
+Verify the workloads belonging to the request have been deleted in the worker
 ```console
 kubectl --context $WORKER get pods
 ```
@@ -834,8 +831,7 @@ Now that the Resource has been deleted you can delete the Promise
 kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
-Verify the Dependencies are deleted from the Worker Cluster
-
+Verify the Dependencies are deleted from the worker
 ```console
 kubectl --context $WORKER get pods
 ```

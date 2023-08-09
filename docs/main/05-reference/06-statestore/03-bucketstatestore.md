@@ -22,7 +22,7 @@ spec:
   # Skip TLS veritfication: optional, defaults to false
   insecure: false
   # The Top-level path in the Bucket repository to write to: optional
-  path: clusters/
+  path: destinations/
   # Required
   secretRef:
     # The name and namespace of the secret to use to authenticate: required
@@ -61,4 +61,3 @@ For other providers see there documentation for setting up the bucket and creden
 Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
-

@@ -18,4 +18,4 @@ At a very high-level, a Promise is made up of four parts:
    steps top generate a *declarative state* that's then persisted into the State
    Store. Other systems will then *converge* on that state.
 4. **The Dependencies**: A dependency is anything that must be installed or made
-   available on Worker clusters to enable the promised service to run.
+   available on Worker Destinations to enable the promised service to run.

@@ -6,8 +6,8 @@ import Link from '@docusaurus/Link';
 import CurvedArrow from 'react-curved-arrow';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 
-interface Props {}
-export default function GettingStarted({}: Props): JSX.Element {
+interface Props { }
+export default function GettingStarted({ }: Props): JSX.Element {
   const win1ID = uniqueId('window-1');
   const win2ID = uniqueId('window-2');
   const win3ID = uniqueId('window-3');
@@ -45,7 +45,7 @@ export default function GettingStarted({}: Props): JSX.Element {
         <strong>🎉 Your Promised Postgres is ready to use! 🎉</strong>
       </p>
       <p>
-        Follow our <Link to="/docs/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and clusters.
+        Follow our <Link to="/docs/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and additional destinations.
       </p>
 
       <BrowserOnly fallback={<div></div>}>
