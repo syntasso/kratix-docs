@@ -6,7 +6,7 @@ id: intro
 
 This page walks through the Kratix deployment topology for the Platform team for our example organisation EasyEaty. The organisation has a number of Application Development teams that all use the Platform to get the services they require.
 
-![Overview](/img/kratix-arch-diagram.png)
+![Overview](/img/kratix-arch-full.png)
 
 ## Kratix platform cluster
 

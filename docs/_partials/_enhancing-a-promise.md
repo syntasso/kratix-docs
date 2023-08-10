@@ -660,7 +660,7 @@ works.platform.kratix.io                 2022-08-09T14:35:55Z
 
 <br />
 
-<p>Check that the Dependencies have been installed on the worker:<br/>
+<p>Check that the ependencies have been installed on the worker:<br/>
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
