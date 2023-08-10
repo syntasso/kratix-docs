@@ -32,7 +32,7 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 1. [Use the Jenkins](#use-your-jenkins-resource)
 1. [Clean up environment](#cleanup)
 
-![Overview](/img/docs/Treasure_Trove-Install_a_Promise.jpeg)
+![Overview](/img/docs/kratix_diagrams-Install_Promise.jpg)
 ### Install the Jenkins Promise
 
 
@@ -99,7 +99,7 @@ Application developers using your platform will be issued a Jenkins after reques
 <br />
 <br />
 
-![Verify-Instance](/img/docs/Treasure_Trove-Get_an_instance.jpeg)
+![Verify-Instance](/img/docs/kratix_diagrams-Get_Instance.jpg)
 
 Test your platform by acting as an application developer and submitting a request for a Resource:
 ```bash

@@ -104,7 +104,8 @@ folder for now.
 
 <img
 align="right"
-src={useBaseUrl('/img/docs/api.png')}
+width="50%"
+src={useBaseUrl('/img/docs/promise-crd-api.jpg')}
 alt="screenshot of a YAML file, highlighting the presence of the api key"
 />
 
@@ -192,7 +193,8 @@ api:
 
 <img
 align="right"
-src={useBaseUrl('/img/docs/dependencies.png')}
+width="50%"
+src={useBaseUrl('/img/docs/promise-crd-dependencies.jpg')}
 alt="screenshot of a YAML file, highlighting the presence of the Dependencies key"
 />
 
@@ -381,11 +383,10 @@ Under the `kubernetes` key, add `inherited_labels: [costCentre]`.
 
 #### About `workflows`
 
-<!-- TODO: (promising future) update diagram -->
-
 <img
 align="right"
-src={useBaseUrl('img/docs/xaasRequestPipeline.png')}
+width="50%"
+src={useBaseUrl('img/docs/promise-crd-workflows.jpg')}
 alt="screenshot of a YAML file, highlighting the presence of the Workflow key"
 />
 
