@@ -52,7 +52,7 @@ The commands below will refer to a `KRATIX_MARKETPLACE_REPO` env variable. You c
 :::
 
 
-Installing a Kratix Promise is as simple as applying the Promise YAML definition on your Platform cluster:
+Installing a Kratix Promise is as simple as applying the Promise YAML definition on your platform cluster:
 
 ```bash
 kubectl --context $PLATFORM apply \
@@ -150,7 +150,6 @@ Before you can access Jenkins UI, you must port forward from within the Kubernet
 _**Open a new terminal to request the port forward**_.
 
 ```console
-export WORKER=kind-worker
 kubectl --context $WORKER port-forward jenkins-dev-example 8080:8080
 ```
 

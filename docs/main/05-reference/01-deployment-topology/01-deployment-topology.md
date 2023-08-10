@@ -8,9 +8,9 @@ This page walks through the Kratix deployment topology for the Platform team for
 
 ![Overview](/img/kratix-arch-diagram.png)
 
-## Kratix Platform cluster
+## Kratix platform cluster
 
-The cluster where Kratix is installed is the Platform cluster, which is in the centre of the diagram and has the label _Platform_. This is the cluster that both the Platform team and Application Development teams interface with.
+The cluster where Kratix is installed is the platform cluster, which is in the centre of the diagram and has the label _Platform_. This is the cluster that both the Platform team and Application Development teams interface with.
 
 The Platform contains three important elements:
 
@@ -22,7 +22,7 @@ The Platform contains three important elements:
 
 When a [Kratix Promise](./promises/intro) is installed, or when a request for a new [Resource](./resources/intro) comes in to the Platform, Kratix will react by writing workloads to the Desintation's State Store.
 
-For example, the State Store in EasyEaty's topology is a Git Repository pictured to the right of the Platform cluster. When the _Web App Golden Path_ Promise was installed on the Platform, a set of workloads required to fulfil the Promise was written to that State Store.
+For example, the State Store in EasyEaty's topology is a Git Repository pictured to the right of the platform cluster. When the _Web App Golden Path_ Promise was installed on the Platform, a set of workloads required to fulfil the Promise was written to that State Store.
 
 ## Worker Destinations
 
@@ -40,7 +40,7 @@ For example, the _EKS_ Worker has a number of Resources that were requested by _
 
 To enable these Resources, each Destination also has a set of Dependencies installed. These Dependencies are baseline capabilities installed on the Destination at the time the Promise is installed on the Platform, and they represent the software that needs to be running prior to any requested Resource.
 
-For example, when the _Web App Golden Path_ Promise was installed on the Platform cluster, one of the Dependencies that was immediately installed on the _EKS_ Worker was the Jenkins Operator, which is required before a request for a Jenkins Resource can be fulfilled.
+For example, when the _Web App Golden Path_ Promise was installed on the platform cluster, one of the Dependencies that was immediately installed on the _EKS_ Worker was the Jenkins Operator, which is required before a request for a Jenkins Resource can be fulfilled.
 
 ### Platform as a Worker
 

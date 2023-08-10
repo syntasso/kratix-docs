@@ -31,12 +31,12 @@ instance instead.
 
 :::
 
-## Set up Platform cluster {#platform-setup}
+## Set up platform cluster {#platform-setup}
 
 If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
 ```bash
 kind create cluster --image kindest/node:v1.24.0 --name platform
-# set PLATFORM to point to the Platform cluster context
+# set PLATFORM to point to the platform cluster context
 export PLATFORM="kind-platform"
 ```
 
@@ -95,7 +95,7 @@ If you are not using a pre-existing cluster, create your platform cluster locall
 ```bash
 kind create cluster --image kindest/node:v1.24.0 --name worker
 
-# set WORKER to point to the Worker cluster context
+# set WORKER to point to the worker cluster context
 export WORKER="kind-worker"
 ```
 
@@ -107,7 +107,7 @@ Install [Flux](https://fluxcd.io/). Flux will be used to pull down resources to 
 cluster from the State Store
 ```bash
 # Install flux on the worker
-kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-install.yaml
 ```
 
 
@@ -120,7 +120,7 @@ Follow the steps below that match the State Store you created previously:
 
 ```bash
 # Configure Flux to pull down from MinIO
-kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources.yaml
 ```
 
 </TabItem>
@@ -129,7 +129,7 @@ kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syn
 
 ```bash
 # Configure Flux to pull down from Gitea
-kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-git.yaml
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources-git.yaml
 ```
 
 </TabItem>
@@ -138,9 +138,9 @@ kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syn
 
   You will need to manual configure the Flux resources to use the Git/Bucket created.
 
-  - Bucket: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources.yaml)
+  - Bucket: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources.yaml)
     to use the endpoint, bucket and credentials for your Bucket.
-  - Git: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-git.yaml)
+  - Git: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources-git.yaml)
     to use the url, branch, and credentials for your Git Repository.
 
 </TabItem>

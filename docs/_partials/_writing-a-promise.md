@@ -30,7 +30,7 @@ alt="Kratix logo"
 
 1. `api`: the API (in Kubernetes terms, the CRD) that application developers
    use to request a Resource from the Kratix Promise.
-1. `dependencies`: a collection of prerequisites that enable the creation of a Resource that must be pre-installed in the Workers.
+1. `dependencies`: a collection of prerequisites that enable the creation of a Resource that must be pre-installed on any Destinations.
 1. `workflows`: a list of pipelines to be executed at different stages of the
    Promise lifecycle, like during the Promise installation or the creation of a
    new Resource. It contains the series of steps required by your business to
@@ -50,13 +50,13 @@ Thinking of your platform as-a-Product, steps to write a Promise are:
 - Next, determine what the software dependencies are that you need to fulfils
   the Promise. You may find out you need a [Kubernetes
   Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
-  running on the Worker, for example.
+  running on the Destination cluster, for example.
 - In the Promise, add your dependencies in the `dependencies`.
 - Finally, determine the steps that need to be executed during the Promise's
   lifecycle. The minimum you'll need is a Workflow to configure your Resource which will run on creation. These may include translating the user's request into the Operator's expected document, injecting custom configuration, sending requests to internal APIs to
   verify permissions, scanning images for vulnerabilities, etc.
 * In the Promise, list those Workflows in the `workflows`.
-* Install the Promise on your Platform cluster, where Kratix is installed.
+* Install the Promise on your platform cluster, where Kratix is installed.
 
 ### Platform User Journey
 
@@ -77,7 +77,7 @@ At this point, Kratix will execute the following steps:
   documentation](/docs/main/reference/resources/workflows).
 - Once all Workflows are executed, a series of documents are outputted,
   encapsulating the user's request into valid Kubernetes objects.
-* Those documents are schedule to an available Worker Cluster, which in turn has
+* Those documents are schedule to an available Destination, which in turn has
   the necessary dependencies installed (via the Promise's `dependencies` field)
 - The necessary infrastructure is created and configured, and the user can reference any necessary details in the Resource status field (e.g. how to connect to a service).
 
@@ -481,14 +481,14 @@ In summary, you have:
   - A shell script to retrieve the per-Resource details from the user's
     request, and inject them into the template (`execute-pipeline`)
 - Executed the image locally to validate its output
-- Loaded the image into the Platform cluster (or pushed it to the registry)
+- Loaded the image into the platform cluster (or pushed it to the registry)
 - Wrapped the image in a Kratix Pipeline and added it to the
   `resource.configure` Workflow.
 
 ### Define the `dependencies` in your Promise definition {#dependencies}
 
 The `dependencies` describes everything required to fulfil the
-Promise. Kratix applies this content on all registered Workers.
+Promise. Kratix applies this content on all registered Destinations.
 
 For this Promise, the `dependencies` needs to contain the Jenkins CRD
 and Operator.
@@ -696,7 +696,7 @@ docs](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom
 #### `dependencies`
 
 The `dependencies` describes everything required to fulfil the
-Promise. Kratix applies this content on all registered Workers. For
+Promise. Kratix applies this content on all registered Destinations. For
 instance with the Jenkins Promise, the `dependencies` contains the
 Jenkins CRD, the Jenkins Operator, and the resources the Operator requires.
 
@@ -707,7 +707,7 @@ The `workflows` describes a set of actions to run in response to actions that af
 You have configured the `instance.configure` lifecycle hook to run a Kratix `Pipeline`. In the pipeline, you defined an array of container images that will be executed in order, in response to a Resource being created or updated.
 
 Once all images are executed, Kratix will schedule any document outputted by the
-pipeline to a Worker cluster.
+pipeline to a worker cluster.
 
 ## Recap {#summary}
 
@@ -721,7 +721,7 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Packaged the pipeline step as a Docker image
 1. ✅&nbsp;&nbsp;Tested the Docker image
 1. ✅&nbsp;&nbsp;`dependencies`: Defined what needs to be present on
-   your Workers to fulfil this Promise
+   your Destinations to fulfil this Promise
 1. ✅&nbsp;&nbsp;Installed your Kratix Promise
 1. ✅&nbsp;&nbsp;Created and submitted a request for the promised Resource
 1. ✅&nbsp;&nbsp;Reviewed the components of a Promise

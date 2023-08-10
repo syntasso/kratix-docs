@@ -1,14 +1,14 @@
 ---
-description: Guide on how to register a new Worker with Kratix
-title: Adding a new Worker
+description: Guide on how to register a new Destination with Kratix
+title: Adding a new Destination
 ---
 
-One of the most powerful features of Kratix is its ability to react when new Workers are added to the platform. By default, any Promise installed into Kratix will schedule it's Dependencies to new clusters joining the platform.
+One of the most powerful features of Kratix is its ability to react when new Destinations are added to the platform. These Destinations can represent additional Kubernetes clusters, Kubernetes namespaces, or completely different infrastructure like a Terraform Cloud account or edge compute provider. By default, any Promise installed into Kratix will schedule it's Dependencies to new Destinations joining the platform.
 
 ## Pre-requisites
 
 In this section, we will register a new Kubernetes cluster as a Destination with Kratix, and
-verify its multi-cluster capabilities. Before continuing, you will need a Platform
+experience the Kratix multi-cluster capabilities. Before continuing, you will need a Platform
 Kubernetes cluster running Kratix, and a second worker Kubernetes cluster to
 register with the Platform. You also need at least one Promise installed on
 the Platform.
@@ -31,7 +31,7 @@ installed, if needed.
 ```shell-session
 $ kubectl --context $PLATFORM get destinations.platform.kratix.io
 NAME               AGE
-worker-cluster-1   1h
+worker-1   1h
 
 $ kubectl --context $PLATFORM get promises.platform.kratix.io
 NAME              AGE
@@ -50,12 +50,12 @@ If your setup is different, update the commands accordingly.
 
 ## Preparing the new cluster
 
-You will now add a new cluster to the Platform as a Destination and watch Kratix reconcile the
+You will now add the new cluster to the Platform as a Destination and watch Kratix reconcile the
 system. For that, you need to first create the new Kubernetes cluster:
 
 ```bash
-kind create destination --image kindest/node:v1.24.0 --name worker-cluster-2
-export WORKER_2="kind-worker-cluster-2"
+kind create cluster --image kindest/node:v1.24.0 --name worker-2
+export WORKER_2="kind-worker-2"
 ```
 
 Next, install the GitOps toolkit and create the necessary GitOps resources on the new worker cluster. The quickest
@@ -64,32 +64,32 @@ directory:
 
 ```bash
 cd /path/to/kratix
-./scripts/install-gitops --context ${WORKER_2} --path worker-cluster-2
+./scripts/install-gitops --context ${WORKER_2} --path worker-2
 ```
 
 ## Registering the Destination
 
-You can now register your cluster with Kratix as a Destination. Create a file called `worker-cluster-2.yaml` with the
+You can now register your cluster with Kratix as a Destination. Create a file called `worker-2.yaml` with the
 following contents:
 
-```yaml title="worker-cluster-2.yaml"
+```yaml title="worker-2.yaml"
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination
 metadata:
-  name: worker-cluster-2
+  name: worker-2
   labels:
     environment: dev
 spec:
   stateStoreRef:
-    name: default
+    name: minio-store
     kind: BucketStateStore
 ```
 
 The Destination will using the pre-existing MinIO [State Store](/docs/main/05-reference/06-statestore/01-statestore.md).
-Apply the Destination document to the Platform cluster:
+Apply the Destination document to the platform cluster:
 
 ```bash
-kubectl --context $PLATFORM apply --filename worker-cluster-2.yaml
+kubectl --context $PLATFORM apply --filename worker-2.yaml
 ```
 
 Check the Destination was created:
@@ -98,7 +98,7 @@ Check the Destination was created:
 $ kubectl --context $PLATFORM get destinations.platform.kratix.io
 NAME               AGE
 worker-cluster-1   1h
-worker-cluster-2   1h
+worker-2   1h
 ```
 
 Kratix will react to the new Destination by scheduling the installation of the Jenkins Promise

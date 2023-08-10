@@ -1,5 +1,5 @@
 Following the previous step of this tutorial, you should now
-have a deployment of both Kratix and MinIO running on your Platform cluster
+have a deployment of both Kratix and MinIO running on your platform cluster
 with no installed Promises.
 
 You should also have two environment variables, `PLATFORM` and `WORKER`.

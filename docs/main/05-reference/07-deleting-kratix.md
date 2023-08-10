@@ -4,7 +4,7 @@ sidebar_label: Uninstalling Kratix
 description: Learn more about how to uninstall Kratix
 ---
 
-## Platform cluster
+## platform cluster
 To uninstall Kratix you need to run through the following steps:
 1. Delete all installed Promises:
   ```bash

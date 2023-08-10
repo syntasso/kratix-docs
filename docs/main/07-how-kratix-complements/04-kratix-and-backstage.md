@@ -36,7 +36,7 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 
 ## How
 
-Integrating Backstage with Kratix is simple. Point Backstage at the Kratix Platform cluster and that's it. Kratix will then build the Backstage views as Promises are loaded into Kratix, and Resources are requested by users of the platform.
+Integrating Backstage with Kratix is simple. Point Backstage at the Kratix platform cluster and that's it. Kratix will then build the Backstage views as Promises are loaded into Kratix, and Resources are requested by users of the platform.
 
 Declarative UIs by default with Kratix:
 

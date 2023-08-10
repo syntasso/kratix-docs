@@ -36,7 +36,7 @@ kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/
 kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/minio-install.yaml
 
 # Install Flux
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-install.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-install.yaml
 ```
 
 </details>
@@ -59,7 +59,7 @@ You can then install and configure Flux with the commands below:
 
 ```bash
 # Install the GitOps toolkit
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/worker/gitops-tk-resources-single-cluster.yaml
+kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources-single-cluster.yaml
 ```
 
 </details>

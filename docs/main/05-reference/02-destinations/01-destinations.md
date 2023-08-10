@@ -30,7 +30,7 @@ spec:
     kind: BucketStateStore
 ```
 
-When a new Destination is registered in the Platform cluster (i.e., a new Destination resource is
+When a new Destination is registered in the platform cluster (i.e., a new Destination resource is
 created), Kratix will write to two paths in the [State Store](../06-statestore/01-statestore.md):
 one for `resources`, one for `crds`. The path within the `State Store` follows the following pattern:
 ```

@@ -15,8 +15,8 @@ You can run Kratix either with a multi-cluster or a single-cluster setup. The
 commands on the remainder of this document assume that two environment variables
 are set:
 
-1. `PLATFORM` representing the Platform cluster Kubernetes context
-2. `WORKER` representing the Worker cluster Kubernetes context
+1. `PLATFORM` representing the platform cluster Kubernetes context
+2. `WORKER` representing the worker cluster Kubernetes context
 
 If you ran the quick-start script above, do:
 
@@ -35,5 +35,3 @@ kubectl config get-contexts
 Refer back to [Installing Kratix](../../category/installing-kratix) for more
 details.
 </details>
-
-

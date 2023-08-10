@@ -23,7 +23,7 @@ Compound Promises are Promises that, in its Dependencies, contain other Promises
 
 ## Register the Platform as a Worker
 
-To install a Compound Promises, the first step is to register the Platform cluster itself as an available Destination. That's because the Dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the Platform cluster.
+To install a Compound Promises, the first step is to register the platform cluster itself as an available Destination. That's because the Dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the platform cluster.
 
 Create a new [Destination document](../reference/destinations/intro) platform-cluster.yaml` with the following contents:
 
@@ -48,7 +48,7 @@ kubectl --context $PLATFORM apply --filename platform-cluster.yaml
 
 ## Install and configure GitOps
 
-For the Platform cluster to sync as a worker, you will need to install the GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
+For the platform cluster to sync as a worker, you will need to install the GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
@@ -166,7 +166,7 @@ spec:
   ... # remainder of the paved path Promise...
 ```
 
-Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its CRDs are only installed in the Platform cluster, you need to ensure the Dependencies are applied exclusively to the Platform cluster.
+Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its CRDs are only installed in the platform cluster, you need to ensure the Dependencies are applied exclusively to the platform cluster.
 
 That is controlled by the `scheduling` key:
 
@@ -205,7 +205,7 @@ worker-cluster-1     1hr    environment=dev
 ```
 
 However, the sub-Promises' Dependencies (i.e. the Knative and Postgres Dependencies) should not be installed
-in the Platform cluster, but in the worker cluster. When you executed the quick start
+in the platform cluster, but in the worker cluster. When you executed the quick start
 script, it registered the worker cluster as a Destination with a label `environment: dev` (as
 per output above). The `scheduling` field in the sub-Promises are set to target
 those clusters:
@@ -252,7 +252,7 @@ spec:
 
 This configuration ensures the Knative CRDs and the Postgres Operator are installed
 exclusively in the worker. This is how, when installing the Paved Path Promise,
-Kratix knew it should install the sub-Promises in the Platform cluster and the
+Kratix knew it should install the sub-Promises in the platform cluster and the
 sub-Promises' Dependencies in the worker.
 
 ## A closer look in the Workflow
@@ -263,7 +263,7 @@ Compound Promises, that's usually a set of requests for other promised Resources
 
 The Paved Path Promise is a very basic example, but you can see that's exactly what the
 Workflow Pipeline is doing in its
-[Dockerfile](https://github.com/syntasso/kratix/blob/main/samples/paved-path-demo/configure-pipeline-image/Dockerfile#L6-L11).
+[Dockerfile](https://github.com/syntasso/kratix/blob/main/samples/paved-path-demo/configure-pipeline/Dockerfile#L6-L11).
 
 ## 🎉 Congratulations
 

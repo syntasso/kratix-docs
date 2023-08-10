@@ -67,6 +67,6 @@ spec:
   storageGB: 10
 ```
 
-When applied to the Platform cluster, Kratix will trigger the associated Workflows. For more details on the Workflows, see the [Workflow reference](./workflows).
+When applied to the platform cluster, Kratix will trigger the associated Workflows. For more details on the Workflows, see the [Workflow reference](./workflows).
 
 For a in-depth exploration of requesting a Resource and Kratix Workflows, check the [Writing a Promise](../../guides/writing-a-promise) and [Enhancing a Promise](../../guides/enhancing-a-promise) guides.

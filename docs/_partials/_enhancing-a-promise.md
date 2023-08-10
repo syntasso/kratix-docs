@@ -593,7 +593,7 @@ kind load docker-image kratix-workshop/postgres-configure-pipeline:dev --name pl
 
 #### Update the Promise's `workflows` value
 
-The new image is built and available on your Platform cluster. Update your Promise to use the new image.
+The new image is built and available on your platform cluster. Update your Promise to use the new image.
 
 Open the Promise definition file (`promise-postgresql/promise.yaml`). From the top of the file, navigate to `spec` > `workflows` > `resource` > `configure[0]` > `spec` > `containers[0]` > `image` and replace the current value image with the newly created `kratix-workshop/postgres-configure-pipeline:dev` image.
 
@@ -660,8 +660,7 @@ works.platform.kratix.io                 2022-08-09T14:35:55Z
 
 <br />
 
-<p>Check that the `dependencies` have been installed on the
-worker:<br/>
+<p>Check that the Dependencies have been installed on the worker:<br/>
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -727,7 +726,7 @@ spec:
 
 </details>
 
-Then apply the request file to the Platform cluster:
+Then apply the request file to the platform cluster:
 
 ```console
 kubectl --context $PLATFORM apply --filename resource-request.yaml
