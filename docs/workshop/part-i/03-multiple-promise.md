@@ -22,10 +22,10 @@ This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 
 **In this tutorial, you will:**
 
-- learn about Compound Promises
-- see a Compound Promise in action
+- [learn about Compound Promises](#what-is-a-compound-promise)
+- [see a Compound Promise in action](#write-a-compound-promise)
 
-## What's a Compound Promise?
+## What's a Compound Promise? {#what-is-a-compound-promise}
 
 Imagine that you want to provide your users with a simpler way to deploy their
 applications. You do your research and notice that most teams use a similar
@@ -55,21 +55,20 @@ Promise that define other Promises as its Dependencies.
 
 In this tutorial, you will install and use a Compound Promise.
 
-## Installing a Compound Promise
-
+## Installing a Compound Promise {#write-a-compound-promise}
 
 The Compound Promise you will install can be found on the Kratix repository,
 under `samples/easy-app`. This Compound Promise encapsulate the Nginx
 and the Postgres Promises.
 
 Compound Promises work by including, in their list of Dependencies, other
-Promises. Those Promises need to be scheduled to the Platform cluster itself.
-That means you will need to include the Platform cluster to the list of clusters
+Promises. Those Promises need to be scheduled to the platform cluster itself.
+That means you will need to include the platform cluster to the list of clusters
 where workloads can be scheduled to.
 
-### Validate the state of your Platform cluster
+### Validate the state of your platform cluster
 
-Before jumping in, verify that Kratix is still up and running on your Platform cluster:
+Before jumping in, verify that Kratix is still up and running on your platform cluster:
 
 ```bash
 kubectl --context $PLATFORM get pods --namespace kratix-platform-system
@@ -86,10 +85,10 @@ If the command above display a different output, please refer back to previous
 guides.
 
 
-### Register the Platform as a Worker
+### Register the platform as a worker
 
-To register the Platform cluster as an available Worker cluster, you will run
-through the same steps you ran during the Worker cluster registration in
+To register the platform cluster as an available worker cluster, you will run
+through the same steps you ran during the worker cluster registration in
 [Installing a Promise](installing-a-promise):
 
 * Install and configure Flux
@@ -101,7 +100,7 @@ There's a script in the `kratix` directory that will do exactly that. Run:
 ./scripts/register-worker --name platform-cluster --context $PLATFORM --state-store minio-store
 ```
 
-The Platform cluster should now be registered with Kratix and ready to receive
+The platform cluster should now be registered with Kratix and ready to receive
 the workloads. Verify:
 
 ```bash
@@ -253,7 +252,7 @@ worker-cluster      1h   environment=dev
 
 </figure>
 
-Note that the Platform cluster is missing the required label. Adding the missing
+Note that the platform cluster is missing the required label. Adding the missing
 label should cause the system to converge to the desired state:
 
 ```bash
@@ -305,7 +304,7 @@ The NGINX and the PosgreSQL Promises are telling Kratix:
 > Only install my Dependencies (which include, the NGINX Ingress Controller and the
 > PostgreSQL operator) in Destinations with the **label environment=dev**.
 
-As you may have noted before, the Worker cluster is already labelled correctly.
+As you may have noted before, the worker cluster is already labelled correctly.
 Verify:
 
 ```bash
@@ -318,8 +317,8 @@ NAME               AGE   LABELS
 worker-cluster      1h   environment=dev
 ```
 
-Since the Worker Destination include the label, the NGINX and PostgreSQL Promise
-Dependencies should be getting installed into the Worker cluster. Verify:
+Since the worker Destination include the label, the NGINX and PostgreSQL Promise
+Dependencies should be getting installed into the worker cluster. Verify:
 
 ```bash
 kubectl --context $WORKER get deployments --watch
@@ -348,7 +347,7 @@ Platform users can go ahead and start using the Promises!
 :::info Managing a Fleet of Destinations
 
 The mechanism described above is one of the most powerful features in Kratix:
-the ability Platform teams have to fully control the scheduling of works across
+the ability platform teams have to fully control the scheduling of works across
 Destinations.
 
 When a Destination is registered, Kratix will execute its scheduling tasks and
@@ -365,7 +364,7 @@ If you are curious to learn more about Kratix Scheduling, check the
 
 ## Request an EasyApp
 
-As a Platform user, you now have a few choices of Promises. Verify the available
+As a platform user, you now have a few choices of Promises. Verify the available
 Promises:
 
 ```bash
@@ -419,7 +418,7 @@ service.
   <figcaption>EasyApp Workflow execution; NGINX omitted from brevity</figcaption>
 </figure>
 
-Verify the Workflows running on the Platform cluster:
+Verify the Workflows running on the platform cluster:
 
 
 ```bash
@@ -438,10 +437,10 @@ Once the Status column reports `Complete`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
 Similar to last time, Kratix will store the Pipeline outputs (i.e. the desired
-state) in the State Store for the Worker cluster, and that will be picked up by
-the GitOps toolkit running on the Worker.
+state) in the State Store for the worker cluster, and that will be picked up by
+the GitOps toolkit running on the worker.
 
-Verify that the requested pods start on the Worker cluster (it may take a few
+Verify that the requested pods start on the worker cluster (it may take a few
 minutes):
 
 ```bash

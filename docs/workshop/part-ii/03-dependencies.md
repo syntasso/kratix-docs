@@ -15,22 +15,32 @@ import PartialWcrBinaryDownload from '../../_partials/_wcr-binary-download.md';
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Delivering your service on demand](service-on-demand) <br />
-👉🏾&nbsp;&nbsp; Next: [Intentionally schedule Promise resources](schedule-promise)
+👉🏾&nbsp;&nbsp; Next: [Intentionally schedule Promise resources](scheduling-promise)
 
 <hr />
 
 **In this tutorial, you will**
-* [Understanding Kratix Promise Dependencies](#understanding-dependencies)
-* [Splitting out Elastic Cloud Kubernetes (ECK) Dependencies](#splitting-dependencies)
-* [Install the Promise with separate Dependencies](#install-promise)
-* [Make multiple requests](#resource-requests)
-* [Summary](#summary)
-* [Clean up environment](#cleanup)
+
+- [Understanding Kratix Promise Dependencies {#understanding-dependencies}](#understanding-kratix-promise-dependencies-understanding-dependencies)
+- [Splitting out Elastic Cloud Kubernetes (ECK) Dependencies {#splitting-dependencies}](#splitting-out-elastic-cloud-kubernetes-eck-dependencies-splitting-dependencies)
+  - [Dependencies](#dependencies)
+  - [Remove shared dependencies from the Pipeline](#remove-shared-dependencies-from-the-pipeline)
+    - [Remove one-off files (i.e. Dependencies) from Pipeline](#remove-one-off-files-ie-dependencies-from-pipeline)
+    - [Run the test suite, see it passing](#run-the-test-suite-see-it-passing)
+  - [Add shared dependencies to the Promise](#add-shared-dependencies-to-the-promise)
+    - [Download the WorkerResourcesBuilder](#download-the-workerresourcesbuilder)
+    - [Add all Dependencies to the Promise](#add-all-dependencies-to-the-promise)
+- [Install the Promise {#install-promise}](#install-the-promise-install-promise)
+  - [Prerequisite setup](#prerequisite-setup)
+  - [Install the Promise](#install-the-promise)
+- [Make multiple requests {#resource-requests}](#make-multiple-requests-resource-requests)
+- [Summary {#summary}](#summary-summary)
+- [Clean up environment {#cleanup}](#clean-up-environment-cleanup)
+- [🎉   Congratulations](#--congratulations)
 
 ## Understanding Kratix Promise Dependencies {#understanding-dependencies}
 
-After the previous tutorial step, the ECK Promise bundled all necessary provisioning
-steps into the Resource Workflow. This made it possible to only do a single request because of duplication across the requests.
+The ECK Promise has now bundled all necessary provisioning steps into the Resource Workflow. This made it possible to only do a single request because of duplication of fixed dependencies across the requests.
 
 In this section we will focus on introducing the Dependencies part of Promises to manage many requests from a single Promise.
 
@@ -298,7 +308,7 @@ configure-pipeline-elastic-cloud-default-01650   0/1     Completed   0          
 configure-pipeline-elastic-cloud-default-99684   0/1     Completed   0          11s
 ```
 
-And once completed you will be able to watch for two sets of ECK resources being deployed to the Worker cluster:
+And once completed you will be able to watch for two sets of ECK resources being deployed to the worker cluster:
 
 ```bash
 kubectl --context $WORKER get pods --watch
@@ -316,11 +326,11 @@ second-request-kb-6cdc9594ff-7dnnm   1/1     Running   0          42s
 ```
 
 <details>
-  <summary>🤔 Want to see these Kibana's in the browser? </summary>
+  <summary>🤔 Want to see these Kibanas in the browser? </summary>
 
 The first Kibana has been set up with a unique node port which has been configured to be exposed as a part of the workshop cluster setup.
 
-You can visit http://localhost:30269 and check it out, and you can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
+You can visit <http://localhost:30269> and check it out, and you can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
 
 ```bash
 kubectl --context $WORKER \
@@ -380,7 +390,7 @@ To delete all the Promises:
 kubectl --context $PLATFORM delete promises --all
 ```
 
-## 🎉 &nbsp; Congratulations!
+## 🎉 &nbsp; Congratulations
 
 ✅&nbsp;&nbsp;Your Promise can deliver on-demand services that have shared dependencies.<br />
-👉🏾&nbsp;&nbsp;Next you will [Intentionally schedule Promise resources](schedule-promise).
+👉🏾&nbsp;&nbsp;Next you will [Intentionally schedule Promise resources](scheduling-promise).

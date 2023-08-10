@@ -4,6 +4,7 @@ title: Creating your first service API
 id: creating-an-api
 slug: ../creating-an-api
 ---
+
 ```mdx-code-block
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import PartialPromise from '../../_partials/_promise-architecture.md';
@@ -16,31 +17,32 @@ This is Part 1 of [a series](intro) illustrating how Kratix works.
 <hr />
 
 **In this tutorial, you will**
-* [Learn more about a Promise](#what-is-a-promise)
-* [Design an API for your service](#api-design)
-* [Implement the design with validations and versioning](#api-implementation)
-* [Deploy your API using Kratix](#deploy-api)
-* [Experience requesting a Resource](#request-via-api)
-* [Summary](#summary)
-* [Clean up environment](#cleanup)
+
+- [Learn more about a Promise](#what-is-a-promise)
+- [Design an API for your service](#api-design)
+- [Implement the design with validations and versioning](#api-implementation)
+- [Deploy your API using Kratix](#deploy-api)
+- [Experience requesting a Resource](#request-via-api)
+- [Summary](#summary)
+- [Clean up environment](#cleanup)
 
 ## What is a Promise? {#what-is-a-promise}
 
-In [Part I](part-i/intro), you have learned that Kratix is a framework used by
-platform teams to build the platforms tailored to their organisation.
+In [Part I](part-i/intro), you learned that Kratix is a framework used by
+platform teams to build platforms tailored to their organisation.
 
-Promises are the encapsulation of platform offerings. They provide a structure
+Kratix Promises are the encapsulation of platform offerings. They provide a structure
 to manage the complexities of providing _something-as-a-service_, including the
 definition of how a user can request the Resource, the steps to provision the
 requested Resource, and how to provide access to the Resource.
 
 Promises allow platform teams to:
 
-* Define an API, including versioning and validation
-* Execute imperative commands per user request
-* Use GitOps to continuously reconcile delivered services
-* Install and configure (or verify) Dependencies for delivering a service
-* Manage where services are deployed across the infrastructure (on and
+- Define an API, including versioning and validation
+- Execute imperative commands per user request
+- Use GitOps to continuously reconcile delivered services
+- Install and configure (or verify) dependencies for delivering a service
+- Manage where services are deployed across the infrastructure (on and
   off-Kubernetes, on Cloud providers, etc)
 
 ### Promise Architecture
@@ -57,11 +59,12 @@ four sections in detail. This specific section will focus on the API.
 
 When building an API, you have a lot of design considerations to include. For example,
 you will want to:
-* require certain parameters
-* make some parameters dependent on values in other parameters
-* provide client-side validation
-* run server-side validation
-* ensure API versioning to manage updates
+
+- require certain parameters
+- make some parameters dependent on values in other parameters
+- provide client-side validation
+- run server-side validation
+- ensure API versioning to manage updates
 
 These and many other features are all provided standard with a Kubernetes Custom Resource
 Definition (CRD). This is why Kratix uses CRDs as the mechanism to
@@ -96,20 +99,18 @@ for further details on the topic.
 
 ## Design an API for your service {#api-design}
 
-Imagine that your users have requested a monitoring system to use with their
-applications. You, as part of a platform team, have investigated potential
+Imagine that your users have requested a monitoring system for their
+applications. You on the platform team have investigated potential
 options and determined that [Elastic Cloud on Kubernetes
 (ECK)](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html)
 is the best fit for your users needs.
 
 In addition, you have found that ECK provides an
-[operator](https://www.elastic.co/downloads/elastic-cloud-kubernetes) which can
-help your team manage the configuration of different deployments. There's also a
-[Helm
-Chart](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-stack-helm-chart.html),
+[Kubernetes Operator](https://www.elastic.co/downloads/elastic-cloud-kubernetes) which can
+help your team manage the configuration of different deployments. There's also a [Helm chart](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-stack-helm-chart.html),
 which can be used to request fully configured Resources.
 
-You have a few concerns though about how to expose the operator to your users.
+You have a few concerns though about how to expose the Operator to your users.
 While some of your users have a deep knowledge of monitoring, the majority of them
 are not bothered by the details and just want access to the Kibana interface.
 
@@ -128,6 +129,7 @@ configured and within what parameters.
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-api-only.svg"
 ```
+
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
@@ -151,6 +153,7 @@ support requests from users who need slight variations to the stock deployment.
 ```mdx-code-block
 import APISpectrum from "/img/docs/workshop/design-api-spectrum.svg"
 ```
+
 <figure class="diagram">
   <APISpectrum className="large"/>
 
@@ -159,8 +162,8 @@ import APISpectrum from "/img/docs/workshop/design-api-spectrum.svg"
 </figure>
 
 While both extremes are possible using Kratix, the recommendation is to design
-your API with one key principle in mind: What do your users (need to) care
-about? Answering that question is fundamental to designing an useful API.
+your API with one key principle in mind: what do your users (need to) care
+about? Answering that question is fundamental to designing a useful API.
 
 ### Define your interface
 
@@ -177,6 +180,7 @@ which provides the ability to turn on and off specific services.
 ```mdx-code-block
 import ElasticStack from "/img/docs/workshop/elastic-stack.svg"
 ```
+
 <figure class="diagram right">
   <ElasticStack className="fullwidth"/>
   <figcaption>Elastic Cloud Stack</figcaption>
@@ -190,12 +194,14 @@ you have seen that data collection is less consistent: some people want to use
 the provided collectors whereas others will use language specific libraries in
 their applications.
 
-Therefore, a truly user-centric API for your Platform may be as simple as:
-* *enable data collection: true or false (false by default)*
+Therefore, a truly user-centric API for your platform may be as simple as:
+
+- _enable data collection: true or false (false by default)_
 
 While only a single parameter, you can notice two key aspects in this final API design:
+
 1. The parameter is named on your internal domain language
-1. Your API codifies the Platform teams opinion (i.e. Fleet Server and Agents
+1. Your API codifies the platform teams opinion (i.e. Fleet Server and Agents
    are never included)
 
 With your API defined, you can start writing your Promise.
@@ -235,20 +241,20 @@ spec:
         plural: elastic-clouds
       scope: Namespaced
       versions:
-      - name: v1alpha1
-        served: true
-        storage: true
-        schema:
-          openAPIV3Schema:
-            type: object
-            properties:
-              spec:
-                type: object
-                properties:
-                  enableDataCollection:
-                    type: boolean
-                    default: false
-                    description: |
+        - name: v1alpha1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  properties:
+                    enableDataCollection:
+                      type: boolean
+                      default: false
+                      description: |
                         If enabled, you will receive tools for
                         metric, log, and trace collection that
                         can be used to populate the elastic
@@ -269,7 +275,7 @@ the fields.
 
 **Naming:**
 
-Your API will be referred to as a combination of the CRD defined group and plural
+Your API will be referred to as a combination of the CRD defined `group` and `plural`
 name. The group can be shared across all of your APIs or be further subdivided.
 In this case, the group will be `workshop.kratix.io` and the plural name will be
 `elastic-clouds`. This means the full name will be
@@ -292,12 +298,14 @@ spec:
 **Field definition:**
 
 Your API only has a single field, but it requires a number of validations. Specifically you need to:
+
 1. Define a new key within the `spec.properties` field with the name of the field
 1. Set the property type as `boolean`
 1. Provide a default value of `false`
 1. Optionally add a description that can later be used for automated documentation
 
 This is all added to the CRD as a schema for a single version:
+
 ```yaml jsx title="Partial view of a CRD showing the version specification"
 versions:
   - name: v1alpha1
@@ -312,13 +320,13 @@ versions:
                 type: boolean
                 default: false
                 description: |
-                    If enabled, you will receive tools for
-                    metric, log, and trace collection that
-                    can be used to populate the elastic
-                    cloud instance.
+                  If enabled, you will receive tools for
+                  metric, log, and trace collection that
+                  can be used to populate the elastic
+                  cloud instance.
 ```
-</details>
 
+</details>
 
 ## Deploy your API using Kratix {#deploy-api}
 
@@ -370,6 +378,7 @@ worker-cluster-1   10s
 ```
 
 And you can see that you have two separate Kubectl contexts, one for each KinD cluster you created:
+
 ```bash
 kubectl config get-contexts
 ```
@@ -402,11 +411,13 @@ This provides the benefit of being able to catalog all platform offerings
 by just listing all Promises in your cluster.
 
 To see that the Promise has been installed, run:
+
 ```bash
 kubectl --context kind-platform get promises
 ```
 
 Your output will show the `elastic-cloud` Promise:
+
 ```shell-session
 NAME            AGE
 elastic-cloud   10s
@@ -419,6 +430,7 @@ kubectl --context kind-platform get crds | grep workshop
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 elastic-cloud.workshop.kratix.io            2023-01-01T12:00:00Z
 ```
@@ -462,23 +474,26 @@ schema.
 
 </details>
 
-You can now use this resource to make a request for an Elastic Cloud Resource:
+You can now make a request for an Elastic Cloud Resource:
+
 ```bash
 kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```
 
 You should get the following output:
+
 ```shell-session
 elastic-cloud.workshop.kratix.io/example created
 ```
 
-Just as Promises are Kubernetes resources, so are the Resources that are requested of a Promise. You can
-list all the elastic cloud Resources using the following command:
+For this particular Promise, the resources it creates are also Kubernetes Resources. So just as you did for Promises, you can list all the elastic cloud Resources using the following command:
+
 ```bash
 kubectl --context $PLATFORM get elastic-cloud
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME      STATUS
 example   Pending
@@ -489,18 +504,17 @@ You may see the status as `Resource requested`.
 In future steps of this workshop you will get a chance to edit and update this output.
 :::
 
-
 :::tip Client-side Validations
 At this stage you can explore the API validation if you would like.
 
 For example, you can try to:
-* remove the `enableDataCollection` field
-* setting the `enableDataCollection` field to a non-boolean value
-* introducing an addition field that you did not define in your CRD
+
+- remove the `enableDataCollection` field
+- setting the `enableDataCollection` field to a non-boolean value
+- introducing an addition field that you did not define in your CRD
 
 These are just a few examples of simple validations that are being applied to each user request to the API.
 :::
-
 
 ## Summary {#summary}
 
@@ -511,7 +525,7 @@ provisioning process for your Promise just yet. That means Elastic Stack
 will not be delivered until you codify the provisioning process.
 
 That is not to say that what you just did is useless! The current Promise is, in
-a way, very similar to Platforms based on tickets: a resource is requested,
+a way, very similar to platforms based on tickets: a resource is requested,
 which can notify a platform team to go and manually create the service, updating
 the request once the service is instantiated.
 
@@ -519,6 +533,7 @@ In the next section, you will build on top of this Promise and actually deliver
 your first Elastic Stack on-demand.
 
 To recap the steps you took:
+
 1. ✅&nbsp;&nbsp;Identify a service to provide on demand
 1. ✅&nbsp;&nbsp;Design a user experience for requesting the service
 1. ✅&nbsp;&nbsp;Define an API to match the user experience
@@ -530,10 +545,12 @@ To recap the steps you took:
 Before moving on, please remove the ECK Promise from your cluster.
 
 To delete all the Promises:
+
 ```bash
 kubectl --context $PLATFORM delete promises --all
 ```
 
-## 🎉 &nbsp; Congratulations!
+## 🎉 &nbsp; Congratulations
+
 ✅&nbsp;&nbsp;Your Promise has an API. <br />
 👉🏾&nbsp;&nbsp;Next you will [deliver a service on each user request](service-on-demand).

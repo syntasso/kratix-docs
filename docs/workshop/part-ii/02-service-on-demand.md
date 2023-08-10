@@ -31,7 +31,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 A [Kratix Promise](../main/reference/promises/intro) is configured with a collection of Workflows, defined as `workflows` in the Promise definition.
 
-It's possible to trigger Workflows at different stages of the Promise and of the Resource lifecycle. In this workshop, you will focus on the Workflow for `resource.configure`. This Workflow will run whenever a user makes a request to your Promise API, for example when someone requests an Elastic Cloud Kubernetes (ECK) Resource.
+It's possible to trigger Workflows at different stages of the Promise or Resource lifecycle. In this workshop, you will focus on the Workflow for `resource.configure`. This Workflow will run whenever a user makes a request to your Promise API, for example when someone requests an Elastic Cloud Kubernetes (ECK) Resource.
 
 Kratix provides a straightforward way to define Workflows as Pipelines, though you can use other technologies (such as Tekton) if you prefer.
 
@@ -43,18 +43,12 @@ The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
 </figure>
 
 In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
-<<<<<<< HEAD
 
-- `/kratix/output`: The files in this directory will be scheduled to a matching Kratix Cluster.
-- `/kratix/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
-- `/kratix/metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
-=======
-* `/output`: The files in this directory will be scheduled to a matching Kratix Destination.
-* `/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which cluster should run this workload.
-* `metadata/status.yaml`: A YAML document that will be written to the Resource status section on Pipeline completion.
->>>>>>> 9ca71029 (first pass on cluster rename)
+- `/output`: The files in this directory will be scheduled to a matching Kratix Destination.
+- `/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which destination should run this workload.
+- `metadata/status.yaml`: A YAML document that will be written to the Resource `status` section on Pipeline completion.
 
-This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both scheduling and status will be explored in an upcoming section of this workshop.
+This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both `scheduling` and `status` will be explored in an upcoming section of this workshop.
 
 ### Design principles
 
@@ -70,7 +64,7 @@ While most Workflows will have at least one stage with logic unique to that Prom
 
 #### Idempotency
 
-An idempotent Workflow guarantees that running the same command multiple times will result in the same outcome. This is an important feature because they will be auto-reconciled on an on going basis.
+An idempotent Workflow guarantees that running the same command multiple times will result in the same outcome. This is an important feature because they will be auto-reconciled on an ongoing basis.
 
 Kubernetes controllers reconcile their objects in three scenarios:
 
@@ -93,27 +87,9 @@ Promises are not the only way to create reusable components when designing your 
 
 Since both Promises and Workflows can be reused, you may wonder when to use each. The best rule of thumb is to ask if you are describing a noun or a verb.
 
-Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide _something_ as-a-Service you should be thinking about creating a Promise.
+Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide some_thing_ as-a-Service you should be thinking about creating a Promise.
 
 Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a Workflow step.
-
-Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
-
-</details>
-
-<details>
-  <summary>🤔 Wondering when to use pipelines images versus creating a new Promise?</summary>
-Platform design requires thinking about how to divide platform offerings into right sized Promises and evaluating options for reusability and composability.
-
-Each Promise is a the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
-
-Promises are not the only way to create reusable components when designing your platform with Kratix. You can also create reusable pipeline steps that can be run in a number of different Promise pipelines. For example, you may want to add default labels to certain types of resources. You can create a pipeline stage which evaluates the resources set to be declared at the end of the pipeline and apply consistent labelling before writing.
-
-Since both Promises and Pipelines can be reused, you may wonder when to use each. The best rule of thumb is to ask if you are describing a noun or a verb.
-
-Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide _something_ as-a-Service you should be thinking about creating a Promise.
-
-Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a pipeline step.
 
 Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
 
@@ -305,7 +281,7 @@ eck-beats:
 <summary>🤔 How does the run script work?</summary>
 Take a look at the file you have just created and see how the principles and structures introduced above are applied.
 
-On line 11 and 15 the script is downloading a specific version of ECK rather than using a mutable tag like `latest`. This means that no matter how frequently this image runs, it will always generate the same output.
+On line 11 and line 15 the script is downloading a specific version of ECK rather than using a mutable tag like `latest`. This means that no matter how frequently this image runs, it will always generate the same output.
 
 In addition, on line 34 the files that should be deployed to the cluster are copied to `/kratix/output`. You may wonder why these files were not downloaded and created directly to the `output` directory. This is an good practice that allows you to use a temporary directory to download and possibly manipulate files before finalising them in the `output` directory.
 
@@ -804,7 +780,7 @@ example-eck-kibana-kb-6f4f95b787-4fqsr   1/1     Running   0          5m
 Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-Go to http://localhost:30269 and check it out!
+Go to <http://localhost:30269> and check it out!
 
 :::info
 If you are in Instruqt, you can just navigate to the `🔗 ECK Instance` tab and use the refresh button on the top left.
@@ -884,6 +860,7 @@ kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workl
 ```
 
 The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out Dependencies from requests.
+
 ## Summary {#summary}
 
 And with that, you have transformed Elastic Cloud into an on-demand service!
@@ -901,7 +878,7 @@ To recap the steps you took:
 
 <PartialCleanup />
 
-## 🎉 &nbsp; Congratulations!
+## 🎉 &nbsp; Congratulations
 
 ✅&nbsp;&nbsp;Your Promise can deliver on-demand services. <br />
 👉🏾&nbsp;&nbsp;Next you will [Extract shared dependencies](shared-dependencies).
