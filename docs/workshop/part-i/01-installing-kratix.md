@@ -174,7 +174,7 @@ workloads.
 
 ### Set up the GitOps State Store {#gitops-setup}
 
-As mentioned above, Kratix leverages GitOps for scheduling. From a GitOps perspective, a Destination is the Kratix model that captures how workload definitions should be stored and organised to enable the appropriate infrastructure to be able to identify and reconcile the workloads. Each Kratix Destination has a backing State Store which is either an S3-compatible bucket or a Git repository. For this workshop we will use an S3-compatible MinIO bucket created locally on a MinIO instance running in the platform cluster. Please check the [docs](../main/reference/statestore/intro) for further details.
+As mentioned above, Kratix leverages GitOps for deploying and reconciling scheduled workloads. From a GitOps perspective, a Destination is the Kratix model that captures how workload definitions should be stored and organised to enable the appropriate infrastructure to be able to identify and reconcile the workloads. Each Kratix Destination has a backing State Store which is either an S3-compatible bucket or a Git repository. For this workshop we will use an S3-compatible MinIO bucket created locally on a MinIO instance running in the platform cluster. Please check the [docs](../main/reference/statestore/intro) for further details.
 
 To install the MinIO instance, run:
 
@@ -222,7 +222,7 @@ Once the Job completes, you are able register the MinIO bucket with Kratix.
 The State Store represents the various backing storage options to which Kratix
 can write. When registering a worker cluster with Kratix, you will need to
 specify the state store you intend to use. Kratix will then write to the
-specified state store when scheduling workloads for execution on that cluster.
+specified state store when scheduling workloads for deployment on that cluster.
 
 Create a new State Store that points to the MinIO bucket we created on the previous
 step:

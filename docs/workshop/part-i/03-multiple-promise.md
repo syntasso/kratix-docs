@@ -211,21 +211,20 @@ ERROR    Reconciler error {
 
 Kratix is failing to reconcile since _no Destination can be selected for
 scheduling_. Promises can specify scheduling logic to determine the
-suitable Destinations for hosting Dependencies and workloads. Check the scheduling
-logic defined for the EasyApp Promise:
+suitable Destinations for hosting Dependencies and workloads. Check what
+destination selectors have been defined for the EasyApp Promise:
 
 ```bash
 kubectl --context $PLATFORM describe promise easyapp | tail -n 20 | \
-  grep "Scheduling:" --after-context 3 --max-count 1
+  grep "destinationSelectors:" --after-context 3 --max-count 1
 ```
 
 The above command will give an output similar to:
 ```shell-session
 Spec:
-  Scheduling:
-    Target:
-      Match Labels:
-        Environment: platform
+  destinationSelectors:
+    - matchLabels:
+      Environment: platform
 ```
 
 This means the EasyApp Promise is telling Kratix:
@@ -283,19 +282,17 @@ Destination. The EasyApp sub-Promises are also declaring a cluster Selector.
 Verify:
 
 ```bash
-kubectl --context $PLATFORM describe promise nginx-ingress |  grep "Scheduling:" -A 3 -m 1
-kubectl --context $PLATFORM describe promise postgresql | grep "Scheduling:" -A 3 -m 1
+kubectl --context $PLATFORM describe promise nginx-ingress |  grep "DestinationSelectors:" -A 3 -m 1
+kubectl --context $PLATFORM describe promise postgresql | grep "DestinationSelectors:" -A 3 -m 1
 ```
 
 The above command will give an output similar to:
 ```shell-session
-  Scheduling:
-    Target:
-      Match Labels:
+  DestinationSelectors:
+    - Match Labels:
         Environment:  dev
-  Scheduling:
-    Target:
-      Match Labels:
+  DestinationSelectors:
+    - Match Labels:
         Environment:  dev
 ```
 
@@ -350,13 +347,13 @@ The mechanism described above is one of the most powerful features in Kratix:
 the ability platform teams have to fully control the scheduling of works across
 Destinations.
 
-When a Destination is registered, Kratix will execute its scheduling tasks and
+When a Destination is registered, Kratix will use the destination selectors to
 determine what should be immediately installed on the new Destination. When a
 Promise gets updated or upgraded, its Dependencies are seamlessly propagated
 across the fleet. If a Destination labels change, Kratix will automatically converge
 on the expected system state.
 
-If you are curious to learn more about Kratix Scheduling, check the
+If you are curious to learn more about Kratix scheduling, check the
 [Multi-cluster Management](../main/reference/multicluster-management) docs.
 
 :::

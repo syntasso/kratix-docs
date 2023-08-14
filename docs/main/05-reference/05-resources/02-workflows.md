@@ -93,7 +93,7 @@ All containers in the `configure` Pipeline have access to this directory.
 
 Pipeline containers can control aspects of how Kratix behaves by creating special files in this directory:
 
-- `scheduling.yaml` can be added to any Promise to
+- `destination-selectors.yaml` can be added to any Promise to
   further refine where the resources in `/kratix/output` will be
   [scheduled](../04-multicluster-management.md#pipeline).
 - `status.yaml` allows the Pipeline to communicate information about the

@@ -132,10 +132,9 @@ kind: Promise
 metadata:
   name: paved-path-demo-promise
 spec:
-  scheduling:
-    - target:
-        matchLabels:
-          environment: platform
+  destinationSelectors:
+    - matchLabels:
+        environment: platform
   dependencies:
     #highlight-start
     - apiVersion: platform.kratix.io/v1alpha1
@@ -144,10 +143,9 @@ spec:
       metadata:
         name: knative-serving-promise
       spec:
-        scheduling:
-          - target:
-              matchLabels:
-                environment: dev
+        destinationSelectors:
+          - matchLabels:
+              environment: dev
         dependencies:
         ... # remainder of the knative Promise
     #highlight-start
@@ -157,10 +155,9 @@ spec:
       metadata:
         name: ha-postgres-promise
       spec:
-        scheduling:
-          - target:
-              matchLabels:
-                environment: dev
+        destinationSelectors:
+          - matchLabels:
+              environment: dev
         dependencies:
         ... # remainder of the postgres Promise
   ... # remainder of the paved path Promise...
@@ -168,7 +165,7 @@ spec:
 
 Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its CRDs are only installed in the platform cluster, you need to ensure the Dependencies are applied exclusively to the platform cluster.
 
-That is controlled by the `scheduling` key:
+That is controlled by the `destinationSelectors` key:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -177,10 +174,9 @@ metadata:
   name: paved-path-demo-promise
 spec:
   #highlight-start
-  scheduling:
-    - target:
-        matchLabels:
-          environment: platform
+  destinationSelectors:
+    - matchLabels:
+        environment: platform
   #highlight-end
   dependencies:
     -  # knative Promise
@@ -188,7 +184,7 @@ spec:
   ... # remainder of the paved path Promise
 ```
 
-The Paved Path Promise `scheduling` is set to target clusters with `matchLabel`
+The Paved Path Promise `destinationSelectors` is set to target clusters with `matchLabel`
 equal to `environment: platform`. In other words, that is telling Kratix to
 install the sub-Promises into Destinations with an `environment: platform` label.
 
@@ -207,7 +203,7 @@ worker-cluster-1     1hr    environment=dev
 However, the sub-Promises' Dependencies (i.e. the Knative and Postgres Dependencies) should not be installed
 in the platform cluster, but in the worker cluster. When you executed the quick start
 script, it registered the worker cluster as a Destination with a label `environment: dev` (as
-per output above). The `scheduling` field in the sub-Promises are set to target
+per output above). The `destinationSelectors` field in the sub-Promises are set to target
 those clusters:
 
 ```yaml showLineNumbers
@@ -216,10 +212,9 @@ kind: Promise
 metadata:
   name: paved-path-demo-promise
 spec:
-  scheduling:
-    - target:
-        matchLabels:
-          environment: platform
+  destinationSelectors:
+    - matchLabels:
+        environment: platform
   dependencies:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
@@ -227,10 +222,9 @@ spec:
         name: knative-serving-promise
       spec:
         #highlight-start
-        scheduling:
-          - target:
-              matchLabels:
-                environment: dev
+        destinationSelectors:
+          - matchLabels:
+              environment: dev
         #highlight-end
         dependencies:
         ... # remainder of the knative Promise
@@ -240,10 +234,9 @@ spec:
         name: ha-postgres-promise
       spec:
         #highlight-start
-        scheduling:
-          - target:
-              matchLabels:
-                environment: dev
+        destinationSelectors:
+          - matchLabels:
+              environment: dev
         #highlight-end
         dependencies:
         ... # remainder of the postgres Promise ...

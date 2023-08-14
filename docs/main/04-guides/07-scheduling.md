@@ -101,9 +101,9 @@ worker-cluster-1   1h
 worker-2   1h
 ```
 
-Kratix will react to the new Destination by scheduling the installation of the Jenkins Promise
+Kratix will react to the new Destination by scheduling the Jenkins Promise
 to the the correct bucket. After a couple of minutes, you should see the Jenkins Operator
-running on the new worker cluster:
+deployed and running on the new worker cluster:
 
 ```shell-session {3}
 $ kubectl --context ${WORKER_2} get pods
@@ -113,7 +113,7 @@ jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h
 
 When you request a new Jenkins, the Resources will be created in one of the available Destinations, by default this is selected in a non-deterministic way.
 
-For further documentation on Destination Scheduling, check the [Destination Reference
+For further documentation on Destination scheduling, check the [Destination Reference
 documentation](../reference/destinations/intro)
 
 :::info 

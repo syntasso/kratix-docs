@@ -42,7 +42,7 @@ metadata:
   # ...
 ```
 
-In the Promise document, the scheduling is controlled via the `spec.scheduling`
+In the Promise document, the scheduling is controlled via the `spec.destinationSelectors`
 key, following the format below:
 
 ```yaml
@@ -50,14 +50,13 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata: #...
 spec:
-  scheduling:
-  - target:
-      matchLabels:
-        key: value
+  destinationSelectors:
+    - matchLabels:
+      key: value
 ```
 
 By setting the `matchLabels` with a `key: value` pair, Platform teams can
-control to which Destinations (i.e. `target`) the Promise's Dependencies should be
+control to which Destinations the Promise's Dependencies should be
 scheduled. `matchLabels` is a _equality-based_ selector. This means it will only
 match Destinations that have keys/values that match. You can add multiple key/value pairs to the `matchLabels`, but note that it will only match when the Destination has a matching label for _all_ the selectors.
 
@@ -68,17 +67,16 @@ metadata:
   name: jenkins-promise
 spec:
   #highlight-start
-  scheduling:
-    - target:
-        matchLabels:
-          environment: dev
+  destinationSelectors:
+    - matchLabels:
+        environment: dev
   #highlight-end
   dependencies:
   # ...
 ```
 
-If a Promise has no `scheduling`, it will be applied to all Destinations. If a
-Destination has no `labels`, only Promises with no `scheduling` set will be applied.
+If a Promise has no `destinationSelectors`, it will be applied to all Destinations. If a
+Destination has no `labels`, only Promises with no `destinationSelectors` set will be applied.
 
 The table below contains a few examples:
 
@@ -97,24 +95,23 @@ The table below contains a few examples:
 
 When a new request for a Resource comes in, Kratix reacts by triggering the `resource.configure` Workflow, as defined in the Promise `spec.workflows`. If the Workflow contains a Kratix Pipeline, the outputs of the Pipeline will then use the labels to identify one matching Kratix Destination which will be the target Destination.
 
-When multiple Destinations match, Kratix will by default randomly select a registered Destination to schedule the Resource. If the Promise has `spec.scheduling` set, the workload can only be scheduled to a Destination that has matching labels for the Promise.
+When multiple Destinations match, Kratix will by default randomly select a registered Destination to schedule the Resource. If the Promise has `spec.destinationSelectors` set, the workload can only be scheduled to a Destination that has matching labels for the Promise.
 
 It is possible to dynamically determine where Resources will go during the Kratix Pipeline. The section below documents the process.
 
-### Dynamic Scheduling {#pipeline}
+### Dynamic scheduling {#pipeline}
 
 Kratix mounts a `metadata` directory at the root of the Pipeline's container when
 instantiating the Configure Pipeline. At scheduling time, Kratix will look for a
-`scheduling.yaml` file in that directory with the following format:
+`destination-selectors.yaml` file in that directory with the following format:
 
 ```yaml
-- target:
-    matchLabels:
-      key: value
+- matchLabels:
+    key: value
 ```
 
 Kratix will then **add** those to what is already present in the Promise
-`spec.scheduling` field when identifying a target Destination.
+`spec.destinationSelectors` field when identifying a target Destination.
 
 There is no way to overwrite keys. For example, if the Promise defines
 `matchLabels` with `env: dev` and the Pipeline defines it with `env: prod`,
@@ -122,17 +119,17 @@ Kratix will only ever look for Destinations with the `env: dev` label.
 
 The table below contains a few examples:
 
-| Destination Label            | Promise Selector             | scheduling.yaml | Match? |
-| ---------------------------- | ---------------------------- | ---------------------- | ------ |
-| _no label_                   | _no selector_                | _no_selector_          | ✅     |
-| `env: dev`                   | _no selector_                | _no_selector_          | ✅     |
-| `env: dev`                   | `env: dev`                   | _no_selector_          | ✅     |
-| `env: dev` <br /> `zone: eu` | `env: dev`                   | `zone: eu`             | ✅     |
-| `env: dev` <br /> `zone: eu` | _no selector_                | `zone: eu`             | ✅     |
-| `env: dev`                   | `env: dev`                   | `env: prod`            | ✅     |
-| `env: dev`                   | `env: prod`                  | `env: dev`             | ⛔️     |
-| `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_          | ⛔️     |
-| _no label_                   | _no_selector_                | `env: dev`             | ⛔️     |
+| Destination Label            | Promise destinationSelector  | destination-selectors.yaml | Match? |
+| ---------------------------- | ---------------------------- | -------------------------- | ------ |
+| _no label_                   | _no selector_                | _no_selector_              | ✅     |
+| `env: dev`                   | _no selector_                | _no_selector_              | ✅     |
+| `env: dev`                   | `env: dev`                   | _no_selector_              | ✅     |
+| `env: dev` <br /> `zone: eu` | `env: dev`                   | `zone: eu`                 | ✅     |
+| `env: dev` <br /> `zone: eu` | _no selector_                | `zone: eu`                 | ✅     |
+| `env: dev`                   | `env: dev`                   | `env: prod`                | ✅     |
+| `env: dev`                   | `env: prod`                  | `env: dev`                 | ⛔️     |
+| `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_              | ⛔️     |
+| _no label_                   | _no_selector_                | `env: dev`                 | ⛔️     |
 
 In the event that more than one Destination matches the resulting labels, Kratix
 will randomly select within the available matching registered Destinations. If you

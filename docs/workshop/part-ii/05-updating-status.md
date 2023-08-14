@@ -42,7 +42,7 @@ In the context of your Promise, an example of what you might want to convey back
 
 As we saw in [scheduling](./04-scheduling-promise.md), within the Pipeline container file system, Kratix mounts a [`/kratix/metadata`](../main/reference/resources/workflows#metadata) directory to manage important configuration that is independent of the Resources definitions for your State Store.
 
-Similar to writing scheduling rules to `/kratix/metadata/scheduling.yaml`, you will write changes to the Resource status to the `/kratix/metadata/status.yaml` file.
+Similar to writing destination selector rules to `/kratix/metadata/destination-selectors.yaml`, you will write changes to the Resource status to the `/kratix/metadata/status.yaml` file.
 
 - The `status.yaml` file can contain arbitrary key values, with the `message` key being a special key that is communicated back to the user when running `kubectl get elastic-cloud`.
 - All other key-value pairs are viewable by getting the full Resource definition.
@@ -67,7 +67,7 @@ EOF
 
 ## Request a resource and check its status
 
-The `run` script is included in the Pipeline's container image, so to have these scheduling changes take effect, you need to rebuild and re-load the Docker image.
+The `run` script is included in the Pipeline's container image, so to have these destination selector changes take effect, you need to rebuild and re-load the Docker image.
 
 The `test-pipeline` script builds, loads, and runs the Docker image.
 
@@ -82,7 +82,7 @@ Verify that the test output directory contains the correct status:
 ├── input
 │   └── object.yaml
 ├── metadata
-│   └── scheduling.yaml
+│   └── destination-selectors.yaml
 #highlight-next-line
     └── status.yaml
 └── output

@@ -52,12 +52,11 @@ metadata:
   # Name of the Promise; what the platform team will manage in the platform cluster
   name: promise-name
 spec:
-  # Check the Scheduling docs for details
-  scheduling:
-    - target:
-        matchLabels:
-          # Arbitrary key/value pairs that will be used for scheduling
-          key: value
+  # Check the scheduling docs for details
+  destinationSelectors:
+    - matchLabels:
+        # Arbitrary key/value pairs that will be used for scheduling
+        key: value
 
   # Array of Kubernetes resources to be scheduled to matching Workers
   dependencies:

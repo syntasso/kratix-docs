@@ -32,7 +32,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 So far you have built an ECK Promise that will allow us to deliver ECK Resources on-demand to the
 application developers.
 
-When developing locally you have been deploying to a single worker Kubernetes cluster, which Kratix has been scheduling everything to by default. In reality, the likelyhood is that an organisation will have multiple destinations for its workloads, potentially spread out across infrastructure types, zones, regions, and cloud-providers. Each individual destination might be designed for a particular purpose, e.g. destinations that contain GPUs for AI intensive workloads, or edge destinations that are designed to run particular applications close the intended consumers. However it is common to want some software deployed on many of these speciality clusters.
+When developing locally you have been deploying to a single worker Kubernetes cluster, which Kratix has been scheduling everything to by default. In reality, the likelihood is that an organisation will have multiple destinations for its workloads, potentially spread out across infrastructure types, zones, regions, and cloud-providers. Each individual destination might be designed for a particular purpose, e.g. destinations that contain GPUs for AI intensive workloads, or edge destinations that are designed to run particular applications close the intended consumers. However it is common to want some software deployed on many of these speciality clusters.
 
 This section will focus on how Kratix has native support for flexible multi-destination scheduling.
 
@@ -43,7 +43,7 @@ import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-scheduling.
 <figure class="diagram">
   <PromiseWayfinding className="small"/>
 
-  <figcaption>Using scheduling, you can either support either global or limited access to Promise resources.</figcaption>
+  <figcaption>Using destination selectors, you can either support either global or limited access to Promise resources.</figcaption>
 </figure>
 
 Kratix uses the Kubernetes-native label-based approach to scheduling where resources go, similar to how Kubernetes works when [scheduling pods](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/). When you create a Destination resource in Kratix you assign a set of labels to it. Kratix also manages additions to these labels as your platform evolves.
@@ -69,10 +69,10 @@ Kubernetes clusters. You have decided to restrict deploying workloads from the E
 ## Schedule Promises to specific clusters {#dependency-scheduling}
 
 Inside of a Promise you can define what destinations the Promise should schedule resources
-to via the `scheduling` field.
+to via the `destinationSelectors` field.
 
 This field contains a map of key values that are all the labels that must be matched to
-a cluster. Update the Promise to contain the new `scheduling` field shown below:
+a cluster. Update the Promise to contain the new `destinationSelectors` field shown below:
 
 ```yaml title=promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -81,10 +81,9 @@ metadata:
   name: elastic-cloud
 spec:
   #highlight-start
-  scheduling:
-    - target:
-        matchLabels:
-          environment: dev
+  destinationSelectors:
+    - matchLabels:
+        environment: dev
   #highlight-end
   #...
 ```
@@ -122,16 +121,16 @@ able to find a matching cluster to schedule the request:
 ```bash
 kubectl --context $PLATFORM --namespace kratix-platform-system \
   logs deployment/kratix-platform-controller-manager \
-  --container manager | grep --max-count 1 "no destinations can be selected for scheduling"
+  --container manager | grep --max-count 1 "no Destinations can be selected for scheduling"
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
 # output formatted for readability
-INFO no destinations can be selected for scheduling
+INFO no Destinations can be selected for scheduling
 {
-  "scheduling":
+  "destinationSelectors":
     {
       "promise":[{"target":{"matchLabels":{"environment":"dev"}}}]
     }
@@ -174,33 +173,33 @@ the `environment=dev` label, the Promise wouldn't schedule any work to it.
 
 ## Schedule Resource to specific destinations {#rr-scheduling}
 
-In the previous section, you updated the Promise definition with `scheduling` properties to control where Resources are provisioned (only to Destinations that match the label `environment=dev`).
+In the previous section, you updated the Promise definition with `destinationSelectors` properties to control where Resources are provisioned (only to Destinations that match the label `environment=dev`).
 
 Imagine that some Resources need to be able to collect data. On the platform team you know what implications that feature has. In your platform, Resources that collect data require a Kubernetes cluster with a persistent volume storage of adequate size to handle the data collected. If they don't collect data, you don't mind on which cluster Kratix schedules the workloads.
 
 To enable users to specify when they're collecting data, you've added `enableDataCollection: true` to the Promise API. Now you need a way to schedule Resources that are collecting data to the right Kratix Dstination.
 
-To do this, you need to update the Promise's Workflow's internal Pipeline functionality. In addition to the other features already covered (in a [previous section](./02-service-on-demand.md)), the Workflow for a Promise offers another hook for adjusting scheduling for a Resource.
+To do this, you need to update the Promise's Workflow's internal Pipeline functionality. In addition to the other features already covered (in a [previous section](./02-service-on-demand.md)), the Workflow for a Promise offers another hook for adjusting where a Resource is deployed.
 
 Within the Pipeline container file system, Kratix mounts a [`/kratix/metadata`](../main/reference/resources/workflows#metadata) directory to manage important configuration that is independent of the Resources definitions for your State Store.
 
-To set additional scheduling labels, you can add a `scheduling.yaml` document to `/kratix/metadata` that follows the same structure as the Promise's `scheduling` field. Any selectors added in this file will be added to the list provided by the Promise. By design, _you cannot override the Kratix Destination selectors set in the Promise definition_. This is to ensure clear security controls to the Promise author, and it guarantees that a Resource will always be scheduled to a Kratix cluster that has already received the Promise Dependencies.
+To set additional destination selector labels, you can add a `destination-selectors.yaml` document to `/kratix/metadata` that follows the same structure as the Promise's `destinationSelectors` field. Any selectors added in this file will be added to the list provided by the Promise. By design, _you cannot override the Kratix Destination selectors set in the Promise definition_. This is to ensure clear security controls to the Promise author, and it guarantees that a Resource will always be scheduled to a Kratix cluster that has already received the Promise Dependencies.
 
 For scheduling Resources to Destinations that support data collection, you can update the Resource Configure Workflow to add a `pvCapacity=large` selector when `enableDataCollection` is set to `true`.
 This will mean Resources that collect data will be scheduled to a Destination that has the labels `environment=dev` _and_ `pvCapacity=large`.
 
-Add the following to the end of the Promise Workflow's Pipline's `run` script (`pipeline/run`):
+Add the following to the end of the Promise Workflow's Pipeline's `run` script (`pipeline/run`):
 
 ```bash title=pipeline/run -- add to the end
 if ${enableDataCollection}; then
   echo "Setting additional cluster selectors: pvCapacity=large"
-  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /kratix/metadata/scheduling.yaml
+  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /kratix/metadata/destination-selectors.yaml
 fi
 ```
 
 ### Build and test the image
 
-The `run` script is included in the Pipeline's container image, so to have these scheduling changes take effect, you need to rebuild and re-load the Docker image.
+The `run` script is included in the Pipeline's container image, so to have these Destination Selector changes take effect, you need to rebuild and re-load the Docker image.
 
 The `test-pipeline` script builds, loads, and runs the Docker image.
 
@@ -208,7 +207,7 @@ The `test-pipeline` script builds, loads, and runs the Docker image.
 ./scripts/test-pipeline
 ```
 
-Verify that the output now shows the scheduling file with the correct properties.
+Verify that the output now shows the `destination-selectors` file with the correct properties.
 
 ```shell-session
 📂 test
@@ -216,7 +215,7 @@ Verify that the output now shows the scheduling file with the correct properties
 │   └── object.yaml
 ├── metadata
 #highlight-next-line
-│   └── scheduling.yaml
+│   └── destination-selectors.yaml
 └── output
     ├── beats.yaml
     ├── elasticsearch.yaml
@@ -277,7 +276,7 @@ The above command will give an output similar to:
 ```shell-session
 # output formatted for readability
 INFO no Destinations can be selected for scheduling
-{"scheduling":
+{"destinationSelectors":
   {
     "promise":[{"target":{"matchLabels":{"environment":"dev"}}}],
     "resource":[{"target":{"matchLabels":{"pvCapacity":"large"}}}]}
@@ -319,7 +318,7 @@ NAME                            READY   STATUS    RESTARTS   AGE
 elastic-instance-es-default-0   1/1     Running   0          5m
 ```
 
-Once you verify the scheduling has started, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
+Once you verify the resource has begun deployment in the worker, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
 
 ## Summary {#summary}
 

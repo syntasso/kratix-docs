@@ -435,7 +435,7 @@ kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-resources created
 ```
 
 You will notice that there are two Kustomizations created. When scheduling
-Works, Kratix will separate the documents based on their GVK (Group, Version,
+workloads, Kratix will separate the documents based on their GVK (Group, Version,
 Kind):
 
 - Custom Resource Definition (as defined

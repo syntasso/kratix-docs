@@ -45,10 +45,10 @@ The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
 In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
 
 - `/output`: The files in this directory will be scheduled to a matching Kratix Destination.
-- `/metadata/scheduling.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which destination should run this workload.
+- `/metadata/destination-selectors.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which destination should run this workload.
 - `metadata/status.yaml`: A YAML document that will be written to the Resource `status` section on Pipeline completion.
 
-This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both `scheduling` and `status` will be explored in an upcoming section of this workshop.
+This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both `destination-selectors` and `status` will be explored in an upcoming section of this workshop.
 
 ### Design principles
 
