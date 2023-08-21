@@ -54,7 +54,7 @@ You will now add the new cluster to the Platform as a Destination and watch Krat
 system. For that, you need to first create the new Kubernetes cluster:
 
 ```bash
-kind create cluster --image kindest/node:v1.24.0 --name worker-2
+kind create cluster --image kindest/node:v1.27.3 --name worker-2
 export WORKER_2="kind-worker-2"
 ```
 

@@ -35,7 +35,7 @@ instance instead.
 
 If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
 ```bash
-kind create cluster --image kindest/node:v1.24.0 --name platform
+kind create cluster --image kindest/node:v1.27.3 --name platform
 # set PLATFORM to point to the platform cluster context
 export PLATFORM="kind-platform"
 ```
@@ -93,7 +93,7 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 ### Create worker cluster
 If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
 ```bash
-kind create cluster --image kindest/node:v1.24.0 --name worker
+kind create cluster --image kindest/node:v1.27.3 --name worker
 
 # set WORKER to point to the worker cluster context
 export WORKER="kind-worker"
