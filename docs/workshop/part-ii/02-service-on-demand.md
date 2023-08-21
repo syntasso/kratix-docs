@@ -855,8 +855,8 @@ The above command will give an output similar to:
 
 ```shell-session
 NAME                        AGE     READY   STATUS
-kratix-workload-crds        9m15s   False   kustomize build failed: accumulating resources: accumulation err='merging resources from './00-default-elastic-cloud-default-default-second-request-crds.yaml': may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]': must build at directory: '/tmp/kustomization-1131766306/default/worker-cluster-1/crds/00-default-elastic-cloud-default-default-second-request-crds.yaml': file is not directory
-kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workload-crds' is not ready
+kratix-workload-dependencies        9m15s   False   kustomize build failed: accumulating resources: accumulation err='merging resources from './00-default-elastic-cloud-default-default-second-request-crds.yaml': may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]': must build at directory: '/tmp/kustomization-1131766306/default/worker-cluster-1/dependencies/00-default-elastic-cloud-default-default-second-request-crds.yaml': file is not directory
+kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workload-dependencies' is not ready
 ```
 
 The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out Dependencies from requests.
