@@ -97,7 +97,7 @@ through the same steps you ran during the worker cluster registration in
 There's a script in the `kratix` directory that will do exactly that. Run:
 
 ```bash
-./scripts/register-worker --name platform-cluster --context $PLATFORM --state-store minio-store
+./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store minio-store
 ```
 
 The platform cluster should now be registered with Kratix and ready to receive
@@ -216,15 +216,14 @@ destination selectors have been defined for the EasyApp Promise:
 
 ```bash
 kubectl --context $PLATFORM describe promise easyapp | tail -n 20 | \
-  grep "destinationSelectors:" --after-context 3 --max-count 1
+  grep "Destination Selectors" --after-context 2 --max-count 1
 ```
 
 The above command will give an output similar to:
 ```shell-session
-Spec:
-  destinationSelectors:
-    - matchLabels:
-      Environment: platform
+Destination Selectors:
+  Match Labels:
+    Environment: platform
 ```
 
 This means the EasyApp Promise is telling Kratix:
@@ -282,18 +281,15 @@ Destination. The EasyApp sub-Promises are also declaring a cluster Selector.
 Verify:
 
 ```bash
-kubectl --context $PLATFORM describe promise nginx-ingress |  grep "DestinationSelectors:" -A 3 -m 1
-kubectl --context $PLATFORM describe promise postgresql | grep "DestinationSelectors:" -A 3 -m 1
+kubectl --context $PLATFORM describe promise nginx-ingress |  grep "Destination Selectors:" -A 2 -m 1
+kubectl --context $PLATFORM describe promise postgresql | grep "Destination Selectors:" -A 2 -m 1
 ```
 
 The above command will give an output similar to:
 ```shell-session
-  DestinationSelectors:
-    - Match Labels:
-        Environment:  dev
-  DestinationSelectors:
-    - Match Labels:
-        Environment:  dev
+Destination Selectors:
+  Match Labels:
+    Environment: dev
 ```
 
 The NGINX and the PosgreSQL Promises are telling Kratix:
