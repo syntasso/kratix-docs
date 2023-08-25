@@ -72,7 +72,7 @@ codify your Promise API.
 
 :::info
 
-In a Promise the API is stored in a key called `api`
+In a Promise, the API is stored in a key called `api`
 
 :::
 
@@ -337,7 +337,7 @@ For this tutorial, you will need a fresh installation of Kratix.
 You can use the following command if you are unsure about your state.
 
 :::tip
-If you are participating in a facilitated workshop using Instruqt this is not necessary.
+If you are participating in a facilitated workshop using Instruqt, this is not necessary.
 :::
 
 <details>

@@ -44,9 +44,9 @@ The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
 
 In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
 
-- `/output`: The files in this directory will be scheduled to a matching Kratix Destination.
-- `/metadata/destination-selectors.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which destination should run this workload.
-- `metadata/status.yaml`: A YAML document that will be written to the Resource `status` section on Pipeline completion.
+- `/kratix/output`: The files in this directory will be scheduled to a matching Kratix Destination.
+- `/kratix/metadata/destination-selectors.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which destination should run this workload.
+- `/kratix/metadata/status.yaml`: A YAML document that will be written to the Resource `status` section on Pipeline completion.
 
 This step of the workshop will focus on defining a script that the Kratix Pipeline container runs and the files defined in the output directory. Both `destination-selectors` and `status` will be explored in an upcoming section of this workshop.
 
@@ -132,7 +132,7 @@ To create the subfolder and these two executable files, you can run the followin
 
 ```bash
 mkdir -p pipeline
-touch pipeline/{run,default-config.yaml,beats-values.yaml}
+touch pipeline/run pipeline/default-config.yaml pipeline/beats-values.yaml
 chmod +x pipeline/run
 ```
 
@@ -180,8 +180,13 @@ find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'select(.metadata
 echo "Removing enterprise annotation..."
 find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'del(.metadata.annotations["eck.k8s.elastic.co/license"])' {} \;
 
+
 echo "Copying files to /kratix/output..."
 find /pipeline/to-deploy -name \*.yaml -exec cp {} /kratix/output \;
+
+if [ -f /kratix/output/beats.yaml ]; then
+  head -n -1 /kratix/output/beats.yaml > temp.yaml ; mv temp.yaml /kratix/output/beats.yaml
+fi
 
 echo "Done"
 ```
@@ -372,7 +377,7 @@ As an example input, copy the Resource definition as `object.yaml` into the `inp
 directory:
 
 ```bash
-cp resource-request.yaml test/kratix/input/object.yaml
+cp resource-request.yaml test/input/object.yaml
 ```
 
 At this stage, your directory structure should look like this:
@@ -406,7 +411,7 @@ Use the following command to once again set up the necessary local file structur
 
 ```bash
 mkdir -p scripts
-touch scripts/{build-pipeline,test-pipeline}
+touch scripts/build-pipeline scripts/test-pipeline
 chmod +x scripts/*
 ```
 
@@ -430,9 +435,9 @@ Paste the following in `scripts/test-pipeline`
 
 scriptsdir=$(cd "$(dirname "$0")"; pwd)
 testdir=$(cd "$(dirname "$0")"/../test; pwd)
-inputDir="$testdir/kratix/input"
-outputDir="$testdir/kratix/output"
-metadataDir="$testdir/kratix/metadata"
+inputDir="$testdir/input"
+outputDir="$testdir/output"
+metadataDir="$testdir/metadata"
 
 $scriptsdir/build-pipeline
 rm $outputDir/*
@@ -443,7 +448,7 @@ docker run --rm --volume ${outputDir}:/kratix/output --volume ${inputDir}:/krati
 These scripts do the following:
 
 - `build-pipeline` codifies the dev tag for the image and how to build it. It will also load the container image on the KinD cluster.
-- `test-pipeline` calls build-pipeline and also runs the image, allowing you to verify the created files in the `test/kratix/output` directory.
+- `test-pipeline` calls build-pipeline and also runs the image, allowing you to verify the created files in the `test/output` directory.
 
 At this stage, your directory structure should look like this:
 
@@ -475,7 +480,7 @@ To execute the test, run the script with the following command:
 ```
 
 Which should build and run the image. Once the execution completes,
-verify the `test/kratix/output` directory. You should see the following files:
+verify the `test/output` directory. You should see the following files:
 
 ```bash
 📂 elastic-cloud-promise
@@ -669,8 +674,8 @@ kubectl --context $PLATFORM get pods --show-labels
 The output should look something like this:
 
 ```shell-session
-NAME                                           READY   STATUS      RESTARTS   AGE     LABELS
-configure-pipeline-elastic-cloud-default-33029   0/1     Completed   0          1m   kratix-promise-id=elastic-cloud-default...
+NAME                                     READY   STATUS      RESTARTS   AGE     LABELS
+configure-pipeline-elastic-cloud-33029   0/1     Completed   0          1m   kratix-promise-id=elastic-cloud...
 ```
 
 Within this pod there will be a number of containers including Kratix utility actions and the list of images you provided in the Promise.
@@ -680,7 +685,7 @@ To see the list of these containers in order of execution you can run:
 ```bash
 kubectl --context $PLATFORM \
   get pods \
-  --selector kratix-promise-id=elastic-cloud-default \
+  --selector kratix-promise-id=elastic-cloud \
   --output jsonpath="{range .items[*].spec.initContainers[*]}{.name}{'\n'}{end}{range .items[*].spec.containers[*]}{.name}{'\n'}{end}"
 ```
 
@@ -704,7 +709,7 @@ The most interesting container for you will be the one you created, the `pipelin
 
 ```bash
 kubectl --context $PLATFORM logs \
-  --selector kratix-promise-id=elastic-cloud-default \
+  --selector kratix-promise-id=elastic-cloud \
   --container pipeline-stage-0
 ```
 
@@ -854,9 +859,9 @@ kubectl --context $WORKER get kustomizations -n flux-system
 The above command will give an output similar to:
 
 ```shell-session
-NAME                        AGE     READY   STATUS
-kratix-workload-dependencies        9m15s   False   kustomize build failed: accumulating resources: accumulation err='merging resources from './00-default-elastic-cloud-default-default-second-request-crds.yaml': may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]': must build at directory: '/tmp/kustomization-1131766306/default/worker-cluster-1/dependencies/00-default-elastic-cloud-default-default-second-request-crds.yaml': file is not directory
-kratix-workload-resources   9m15s   False   dependency 'flux-system/kratix-workload-dependencies' is not ready
+NAME                         AGE   READY   STATUS
+kratix-worker-dependencies   49m   True    Applied revision: d26ce528a44746fe33e771659662fd2217e3ae74c0744203a334cc69d1f7f30a
+kratix-worker-resources      49m   False   kustomize build failed: accumulating resources: accumulation err='merging resources from './default/elastic-cloud/second-request/elastic-crds.yaml': may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]': must build at directory: '/tmp/kustomization-3151309318/worker-1/resources/default/elastic-cloud/second-request/elastic-crds.yaml': file is not directory
 ```
 
 The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out Dependencies from requests.

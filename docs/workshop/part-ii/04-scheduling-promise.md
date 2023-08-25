@@ -57,8 +57,8 @@ kubectl --context $PLATFORM get destinations --show-labels
 You should see output like:
 
 ```
-NAME               AGE   LABELS
-worker-cluster-1    1h   <none>
+NAME        AGE   LABELS
+worker-1    1h   <none>
 ```
 
 The cluster currently has no labels applied. So far the Promise you have written has taken no opinion about what sort of destinations it should schedule work to, meaning that a Destination with no labels is acceptable.
@@ -142,7 +142,7 @@ INFO no Destinations can be selected for scheduling
 Update the worker cluster Destination definition to have the matching `environment=dev` so that it will receive the ECK resources:
 
 ```
-kubectl --context $PLATFORM label destination worker-cluster-1 environment=dev
+kubectl --context $PLATFORM label destination worker-1 environment=dev
 ```
 
 ### Verify the worker
@@ -193,7 +193,7 @@ Add the following to the end of the Promise Workflow's Pipeline's `run` script (
 ```bash title=pipeline/run -- add to the end
 if ${enableDataCollection}; then
   echo "Setting additional cluster selectors: pvCapacity=large"
-  echo "[{target: {matchLabels: { pvCapacity: large }}}]" > /kratix/metadata/destination-selectors.yaml
+  echo "[{matchLabels: { pvCapacity: large }}]" > /kratix/metadata/destination-selectors.yaml
 fi
 ```
 
@@ -242,7 +242,7 @@ Once the Pipeline has complete take a look at the logs for the request:
 
 ```bash
 kubectl --context $PLATFORM logs \
-  --selector kratix-promise-id=elastic-cloud-default \
+  --selector kratix-promise-id=elastic-cloud \
   --container pipeline-stage-0
 ```
 
@@ -300,7 +300,7 @@ import SchedulingRR from "/img/docs/workshop/scheduling-resource-requests.svg"
 Next add the `pvCapacity=large` label to the cluster:
 
 ```
-kubectl --context $PLATFORM label destination worker-cluster-1 pvCapacity=large
+kubectl --context $PLATFORM label destination worker-1 pvCapacity=large
 ```
 
 ### Verify the Resource is scheduled
@@ -314,8 +314,8 @@ kubectl --context $WORKER get pods -w
 The above command will give an output similar to (it may take a few minutes):
 
 ```shell-session
-NAME                            READY   STATUS    RESTARTS   AGE
-elastic-instance-es-default-0   1/1     Running   0          5m
+NAME                   READY   STATUS    RESTARTS   AGE
+elastic-es-default-0   1/1     Running   0          5m
 ```
 
 Once you verify the resource has begun deployment in the worker, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
