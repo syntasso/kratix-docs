@@ -44,6 +44,7 @@ The Kratix Pipeline is essentially an ordered list of OCI-compliant images. Each
 
 In addition to running commands within the images, when using a Kratix Pipeline you will also be provided a few key files conventions:
 
+- `/kratix/input`: Kratix will add the user's request into this directory as `object.yaml`.
 - `/kratix/output`: The files in this directory will be scheduled to a matching Kratix Destination.
 - `/kratix/metadata/destination-selectors.yaml`: A YAML document containing the extra matchers to be used by Kratix when determining which destination should run this workload.
 - `/kratix/metadata/status.yaml`: A YAML document that will be written to the Resource `status` section on Pipeline completion.
