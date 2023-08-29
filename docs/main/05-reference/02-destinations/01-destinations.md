@@ -38,18 +38,20 @@ For `dependencies`:
 ```
 statestore.Spec.Path/
     destination.Spec.Path/
-        dependencies/
-            promise.Name/
+        destination.Name/
+            dependencies/
+                promise.Name/
 ```
 
 For `resources`:
 ```
 statestore.Spec.Path/
     destination.Spec.Path/
-        resources/
-            resources.Namespace/
-                promise.Name/
-                    promise.Namespace/
+        destination.Name/
+            resources/
+                resource.Namespace/
+                    promise.Name/
+                        resource.Namespace/
 ```
 
 For example installing and requesting from a Promise that provides `Redis` as a service you would get:
