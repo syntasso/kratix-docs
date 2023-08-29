@@ -17,11 +17,10 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 **In this tutorial, you will**
 
-- [Conveying information back to the application developers {#understand-metadata}](#conveying-information-back-to-the-application-developers-understand-metadata)
+- [Conveying information back to the application developers](#understand-metadata)
 - [Status](#status)
   - [Picking a status for your ECK Promise](#picking-a-status-for-your-eck-promise)
 - [Request a resource and check its status](#request-a-resource-and-check-its-status)
-  - [The conditions field](#the-conditions-field)
 - [Summary](#summary)
 
 ## Conveying information back to the application developers {#understand-metadata}
@@ -140,7 +139,7 @@ initialLoginDetails:
 <details>
   <summary>🤔 Curious about the conditions fields?</summary>
 
-### The conditions field
+### The conditions field {#the-conditions-field}
 
 [Conditions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties) are a core Kubernetes concept and standard to convey information about a resources status. For example, Pods report back various conditions:
 
