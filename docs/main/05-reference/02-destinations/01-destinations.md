@@ -33,11 +33,29 @@ spec:
 When a new Destination is registered in the platform cluster (i.e., a new Destination resource is
 created), Kratix will write to two paths in the [State Store](../06-statestore/01-statestore.md):
 one for `resources`, one for `crds`. The path within the `State Store` follows the following pattern:
+
+For `dependencies`:
 ```
 statestore.Spec.Path/
     destination.Spec.Path/
-        destination.Metadata.Namespace/
-            destination.Metadata.Name/
+        dependencies/
+            promise.Name/
+```
+
+For `resources`:
+```
+statestore.Spec.Path/
+    destination.Spec.Path/
+        resources/
+            resources.Namespace/
+                promise.Name/
+                    promise.Namespace/
+```
+
+For example installing and requesting from a Promise that provides `Redis` as a service you would get:
+```
+worker-cluster/dependencies/redis/static/dependencies.yaml
+worker-cluster/resources/default/redis/my-request/redis.yaml
 ```
 
 For example:
