@@ -30,12 +30,12 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
   - [Add shared dependencies to the Promise](#add-shared-dependencies-to-the-promise)
     - [Download the WorkerResourcesBuilder](#download-the-workerresourcesbuilder)
     - [Add all Dependencies to the Promise](#add-all-dependencies-to-the-promise)
-- [Install the Promise {#install-promise}](#install-the-promise-install-promise)
+- [Install the Promise](#install-promise)
   - [Prerequisite setup](#prerequisite-setup)
   - [Install the Promise](#install-the-promise)
-- [Make multiple requests {#resource-requests}](#make-multiple-requests-resource-requests)
+- [Make multiple requests](#resource-requests)
 - [Summary](#summary-summary)
-- [Clean up environment {#cleanup}](#clean-up-environment-cleanup)
+- [Clean up environment](#clean-up-environment-cleanup)
 - [🎉   Congratulations](#--congratulations)
 
 ## Understanding Kratix Promise Dependencies {#understanding-dependencies}
