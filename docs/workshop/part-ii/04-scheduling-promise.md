@@ -177,7 +177,7 @@ In the previous section, you updated the Promise definition with `destinationSel
 
 Imagine that some Resources need to be able to collect data. On the platform team you know what implications that feature has. In your platform, Resources that collect data require a Kubernetes cluster with a persistent volume storage of adequate size to handle the data collected. If they don't collect data, you don't mind on which cluster Kratix schedules the workloads.
 
-To enable users to specify when they're collecting data, you've added `enableDataCollection: true` to the Promise API. Now you need a way to schedule Resources that are collecting data to the right Kratix Dstination.
+To enable users to specify when they're collecting data, you've added `enableDataCollection: true` to the Promise API. Now you need a way to schedule Resources that are collecting data to the right Kratix Destination.
 
 To do this, you need to update the Promise's Workflow's internal Pipeline functionality. In addition to the other features already covered (in a [previous section](./02-service-on-demand.md)), the Workflow for a Promise offers another hook for adjusting where a Resource is deployed.
 
