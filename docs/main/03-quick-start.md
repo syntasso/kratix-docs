@@ -21,6 +21,11 @@ recommend starting with a local cluster tool like
 [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/) or
 [minikube](https://minikube.sigs.k8s.io/docs/start/).
 
+### cert-manager
+import PartialInstallCertManager from '../_partials/installation/_install-cert-manager.md';
+
+<PartialInstallCertManager />
+
 ## 1. Install Kratix
 
 <PartialInstall />

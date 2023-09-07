@@ -6,6 +6,7 @@ title: Single cluster
 ```mdx-code-block
 import PartialInstall from '../../../_partials/installation/_single-cluster-install.md';
 import PartialConfigure from '../../../_partials/installation/_single-cluster-configure.md';
+import PartialInstallCertManager from '../../../_partials/installation/_install-cert-manager.md';
 ```
 
 One of the most powerful features of Kratix is its ability to handle requests
@@ -20,6 +21,12 @@ You will need access to a Kubernetes cluster to deploy Kratix. If you'd like to 
 ```
 minikube start
 ```
+
+## Install cert-manager
+
+<PartialInstallCertManager />
+
+## Install Kratix
 
 <PartialInstall />
 

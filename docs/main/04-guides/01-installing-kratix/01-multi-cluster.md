@@ -6,6 +6,7 @@ title: Multi cluster
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import PartialInstallCertManager from '../../../_partials/installation/_install-cert-manager.md';
 ```
 
 ## System setup
@@ -39,6 +40,12 @@ kind create cluster --image kindest/node:v1.27.3 --name platform
 # set PLATFORM to point to the platform cluster context
 export PLATFORM="kind-platform"
 ```
+
+## Install cert-manager
+
+<PartialInstallCertManager />
+
+## Install Kratix
 
 If your are using your own pre-existing cluster, set the `PLATFORM` environment
 variable to the name of the kubectl context used to communicate to it. Install Kratix

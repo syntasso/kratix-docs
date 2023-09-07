@@ -6,6 +6,7 @@ slug: ../installing-kratix
 ---
 
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import PartialInstallCertManager from '../../_partials/installation/_install-cert-manager.md';
 
 This is Part 1 of [a series](intro) illustrating how Kratix works. <br />
 👉🏾 Next: [Install a Kratix Promise](installing-a-promise)
@@ -105,6 +106,10 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 :::tip
 Note that You have now saved a local environment variable `PLATFORM` to make it easier for the ongoing commands in this workshop
 :::
+
+### Install cert-manager
+
+<PartialInstallCertManager />
 
 ### Install Kratix {#kratix-setup}
 
