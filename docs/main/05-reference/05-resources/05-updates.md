@@ -10,7 +10,7 @@ Kratix supports updating resources with new specifications. An update to a resou
 will trigger the configure pipeline to run again, and resources outputted will replace
 all of the previously outputted resources in the StateStore.
 
-If an update to a resource changes the destination (e.g. the workflow outputs a
+If an update to a resource changes the Destination (e.g. the Workflow outputs a
 different `/kratix/metadata/destination-selectors.yaml`) the change will be
 **ignored**. The destination selected at the first the workflow run is always
 used. To move a resource from one destination to another you can delete and
