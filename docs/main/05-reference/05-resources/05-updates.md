@@ -16,7 +16,7 @@ different `/kratix/metadata/destination-selectors.yaml`) the change will be
 used. To move a resource from one Destination to another you can delete and
 create it again.
 
-## Manually trigger configure workflow
+## Manually trigger configure Workflow
 If you want to manually trigger the configure workflow for a resource you can add
 the `kratix.io/manual-reconciliation: true` labels to the resource. Kratix will detect
 this labels, trigger the configure workflow and remove the label from the resource.
