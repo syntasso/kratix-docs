@@ -17,6 +17,15 @@ used. To move a resource from one Destination to another you can delete and
 create it again.
 
 ## Manually trigger configure Workflow
-If you want to manually trigger the configure workflow for a resource you can add
-the `kratix.io/manual-reconciliation: true` labels to the resource. Kratix will detect
-this labels, trigger the configure workflow and remove the label from the resource.
+Sometimes you may want to manually trigger a Configure Workflow for a 
+specific resource.
+
+While Workflows only trigger when the contents of the resource `Spec`
+change, the Kratix will also look for the appearance of a specific label and
+trigger a Configure Workflow if it newly appears.
+
+Therefore, if you add `kratix.io/manual-reconciliation: true` to any resource,
+it will immediately schedule a manual run for the Configure Workflow.
+
+To run this again, you would need to remove and re-add the label since only
+the new appearance of the label will trigger a manual Configure Workflow run.
