@@ -12,7 +12,7 @@ all of the previously outputted resources in the StateStore.
 
 If an update to a resource changes the Destination (e.g. the Workflow outputs a
 different `/kratix/metadata/destination-selectors.yaml`) the change will be
-**ignored**. The destination selected at the first the workflow run is always
+**ignored**. The Destination selected at the first the Workflow run is always
 used. To move a resource from one destination to another you can delete and
 create it again.
 
