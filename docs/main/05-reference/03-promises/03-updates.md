@@ -60,8 +60,8 @@ spec:
 
 Kratix will schedule the `bar` namespace to all destinations with the label
 `environment: dev` and leave all of `environment: dev` clusters with the old
-`foo` namespace. Its up to the platform team to manually delete these resources
-by deletes all `WorkPlacement` resources marked with the `kratix.io/orphaned`
+`foo` namespace. It's up to the platform team to manually delete these resources
+by deleting all `WorkPlacement` resources marked with the `kratix.io/orphaned`
 label.
 ```
 kubectl --context kind-platform -n kratix-platform-system get workplacements.platform.kratix.io --show-labels
