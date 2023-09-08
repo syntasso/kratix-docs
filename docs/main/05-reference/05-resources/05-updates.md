@@ -1,7 +1,7 @@
 ---
 title: Updates
 sidebar_label: Updates
-description: Documentation on how updates behaviour for resources
+description: Documentation on how updates behave for resources
 ---
 
 # Updates
