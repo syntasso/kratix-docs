@@ -17,8 +17,8 @@ with the new image version.
 ## Scheduling
 When changing the scheduling of a Promise, either by modifying `.spec.destinationSelectors` or
 changing the contents of `/kratix/metadata/destination-selectors.yaml` at the end of a Workflow may result
-in a set of destinations previously targeted from old version of the Promise no longer
-being targeted. When this happens the files written to the destination **are not removed**, but are
+in a set of Destinations previously targeted from old version of the Promise no longer
+being targeted. When this happens the files written to the Destination **are not removed**, but are
 marked as `orphaned` by Kratix and are **not updated anymore**.
 
 ### Example
