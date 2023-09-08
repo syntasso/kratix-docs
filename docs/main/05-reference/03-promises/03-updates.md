@@ -1,7 +1,7 @@
 ---
 title: Updates
 sidebar_label: Updates
-description: Documentation on how updates behaviour for promises
+description: Documentation on how updates behave for Promises
 ---
 
 # Updates
