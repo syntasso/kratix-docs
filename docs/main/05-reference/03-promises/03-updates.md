@@ -7,10 +7,10 @@ description: Documentation on how updates behave for Promises
 # Updates
 
 Kratix supports updating Promises with new specifications. Any update to the
-Promise will result in the retriggering of the configure workflows for all
-resources. For example if you update the configure workflow image version and
-change a field in the dependencies Kratix will roll out all the changes to
-dependencies to all the destinations and retrigger all the configure workflows
+Promise will result in the re-running the Configure Workflows for all resources. 
+For example, if you update the Configure Workflow image version and change 
+a field in the Dependencies Kratix will roll out the new Dependencies to
+Destinations and re-run all the Configure Workflows
 with the new image version.
 
 
