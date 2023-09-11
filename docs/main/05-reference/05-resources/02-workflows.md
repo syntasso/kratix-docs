@@ -156,7 +156,7 @@ Make sure to target the platform cluster and do the following:
   # Replace PROMISE with the name of your Promise
   kubectl create clusterrolebinding promise-secret \
       --clusterrole=promise-secret-cr \
-      --serviceaccount=default:PROMISE-default-promise-pipeline
+      --serviceaccount=default:PROMISE-default-resource-pipeline$
   ```
 
 1. Access the Base64 enconded Secret in the Pipeline with the `kubectl` CLI
