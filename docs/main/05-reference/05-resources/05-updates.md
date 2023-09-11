@@ -27,5 +27,5 @@ trigger a Configure Workflow if it newly appears.
 Therefore, if you add `kratix.io/manual-reconciliation: true` to any resource,
 it will immediately schedule a manual run for the Configure Workflow.
 
-To run this again, you would need to remove and re-add the label since only
-the new appearance of the label will trigger a manual Configure Workflow run.
+Once Kratix schedules the manual workflow the label will be removed allowing
+you to add it again for any additional manual runs.
