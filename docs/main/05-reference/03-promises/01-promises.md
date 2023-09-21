@@ -91,4 +91,20 @@ spec:
               - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
+    # Tasks to be run only during the Promise lifecycle
+    promise:
+      # Tasks to be run only on creation, maintenance, or update of the Promise
+      configure:
+        # A Kratix provided Pipeline that runs an ordered set of OCI compliant images
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: configure-promise
+          spec:
+            containers:
+              - name: pipeline-stage-0
+                image: myorg/pipeline-image-1 # Kubernetes defaults to docker.io
+              - name: pipeline-stage-1
+                image: ghcr.io/myorg/pipeline-image-2
+              -  #...
 ```
