@@ -51,9 +51,9 @@ spec:
 Kratix will run each container in the `spec.containers` list in order, providing
 a set of common volumes. The behaviour of these volumes differ slightly for
 `configure` and `delete` (see blow). In order to allow re-use of the same image
-in both `configure` and `delete` Kratix sets the `KRATIX_OPERATION` environment
+in both `configure` and `delete` Kratix sets the `KRATIX_WORKFLOW_ACTION` environment
 variable to `configure`/`delete` depending on what context the image is being
-called in. Additionally Kratix also sets the `KRATIX_TYPE` environment variable
+called in. Additionally Kratix also sets the `KRATIX_WORKFLOW_TYPE` environment variable
 to `resource`/`promise` depending on what context the image is being called in.
 
 ### `/kratix/input`
