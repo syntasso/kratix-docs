@@ -58,7 +58,9 @@ containers will have access to this file at the `/kratix/input` directory.
 ### `/kratix/output`
 
 This directory is an empty directory provided to the container for writing files
-for future use.
+for future use. If the Promise specifies additional `.spec.depenencies` these
+will be automatically added to the directory at the beginning of the pipeline at
+`/kratix/output/static/dependencies.yaml`.
 
 All containers in the pipeline will have access to the `/kratix/output`
 directory. Any documents on this directory by the end of the pipeline will be
