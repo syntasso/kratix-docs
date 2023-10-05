@@ -1,13 +1,9 @@
 ---
 id: intro
-title: Part II
-description: Summary of what to expect from the Workshop, Part II
+title: Part I
+description: Summary of what to expect from the Workshop, Part I
 ---
 
-Part II of this workshop focus the structure and design of a Kratix Promise. You will:
+Part I of this workshop focus on setting up Kubernetes and installing Kratix.
 
-1. [Create your first service API](../creating-an-api)
-1. [Deliver a service on each user request](../service-on-demand)
-1. [Extract shared dependencies](../shared-dependencies)
-1. [Intentionally schedule Promise resources](../scheduling-promise)
-1. [Update the status of a Resource](../updating-status)
+1. [Install Kratix on a local Kubernetes cluster using](../installing-kratix)

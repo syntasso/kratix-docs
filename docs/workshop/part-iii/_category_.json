@@ -1,10 +1,10 @@
 {
-  "label": "Part II",
-  "position": 3,
+  "label": "Part III",
+  "position": 4,
   "collapsed": false,
   "collapsible": true,
   "link": {
     "type": "doc",
-    "id": "workshop/part-ii/intro"
+    "id": "workshop/part-iii/intro"
   }
 }

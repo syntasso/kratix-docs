@@ -16,7 +16,7 @@ import PipelineDiagram from "/img/docs/workshop/compound-promise-pipeline-execut
 
 This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾&nbsp;&nbsp; Previous: [Install a Kratix Promise](installing-a-promise) <br />
-👉🏾&nbsp;&nbsp; Next: [Part II](part-ii/intro)
+👉🏾&nbsp;&nbsp; Next: [Part II](part-iii/intro)
 
 <hr />
 
@@ -85,57 +85,6 @@ If the command above display a different output, please refer back to previous
 guides.
 
 
-### Register the platform as a worker
-
-To register the platform cluster as an available worker cluster, you will run
-through the same steps you ran during the worker cluster registration in
-[Installing a Promise](installing-a-promise):
-
-* Install and configure Flux
-* Register the cluster with Kratix
-
-There's a script in the `kratix` directory that will do exactly that. Run:
-
-```bash
-./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store minio-store
-```
-
-The platform cluster should now be registered with Kratix and ready to receive
-the workloads. Verify:
-
-```bash
-kubectl --context $PLATFORM get destinations
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME               AGE
-platform-cluster    1m
-worker-cluster      1h
-```
-
-You should also see a `kratix-worker-system` namespace, indicating that Flux is
-correctly configured. Verify:
-
-```bash
-kubectl --context $PLATFORM get namespaces --watch
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME                     STATUS   AGE
-...
-kratix-platform-system   Active    1h
-//highlight-next-line
-kratix-worker-system     Active    1m
-...
-```
-
-Once you see `kratix-worker-system` on the output,
-press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
-
-You are now ready to install the EasyApp Promise.
-
 ### Install the Promise
 
 Ensure there's no other Promise currently installed:
@@ -181,80 +130,6 @@ kubectl --context $PLATFORM apply --filename samples/easy-app/promise.yaml
 Validate the three Promises are now available:
 
 ```bash
-kubectl --context $PLATFORM get promises
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME       AGE
-easyapp    1m
-```
-
-Something is not quite right. You expected three Promises, but only one was
-actually installed. Check the Kratix Controller Manager logs for insights on
-what is happening:
-
-```bash
-kubectl --context $PLATFORM --namespace kratix-platform-system \
- logs deployment/kratix-platform-controller-manager \
- --container manager | grep "Reconciler error"
-```
-
-The above command will give an output similar to:
-```yaml
-# output formatted for readability
-ERROR    Reconciler error {
-  "Work": {"name":"easyapp","namespace":"kratix-platform-system"},
-  "error": "no Destinations can be selected for scheduling"
-}
-```
-
-Kratix is failing to reconcile since _no Destination can be selected for
-scheduling_. Promises can specify scheduling logic to determine the
-suitable Destinations for hosting Dependencies and workloads. Check what
-destination selectors have been defined for the EasyApp Promise:
-
-```bash
-kubectl --context $PLATFORM describe promise easyapp | tail -n 20 | \
-  grep "Destination Selectors" --after-context 2 --max-count 1
-```
-
-The above command will give an output similar to:
-```shell-session
-Destination Selectors:
-  Match Labels:
-    Environment: platform
-```
-
-This means the EasyApp Promise is telling Kratix:
-
-> Only install my Dependencies (i.e., the NGINX and the PostgreSQL Promises) in
-> Destinations with the **label environment=platform**.
-
-Check the registered Destinations again, but this time ask `kubectl` to also show
-the Destination labels:
-
-```bash
-kubectl --context $PLATFORM get destinations --show-labels
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME               AGE   LABELS
-platform-cluster   10m   <none>
-worker-cluster      1h   environment=dev
-```
-
-<figure class="diagram">
-  <InstallErrorDiagram className="large"/>
-
-</figure>
-
-Note that the platform cluster is missing the required label. Adding the missing
-label should cause the system to converge to the desired state:
-
-```bash
-kubectl --context $PLATFORM label destination platform-cluster environment=platform; \
 kubectl --context $PLATFORM get promises --watch
 ```
 
@@ -262,7 +137,7 @@ The above command will give an output similar to:
 ```shell-session
 cluster.platform.kratix.io/platform-cluster labelled
 NAME            AGE
-easyapp         10m
+easyapp         1m
 nginx-ingress    0s
 postgresql       0s
 ...
@@ -463,5 +338,5 @@ You have installed a Compound Promise and created an _EasyApp_ Resource!
 
 ✅&nbsp;&nbsp;This tutorial concludes the Introduction to Kratix. <br />
 👉🏾&nbsp;&nbsp;You can go ahead and start the next module to learn [how to write your own
-Promises](part-ii/intro) or jump to [What's next](whats-next) to learn about
+Promises](part-iii/intro) or jump to [What's next](whats-next) to learn about
 what else you can achieve with Kratix.
