@@ -24,8 +24,9 @@ into how you can customise a Promise for your organisations needs.
 
 ## Postgres Promise
 
-[Here](example.com) you will find an example Promise that provides
-Postgres-as-a-Service using the [Zalando Postgres Operator for
+[Here](https://github.com/syntasso/workshop/blob/main/promises/postgres-full/promise.yaml)
+you will find an example Promise that provides Postgres-as-a-Service using the
+[Zalando Postgres Operator for
 Kubernetes](https://github.com/zalando/postgres-operator). 
 
 ### Installing Postgres Promise
@@ -332,14 +333,17 @@ of value:
   should be configured
 - Reduces user error and potentially dangerous configurations
 
-[Here](example.com) is a version of the Promise with the modified simpler API.
-What we need to do is modify the pipeline that runs in this Promise so that it
-knows how to read the three inputs `size`, `dbName` and `requester`, and
-generate the corresponding Postgres instance. The Image has already been written
-and the logic inside it can be viewed [here](example.com). All you need to do is
-modify the image in the Pipeline specified in the Promise to be the new image
-`syntasso/example.com`. Copy the contents of the [Promise](here) and modify the
-following section:
+[Here](https://github.com/syntasso/workshop/blob/main/promises/promise-clean/promise.yaml)
+is a version of the Promise with the modified simpler API. What we need to do is
+modify the pipeline that runs in this Promise so that it knows how to read the
+three inputs `size`, `dbName` and `requester`, and generate the corresponding
+Postgres instance. The Image has already been written and the logic inside it
+can be viewed
+[here](https://github.com/syntasso/workshop/blob/main/promises/promise-clean/internal/configure-pipeline/execute-pipeline).
+All you need to do is modify the image in the Pipeline specified in the Promise
+to be the new image
+`ghcr.io/syntasso/workshop/postgresql-configure-pipeline:v0.2.0`. Copy the
+contents of the [Promise](here) and modify the following section:
 
 ```yaml
   workflows:
@@ -353,7 +357,7 @@ following section:
           spec:
             containers:
 //highlight-next-line
-              - image: syntasso/example.com
+              - image: ghcr.io/syntasso/workshop/postgresql-configure-pipeline:v0.2.0
                 name: postgresql-configure-pipeline
 ```
 
@@ -431,7 +435,7 @@ The pipeline can be extended to perform more actions, for example it could:
 
 To show this we've written two images for you:
 
-- `syntasso/security-scanner-example.com` that finds all images refencered in
+- `https://ghcr.io/syntasso/workshop/security-scanner:v0.1.0` that finds all images refencered in
   the manifests and scans them for vulnerabilities
 - `syntasso/external-something-example.com` that calls some external API
 
@@ -449,10 +453,10 @@ following:
             namespace: default
           spec:
             containers:
-              - image: syntasso/example.com
+              - image: ghcr.io/syntasso/workshop/postgresql-configure-pipeline:v0.2.0
                 name: postgresql-configure-pipeline
 //highlight-next-line
-              - image: syntasso/security-scanner-example.com
+              - image: https://ghcr.io/syntasso/workshop/security-scanner:v0.1.0
 //highlight-next-line
                 name: security-scanner
 //highlight-next-line
@@ -461,15 +465,18 @@ following:
                 name: external-something
 ```
 
-Lets update our existing Promise with the new pipeline:
+Lets delete the old version and install the new version
 ```shell-session
+kubectl --context $PLATFORM delete promise postgresql
 kubectl --context $PLATFORM apply -f promise.yaml
 ```
 
-Since we've changed the Pipeline for the Promise, Kratix will re-trigger the
-pipeline for all existing requests. Lets take a look at the new Pipeline that
-ran:
+Lets make the request again:
+```shell-session
+kubectl --context $PLATFORM apply -f resource.yaml
+```
 
+We can observe the pipeline pod running:
 ```bash
 kubectl --context $PLATFORM get pods
 ```
@@ -479,7 +486,6 @@ The above command will give an output similar to:
 ```shell-session
 NAME                               READY   STATUS      RESTARTS   AGE
 configure-pipeline-postgres-d22dr   0/1     Completed   0          10s
-configure-pipeline-postgres-c726b   0/1     Completed   0          5m
 ```
 
 If we inspect the logs of our latest run we can see the output of the security
