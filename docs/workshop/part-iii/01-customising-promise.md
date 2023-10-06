@@ -1,8 +1,8 @@
 ---
 description: Customising a Promise
 title: Customising a Promise
-id: customise-promise
-slug: ../customising-promise
+id: customising-promise
+slug: customising-promise
 ---
 
 ```mdx-code-block

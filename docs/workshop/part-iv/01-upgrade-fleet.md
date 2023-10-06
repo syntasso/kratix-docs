@@ -9,9 +9,10 @@ description: Some description
 - [learn about how Kratix schedules workloads](#scheduling)
 - [execute an automatic upgrade across the fleet](#upgrading)
 
-Following the [PREVIOUS_CHALLANGE](previous-slug) tutorial, you should currently have a
-couple of Kubernetes clusters running, with Kratix correctly wired up. You can validate the
-current state of your installation running the following commands:
+Following the [customising a Promise](../part-iii/customising-promise) tutorial,
+you should currently have a couple of Kubernetes clusters running, with Kratix
+correctly wired up. You can validate the current state of your installation
+running the following commands:
 
 ```bash
 kubectl --context $PLATFORM get deployments --namespace kratix-platform-system
@@ -85,12 +86,14 @@ MongoDB instances.
 
 ### Install the MongoDB promise
 
-<!-- TODO: move the mongo promise to the marketplace  -->
+To install the MongoDB promise, first download the promise and then install it:
 
-To install the MongoDB promise, run:
+Copy the [Promise
+contents](https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/mongodb/promise.yaml)
+into a `promise.yaml` file. Then install it to the platform cluster:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/workshop/main/promises/mongodb/promise.yaml
+kubectl --context $PLATFORM apply --filename promise.yaml
 ```
 
 Verify that the MongoDB operator is running on the worker cluster:
@@ -247,30 +250,26 @@ To do that, clone the `syntasso/workshop` repository and go to the `mongodb` dir
 
 ```bash
 git clone git@github.com:syntasso/workshop
-cd workshop/promises/mongodb
+cd workshop/promises/mongodb/pipeline/
 ```
 
 You will find the following files in this directory:
 
 ```
 .
-├── bundle
-├── dependencies
-│   └── dependencies.yaml
 ├── pipeline
 │   ├── Dockerfile
 │   ├── execute-pipeline
+│   ├── bundle
 │   └── resources
 │       ├── mongodb-instance.yaml
 │       └── secret.yaml
-├── promise.yaml
-└── resource.yaml
 ```
 
-Open the `pipeline/execute-pipeline` script and update it accordingly:
+Open the `execute-pipeline` script and update it accordingly:
 
 ```bash
-vim pipeline/execute-pipeline
+vim execute-pipeline
 # edit lines 14 and 18 with the version of MongoDB we defined above
 ```
 
@@ -283,9 +282,9 @@ cluster cache.
 Build a new version of the image and load it:
 
 ```bash
-docker build --tag syntasso/mongodb-configure-pipeline:v0.2.0 ./pipeline
+docker build --tag ghcr.io/syntasso/kratix-marketplace/mongodb-configure-pipeline:v0.2.0 ./pipeline
 
-kind load docker-image syntasso/mongodb-configure-pipeline:v0.2.0 --name platform
+kind load docker-image ghcr.io/syntasso/kratix-marketplace/mongodb-configure-pipeline:v0.2.0 --name platform
 ```
 
 Since you bumped the image version, let's update the `promise.yaml` file to use the new
@@ -310,7 +309,7 @@ spec:
         spec:
           containers:
           //highlight-next-line
-          - image: syntasso/mongodb-configure-pipeline:v0.2.0
+          - image: ghcr.io/syntasso/kratix-marketplace/mongodb-configure-pipeline:v0.2.0
             name: create-instance
 ```
 
@@ -323,7 +322,6 @@ You are now ready to trigger the upgrade!
 To trigger the upgrade, install the updated promise:
 
 ```bash
-# from the `workshop/promises/mongodb` directory
 kubectl --context $PLATFORM apply --filename promise.yaml
 ```
 
@@ -406,4 +404,6 @@ Congratulations! You have successfully upgraded your fleet of MongoDB instances!
 
 ## Conclusion
 
-TODO: write some conclusion notes!!
+In this part of the workshop you can see how Kratix can be utilised to manage a
+fleet of services across multiple clusters.
+
