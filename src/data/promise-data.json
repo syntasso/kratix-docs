@@ -3,7 +3,8 @@
     "name": "MongoDB",
     "description": "A document-oriented NoSQL database",
     "logoUrl": "/img/marketplace/mongodb.svg",
-    "available": false,
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/mongodb",
+    "available": true,
     "categories": [
       "Data"
     ]
