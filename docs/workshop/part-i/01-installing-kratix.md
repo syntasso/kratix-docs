@@ -237,7 +237,7 @@ cat << EOF | kubectl --context $PLATFORM apply -f -
 apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
 metadata:
-  name: minio-store
+  name: default
 spec:
   endpoint: minio.kratix-platform-system.svc.cluster.local
   insecure: true
@@ -251,7 +251,7 @@ EOF
 The above command will give an output similar to:
 
 ```shell-session
-bucketstatestore.platform.kratix.io/minio-store created
+bucketstatestore.platform.kratix.io/default created
 ```
 
 <details>

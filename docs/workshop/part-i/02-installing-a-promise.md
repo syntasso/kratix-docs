@@ -52,8 +52,8 @@ kubectl --context $PLATFORM get bucketstatestores.platform.kratix.io
 The above command will give an output similar to:
 
 ```shell-session
-NAME          AGE
-minio-store   1h
+NAME       AGE
+default    1h
 ```
 
 :::tip
@@ -62,7 +62,7 @@ To check the configuration parameters, run:
 
 ```bash
 kubectl --context $PLATFORM \
-   describe bucketstatestore minio-store
+   describe bucketstatestore default
 ```
 
 :::
@@ -499,7 +499,7 @@ metadata:
     environment: dev
 spec:
    stateStoreRef:
-      name: minio-store
+      name: default
       kind: BucketStateStore
 EOF
 ```
@@ -517,7 +517,7 @@ The Kratix Destination resource is the representation of a system where workload
 can be scheduled to. Those system are usually other Kubernetes clusters.
 
 The only required field is `spec.stateStoreRef`. It contains a reference to a State
-Store present in the platform. In this example, it points to the `minio-store`
+Store present in the platform. In this example, it points to the `default`
 object you created on the previous step. The `spec.StateStoreRef.kind` determines
 what is the kind of State Store being used by this Destination.
 

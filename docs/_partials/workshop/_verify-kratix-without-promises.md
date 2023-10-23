@@ -29,8 +29,8 @@ kubectl --context $PLATFORM get bucketstatestores.platform.kratix.io
 
 The above command will give an output similar to:
 ```shell-session
-NAME          AGE
-minio-store   1h
+NAME        AGE
+default     1h
 ```
 
 Verify there are no existing Promises:

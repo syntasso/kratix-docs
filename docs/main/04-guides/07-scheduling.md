@@ -81,7 +81,7 @@ metadata:
     environment: dev
 spec:
   stateStoreRef:
-    name: minio-store
+    name: default
     kind: BucketStateStore
 ```
 
@@ -116,7 +116,7 @@ When you request a new Jenkins, the Resources will be created in one of the avai
 For further documentation on Destination scheduling, check the [Destination Reference
 documentation](../reference/destinations/intro)
 
-:::info 
+:::info
 If you are specifically interested in making a Resource location deterministic, you can check out the [scheduling workloads](../05-reference/04-multicluster-management.md#workloads) reference.
 :::
 

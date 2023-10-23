@@ -97,7 +97,7 @@ through the same steps you ran during the worker cluster registration in
 There's a script in the `kratix` directory that will do exactly that. Run:
 
 ```bash
-./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store minio-store
+./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default
 ```
 
 The platform cluster should now be registered with Kratix and ready to receive
