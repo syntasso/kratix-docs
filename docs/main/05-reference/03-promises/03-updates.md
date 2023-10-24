@@ -19,7 +19,7 @@ When changing the scheduling of a Promise, either by modifying `.spec.destinatio
 changing the contents of `/kratix/metadata/destination-selectors.yaml` at the end of a Workflow may result
 in a set of Destinations previously targeted from old version of the Promise no longer
 being targeted. When this happens the files written to the Destination **are not removed**, but are
-marked as `orphaned` by Kratix and are **not updated anymore**.
+marked as `misscheduled` by Kratix and are **not updated anymore**.
 
 ### Example
 If you had a Promise with the following scheduling:
@@ -61,11 +61,11 @@ spec:
 Kratix will schedule the `bar` namespace to all Destinations with the label
 `environment: dev` and leave all of `environment: dev` Desintations with the old
 `foo` namespace. It's up to the platform team to manually delete these resources
-by deleting all `WorkPlacement` resources marked with the `kratix.io/orphaned`
+by deleting all `WorkPlacement` resources marked with the `kratix.io/misscheduled`
 label.
 ```
 kubectl --context kind-platform -n kratix-platform-system get workplacements.platform.kratix.io --show-labels
 NAME                       AGE   LABELS
-namespace.dev-cluster-1    40s   kratix.io/orphaned=true,kratix.io/work=namespace
+namespace.dev-cluster-1    40s   kratix.io/misscheduled=true,kratix.io/work=namespace
 namespace.prod-cluster-1   26s   kratix.io/work=namespace
 ```
