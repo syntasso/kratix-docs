@@ -20,8 +20,9 @@ Promise](../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
 
-When a Promise is installed, Kratix will schedule the Promise Dependencies onto
-all Destinations registered with the Platform. When a new Destination is registered, Kratix will also schedule all Promise Dependencies onto this new Destination.
+When a Promise is installed, Kratix will schedule the Promise Dependencies onto all
+Destinations registered with the Platform. When a new Destination is registered, Kratix
+will also schedule all Promise Dependencies onto this new Destination.
 
 Platform teams can, however, control which Destinations receive which Promises by
 using a combination of Destination labels and Promise target selectors.
@@ -91,45 +92,111 @@ The table below contains a few examples:
 | `env: dev`                  | `env: dev` <br /> `zone:eu` | ⛔️    |
 | _no label_                  | `env: dev`                  | ⛔️    |
 
+It is possible to dynamically determine where the Promise dependencies should go during the Promise workflow. Check the [dynamic scheduling](#dynamic) section for more details.
+
 ## Scheduling Resources {#resources}
 
 When a new request for a Resource comes in, Kratix reacts by triggering the `resource.configure` Workflow, as defined in the Promise `spec.workflows`. If the Workflow contains a Kratix Pipeline, the outputs of the Pipeline will then use the labels to identify one matching Kratix Destination which will be the target Destination.
 
 When multiple Destinations match, Kratix will by default randomly select a registered Destination to schedule the Resource. If the Promise has `spec.destinationSelectors` set, the workload can only be scheduled to a Destination that has matching labels for the Promise.
 
-It is possible to dynamically determine where Resources will go during the Kratix Pipeline. The section below documents the process.
+It is possible to dynamically determine where Resources will go during the Workflow. The section below documents the process.
 
-### Dynamic scheduling {#pipeline}
+## Dynamic scheduling {#dynamic}
 
-Kratix mounts a `metadata` directory at the root of the Pipeline's container when
-instantiating the Configure Pipeline. At scheduling time, Kratix will look for a
-`destination-selectors.yaml` file in that directory with the following format:
+For both the [promise](./promises/workflows) and the [resource](./resources/workflows)
+workflows, Kratix mounts a metadata directory under `/kratix/metadata`. At scheduling
+time, Kratix will look for a `destination-selectors.yaml` file in that directory with the
+following format:
 
 ```yaml
-- matchLabels:
+- directory: somedir # Optional
+  matchLabels:
     key: value
 ```
 
-Kratix will then **add** those to what is already present in the Promise
-`spec.destinationSelectors` field when identifying a target Destination.
+If the `directory` key is not present, Kratix will then **add** those to what is already
+present in the Promise `spec.destinationSelectors` field when identifying a target
+Destination.
 
-There is no way to overwrite keys. For example, if the Promise defines
-`matchLabels` with `env: dev` and the Pipeline defines it with `env: prod`,
-Kratix will only ever look for Destinations with the `env: dev` label.
+For example:
 
-The table below contains a few examples:
+Given the following Promise:
 
-| Destination Label            | Promise destinationSelector  | destination-selectors.yaml | Match? |
-| ---------------------------- | ---------------------------- | -------------------------- | ------ |
-| _no label_                   | _no selector_                | _no_selector_              | ✅     |
-| `env: dev`                   | _no selector_                | _no_selector_              | ✅     |
-| `env: dev`                   | `env: dev`                   | _no_selector_              | ✅     |
-| `env: dev` <br /> `zone: eu` | `env: dev`                   | `zone: eu`                 | ✅     |
-| `env: dev` <br /> `zone: eu` | _no selector_                | `zone: eu`                 | ✅     |
-| `env: dev`                   | `env: dev`                   | `env: prod`                | ✅     |
-| `env: dev`                   | `env: prod`                  | `env: dev`                 | ⛔️     |
-| `env: dev`                   | `env: dev` <br /> `zone: eu` | _no_selector_              | ⛔️     |
-| _no label_                   | _no_selector_                | `env: dev`                 | ⛔️     |
+```yaml,title=promise.yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata: #...
+spec:
+  destinationSelectors:
+    - matchLabels:
+        promise: label
+```
+
+And a Workflow that outputs the following `/kratix/metadata/destination-selectors.yaml`
+
+```yaml,title=workflow /kratix/metadata/destination-selectors.yaml
+- matchLabels:
+    workflow: another-label
+```
+
+Will result in resources being scheduled only to destinations containing both labels
+`promise=label` and `workflow=another-label` labels.
+
+:::important
+
+If the Promise Configure workflow creates the `/kratix/output/destination-selector.yaml`
+with an element **without** `directory`, any subsequent Resource requests will use the
+resulting combination of labels as the default scheduling policy.
+
+In the example above, if that was the output of a Promise Configure workflow, any
+subsequent resource requests for that Promise would be scheduled to Destinations with
+`promise=label` and `workflow=another-label` labels.
+:::
+
+If the `directory` key is present, Kratix will **ignore** the Promise
+`spec.destinationSelectors` entirely, and use the matchers defined in the workflow. The
+`directory` represents a directory in `/kratix/output`.
+
+For example:
+
+Given the following Promise:
+
+```yaml,title=promise.yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata: #...
+spec:
+  destinationSelectors:
+    - matchLabels:
+        promise: label
+```
+
+And a Workflow that outputs the following files:
+
+```
+/kratix/output
+├── document-0.yaml
+├── document-1.yaml
+└── somedir/
+    ├── document-2.yaml
+    └── document-3.yaml
+```
+
+With the following `/kratix/metadata/destination-selectors.yaml`
+
+```yaml,title=workflow /kratix/metadata/destination-selectors.yaml
+- directory: somedir
+  matchLabels:
+    workflow: subdir
+```
+
+Kratix will schedule the documents as follows:
+
+* `document-0.yaml` and `document-1.yaml` will be scheduled to destinations with the
+  `promise=label` label.
+* `document-2.yaml` and `document-3.yaml` will be scheduled to destinations with the
+  `workflow=subdir` label.
 
 In the event that more than one Destination matches the resulting labels, Kratix
 will randomly select within the available matching registered Destinations. If you
