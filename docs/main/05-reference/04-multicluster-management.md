@@ -123,7 +123,7 @@ For example:
 
 Given the following Promise:
 
-```yaml,title=promise.yaml
+```yaml title=promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata: #...
@@ -135,7 +135,7 @@ spec:
 
 And a Workflow that outputs the following `/kratix/metadata/destination-selectors.yaml`
 
-```yaml,title=workflow /kratix/metadata/destination-selectors.yaml
+```yaml title="workflow /kratix/metadata/destination-selectors.yaml"
 - matchLabels:
     workflow: another-label
 ```
@@ -162,7 +162,7 @@ For example:
 
 Given the following Promise:
 
-```yaml,title=promise.yaml
+```yaml title=promise.yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata: #...
@@ -185,7 +185,7 @@ And a Workflow that outputs the following files:
 
 With the following `/kratix/metadata/destination-selectors.yaml`
 
-```yaml,title=workflow /kratix/metadata/destination-selectors.yaml
+```yaml title="workflow /kratix/metadata/destination-selectors.yaml"
 - directory: somedir
   matchLabels:
     workflow: subdir
