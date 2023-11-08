@@ -9,8 +9,8 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 _**[Terraform](https://www.terraform.io/)** is a tool for writing infrastructure as code. It is used to define both cloud and on-prem resources in human-readable configuration files that you can version, reuse, and share._
 
 <img
-src={useBaseUrl('/img/k+terraform_arch.png')}
-alt="Sample architecture with Kratix and Terraform"
+src={usebaseurl('/img/k+terraform_arch.png')}
+alt="sample architecture with kratix and terraform"
 style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 />
 

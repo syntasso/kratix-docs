@@ -2,6 +2,7 @@
 title: Workflows
 sidebar_label: Workflows
 description: Learn more about conventions in Workflows
+id: workflows
 ---
 
 ## Passing secrets to the Pipeline

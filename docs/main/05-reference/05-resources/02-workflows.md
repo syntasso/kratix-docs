@@ -2,6 +2,7 @@
 description: Documentation for writing Promise Workflows using Kratix Pipelines, covering how Kratix internally executes the Pipeline containers
 title: Resource Workflows
 sidebar_label: Workflows
+id: workflows
 ---
 
 # Workflows
