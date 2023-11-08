@@ -162,8 +162,8 @@ And a Workflow that outputs the following files:
 ```
 /kratix/output
 ├── document-0.yaml
-├── unscheduled-dir/
-    |-- document-1.yaml
+├── some-dir/
+│   └── document-1.yaml
 └── scheduled-dir/
     ├── document-2.yaml
     └── document-3.yaml
@@ -183,7 +183,7 @@ Kratix will schedule the documents as follows:
   `workflow=subdir` label.
   * The scheduling config in `destination-selectors.yaml` has specifically scheduled this
     directory.
-* `document-0.yaml`, `unscheduled-dir/document-1.yaml` are scheduled to destinations with
+* `document-0.yaml`, `some-dir/document-1.yaml` are scheduled to destinations with
   the `promise=label` label.
   * They are not contained within a directory associated with a specific scheduling, so
     revert to the [default scheduling](#default).
