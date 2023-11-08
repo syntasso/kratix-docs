@@ -58,7 +58,7 @@ Declarative UIs by default with Kratix:
 
 Backstage supports reading objects from S3-Compatible Blobstores, which
 Kratix also supports writing to. You can create a
-[BucketStateStore](../06-statestore/bucketstatestore) and [Destination](../02-destinations/01-destinations.md) that points to the
+[BucketStateStore](../06-statestore/03-bucketstatestore.md) and [Destination](../02-destinations/01-destinations.md) that points to the
 directory that Backstage has been configured to watch. For example:
 
 Create a `BucketStateStore`:
