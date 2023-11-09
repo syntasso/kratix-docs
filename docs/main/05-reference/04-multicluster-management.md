@@ -4,7 +4,7 @@ sidebar_label: Multi-cluster management
 description: Learn more about how Kratix schedules Promises and Resources, and how you can control the scheduling process.
 ---
 
-One of the most powerful features of Kratix full control over the scheduling of work
+One of the most powerful features of Kratix is having full control over the scheduling of work
 across extensive and diverse infrastructure. For example, this could be determining which
 Kubernetes cluster (or other infrastructure) a certain workload should be deployed to.
 
@@ -15,7 +15,7 @@ In Kratix, scheduling happens in two stages:
 2. Determining where the Resources will run following a request for a Promise Resource
    ([Scheduling Workloads](#resources))
 
-The following sections in this page document those stages. For hands-on scheduling guides,
+The following sections on this page document those stages. For hands-on scheduling guides,
 check the [Adding a new Worker Destination](../guides/scheduling) and [Compound
 Promise](../guides/compound-promises) pages.
 
@@ -98,7 +98,7 @@ The table below contains a few examples:
 | `env: dev`                  | `env: dev` <br /> `zone:eu` | ⛔️    |
 | _no label_                  | `env: dev`                  | ⛔️    |
 
-In the event that more than one Destination matches the resulting labels, Kratix
+If more than one Destination matches the resulting labels, Kratix
 will randomly select within the available matching registered Destinations. If you
 prefer to be certain of a single Destination match, it is suggested that you add a
 unique identifier to all Destinations (e.g. `destinationName`) so that there can only
@@ -221,7 +221,7 @@ All resources will only be scheduled to destinations containing _both_ `promise=
 In the event of a label conflict, the Promise `spec.destinationSelectors` take precedence
 over any dynamic scheduling.
 
-The order of precendence is as follows:
+The order of precedence is as follows:
 1. Promise `spec.destinationSelectors`
 2. Promise workflow `destination_selectors.yaml`
 3. Resource workflow `destination_selectors.yaml`
@@ -241,7 +241,7 @@ subsequent resource requests for that Promise would be scheduled to Destinations
 ## Compound Promises
 
 Compound Promises are Promises that, in their Dependencies, contain other
-Promises. That ability allows Platform teams deliver entire stacks on demand,
+Promises. That ability allows Platform teams to deliver entire stacks on demand,
 instead of simple databases or services.
 
 To enable this functionality, the following needs to be true:
@@ -253,5 +253,5 @@ To enable this functionality, the following needs to be true:
 - Optionally, the sub-Promises may instruct Kratix to install their Dependencies outside
   the platform cluster
 
-For detailed instruction on the above, please check the [Compound
+For detailed instructions on the above, please check the [Compound
 Promises](../guides/compound-promises) guide.
