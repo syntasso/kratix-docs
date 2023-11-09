@@ -194,12 +194,12 @@ echo """
 
 The sample Component and Template can be found
 [here](https://github.com/syntasso/kratix-marketplace/blob/main/kafka/internal/configure-promise-pipeline/resources/backstage/backstage.yaml).
-The Template takes advantage of a Backstage plugin to kubectl apply the desired
-resource directly to the Platform cluster. Any plugin can be used that enables
-the request to make its way to the Platform cluster, for example it could
-instead of hitting the cluster directly commit or open a PR to a GitHub
-repository that is being used to deploy resources to the Platform cluster via
-GitOps.
+The Template takes advantage of a [Backstage plugin to kubectl
+apply](https://github.com/muvaf/kubernetes-apply) the desired resource directly
+to the Platform cluster. Any plugin can be used that enables the request to make
+its way to the Platform cluster, for example it could instead of hitting the
+cluster directly commit or open a PR to a GitHub repository that is being used
+to deploy resources to the Platform cluster via GitOps.
 
 Kratix will write the Backstage resources to the Backstage Destination, where
 Backstage will then read and populate the UI with:
@@ -213,7 +213,7 @@ the Kafka form and filling out the details:
 <img src={useBaseUrl('/img/docs/backstage-template.png')} />
 
 The last step is to ensure that after a user has requested a Resource that a
-Component in Backstage appears to resemeble it. Kafka does the in-lined in the
+Component in Backstage appears to resemble it. Kafka does the in-lined in the
 Resource workflow:
 
 ```bash
