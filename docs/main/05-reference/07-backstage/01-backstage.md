@@ -14,6 +14,7 @@ _[Backstage](https://backstage.io/) is a framework for building developer portal
 <img
 align="right"
 src={useBaseUrl('/img/k+backstage.png')}
+style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 alt="Kratix logo and Backstage logo"
 />
 
