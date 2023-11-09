@@ -9,7 +9,7 @@ id: intro
 import useBaseUrl from '@docusaurus/useBaseUrl';
 ```
 
-_[Backstage](https://backstage.io/) is a framework for building developer portals. Kratix is a framework for building platforms. The two were almost designed to work perfectly with one another._
+_[Backstage](https://backstage.io/) is a framework for building developer portals. Kratix is a framework for building platforms. It's as if they were made for each other._
 
 <img
 align="right"
@@ -21,14 +21,13 @@ alt="Kratix logo and Backstage logo"
 ## What
 
 Backstage and Kratix both believe that the most powerful platforms must be built
-by each organisation. While a platform needs to be custom built, both tools also
-encourage building on top of community provided support where possible. Both
-tools provide a framework for platform engineers that encourages user experience
-front and center.
+by each organisation. While each platform needs to be custom-built, both tools also
+encourage building on top of community-provided support where possible. Together, the two
+provide a framework for platform engineers which places user experience front and center.
 
 Backstage is a framework that enables GUIs to be declaratively created with the
 aim of unifying infrastructure tooling, services, and documentation to produce a
-great developer experience. Backstage is un-opinionated and decoupled from how
+stellar developer experience. It's completely un-opinionated and decoupled from how
 you drive your platform infrastructure.
 
 Kratix enables platform teams to declare platform APIs that orchestrates
@@ -43,39 +42,39 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
   GUI architectures shine when their responsibility is limited to the UX
   experience. Rather than define your platform orchestartation in Backstage
   directly, you can have Backstage call the Kratix API which provides easier
-  portability across GUIs, alternative experiences for more CLI driven users,
-  and easier refactoring of platfom implementation due to stable API
-  definitions.
+  portability across GUIs, while still supporting the experience of more CLI-driven
+  users. Plus, decoupling enables easier refactoring of platfom implementation due to
+  stable API definitions.
 
 - **Auto-populated GUI:**
 
-  Backstage GUIs must be declared: this is toil for the platform. Kratix can
+  Backstage GUIs must be declared, which is toil for the platform. Kratix can
   reduce this toil by integrating [Promises](../03-promises/01-promises.md) with
   Backstage by default. In addition, these GUIs can diverge from platform
   offerings if they are managed separately from the backend implementations.
-  Promises that defined the API and the Backstage GUI at the same time provide
-  automatic support for iterations on your offerings.
+  Promises that define the API and the Backstage GUI at the same time provide
+  automatic support for iterations on your platform's offerings.
 
 ## How
 
 Integrating Backstage with Kratix is simple. Point Backstage at the Kratix
-platform cluster and that's it. Kratix will then build the Backstage views as
+platform cluster, and that's it. Kratix will then build the Backstage views as
 Promises are loaded into Kratix, and Resources are requested by users of the
 platform.
 
-Declarative UIs by default with Kratix:
+With Kratix, you get declarative UIs by default:
 
 - The Backstage Catalog is automatically populated when Kratix Promises are
   applied.
 - Templates for Promises are automatically created when Promises are loaded.
-  Giving consumers of the platform simple, predictable UX to create Resources
-  from the Promises they require. This could be entire paved-path environments,
-  or simply instances of services developers need. See the
-  [Marketplace](https://www.kratix.io/marketplace) our Promises.
+  This provides consumers of the platform with a simple, predictable UX to create
+  Resources from the Promises they require. This could be entire paved-path environments,
+  or simply instances of services developers need. See our selection of Promises on our
+  [Marketplace](https://www.kratix.io/marketplace).
 - Due to Kratix's powerful GitOps abstractions, the Backstage configuration data
   lives outside of Backstage, leaving your Kratix-driven Backstage ephemeral in
-  nature. If your Backstage dies, no problem, redeploy it and your views will be
-  automatically brought back to life by Kratix.
+  nature. If your Backstage dies, no problem: redeploy it and your views will
+  automatically be brought back to life by Kratix.
 
 <br />
 <div style={{"text-align":"center"}}>
@@ -86,13 +85,15 @@ Declarative UIs by default with Kratix:
 
 ### Setting up Kratix with Backstage
 
-Backstage supports reading objects from S3-Compatible Blobstores, and Kratix
-also supports writing to them. To set up this integration, create a
-[BucketStateStore](../06-statestore/03-bucketstatestore.md) and a
-[Destination](../02-destinations/01-destinations.md) that points to the
-directory Backstage is configured to watch. For example:
+Backstage supports reading objects from S3-compatible blob stores. Kratix
+also supports writing to them.
 
-Create a `BucketStateStore`:
+To set up this integration, you'll need to create a
+[BucketStateStore](../06-statestore/03-bucketstatestore.md) and a
+[Destination](../02-destinations/01-destinations.md) which points to the
+directory that Backstage is configured to watch.
+
+For example, first create a `BucketStateStore` for Backstage to use:
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
@@ -108,7 +109,7 @@ spec:
     namespace: default
 ```
 
-And a `backstage` Destination:
+And a `backstage` Destination in Kratix to enable Promises to write to the state store:
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination
@@ -122,9 +123,11 @@ spec:
     name: backstage
 ```
 
-Kratix is now setup to enable Promises to write to this Destination. Backstage
-needs to be configured to read from it. Update your [Backstage
-configuration](https://backstage.io/docs/conf/) to read from the bucket:
+At this point, the Kratix half of the partnership is set up: we have a state store, and we
+can write to it. We now need to configure Backstage to read from this state store.
+
+To do this, you can update your [Backstage configuration](https://backstage.io/docs/conf/)
+as follows:
 
 ```yaml
 integrations:
@@ -147,28 +150,30 @@ catalog:
 ```
 
 Backstage is now configured to load any Backstage documents, such as templates
-and components, that Kratix writes to the bucket.
+and components, which Kratix has written to the state store.
 
 ### Create Backstage Resources with Kratix
 
 Kratix [workflows](../workflows) allow Promise authors to define pipelines that
-run for a [Resource](../05-resources/02-workflows.md) or
-[Promise](../03-promises/04-workflows.md) for various different lifecycles.
-These workflows can output documents of *any type*, and a single workflow can
-schedule to [multiple destinations](../multicluster-management#dynamic). This
-enables Promise authors in a single workflow to both output any desired
-resources, like Kubernetes, alongside other types of resources, in this case
-Backstage.
+run at various points in the lifecycle of a [Resource](../05-resources/02-workflows.md) or
+[Promise](../03-promises/04-workflows.md). These workflows can output documents of
+*any type*, and a single workflow can schedule to
+[multiple destinations](../multicluster-management#dynamic).
 
-The Promise workflow can be used to output a component and template for the
-Promise at install time, and then the Resource workflow can output a component
-to describe what has been provisioned. The [Kafka
-Promise](https://github.com/syntasso/kratix-marketplace/tree/main/kafka)
-demonstrates this.
+This powerful combination enables Promise authors to output many distinct types of
+resource to its own destination, all in a single workflow. In this case, we're writing
+both Kubernetes manifests and Backstage components and templates, ensuring that the latter
+are only picked up by Backstage.
 
-The Promise workflow for Kafka outputs the Kafka operator for deployment to a
+The Promise Configure workflow can be used to output a component and template for the
+Promise at installation time, and then the Resource Configure workflow can output a
+component to describe what has been provisioned. The [Kafka
+Promise](https://github.com/syntasso/kratix-marketplace/tree/main/kafka) in our
+Marketplace demonstrates this.
+
+The Promise Configure workflow for Kafka outputs the Kafka operator for deployment to a
 Kubernetes cluster (the default scheduling for this Promise) and then outputs a
-Component and Template separately for backstage and specifies the scheduling to
+component and template separately for Backstage, specifying the scheduling to
 ensure it goes to the Backstage destination:
 
 ```bash
@@ -192,29 +197,28 @@ echo """
 """ >> /kratix/metadata/destination-selectors.yaml
 ```
 
-The sample Component and Template can be found
+The sample component and template can be found
 [here](https://github.com/syntasso/kratix-marketplace/blob/main/kafka/internal/configure-promise-pipeline/resources/backstage/backstage.yaml).
-The Template takes advantage of a [Backstage plugin to kubectl
-apply](https://github.com/muvaf/kubernetes-apply) the desired resource directly
-to the Platform cluster. Any plugin can be used that enables the request to make
-its way to the Platform cluster, for example it could instead of hitting the
-cluster directly commit or open a PR to a GitHub repository that is being used
-to deploy resources to the Platform cluster via GitOps.
+The Template takes advantage of the
+[kubernetes-apply](https://github.com/muvaf/kubernetes-apply) Backstage plugin to
+`kubectl apply` the desired resource directly to the Platform cluster. Any plugin can be
+used which enables the request to make its way to the Platform cluster; for example,
+instead of hitting the cluster directly, it could commit or open a PR to a GitHub
+repository that is being used to deploy resources to the Platform cluster via GitOps.
 
-Kratix will write the Backstage resources to the Backstage Destination, where
-Backstage will then read and populate the UI with:
+Once Kratix and Backstage are wired up, Backstage will read from the Destination and
+populate the UI as shown below:
 
 <img src={useBaseUrl('/img/docs/backstage-promise.png')} />
 
-
-A user can then make a request by clicking "Create" in the top right, selecting
-the Kafka form and filling out the details:
+A user can then make a [Resource request](../05-resources/01-intro.md) to Kratix by
+clicking "Create" in the top right, selecting the Kafka form and filling out the details:
 
 <img src={useBaseUrl('/img/docs/backstage-template.png')} />
 
-The last step is to ensure that after a user has requested a Resource that a
-Component in Backstage appears to resemble it. Kafka does the in-lined in the
-Resource workflow:
+The last step is to ensure that a component in Backstage appears to represent the Resource
+the user requested. The Kafka Promise achieves this as part of the Resource workflow, as
+shown below:
 
 ```bash
 #!/usr/bin/env sh
@@ -258,13 +262,15 @@ echo """
 """ >> /kratix/metadata/destination-selectors.yaml
 ```
 
-This results in the instance being shown in Backstage:
+This results in the instance being displayed in Backstage:
 
 <img src={useBaseUrl('/img/docs/backstage-resource.png')} />
 
 <br />
 
 <br />
+
+### Support
 
 Having difficulties with Backstage and Kratix? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback) or
