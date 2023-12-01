@@ -49,7 +49,7 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 - **Auto-populated GUI:**
 
   Backstage GUIs must be declared, which is toil for the platform. Kratix can
-  reduce this toil by integrating [Promises](../03-promises/01-promises.md) with
+  reduce this toil by integrating [Promises](../promises/intro) with
   Backstage by default. In addition, these GUIs can diverge from platform
   offerings if they are managed separately from the backend implementations.
   Promises that define the API and the Backstage GUI at the same time provide
@@ -89,8 +89,8 @@ Backstage supports reading objects from S3-compatible blob stores. Kratix
 also supports writing to them.
 
 To set up this integration, you'll need to create a
-[BucketStateStore](../06-statestore/03-bucketstatestore.md) and a
-[Destination](../02-destinations/01-destinations.md) which points to the
+[BucketStateStore](../statestore/bucketstatestore) and a
+[Destination](../destinations/intro) which points to the
 directory that Backstage is configured to watch.
 
 For example, first create a `BucketStateStore` for Backstage to use:
@@ -155,8 +155,8 @@ and components, which Kratix has written to the state store.
 ### Create Backstage Resources with Kratix
 
 Kratix [workflows](../workflows) allow Promise authors to define pipelines that
-run at various points in the lifecycle of a [Resource](../05-resources/02-workflows.md) or
-[Promise](../03-promises/04-workflows.md). These workflows can output documents of
+run at various points in the lifecycle of a [Resource](../resources/workflows) or
+[Promise](../promises/workflows). These workflows can output documents of
 *any type*, and a single workflow can schedule to
 [multiple destinations](../multicluster-management#dynamic).
 

@@ -85,7 +85,7 @@ spec:
     kind: BucketStateStore
 ```
 
-The Destination will using the pre-existing MinIO [State Store](/docs/main/05-reference/06-statestore/01-statestore.md).
+The Destination will using the pre-existing MinIO [State Store](/docs/main/reference/statestore/intro).
 Apply the Destination document to the platform cluster:
 
 ```bash
@@ -117,7 +117,7 @@ For further documentation on Destination scheduling, check the [Destination Refe
 documentation](../reference/destinations/intro)
 
 :::info
-If you are specifically interested in making a Resource location deterministic, you can check out the [scheduling workloads](../05-reference/04-multicluster-management.md#workloads) reference.
+If you are specifically interested in making a Resource location deterministic, you can check out the [scheduling workloads](../reference/multicluster-management#workloads) reference.
 :::
 
 

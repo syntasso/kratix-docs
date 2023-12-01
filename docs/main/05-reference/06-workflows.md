@@ -5,7 +5,7 @@ description: Learn more about conventions in Workflows
 id: workflows
 ---
 
-A [Kratix Promise](../promises/intro) can be configured with a series of
+A [Kratix Promise](./promises/intro) can be configured with a series of
 Workflows defined in the Promise's `workflows` key.
 
 Within the Workflows, Promise writers can trigger a series of actions
