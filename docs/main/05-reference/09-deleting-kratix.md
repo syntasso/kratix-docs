@@ -10,7 +10,7 @@ To uninstall Kratix you need to run through the following steps:
   ```bash
   kubectl --context $PLATFORM delete promises --all -A
   ```
-  This will remove all of the Resource workloads from your [State Store](./06-statestore/01-statestore.md).
+  This will remove all of the Resource workloads from your [State Store](./statestore/intro).
 1. Delete all other Kratix resources:
   ```bash
   kubectl --context $PLATFORM delete destinations --all -A
@@ -46,5 +46,5 @@ and the Flux resources that sync down from the State Store.
   ```
 
 ## State Store
-The [State Store](./06-statestore/01-statestore.md) should now be empty, verify
+The [State Store](./statestore/intro) should now be empty, verify
 this manually. In the event any files are left behind they can manually be deleted.

@@ -26,7 +26,7 @@ or want to use a different tool to provision your clusters, skip requirements 1 
 
 To get setup locally quickly with KinD clusters you can use the `./scripts/quick-start.sh`
 from the root of the [Kratix repository](https://github.com/syntasso/kratix). This provisions
-an in-cluster `MinIO` to use as the backing [State Store](../../05-reference/06-statestore/01-statestore.md).
+an in-cluster `MinIO` to use as the backing [State Store](/docs/main/reference/statestore/intro).
 Alternatively you can provide the `--git` flag to create it with an in-cluster Gitea
 instance instead.
 
@@ -57,9 +57,9 @@ kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/s
 
 ## Set up State Store
 Kratix uses GitOps to provision resources on the worker clusters. You can configure Kratix
-with multiple different GitOps repositories by creating [State Stores](/docs/main/05-reference/06-statestore/01-statestore.md).
-Kratix supports [Bucket State Store](/docs/main/05-reference/06-statestore/03-bucketstatestore.md)
-and [Git State Store](/docs/main/05-reference/06-statestore/02-gitstatestore.md).
+with multiple different GitOps repositories by creating [State Stores](/docs/main/reference/statestore/intro).
+Kratix supports [Bucket State Store](/docs/main/reference/statestore/bucketstatestore)
+and [Git State Store](/docs/main/reference/statestore/gitstatestore).
 
 If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store
 
@@ -86,8 +86,9 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 
   <TabItem value="custom" label="Custom">
 
-  If your aren't using KinD clusters you will need to create your own [State Store](/docs/main/05-reference/06-statestore/01-statestore.md)
-  that is accessible by the platform and worker cluster. Follow the [docs for creating State Stores](/docs/main/05-reference/06-statestore/01-statestore.md).
+  If your aren't using KinD clusters you will need to create your own State
+  Store that is accessible by the platform and worker cluster. Follow the [docs
+  for creating State Stores](/docs/main/reference/statestore/intro).
 
   </TabItem>
 
