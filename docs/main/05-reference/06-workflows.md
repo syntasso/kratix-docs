@@ -100,10 +100,11 @@ providing a set of common volumes, as defined below.
 Kratix provides a input directory to the container at `/kratix/input`. This
 directory is populated with different files depending on the type of Workflow.
 
-In Promise Workflows, this directory is empty.
+In Promise Worflows, all containers will have access to an `object.yaml` file
+within the `/kratix/input` directory. The `object.yaml` contains the full
+Promise definition.
 
-In Resource Workflows, all container will have access to an `object.yaml`
-within the `/kratix/input` directory. The `object.yaml` contains the Resource
+In Resource Workflows, the `object.yaml` file contains the Resource
 definition submitted to the platform.
 
 ### Output
