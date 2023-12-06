@@ -108,3 +108,5 @@ spec:
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
 ```
+
+It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promise-releases/intro) docs for details.
