@@ -1,8 +1,8 @@
 ---
 description: Documentation for the Promise Release
-title: Promise Releases
-sidebar_label: Promise Releases
-id: intro
+title: Releases
+sidebar_label: Releases
+id: releases
 ---
 
 A Promise Release represents a Promise with a specific version that will be installed in

@@ -109,4 +109,4 @@ spec:
               -  #...
 ```
 
-It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promise-releases/intro) docs for details.
+It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
