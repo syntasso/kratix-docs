@@ -4,5 +4,5 @@ title: Kratix and Backstage
 id: backstage
 ---
 
-Checkout our [documentation on how to get started with Backstage and
-Kratix](../reference/backstage/intro)
+Check out our [documentation on how to get started with Backstage and
+Kratix](../reference/backstage/intro).

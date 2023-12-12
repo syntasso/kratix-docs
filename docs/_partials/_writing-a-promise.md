@@ -55,6 +55,7 @@ Thinking of your platform as-a-Product, steps to write a Promise are:
 - Finally, determine the steps that need to be executed during the Promise's
   lifecycle. The minimum you'll need is a Workflow to configure your Resource which will run on creation. These may include translating the user's request into the Operator's expected document, injecting custom configuration, sending requests to internal APIs to
   verify permissions, scanning images for vulnerabilities, etc.
+
 * In the Promise, list those Workflows in the `workflows`.
 * Install the Promise on your platform cluster, where Kratix is installed.
 
@@ -77,8 +78,10 @@ At this point, Kratix will execute the following steps:
   documentation](/docs/main/reference/resources/workflows).
 - Once all Workflows are executed, a series of documents are outputted,
   encapsulating the user's request into valid Kubernetes objects.
+
 * Those documents are schedule to an available Destination, which in turn has
   the necessary dependencies installed (via the Promise's `dependencies` field)
+
 - The necessary infrastructure is created and configured, and the user can reference any necessary details in the Resource status field (e.g. how to connect to a service).
 
 <hr />
@@ -111,6 +114,7 @@ This guide will follow the steps below:
 1. [Test your container image](#test-image)
 
 **Promise definition: dependencies**
+
 1. [Define your `dependencies` in your Promise definition](#dependencies)
 
 <!-- TODO: Resource Request -->
@@ -166,31 +170,31 @@ Replace the `api` field in `promise.yaml` with the complete field details
 below. Ensure the indentation is correct (`api` is nested under `spec`).
 
 ```yaml jsx title="api in promise.yaml"
-  api:
-    apiVersion: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    metadata:
-      name: jenkins.example.promise.syntasso.io
-    spec:
-      group: example.promise.syntasso.io
-      scope: Namespaced
-      names:
-        plural: jenkins
-        singular: jenkins
-        kind: jenkins
-      versions:
-        - name: v1
-          served: true
-          storage: true
-          schema:
-            openAPIV3Schema:
-              type: object
-              properties:
-                spec:
-                  type: object
-                  properties:
-                    name:
-                      type: string
+api:
+  apiVersion: apiextensions.k8s.io/v1
+  kind: CustomResourceDefinition
+  metadata:
+    name: jenkins.example.promise.syntasso.io
+  spec:
+    group: example.promise.syntasso.io
+    scope: Namespaced
+    names:
+      plural: jenkins
+      singular: jenkins
+      kind: jenkins
+    versions:
+      - name: v1
+        served: true
+        storage: true
+        schema:
+          openAPIV3Schema:
+            type: object
+            properties:
+              spec:
+                type: object
+                properties:
+                  name:
+                    type: string
 ```
 
 You have now defined the as-a-Service API.
@@ -416,7 +420,9 @@ you are using KinD you can load it in by running:
 
 <details>
   <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
-  If you have not created your Kubernetes clusters with KinD, you will need to either:
+
+If you have not created your Kubernetes clusters with KinD, you will need to either:
+
   <ul>
     <li>Push the image to a Image repository (like Dockerhub) by running <code>./internal/scripts/pipeline-image push</code></li>
     <li>Use the appropriate command to load the image (for example, <code>minikube cache add</code> if you are using minikube)</li>

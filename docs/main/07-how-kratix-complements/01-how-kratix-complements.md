@@ -4,11 +4,9 @@ title: How Kratix Complements
 id: intro
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 <img
 align="right"
-src={useBaseUrl('/img/k+QUESTION.png')}
+src={require('@site/static/img/k+QUESTION.png').default}
 alt="Kratix logo followed by a plus sign and a question mark"
 />
 

@@ -6,6 +6,7 @@ You should also have two environment variables, `PLATFORM` and `WORKER`.
 
 <details>
    <summary>Verify the current state of your installation</summary>
+
 Run:
 
 ```bash
@@ -28,22 +29,26 @@ kubectl --context $PLATFORM get bucketstatestores.platform.kratix.io
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME        AGE
 default     1h
 ```
 
 Verify there are no existing Promises:
+
 ```bash
 kubectl --context $PLATFORM get promises
 ```
 
 Verify your cluster environment variables are set:
+
 ```bash
 env | grep 'PLATFORM\|WORKER'
 ```
 
 which should result in:
+
 ```shell-session
 WORKER=kind-worker
 PLATFORM=kind-platform

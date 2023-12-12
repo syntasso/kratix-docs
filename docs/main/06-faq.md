@@ -10,9 +10,10 @@ description: Common questions about Kratix and how it fits in the Kubernetes eco
 Kratix is intended to help platform teams deliver platforms in a sustainable way. Products are never "done", so a Platform-as-a-Product is never done. Instead, a platform is an opportunity to continuously learn about the best way to accelerate delivery in your organisation. Day two, three, four, etc. are equally as important as day one.
 
 In the future, Kratix will:
+
 - Add health checks and testing to Promises, so that:
-    - The capability of the platform to deploy promised resources on-demand is continuously asserted, with Service-Level Objective(s) assigned against relevant Service-Level Indicator(s)
-    - The capability of each promised resource to deliver its Service-Level Objective(s) against relevant Service-Level indicator(s) is continuously asserted
+  - The capability of the platform to deploy promised resources on-demand is continuously asserted, with Service-Level Objective(s) assigned against relevant Service-Level Indicator(s)
+  - The capability of each promised resource to deliver its Service-Level Objective(s) against relevant Service-Level indicator(s) is continuously asserted
 - Converge all deployed resources (dependency or resource) when a Promise is updated
 - Converge individual resources when a user's Resource is updated
 
@@ -33,8 +34,7 @@ only 'own' operations for aspects core to essential day-to-day delivery.
 
 Quite the opposite. Kratix is at its most powerful when deploying complex
 services. The more complexity that is moved from the application teams to the platform, the lower their cognitive load, and the more
-productive they are. See the [Compound Promises
-page](./guides/compound-promises) for details on how you would create larger,
+productive they are. See the [Compound Promises page](./guides/compound-promises) for details on how you would create larger,
 more complex Promises by combining Promises.
 
 ### My organisation would like to add all of our tooling as Promises to our platform, and some of our tools are challenging to deploy and manage. I worry a single platform team would get overwhelmed. How do I scale up?

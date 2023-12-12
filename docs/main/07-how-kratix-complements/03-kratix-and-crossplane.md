@@ -4,12 +4,10 @@ title: Kratix and Crossplane
 id: crossplane
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 _**[Crossplane](https://www.crossplane.io/)** is an open-source multi-cloud control plane that allows you to extend Kubernetes to connect to and from external sources like databases, the cloud and the edge._
 
 <img
-src={useBaseUrl('/img/k+crossplane_arch.png')}
+src={require('@site/static/img/k+crossplane_arch.png').default}
 alt="Sample architecture with Kratix and Crossplane"
 style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 />

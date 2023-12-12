@@ -88,7 +88,7 @@ Promises are not the only way to create reusable components when designing your 
 
 Since both Promises and Workflows can be reused, you may wonder when to use each. The best rule of thumb is to ask if you are describing a noun or a verb.
 
-Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide some_thing_ as-a-Service you should be thinking about creating a Promise.
+Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide some*thing* as-a-Service you should be thinking about creating a Promise.
 
 Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a Workflow step.
 
@@ -285,6 +285,7 @@ eck-beats:
 
 <details>
 <summary>🤔 How does the run script work?</summary>
+
 Take a look at the file you have just created and see how the principles and structures introduced above are applied.
 
 On line 11 and line 15 the script is downloading a specific version of ECK rather than using a mutable tag like `latest`. This means that no matter how frequently this image runs, it will always generate the same output.
@@ -786,7 +787,7 @@ example-eck-kibana-kb-6f4f95b787-4fqsr   1/1     Running   0          5m
 Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-Go to <http://localhost:30269> and check it out!
+Go to [http://localhost:30269](http://localhost:30269) and check it out!
 
 :::info
 If you are in Instruqt, you can just navigate to the `🔗 ECK Instance` tab and use the refresh button on the top left.

@@ -4,8 +4,9 @@ title: Compound Promise
 ---
 
 ```mdx-code-block
-import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
+import PartialPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.md';
 ```
+
 <!-- remark-abbr terms -->
 *[Dep]: Dependency
 *[Deps]: Dependencies
