@@ -1,7 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const abbr = require("remark-abbr");
+// const abbr = require("remark-abbr");
 
 const { themes } = require("prism-react-renderer");
 const lightTheme = themes.github;
@@ -41,7 +41,7 @@ const config = {
           sidebarCollapsed: true,
           // Remove this to remove the "edit this page" links.
           editUrl: "https://github.com/syntasso/kratix-docs/tree/main",
-          remarkPlugins: [abbr],
+          // remarkPlugins: [abbr],
         },
         // uncomment to add the blog section to the website
         // blog: {
@@ -162,7 +162,6 @@ const config = {
           "diff",
           "json",
           "yaml",
-          "console",
         ],
       },
       algolia: {

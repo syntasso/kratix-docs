@@ -7,12 +7,6 @@ title: Compound Promise
 import PartialPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.md';
 ```
 
-<!-- remark-abbr terms -->
-*[Dep]: Dependency
-*[Deps]: Dependencies
-*[CRD]: Custom Resource Definition
-*[CRDs]: Custom Resource Definitions
-
 Compound Promises are Promises that, in its Dependencies, contain other Promises. That ability allows Platform teams deliver entire stacks on demand, instead of simple databases or services.
 
 **In this tutorial, you will**
@@ -20,7 +14,7 @@ Compound Promises are Promises that, in its Dependencies, contain other Promises
 1. encapsulate multiple Promises into a Compound Promise
 1. request a complete development environment Resource through a Compound Promise
 
-<PartialPreRequisites />
+    <PartialPreRequisites />
 
 ## Register the Platform as a Worker
 
@@ -164,7 +158,9 @@ spec:
   ... # remainder of the paved path Promise...
 ```
 
-Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its CRDs are only installed in the platform cluster, you need to ensure the Dependencies are applied exclusively to the platform cluster.
+Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its
+CRDs (Custom Resource Definitions) are only installed in the platform cluster, you need to ensure the Dependencies are
+applied exclusively to the platform cluster.
 
 That is controlled by the `destinationSelectors` key:
 
@@ -261,5 +257,5 @@ Workflow Pipeline is doing in its
 
 ## 🎉 Congratulations
 
-✅ &nbsp; You have just installed and used your first Compound Promise. <br/>
+✅ &nbsp; You have just installed and used your first Compound Promise. <br />
 👉 &nbsp; Let's see [where to go from here](./whats-next).

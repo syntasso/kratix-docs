@@ -338,8 +338,7 @@ cp /tmp/transfer/* /kratix/output/
 ```
 
 Pipeline images also have the capability to write back information to the
-resource requester by writing to the status. See [status documentation for more
-information.](../main/05-reference/05-resources/04-status.md)
+resource requester by writing to the status. See [status documentation for more information.](../reference/resources/status)
 
 #### Package your code as a Docker image {#docker-file}
 
@@ -641,7 +640,7 @@ kubectl --context $PLATFORM get pods
 This should result in something similar to
 
 ```console
-NAME                                             READY   STATUS      RESTARTS   AGE
+NAME                                       READY   STATUS      RESTARTS   AGE
 configure-pipeline-promise-default-9d40b   0/1     Completed   0          1m
 ```
 

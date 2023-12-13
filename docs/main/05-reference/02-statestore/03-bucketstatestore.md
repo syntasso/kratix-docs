@@ -35,6 +35,7 @@ spec:
 Kratix uses the credentials contained in the `secretRef` to authenticate with the
 S3-Compatible Bucket. Kratix currently supports `accessKeyID` and `secretAccessKey` to authenticate.
 The secret should be in the following format:
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -48,8 +49,10 @@ data:
 ```
 
 ### S3-Compatible Providers
+
 Any S3-Compatible provider will work with Kratix. See the documentation on how
 to use some of the available providers below:
+
 - [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
 - [GCS S3-compatible storage](https://cloud.google.com/storage/docs/interoperability)
 - [MinIO](https://min.io/docs/minio/linux/reference/minio-mc/mc-mb.html)

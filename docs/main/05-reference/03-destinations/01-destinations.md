@@ -36,6 +36,7 @@ Store](../statestore/intro):
 one for `resources`, one for `crds`. The path within the `State Store` follows the following pattern:
 
 For `dependencies`:
+
 ```
 statestore.Spec.Path/
     destination.Spec.Path/
@@ -45,6 +46,7 @@ statestore.Spec.Path/
 ```
 
 For `resources`:
+
 ```
 statestore.Spec.Path/
     destination.Spec.Path/
@@ -56,12 +58,14 @@ statestore.Spec.Path/
 ```
 
 For example installing and requesting from a Promise that provides `Redis` as a service you would get:
+
 ```
 worker-cluster/dependencies/redis/static/dependencies.yaml
 worker-cluster/resources/default/redis/my-request/redis.yaml
 ```
 
 For example:
+
 ```yaml
 ---
 apiVersion: platform.kratix.io/v1alpha1
@@ -91,8 +95,9 @@ spec:
 ```
 
 The above configuration would result in the following paths being written to:
- - `destinations/dev/default/worker-1/crds/`
- - `destinations/dev/default/worker-1/resources/`
+
+- `destinations/dev/default/worker-1/crds/`
+- `destinations/dev/default/worker-1/resources/`
 
 <br/>
 
