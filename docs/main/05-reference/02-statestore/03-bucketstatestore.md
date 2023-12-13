@@ -83,15 +83,15 @@ data:
 
 ### IAM
 
-When `authMethod: IAM` is set Kratix will assume that the place in which Kratix
-is running has been given permissions to authenticate with the S3 API using its
-IAM Role. In practise this might mean that your running Kratix in AWS, and that
+When `authMethod: IAM` is set, Kratix will assume that the place in which it's 
+running has been given permissions to authenticate with the S3 API using its
+IAM Role. In practise, this might mean that you are running Kratix in AWS, and that
 the node role for the instance Kratix is running on has been given permissions
-to read/write to the bucket. Similarly rather than giving the node role
-permissions you may be using [IAM Roles for
+to read/write to the bucket. Similarly, rather than giving the node role
+permissions, you may be using [IAM Roles for
 ServiceAccounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
 to give permissions to just the Kratix container. With both approaches the
-configuration for Kratix is the same:
+configuration for the State store is the same:
 
 ```yaml
 ---
