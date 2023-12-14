@@ -5,8 +5,8 @@ sidebar_label: Quick Start
 ---
 
 ```mdx-code-block
-import PartialInstall from '../_partials/installation/_single-cluster-install.md';
-import PartialConfigure from '../_partials/installation/_single-cluster-configure.md';
+import PartialInstall from '@site/docs/_partials/installation/_single-cluster-install.md';
+import PartialConfigure from '@site/docs/_partials/installation/_single-cluster-configure.md';
 ```
 
 One of the most powerful features of Kratix is its ability to handle requests for

@@ -201,14 +201,16 @@ alt="screenshot of a YAML file, highlighting the presence of the Dependencies ke
 `dependencies` is the description of all of the Kubernetes resources required to create a promised Resource, such as CRDs, Operators and Deployments.
 
 In the Promise definition, you divide resources based on the idea of _prerequisite_ and _per-resource_ items. Prerequisite resources are resources that we create before any application team requests a Resource. This can be helpful for two scenarios:
+
 1. Any CRDs or Dependencies are ready when an Resource is requested which speeds up response time to application teams.
 1. Resources that can be shared across Resources are only deployed once. This can reduce load on the cluster, and it can also allow delivering a Resource as a portion of an existing Resource (e.g. you could provide a whole database instance on each request, or you could provide a database within an existing instance on each request)
 
 The `dependencies` section of the Kratix Promise defines the _prerequisite capabilities_.
 
 These capabilities are:
-* created once per Destination.
-* complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
+
+- created once per Destination.
+- complete Kubernetes YAML documents stored in the `dependencies` section of the Promise.
 
 For the Postgres Promise you're defining, the only Dependency workloads you need are conveniently packaged in a [Kubernetes Operator](https://github.com/zalando/postgres-operator) that is maintained by Zalando. The Operator turns the complexities of configuring Postgres into a manageable configuration format.
 
@@ -585,7 +587,9 @@ kind load docker-image kratix-workshop/postgres-configure-pipeline:dev --name pl
 
 <details>
   <summary><strong>Click here</strong> if your clusters were not created with KinD</summary>
-  If you have not created your Kubernetes clusters with KinD, you will need to either:
+
+If you have not created your Kubernetes clusters with KinD, you will need to either:
+
   <ul>
     <li>Push the image to a Image repository (like Dockerhub), or </li>
     <li>Use the appropriate command to load the image (for example, <code>minikube cache add</code> if you are using minikube)</li>
@@ -661,8 +665,9 @@ works.platform.kratix.io                 2022-08-09T14:35:55Z
 
 <br />
 
-<p>Check that the ependencies have been installed on the worker:<br/>
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+<p>
+Check that the dependencies have been installed on the worker: <br/>
+<sub> (This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching) </sub>
 </p>
 
 For Postgres, you can see in the Promise file that there are a number of RBAC
@@ -745,8 +750,9 @@ After you applied the request in the step above, you should
 eventually see a new pod executing the
 `execute-pipeline.sh` script you created.
 
-<p>Check by listing the pods on the platform:<br />
-<sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
+<p>
+Check by listing the pods on the platform: <br/>
+<sub> (This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching) </sub>
 </p>
 
 ```console
@@ -766,7 +772,8 @@ Then view the Pipeline logs by running _(replace SHA with the value from the out
 kubectl --context $PLATFORM logs --container xaas-configure-pipeline-stage-0 pods/configure-pipeline-postgresql-default-SHA
 ```
 
-<p>On the worker cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined by the Resource definition (<code>postgres-resource-request.yaml</code>).<br />
+<p>
+On the worker cluster, you will eventually see a Postgres service as a two-pod cluster in the <em>Running</em> state with the name defined by the Resource definition (<code>postgres-resource-request.yaml</code>).<br />
 <sub>(This may take a few minutes so <code>--watch</code> will watch the command. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop watching)</sub>
 </p>
 
@@ -810,8 +817,6 @@ To recap the steps we took:
 1. ✅&nbsp;&nbsp;Installed the modified Promise on your platform
 1. ✅&nbsp;&nbsp;Checked it works: make a request to your platform for a Postgres Resource
 
-<br />
-
 ## Clean up environment {#cleanup}
 
 To clean up your environment first delete your request for the Postgres Resource
@@ -821,6 +826,7 @@ kubectl --context $PLATFORM delete --filename resource-request.yaml
 ```
 
 Verify the workloads belonging to the request have been deleted in the worker
+
 ```console
 kubectl --context $WORKER get pods
 ```
@@ -832,6 +838,7 @@ kubectl --context $PLATFORM delete --filename promise.yaml
 ```
 
 Verify the Dependencies are deleted from the worker
+
 ```console
 kubectl --context $WORKER get pods
 ```

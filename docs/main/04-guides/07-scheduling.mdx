@@ -27,7 +27,6 @@ Promise](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins) as an
 example. Follow [Installing a Promise](./installing-a-promise) to get Jenkins
 installed, if needed.
 
-
 ```shell-session
 $ kubectl --context $PLATFORM get destinations.platform.kratix.io
 NAME               AGE
@@ -114,16 +113,13 @@ jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h
 When you request a new Jenkins, the Resources will be created in one of the available Destinations, by default this is selected in a non-deterministic way.
 
 For further documentation on Destination scheduling, check the [Destination Reference
-documentation](../reference/destinations/intro)
+documentation](../reference/destinations/intro).
 
 :::info
 If you are specifically interested in making a Resource location deterministic, you can check out the [scheduling workloads](../reference/multicluster-management#workloads) reference.
 :::
 
-
 ## 🎉 Congratulations
 
 ✅&nbsp;&nbsp; You have created and registered a new Destination and watched the system react to it.<br />
 👉🏾&nbsp;&nbsp; Let's [write compound Promises](./compound-promises).
-
-export const toc = [...EnhancingPromiseTOC];

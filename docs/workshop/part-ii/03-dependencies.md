@@ -335,7 +335,7 @@ second-request-kb-6cdc9594ff-7dnnm   1/1     Running   0          42s
 
 The first Kibana has been set up with a unique node port which has been configured to be exposed as a part of the workshop cluster setup.
 
-You can visit <http://localhost:30269> and check it out, and you can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
+You can visit [http://localhost:30269](http://localhost:30269) and check it out, and you can even login by using the default username `elastic` and retrieving the password from the worker cluster with the following command:
 
 ```bash
 kubectl --context $WORKER \

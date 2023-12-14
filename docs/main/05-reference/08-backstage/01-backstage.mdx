@@ -5,17 +5,13 @@ sidebar_label: Backstage
 id: intro
 ---
 
-```mdx-code-block
-import useBaseUrl from '@docusaurus/useBaseUrl';
-```
-
 _[Backstage](https://backstage.io/) is a framework for building developer portals. Kratix is a framework for building platforms. It's as if they were made for each other._
 
 <img
-align="right"
-src={useBaseUrl('/img/k+backstage.png')}
-style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
-alt="Kratix logo and Backstage logo"
+  align="right"
+  src={require("@site/static/img/k+backstage.png").default}
+  style={{ float: "right", width: "400px", margin: "20px 0 40px 40px" }}
+  alt="Kratix logo and Backstage logo"
 />
 
 ## What
@@ -76,12 +72,24 @@ With Kratix, you get declarative UIs by default:
   nature. If your Backstage dies, no problem: redeploy it and your views will
   automatically be brought back to life by Kratix.
 
-<br />
-<div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/wj5VaXYTvrg" title="Use Kratix to provide on-demand services through a Backstage UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-</div>
+  {" "}
 
-<br/>
+  <br />
+  <div style={{ "text-align": "center" }}>
+    <iframe
+      width="560"
+      height="315"
+      src="https://www.youtube.com/embed/wj5VaXYTvrg"
+      title="Use Kratix to provide on-demand services through a Backstage UI"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    ></iframe>
+  </div>
+
+  {" "}
+
+  <br />
 
 ### Setting up Kratix with Backstage
 
@@ -94,6 +102,7 @@ To set up this integration, you'll need to create a
 directory that Backstage is configured to watch.
 
 For example, first create a `BucketStateStore` for Backstage to use:
+
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: BucketStateStore
@@ -110,6 +119,7 @@ spec:
 ```
 
 And a `backstage` Destination in Kratix to enable Promises to write to the state store:
+
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination
@@ -132,7 +142,7 @@ as follows:
 ```yaml
 integrations:
   awsS3:
-    - endpoint: 'http://s3.amazonaws.com'
+    - endpoint: "http://s3.amazonaws.com"
       s3ForcePathStyle: true
       accessKeyId: ${AWS_ACCESS_KEY_ID}
       secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
@@ -144,9 +154,8 @@ catalog:
         prefix: backstage/
         region: us-east-2
         schedule:
-          frequency: {minutes: 1}
-          timeout: {seconds: 20}
-
+          frequency: { minutes: 1 }
+          timeout: { seconds: 20 }
 ```
 
 Backstage is now configured to load any Backstage documents, such as templates
@@ -157,7 +166,7 @@ and components, which Kratix has written to the state store.
 Kratix [workflows](../workflows) allow Promise authors to define pipelines that
 run at various points in the lifecycle of a [Resource](../resources/workflows) or
 [Promise](../promises/workflows). These workflows can output documents of
-*any type*, and a single workflow can schedule to
+_any type_, and a single workflow can schedule to
 [multiple destinations](../multicluster-management#dynamic).
 
 This powerful combination enables Promise authors to output many distinct types of
@@ -209,12 +218,12 @@ repository that is being used to deploy resources to the Platform cluster via Gi
 Once Kratix and Backstage are wired up, Backstage will read from the Destination and
 populate the UI as shown below:
 
-<img src={useBaseUrl('/img/docs/backstage-promise.png')} />
+![Promise in Backstage](/img/docs/backstage-promise.png)
 
 A user can then make a [Resource request](../05-resources/01-intro.md) to Kratix by
 clicking "Create" in the top right, selecting the Kafka form and filling out the details:
 
-<img src={useBaseUrl('/img/docs/backstage-template.png')} />
+![Backstage Template](/img/docs/backstage-template.png)
 
 The last step is to ensure that a component in Backstage appears to represent the Resource
 the user requested. The Kafka Promise achieves this as part of the Resource workflow, as
@@ -264,11 +273,7 @@ echo """
 
 This results in the instance being displayed in Backstage:
 
-<img src={useBaseUrl('/img/docs/backstage-resource.png')} />
-
-<br />
-
-<br />
+![Backstage Instace](/img/docs/backstage-resource.png)
 
 ### Support
 

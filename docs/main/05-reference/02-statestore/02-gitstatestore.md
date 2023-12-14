@@ -8,6 +8,7 @@ id: gitstatestore
 # GitStateStore
 
 Kratix supports writing to Git repositories. See below for the API documentation:
+
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: GitStateStore
@@ -28,9 +29,11 @@ spec:
 ```
 
 ## Auth
+
 Kratix uses the credentials contained in the `secretRef` to authenticate with the
 Git storage. Kratix currently supports using `username` and `password` to authenticate.
 The secret should be in the following format:
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -48,12 +51,14 @@ you are using you may be able to use an access token in-place of an actual passw
 See below for further details.
 
 ### GitHub
+
 GitHub supports using [person access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 instead of user passwords for authenticating with GitHub. Create a personal access token
 with read and write permissions to the repository. Populate the `username` and `password`
 fields with the GitHub username and token value.
 
 ### GitLab
+
 GitLab supports using [project access tokens](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
 instead of user passwords for authenticating with GitLab. Create a project access token
 with read and write permissions to the repository. The token is created on the project, and is therefore

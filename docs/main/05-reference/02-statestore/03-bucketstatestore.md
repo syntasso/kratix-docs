@@ -33,6 +33,7 @@ spec:
 ```
 
 ### S3-Compatible Providers
+
 Any S3-Compatible provider will work with Kratix. See the documentation on how
 to use some of the available providers below:
 - [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
@@ -42,6 +43,7 @@ to use some of the available providers below:
 For other providers see there documentation for setting up the bucket and credentials.
 
 ## Auth
+
 
 The `.spec.authMethod` key is used to determine which authentication method
 should be used when communicating to the S3-Compatible API. There are two
@@ -110,8 +112,6 @@ When running in EKS you need to ensure your security group rules allow Kratix to
 access the S3 API. If you are running the cluster in a restrictred setup you can
 grant the access to just the S3 API using [gateway VPC
 endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html)
-
-
 
 ---
 

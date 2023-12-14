@@ -1,5 +1,3 @@
-import useBaseUrl from '@docusaurus/useBaseUrl';
-
 What about further enhancements? What about more Promises?
 
 ## Designing the right Promise for a single service
@@ -7,7 +5,7 @@ What about further enhancements? What about more Promises?
 <img
 align="right"
 width="500px"
-src={useBaseUrl('/img/docs/Treasure_Trove-Final_Thoughts-Single_Promise.jpeg')}
+src={require("@site/static/img/docs/Treasure_Trove-Final_Thoughts-Single_Promise.jpeg").default}
 alt="Single Kratix Promise"
 />
 
@@ -47,7 +45,7 @@ Stepping back, the beauty of Kratix is in its flexibility. It allows you to enca
 <img
 align="right"
 width="500px"
-src={useBaseUrl('/img/docs/Treasure_Trove-Final_Thoughts-Higher_Level_Promise.jpeg')}
+src={require('@site/static/img/docs/Treasure_Trove-Final_Thoughts-Higher_Level_Promise.jpeg').default}
 alt="Higher level Promise"
 />
 
