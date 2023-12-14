@@ -10,8 +10,7 @@
   "stop_urls": [
     "/blog",
     "/workshop",
-    "/marketplace",
-    "/docs/events"
+    "/marketplace"
   ],
   "selectors": {
     "lvl0": {
