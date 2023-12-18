@@ -15,8 +15,7 @@ function HomepageHeader() {
         <h1 className="hero__title">{siteConfig.title}</h1>
         <div className="row">
           <div className={clsx('col', styles.kratixDescription)}>
-            <p className="hero__subtitle">{siteConfig.tagline}</p>
-            Kratix makes it possible for you to stand up a platform (or many platforms!) that is specific to your needs but easy to maintain and upgrade because it’s built on the best of open-source and cloud offerings.
+            Kratix is an open-source platform framework that combines the flexibility and customisability of building your platform from scratch with the on-demand and self-service power of public clouds.
           </div>
           <div className="col col--5 text--center">
             <img className={styles.kratixLogo} src={useBaseUrl('/img/kratix_banner_logo.jpeg')} alt="Kratix Logo" />
