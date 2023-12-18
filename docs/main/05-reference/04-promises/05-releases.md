@@ -1,9 +1,30 @@
 ---
 description: Documentation for the Promise Release
-title: Releases
-sidebar_label: Releases
+title: Versioning
+sidebar_label: Versioning
 id: releases
 ---
+
+Platform engineers can version their Promise by adding the following label to
+their Promise definition:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: jenkins
+  labels:
+#highlight-next-line
+    kratix.io/promise-version: v1.1.0
+spec:
+  # Promise spec
+```
+
+A Promise version is an arbitrary number that represents a specific version of a
+Promise. Kratix will, through Promise Releases, ensure the Promise at the
+specified version is installed in the Platform.
+
+## Promise Release
 
 A Promise Release represents a Promise with a specific version that will be installed in
 the Platform. Kratix knows how to fetch the Promise from the specified source and will
@@ -17,18 +38,19 @@ kind: PromiseRelease
 metadata:
   name: jenkins-release
 spec:
-  version: # The version of the Promise
+  version: # The version of the Promise found at the sourceRef
   sourceRef:
     type: # Source type: http, git, etc.
     # Source specific fields
 ```
 
-The `spec.version` represents the version of the Promise as it relates to your platform.
-It is an arbitrary number and doesn't need to follow any specific format.
+The `spec.version` represents the version of the Promise that can be found at
+the `sourceRef`. If the Promise version label and the Promise Release
+`spec.version` do not match, Kratix will not install the Promise.
 
-Promise authors can decide to version their Promises either via a Promise Release or by
-versioning their Promise definition directly. In the latter case, platform engineers
-must wrap that Promise in a Promise Release and assign it a version.
+`spec.version` can be left blank. In this case, Kratix will set the Promise
+Release `spec.version` to the version of the Promise found at the `sourceRef` at
+the first reconciliation loop.
 
 ## Source Reference types
 
@@ -57,9 +79,10 @@ spec:
 
 Whenever the `spec.version` of a Promise Release changes, Kratix will
 automatically fetch the latest Promise definition from the `sourceRef` and
-update it in the Platform.
+update it in the Platform, as long as the Promise version label matches the
+Promise Release version.
 
-Note that updating the Promise definition in the remote location will not
+Note that updating the Promise version in the remote location will not
 automatically update the Promise in the Platform. The Promise Release
 `spec.version` must be updated to trigger the Promise update.
 
