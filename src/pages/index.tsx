@@ -2,9 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import ActionButtons from '@site/src/components/ActionButtons';
-import UseCases from '@site/src/components/UseCases';
 import styles from './index.module.css';
 import useBaseUrl from '@docusaurus/useBaseUrl'
 import GettingStarted from '@site/src/components/GettingStarted'
@@ -17,9 +15,7 @@ function HomepageHeader() {
         <h1 className="hero__title">{siteConfig.title}</h1>
         <div className="row">
           <div className={clsx('col', styles.kratixDescription)}>
-            <p className="hero__subtitle">{siteConfig.tagline}</p>
-            Kratix enables the co-creation of capabilities by providing a clear
-            contract between application and platform teams through the definition and creation of Promises.
+            Kratix is an open-source platform framework that combines the flexibility and customisability of building your platform from scratch with the on-demand and self-service power of public clouds.
           </div>
           <div className="col col--5 text--center">
             <img className={styles.kratixLogo} src={useBaseUrl('/img/kratix_banner_logo.jpeg')} alt="Kratix Logo" />
@@ -100,10 +96,6 @@ export default function Home(): JSX.Element {
       <HomepageHeader />
       <main>
         <GettingStarted />
-        <HomepageFeatures />
-        <HomepagePromises />
-        <UseCases />
-        <ActionButtonFrame />
       </main>
     </Layout>
   );

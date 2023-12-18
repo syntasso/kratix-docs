@@ -10,7 +10,7 @@ const darkTheme = themes.dracula;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Kratix",
-  tagline: "A framework for building platforms",
+  tagline: "An open-source framework for building platforms",
   url: "https://kratix.io",
   baseUrl: "/",
   onBrokenLinks: "throw",
