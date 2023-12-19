@@ -51,6 +51,9 @@ kind: Promise
 metadata:
   # Name of the Promise; what the platform team will manage in the platform cluster
   name: promise-name
+  labels:
+    # optional: the version of this promise
+    kratix.io/promise-version: v1.0.0
 spec:
   # Check the scheduling docs for details
   destinationSelectors:
@@ -107,6 +110,10 @@ spec:
               - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
+  # A list of Promises that are required by the Promise
+  requirements:
+  - name: required-promise-name
+    version: required-promise-version
 ```
 
 It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
