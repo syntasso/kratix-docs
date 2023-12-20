@@ -110,9 +110,9 @@ spec:
               - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
-  # A list of Promises that are required by the Promise
-  requirements:
-  - name: required-promise-name
+    # A list of Promises that are required by the Promise
+    requirements:
+    - name: required-promise-name
     version: required-promise-version
 ```
 
