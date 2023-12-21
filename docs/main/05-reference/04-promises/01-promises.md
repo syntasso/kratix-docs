@@ -61,6 +61,11 @@ spec:
         # Arbitrary key/value pairs that will be used for scheduling
         key: value
 
+  # A list of Promises that are required by the Promise
+  requirements:
+    - name: required-promise-name
+      version: required-promise-version
+
   # Array of Kubernetes resources to be scheduled to matching Workers
   dependencies:
     - apiVersion: apps/v1
@@ -110,10 +115,6 @@ spec:
               - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
-    # A list of Promises that are required by the Promise
-    requirements:
-    - name: required-promise-name
-    version: required-promise-version
 ```
 
 It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
