@@ -79,7 +79,7 @@ At this point, Kratix will execute the following steps:
 - Once all Workflows are executed, a series of documents are outputted,
   encapsulating the user's request into valid Kubernetes objects.
 
-* Those documents are schedule to an available Destination, which in turn has
+* Those documents are scheduled to an available Destination, which in turn has
   the necessary dependencies installed (via the Promise's `dependencies` field)
 
 - The necessary infrastructure is created and configured, and the user can reference any necessary details in the Resource status field (e.g. how to connect to a service).
