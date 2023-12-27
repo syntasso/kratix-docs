@@ -1,7 +1,7 @@
 Install Kratix and its Dependencies with the command below:
 
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/install-all-in-one.yaml
+kubectl apply --filename https://github.com/syntasso/kratix/releases/latest/download/install-all-in-one.yaml
 ```
 
 The above will install Kratix, MinIO, and FluxCD. MinIO will be the [State Store](/docs/main/reference/statestore/intro)

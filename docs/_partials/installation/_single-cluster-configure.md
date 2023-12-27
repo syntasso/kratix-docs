@@ -4,5 +4,5 @@ the worker clusters. The commands below will register the cluster as a Destinati
 FluxCD to watch for the cluster's [State Store](/docs/main/reference/statestore/intro):
 
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/config-all-in-one.yaml
+kubectl apply --filename https://github.com/syntasso/kratix/releases/latest/download/config-all-in-one.yaml
 ```

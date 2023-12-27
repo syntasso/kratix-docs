@@ -118,7 +118,7 @@ To install Kratix, all you need is the Kratix distribution file.
 Run the command below to deploy Kratix on the platform cluster:
 
 ```bash
-kubectl --context $PLATFORM apply --filename distribution/kratix.yaml
+kubectl --context $PLATFORM apply --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
 ```
 
 This command will create a Kratix deployment (in the

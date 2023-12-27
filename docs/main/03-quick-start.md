@@ -130,7 +130,7 @@ To clean up the created resources, run:
 
 ```console
 kubectl delete --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
-kubectl delete --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/single-cluster/install-all-in-one.yaml
+kubectl delete --filename https://github.com/syntasso/kratix/releases/latest/download/install-all-in-one.yaml
 ```
 
 ## 🎉 Congratulations!

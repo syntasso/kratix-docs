@@ -3,6 +3,7 @@ description: Run Kratix
 slug: /main/guides/installing-kratix
 title: Multi cluster
 ---
+
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -52,7 +53,7 @@ variable to the name of the kubectl context used to communicate to it. Install K
 on the platform cluster.
 ```bash
 # Install Kratix
-kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
+kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
 ```
 
 ## Set up State Store

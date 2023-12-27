@@ -19,7 +19,7 @@ To uninstall Kratix you need to run through the following steps:
   ```
 1. Kratix can now be uninstalled:
   ```bash
-  kubectl delete -f https://raw.githubusercontent.com/syntasso/kratix/main/distribution/kratix.yaml
+  kubectl delete -f https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
   ```
 
 ## Worker Destination
