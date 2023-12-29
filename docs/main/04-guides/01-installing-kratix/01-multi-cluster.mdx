@@ -56,6 +56,9 @@ on the platform cluster.
 kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
 ```
 
+You can also install and configure Kratix with Helm. For more information, see
+the [Helm Chart](https://github.com/syntasso/helm-charts) documentation.
+
 ## Set up State Store
 Kratix uses GitOps to provision resources on the worker clusters. You can configure Kratix
 with multiple different GitOps repositories by creating [State Stores](/docs/main/reference/statestore/intro).
