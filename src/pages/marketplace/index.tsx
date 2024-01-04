@@ -22,55 +22,55 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Link from '@docusaurus/Link';
 import clsx from 'clsx';
 type BreakpointOrNull = Breakpoint | null;
-import {useLocation} from '@docusaurus/router';
+import { useLocation } from '@docusaurus/router';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
-function Banner({title, style}) {
+function Banner({ title, style }) {
   return (
     <div className={clsx(styles.banner, style)}>
-      <h3 className={styles.bannerTitle}>{ title }</h3>
+      <h3 className={styles.bannerTitle}>{title}</h3>
     </div>
   )
 }
 
-function MarketplaceCard({name, url, logoUrl, description, categories, available = true, example = false}) {
+function MarketplaceCard({ name, url, logoUrl, description, categories, available = true, example = false }) {
   return (
-      <Card className={clsx(styles.card, available ? null : styles.cardComingSoon)}>
-        <CardActionArea
-          href={url || '#'}
-          disabled={!available}
-          target="_blank"
-          className={styles.cardAction}
-        >
-          <CardMedia
-            component="img"
-            alt={name}
-            image={logoUrl}
-            title={name}
-            className={styles.logo}
-          />
+    <Card className={clsx(styles.card, available ? null : styles.cardComingSoon)}>
+      <CardActionArea
+        href={url || '#'}
+        disabled={!available}
+        target="_blank"
+        className={styles.cardAction}
+      >
+        <CardMedia
+          component="img"
+          alt={name}
+          image={logoUrl}
+          title={name}
+          className={styles.logo}
+        />
 
-          <CardContent>
-            <h2 className={styles.cardTitle}>{name}</h2>
-            <p className={styles.cardDescription}>
-              {description}
-            </p>
+        <CardContent>
+          <h2 className={styles.cardTitle}>{name}</h2>
+          <p className={styles.cardDescription}>
+            {description}
+          </p>
 
-            <ul className={styles.categoriesList}>
-              {categories.map((category) => (
-                <ListItem key={category}>
-                  <Chip variant="outlined" label={category} className={styles.chip} />
-                </ListItem>
-              ))}
-            </ul>
-            {!available ? <Banner title="Coming Soon" style={styles.preview} /> : null }
-            {example ? <Banner title="Example" style={styles.example} /> : null }
-          </CardContent>
-        </CardActionArea>
-      </Card>
+          <ul className={styles.categoriesList}>
+            {categories.map((category) => (
+              <ListItem key={category}>
+                <Chip variant="outlined" label={category} className={styles.chip} />
+              </ListItem>
+            ))}
+          </ul>
+          {!available ? <Banner title="Coming Soon" style={styles.preview} /> : null}
+          {example ? <Banner title="Example" style={styles.example} /> : null}
+        </CardContent>
+      </CardActionArea>
+    </Card>
   )
 }
 
@@ -143,7 +143,7 @@ export function Marketplace(): JSX.Element {
           <section className={pipelineMktClass}>
             <hgroup className="text--center">
               <h2>Pipeline Images</h2>
-              <p className="text--center">Community Pipeline images for <Link href="/docs/main/reference/promises/intro">Kratix Promises</Link>.</p>
+              <p className="text--center">Community Pipeline images for <Link href="/main/reference/promises/intro">Kratix Promises</Link>.</p>
             </hgroup>
 
             <GridList

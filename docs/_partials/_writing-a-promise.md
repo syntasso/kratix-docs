@@ -75,7 +75,7 @@ At this point, Kratix will execute the following steps:
   passing, the Resource definition as an input. This will be a Kratix
   `Pipeline`, responsible for running the necessary business processes to create
   the Resource. For further details on Pipelines, check the [Pipeline reference
-  documentation](/docs/main/reference/resources/workflows).
+  documentation](/main/reference/resources/workflows).
 - Once all Workflows are executed, a series of documents are outputted,
   encapsulating the user's request into valid Kubernetes objects.
 
@@ -205,7 +205,7 @@ Kratix provides several hooks for managing and customising the Promise's
 lifecycle. Those hooks are defined in the Promise `workflows` key. The minimum you
 need to define is what must happen when the platform receives a request for a
 new resource from the promised service. Refer to the [Workflows reference
-documentation](/docs/main/reference/resources/workflows) for further
+documentation](/main/reference/resources/workflows) for further
 details.
 
 The Kratix `Pipeline` kind provides an straightforward way to define Workflows.

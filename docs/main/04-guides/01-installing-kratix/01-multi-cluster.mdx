@@ -27,7 +27,7 @@ or want to use a different tool to provision your clusters, skip requirements 1 
 
 To get setup locally quickly with KinD clusters you can use the `./scripts/quick-start.sh`
 from the root of the [Kratix repository](https://github.com/syntasso/kratix). This provisions
-an in-cluster `MinIO` to use as the backing [State Store](/docs/main/reference/statestore/intro).
+an in-cluster `MinIO` to use as the backing [State Store](/main/reference/statestore/intro).
 Alternatively you can provide the `--git` flag to create it with an in-cluster Gitea
 instance instead.
 
@@ -61,9 +61,9 @@ the [Helm Chart](https://github.com/syntasso/helm-charts) documentation.
 
 ## Set up State Store
 Kratix uses GitOps to provision resources on the worker clusters. You can configure Kratix
-with multiple different GitOps repositories by creating [State Stores](/docs/main/reference/statestore/intro).
-Kratix supports [Bucket State Store](/docs/main/reference/statestore/bucketstatestore)
-and [Git State Store](/docs/main/reference/statestore/gitstatestore).
+with multiple different GitOps repositories by creating [State Stores](/main/reference/statestore/intro).
+Kratix supports [Bucket State Store](/main/reference/statestore/bucketstatestore)
+and [Git State Store](/main/reference/statestore/gitstatestore).
 
 If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store
 
@@ -92,7 +92,7 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 
   If your aren't using KinD clusters you will need to create your own State
   Store that is accessible by the platform and worker cluster. Follow the [docs
-  for creating State Stores](/docs/main/reference/statestore/intro).
+  for creating State Stores](/main/reference/statestore/intro).
 
   </TabItem>
 

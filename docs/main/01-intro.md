@@ -21,7 +21,7 @@ Check out a video overview of our product:
 ### Using Kratix to build your platform you can:
 
 * use GitOps workflow and familiar Kubernetes-native constructs.
-* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of _Promises_. Learn more about Kratix Promises [here](./reference/promises/intro).
+* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of _Promises_. Learn more about Kratix Promises [here](../main/reference/promises/intro).
 * create a flexible platform with your paved paths as Promises.
 * evolve your platform easily as your business needs change.
 * start small on a laptop and expand to multi-team, multi-cluster, multi-region, and multi-cloud with a consistent API everywhere.
@@ -43,8 +43,8 @@ integration with Backstage, check the video below:
 Follow our handy guides to get started on the basics as quickly as possible:
 
 * [Installing Kratix](../category/installing-kratix)
-* [Installing and using a Promise](./guides/installing-a-promise)
-* [Writing a Promise](./guides/writing-a-promise)
+* [Installing and using a Promise](../main/guides/installing-a-promise)
+* [Writing a Promise](../main/guides/writing-a-promise)
 
 <br />
 

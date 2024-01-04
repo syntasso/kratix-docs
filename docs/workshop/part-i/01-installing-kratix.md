@@ -186,7 +186,7 @@ enable the appropriate infrastructure to be able to identify and reconcile the
 workloads. Each Kratix Destination has a backing State Store which is either an
 S3-compatible bucket or a Git repository. For this workshop we will use an
 S3-compatible MinIO bucket created locally on a MinIO instance running in the
-platform cluster. Please check the [docs](/docs/main/reference/statestore/intro)
+platform cluster. Please check the [docs](/main/reference/statestore/intro)
 for further details.
 
 To install the MinIO instance, run:
@@ -320,7 +320,7 @@ secretAccessKey:  10 bytes
 ```
 
 For further details on State Stores, check the [State Store documentation
-page](/docs/main/reference/statestore/intro)
+page](/main/reference/statestore/intro)
 
 </details>
 

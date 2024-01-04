@@ -247,7 +247,7 @@ kubectl --context $WORKER get pods
 ```
 
 Alternatively, you could delete the Promise directly. By default Kratix will delete all child Resources when a Promise is deleted. For more details, check the [deletion
-reference docs](/docs/main/reference/promises/delete)
+reference docs](/main/reference/promises/delete)
 
 ---
 

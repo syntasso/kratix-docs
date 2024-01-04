@@ -45,7 +45,7 @@ export default function GettingStarted({ }: Props): JSX.Element {
         <strong>🎉 Your Promised Postgres is ready to use! 🎉</strong>
       </p>
       <p>
-        Follow our <Link to="/docs/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and additional destinations.
+        Follow our <Link to="/main/quick-start">Quick Start</Link> on a Kubernetes cluster, then extend your platform by adding Promises and additional destinations.
       </p>
 
       <BrowserOnly fallback={<div></div>}>

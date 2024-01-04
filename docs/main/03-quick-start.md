@@ -136,5 +136,5 @@ kubectl delete --filename https://github.com/syntasso/kratix/releases/latest/dow
 ## 🎉 Congratulations!
 
 You have successfully installed Kratix and used it to deliver Postgres-as-a-Service to
-your platform. Check out our [guides](/docs/category/guides) to learn more about Kratix
+your platform. Check out our [guides](/category/guides) to learn more about Kratix
 capabilities.

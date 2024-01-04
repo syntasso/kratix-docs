@@ -2,7 +2,6 @@
 description: Documentation for the lifecycle of Resources
 title: Promise Resources
 sidebar_label: Introduction
-id: intro
 ---
 
 # Requesting a Resource
