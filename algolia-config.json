@@ -1,10 +1,10 @@
 {
-  "index_name": "kratix_io",
+  "index_name": "docs_kratix_io",
   "start_urls": [
-    "https://kratix.io"
+    "https://docs.kratix.io"
   ],
   "sitemap_urls": [
-    "https://kratix.io/sitemap.xml"
+    "https://docs.kratix.io/sitemap.xml"
   ],
   "sitemap_alternate_links": true,
   "stop_urls": [

@@ -1,6 +1,6 @@
 # Kratix Docs
 
-Kratix documentation is built using [Docusaurus 2](https://docusaurus.io/). The live version of the documentation is available at [kratix.io](https://kratix.io).
+Kratix documentation is built using [Docusaurus 2](https://docusaurus.io/). The live version of the documentation is available at [docs.kratix.io](https://docs.kratix.io).
 
 ## Installation
 
@@ -50,7 +50,7 @@ The live website is hosted on GitHub Pages and the deployment is done by pushing
 
 Once the `gh-pages` is updated, a Github Actions will be triggered to update the live website, and is available [here](https://github.com/syntasso/kratix-docs/actions/workflows/pages/pages-build-deployment).
 
-Once the Action completes, you can verify the documentation at [kratix.io](https://kratix.io).
+Once the Action completes, you can verify the documentation at [docs.kratix.io](https://docs.kratix.io).
 
 ## Docs structure
 
