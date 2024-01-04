@@ -13,7 +13,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Kratix" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.d73ef8be.css">
-<script src="/assets/js/runtime~main.27109877.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.866e49a9.js" defer="defer"></script>
 <script src="/assets/js/main.4e7025e3.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -63,7 +63,7 @@ details.</p></div></div></details>
 <li><a href="#verify-resource">Check it works: make a request to your platform for a Postgres Resource</a></li>
 </ol>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="base-promise">Step one: Get a base Promise<a href="#base-promise" class="hash-link" aria-label="Direct link to Step one: Get a base Promise" title="Direct link to Step one: Get a base Promise">​</a></h3>
-<p>There&#x27;s a PostgreSQL Promise available on the <a href="http://kratix.io/marketplace" target="_blank" rel="noopener noreferrer">Marketplace</a>. You&#x27;ll use that as your base. Start by cloning the repository:</p>
+<p>There&#x27;s a PostgreSQL Promise available on the <a href="http://docs.kratix.io/marketplace" target="_blank" rel="noopener noreferrer">Marketplace</a>. You&#x27;ll use that as your base. Start by cloning the repository:</p>
 <div class="language-console codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-console codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">git clone https://github.com/syntasso/promise-postgresql.git</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
 <p>Take a look</p>
 <div class="language-console codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-console codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">cd promise-postgresql</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">ls</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
@@ -237,7 +237,7 @@ with any valid input. For example, <code>costCentre: &quot;rnd-10002&quot;</code
 <p>Then apply the request file to the platform cluster:</p>
 <div class="language-console codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-console codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">kubectl --context $PLATFORM apply --filename resource-request.yaml</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
 <p>We will validate the outcomes of this command in the next section.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="validating-the-created-postgres">Validating the created Postgres<a href="#validating-the-created-postgres" class="hash-link" aria-label="Direct link to Validating the created Postgres" title="Direct link to Validating the created Postgres"> ​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="validating-the-created-postgres">Validating the created Postgres<a href="#validating-the-created-postgres" class="hash-link" aria-label="Direct link to Validating the created Postgres" title="Direct link to Validating the created Postgres">​</a></h4>
 <p>Back as a platform engineer, you want to ensure that the platform and Promise
 behaved as it should when creating the Resources and that the Resources have
 met the requirements for the feature.</p>
@@ -268,7 +268,7 @@ done!</p>
 <ol>
 <li>✅  Acquired a base Promise</li>
 <li>✅  Changed the Promise so that <em>the user who wants a Postgres</em> knows they need to include their <code>costCentre</code> name when they make their request to the platform</li>
-<li>✅  Changed the Promise so that <em>the operator dependency</em> that creates the Resource knows to apply the new <code>costCentre</code> label <code>costCentre</code></li>
+<li>✅   Changed the Promise so that <em>the operator dependency</em> that creates the Resource knows to apply the new <code>costCentre</code> label <code>costCentre</code></li>
 <li>✅  Changed the Promise so that <em>the Workflow</em> knows how to add the user&#x27;s <code>costCentre</code> to the request for the Postgres</li>
 <li>✅  Installed the modified Promise on your platform</li>
 <li>✅  Checked it works: make a request to your platform for a Postgres Resource</li>
