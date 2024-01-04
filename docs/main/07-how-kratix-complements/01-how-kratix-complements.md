@@ -16,6 +16,6 @@ Rather than directly comparing Kratix to technologies in our space, we prefer to
 
 Read on to understand how Kratix works with:
 
-- [Terraform](./02-kratix-and-terraform.md)
-- [Crossplane](./03-kratix-and-crossplane.md)
-- [Backstage](./04-kratix-and-backstage.md)
+- [Terraform](./terraform)
+- [Crossplane](./crossplane)
+- [Backstage](./backstage)
