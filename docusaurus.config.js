@@ -42,6 +42,7 @@ const config = {
           // Remove this to remove the "edit this page" links.
           editUrl: "https://github.com/syntasso/kratix-docs/tree/main",
           // remarkPlugins: [abbr],
+          routeBasePath: '/',
         },
         // uncomment to add the blog section to the website
         // blog: {
@@ -78,10 +79,11 @@ const config = {
         },
       },
       navbar: {
-        title: "Kratix",
         logo: {
           alt: "Kratix Logo",
-          src: "/img/kratix_k_logo.png",
+          src: "/img/kratix-purple-io.svg",
+          srcDark: "/img/kratix-white-io.svg",
+          href: "https://kratix.io",
         },
         items: [
           {
@@ -102,12 +104,6 @@ const config = {
             position: "left",
           },
           {
-            type: "doc",
-            docId: "main/community",
-            position: "left",
-            label: "Community",
-          },
-          {
             href: "https://github.com/syntasso/kratix",
             position: "right",
             className: "header-github-link",
@@ -123,22 +119,17 @@ const config = {
             items: [
               {
                 label: "Getting Started",
-                to: "/docs/main/intro",
-              },
-            ],
-          },
-          {
-            title: "Community",
-            items: [
-              {
-                label: "Twitter",
-                href: "https://twitter.com/kratixio",
+                to: "/",
               },
             ],
           },
           {
             title: "More",
             items: [
+              {
+                label: "Kratix",
+                href: "https://kratix.io",
+              },
               {
                 label: "GitHub",
                 href: "https://github.com/syntasso/kratix",

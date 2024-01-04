@@ -3,6 +3,7 @@ title: Docs Introduction
 description: Introduction to Kratix and how to get started quickly. Includes guides on how to read Kratix docs and pointers to other pages.
 keywords: [kratix documentation]
 sidebar_label: Introduction
+slug: /
 ---
 
 # Introduction
