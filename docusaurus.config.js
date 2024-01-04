@@ -11,7 +11,7 @@ const darkTheme = themes.dracula;
 const config = {
   title: "Kratix",
   tagline: "An open-source framework for building platforms",
-  url: "https://kratix.io",
+  url: "https://docs.kratix.io",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "throw",
