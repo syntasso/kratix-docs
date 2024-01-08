@@ -52,7 +52,7 @@ See below for further details.
 
 ### GitHub
 
-GitHub supports using [person access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+GitHub supports using [personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 instead of user passwords for authenticating with GitHub. Create a personal access token
 with read and write permissions to the repository. Populate the `username` and `password`
 fields with the GitHub username and token value.
