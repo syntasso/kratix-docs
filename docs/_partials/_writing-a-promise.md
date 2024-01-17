@@ -501,8 +501,8 @@ and Operator.
 Run the following commands to download the resource files
 
 ```bash
-curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/resources/jenkins.io_jenkins.yaml --output internal/dependencies/jenkins.io_jenkins.yaml --silent
-curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/resources/all-in-one-v1alpha2.yaml --output internal/dependencies/all-in-one-v1alpha2.yaml --silent
+curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/configure-pipeline/dependencies/jenkins.io_jenkins.yaml --output internal/dependencies/jenkins.io_jenkins.yaml --silent
+curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/internal/configure-pipeline/dependencies/all-in-one-v1alpha2.yaml --output internal/dependencies/all-in-one-v1alpha2.yaml --silent
 ```
 
 <br />
