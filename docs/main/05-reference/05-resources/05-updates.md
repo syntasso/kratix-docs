@@ -29,3 +29,11 @@ it will immediately schedule a manual run for the Configure Workflow.
 
 Once Kratix schedules the manual workflow the label will be removed allowing
 you to add it again for any additional manual runs.
+
+
+Example to trigger the reconciliation of a `example` request of a `redis`
+Promise
+
+```
+kubectl label redis example kratix.io/manual-reconciliation=true
+```
