@@ -27,6 +27,7 @@ spec:
     name: gitea-credentials
     namespace: default
   # The address of the git repository. If auth method is basic auth, use `http`/`https` format: required
+  # if your using ssh auth then ensure its of the format git@github.com:<org>/<repo>.git
   url: https://github.com/syntasso/kratix-repo
 ```
 
