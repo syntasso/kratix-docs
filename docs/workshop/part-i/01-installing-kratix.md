@@ -128,19 +128,19 @@ Kratix needs.
 Verify that the Kratix CRDs are available:
 
 ```bash
-kubectl --context $PLATFORM get crds
+kubectl --context $PLATFORM get crds | grep kratix
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
-NAME                                         CREATED AT
-bucketstatestores.platform.kratix.io         2023-05-22T12:02:41Z
-destinations.platform.kratix.io              2023-05-22T12:02:41Z
-gitstatestores.platform.kratix.io            2023-05-22T12:02:41Z
-promises.platform.kratix.io                  2023-05-22T12:02:41Z
-workplacements.platform.kratix.io            2023-05-22T12:02:42Z
-works.platform.kratix.io                     2023-05-22T12:02:42Z
+bucketstatestores.platform.kratix.io   2023-01-22T11:53:15Z
+destinations.platform.kratix.io        2023-01-22T11:53:15Z
+gitstatestores.platform.kratix.io      2023-01-22T11:53:15Z
+promisereleases.platform.kratix.io     2023-01-22T11:53:15Z
+promises.platform.kratix.io            2023-01-22T11:53:15Z
+workplacements.platform.kratix.io      2023-01-22T11:53:15Z
+works.platform.kratix.io               2023-01-22T11:53:15Z
 ```
 
 :::info What are CRDs?

@@ -170,16 +170,15 @@ In fact, if you look closely, the Kratix controller will be complaining:
 ```yaml
 kubectl --context $PLATFORM --namespace kratix-platform-system \
 logs deployment/kratix-platform-controller-manager \
---container manager | grep "Reconciler error"
+--container manager | grep "no Destinations"
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
 # output formatted for readability
-ERROR Reconciler error {
-    "Work": {"name":"jenkins","namespace":"kratix-platform-system"},
-    "error": "no Destinations can be selected for scheduling"
+INFO no Destinations can be selected for scheduling
+    {"scheduling": { "environment": "dev"} ... },
 }
 ```
 
@@ -583,8 +582,8 @@ kubectl --context $PLATFORM get promises.platform.kratix.io
 The above command will give an output similar to:
 
 ```shell-session
-NAME      AGE
-jenkins   1h
+NAME      STATUS      KIND      API VERSION                      VERSION
+jenkins   Available   jenkins   marketplace.kratix.io/v1alpha1
 ```
 
 To request a Jenkins, all you need is to send a request for a new Jenkins Resource to the platform.

@@ -146,7 +146,7 @@ kubectl --context $PLATFORM get promises
 
 The above command will give an output similar to:
 ```shell-session
-No resources found in default namespace.
+No resources found
 ```
 
 :::note
@@ -181,30 +181,33 @@ kubectl --context $PLATFORM apply --filename samples/easy-app/promise.yaml
 Validate the three Promises are now available:
 
 ```bash
-kubectl --context $PLATFORM get promises
+kubectl --context $PLATFORM get promises -w
 ```
 
-The above command will give an output similar to:
+The above command will eventually give an output similar to:
 ```shell-session
-NAME       AGE
-easyapp    1m
+NAME      STATUS        KIND      API VERSION                      VERSION
+easyapp   Available     EasyApp   example.promise.syntasso.io/v1
 ```
 
-Something is not quite right. You expected three Promises, but only one was
-actually installed. Check the Kratix Controller Manager logs for insights on
+Once you see the "Available", press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
+exit the watch mode.
+
+However, something is not quite right. You expected three Promises, but only one
+was actually installed. Check the Kratix Controller Manager logs for insights on
 what is happening:
 
 ```bash
 kubectl --context $PLATFORM --namespace kratix-platform-system \
  logs deployment/kratix-platform-controller-manager \
- --container manager | grep "Reconciler error"
+ --container manager | grep "no Destination"
 ```
 
 The above command will give an output similar to:
 ```yaml
 # output formatted for readability
-ERROR    Reconciler error {
-  "Work": {"name":"easyapp","namespace":"kratix-platform-system"},
+INFO    no Destinations can be selected for scheduling {
+  "scheduling": {"environment":"platform"} #...
   "error": "no Destinations can be selected for scheduling"
 }
 ```
@@ -215,7 +218,7 @@ suitable Destinations for hosting Dependencies and workloads. Check what
 destination selectors have been defined for the EasyApp Promise:
 
 ```bash
-kubectl --context $PLATFORM describe promise easyapp | tail -n 20 | \
+kubectl --context $PLATFORM describe promise easyapp | tail -n 30 | \
   grep "Destination Selectors" --after-context 2 --max-count 1
 ```
 
@@ -258,14 +261,12 @@ kubectl --context $PLATFORM label destination platform-cluster environment=platf
 kubectl --context $PLATFORM get promises --watch
 ```
 
-The above command will give an output similar to:
+The above command will eventually give an output similar to:
 ```shell-session
-cluster.platform.kratix.io/platform-cluster labelled
-NAME            AGE
-easyapp         10m
-nginx-ingress    0s
-postgresql       0s
-...
+NAME            STATUS      KIND         API VERSION                      VERSION
+easyapp         Available   EasyApp      example.promise.syntasso.io/v1
+nginx-ingress   Available   deployment   marketplace.kratix.io/v1alpha1
+postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
 ```
 
 Once you see the expected three Promises, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
@@ -366,10 +367,10 @@ kubectl --context $PLATFORM get promises
 
 The above command will give an output similar to:
 ```shell-session
-NAME            AGE
-nginx-ingress   1h
-easyapp         1h
-postgresql      1h
+NAME            STATUS      KIND         API VERSION                      VERSION
+easyapp         Available   EasyApp      example.promise.syntasso.io/v1
+nginx-ingress   Available   deployment   marketplace.kratix.io/v1alpha1
+postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
 ```
 
 You could request each one of those services individually if you need
@@ -426,8 +427,9 @@ configure-pipeline-easyapp-default-8769b      0/1     Completed   0          40s
 configure-pipeline-postgresql-default-c3516   0/1     Completed   0          18s
 ```
 
-Once the Status column reports `Complete`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
-exit the watch mode.
+Once the Status column reports `Completed` for all three request pipelines,
+press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode. It may take a few
+seconds for the Postgres and Nginx pipelines to start.
 
 Similar to last time, Kratix will store the Pipeline outputs (i.e. the desired
 state) in the State Store for the worker cluster, and that will be picked up by
