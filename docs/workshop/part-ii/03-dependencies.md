@@ -203,6 +203,14 @@ cp /root/bin/worker-resource-builder ./bin
 
 Per the usage instructions you have now seen, you can use the provided binary to add Dependencies to an existing Promise. Run the following command to overwrite the current Promise file to add the Dependencies to the existing API and Workflows sections:
 
+:::warning
+
+If you are using Instruqt, please make sure the promise.yaml file is closed in
+the editor tab before running the command below. Once you execute the command,
+make sure to click the Reload button on the editor tab.
+
+:::
+
 ```bash
 echo "current Promise length is: $(wc -l promise.yaml)"
 ./bin/worker-resource-builder -resources-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
@@ -215,6 +223,7 @@ The above command will give an output similar to:
 current Promise length is: 35 promise.yaml
 new Promise length is: 11398 promise.yaml
 ```
+
 
 In this output, you can see that the the files in the `dependencies` directory have now been added to the `promise.yaml` file. You can also check the top of the newly edited `promise.yaml` and see that these resources have been added as list items under the `dependencies` key.
 
@@ -251,11 +260,11 @@ To validate the Promise has been installed, you can list all Promises by running
 kubectl --context kind-platform get promises
 ```
 
-Your output will show the `elastic-cloud` Promise:
+Your output will eventually show the `elastic-cloud` Promise:
 
 ```shell-session
-NAME            AGE
-elastic-cloud   10s
+NAME            STATUS      KIND            API VERSION                   VERSION
+elastic-cloud   Available   elastic-cloud   workshop.kratix.io/v1alpha1
 ```
 
 In addition, you can now verify that the Dependencies have been installed on the worker cluster:

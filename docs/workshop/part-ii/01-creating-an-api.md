@@ -419,8 +419,8 @@ kubectl --context kind-platform get promises
 Your output will show the `elastic-cloud` Promise:
 
 ```shell-session
-NAME            AGE
-elastic-cloud   10s
+NAME            STATUS      KIND            API VERSION                   VERSION
+elastic-cloud   Available   elastic-cloud   workshop.kratix.io/v1alpha1
 ```
 
 More importantly, you will also be able to see the `elastic-cloud` API you defined:

@@ -130,10 +130,7 @@ The above command will give an output similar to:
 # output formatted for readability
 INFO no Destinations can be selected for scheduling
 {
-  "destinationSelectors":
-    {
-      "promise":[{"target":{"matchLabels":{"environment":"dev"}}}]
-    }
+  "scheduling": {"environment":"dev"} #...
 }
 ```
 
@@ -276,11 +273,9 @@ The above command will give an output similar to:
 ```shell-session
 # output formatted for readability
 INFO no Destinations can be selected for scheduling
-{"destinationSelectors":
-  {
-    "promise":[{"target":{"matchLabels":{"environment":"dev"}}}],
-    "resource":[{"target":{"matchLabels":{"pvCapacity":"large"}}}]}
-  }
+{
+  "scheduling": {"environment":"dev","pvCapacity":"large"} ...
+}
 ```
 
 Just as with the original `environment` label, Kratix queried what Destinations matched _all_
