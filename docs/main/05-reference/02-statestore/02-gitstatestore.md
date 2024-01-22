@@ -20,7 +20,7 @@ spec:
   # The top-level path in the git repository to write to: optional
   path: destinations/
   # Valid options: basicAuth, and ssh; defaults to basicAuth
-  authMethod: accessKey
+  authMethod: basicAuth
   # Required
   secretRef:
     # The name and namespace of the secret to use to authenticate: required
