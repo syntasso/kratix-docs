@@ -22,6 +22,16 @@ metadata:
 spec:
   # Destination identifier: optional, appended path to be used within the State Store
   path: path/in/statestore
+
+  # Optional, defaults to false
+
+  # By default, Kratix will schedule workloads for Promises without
+  #   `destinationSelectors` to all available Destinations.
+  # If this property is set to true, Kratix will only schedule Workloads
+  #   to this Destination if the Promise `destinationSelectors` match
+  #   this Destination's labels
+  strictMatchLabels: false
+
   # Required
   stateStoreRef:
     # The name of the State Store to use: required
