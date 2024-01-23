@@ -81,9 +81,10 @@ spec:
   # ...
 ```
 
-If a Promise has no `destinationSelectors`, it will be applied to all Destinations. If a
-Destination has no `labels`, only Promises with no `destinationSelectors` set will be
-applied.
+If a Promise has no `destinationSelectors`, it will be applied to all
+Destinations (unless the Destination has `strictMatchLabels` set). If a
+Destination has no `labels`, only Promises with no `destinationSelectors` set
+will be applied.
 
 The table below contains a few examples:
 
