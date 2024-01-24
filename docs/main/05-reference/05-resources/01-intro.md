@@ -68,4 +68,4 @@ spec:
 
 When applied to the platform cluster, Kratix will trigger the associated Workflows. For more details on the Workflows, see the [Workflow reference](./workflows).
 
-For a in-depth exploration of requesting a Resource and Kratix Workflows, check the [Writing a Promise](../../guides/writing-a-promise) and [Enhancing a Promise](../../guides/enhancing-a-promise) guides.
+For a in-depth exploration of requesting a Resource and Kratix Workflows, check the [Writing a Promise](../../guides/writing-a-promise) guide.
