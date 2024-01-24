@@ -556,6 +556,17 @@ At this point, your Promise directory structure should look like:
 Before installing your Promise, verify that Kratix and MinIO are installed and
 healthy.
 
+:::tip
+
+Make sure you have PLATFORM and WORKER set in your environment:
+
+```bash
+export PLATFORM="kind-platform"
+export WORKER="kind-worker"
+```
+
+:::
+
 ```bash
 kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 ```
