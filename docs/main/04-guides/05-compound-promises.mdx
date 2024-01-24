@@ -14,7 +14,7 @@ Compound Promises are Promises that, in its Dependencies, contain other Promises
 1. encapsulate multiple Promises into a Compound Promise
 1. request a complete development environment Resource through a Compound Promise
 
-    <PartialPreRequisites />
+   <PartialPreRequisites />
 
 ## Register the Platform as a Worker
 
@@ -68,12 +68,12 @@ To verify the installation was successful, run:
 
 ```shell-session
 $ kubectl --context $PLATFORM get promises
-NAME                      AGE
-ha-postgres-promise       1h
-knative-serving-promise   1h
-paved-path-demo-promise   1h
+NAME                      STATUS      KIND              API VERSION                      VERSION
+knative                   Available   knative           marketplace.kratix.io/v1alpha1
+paved-path-demo-promise   Available   paved-path-demo   example.promise.syntasso.io/v1
+postgresql                Available   postgresql        marketplace.kratix.io/v1alpha1
 
-$ kubectl --context $WORKER get pods -A
+$ kubectl --context $WORKER get pods
 NAME                                 READY   STATUS    RESTARTS   AGE
 postgres-operator-6c6dbd4459-kv5lw   1/1     Running   0          1h
 
@@ -95,10 +95,10 @@ You can see the Workflow for the Paved Path Promise running, which will in turn 
 
 ```shell-session
 $ kubectl --context $PLATFORM get pods
-NAME                                                     READY   STATUS      RESTARTS   AGE
-configure-pipeline-ha-postgres-promise-default-617a3       0/1     Completed   0          64s
-configure-pipeline-knative-serving-promise-default-e0157   0/1     Completed   0          64s
-configure-pipeline-paved-path-demo-promise-default-d3a89   0/1     Completed   0          87s
+NAMESPACE                NAME                                                     READY   STATUS      RESTARTS   AGE
+default                  configure-pipeline-knative-66cf1-g4kx7                   0/1     Completed   0          28s
+default                  configure-pipeline-paved-path-demo-promise-d8e6e-58grl   0/1     Completed   0          36s
+default                  configure-pipeline-postgresql-4e937-bnnpb                0/1     Completed   0          28s
 ```
 
 Eventually, the resources will be ready to be used:
@@ -137,7 +137,7 @@ spec:
       kind: Promise
       #highlight-end
       metadata:
-        name: knative-serving-promise
+        name: knative
       spec:
         destinationSelectors:
           - matchLabels:
@@ -149,7 +149,7 @@ spec:
       kind: Promise
       #highlight-end
       metadata:
-        name: ha-postgres-promise
+        name: postgres
       spec:
         destinationSelectors:
           - matchLabels:
@@ -178,7 +178,7 @@ spec:
   #highlight-end
   dependencies:
     -  # knative Promise
-    -  # postgresPromise
+    -  # postgres Promise
   ... # remainder of the paved path Promise
 ```
 
@@ -195,7 +195,7 @@ NAME                 AGE    LABELS
 #highlight-start
 platform-cluster     1hr    environment=platform
 #highlight-end
-worker-cluster-1     1hr    environment=dev
+worker-1             1hr    environment=dev
 ```
 
 However, the sub-Promises' Dependencies (i.e. the Knative and Postgres Dependencies) should not be installed
@@ -217,7 +217,7 @@ spec:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
       metadata:
-        name: knative-serving-promise
+        name: knative
       spec:
         #highlight-start
         destinationSelectors:
@@ -229,7 +229,7 @@ spec:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Promise
       metadata:
-        name: ha-postgres-promise
+        name: postgres
       spec:
         #highlight-start
         destinationSelectors:
