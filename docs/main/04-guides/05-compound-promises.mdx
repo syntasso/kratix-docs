@@ -20,7 +20,7 @@ Compound Promises are Promises that, in its Dependencies, contain other Promises
 
 To install a Compound Promises, the first step is to register the platform cluster itself as an available Destination. That's because the Dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the platform cluster.
 
-Create a new [Destination document](../reference/destinations/intro) platform-cluster.yaml` with the following contents:
+Create a new [Destination document](../reference/destinations/intro) `platform-cluster.yaml` with the following contents:
 
 ```yaml title="platform-cluster.yaml"
 apiVersion: platform.kratix.io/v1alpha1
@@ -30,6 +30,7 @@ metadata:
   labels:
     environment: platform
 spec:
+  strictMatchLabels: true
   stateStoreRef:
     name: default
     kind: BucketStateStore
