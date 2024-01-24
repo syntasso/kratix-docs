@@ -55,10 +55,10 @@ you are using you may be able to use an per-repo ssh key in-place of user's ssh 
 See below for further details.
 
 #### GitHub
-GitHub supports per-repo ssh keys using [deploy keys](https://docs.github.com/en/rest/deploy-keys/deploy-keys?apiVersion=2022-11-28)
+GitHub supports per-repo ssh keys using [deploy keys](https://docs.github.com/en/rest/deploy-keys/deploy-keys?apiVersion=2022-11-28).
 
 #### GitLab
-GitLab supports per-repo ssh keys using [deploy keys](https://docs.gitlab.com/ee/user/project/deploy_keys/)
+GitLab supports per-repo ssh keys using [deploy keys](https://docs.gitlab.com/ee/user/project/deploy_keys/).
 
 ### Basic Auth
 When `authMethod` is equal to `basicAuth` Kratix will check the secret for `username`
