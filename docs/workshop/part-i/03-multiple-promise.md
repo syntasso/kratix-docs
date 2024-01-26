@@ -97,7 +97,7 @@ through the same steps you ran during the worker cluster registration in
 There's a script in the `kratix` directory that will do exactly that. Run:
 
 ```bash
-./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default
+./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels
 ```
 
 The platform cluster should now be registered with Kratix and ready to receive
@@ -114,8 +114,7 @@ platform-cluster    1m
 worker-cluster      1h
 ```
 
-You should also see a `kratix-worker-system` namespace, indicating that Flux is
-correctly configured. Verify:
+Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify:
 
 ```bash
 kubectl --context $PLATFORM get namespaces --watch
@@ -138,33 +137,6 @@ You are now ready to install the EasyApp Promise.
 
 ### Install the Promise
 
-Ensure there's no other Promise currently installed:
-
-```bash
-kubectl --context $PLATFORM get promises
-```
-
-The above command will give an output similar to:
-```shell-session
-No resources found
-```
-
-:::note
-
-If the Jenkins Promise is still showing up on your list, delete it before
-continuing:
-
-```bash
-kubectl --context $PLATFORM delete promise jenkins
-```
-
-:::
-
-<figure class="diagram">
-  <PavedPathDiagram className="small"/>
-
-  <figcaption>EasyApp Promise</figcaption>
-</figure>
 
 Since the EasyApp Promise declares two other Promises as its Dependencies,
 installing it will add a total of three Promises to the platform:
@@ -172,50 +144,38 @@ installing it will add a total of three Promises to the platform:
 * The EasyApp Promise itself
 * Its Dependencies: NGINX and PostgreSQL
 
+<figure class="diagram">
+  <PavedPathDiagram className="small"/>
+
+  <figcaption>EasyApp Promise</figcaption>
+</figure>
+
 From the Kratix directory, install the EasyApp Promise:
 
 ```bash
 kubectl --context $PLATFORM apply --filename samples/easy-app/promise.yaml
 ```
 
-Validate the three Promises are now available:
+Validate the EasyApp promises gets installed:
 
 ```bash
 kubectl --context $PLATFORM get promises -w
 ```
 
-The above command will eventually give an output similar to:
+The above command will eventually include an output with:
+
 ```shell-session
-NAME      STATUS        KIND      API VERSION                      VERSION
 easyapp   Available     EasyApp   example.promise.syntasso.io/v1
 ```
 
 Once you see the "Available", press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-However, something is not quite right. You expected three Promises, but only one
-was actually installed. Check the Kratix Controller Manager logs for insights on
-what is happening:
+You may be, at this point, asking yourself: _"Wait, wasn't the EasyApp Promise supposed to install three Promises? Why is there only one?"_
 
-```bash
-kubectl --context $PLATFORM --namespace kratix-platform-system \
- logs deployment/kratix-platform-controller-manager \
- --container manager | grep "no Destination"
-```
+That's because the EasyApp Promise makes use of the Kratix _Destination Selectors_ feature. Destination Selectors allow Promises to specify scheduling logic to determine the suitable Destinations for hosting Dependencies and workloads.
 
-The above command will give an output similar to:
-```yaml
-# output formatted for readability
-INFO    no Destinations can be selected for scheduling {
-  "scheduling": {"environment":"platform"} #...
-  "error": "no Destinations can be selected for scheduling"
-}
-```
-
-Kratix is failing to reconcile since _no Destination can be selected for
-scheduling_. Promises can specify scheduling logic to determine the
-suitable Destinations for hosting Dependencies and workloads. Check what
-destination selectors have been defined for the EasyApp Promise:
+You can verify the EasyApp Destination Selector by describing the Promise:
 
 ```bash
 kubectl --context $PLATFORM describe promise easyapp | tail -n 30 | \
@@ -234,8 +194,7 @@ This means the EasyApp Promise is telling Kratix:
 > Only install my Dependencies (i.e., the NGINX and the PostgreSQL Promises) in
 > Destinations with the **label environment=platform**.
 
-Check the registered Destinations again, but this time ask `kubectl` to also show
-the Destination labels:
+Check the registered Destinations again, but this time ask `kubectl` to also show the Destination labels:
 
 ```bash
 kubectl --context $PLATFORM get destinations --show-labels
@@ -261,7 +220,7 @@ kubectl --context $PLATFORM label destination platform-cluster environment=platf
 kubectl --context $PLATFORM get promises --watch
 ```
 
-The above command will eventually give an output similar to:
+The above command will eventually converge to an output similar to:
 ```shell-session
 NAME            STATUS      KIND         API VERSION                      VERSION
 easyapp         Available   EasyApp      example.promise.syntasso.io/v1
@@ -278,7 +237,7 @@ exit the watch mode.
 </figure>
 
 Once the sub-Promises are installed, their Dependencies will be scheduled to a
-Destination. The EasyApp sub-Promises are also declaring a cluster Selector.
+Destination. The EasyApp sub-Promises are also declaring a Destination Selector.
 Verify:
 
 ```bash
@@ -347,8 +306,7 @@ Destinations.
 When a Destination is registered, Kratix will use the destination selectors to
 determine what should be immediately installed on the new Destination. When a
 Promise gets updated or upgraded, its Dependencies are seamlessly propagated
-across the fleet. If a Destination labels change, Kratix will automatically converge
-on the expected system state.
+across the fleet. If a Destination labels change, Kratix will automatically converge on the expected system state.
 
 If you are curious to learn more about Kratix scheduling, check the
 [Multi-cluster Management](../main/reference/multicluster-management) docs.
@@ -376,8 +334,7 @@ postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
 You could request each one of those services individually if you need
 fine-grained control of how they ought to be deployed, or you can use the
 EasyApp Promise to get an opinionated deployment of each of those. In this
-example, don't really care about the details; all you want is to run your
-application.
+example, all you want is to run your application without much fuzz.
 
 Create a request for a new EasyApp Resource:
 

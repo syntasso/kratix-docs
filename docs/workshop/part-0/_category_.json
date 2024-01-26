@@ -1,0 +1,10 @@
+{
+  "label": "Prerequisites",
+  "position": 3,
+  "collapsed": false,
+  "collapsible": true,
+  "link": {
+    "type": "doc",
+    "id": "workshop/part-0/intro"
+  }
+}
