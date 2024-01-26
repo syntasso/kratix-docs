@@ -10,7 +10,7 @@ import PartialVerifyKratixWithOutPromises from '../../_partials/workshop/_verify
 ```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
-👈🏾&nbsp;&nbsp; Previous: [Extract shared dependencies](shared-dependencies)<br />
+👈🏾&nbsp;&nbsp; Previous: [Delivering your service on demand](service-on-demand)<br />
 👉🏾&nbsp;&nbsp; Next: [Update the Resource status](updating-status)
 
 <hr />
@@ -29,8 +29,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 ## Promise scheduling {#understand-scheduling}
 
-So far you have built an ECK Promise that will allow us to deliver ECK Resources on-demand to the
-application developers.
+So far you have built an ECK Promise that will allow us to deliver ECK Resources on-demand to the application developers.
 
 When developing locally you have been deploying to a single worker Kubernetes cluster, which Kratix has been scheduling everything to by default. In reality, the likelihood is that an organisation will have multiple destinations for its workloads, potentially spread out across infrastructure types, zones, regions, and cloud-providers. Each individual destination might be designed for a particular purpose, e.g. destinations that contain GPUs for AI intensive workloads, or edge destinations that are designed to run particular applications close the intended consumers. However it is common to want some software deployed on many of these speciality clusters.
 

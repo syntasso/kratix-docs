@@ -12,7 +12,7 @@ import PartialPromise from '../../_partials/_promise-architecture.md';
 
 This is Part 1 of [a series](intro) illustrating how Kratix works.
 
-👉🏾 Next: [Delivering your service on demand](service-on-demand)
+👉🏾 Next: [Extracting shared dependencies](shared-dependencies)
 
 <hr />
 
@@ -529,8 +529,7 @@ a way, very similar to platforms based on tickets: a resource is requested,
 which can notify a platform team to go and manually create the service, updating
 the request once the service is instantiated.
 
-In the next section, you will build on top of this Promise and actually deliver
-your first Elastic Stack on-demand.
+Before creating on demand Elastic Stack instances, you will first need to define what are the dependencies that need to be installed in the worker cluster. In the next section you will do exactly that.
 
 To recap the steps you took:
 
@@ -540,17 +539,7 @@ To recap the steps you took:
 1. ✅&nbsp;&nbsp;Install a Kratix Promise with that API definition
 1. ✅&nbsp;&nbsp;Request an on-demand Resource from a Promise
 
-## Clean up environment {#cleanup}
-
-Before moving on, please remove the ECK Promise from your cluster.
-
-To delete all the Promises:
-
-```bash
-kubectl --context $PLATFORM delete promises --all
-```
-
 ## 🎉 &nbsp; Congratulations
 
 ✅&nbsp;&nbsp;Your Promise has an API. <br />
-👉🏾&nbsp;&nbsp;Next you will [deliver a service on each user request](service-on-demand).
+👉🏾&nbsp;&nbsp;Next you will [define the Promise dependencies](shared-dependencies).

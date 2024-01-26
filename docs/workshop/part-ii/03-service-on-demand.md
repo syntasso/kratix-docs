@@ -11,8 +11,8 @@ import PartialCleanup from '../../_partials/_cleanup.md';
 ```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
-👈🏾&nbsp;&nbsp; Previous: [Create your first service API](creating-an-api) <br />
-👉🏾&nbsp;&nbsp; Next: [Extracting shared dependencies](shared-dependencies)
+👉🏾&nbsp;&nbsp; Previous: [Extracting shared dependencies](shared-dependencies) <br />
+👈🏾&nbsp;&nbsp; Next: [Scheduling Promise](scheduling-promise) <br />
 
 <hr />
 
@@ -114,10 +114,7 @@ import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-pipeline-on
 
 ## Codify your delivery process in a Container {#write-docker-container}
 
-To provision Elastic Cloud Kubernetes (ECK) you will need to both install the
-operator and use the ECK-stack Helm chart to make requests to the operator. By
-encapsulating the process in a Container you are able to manage quite complex
-actions while also having access to a testable interface.
+Your elastic promise is already configured to deploy the Operator and its CRDs at promise installation time, as part of the `dependencies`. You can go ahead and define the workflow that will then be used to provision the Elastic Cloud.
 
 ### Write the script to run your Kratix Pipeline
 
@@ -148,14 +145,6 @@ set -eu -o pipefail
 mkdir -p to-deploy
 export name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 export enableDataCollection="$(yq eval '.spec.enableDataCollection' /kratix/input/object.yaml)"
-
-echo "Downloading CRDS..."
-curl --silent --location --output to-deploy/elastic-crds.yaml \
-    https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
-
-echo "Downloading Operator..."
-curl --silent --location --output to-deploy/elastic-operator.yaml \
-    https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
 
 echo "Generate ECK requests..."
 # Only set the beats value file if data collection is enabled
@@ -492,8 +481,6 @@ verify the `test/output` directory. You should see the following files:
     │   └── object.yaml
     └── output
         ├── beats.yaml
-        ├── elastic-crds.yaml
-        ├── elastic-operator.yaml
         ├── elasticsearch.yaml
         └── kibana.yaml
 ```
@@ -546,72 +533,14 @@ spec:
   ...
 ```
 
-<details>
-  <summary> 👉🏾 Prefer to copy the whole working Promise file? 👈🏾 </summary>
-
-```yaml title="Complete promise.yaml"
-apiVersion: platform.kratix.io/v1alpha1
-kind: Promise
-metadata:
-  name: elastic-cloud
-spec:
-  workflows:
-    resource:
-      configure:
-        - apiVersion: platform.kratix.io/v1alpha1
-          kind: Pipeline
-          metadata:
-            name: resource-configure
-          spec:
-            containers:
-              - name: pipeline-stage-0
-                image: kratix-workshop/elastic-pipeline:dev
-  api:
-    apiVersion: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    metadata:
-      name: elastic-clouds.workshop.kratix.io
-    spec:
-      group: workshop.kratix.io
-      names:
-        kind: elastic-cloud
-        plural: elastic-clouds
-      scope: Namespaced
-      versions:
-        - name: v1alpha1
-          served: true
-          storage: true
-          schema:
-            openAPIV3Schema:
-              type: object
-              properties:
-                spec:
-                  type: object
-                  properties:
-                    enableDataCollection:
-                      type: boolean
-                      default: false
-                      description: |
-                        If enabled, you will receive tools for
-                        metric, log, and trace collection that
-                        can be used to populate the elastic
-                        cloud instance.
-```
-
-</details>
-
 ## Install the Promise {#install-promise}
-
-### Prerequisite setup
-
-<PartialVerifyKratixWithOutPromises />
 
 ### Install the Promise
 
 You can now install the updated Promise:
 
 ```bash
-kubectl --context $PLATFORM create --filename promise.yaml
+kubectl --context $PLATFORM replace --filename promise.yaml --force
 ```
 
 To validate the Promise has been installed, you can list all Promises by running:
@@ -718,7 +647,6 @@ kubectl --context $PLATFORM logs \
 The logs will look something like this:
 
 ```shell-session
-Downloading Operator...
 Generate ECK requests...
 wrote to-deploy/eck-stack/charts/eck-beats/templates/beats.yaml
 wrote to-deploy/eck-stack/charts/eck-elasticsearch/templates/elasticsearch.yaml
@@ -804,7 +732,10 @@ kubectl --context $WORKER \
 :::caution
 If you gave your ECK Resource a different name, you may need port-forwarding to access the running instance:
 
+```bash
 kubectl --context $WORKER port-forward deploy/NAME-kb 8080:30269
+```
+
 :::
 
 ### Trying to request a second resource
@@ -841,32 +772,7 @@ You can also see that a second pipeline has run by checking the pods:
 kubectl --context $PLATFORM get pods
 ```
 
-However, when you go to check the status on the worker cluster, you will not see a second elastic cloud Resource:
-
-```bash
-kubectl --context $WORKER get pods
-```
-
-This is because our pipeline is not outputting resources that can be applied to the same cluster multiple times. Our pipeline outputs two sets of resources:
-
-- The operator and its CRDs
-- The request to the operator (helm output)
-
-Operators are only designed to be installed once per cluster, because each run of the pipeline is outputting we are getting a failure were the resources we are trying to schedule to the cluster aren't compatible. Take a look at the feedback our GitOps reconciler is giving back:
-
-```bash
-kubectl --context $WORKER get kustomizations -n flux-system
-```
-
-The above command will give an output similar to:
-
-```shell-session
-NAME                         AGE   READY   STATUS
-kratix-worker-dependencies   49m   True    Applied revision: d26ce528a44746fe33e771659662fd2217e3ae74c0744203a334cc69d1f7f30a
-kratix-worker-resources      49m   False   kustomize build failed: accumulating resources: accumulation err='merging resources from './default/elastic-cloud/second-request/elastic-crds.yaml': may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]': must build at directory: '/tmp/kustomization-3151309318/worker-1/resources/default/elastic-cloud/second-request/elastic-crds.yaml': file is not directory
-```
-
-The key part being `may not add resource with an already registered id: CustomResourceDefinition.v1.apiextensions.k8s.io/agents.agent.k8s.elastic.co.[noNs]'`, the GitOps reconciler detects its trying to install the same resource (CRD) twice and errors. In the next section we will tackle separating out Dependencies from requests.
+Following the same steps as previously, you should eventually see the second elastic stack running at the worker cluster.
 
 ## Summary {#summary}
 
@@ -879,7 +785,6 @@ To recap the steps you took:
 1. ✅&nbsp;&nbsp;Validated the containers behaviour with a reusable test script
 1. ✅&nbsp;&nbsp;Added the container to the Kratix Promise pipeline
 1. ✅&nbsp;&nbsp;Installed the Promise and validated the created Resource
-1. ✅&nbsp;&nbsp;Explored the limitations of all logic living in the pipeline
 
 ## Clean up environment {#cleanup}
 
