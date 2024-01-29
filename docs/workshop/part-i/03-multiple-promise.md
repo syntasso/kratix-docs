@@ -94,7 +94,7 @@ through the same steps you ran during the worker cluster registration in
 * Install and configure Flux
 * Register the cluster with Kratix
 
-There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](destination-setup) section. Run:
+There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](./installing-kratix#destination-setup) section. Run:
 
 ```bash
 ./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels

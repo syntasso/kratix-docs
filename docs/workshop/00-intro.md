@@ -72,4 +72,4 @@ Kratix. On Part II, you will dive into writing and extending Promises.
 
 ## 🥁 Time to get started
 
-Begin with [setting up your machine for the workshop](setup).
+Begin with [setting up your machine for the workshop](part-0/intro).

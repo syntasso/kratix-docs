@@ -175,7 +175,7 @@ Imagine that some Resources need to be able to collect data. On the platform tea
 
 To enable users to specify when they're collecting data, you've added `enableDataCollection: true` to the Promise API. Now you need a way to schedule Resources that are collecting data to the right Kratix Destination.
 
-To do this, you need to update the Promise's Workflow's internal Pipeline functionality. In addition to the other features already covered (in a [previous section](./02-service-on-demand.md)), the Workflow for a Promise offers another hook for adjusting where a Resource is deployed.
+To do this, you need to update the Promise's Workflow's internal Pipeline functionality. In addition to the other features already covered (in a [previous section](./service-on-demand)), the Workflow for a Promise offers another hook for adjusting where a Resource is deployed.
 
 Within the Pipeline container file system, Kratix mounts a [`/kratix/metadata`](../main/reference/resources/workflows#metadata) directory to manage important configuration that is independent of the Resources definitions for your State Store.
 
