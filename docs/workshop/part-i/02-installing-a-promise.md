@@ -62,7 +62,7 @@ kube-system            Active   41m
 local-path-storage     Active   41m
 ```
 
-If your outputs do not align with the expected, please refer back to
+If your outputs do not align with the above, please refer back to
 [Installing Kratix](installing-kratix).
 
 With that, you have all the pieces you need to install your first Promise!
@@ -169,7 +169,7 @@ If at this stage you create another Kubernetes cluster and follow similar steps 
 
 Later in this tutorial you will learn how to make certain Promises available only in certain clusters based on Promise configuration.
 
-You environment now looks like this (with bits ommited for clarity):
+You environment now looks like this (with some detail omitted for clarity):
 
 
 ```mdx-code-block
@@ -182,7 +182,9 @@ import Topology03 from "/img/docs/workshop/topology-03.png"
   <figcaption>Jenkins dependencies are reconciled on all workers</figcaption>
 </figure>
 
-With the both the API available in the platform, and the dependencies installed in the worker, the Jenkins Promise installation is now complete. It is time to switch roles for a moment and become the developer requesting a new Jenkins Resource.
+With the both the API available in the platform, and the dependencies installed in the worker, the Jenkins Promise installation is now complete.
+
+It is now time to switch roles for a moment, and imagine you are a developer who wants to request a new Jenkins Resource.
 
 ## Request a Resource from a Promised service {#request-jenkins}
 
@@ -337,7 +339,7 @@ kubectl --context $WORKER get secrets --selector app=jenkins-operator -o go-temp
 
 ## Clean up
 
-Since you will no longer need Jenkins in the remaining of this tutorial, you can go ahead and delete it.
+Since you will no longer need Jenkins in the remainder of this tutorial, you can go ahead and delete it.
 
 Delete the Jenkins Promise:
 

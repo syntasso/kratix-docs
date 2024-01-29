@@ -163,8 +163,8 @@ You platform cluster is now ready to receive Kratix!
 
 ## Install the Worker prerequisites
 
-Kratix schedules works by writing a state declaration (following Kubernetes
-declare-and-converge pattern) to the designated State Store. When it comes to
+Kratix schedules works by writing a state declaration (following the Kubernetes
+declare-and-converge pattern) to a designated State Store. When it comes to
 reconciling the declared state, Kratix remains agnostic about the specific tool
 to be used on the clusters. In this tutorial, you will utilise
 [Flux](https://fluxcd.io/) on the worker, and configure it to reconcile the
@@ -185,6 +185,9 @@ The script above will:
 
 The Flux `Kustomizations` are responsible for continuously reconciling with the state
 declared in the `Source`.
+
+If you are curious to know what this script does, or would prefer to configure the worker cluster yourself, take a look at the section below.
+
 
 <details>
 <summary>Configuring the cluster: the manual way</summary>
@@ -346,16 +349,16 @@ You will notice that there are two Kustomizations created. When scheduling
 workloads, Kratix will separate the documents based on their GVK (Group, Version,
 Kind):
 
-- Custom Resource Definition (as defined
+- All dependencies (i.e. the Custom Resource Definition as defined
   [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#customresourcedefinition-v1-apiextensions-k8s-io))
-  will be written to a specific `crds` path within the State Store.
+  will be written to a specific `dependencies` path within the State Store.
 - All other documents will be written to a specific `resources` path within the
   State Store.
 
 Later when you register the cluster as a Destination, Kratix will use the cluster's `namespace`
 and `name` to build the full path for that cluster within the State Store.
 
-The first Kustomization above is for the CRDs, while the second is for the other
+The first Kustomization above is for dependencies (CRDs), while the second is for the other
 resources (note the `spec.path`). You can also note that the
 `kratix-workload-resources` depends on the `kratix-workload-dependencies`. That's to
 avoid failures when a resource documents uses a GVK being defined by a CRD
