@@ -142,7 +142,7 @@ Since the EasyApp Promise declares two other Promises as its Dependencies,
 installing it will add a total of three Promises to the platform:
 
 * The EasyApp Promise itself
-* Its Dependencies: NGINX and PostgreSQL
+* The EasyApp Promise dependencies: NGINX and PostgreSQL
 
 <figure class="diagram">
   <PavedPathDiagram className="small"/>
