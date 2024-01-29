@@ -334,7 +334,7 @@ postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
 You could request each one of those services individually if you need
 fine-grained control of how they ought to be deployed, or you can use the
 EasyApp Promise to get an opinionated deployment of each of those. In this
-example, all you want is to run your application without much fuzz.
+example, all you want is to run your application without much fuss.
 
 Create a request for a new EasyApp Resource:
 
