@@ -171,7 +171,7 @@ easyapp   Available     EasyApp   example.promise.syntasso.io/v1
 Once you see the "Available", press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-You may be, at this point, asking yourself: _"Wait, wasn't the EasyApp Promise supposed to install three Promises? Why is there only one?"_
+At this point, you may be asking yourself: _"Wait, wasn't the EasyApp Promise supposed to install three Promises? Why is there only one?"_
 
 That's because the EasyApp Promise makes use of the Kratix _Destination Selectors_ feature. Destination Selectors allow Promises to specify scheduling logic to determine the suitable Destinations for hosting Dependencies and workloads.
 
