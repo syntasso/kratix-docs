@@ -660,41 +660,7 @@ Done
 
 While it is useful to verify the container has run by viewing the logs, the outcome you most want to verify is the scheduling and creation of an ECK Resource.
 
-To see this you will need to check the worker cluster where the ECK server was scheduled. First you may want to verify that the operator is running:
-
-```bash
-kubectl --context $WORKER get pods -n elastic-system
-```
-
-With the following output:
-
-```shell-session
-NAME                 READY   STATUS    RESTARTS   AGE
-elastic-operator-0   1/1     Running   0          1m
-```
-
-With all the necessary CRDs installed:
-
-```bash
-kubectl --context $WORKER get crds | grep elastic
-```
-
-which will result in something like:
-
-```shell-session
-agents.agent.k8s.elastic.co                            2023-01-01T12:00:00Z
-apmservers.apm.k8s.elastic.co                          2023-01-01T12:00:00Z
-beats.beat.k8s.elastic.co                              2023-01-01T12:00:00Z
-elasticmapsservers.maps.k8s.elastic.co                 2023-01-01T12:00:00Z
-elasticsearchautoscalers.autoscaling.k8s.elastic.co    2023-01-01T12:00:00Z
-elasticsearches.elasticsearch.k8s.elastic.co           2023-01-01T12:00:00Z
-enterprisesearches.enterprisesearch.k8s.elastic.co     2023-01-01T12:00:00Z
-kibanas.kibana.k8s.elastic.co                          2023-01-01T12:00:00Z
-logstashes.logstash.k8s.elastic.co                     2023-01-01T12:00:00Z
-stackconfigpolicies.stackconfigpolicy.k8s.elastic.co   2023-01-01T12:00:00Z
-```
-
-Finally, you will want to see the provisioned Resource by running:
+To see this you will need to check the worker cluster where the ECK server was scheduled. You will want to see the provisioned Resource by running:
 
 ```bash
 kubectl --context $WORKER get pods --watch
