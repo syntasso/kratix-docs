@@ -1,10 +1,10 @@
 {
-  "label": "Part I: Operating Kratix",
+  "label": "Prerequisites",
   "position": 3,
   "collapsed": false,
   "collapsible": true,
   "link": {
     "type": "doc",
-    "id": "workshop/part-i/intro"
+    "id": "workshop/part-0/intro"
   }
 }

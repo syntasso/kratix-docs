@@ -1,6 +1,6 @@
 ---
 id: setup
-title: Prerequisites
+title: "Installing the tools"
 description: Find out what you need in installed before starting the workshop
 ---
 
@@ -23,6 +23,12 @@ tools:
 1. `yq` / **YAML parsing command-line tool**: <br /> The CLI for
    Kubernetes&mdash;allows you to run parse and transform YAML files. This is only used in Part II. <br
    /> See [the install guide](https://github.com/mikefarah/yq#install).
+
+1. `mc` / **MinIO Client**: <br /> The CLI for MinIO&mdash;allows you to run commands against MinIO clusters. <br
+   /> See [the install guide](https://docs.min.io/docs/minio-client-quickstart-guide.html).
+
+1. `git` / **Git**: <br /> The CLI for Git&mdash;allows you to clone the Kratix repository. <br
+   /> See [the install guide](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
 :::info
 
@@ -52,19 +58,4 @@ resources to Docker. Ensure you allocate at least:
 
 This can be managed through your tool of choice (e.g. Docker Desktop, Rancher, etc).
 
-## Delete pre-existing kind clusters {#delete-clusters}
-
-Ensure no clusters are currently running:
-
-```shell-session
-$ kind get clusters
-No kind clusters found.
-```
-
-If you have clusters named `platform` or `worker` please delete them with:
-```bash
-kind delete clusters platform worker
-```
-
-You are now ready to start. Navigate to the [next
-section](installing-kratix) and get started!
+You are now ready to [create the clusters](./create-clusters) for the workshop!

@@ -42,74 +42,20 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 
 ## Hands on: Installing Kratix {#install-kratix}
 
-Before continuing, make sure to go back to [prerequisites](setup)
+Before continuing, make sure to go back to [prerequisites](./part-0/intro)
 and follow the guide if you haven't done that already.
 
-This guide will go through the following steps:
-
-1. [Clone Kratix](#clone-kratix)
-1. [Create the platform cluster](#platform-setup)
-1. [Install Kratix](#kratix-setup)
-1. [Set up the GitOps State Store](#gitops-setup)
-1. [Create the Kratix State Store](#statestore-setup)
-
-### Clone Kratix {#clone-kratix}
-
-You will need the Kratix source code to complete this workshop. Clone the
-project to your local machine and change into the directory:
-
-```bash
-git clone https://github.com/syntasso/kratix.git
-cd kratix
-```
-
-### Create a Kubernetes cluster where you will install Kratix {#platform-setup}
-
-One of the most powerful Kratix features is the ability platform teams have to
-fully control the scheduling of work across extensive and diverse infrastructure, i.e., to
-determine in which Kubernetes cluster (or other infrastructure) a certain workload should be deployed to.
-Kratix leverages the GitOps toolkit to deliver this capability.
-
-Kratix itself runs in Kubernetes. The first step in getting Kratix up and running is to create a Kubernetes cluster where you can install it. In this workshop, you will use `kind` to run Kubernetes clusters locally. Run the
-following command to create a Kubernetes cluster and give it the name `platform`:
-
-```bash
-kind create cluster --name platform \
-    --image kindest/node:v1.27.3 \
-    --config config/samples/kind-platform-config.yaml
-```
-
-This command will create a cluster on the specified Kubernetes version and
-update your local `.kube/config` with the credentials to access the cluster. You
-are also providing `kind` with a config file to simplify accessing the services
-running in the cluster.
-
-Once the creation completes, you can reach the local platform cluster with the
-`kind-platform` context.
-
-Verify the cluster is ready:
+You should also make sure you are currently in the `kratix` directory and have the following environment variables set:
 
 ```bash
 export PLATFORM="kind-platform"
-kubectl --context $PLATFORM cluster-info
+export WORKER="kind-worker"
 ```
 
-The above command will give an output similar to:
+This guide will go through the following steps:
 
-```shell-session
-Kubernetes control plane is running at https://127.0.0.1:XXXX
-CoreDNS is running at https://127.0.0.1:55960/api/v1/...
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
-```
-
-:::tip
-Note that You have now saved a local environment variable `PLATFORM` to make it easier for the ongoing commands in this workshop
-:::
-
-### Install cert-manager
-
-<PartialInstallCertManager />
+1. [Install Kratix](#kratix-setup)
+1. [Create the Kratix State Store](#statestore-setup)
 
 ### Install Kratix {#kratix-setup}
 
@@ -121,9 +67,7 @@ Run the command below to deploy Kratix on the platform cluster:
 kubectl --context $PLATFORM apply --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
 ```
 
-This command will create a Kratix deployment (in the
-`kratix-platform-system` namespace). It will also install all the APIs (as Kubernetes CRDs) that
-Kratix needs.
+This command will create a Kratix deployment (in the `kratix-platform-system` namespace). It will also install all the APIs (as Kubernetes CRDs) that Kratix needs.
 
 Verify that the Kratix CRDs are available:
 
@@ -143,7 +87,8 @@ workplacements.platform.kratix.io      2023-01-22T11:53:15Z
 works.platform.kratix.io               2023-01-22T11:53:15Z
 ```
 
-:::info What are CRDs?
+<details>
+<summary>What are CRDs?</summary>
 
 A Custom Resource (CR) is an extension of the Kubernetes API that is not
 necessarily available in a default Kubernetes installation. It represents a
@@ -158,8 +103,7 @@ Check the Kubernetes documentation for further details on [Custom
 Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 and [Custom Resources
 Definition](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
-
-:::
+</details>
 
 Verify the Kratix deployment:
 
@@ -177,59 +121,6 @@ kratix-platform-controller-manager   1/1     1            1           1h
 You can now tell Kratix which repositories it will use to deploy and manage the
 workloads.
 
-### Set up the GitOps State Store {#gitops-setup}
-
-As mentioned above, Kratix leverages GitOps for deploying and reconciling
-scheduled workloads. From a GitOps perspective, a Destination is the Kratix
-model that captures how workload definitions should be stored and organised to
-enable the appropriate infrastructure to be able to identify and reconcile the
-workloads. Each Kratix Destination has a backing State Store which is either an
-S3-compatible bucket or a Git repository. For this workshop we will use an
-S3-compatible MinIO bucket created locally on a MinIO instance running in the
-platform cluster. Please check the [docs](/main/reference/statestore/intro)
-for further details.
-
-To install the MinIO instance, run:
-
-```bash
-kubectl --context $PLATFORM apply --filename config/samples/minio-install.yaml
-```
-
-The above command will:
-
-- Deploy an instance of MinIO on the `kratix-platform-system` namespace
-- Create a Secret with the MinIO credentials
-- Run a Job to create a bucket called `kratix` on the MinIO instance. <br />
-
-Verify the installation:
-
-```bash
-kubectl --context $PLATFORM get deployments --namespace kratix-platform-system
-```
-
-The above command will give an output similar to:
-
-```shell-session
-NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-kratix-platform-controller-manager   1/1     1            1           1h
-minio                                1/1     1            1           1h
-```
-
-Verify the Create Bucket job:
-
-```
-kubectl --context $PLATFORM get jobs
-```
-
-The above command will give an output similar to:
-
-```shell-session
-NAME                  COMPLETIONS   DURATION   AGE
-minio-create-bucket   1/1           3m5s       1h
-```
-
-Once the Job completes, you are able register the MinIO bucket with Kratix.
-
 ### Create the Kratix State Store {#statestore-setup}
 
 The State Store represents the various backing storage options to which Kratix
@@ -237,8 +128,7 @@ can write. When registering a worker cluster with Kratix, you will need to
 specify the state store you intend to use. Kratix will then write to the
 specified state store when scheduling workloads for deployment on that cluster.
 
-Create a new State Store that points to the MinIO bucket we created on the previous
-step:
+Create a new State Store that points to the MinIO bucket we created in the previous tutorial:
 
 ```yaml
 cat << EOF | kubectl --context $PLATFORM apply -f -
@@ -324,8 +214,135 @@ page](/main/reference/statestore/intro)
 
 </details>
 
-And with that, Kratix is fully installed and configured. Continue to the next
-section to install your first Promise!
+At this point, your environment looks like this (with a few components omitted for clarity):
+
+```mdx-code-block
+import Topology01 from "/img/docs/workshop/topology-01.png"
+```
+
+<figure class="diagram">
+  <img class="medium" src={Topology01} alt="Deployed resources with State Store" />
+
+  <figcaption>Current environment: with Bucket State Store</figcaption>
+</figure>
+
+Although Kratix now knows about the State Store, it's not currently aware of any place that the workloads can actually run: there's no _Destination_ registered with the platform cluster.
+
+### Register the Worker cluster as a Destination {#destination-setup}
+
+In Kratix terms, a _Destination_ is any system _converging_ on the state
+declared by Kratix.
+
+You already have created a worker cluster as part of the previous tutorial. You will now register this cluster as a Destination.
+
+:::info
+
+Note that the order of operations here is not important; you could have registered the worker as a Destination first, and then created the worker cluster. Kratix would have scheduled to the State Store path representing the worker cluster, and the state would eventually be applied to a worker.
+
+:::
+
+It's important to note that Kratix makes no assumptions about the Destinations themselves. Although Destinations are often Kubernetes clusters, they may be any system that can interpret whatever state is being declared as desired.
+
+For example, you may write a Promise that tells Kratix to declare Terraform
+plans as desired state, and a Destination may be a system applying these
+plans as they are written to the State Store.
+
+To register the worker cluster, create a `Destination` object on your platform cluster:
+
+```yaml
+cat <<EOF | kubectl --context $PLATFORM apply --filename -
+apiVersion: platform.kratix.io/v1alpha1
+kind: Destination
+metadata:
+   name: worker-cluster
+   labels:
+    environment: dev
+spec:
+   stateStoreRef:
+      name: default
+      kind: BucketStateStore
+EOF
+```
+
+The above command will give an output similar to:
+
+```shell-session
+destinations.platform.kratix.io/worker-cluster created
+```
+
+<details>
+<summary>Destinations in detail</summary>
+
+The Kratix Destination resource is the representation of a system where workloads can be scheduled to. Those system are usually other Kubernetes clusters, but can be any system that can interpret the declared state.
+
+The only required field is `spec.stateStoreRef`, which contains a reference to a State Store present in the platform. In this example, it points to the `default`
+object you created on the previous step. The `spec.StateStoreRef.kind` specifies the kind of State Store being used by this Destination.
+
+That means different Destinations can use different backing storage. For example, you can have a set of Destinations backed by Git, while another set of Destinations can be backed by a Bucket. Further configuration options pertaining paths are also available both in the [State Store](../main/reference/statestore/intro) and the [Destination object](../main/reference/destinations/intro).
+
+</details>
+
+With the Destinations registered, Kratix now has a place where it can run workloads!
+
+In fact, as soon as a new Destination is registered, Kratix writes a test document to the State Store. You can use this test to validate that the entire system is wired up correctly.
+
+First, check the MinIO `kratix` bucket:
+
+```bash
+mc ls -r kind
+```
+
+The above command will give an output similar to:
+
+```shell-session
+[2024-01-01 15:00:00 GMT]   116B STANDARD kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
+[2024-01-01 15:00:00 GMT]   206B STANDARD kratix/worker-cluster/resources/kratix-canary-configmap.yaml
+```
+
+You can also inspect the contents of the test documents. For example, take the `kratix-canary-namespace.yaml`:
+
+```bash
+mc cat kind/kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
+```
+
+The above command will give an output similar to:
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: kratix-worker-system
+spec: {}
+status: {}
+```
+
+Since your worker cluster is already listening to this path within the bucket, you should see Flux automatically creating the namespace on the worker cluster as soon as it detects the change:
+
+```bash
+kubectl --context $WORKER get namespace kratix-worker-system
+```
+
+It may take a few minutes, but the above command will give an output similar to:
+
+```shell-session
+NAME                   STATUS   AGE
+kratix-worker-system   Active   1m
+```
+
+You environment now looks like this:
+
+```mdx-code-block
+import Topology02 from "/img/docs/workshop/topology-02.png"
+```
+
+<figure class="diagram">
+  <img class="large" src={Topology02} alt="Deployed resources with Destination" />
+
+  <figcaption>Flux reconciled and created the test resources</figcaption>
+</figure>
+
+Kratix is now fully installed and configure, and can start deploying Promises and resources to your worker cluster.
 
 ## Summary
 
@@ -333,12 +350,10 @@ Your platform is ready to receive Promises! Well done!
 
 To recap the steps you took:
 
-1. ✅&nbsp;&nbsp;Created a platform cluster
 1. ✅&nbsp;&nbsp;Installed Kratix on the platform cluster
-1. ✅&nbsp;&nbsp;Installed MinIO on the platform cluster as the GitOps document store
-1. ✅&nbsp;&nbsp;Told Kratix about the MinIO bucket
+1. ✅&nbsp;&nbsp;Told Kratix about the MinIO bucket, as a Bucket State Store
+1. ✅&nbsp;&nbsp;Told Kratix about the worker cluster, as a Destination
 
-## 🎉 &nbsp; Congratulations
-
-✅&nbsp;&nbsp;Kratix is now installed. <br />
-👉🏾&nbsp;&nbsp;Next you will [install an sample Kratix Promise](installing-a-promise).
+## 🎉 Congratulations
+✅ Kratix is now installed and configured! <br />
+👉🏾 [Next you will deploy your first Promise](./installing-a-promise).
