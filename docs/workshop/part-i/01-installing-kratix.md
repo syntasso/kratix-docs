@@ -45,7 +45,7 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 Before continuing, make sure to go back to [prerequisites](./part-0/intro)
 and follow the guide if you haven't done that already.
 
-You should also make sure you are currently on the `kratix` directory and have the following environment variables set:
+You should also make sure you are currently in the `kratix` directory and have the following environment variables set:
 
 ```bash
 export PLATFORM="kind-platform"
