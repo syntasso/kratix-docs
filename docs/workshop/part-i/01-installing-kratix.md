@@ -128,7 +128,7 @@ can write. When registering a worker cluster with Kratix, you will need to
 specify the state store you intend to use. Kratix will then write to the
 specified state store when scheduling workloads for deployment on that cluster.
 
-Create a new State Store that points to the MinIO bucket we created on the previous tutorial:
+Create a new State Store that points to the MinIO bucket we created in the previous tutorial:
 
 ```yaml
 cat << EOF | kubectl --context $PLATFORM apply -f -
@@ -226,24 +226,28 @@ import Topology01 from "/img/docs/workshop/topology-01.png"
   <figcaption>Current environment: with Bucket State Store</figcaption>
 </figure>
 
-Altough Kratix is now knows about the state store, it's currently not aware of any place where workloads can run: there's no _Destination_ registered with the platform cluster.
+Although Kratix now knows about the State Store, it's not currently aware of any place that the workloads can actually run: there's no _Destination_ registered with the platform cluster.
 
 ### Register the Worker cluster as a Destination {#destination-setup}
 
 In Kratix terms, a _Destination_ is any system _converging_ on the state
 declared by Kratix.
 
-You already have created a worker cluster as part of the previous tutorial. You will register this cluster as a Destination.
+You already have created a worker cluster as part of the previous tutorial. You will now register this cluster as a Destination.
 
-Note that the order of operations here is not important; you could have registered the worker first and then created the worker cluster. Kratix would have scheduled to the State Store path representing the worker cluster, and the state would eventually be applied to a worker.
+:::info
 
-Furthermore, it's important to note that Kratix makes no assumptions about the Destinations themselves. Although Destinations are often Kubernetes clusters, they may be any system that can interpret whatever state is being declared as desired.
+Note that the order of operations here is not important; you could have registered the worker as a Destination first, and then created the worker cluster. Kratix would have scheduled to the State Store path representing the worker cluster, and the state would eventually be applied to a worker.
+
+:::
+
+It's important to note that Kratix makes no assumptions about the Destinations themselves. Although Destinations are often Kubernetes clusters, they may be any system that can interpret whatever state is being declared as desired.
 
 For example, you may write a Promise that tells Kratix to declare Terraform
 plans as desired state, and a Destination may be a system applying these
 plans as they are written to the State Store.
 
-To register a cluster, create a `Destination` object on your platform cluster:
+To register the worker cluster, create a `Destination` object on your platform cluster:
 
 ```yaml
 cat <<EOF | kubectl --context $PLATFORM apply --filename -
@@ -263,24 +267,24 @@ EOF
 The above command will give an output similar to:
 
 ```shell-session
-cluster.platform.kratix.io/worker-cluster created
+destinations.platform.kratix.io/worker-cluster created
 ```
 
 <details>
-<summary>Destination in detail</summary>
+<summary>Destinations in detail</summary>
 
-The Kratix Destination resource is the representation of a system where workloads can be scheduled to. Those system are usually other Kubernetes clusters.
+The Kratix Destination resource is the representation of a system where workloads can be scheduled to. Those system are usually other Kubernetes clusters, but can be any system that can interpret the declared state.
 
-The only required field is `spec.stateStoreRef`. It contains a reference to a State Store present in the platform. In this example, it points to the `default`
-object you created on the previous step. The `spec.StateStoreRef.kind` determines what is the kind of State Store being used by this Destination.
+The only required field is `spec.stateStoreRef`, which contains a reference to a State Store present in the platform. In this example, it points to the `default`
+object you created on the previous step. The `spec.StateStoreRef.kind` specifies the kind of State Store being used by this Destination.
 
 That means different Destinations can use different backing storage. For example, you can have a set of Destinations backed by Git, while another set of Destinations can be backed by a Bucket. Further configuration options pertaining paths are also available both in the [State Store](../main/reference/statestore/intro) and the [Destination object](../main/reference/destinations/intro).
 
 </details>
 
-With the Destinations registered, Kratix now have a place where it can run workloads.
+With the Destinations registered, Kratix now has a place where it can run workloads!
 
-In fact, as soon as a new destination is registered, Kratix writes a test document to the state store. You can use this test to validate that the entire system is wired up correctly.
+In fact, as soon as a new Destination is registered, Kratix writes a test document to the State Store. You can use this test to validate that the entire system is wired up correctly.
 
 First, check the MinIO `kratix` bucket:
 

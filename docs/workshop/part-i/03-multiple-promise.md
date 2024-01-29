@@ -94,7 +94,7 @@ through the same steps you ran during the worker cluster registration in
 * Install and configure Flux
 * Register the cluster with Kratix
 
-There's a script in the `kratix` directory that will do exactly that. Run:
+There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](destination-setup) section. Run:
 
 ```bash
 ./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels
@@ -156,13 +156,13 @@ From the Kratix directory, install the EasyApp Promise:
 kubectl --context $PLATFORM apply --filename samples/easy-app/promise.yaml
 ```
 
-Validate the EasyApp promises gets installed:
+Validate the EasyApp promises are successfully installed:
 
 ```bash
 kubectl --context $PLATFORM get promises -w
 ```
 
-The above command will eventually include an output with:
+The above command will eventually include the following output:
 
 ```shell-session
 easyapp   Available     EasyApp   example.promise.syntasso.io/v1
@@ -173,7 +173,9 @@ exit the watch mode.
 
 At this point, you may be asking yourself: _"Wait, wasn't the EasyApp Promise supposed to install three Promises? Why is there only one?"_
 
-That's because the EasyApp Promise makes use of the Kratix _Destination Selectors_ feature. Destination Selectors allow Promises to specify scheduling logic to determine the suitable Destinations for hosting Dependencies and workloads.
+That's because the EasyApp Promise makes use of the Kratix _Destination Selectors_ feature.
+
+Destination Selectors allow Promises to specify scheduling logic to determine the suitable Destinations for hosting Dependencies and workloads.
 
 You can verify the EasyApp Destination Selector by describing the Promise:
 
