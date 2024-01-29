@@ -47,7 +47,7 @@ kind create cluster \
 
 The **Platform** cluster is the Kubernetes cluster where Kratix will be installed. It will also be the cluster where the Platform team will manage the Kratix configuration.
 
-The Platform cluster is not, generally, where most of the workloads will be deployed to though.
+Although it is possible to schedule workloads to the Platform cluster, it is not generally where most of the workloads will be deployed to.
 More often, platform teams will have a dedicated set of clusters (and other varied infrastructure) where the requested services will actually run. In this workshop, you will use a second cluster to simulate this scenario. Whenever you read _worker cluster_ in the workshop, it will refer to this second cluster.
 
 Create the **Worker** cluster with the following command:
