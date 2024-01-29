@@ -60,7 +60,7 @@ To use ECK, as defined in the [documentation](https://www.elastic.co/guide/en/cl
 
 <img src={useBaseUrl('/img/docs/workshop/operator-as-shared-dependency.png')} />
 
-The desired workflow is to have the ECK Operator and its CRDs installed in the cluster immediately after the Promise gets installed. This way, the Promise can use the Operator to install the Elastic Stack.
+The goal is to have the ECK Operator and its CRDs installed in the worker cluster immediately after the Promise gets installed. This way, the Promise can use the Operator to install the Elastic Stack.
 
 <img src={useBaseUrl('/img/docs/workshop/promise-with-dependencies.png')} />
 
@@ -143,7 +143,7 @@ kubectl --context ${PLATFORM} replace --filename promise.yaml --force
 To validate the Promise has been installed, you can list all Promises by running:
 
 ```bash
-kubectl --context kind-platform get promises
+kubectl --context ${PLATFORM} get promises
 ```
 
 Your output will eventually show the `elastic-cloud` Promise:
@@ -177,8 +177,6 @@ stackconfigpolicies.stackconfigpolicy.k8s.elastic.co   2023-02-01T12:00:00Z
 NAME                 READY   STATUS    RESTARTS   AGE
 elastic-operator-0   1/1     Running   0          1m
 ```
-
-## Make multiple requests {#resource-requests}
 
 Now that you have installed the operator and CRDs as a part of Promise installation, you are one step closer to being able to request Resources from the Promise. The next step is to define the Configure Pipeline Workflow.
 

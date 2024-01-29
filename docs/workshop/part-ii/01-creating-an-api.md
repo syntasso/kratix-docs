@@ -413,7 +413,7 @@ by just listing all Promises in your cluster.
 To see that the Promise has been installed, run:
 
 ```bash
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 Your output will show the `elastic-cloud` Promise:
@@ -426,7 +426,7 @@ elastic-cloud   Available   elastic-cloud   workshop.kratix.io/v1alpha1
 More importantly, you will also be able to see the `elastic-cloud` API you defined:
 
 ```bash
-kubectl --context kind-platform get crds | grep workshop
+kubectl --context $PLATFORM get crds | grep workshop
 ```
 
 The above command will give an output similar to:

@@ -120,7 +120,7 @@ Your elastic promise is already configured to deploy the Operator and its CRDs a
 
 Defining a Pipeline requires a number of files and scripts. For that reason it is best to create a subfolder to organise these specific items.
 
-More specifically, the first two files you will need are:
+More specifically, the first three files you will need are:
 
 - `run`: a script containing the code that will be executed when the Workflow runs.
 - `default-config.yaml`: a values document containing configuration options for the default ElasticSearch and Kibana.
@@ -185,7 +185,7 @@ Next, populate the `default-config.yaml` document. This is file contains default
 configuration for the Kibana deployment. The NodePort will be injected by the
 pipeline:
 
-```yaml title=pipeline/default-config.yaml
+```yaml title="pipeline/default-config.yaml"
 eck-elasticsearch:
   fullnameOverride: NAME
 eck-kibana:
@@ -305,7 +305,7 @@ touch pipeline/Dockerfile
 
 Next, paste the contents below into the newly created `pipeline/Dockerfile`:
 
-```docker
+```docker title="pipeline/Dockerfile"
 FROM "alpine"
 WORKDIR /pipeline
 
@@ -327,6 +327,9 @@ At this stage, your `elastic-cloud-promise` directory should look like this:
 
 ```
 📂 elastic-cloud-promise
+├── dependencies
+│   ├── elastic-crds.yaml
+│   └── elastic-operator.yaml
 ├── pipeline
 │   ├── Dockerfile
 │   ├── beats-values.yaml
@@ -371,22 +374,14 @@ directory:
 cp resource-request.yaml test/input/object.yaml
 ```
 
-At this stage, your directory structure should look like this:
+At this stage, your test directory structure should look like this:
 
 ```
-📂 elastic-cloud-promise
-├── pipeline
-│   ├── Dockerfile
-│   ├── beats-values.yaml
-│   ├── default-config.yaml
-│   └── run
-├── promise.yaml
-├── resource-request.yaml
-└── test
-    ├── input
-    │   └── object.yaml
-    ├── metadata
-    └── output
+📂 test
+├── input
+│   └── object.yaml
+├── metadata
+└── output
 ```
 
 ### Create simple test suite
@@ -445,19 +440,22 @@ At this stage, your directory structure should look like this:
 
 ```
 📂 elastic-cloud-promise
+├── dependencies
+│   ├── elastic-crds.yaml
+│   └── elastic-operator.yaml
 ├── pipeline
-│   ├── Dockerfile
-│   ├── beats-values.yaml
-│   ├── default-config.yaml
-│   └── run
+│   ├── Dockerfile
+│   ├── beats-values.yaml
+│   ├── default-config.yaml
+│   └── run
 ├── promise.yaml
 ├── resource-request.yaml
 ├── scripts
-│   ├── build-pipeline
-│   └── test-pipeline
+│   ├── build-pipeline
+│   └── test-pipeline
 └── test
     ├── input
-    │   └── object.yaml
+    │   └── object.yaml
     ├── metadata
     └── output
 ```
@@ -508,7 +506,7 @@ you will add a new top level key in the Promise `spec` as a sibling to the
 `api` key you created in the last section.
 
 The key should be `workflows` and should contain a list of your
-pipelines containers which will be just one for now:
+pipelines containers which will be just one for now. The key should already exist on the document, so make sure to update it instead of creating a new one:
 
 ```yaml title="promise.yaml -- include it under the 'spec' key"
 apiVersion: platform.kratix.io/v1alpha1
@@ -516,6 +514,8 @@ kind: Promise
 metadata:
   name: elastic-cloud
 spec:
+  dependencies: #...
+  api: #...
   #highlight-start
   workflows:
     resource:
@@ -529,8 +529,6 @@ spec:
             - name: pipeline-stage-0
               image: kratix-workshop/elastic-pipeline:dev
   #highlight-end
-  api:
-  ...
 ```
 
 ## Install the Promise {#install-promise}
@@ -546,7 +544,7 @@ kubectl --context $PLATFORM replace --filename promise.yaml --force
 To validate the Promise has been installed, you can list all Promises by running:
 
 ```bash
-kubectl --context kind-platform get promises
+kubectl --context $PLATFORM get promises
 ```
 
 Your output will show the `elastic-cloud` Promise:
@@ -599,14 +597,14 @@ As an application engineer, you can see the Status as either `Pending` meaning t
 As a platform engineer you can continue on to verify some of the processes behind the scenes. First of all, you can verify that the pipeline has been triggered by the request for a Resource. To see the pod run:
 
 ```bash
-kubectl --context $PLATFORM get pods --show-labels
+kubectl --context $PLATFORM get pods
 ```
 
 The output should look something like this:
 
 ```shell-session
 NAME                                     READY   STATUS      RESTARTS   AGE     LABELS
-configure-pipeline-elastic-cloud-33029   0/1     Completed   0          1m   kratix-promise-id=elastic-cloud...
+configure-pipeline-elastic-cloud-33029   0/1     Completed   0          1m
 ```
 
 Within this pod there will be a number of containers including Kratix utility actions and the list of images you provided in the Promise.
