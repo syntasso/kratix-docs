@@ -1,6 +1,6 @@
 ---
 description: Delivering your service on demand
-title: Delivering your service on demand
+title: "[old] Delivering your service on demand"
 id: service-on-demand
 slug: ../service-on-demand
 ---

@@ -1,6 +1,6 @@
 ---
 description: Updating the Resource status
-title: Updating the Resource status
+title: "[old] Updating the Resource status"
 id: updating-status
 slug: ../updating-status
 ---

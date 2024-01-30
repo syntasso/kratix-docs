@@ -9,7 +9,7 @@ import CodeBlock from '@theme/CodeBlock';
 
 This is Part 1 of [a series](intro) illustrating how to write Kratix Promises.
 
-👉🏾 Next: [Improve your Promise API](./improving-your-promise-api)
+👉🏾 Next: [Using Promise Workflows](./promise-workflows)
 
 **In this tutorial, you will**
 
@@ -140,7 +140,9 @@ For now, you can use the following CRD to define the API for your Promise:
 import PromiseCRD from "!!raw-loader!./_partials/01-promise-api.yaml"
 ```
 
-<CodeBlock language="yaml">{PromiseCRD}</CodeBlock>
+<CodeBlock language="yaml">
+    {PromiseCRD}
+</CodeBlock>
 
 To keep the promise all in one place, create a directory called `app-promise` and a file `promise.yaml` inside it:
 
@@ -170,7 +172,9 @@ Finally, copy the contents of the CRD above and paste it in the `api` key of the
 import PromiseWithAPI from "!!raw-loader!./_partials/02-promise-with-api.yaml"
 ```
 
-<CodeBlock language="yaml" title="app-promise/promise.yaml">{PromiseWithAPI}</CodeBlock>
+<CodeBlock language="yaml" title="app-promise/promise.yaml">
+    {PromiseWithAPI}
+</CodeBlock>
 
 </details>
 
@@ -245,7 +249,9 @@ Open the `Dockerfile` in your editor and add the following content:
 import Dockerfile from "!!raw-loader!./_partials/03-Dockerfile"
 ```
 
-<CodeBlock language="dockerfile" title="app-promise/workflows/Dockerfile">{Dockerfile}</CodeBlock>
+<CodeBlock language="dockerfile" title="app-promise/workflows/Dockerfile">
+    {Dockerfile}
+</CodeBlock>
 
 
 
@@ -264,7 +270,9 @@ Write the following into the `execute-pipeline` script:
 import ExecutePipeline from "!!raw-loader!./_partials/04-execute-pipeline.sh"
 ```
 
-<CodeBlock language="bash" title="app-promise/workflows/execute-pipeline">{ExecutePipeline}</CodeBlock>
+<CodeBlock language="bash" title="app-promise/workflows/execute-pipeline">
+    {ExecutePipeline}
+</CodeBlock>
 
 
 As you can see, the script above uses the `kubectl` command to create a Deployment, a Service, and an Ingress. The script uses the `yq` command to extract the user's input from the `/kratix/input/object.yaml` file. The `object.yaml` file contains the input the user provided when requesting the new resource.
@@ -285,7 +293,9 @@ With the pipeline image defined, you can now configure the `resource.configure` 
 import ResourceWorkflow from "!!raw-loader!./_partials/05-resource-workflow.yaml"
 ```
 
-<CodeBlock language="yaml" title="app-promise/promise.yaml">{ResourceWorkflow}</CodeBlock>
+<CodeBlock language="yaml" title="app-promise/promise.yaml">
+    {ResourceWorkflow}
+</CodeBlock>
 
 The final step is to actually build the pipeline image and make it available in the container registry. Since you are using `kind` clusters, you can build and load the image into the cluster directly by running the following commands:
 
@@ -307,7 +317,9 @@ _Click here_ for the full `promise.yaml` file.
 import FullPromise from "!!raw-loader!./_partials/06-full-promise.yaml"
 ```
 
-<CodeBlock language="yaml" title="app-promise/promise.yaml">{FullPromise}</CodeBlock>
+<CodeBlock language="yaml" title="app-promise/promise.yaml">
+    {FullPromise}
+</CodeBlock>
 
 </details>
 
@@ -396,5 +408,5 @@ To recap the steps we took:
 
 ## 🎉 &nbsp; Congratulations!
 
-✅&nbsp;&nbsp; You have written your first Kratix Promise.
+✅&nbsp;&nbsp; You have written your first Kratix Promise. <br />
 👉🏾&nbsp;&nbsp; Let's [iterate over it and make it even better](./scheduling).

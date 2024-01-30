@@ -1,6 +1,6 @@
 ---
 description: Extracting shared dependencies across multiple requests
-title: Defining the Dependencies
+title: "[old] Defining the Dependencies"
 id: shared-dependencies
 slug: ../shared-dependencies
 ---
