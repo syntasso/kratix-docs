@@ -1,0 +1,8 @@
+FROM ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+RUN [ "mkdir", "/templates" ]
+
+COPY execute-pipeline execute-pipeline
+COPY promise-configure promise-configure
+
+CMD [ "sh", "-c", "./execute-pipeline"]
+ENTRYPOINT []
