@@ -15,7 +15,7 @@ At a very high-level, a Promise is made up of four parts:
 2. **The Imperative Workflow:** A series of steps where Platform teams can
    codify all of their business requirements.
 3. **The Declarative State:** The Workflow executes a series of *imperative*
-   steps top generate a *declarative state* that's then persisted into the State
+   steps to generate a *declarative state* that is then persisted to the State
    Store. Other systems will then *converge* on that state.
 4. **The Dependencies**: A dependency is anything that must be installed or made
    available on Worker Destinations to enable the promised service to run.

@@ -4,7 +4,7 @@ title: Part II
 description: Summary of what to expect from the Workshop, Part II
 ---
 
-Part II of this workshop focus the structure and design of a Kratix Promise. You will:
+Part II of this workshop focuses on the structure and design of a Kratix Promise. You will:
 
 1. [Write your first Promise](./writing-your-first-promise)
 1. [Improve your Promise API](./improving-your-promise-api)

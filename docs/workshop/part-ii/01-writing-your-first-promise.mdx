@@ -13,7 +13,7 @@ This is Part 1 of [a series](intro) illustrating how to write Kratix Promises.
 
 **In this tutorial, you will**
 
-- [Learn more about a Promise](#what-is-a-promise)
+- [Learn more about Promises](#what-is-a-promise)
 - [Design an API for your service](#api-design)
 - [Define the dependencies of your promise](#dependencies)
 - [Write a Workflow to deliver the service](#workflow)
@@ -23,12 +23,12 @@ This is Part 1 of [a series](intro) illustrating how to write Kratix Promises.
 
 In [Part I](part-i/intro), you learned that Kratix is a framework used by platform teams to build platforms tailored to their organisation.
 
-Kratix Promises are the encapsulation of platform offerings. They provide a structure to manage the complexities of providing _something-as-a-service_, including the definition of how a user can request the Resource, the steps to provision the requested Resource, and how to provide access to the Resource.
+Kratix Promises are the encapsulation of platform offerings. They provide a structure to manage the complexities of providing _something-as-a-service_, including the definition of how a user can request a Resource, the steps to provision the requested Resource, and how to provide access to the Resource.
 
 Promises allow platform teams to:
 
 - Define an API, including versioning and validation
-- Execute imperative commands per user request
+- Execute imperative commands per the user request
 - Use GitOps to continuously reconcile delivered services
 - Install and configure (or verify) dependencies for delivering a service
 - Manage where services are deployed across the infrastructure (on and
@@ -49,7 +49,7 @@ As you go through building your own Promise, you will explore each of these four
 
 ## The Promise
 
-In this tutorial, you are going to create a Promise that delivers Apps as a service. It will bundle the Kubernetes resources needed to run an application, including a Deployment, Service, and Ingress.
+In this tutorial, you are going to create a Promise that delivers Apps as a service. It will bundle the Kubernetes resources needed to run an application, namely a Deployment, Service, and Ingress.
 
 For Ingress, you will use the [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx). This is a popular Ingress Controller that is used to expose Kubernetes services to the internet.
 
@@ -65,7 +65,7 @@ When building an API, you have a lot of design considerations to include. For ex
 - run server-side validation
 - ensure API versioning to manage updates
 
-These and many other features are all provided standard with a Kubernetes Custom Resource Definition (CRD). This is why Kratix uses CRDs as the mechanism to codify your Promise API.
+These and many other features are all provided as standard with a Kubernetes Custom Resource Definition (CRD). This is why Kratix uses CRDs as the mechanism to codify your Promise API.
 
 :::info
 
@@ -82,7 +82,7 @@ A Custom Resource Definition (CRD) is the object you create to teach your Kubern
 
 To read more about CRDs please refer to the [Kubernetes documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition).
 
-This tutorial will not go through details on how to write a Kubernetes CRD, but check out the [Kubernetes documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition) for further details on the topic.
+This tutorial will not go through details on how to write a Kubernetes CRD, but you can check out the [Kubernetes documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition) for further details on the topic.
 
 </details>
 
@@ -90,7 +90,7 @@ This tutorial will not go through details on how to write a Kubernetes CRD, but 
 
 A Kratix Promise allows platform teams to fine-tune how much application teams need to know about low-level details while still providing the levers they need to get the service they want.
 
-You can start by defining an interface for the applications teams to deploy their applications. This interface is the contract of what can be configured and within what parameters.
+You can start by defining an interface for the application teams to deploy their applications. This interface is the contract of what can be configured and within what parameters.
 
 ```mdx-code-block
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-api-only.svg"
@@ -104,9 +104,9 @@ import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-api-only.sv
 
 When designing the API for your new Promise, you can decide how much control you want to give to the application teams.
 
-For example, you could allow them to configure all aspects of the underlying Deployment and Ingress rules. That option provides your users with the maximum autonomy and configurability. However, it may be a lot to understand and misconfiguration of services can cause both cost and security issues in the future.
+For example, you could allow them to configure all aspects of the underlying Deployment and Ingress rules. That option provides your users with maximum autonomy and configurability. However, it may be a lot to understand and misconfiguration of services can cause both cost and security issues in the future.
 
-On the other hand, you could go to the other end of the spectrum, hiding all the options and asking users to provide only the absolute necessary pieces of configuration. This allow for less configuration errors, but it also limits the flexibility of the service.
+On the other hand, you could go to the other end of the spectrum, hiding all the options and asking users to provide only the absolute necessary pieces of configuration. This allows for fewer configuration errors, but it also limits the flexibility of the service.
 
 ```mdx-code-block
 import APISpectrum from "/img/docs/workshop/design-api-spectrum.svg"
@@ -144,7 +144,7 @@ import PromiseCRD from "!!raw-loader!./_partials/01-promise-api.yaml"
     {PromiseCRD}
 </CodeBlock>
 
-To keep the promise all in one place, create a directory called `app-promise` and a file `promise.yaml` inside it:
+To keep the promise all in one place, create a directory called `app-promise` and a file called `promise.yaml` inside it:
 
 ```bash
 mkdir -p app-promise && cd app-promise
@@ -184,11 +184,11 @@ Great! Your Promise now has an API. You can move on to the next step: defining t
 
 The next step is to define the dependencies of your Promise. This is where you will define the Kubernetes resources that will be created when the Promise is deployed.
 
-As previously mentioned, this Promise will create a Deployment, a Service, and an Ingress. Deployments and Services are builtins in Kubernetes, so you can use them directly. However, to use the NGINX Ingress Controller, you need to have it installed in your worker cluster _prior_ to any user deploying their applications.
+As previously mentioned, this Promise will create a Deployment, a Service, and an Ingress. Deployments and Services are built in to Kubernetes, so you can use them directly. However, to use the NGINX Ingress Controller, you need to have it installed on your worker cluster _prior_ to any user deploying their applications.
 
 That's exactly what Kratix dependencies are for: to define the resources that need to be created when the Promise is installed.
 
-If you follow the NGINX Ingress Controller [installation instructions](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps), you will find that you need a the resources defined in [this file](https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml) to be installed in the cluster.
+If you follow the NGINX Ingress Controller [installation instructions](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps), you will find that you need the resources defined in [this file](https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml) installed on the cluster.
 
 Create a subdirectory in your `app-promise` directory called `dependencies`. Then, create a file called `dependencies.yaml` and copy the contents of the file above into it.
 
@@ -197,10 +197,10 @@ mkdir -p dependencies
 curl -o dependencies/dependencies.yaml --silent https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml
 ```
 
-Once stored locally, you will need to add these Dependencies to the Promise file. The Dependencies are added as a list under `dependencies` which can tricky with formatting and require some subtle white space changes.
+Once stored locally, you will need to add these Dependencies to the Promise file. The Dependencies are added as a list under `dependencies` which can be tricky to format and requires some subtle whitespace changes.
 
 
-#### Inject into the Promise
+#### Inject Dependencies into the Promise
 
 You should have the `worker-resources-builder` available in your `PATH` at this stage. If that's not the case, please refer back to the [prerequisites section](../part-0/setup) for instructions on how to install it.
 
@@ -216,7 +216,7 @@ If you are using Instruqt, please make sure the `promise.yaml` file is closed in
 worker-resource-builder -resources-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
 ```
 
-If everything goes well, the command above should not output anything. You can verify that the dependencies were added by checking the contents of the `promise.yaml` file. You should see the contents of the `dependencies.yaml` file under the `dependencies` key.
+If everything goes well, the command above should not output anything. You can verify that the dependencies were added by checking the contents of the `promise.yaml` file. You should now see the contents of the `dependencies.yaml` file under the `dependencies` key.
 
 :::info
 
@@ -236,7 +236,7 @@ In a nutshell, a Kratix `Pipeline` is a series of containers that will be execut
 
 When a user requests a new App deployment, the `resource.configure` Workflow will be executed. This workflow will query the user's input and declare the resources that must be created.
 
-Start by creating a new directory called `workflows` inside the `app-promise` directory. Then, inside the directory, create a `Dockerfile`. The Dockerfile will be the container image that will be executed as part of the `resource.configure` Workflow:
+Start by creating a new directory called `workflows` inside the `app-promise` directory. Then, inside the directory, create a `Dockerfile`. The Dockerfile will define the container image that will be executed as part of the `resource.configure` Workflow:
 
 ```bash
 mkdir -p workflows
@@ -277,7 +277,7 @@ import ExecutePipeline from "!!raw-loader!./_partials/04-execute-pipeline.sh"
 
 As you can see, the script above uses the `kubectl` command to create a Deployment, a Service, and an Ingress. The script uses the `yq` command to extract the user's input from the `/kratix/input/object.yaml` file. The `object.yaml` file contains the input the user provided when requesting the new resource.
 
-You may also notice that the script uses the `/kratix/output` directory to store the resources that must be created. At the end of the workflow, Kratix will deploy the resources stored in the `/kratix/output` directory in one of the available Destinations.
+You may also notice that the script uses the `/kratix/output` directory to store the resources that must be created. At the end of the workflow, Kratix will deploy the resources stored in the `/kratix/output` directory to one of the available Destinations.
 
 Finally, you can see this pipeline script is written in shell script. Kratix is unopinionated about the language you use to write your Pipelines. You can use any language you want as long as you provide a script that can be executed in a container.
 
@@ -287,7 +287,7 @@ It's straightforward to test your pipeline using `docker run` (or equivalent). Y
 
 :::
 
-With the pipeline image defined, you can now configure the `resource.configure` Workflow. Open the `promise.yaml` file in your editor and add the following content under the `spec` key:
+With the pipeline image defined, you can now define the `resource.configure` Workflow. Open the `promise.yaml` file in your editor and add the following content under the `spec` key:
 
 ```mdx-code-block
 import ResourceWorkflow from "!!raw-loader!./_partials/05-resource-workflow.yaml"
@@ -296,6 +296,12 @@ import ResourceWorkflow from "!!raw-loader!./_partials/05-resource-workflow.yaml
 <CodeBlock language="yaml" title="app-promise/promise.yaml">
     {ResourceWorkflow}
 </CodeBlock>
+
+:::info
+
+Please note that the `worker-resources-builder` might have already added a `workflows` key to your `spec`. If so, you can instead _replace_ this key with the above.
+
+:::
 
 The final step is to actually build the pipeline image and make it available in the container registry. Since you are using `kind` clusters, you can build and load the image into the cluster directly by running the following commands:
 
@@ -345,11 +351,11 @@ NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
 ingress-nginx-controller   1/1     1            1           2m8s
 ```
 
-You can switch hats now and assume the role of a App developer trying to deploy their application.
+You can switch hats now and assume the role of an App developer trying to deploy their application.
 
 ## Using the App Promise {#using-the-app-promise}
 
-As a developer, you can check what are the available promises by running the following command:
+As a developer, you can check the available promises by running the following command:
 
 ```bash
 kubectl --context $PLATFORM get promises
