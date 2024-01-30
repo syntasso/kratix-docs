@@ -4,6 +4,8 @@ title: "Installing the tools"
 description: Find out what you need in installed before starting the workshop
 ---
 
+## Install cli tools
+
 In this workshop, you will deploy Kratix on a local Kubernetes cluster, and deploy
 Kratix workloads on another Kubernetes cluster. You will need the following
 tools:
@@ -46,6 +48,18 @@ If you want to try it on a single cluster, you can omit the `--context` flag and
 argument entirely.
 
 :::
+
+## Install the WorkerResourcesBuilder
+
+```mdx-code-block
+import PartialWcrBinaryDownloadTabs from '../../_partials/_wcr-binary-download-tabs.md';
+```
+
+For Part II of this workshop, you will need to install the `WorkerResourcesBuilder` binary. This is a tool that will help you inject Promise dependencies into your Promise definition. Please install the binary for your operating system:
+
+<PartialWcrBinaryDownloadTabs />
+
+Make sure to add the binary to your `PATH` environment variable.
 
 ## Docker Resources {#docker-config}
 
