@@ -336,7 +336,7 @@ kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 You can verify the logs to see the output of the script:
 
 ```bash
-kubectl --context $PLATFORM logs --namespace kratix-platform-system -l kratix-workflow-type=resource promise-configure
+kubectl --context $PLATFORM logs --namespace kratix-platform-system -l kratix-workflow-type=promise -c download-dependencies
 ```
 
 You can also check the worker, and verify that the NGINX Ingress Controller continues to be running:
