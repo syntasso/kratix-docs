@@ -9,7 +9,7 @@ import CodeBlock from '@theme/CodeBlock';
 
 This is Part 2 of [a series](intro) illustrating how to write Kratix Promises.
 
-👉🏾&nbsp;&nbsp; Previous: [Writing your first Promise](writing-your-first-promise) <br />
+👉🏾 Previous: [Writing your first Promise](writing-your-first-promise) <br />
 👉🏾 Next: [Accessing secrets and storing state](./secrets-and-state)
 
 ---
@@ -147,7 +147,7 @@ docker run \
     --volume ${outputDir}:/kratix/output \
     --volume ${inputDir}:/kratix/input \
     --volume ${metadataDir}:/kratix/metadata \
-    kratix-workshop/create-resources:v1.0.0 ./$command
+    kratix-workshop/app-pipeline-image:v1.0.0 ./$command
 EOF
 ```
 
@@ -162,18 +162,18 @@ At this stage, your directory structure should look like this:
 📂 app-promise
 ├── dependencies
 │   └── dependencies.yaml
-├── workflows
-│   ├── Dockerfile
-│   └── execute-pipeline
 ├── promise.yaml
 ├── scripts
 │   ├── build-pipeline
 │   └── test-pipeline
-└── test
-    ├── input
-    │   └── object.yaml
-    ├── metadata
-    └── output
+├── test
+│   ├── input
+│   │   └── object.yaml
+│   ├── metadata
+│   └── output
+└── workflows
+    ├── Dockerfile
+    └── resource-configure
 ```
 
 ### Run the tests
@@ -279,16 +279,16 @@ At this stage, your directory structure should look like this:
 
 ```
 📂 app-promise
-├── workflows
-│   ├── Dockerfile
-│   ├── execute-pipeline
-│   └── promise-configure
 ├── promise.yaml
 ├── scripts
 │   ├── build-pipeline
 │   └── test-pipeline
-└── test
-    └── ...
+├── test
+│   └── ...
+└── workflows
+    ├── Dockerfile
+    ├── promise-configure
+    └── resource-configure
 ```
 
 ### Test the Promise workflow

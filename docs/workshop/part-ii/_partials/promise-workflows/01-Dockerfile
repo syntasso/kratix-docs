@@ -4,5 +4,5 @@ RUN [ "mkdir", "/templates" ]
 COPY resource-configure resource-configure
 COPY promise-configure promise-configure
 
-CMD [ "sh", "-c", "./execute-pipeline"]
+CMD [ "sh", "-c", "./resource-configure"]
 ENTRYPOINT []
