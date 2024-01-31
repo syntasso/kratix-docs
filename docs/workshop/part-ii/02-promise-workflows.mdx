@@ -10,7 +10,7 @@ import CodeBlock from '@theme/CodeBlock';
 This is Part 2 of [a series](intro) illustrating how to write Kratix Promises.
 
 👉🏾&nbsp;&nbsp; Previous: [Writing your first Promise](writing-your-first-promise) <br />
-👉🏾 Next: [Using Promise Workflows](./promise-workflows)
+👉🏾 Next: [Accessing secrets and storing state](./secrets-and-state)
 
 ---
 
@@ -141,7 +141,10 @@ $scriptsdir/build-pipeline
 rm -f $outputDir/*
 
 type=${1:-"resource"}
-command="execute-pipeline"
+command="$type"
+if [[ "$type" == "resource" ]]; then
+  command="execute-pipeline"
+fi
 if [[ "$type" == "promise" ]]; then
   command="promise-configure"
 fi
