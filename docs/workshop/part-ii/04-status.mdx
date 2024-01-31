@@ -4,7 +4,233 @@ title: Surfacing information via Status
 description: Learn how to surface information to users via the status of a Resource
 ---
 
-Cover:
+```mdx-code-block
+import CodeBlock from '@theme/CodeBlock';
+```
 
-* setting status
-* retrieving status (idempotency)
+This is Part 4 of [a series](intro) illustrating how to write Kratix Promises.
+
+👉🏾 Previous: [Accessing secrets and storing state](./secrets-and-state) <br />
+👉🏾 Next: [Writing Compound Promises](./compound-promise)
+
+
+---
+
+In the previous tutorial, you learned how to access secrets and states from a Pipeline. In this section, you will learn how to surface information to users via the status of a Resource.
+
+You will:
+
+* [Learn about the Metadata directory in Kratix Workflows](#metadata)
+* [Learn how to expose information via the Resource Status](#status)
+
+## Conveying information back to the application developers {#understand-metadata}
+
+What we've focused on so far is how to define a Kratix Promise in a compelling way so that platform users choose to use the platform. A Kratix-powered platform enables users to ask for the services they need, on-demand, without having to know unnecessary business and service lifecycle requirements.
+
+What platform users need, though, is the end-to-end experience of making a simple request, understanding what's happening with the request, then ultimately making use of the service created by the request. So how do you communicate back to platform users information about their request, and how do users use the services that the platform creates?
+
+There are actually a number of ways you can communicate the status of a service to the platform, and the choice comes down to the Promise and Promise Workflow author.
+
+One approach is to generate notifications for internal systems like Slack or Teams from the Promise Workflow's Pipeline container.
+
+Another approach, which is what we'll choose today, is to follow convention and leverage the `status` field on Kubernetes resources. The Kratix Workflow's Pipeline has the ability to write information back to the status of the Resource.
+
+In the context of your Promise, an example of what you might want to convey back is the configuration of the Resource (e.g. default configuration), and how to access the running Resources (e.g. a URL or connection string).
+
+## Status
+
+As we saw in [Promise Workflows](./promise-workflows), within the Pipeline container file system, Kratix mounts a [`/kratix/metadata`](/main/reference/resources/workflows#metadata) directory to manage important configuration that is independent of the Resources definitions for your State Store.
+
+In this section, you will focus on one of the files in the `metadata` directory: `status.yaml`.
+
+The `status.yaml` file can contain arbitrary key-value pairs. Anything you write in this file will be persistent in the resource, and visible when the user inspects it.
+
+The `message` key is a special key that is displayed as part of the `kubectl get resource` command.
+
+With that in-mind, you can update your existing `workflows/resource-configure` script to surface some information about the Resource in the `status.yaml` file. One of the things you may want to surface is, for example, the URL of the running application. You also want to expose the date the resource was created, as a human-friendly string.
+
+:::note
+
+Kubernetes automatically adds a `metadata.creationTimestamp` field to all resources. The date you will add to the status is only to illustrate how to add dynamic information to the status.
+
+:::
+
+Add the following lines to the end of your `workflow/resource-configure` script:
+
+```bash
+createdAt="$(date)"
+
+# Set the resource status
+cat <<EOF > /kratix/metadata/status.yaml
+createdAt: ${createdAt}
+message: "${name}.local.gd:31338"
+EOF
+```
+
+Next, run the tests:
+
+```bash
+./scripts/test-pipeline resource-configure
+```
+
+You should see the following on your local directory:
+
+```
+📁 app-promise
+...
+└── test
+    ├── input
+    │   └── object.yaml
+    ├── metadata
+    │   └── status.yaml
+    └── output
+        ├── deployment.yaml
+        ├── ingress.yaml
+        └── service.yaml
+ ```
+
+ If you inspect the `test/metadata/status.yaml` file, you should see the following:
+
+```yaml
+createdAt: "Wed Jan 1 15:00:00 UTC 2023"
+message: "my-app.local.gd:31338"
+```
+
+Excellent. With that file in place, Kratix will automatically persist that information to the status of the Resource. The next time the pipeline runs, the `input/object.yaml` file will contain the `status` field with what was previously persistent.
+
+However our pipeline is not, once again, idempotent. If you run the pipeline again, you will see that the `createdAt` field is updated to the current date. You can fix this by checking the status on the resource, and only updating the status if it is not already set.
+
+Update your `workflow/resource-configure` script to the following:
+
+```bash
+
+#highlight-start
+createdAt=$(yq '.status.createdAt // ""' /kratix/input/object.yaml)
+if [ -z "$createdAt" ]; then
+  createdAt="$(date)"
+fi
+#highlight-end
+
+# Set the resource status
+cat <<EOF > /kratix/metadata/status.yaml
+createdAt: "$(createdAt)"
+message: "${name}.local.gd:31338"
+EOF
+```
+
+Now test your changes:
+
+```bash
+./scripts/test-pipeline resource-configure
+```
+
+Inspect the `test/metadata/status.yaml` file. Since your input does not contain the `status` field, you should see today's date in the `createdAt` field. Now, to test that the status is not updated if it already exists, change your test input to look like the following:
+
+```yaml
+apiVersion: workshop.kratix.io/v1
+kind: App
+metadata:
+  name: my-app
+  namespace: default
+spec:
+  image: example/image:v1.0.0
+  service:
+    port: 9000
+status:
+  createdAt: "Thu Jan 28 15:00:00 UTC 2021"
+  message: "my-app.local.gd:31338"
+```
+
+Re-run the tests:
+
+```bash
+./scripts/test-pipeline resource-configure
+```
+
+If you inspect the `test/metadata/status.yaml` file now, you should see the following:
+
+```yaml
+createdAt: "Thu Jan 28 15:00:00 UTC 2021"
+message: "my-app.local.gd:31338"
+```
+
+Great! Now you have a way to persist information about your Resource, and you have a way to ensure that the information is not overwritten if it already exists.
+
+This time, you haven't changed the Promise at all, but rather updated the underlying pipeline image. The existing resources will automatically get the new status information on the next reconciliation.
+
+Just like last time, you can force a reconciliation by adding the `kratix.io/manual-reconciliation = true` label:
+
+```bash
+kubectl --context $PLATFORM label apps.workshop.kratix.io todo kratix.io/manual-reconciliation=true
+```
+
+Once the pipeline completes, you should see the new status information on the Resource:
+
+```bash
+kubectl --context $PLATFORM describe apps.workshop.kratix.io todo
+```
+
+The above command outputs something similar to the following:
+
+```yaml
+Name:         todo
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  workshop.kratix.io/v1
+Kind:         App
+Metadata:
+  Creation Timestamp:  2024-01-31T15:27:43Z
+  Finalizers:
+    kratix.io/work-cleanup
+    kratix.io/workflows-cleanup
+    kratix.io/delete-workflows
+  Generation:        1
+  Resource Version:  814088
+  UID:               19266d15-6362-4a54-85fb-b4965af65c24
+Spec:
+  Image:  syntasso/sample-todo:v0.1.0
+  Service:
+    Port:  8080
+Status:
+  Conditions:
+    Last Transition Time:  2024-01-31T16:15:38Z
+    Message:               Pipeline completed
+    Reason:                PipelineExecutedSuccessfully
+    Status:                True
+    Type:                  PipelineCompleted
+  #highlight-start
+  Created At:              Wed Jan1 15:01:01 UTC 2023
+  Message:                 todo.local.gd:31338
+  #highlight-end
+Events:                    <none>
+```
+
+Note how the `status` field is now populated with the information you added to the `status.yaml` file.
+
+:::info
+
+You may also notice that there's a condition called `PipelineCompleted`. This is a special condition that is automatically added to the status of the Resource, and set to `True` when the pipeline completes successfully.
+
+:::
+
+Furthermore, the value for the `message` key should also be displayed as part of the `get` command:
+
+```bash
+$> kubectl --context $PLATFORM get apps.workshop.kratix.io
+NAME   STATUS
+todo   todo.local.gd:31338
+```
+
+Try retriggering the reconcilation by adding the label again. You should notice that the `Create At` field is not updated, just like you observed in the test.
+
+## 🎉 &nbsp; Congratulations!
+
+You successfully surfaced information back to the user by writing to the resource status! You Promise is getting more and more useful.
+
+To recap what you achieved:
+
+1. ✅&nbsp;&nbsp;Learned how to use metadata to set a custom Resource status
+1. ✅&nbsp;&nbsp;Learned how to make writing to status idempotent
+
+👉🏾&nbsp;&nbsp; Next, let's [add support for stateful applications](./compound-promise).
