@@ -117,7 +117,7 @@ mkdir -p scripts
 touch scripts/build-pipeline scripts/test-pipeline
 chmod +x scripts/*
 
-cat <<EOF > scripts/build-pipeline
+cat << 'EOF' > scripts/build-pipeline
 #!/usr/bin/env bash
 
 set -eu -o pipefail
@@ -128,7 +128,7 @@ docker build --tag kratix-workshop/create-resources:v1.0.0 $testdir/../workflows
 kind load docker-image --name platform kratix-workshop/create-resources:v1.0.0
 EOF
 
-cat <<EOF > scripts/test-pipeline
+cat <<'EOF' > scripts/test-pipeline
 #!/usr/bin/env bash
 
 scriptsdir=$(cd "$(dirname "$0")"; pwd)
@@ -138,7 +138,7 @@ outputDir="$testdir/output"
 metadataDir="$testdir/metadata"
 
 $scriptsdir/build-pipeline
-rm $outputDir/*
+rm -f $outputDir/*
 
 type=${1:-"resource"}
 command="execute-pipeline"
@@ -151,7 +151,7 @@ docker run \
     --volume ${outputDir}:/kratix/output \
     --volume ${inputDir}:/kratix/input \
     --volume ${metadataDir}:/kratix/metadata \
-    kratix-workshop/create-resources:v1.0.0 -- $command
+    kratix-workshop/create-resources:v1.0.0 ./$command
 EOF
 ```
 
