@@ -137,7 +137,7 @@ As previously mentioned, the Kratix Promise API is defined via a Kubernetes CRD.
 For now, you can use the following CRD to define the API for your Promise:
 
 ```mdx-code-block
-import PromiseCRD from "!!raw-loader!./_partials/01-promise-api.yaml"
+import PromiseCRD from "!!raw-loader!./_partials/writing-a-promise/01-promise-api.yaml"
 ```
 
 <CodeBlock language="yaml">
@@ -169,7 +169,7 @@ Finally, copy the contents of the CRD above and paste it in the `api` key of the
 
 
 ```mdx-code-block
-import PromiseWithAPI from "!!raw-loader!./_partials/02-promise-with-api.yaml"
+import PromiseWithAPI from "!!raw-loader!./_partials/writing-a-promise/02-promise-with-api.yaml"
 ```
 
 <CodeBlock language="yaml" title="app-promise/promise.yaml">
@@ -246,7 +246,7 @@ touch workflows/Dockerfile
 Open the `Dockerfile` in your editor and add the following content:
 
 ```mdx-code-block
-import Dockerfile from "!!raw-loader!./_partials/03-Dockerfile"
+import Dockerfile from "!!raw-loader!./_partials/writing-a-promise/03-Dockerfile"
 ```
 
 <CodeBlock language="dockerfile" title="app-promise/workflows/Dockerfile">
@@ -267,7 +267,7 @@ chmod +x workflows/execute-pipeline
 Write the following into the `execute-pipeline` script:
 
 ```mdx-code-block
-import ExecutePipeline from "!!raw-loader!./_partials/04-execute-pipeline.sh"
+import ExecutePipeline from "!!raw-loader!./_partials/writing-a-promise/04-execute-pipeline.sh"
 ```
 
 <CodeBlock language="bash" title="app-promise/workflows/execute-pipeline">
@@ -290,7 +290,7 @@ It's straightforward to test your pipeline using `docker run` (or equivalent). Y
 With the pipeline image defined, you can now define the `resource.configure` Workflow. Open the `promise.yaml` file in your editor and add the following content under the `spec` key:
 
 ```mdx-code-block
-import ResourceWorkflow from "!!raw-loader!./_partials/05-resource-workflow.yaml"
+import ResourceWorkflow from "!!raw-loader!./_partials/writing-a-promise/05-resource-workflow.yaml"
 ```
 
 <CodeBlock language="yaml" title="app-promise/promise.yaml">
@@ -320,7 +320,7 @@ _Click here_ for the full `promise.yaml` file.
 </summary>
 
 ```mdx-code-block
-import FullPromise from "!!raw-loader!./_partials/06-full-promise.yaml"
+import FullPromise from "!!raw-loader!./_partials/writing-a-promise/06-full-promise.yaml"
 ```
 
 <CodeBlock language="yaml" title="app-promise/promise.yaml">
