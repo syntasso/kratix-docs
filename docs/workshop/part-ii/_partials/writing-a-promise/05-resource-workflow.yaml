@@ -15,4 +15,4 @@ spec:
           spec:
             containers:
               - name: create-resources
-                image: kratix-workshop/create-resources:v1.0.0
+                image: kratix-workshop/app-pipeline-image:v1.0.0

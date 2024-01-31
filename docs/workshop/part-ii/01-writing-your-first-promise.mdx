@@ -253,24 +253,22 @@ import Dockerfile from "!!raw-loader!./_partials/writing-a-promise/03-Dockerfile
     {Dockerfile}
 </CodeBlock>
 
+The Dockerfile above uses the `kratix-pipeline-utility` image as a base image. This image provides a set of utilities that make it easier to write Kratix Pipelines. You may also notice that image will execute a script called `resource-configure` when the container starts.
 
-
-The Dockerfile above uses the `kratix-pipeline-utility` image as a base image. This image provides a set of utilities that make it easier to write Kratix Pipelines. You may also notice that image will execute a script called `execute-pipeline` when the container starts.
-
-Create a file called `execute-pipeline` in the same directory, and make it executable:
+Create a file called `resource-configure` in the same directory, and make it executable:
 
 ```bash
-touch workflows/execute-pipeline
-chmod +x workflows/execute-pipeline
+touch workflows/resource-configure
+chmod +x workflows/resource-configure
 ```
 
-Write the following into the `execute-pipeline` script:
+Write the following into the `resource-configure` script:
 
 ```mdx-code-block
-import ExecutePipeline from "!!raw-loader!./_partials/writing-a-promise/04-execute-pipeline.sh"
+import ExecutePipeline from "!!raw-loader!./_partials/writing-a-promise/04-resource-configure.sh"
 ```
 
-<CodeBlock language="bash" title="app-promise/workflows/execute-pipeline">
+<CodeBlock language="bash" title="app-promise/workflows/resource-configure">
     {ExecutePipeline}
 </CodeBlock>
 
@@ -306,8 +304,8 @@ Please note that the `worker-resources-builder` might have already added a `work
 The final step is to actually build the pipeline image and make it available in the container registry. Since you are using `kind` clusters, you can build and load the image into the cluster directly by running the following commands:
 
 ```bash title="from the app-promise directory"
-docker build --tag kratix-workshop/create-resources:v1.0.0 workflows
-kind load docker-image kratix-workshop/create-resources:v1.0.0 --name platform
+docker build --tag kratix-workshop/app-pipeline-image:v1.0.0 workflows
+kind load docker-image kratix-workshop/app-pipeline-image:v1.0.0 --name platform
 ```
 
 And that's it! You have now defined a Promise that can be used to deploy a new App.

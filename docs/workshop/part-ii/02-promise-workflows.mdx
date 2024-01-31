@@ -124,8 +124,8 @@ set -eu -o pipefail
 
 testdir=$(cd "$(dirname "$0")"/../test; pwd)
 
-docker build --tag kratix-workshop/create-resources:v1.0.0 $testdir/../workflows
-kind load docker-image --name platform kratix-workshop/create-resources:v1.0.0
+docker build --tag kratix-workshop/app-pipeline-image:v1.0.0 $testdir/../workflows
+kind load docker-image --name platform kratix-workshop/app-pipeline-image:v1.0.0
 EOF
 
 cat <<'EOF' > scripts/test-pipeline
@@ -140,14 +140,7 @@ metadataDir="$testdir/metadata"
 $scriptsdir/build-pipeline
 rm -f $outputDir/*
 
-type=${1:-"resource"}
-command="$type"
-if [[ "$type" == "resource" ]]; then
-  command="execute-pipeline"
-fi
-if [[ "$type" == "promise" ]]; then
-  command="promise-configure"
-fi
+command=${1:-"resource-configure"}
 
 docker run \
     --rm \
@@ -188,7 +181,7 @@ At this stage, your directory structure should look like this:
 To execute the test, run the script with the following command:
 
 ```bash
-./scripts/test-pipeline resource
+./scripts/test-pipeline resource-configure
 ```
 
 Which should build and run the image. Once the execution completes,
@@ -303,7 +296,7 @@ At this stage, your directory structure should look like this:
 Similar to the resource workflow, you can test the Promise workflow by running the `test-pipeline` script:
 
 ```bash
-./scripts/test-pipeline promise
+./scripts/test-pipeline promise-configure
 ```
 
 This will build the image, run it, and verify the output. You should see a single files `nginx.yaml` file in the `test/output` directory.
