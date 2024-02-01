@@ -234,6 +234,15 @@
     ]
   },
   {
+    "name": "Ansible Job Launcher",
+    "description": "Everything needed to create, execute, and manage infrastructure automation",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/ansible-job-launcher",
+    "logoUrl": "/img/marketplace/ansible.svg",
+    "categories": [
+      "Infrastructure Provisioning"
+    ]
+  },
+  {
     "name": "Jaeger OTel",
     "description": "An OpenTelemetry operator that ships data to the trace visualiser Jaeger",
     "url": "https://github.com/avillela/kratix-playground/tree/main/oteloperator-promise",
