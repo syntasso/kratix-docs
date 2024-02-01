@@ -138,16 +138,18 @@ outputDir="$testdir/output"
 metadataDir="$testdir/metadata"
 
 $scriptsdir/build-pipeline
-rm -f $outputDir/*
+rm -rf $outputDir/*
 
 command=${1:-"resource-configure"}
 
 docker run \
     --rm \
+    --volume ~/.kube:/root/.kube \
+    --network=host \
     --volume ${outputDir}:/kratix/output \
     --volume ${inputDir}:/kratix/input \
     --volume ${metadataDir}:/kratix/metadata \
-    kratix-workshop/app-pipeline-image:v1.0.0 ./$command
+    kratix-workshop/app-pipeline-image:v1.0.0 bash -c "$command"
 EOF
 ```
 
@@ -226,7 +228,7 @@ To define this new workflow, you could go ahead and create a new Dockerfile, wit
 Add the following line to your `Dockerfile`:
 
 ```dockerfile title="app-promise/workflows/Dockerfile"
-COPY promise-configure promise-configure
+COPY promise-configure /scripts/promise-configure
 ```
 
 <details>
@@ -331,7 +333,7 @@ kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 
 This pod can run to completion quite quickly so when you verify that it exists, it might already be in a `Completed` state. This reflects that the `promise.configure` workflow has finished running.
 
-```bash
+```shell-session
 NAME                                                 READY   STATUS      RESTARTS   AGE
 configure-pipeline-app-20073-6phwj                   0/1     Completed   0          19s
 ```

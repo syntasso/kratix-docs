@@ -680,3 +680,4 @@ spec:
             containers:
               - name: create-resources
                 image: kratix-workshop/app-pipeline-image:v1.0.0
+                command: [ resource-configure ]

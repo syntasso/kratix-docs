@@ -68,15 +68,21 @@ export WORKER="kind-worker"
 
 You can validate your clusters are running with the `cluster-info` command:
 
+```bash
+kubectl --context $PLATFORM cluster-info
+kubectl --context $WORKER cluster-info
+```
+
+which should give an output similar to:
+
 ```shell-session
-$ kubectl --context $PLATFORM cluster-info
 Kubernetes control plane is running at https://127.0.0.1:65003
 CoreDNS is running at https://127.0.0.1:65003/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
-$ kubectl --context $WORKER cluster-info
 Kubernetes control plane is running at https://127.0.0.1:65004
 CoreDNS is running at https://127.0.0.1:65004/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 ```
+
 ## Install the Platform Prerequisites
 
 ### Cert-manager
@@ -91,8 +97,13 @@ kubectl --context $PLATFORM apply --filename https://github.com/cert-manager/cer
 
 You can validate cert-manager is running with the following command:
 
+```bash
+kubectl --context $PLATFORM get pods --namespace cert-manager
+```
+
+which should give an output similar to:
+
 ```shell-session
-$ kubectl --context $PLATFORM get pods --namespace cert-manager
 NAME                                      READY   STATUS    RESTARTS   AGE
 cert-manager-7476c8fcf4-r8cnd             1/1     Running   0          19s
 cert-manager-cainjector-bdd866bd4-7d8zp   1/1     Running   0          19s
@@ -132,7 +143,7 @@ minio    1/1     1            1           1h
 
 You can also verify the Create Bucket job:
 
-```
+```bash
 kubectl --context $PLATFORM get jobs
 ```
 

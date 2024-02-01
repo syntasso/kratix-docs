@@ -1,8 +1,10 @@
 FROM ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
-RUN [ "mkdir", "/templates" ]
+RUN [ "mkdir", "/scripts/" ]
 
-COPY resource-configure resource-configure
-COPY promise-configure promise-configure
+ENV PATH="${PATH}:/scripts/"
+
+COPY resource-configure /scripts/resource-configure
+COPY promise-configure /scripts/promise-configure
 
 CMD [ "sh", "-c", "./resource-configure"]
 ENTRYPOINT []

@@ -126,7 +126,7 @@ Now test your changes:
 
 Inspect the `test/metadata/status.yaml` file. Since your input does not contain the `status` field, you should see today's date in the `createdAt` field. Now, to test that the status is not updated if it already exists, change your test input to look like the following:
 
-```yaml
+```yaml title="test/input/object.yaml"
 apiVersion: workshop.kratix.io/v1
 kind: App
 metadata:
@@ -217,7 +217,12 @@ You may also notice that there's a condition called `PipelineCompleted`. This is
 Furthermore, the value for the `message` key should also be displayed as part of the `get` command:
 
 ```bash
-$> kubectl --context $PLATFORM get apps.workshop.kratix.io
+kubectl --context $PLATFORM get apps.workshop.kratix.io
+```
+
+The above command should output the following:
+
+```shell-session
 NAME   STATUS
 todo   todo.local.gd:31338
 ```

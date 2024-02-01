@@ -344,7 +344,7 @@ kubectl --context $WORKER get deployments --context $WORKER --namespace ingress-
 
 It may take a couple of minutes, but you will eventually see an output similar to:
 
-```console
+```shell-session
 NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
 ingress-nginx-controller   1/1     1            1           2m8s
 ```
@@ -361,15 +361,22 @@ kubectl --context $PLATFORM get promises
 
 The above command should output the following:
 
-```bash
+```shell-session
 NAME   STATUS      KIND   API VERSION             VERSION
 app    Available   App    workshop.kratix.io/v1
 ```
 
-You can see that the `app` Promise is available. Great! You can deploy your app by providing an `image` and a `service.port`. Go ahead and send the request:
+You can see that the `app` Promise is available. Great! You can deploy your app by providing an `image` and a `service.port`.
 
-```yaml
-cat <<EOF | kubectl --context $PLATFORM apply -f -
+Create a file named `resource-request.yaml`:
+
+```bash
+touch resource-request.yaml
+```
+
+Open the file in your editor and add the following content:
+
+```yaml title="app-promise/resource-request.yaml"
 apiVersion: workshop.kratix.io/v1
 kind: App
 metadata:
@@ -379,7 +386,12 @@ spec:
   image: syntasso/sample-todo:v0.1.0
   service:
     port: 8080
-EOF
+```
+
+Then, submit the request by running the following command:
+
+```bash
+kubectl --context $PLATFORM apply --filename resource-request.yaml
 ```
 
 Kratix will receive the request and execute the workflow defined in the Promise. You can verify the workflow by running the following command:
@@ -388,10 +400,25 @@ Kratix will receive the request and execute the workflow defined in the Promise.
 kubectl --context $PLATFORM get pods
 ```
 
+The above command should output something similar to:
+
+```shell-session
+NAME                                   READY   STATUS      RESTARTS      AGE
+configure-pipeline-app-029c3-5tmbq     0/1     Completed   0             1m
+```
+
 It may take a few seconds for the pod to appear, but it will eventually show as Completed. At this stage, Kratix will schedule the workflow outputs to the worker cluster. You should see the App getting deployed on the Worker with the following command:
 
 ```bash
 kubectl --context $WORKER get deployments
+```
+
+The above command should output something similar to (it may take a couple of
+minutes):
+
+```shell-session
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE
+todo   1/1     1            1           16s
 ```
 
 Once the deployment is completed, you can access the App in your browser, at [http://todo.local.gd:31338](http://todo.local.gd:31338).

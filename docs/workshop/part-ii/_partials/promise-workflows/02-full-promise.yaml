@@ -46,7 +46,7 @@ spec:
             containers:
               - name: download-dependencies
                 image: kratix-workshop/app-pipeline-image:v1.0.0
-                command: [/promise-configure]
+                command: [ promise-configure ]
     resource:
       configure:
         - apiVersion: platform.kratix.io/v1alpha1
@@ -57,4 +57,4 @@ spec:
             containers:
               - name: create-resources
                 image: kratix-workshop/app-pipeline-image:v1.0.0
-                command: [/resource-configure]
+                command: [ resource-configure ]
