@@ -102,7 +102,7 @@ cert-manager-webhook-5655dcfb4b-54r49     1/1     Running   0          19s
 ### MinIO as the GitOps Repository
 
 As mentioned before, Kratix leverages GitOps for deploying and reconciling
-scheduled workloads. That means that Kratix needs a backing service to serve as the state store. Kraix supports two types of state stores: S3-compatible buckets and Git repositories. In this workshop, you will use a MinIO instance running in the platform cluster as the state store. In productions environment, you will probably use a Git repository or a S3-compatible bucket in a cloud provider.
+scheduled workloads. That means that Kratix needs a backing service to serve as the state store. Kratix supports two types of state stores: S3-compatible buckets and Git repositories. In this workshop, you will use a MinIO instance running in the platform cluster as the state store. In productions environment, you will probably use a Git repository or a S3-compatible bucket in a cloud provider.
 
 To install MinIO in the platform, run:
 
@@ -163,11 +163,11 @@ You platform cluster is now ready to receive Kratix!
 
 ## Install the Worker prerequisites
 
-Kratix schedules works by writing a state declaration (following the Kubernetes
+Kratix schedules workloads to destination clusters by writing a state declaration (following the Kubernetes
 declare-and-converge pattern) to a designated State Store. When it comes to
-reconciling the declared state, Kratix remains agnostic about the specific tool
+reconciling the declared state on the destination cluster, Kratix remains agnostic about the specific tool
 to be used on the clusters. In this tutorial, you will utilise
-[Flux](https://fluxcd.io/) on the worker, and configure it to reconcile the
+[Flux](https://fluxcd.io/) on the destination cluster, and configure it to reconcile the
 state from the MinIO bucket.
 
 To install and configure Flux, run the following script from the Kratix
@@ -390,7 +390,7 @@ source-controller         1/1     1            1           10m
 Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-At this stage, you environment looks like this:
+At this stage, your environment looks like this:
 
 ```mdx-code-block
 import Topology00 from "/img/docs/workshop/topology-00.png"
