@@ -61,7 +61,7 @@ spec:
         key: value
 
   # A list of Promises that are required by the Promise
-  requirements:
+  requiredPromises:
     - name: required-promise-name
       version: required-promise-version
 
