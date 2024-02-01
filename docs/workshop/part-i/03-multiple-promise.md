@@ -45,7 +45,7 @@ use the API to get the exact service they need.
 
 To deliver the simpler experience though, you want to orchestrate those Promises
 in a higher-level Promise. In Kratix terms, this is a Compound Promise: a
-Promise that define other Promises as its Dependencies.
+Promise that defines other Promises as its Dependencies.
 
 <figure class="diagram">
   <CompoundPromiseDiagram className="small"/>
