@@ -1,0 +1,422 @@
+---
+id: compound-promise
+title: Making a Compound Promise
+description: Extend the app promise with a database option, making it a compound promise
+---
+```mdx-code-block
+import CodeBlock from '@theme/CodeBlock';
+```
+
+This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
+👈🏾&nbsp;&nbsp; Previous: [Surfacing information via Status](status)<br />
+👉🏾&nbsp;&nbsp; Next: [What's next](whats-next)
+
+<hr />
+
+
+In the previous section, you learned how the update the status of a resource request. This allowed you to equip the user with relevant information about their request, in this case, the url of their todo app.
+
+In this section, you will gain an understanding of Compound Promises. You will:
+
+- [Configure a Compound Promises](#configuring)
+- [Learn how to use Destination Selectors in your pipeline](#destination-selectors)
+
+## Delivering Developer Experiences
+
+At present, users can self-serve their own App-as-a-Service but we know that eventually users will need a way to persist the state of their applications. In fact, if you go to the Application (at [http://todo.local.gd:31338/](http://todo.local.gd:31338/)) and add some Todos, then delete it:
+
+```bash
+kubectl --context $WORKER delete deployment todo
+```
+
+You should notice that the App is brought back online, which is great! However, all the Todos you added are gone. This is because the state of the App is not persisted anywhere. We can solve this by providing a database service alongside the App-as-a-Service. As the need for a database is tied to the functionality of the App-as-a-Service, we can make the Database platform offering something that can requested alongside the App-as-a-service.
+
+To achieve this, we will make it possible for users to request a PostgreSQL service alongside their App.
+
+## Writing a Compound Promise
+
+As mentioned in Part I, Compound Promises are Promises that contain or use other Promises. That ability allows Platform teams to deliver entire developer experiences on-demand, providing more than just components but entire software stacks.
+
+To create a compound promise, you generally need three updates:
+
+- Update the Promise to include the required Promise
+- Update the API to expose the configuration options for the required Promise
+- Update the Pipeline to create requests to the required Promise
+
+### Updating the API
+
+You want users to have control whether their app deployment should include a database or not. You decide to expose that option via a new field on the Promise API called `dbDriver`. This field will allow users to specify the database they want to use. In this tutorial, we will only build support for PostgreSQL, but the process to extend that to many other DBs would be very similar.
+
+As covered previously, the `spec.api` field is where you define the API for your Promise. You will need to add a new field called `dbDriver` to the `spec.api.openAPIV3Schema` field. Locate the `schema` field in your `promise.yaml` and add the following:
+
+```yaml title="promise.yaml"
+# ...
+schema:
+  openAPIV3Schema:
+    type: object
+    properties:
+      spec:
+        type: object
+        properties:
+          service:
+            type: object
+            properties:
+              port:
+                type: integer
+        image:
+          type: string
+#highlight-start
+        dbDriver:
+          type: string
+#highlight-end
+```
+
+Great! Users now have a way to specify the database they want to use. Next, you need to tell Kratix that this Promise is dependent on the PostgreSQL Promise.
+
+### Configuring a Compound Promise {#configuring}
+
+We are going to make PostgreSQL available to the App-as-a-Service Promise via the PostgreSQL Promise available in the [Kratix Marketplace](https://docs.kratix.io/marketplace). In the Marketplace, you will find many other Promises you could integrate with your Promises.
+
+There are multiple ways to define a Compound Promise:
+
+- You can add the Promise as part of the `dependencies` field in the Promise
+- You can update the Promise Configure Workflow to output the PostgreSQL Promise as part of the dependencies
+- You can use the `requiredPromises` field in the Promise
+
+This tutorial will cover only the last method: using the `requiredPromises` field. The EasyApp Promise you used in the previous section uses the first method, in case you want to explore how to do that.
+
+#### Defining Promises as Required Promises
+
+The `requiredPromises` field is a list of required Promises that the Promise needs to be installed in the Platform. You can make Kratix automatically install the required promises, but, for simplicity, we will not be doing that in this tutorial.
+
+Add the following to the `spec` of your `promise.yaml`.
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: app
+spec:
+  #highlight-start
+  requiredPromises:
+  - name: postgresql
+    version: v1.0.0-beta.1
+  #highlight-end
+  # ...
+```
+
+This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.1`. You can read more about Promise versioning [in the reference documentation](releases).
+
+Apply your newly updated promise:
+
+```bash
+kubectl --context $PLATFORM apply --filename promise.yaml
+```
+
+You should have observed a warning similar to the following:
+
+```shell-session
+Warning: Requirement Promise "postgresql" at version "v1.0.0-beta.1" not installed
+Warning: Promise will not be available until the above issue(s) is resolved
+```
+
+This is because the PostgreSQL promise is not currently installed. If you query the list of Promises:
+
+```bash
+kubectl --context $PLATFORM get promises
+```
+
+You should see the App promise as "Unavailable":
+
+```shell-session
+NAME   STATUS        KIND   API VERSION             VERSION
+app    Unavailable   App    workshop.kratix.io/v1
+```
+
+To fix that, run the following to install the PostgreSQL Promise:
+
+```bash
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
+```
+
+:::info
+You might have noticed that the above command uses a Promise Release to install the PostgreSQL Promise, we will not be exploring this in depth but you can look at the [documentation](/main/reference/promises/releases) for more information
+:::
+
+Kratix should automatically detect that the App Promise should now be available, since its requirements are now met. If you query the list of Promises again:
+
+```bash
+kubectl --context $PLATFORM get promises
+```
+
+You should see, after a few seconds, that both promises are marked as "Available":
+
+```shell-session
+NAME         STATUS      KIND         API VERSION                      VERSION
+app          Available   App          workshop.kratix.io/v1
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha1   v1.0.0-beta.1
+```
+
+Excellent. You have now configured the App-as-a-Service Promise to be a Compound Promise that requires a PostgreSQL Promise. Next, you will need to update the Resource Workflow to actually use the new promise.
+
+### Updating the Pipelines
+
+We'll need to define an additional step in the pipeline that makes a request for a PostgreSQL service when making or updating a request for an app. We'll start by defining the pipeline stage that will run when a user wants the request a PostgreSQL service with their app.
+
+Create a `database-configure` file in the `workflows` directory and make it executable. Next, copy the contents of [this file](https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt) into it:
+
+```bash
+touch workflows/database-configure
+chmod +x workflows/database-configure
+curl -o workflows/database-configure --silent https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt
+```
+
+Take a closer look at the script. Unlike the Ingress configured via the NGINX Controller, we will not always want to provision a PostgreSQL service with each app. The script will only provision a PostgreSQL if the resource request `spec` specifies a `dbDriver` key a value of `postgresql`:
+
+```ruby
+if dbDriver != 'postgresql' then
+  puts "Unsupported db driver: #{dbDriver}"
+  puts "Supported drivers: postgresql"
+  exit 1
+end
+```
+
+It then creates a Resource Request for the PostgreSQL promise:
+
+```ruby
+postgresqlRequest = {
+  'apiVersion' => "marketplace.kratix.io/v1alpha1",
+  'kind' => 'postgresql',
+  'metadata' => {
+    'name' => "#{dbName}",
+    'namespace' => "#{namespace}"
+  },
+  'spec' => {
+    'teamId' => "#{teamId}",
+    'dbName' => "#{dbName}"
+  }
+}
+```
+
+As the the contents of `/kratix/output/platform` need to go to the Platform cluster, it explicitly states that the output needs to be directed to the Platform:
+
+```ruby
+destinationSelectorsRequest = [{
+  'directory' => 'platform',
+  'matchLabels' => {
+    'environment' => 'platform'
+  }
+}]
+```
+
+It then updates the app deployment with the details of the database:
+
+```ruby
+env = [{
+  'name' => 'PGPASSWORD',
+  'valueFrom' => {
+    'secretKeyRef' => {
+      'name' => "#{secretRef}",
+      'key' => 'password'
+      },
+    }
+  }, {
+    'name' => 'PGUSER',
+    'valueFrom' => {
+      'secretKeyRef' => {
+        'name' => "#{secretRef}",
+        'key' => 'username'
+      },
+    }
+  }, {
+    'name' => 'PGHOST',
+    'value' => "#{teamId}-#{dbName}-postgresql.default.svc.cluster.local"
+  }, {
+    'name' => 'DBNAME',
+    'value' => "#{dbName}"
+  }
+]
+
+# Injecting the database credentials into the app deployment
+existingDeployment = YAML.load_file('/kratix/output/deployment.yaml')
+existingDeployment['spec']['template']['spec']['containers'][0]['env'] = env
+```
+
+You should also ensure that the `database-configure` is available in the Pipeline image. Update `Dockerfile` to add the new `database-configure` script:
+
+```dockerfile title="app-promise/workflows/Dockerfile
+COPY database-configure /scripts/database-configure
+```
+
+Now that the script has been defined, you can test it. Since the `database-configure` manipulates both the user's input as the existing output, you need to chain the scripts in order to test it properly. Go ahead and execute the test script:
+
+```bash
+./scripts/test-pipeline "resource-configure && database-configure"
+```
+
+You should see, at the tail-end of your output, the following log:
+
+```shell-session
+Checking for database driver...
+No database driver specified, skipping
+```
+
+That's because our test input does not specify a `dbDriver`. Open the `test/input/object.yaml` and update its `spec` to include the `dbDriver`:
+
+```yaml
+apiVersion: workshop.kratix.io/v1
+kind: App
+metadata:
+  name: my-app
+  namespace: default
+spec:
+  image: example/image:v1.0.0
+  service:
+    port: 9000
+  #highlight-next-line
+  dbDriver: postgresql
+status:
+  createdAt: "Thu Jan 28 15:00:00 UTC 2021"
+  message: "my-app.local.gd:31338"
+```
+
+Run the tests again:
+
+
+```bash
+./scripts/test-pipeline "resource-configure && database-configure"
+```
+
+You should now see:
+
+```shell-session
+Checking for database driver...
+Postgresql database driver detected, including database resources
+```
+
+Great! If you inspect your file test file tree, you should now see the following:
+
+```
+test
+├── input
+│   └── object.yaml
+├── metadata
+│   ├── destination-selectors.yaml
+│   └── status.yaml
+└── output
+    ├── deployment.yaml
+    ├── ingress.yaml
+    ├── platform
+    │   └── postgresql.yaml
+    └── service.yaml
+```
+
+Inspect those files. You should see that the `test/output/platform/postgresql.yaml` file has been created and contains the details of the PostgreSQL service, and the `test/metadata/destination-selectors.yaml` is telling Kratix to request the PostgreSQL from the platform cluster. The `test/output/deployment.yaml` file should also contain the details of the PostgreSQL service in the `env` block of the first `container`.
+
+```yaml title="app-promise/test/output/deployment.yaml"
+env:
+- name: PGPASSWORD
+  valueFrom:
+  secretKeyRef:
+    name: my-app-team.my-app-team-my-app-db-postgresql.credentials.postgresql.acid.zalan.do
+    key: password
+- name: PGUSER
+  valueFrom:
+  secretKeyRef:
+    name: my-app-team.my-app-team-my-app-db-postgresql.credentials.postgresql.acid.zalan.do
+    key: password
+- name: PGHOST
+  value: my-app-team-my-app-db-postgresql.default.svc.cluster.local
+- name: DBNAME
+  value: my-app-db
+```
+
+Great! It looks like everything is in place. Last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `workflows.resource.configure`:
+
+```yaml
+# ...
+workflows:
+  resources:
+    configure:
+    - apiVersion: platform.kratix.io/v1alpha1
+      kind: Pipeline
+      metadata:
+        name: resource-configure
+      spec:
+        containers:
+          - name: create-resources
+            # ...
+          - name: create-bucket
+            # ...
+          #highlight-start
+          - name: database-configure
+            image: kratix-workshop/app-pipeline-image:v1.0.0
+            command: [ database-configure ]
+          #highlight-end
+```
+
+Apply your newly updated promise:
+
+```bash
+kubectl --context $PLATFORM apply --filename promise.yaml
+```
+
+Great! Your App-as-a-Service Promise is now a Compound Promise that can request a PostgreSQL service. You can now test it by making a request for an App-as-a-Service with a PostgreSQL service.
+
+## Requesting a Database with your App
+
+Users can now request a database together with their Apps. Open the `resource-request.yaml` and update it to include the `dbDriver` property set to `postgresql`:
+
+```yaml title="app-promise/resource-request.yaml"
+apiVersion: workshop.kratix.io/v1
+kind: App
+metadata:
+  name: todo
+  namespace: default
+spec:
+  image: syntasso/sample-todo:v0.1.0
+  service:
+    port: 8080
+  dbDriver: postgresql
+```
+
+Apply the updated App-as-a-Service Resource Request:
+
+```bash
+kubectl --context $PLATFORM apply --filename resource-request.yaml
+```
+
+At this point, the Resource Configure workflow for the App-as-a-Service will be executed. As part of the workflow, the `database-configure` step will be executed, which will create a request for a PostgreSQL service, which, in turn, will trigger the PostgreSQL workflow. You can see the PostgreSQL pipeline getting executed (it may take a few seconds for it to appear):
+
+```bash
+kubectl --context $PLATFORM get pods --selector kratix-promise-id=postgresql
+```
+
+The above command will output something similar to:
+
+```bash
+NAME                                        READY   STATUS      RESTARTS   AGE
+configure-pipeline-postgresql-abad9-vxgd8   0/1     Completed   0          5m4s
+```
+
+In a couple of minutes, if you list the running pods on your Worker:
+
+```bash
+kubectl --context $WORKER get pods
+```
+
+You should see the both the App and the PostgreSQL getting deployed on the Worker cluster:
+
+```bash
+NAME                                 READY   STATUS    RESTARTS       AGE
+postgres-operator-64cbcd6fdf-7x6ks   1/1     Running   0              4m19s
+todo-568ddbc474-qrk8g                1/1     Running   1 (4m7s ago)   10m
+todoteam-tododb-postgresql-0         1/1     Running   0              4m12s
+```
+
+Amazing! You have successfully created a Compound Promise that can request a PostgreSQL service alongside an App-as-a-Service. You can now go to the [http://todo.local.gd:31338](http://todo.local.gd:31338/) and add some Todos. Then, delete re-run the command to delete the App. Once the App gets redeployed, you should see that the Todos are still there, as the state of the App is now persisted in the PostgreSQL service.
+
+## 🎉 Congratulations
+
+✅ &nbsp; You have just created your first Compound Promise. <br />
+👉 &nbsp; You can go check [what's next](whats-next) to learn about what else you can achieve with Kratix.

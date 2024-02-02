@@ -45,9 +45,9 @@ use the API to get the exact service they need.
 
 To deliver the simpler experience though, you want to orchestrate those Promises
 in a higher-level Promise. In Kratix terms, this is a Compound Promise: a
-Promise that define other Promises as its Dependencies.
+Promise that defines other Promises as its Dependencies.
 
-<figure class="diagram">
+<figure className="diagram">
   <CompoundPromiseDiagram className="small"/>
 
   <figcaption>A Compound Promise</figcaption>
@@ -144,7 +144,7 @@ installing it will add a total of three Promises to the platform:
 * The EasyApp Promise itself
 * The EasyApp Promise dependencies: NGINX and PostgreSQL
 
-<figure class="diagram">
+<figure className="diagram">
   <PavedPathDiagram className="small"/>
 
   <figcaption>EasyApp Promise</figcaption>
@@ -209,7 +209,7 @@ platform-cluster   10m   <none>
 worker-cluster      1h   environment=dev
 ```
 
-<figure class="diagram">
+<figure className="diagram">
   <InstallErrorDiagram className="large"/>
 
 </figure>
@@ -233,7 +233,7 @@ postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
 Once you see the expected three Promises, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-<figure class="diagram">
+<figure className="diagram">
   <InstallationPlatformDiagram/>
   <figcaption>Sequence of events during the installation of a Compound Promise</figcaption>
 </figure>
@@ -291,7 +291,7 @@ postgres-operator     1/1     1            1           1m
 When the deployments eventually complete, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit.
 
-<figure class="diagram">
+<figure className="diagram">
   <InstallationCompleteDiagram />
 
   <figcaption>Full sequence of events during the installation of the Compound Promise</figcaption>
@@ -365,7 +365,7 @@ requests for the sub-Promises, wiring up the application to the Postgres
 service.
 
 
-<figure class="diagram">
+<figure className="diagram">
   <PipelineDiagram className="large"/>
 
   <figcaption>EasyApp Workflow execution; NGINX omitted from brevity</figcaption>
@@ -417,6 +417,20 @@ Once you see the `todo` and the `acid-todo-postgresql-0` pods reporting `Ready
 
 The app is now fully deployed! You can now access it on
 [http://todo.local.gd:31338/](http://todo.local.gd:31338/).
+
+## Clean up
+
+Delete the EasyApp Promise:
+
+```bash
+kubectl --context $PLATFORM delete promise easyapp
+```
+
+The above command will give an output similar to:
+
+```shell-session
+promise.platform.kratix.io "easyapp" deleted
+```
 
 ## 🎉 Congratulations
 

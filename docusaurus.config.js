@@ -62,7 +62,7 @@ const config = {
     ],
   ],
 
-  plugins: ["docusaurus-plugin-sass"],
+  plugins: ["docusaurus-plugin-sass", require.resolve("docusaurus-plugin-image-zoom")],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -153,6 +153,7 @@ const config = {
           "diff",
           "json",
           "yaml",
+          "ruby",
         ],
       },
       algolia: {
@@ -163,6 +164,16 @@ const config = {
         indexName: "kratix",
         contextualSearch: true,
       },
+      zoom: {
+        selector: '.diagram > .large',
+        config: {
+          // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+          background: {
+            light: 'rgb(255, 255, 255)',
+            dark: 'rgb(50, 50, 50)'
+          }
+        }
+      }
     }),
 };
 

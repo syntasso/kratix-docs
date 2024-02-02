@@ -27,8 +27,8 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 ### Using Kratix to build your platform you can
 
 - use GitOps workflow and familiar Kubernetes-native constructs.
-- co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”.This tutorial will talk more about Kratix Promises in [the next step](installing-a-promise).
-- create a flexible platform with your paved paths as Promises.
+- co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”. This tutorial will talk more about Kratix Promises in [the next step](installing-a-promise).
+- create a flexible platform by providing your own paved paths as Promises.
 - evolve your platform easily as your business needs change.
 - start small on a laptop and expand to multi-team, multi-cluster, multi-region, and multi-cloud with a consistent API everywhere.
 
@@ -36,7 +36,7 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 
 - discover available services that are already fit-for-purpose.
 - consume services on demand using standard Kubernetes APIs.
-- move focus away from infrastructure toward adding product value.
+- move focus away from infrastructure toward adding product value into your platform.
 
 <hr />
 
@@ -220,8 +220,8 @@ At this point, your environment looks like this (with a few components omitted f
 import Topology01 from "/img/docs/workshop/topology-01.png"
 ```
 
-<figure class="diagram">
-  <img class="medium" src={Topology01} alt="Deployed resources with State Store" />
+<figure className="diagram">
+  <img className="medium" src={Topology01} alt="Deployed resources with State Store" />
 
   <figcaption>Current environment: with Bucket State Store</figcaption>
 </figure>
@@ -336,8 +336,8 @@ You environment now looks like this:
 import Topology02 from "/img/docs/workshop/topology-02.png"
 ```
 
-<figure class="diagram">
-  <img class="large" src={Topology02} alt="Deployed resources with Destination" />
+<figure className="diagram">
+  <img className="large" src={Topology02} alt="Deployed resources with Destination" />
 
   <figcaption>Flux reconciled and created the test resources</figcaption>
 </figure>

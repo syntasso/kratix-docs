@@ -1,0 +1,385 @@
+---
+id: promise-workflows
+title: Improving the Workflows
+description: Learn more about the different types of workflows that can be used within a Promise.
+---
+```mdx-code-block
+import CodeBlock from '@theme/CodeBlock';
+```
+
+This is Part 2 of [a series](intro) illustrating how to write Kratix Promises.
+
+👉🏾 Previous: [Writing your first Promise](writing-your-first-promise) <br />
+👉🏾 Next: [Accessing secrets and storing state](./secrets-and-state)
+
+---
+
+In the previous tutorial, you wrote your first Promise, delivering Apps-as-a-service. In this section, you will dive deeper into Promise Workflows.
+
+You will:
+
+* [Read about Workflow design patterns](#workflows-design-patterns)
+* [Learn how to test your workflows](#test-driving-your-workflows)
+* [Learn about Promise Configure Workflows](#promise-workflows)
+
+## Workflow design patterns {#workflows-design-patterns}
+
+To recap, A [Kratix Promise](../main/reference/promises/intro) is configured with a collection of Workflows that can be triggered at different stages of the Promise or Resource lifecycle. In the previous section, you defined a Workflow for the `resource.configure` action. In that workflow, you defined a collection of Kubernetes Resources that needed to be created to fulfill the user's request.
+
+However, there's virtually no limitation to what you can do in a Workflow. You can, for example, download software, run imperative commands, wait for manual approvals and more. Pipeline stages are meant to be reused across different Promises, so you can define a Workflow once and reuse it across multiple Promises.
+
+To make that possible, it's important to follow some design patterns when writing Workflows. In this section, you will learn about some of these design patterns.
+
+### Reusability
+
+Workflows are a great place to validate and enforce common requirements. For example, if you write a stage that can check for necessary compliance requirements, that stage can be used by all applicable Pipelines. In addition, you can write stages to check for excess costs, labelling conventions, security risks, and more.
+
+While most Workflows will have at least one stage with logic unique to that Promise, building the Kratix Pipeline stages with reusability in mind is a great way to make your platform extensible.
+
+### Idempotency
+
+An idempotent Workflow guarantees that running the same command multiple times will result in the same outcome. This is an important feature because they will be auto-reconciled on an ongoing basis.
+
+Kubernetes controllers reconcile their objects in three scenarios:
+
+- Object change
+- Controller restart
+- Default cadence
+
+This means that yes, on every request for a Resource the Workflow will run. But also, it will run any time the controller is reset, as well as every 10 hours.
+
+This means you will need to write your Workflows to make sure that rerunning them will not result in any adverse side effects. This is especially important when your workflow is interacting with external systems. In the next tutorials you will learn some strategies to make your Workflows idempotent.
+
+<details>
+  <summary>🤔 Wondering when to use Workflows versus creating a new Promise?</summary>
+
+    Platform design requires thinking about how to divide platform offerings into right sized Promises and evaluating options for reusability and composability.
+
+    Each Promise is a the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
+
+    Promises are not the only way to create reusable components when designing your platform with Kratix. You can also create reusable Pipeline stages that can be run in a number of different Promise Workflows. For example, you may want to add default labels to certain types of resources. You can create a Pipeline stage which evaluates the resources set to be declared at the end of the Workflow and apply consistent labelling before writing.
+
+    Since both Promises and Workflows can be reused, you may wonder when to use each. The best rule of thumb is to ask if you are describing a noun or a verb.
+
+    Nouns are most easily described as _things_. A database is a thing, so is a cluster, or an application, or any number of software offerings your platform may support. If you are trying to provide some*thing* as-a-Service you should be thinking about creating a Promise.
+
+    Verbs can be described as _actions_. Labelling, notifying, or scanning can all be actions you may want to take rather than things you want to create. These actions can often be made across multiple things, e.g. you may want to label both databases and queues. When you are trying to take action to fulfil a cross-cutting concern, this is most suited to a Workflow step.
+
+    Like all rules of thumb, this should be treated as a guide. When it comes to system design it is important that it works for your context and the Syntasso team is happy to work with you as you approach these discussions as a team.
+</details>
+
+### Testability
+
+One of the advantages of the Kratix workflow model is that it makes it easy to test your workflows. You can test your workflows in isolation, without having to deploy them to a cluster. This makes it easy to test your workflows as you are developing them.
+
+The next section goes into more detail about how to test your workflows.
+
+## Test driving your workflows {#test-driving-your-workflows}
+
+In the previous tutorial you created a simple workflow that generated the Kubernetes resources needed to fulfill the user's request. You tested it by installing the Promise and then sending a resource request to the Platform.
+
+A better way to test your workflows is to just execute the container in your local environment. It's relatively easy to do this, and it will save you a lot of time as you are developing your workflows.
+
+### Prepare your environment
+
+When Kratix starts your workflow, it will mount the following three volumes:
+
+- `/kratix/input`: Kratix will add the user's request into this directory as `object.yaml`.
+- `/kratix/output`: the files in this directory will be scheduled to a matching Destination.
+- `/kratix/metadata`: a directory where you can write documents with special meaning to Kratix; you will cover this in the next tutorials.
+
+That means that, to test it locally, you will need to provide the three volumes to your Docker command. Note that you will also need to write the `object.yaml` containing an example request in the `input` directory.
+
+Still in the `app-promise` directory, run:
+
+```bash
+mkdir -p test/{input,output,metadata}
+touch test/input/object.yaml
+```
+
+Later, when you run `docker run`, you will mount the three directories onto the container. But first, you need to create the `object.yaml` file in the `input` directory. Create a file called `test/input/object.yaml` with the following content:
+
+```yaml title="app-promise/test/input/object.yaml"
+apiVersion: workshop.kratix.io/v1
+kind: App
+metadata:
+  name: my-app
+  namespace: default
+spec:
+  image: example/image:v1.0.0
+  service:
+    port: 9000
+```
+
+With that in place, you can go ahead and test your pipeline! Since the next tutorials will ask you to rebuild and retest the image, it's a good idea to write a simple helper script that you can re-run in the future. Run the following:
+
+```bash
+mkdir -p scripts
+touch scripts/build-pipeline scripts/test-pipeline
+chmod +x scripts/*
+
+cat << 'EOF' > scripts/build-pipeline
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+testdir=$(cd "$(dirname "$0")"/../test; pwd)
+
+docker build --tag kratix-workshop/app-pipeline-image:v1.0.0 $testdir/../workflows
+kind load docker-image --name platform kratix-workshop/app-pipeline-image:v1.0.0
+EOF
+
+cat <<'EOF' > scripts/test-pipeline
+#!/usr/bin/env bash
+
+scriptsdir=$(cd "$(dirname "$0")"; pwd)
+testdir=$(cd "$(dirname "$0")"/../test; pwd)
+inputDir="$testdir/input"
+outputDir="$testdir/output"
+metadataDir="$testdir/metadata"
+
+$scriptsdir/build-pipeline
+rm -rf $outputDir/*
+
+command=${1:-"resource-configure"}
+
+docker run \
+    --rm \
+    --volume ~/.kube:/root/.kube \
+    --network=host \
+    --volume ${outputDir}:/kratix/output \
+    --volume ${inputDir}:/kratix/input \
+    --volume ${metadataDir}:/kratix/metadata \
+    kratix-workshop/app-pipeline-image:v1.0.0 bash -c "$command"
+EOF
+```
+
+These scripts do the following:
+
+- `build-pipeline` codifies the image building and loads the container image on the KinD cluster.
+- `test-pipeline` calls build-pipeline and also runs the image, allowing you to verify the created files in the `test/output` directory.
+
+At this stage, your directory structure should look like this:
+
+```
+📂 app-promise
+├── dependencies
+│   └── dependencies.yaml
+├── promise.yaml
+├── scripts
+│   ├── build-pipeline
+│   └── test-pipeline
+├── test
+│   ├── input
+│   │   └── object.yaml
+│   ├── metadata
+│   └── output
+└── workflows
+    ├── Dockerfile
+    └── resource-configure
+```
+
+### Run the tests
+
+To execute the test, run the script with the following command:
+
+```bash
+./scripts/test-pipeline resource-configure
+```
+
+Which should build and run the image. Once the execution completes,
+verify the `test/output` directory. You should see the following files:
+
+```bash
+📂 app-promise
+├── ...
+└── test
+    ├── input
+    │   └── object.yaml
+    └── output
+        ├── deployment.yaml
+        ├── ingress.yaml
+        └── service.yaml
+```
+
+You can take a look at the files and verify their contents. You can see where the user's inputs are being used, and how that is reflected in the created services. You can poke around and make changes to both the input and to the workflow, and see how the output reflects this.
+
+The ability to treat images as independent pieces of software that can
+have their own development lifecycle (fully testable, easy to execute locally,
+release independent) allows platform teams to move faster, sharing and reusing
+images across their Promises.
+
+## Promise workflows {#promise-workflows}
+
+As previously mentioned, you can define workflows to be executed at different stages of the lifecycle of a Promise or of a Resource. In this section, you will learn how to define workflows that will be executed when a Promise is installed.
+
+Promise workflows are useful when you want to take actions that are not directly related to the creation of a Resource. For example, you may want to create an account on a third-party service, or send a notification to a Slack channel, when a promise is installed.
+
+You can also declare all of your Promise dependencies inside a Promise workflow. This helps you keep your Promise definition clean and focused on the user's request.
+
+### Create a Promise workflow
+
+A Promise Workflow is no different from a Resource Workflow. The only differences are:
+
+* In a Promise workflow, `/kratix/input/object.yaml` will contain the Promise definition, instead of a Resource definition.
+* At the end of the workflow, any documents in `/kratix/output` will be scheduled to _all_ Destinations, instead of just one.
+
+To define this new workflow, you could go ahead and create a new Dockerfile, with a new entrypoint, and a new script. However, that would be a lot of duplication. Instead, you can reuse the same image, and just run a different script.
+
+Add the following line to your `Dockerfile`:
+
+```dockerfile title="app-promise/workflows/Dockerfile"
+COPY promise-configure /scripts/promise-configure
+```
+
+<details>
+
+<summary> _Click here_ for the entire Dockerfile </summary>
+
+```mdx-code-block
+import Dockerfile from "!!raw-loader!./_partials/promise-workflows/01-Dockerfile"
+```
+
+<CodeBlock language="dockerfile" title="app-promise/workflows/Dockerfile">
+    {Dockerfile}
+</CodeBlock>
+
+</details>
+
+Next, create the `promise-configure` script and make it executable:
+
+```bash
+touch workflows/promise-configure
+chmod +x workflows/promise-configure
+```
+
+During the Promise installation, the `promise-configure` script will be executed. You want to use this script to create the Promise dependencies, and to create the Promise itself. Add the following content to the `promise-configure` script:
+
+```bash title="app-promise/workflows/promise-configure"
+#!/usr/bin/env bash
+
+set -eux
+
+echo "Downloading nginx..."
+curl -o kratix/output/nginx.yaml --silent https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml
+```
+
+:::info
+
+The step above is exactly the same step you executed when downloading the dependencies locally. This means that every time the Promise reconciles, the script will download the latest version of the dependencies found at that URL.
+
+An alternative approach would be to include the dependencies in the Dockerfile and just copy them over in the script
+
+:::
+
+Given you will no longer need the `dependencies` directory, you can delete it:
+
+```bash
+rm -rf dependencies
+```
+
+At this stage, your directory structure should look like this:
+
+```
+📂 app-promise
+├── promise.yaml
+├── scripts
+│   ├── build-pipeline
+│   └── test-pipeline
+├── test
+│   └── ...
+└── workflows
+    ├── Dockerfile
+    ├── promise-configure
+    └── resource-configure
+```
+
+### Test the Promise workflow
+
+Similar to the resource workflow, you can test the Promise workflow by running the `test-pipeline` script:
+
+```bash
+./scripts/test-pipeline promise-configure
+```
+
+This will build the image, run it, and verify the output. You should see a single files `nginx.yaml` file in the `test/output` directory.
+
+### Add the workflow to the Promise
+
+Now that you have a Promise workflow, you can update your Promise to use it. Replace the contents of the `promise.yaml` file with the following:
+
+```mdx-code-block
+import FullPromise from "!!raw-loader!./_partials/promise-workflows/02-full-promise.yaml"
+```
+
+<CodeBlock language="yaml" title="app-promise/promise.yaml">
+    {FullPromise}
+</CodeBlock>
+
+Note how there are two `workflows` being defined now: `resource` and `promise`. The `resource` workflow will be executed when a Resource is reconciled, and the `promise` workflow will be executed when a Promise is reconciled. You can also add `resource.delete` and `promise.delete` workflows, but those are out of the scope of this tutorial.
+
+### Update the Promise
+
+You can now update the Promise on the Platform cluster:
+
+```bash
+kubectl --context $PLATFORM apply --filename promise.yaml
+```
+
+Kratix will automatically detect the changes and will execute the newly defined `promise.configure` workflow. You can verify this by checking that there is now a pod running on the `kratix-platform-system`:
+
+```bash
+kubectl --context $PLATFORM get pods --namespace kratix-platform-system
+```
+
+This pod can run to completion quite quickly so when you verify that it exists, it might already be in a `Completed` state. This reflects that the `promise.configure` workflow has finished running.
+
+```shell-session
+NAME                                                 READY   STATUS      RESTARTS   AGE
+configure-pipeline-app-20073-6phwj                   0/1     Completed   0          19s
+```
+
+You can verify the logs to see the output of the script:
+
+```bash
+kubectl --context $PLATFORM logs --namespace kratix-platform-system -l kratix-workflow-type=promise -c download-dependencies
+```
+
+You should see output similar to the following:
+
+```bash
++ echo 'Downloading nginx...'
++ curl -o kratix/output/nginx.yaml --silent https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml
+```
+
+You can also check the worker, and verify that the NGINX Ingress Controller continues to be running:
+
+```bash
+kubectl --context $WORKER get deployments --namespace ingress-nginx
+```
+
+The combination of the workflows Kratix provides is very powerful. It enables platform teams to define complex workflows that can be executed at different stages of the lifecycle of a Resource or a Promise.
+
+```mdx-code-block
+import PromiseConfigureWorkflow from "/img/docs/workshop/part-ii-promise-configure-workflow.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={PromiseConfigureWorkflow} alt="Promise with
+  Configure Workflow" />
+
+  <figcaption>Promise Dependencies getting installed via a Workflow</figcaption>
+</figure>
+
+Next, you will explore how to access secrets and store state from within a workflow.
+
+## 🎉 &nbsp; Congratulations!
+
+You iterated over the Promise and added a Promise Workflow! Congratulations 🎉
+
+To recap what you achieved:
+
+1. ✅&nbsp;&nbsp;You got a deeper understand of the Workflows.
+2. ✅&nbsp;&nbsp;You created a Promise Workflow.
+
+👉🏾&nbsp;&nbsp; Let's [explore accessing secrets and storing state in workflows](./secrets-and-state).

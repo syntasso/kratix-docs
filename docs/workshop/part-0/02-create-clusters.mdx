@@ -68,15 +68,21 @@ export WORKER="kind-worker"
 
 You can validate your clusters are running with the `cluster-info` command:
 
+```bash
+kubectl --context $PLATFORM cluster-info
+kubectl --context $WORKER cluster-info
+```
+
+which should give an output similar to:
+
 ```shell-session
-$ kubectl --context $PLATFORM cluster-info
 Kubernetes control plane is running at https://127.0.0.1:65003
 CoreDNS is running at https://127.0.0.1:65003/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
-$ kubectl --context $WORKER cluster-info
 Kubernetes control plane is running at https://127.0.0.1:65004
 CoreDNS is running at https://127.0.0.1:65004/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 ```
+
 ## Install the Platform Prerequisites
 
 ### Cert-manager
@@ -91,8 +97,13 @@ kubectl --context $PLATFORM apply --filename https://github.com/cert-manager/cer
 
 You can validate cert-manager is running with the following command:
 
+```bash
+kubectl --context $PLATFORM get pods --namespace cert-manager
+```
+
+which should give an output similar to:
+
 ```shell-session
-$ kubectl --context $PLATFORM get pods --namespace cert-manager
 NAME                                      READY   STATUS    RESTARTS   AGE
 cert-manager-7476c8fcf4-r8cnd             1/1     Running   0          19s
 cert-manager-cainjector-bdd866bd4-7d8zp   1/1     Running   0          19s
@@ -102,7 +113,7 @@ cert-manager-webhook-5655dcfb4b-54r49     1/1     Running   0          19s
 ### MinIO as the GitOps Repository
 
 As mentioned before, Kratix leverages GitOps for deploying and reconciling
-scheduled workloads. That means that Kratix needs a backing service to serve as the state store. Kraix supports two types of state stores: S3-compatible buckets and Git repositories. In this workshop, you will use a MinIO instance running in the platform cluster as the state store. In productions environment, you will probably use a Git repository or a S3-compatible bucket in a cloud provider.
+scheduled workloads. That means that Kratix needs a backing service to serve as the state store. Kratix supports two types of state stores: S3-compatible buckets and Git repositories. In this workshop, you will use a MinIO instance running in the platform cluster as the state store. In productions environment, you will probably use a Git repository or a S3-compatible bucket in a cloud provider.
 
 To install MinIO in the platform, run:
 
@@ -132,7 +143,7 @@ minio    1/1     1            1           1h
 
 You can also verify the Create Bucket job:
 
-```
+```bash
 kubectl --context $PLATFORM get jobs
 ```
 
@@ -163,11 +174,11 @@ You platform cluster is now ready to receive Kratix!
 
 ## Install the Worker prerequisites
 
-Kratix schedules works by writing a state declaration (following the Kubernetes
+Kratix schedules workloads to destination clusters by writing a state declaration (following the Kubernetes
 declare-and-converge pattern) to a designated State Store. When it comes to
-reconciling the declared state, Kratix remains agnostic about the specific tool
+reconciling the declared state on the destination cluster, Kratix remains agnostic about the specific tool
 to be used on the clusters. In this tutorial, you will utilise
-[Flux](https://fluxcd.io/) on the worker, and configure it to reconcile the
+[Flux](https://fluxcd.io/) on the destination cluster, and configure it to reconcile the
 state from the MinIO bucket.
 
 To install and configure Flux, run the following script from the Kratix
@@ -390,7 +401,7 @@ source-controller         1/1     1            1           10m
 Once the Ready column reports `1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-At this stage, you environment looks like this:
+At this stage, your environment looks like this:
 
 ```mdx-code-block
 import Topology00 from "/img/docs/workshop/topology-00.png"
