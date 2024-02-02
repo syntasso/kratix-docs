@@ -116,7 +116,7 @@ spec:
 
 As you can see, defining an additional Promise as a dependency in the `promise.yaml` can make the Promise definition much longer, and make it harder to read. Instead of defining the Postgresql promise as a `Dependency`, it can instead be specified as a `requiredPromise`.
 
-We know that it is not only users of the App-as-a-Service who will require the `postgres` and as result a result, it doesn't make sense for the Postgresql promise to be tied to the App-as-a-Service promise. You can instead deploy the Postgresql Promise on its own and ensure that the Postgresql Promise is installed when you install or update any Promise that will utilise it.
+We know that it is not only users of the App-as-a-Service who will require the `postgres` and as result, it doesn't make sense for the Postgresql promise to be tied to the App-as-a-Service promise. You can instead deploy the Postgresql Promise on its own and ensure that the Postgresql Promise is installed when you install or update any Promise that will utilise it.
 
 With `requiredPromises` you can specify the name and version of an existing Promise. Add the following to the `spec` of your `promise.yaml`. 
 

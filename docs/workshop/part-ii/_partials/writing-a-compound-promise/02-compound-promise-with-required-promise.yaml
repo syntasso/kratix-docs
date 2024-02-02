@@ -37,6 +37,9 @@ spec:
                       type: string
                     dbDriver:
                       type: string
+  requiredPromises:
+  - name: postgresql
+    version: v1.0.0-beta.1
   workflows:
     promise:
       configure:
