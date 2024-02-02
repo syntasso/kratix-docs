@@ -63,12 +63,25 @@ spec:
               - name: create-resources
                 image: kratix-workshop/app-pipeline-image:v1.0.0
                 command: [ resource-configure ]
-        - apiVersion: platform.kratix.io/v1alpha1
-          kind: Pipeline
-          metadata:
-            name: database-configure
-          spec:
-            containers:
-              - name: create-resources
+              - name: create-bucket
+                image: kratix-workshop/app-pipeline-image:v1.0.0
+                command: [ create-bucket ]
+                env:
+                  - name: MINIO_ENDPOINT
+                    valueFrom:
+                      secretKeyRef:
+                        name: app-promise-minio-creds
+                        key: endpoint
+                  - name: MINIO_USER
+                    valueFrom:
+                      secretKeyRef:
+                        name: app-promise-minio-creds
+                        key: username
+                  - name: MINIO_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: app-promise-minio-creds
+                        key: password
+              - name: database-configure
                 image: kratix-workshop/app-pipeline-image:v1.0.0
                 command: [ database-configure ]
