@@ -423,6 +423,10 @@ todo   1/1     1            1           16s
 
 Once the deployment is completed, you can access the App in your browser, at [http://todo.local.gd:31338](http://todo.local.gd:31338).
 
+## Bonus Challenge
+
+Kubernetes CRDs provide many features that you can use to make your Promise API more user-friendly. For example, you can set the `image` property to be required, ensure `service.port` is within a range of ports and set it to be `8080` by default. Try adding some of those validations to your Promise API. Check the [Kubernetes documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#validation) for reference. Once you add the validations, try sending invalid resource requests and see how Kubernetes responds.
+
 ## 🎉 &nbsp; Congratulations!
 
 You just now authored your first Promise and delivered an App-as-a-Service. Well done!
