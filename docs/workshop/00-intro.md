@@ -48,22 +48,20 @@ Kratix. On Part II, you will dive into writing and extending Promises.
 
 ### Part II
 
-1. [Create your first service API](creating-an-api) <br />
-   Learn more about how to design and implement an API using Kratix Promises.
+1. [Writing your first Promise](part-ii/writing-your-first-promise) <br />
+   Learn the basics of how to write a Kratix Promise
 
-1. [Deliver a service on each user request](service-on-demand) <br />
-   Learn more about the Promise Workflows and how it can provision an on-demand Resource.
+1. [Improving the Workflows](part-ii/promise-workflows) <br />
+   Learn more about the different types of workflows that can be used within a Promise.
 
-1. [Extracting shared dependencies](shared-dependencies) <br />
-   Learn more about how a Promise can pre-install shared dependencies to make vending Resources easier and faster.
+1. [Accesing Secrets and storing state](part-ii/secrets-and-state) <br />
+   Learn how you can access Secrets and store state from within a Kratix pipeline
 
-1. [Intentionally schedule Promise resources](scheduling-promise) <br />
-   Learn more about how you, as the platform team, can manage where Resources are
-   installed to manage capacity, security, and other business requirements.
+1. [Surfacing information via Status](part-ii/status) <br />
+   Learn how to surface information to users via the status of a Resource
 
-1. [Update the Resource status](updating-status) <br />
-   Use what you have learned so far to make one more update to your Promise
-   which provides Application Developers context on the status of their Resource.
+1. [Making a Compound Promise](part-ii/compound-promise) <br />
+   Extend your Promise with another Promise, making it a compound promise
 
 ### Conclusion
 

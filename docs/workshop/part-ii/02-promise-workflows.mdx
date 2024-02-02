@@ -24,7 +24,7 @@ You will:
 
 ## Workflow design patterns {#workflows-design-patterns}
 
-To recap, A [Kratix Promise](../main/reference/promises/intro) is configured with a collection of Workflows that can be triggered at different stages of the Promise or Resource lifecycle. In the previous section, you defined a Workflow for the `resource.configure` action. In that workflow, you defined a collection of Kubernetes Resources that needed to be created to fulfill the user's request.
+To recap, A [Kratix Promise](/main/reference/promises/intro) is configured with a collection of Workflows that can be triggered at different stages of the Promise or Resource lifecycle. In the previous section, you defined a Workflow for the `resource.configure` action. In that workflow, you defined a collection of Kubernetes Resources that needed to be created to fulfill the user's request.
 
 However, there's virtually no limitation to what you can do in a Workflow. You can, for example, download software, run imperative commands, wait for manual approvals and more. Pipeline stages are meant to be reused across different Promises, so you can define a Workflow once and reuse it across multiple Promises.
 
