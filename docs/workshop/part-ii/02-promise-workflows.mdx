@@ -359,6 +359,17 @@ kubectl --context $WORKER get deployments --namespace ingress-nginx
 
 The combination of the workflows Kratix provides is very powerful. It enables platform teams to define complex workflows that can be executed at different stages of the lifecycle of a Resource or a Promise.
 
+```mdx-code-block
+import PromiseConfigureWorkflow from "/img/docs/workshop/part-ii-promise-configure-workflow.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={PromiseConfigureWorkflow} alt="Promise with
+  Configure Workflow" />
+
+  <figcaption>Promise Dependencies getting installed via a Workflow</figcaption>
+</figure>
+
 Next, you will explore how to access secrets and store state from within a workflow.
 
 ## 🎉 &nbsp; Congratulations!
