@@ -6,5 +6,5 @@ ENV PATH="${PATH}:/scripts/"
 COPY resource-configure /scripts/resource-configure
 COPY promise-configure /scripts/promise-configure
 
-CMD [ "sh", "-c", "./resource-configure"]
+CMD [ "sh", "-c", "/scripts/resource-configure"]
 ENTRYPOINT []
