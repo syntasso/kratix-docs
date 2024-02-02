@@ -418,6 +418,20 @@ Once you see the `todo` and the `acid-todo-postgresql-0` pods reporting `Ready
 The app is now fully deployed! You can now access it on
 [http://todo.local.gd:31338/](http://todo.local.gd:31338/).
 
+## Clean up
+
+Delete the EasyApp Promise:
+
+```bash
+kubectl --context $PLATFORM delete promise easyapp
+```
+
+The above command will give an output similar to:
+
+```shell-session
+promise.platform.kratix.io "easyapp" deleted
+```
+
 ## 🎉 Congratulations
 
 You have installed a Compound Promise and created an _EasyApp_ Resource!

@@ -311,9 +311,9 @@ test
     └── service.yaml
 ```
 
-Inspect those files. You should see that the `output/platform/postgresql.yaml` file has been created and contains the details of the PostgreSQL service, and the `metadata/destination_selectors.yaml` is telling Kratix to request the PostgreSQL from the platform cluster. The `deployment.yaml` file should also contain the details of the PostgreSQL service in the `env` block of the first `container`.
+Inspect those files. You should see that the `test/output/platform/postgresql.yaml` file has been created and contains the details of the PostgreSQL service, and the `test/metadata/destination-selectors.yaml` is telling Kratix to request the PostgreSQL from the platform cluster. The `test/output/deployment.yaml` file should also contain the details of the PostgreSQL service in the `env` block of the first `container`.
 
-```yaml title="app-promise/workflows/test/output/deployment.yaml"
+```yaml title="app-promise/test/output/deployment.yaml"
 env:
 - name: PGPASSWORD
   valueFrom:
@@ -341,16 +341,18 @@ workflows:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Pipeline
       metadata:
-        name: database-configure
+        name: resource-configure
       spec:
         containers:
           - name: create-resources
             # ...
           - name: create-bucket
             # ...
+          #highlight-start
           - name: database-configure
             image: kratix-workshop/app-pipeline-image:v1.0.0
             command: [ database-configure ]
+          #highlight-end
 ```
 
 Apply your newly updated promise:
@@ -400,7 +402,7 @@ configure-pipeline-postgresql-abad9-vxgd8   0/1     Completed   0          5m4s
 In a couple of minutes, if you list the running pods on your Worker:
 
 ```bash
-kubectl --context $PLATFORM get pods
+kubectl --context $WORKER get pods
 ```
 
 You should see the both the App and the PostgreSQL getting deployed on the Worker cluster:

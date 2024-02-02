@@ -94,6 +94,7 @@ Still in the `app-promise` directory, run:
 
 ```bash
 mkdir -p test/{input,output,metadata}
+touch test/input/object.yaml
 ```
 
 Later, when you run `docker run`, you will mount the three directories onto the container. But first, you need to create the `object.yaml` file in the `input` directory. Create a file called `test/input/object.yaml` with the following content:
