@@ -209,13 +209,14 @@ As previously mentioned, this Promise will create a Deployment, a Service, and a
 
 That's exactly what Kratix dependencies are for: to define the resources that need to be created when the Promise is installed.
 
-If you follow the NGINX Ingress Controller [installation instructions](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps), you will find that you need the resources defined in [this file](https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml) installed on the cluster.
+If you follow the NGINX Ingress Controller [installation instructions](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps), you will find that you need the resources defined in [this file](https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml) installed on the cluster.
 
 Create a subdirectory in your `app-promise` directory called `dependencies`. Then, create a file called `dependencies.yaml` and copy the contents of the file above into it.
 
 ```bash
 mkdir -p dependencies
-curl -o dependencies/dependencies.yaml --silent https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml
+curl -o dependencies/dependencies.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml
+
 ```
 
 Once stored locally, you will need to add these Dependencies to the Promise file. The Dependencies are added as a list under `dependencies` which can be tricky to format and requires some subtle whitespace changes.

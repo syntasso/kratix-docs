@@ -261,7 +261,7 @@ During the Promise installation, the `promise-configure` script will be executed
 set -eux
 
 echo "Downloading nginx..."
-curl -o kratix/output/nginx.yaml --silent https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml
+curl -o kratix/output/nginx.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml
 ```
 
 :::info
@@ -349,7 +349,7 @@ You should see output similar to the following:
 
 ```bash
 + echo 'Downloading nginx...'
-+ curl -o kratix/output/nginx.yaml --silent https://gist.githubusercontent.com/kirederik/b39aaefbc1a4ea48d98039ba77eb676c/raw/831758503c86b5accbca3eff416b15e1aaf827e9/nginx-patched.yaml
++ curl -o kratix/output/nginx.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml
 ```
 
 You can also check the worker, and verify that the NGINX Ingress Controller continues to be running:
