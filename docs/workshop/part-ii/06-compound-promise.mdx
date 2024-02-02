@@ -47,7 +47,7 @@ To create a compound promise, you generally need three updates:
 
 You want users to have control whether their app deployment should include a database or not. You decide to expose that option via a new field on the Promise API called `dbDriver`. This field will allow users to specify the database they want to use. In this tutorial, we will only build support for PostgreSQL, but the process to extend that to many other DBs would be very similar.
 
-s coveredp previously, the `spec.api` field is where you define the API for your Promise. You will need to add a new field called `dbDriver` to the `spec.api.openAPIV3Schema` field. Locate the `schema` field in your `promise.yaml` and add the following:
+As covered previously, the `spec.api` field is where you define the API for your Promise. You will need to add a new field called `dbDriver` to the `spec.api.openAPIV3Schema` field. Locate the `schema` field in your `promise.yaml` and add the following:
 
 ```yaml title="promise.yaml"
 # ...
