@@ -153,6 +153,7 @@ const config = {
           "diff",
           "json",
           "yaml",
+          "ruby",
         ],
       },
       algolia: {

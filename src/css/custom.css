@@ -70,6 +70,10 @@
   color: var(--color-purple)!important;
   font-style: normal!important;
 }
+.token.string-literal, .token.string {
+  color: var(--color-purple)!important;
+  font-style: normal!important;
+}
 
 .header-github-link:hover {
   opacity: 0.6;
