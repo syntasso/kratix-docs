@@ -102,8 +102,7 @@ However our pipeline is not, once again, idempotent. If you run the pipeline aga
 
 Update your `workflow/resource-configure` script to the following:
 
-```bash
-
+```bash title="workflows/resource-configure"
 #highlight-start
 createdAt=$(yq '.status.createdAt // ""' /kratix/input/object.yaml)
 if [ -z "$createdAt" ]; then
@@ -200,7 +199,7 @@ Status:
     Status:                True
     Type:                  PipelineCompleted
   #highlight-start
-  Created At:              Wed Jan1 15:01:01 UTC 2023
+  Created At:              Wed Jan 1 15:01:01 UTC 2023
   Message:                 todo.local.gd:31338
   #highlight-end
 Events:                    <none>
