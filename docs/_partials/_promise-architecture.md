@@ -2,7 +2,7 @@
 import PromiseDiagram from "/img/docs/workshop/promise-diagram.svg"
 ```
 
-<figure class="diagram">
+<figure className="diagram">
   <PromiseDiagram className="medium"/>
 
   <figcaption>A Promise in details</figcaption>

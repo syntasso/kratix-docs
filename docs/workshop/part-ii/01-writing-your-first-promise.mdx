@@ -55,6 +55,17 @@ For Ingress, you will use the [NGINX Ingress Controller](https://kubernetes.gith
 
 You can start thinking about your promise by designing the Promise API.
 
+
+```mdx-code-block
+import AppPromise from "/img/docs/workshop/part-ii-app-promise.png"
+```
+
+<figure className="diagram">
+  <img className="medium" src={AppPromise} alt="The App Promise" />
+
+  <figcaption>The App-as-a-Service Promise</figcaption>
+</figure>
+
 ### Design an API for your service {#api-design}
 
 When building an API, you have a lot of design considerations to include. For example, you will want to:
@@ -96,7 +107,7 @@ You can start by defining an interface for the application teams to deploy their
 import PromiseWayfinding from "/img/docs/workshop/part-ii-wayfinding-api-only.svg"
 ```
 
-<figure class="diagram">
+<figure className="diagram">
   <PromiseWayfinding className="small"/>
 
   <figcaption>The Promise API is where you will define the interface</figcaption>
@@ -112,7 +123,7 @@ On the other hand, you could go to the other end of the spectrum, hiding all the
 import APISpectrum from "/img/docs/workshop/design-api-spectrum.svg"
 ```
 
-<figure class="diagram">
+<figure className="diagram">
   <APISpectrum className="large"/>
 
   <figcaption>The sweet spot for your organisation can be anywhere in the
@@ -182,6 +193,16 @@ Great! Your Promise now has an API. You can move on to the next step: defining t
 
 ### Define the dependencies {#dependencies}
 
+```mdx-code-block
+import PromiseDeps from "/img/docs/workshop/part-ii-wayfinding-extract-dependencies.svg"
+```
+
+<figure className="diagram">
+  <PromiseDeps className="small"/>
+
+  <figcaption>The Promise API is where you will define the interface</figcaption>
+</figure>
+
 The next step is to define the dependencies of your Promise. This is where you will define the Kubernetes resources that will be created when the Promise is deployed.
 
 As previously mentioned, this Promise will create a Deployment, a Service, and an Ingress. Deployments and Services are built in to Kubernetes, so you can use them directly. However, to use the NGINX Ingress Controller, you need to have it installed on your worker cluster _prior_ to any user deploying their applications.
@@ -227,6 +248,16 @@ You may notice that promise file is now getting quite big. Further down in this 
 Amazing! You are now one step away from having a working Promise. The next step is to define the Promise Workflow, that is, what must happen when a user requests a new app deployment.
 
 ### Define the Workflow {#workflow}
+
+```mdx-code-block
+import PromiseWorkflows from "/img/docs/workshop/part-ii-wayfinding-pipeline-only.svg"
+```
+
+<figure className="diagram">
+  <PromiseWorkflows className="small"/>
+
+  <figcaption>The Promise API is where you will define the interface</figcaption>
+</figure>
 
 Kratix provides several hooks for managing and customising the Promise's lifecycle. Those hooks are defined in the Promise `workflows` key. The minimum you need to define is what must happen when the platform receives a request for a new resource from the promised service. Refer to the [Workflows reference documentation](/main/reference/resources/workflows) for further details.
 
@@ -351,6 +382,18 @@ ingress-nginx-controller   1/1     1            1           2m8s
 
 You can switch hats now and assume the role of an App developer trying to deploy their application.
 
+```mdx-code-block
+import PromiseInstalled from "/img/docs/workshop/part-ii-promise-installed.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={PromiseInstalled} alt="Clusters with a Promise
+  installed" />
+
+  <figcaption>Dependencies being scheduled to the Destination</figcaption>
+</figure>
+
+
 ## Using the App Promise {#using-the-app-promise}
 
 As a developer, you can check the available promises by running the following command:
@@ -422,6 +465,17 @@ todo   1/1     1            1           16s
 ```
 
 Once the deployment is completed, you can access the App in your browser, at [http://todo.local.gd:31338](http://todo.local.gd:31338).
+
+```mdx-code-block
+import PromiseRequested from "/img/docs/workshop/part-ii-promise-requested.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={PromiseRequested} alt="Clusters with a Promise
+  installed" />
+
+  <figcaption>Todo app getting deployed</figcaption>
+</figure>
 
 ## Bonus Challenge
 

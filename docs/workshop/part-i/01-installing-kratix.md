@@ -220,8 +220,8 @@ At this point, your environment looks like this (with a few components omitted f
 import Topology01 from "/img/docs/workshop/topology-01.png"
 ```
 
-<figure class="diagram">
-  <img class="medium" src={Topology01} alt="Deployed resources with State Store" />
+<figure className="diagram">
+  <img className="medium" src={Topology01} alt="Deployed resources with State Store" />
 
   <figcaption>Current environment: with Bucket State Store</figcaption>
 </figure>
@@ -336,8 +336,8 @@ You environment now looks like this:
 import Topology02 from "/img/docs/workshop/topology-02.png"
 ```
 
-<figure class="diagram">
-  <img class="large" src={Topology02} alt="Deployed resources with Destination" />
+<figure className="diagram">
+  <img className="large" src={Topology02} alt="Deployed resources with Destination" />
 
   <figcaption>Flux reconciled and created the test resources</figcaption>
 </figure>

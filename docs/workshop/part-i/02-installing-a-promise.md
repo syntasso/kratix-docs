@@ -138,7 +138,7 @@ jenkins.marketplace.kratix.io          2024-01-26T16:16:13Z
 
 Kratix will also write a declaration of state to the State Store, informing any worker destinations that they should install the Promise Dependencies. For the Jenkins Promise, the Dependencies include the Jenkins Operator.
 
-<figure class="diagram">
+<figure className="diagram">
   <InstallSuccessDiagram className="large"/>
 
   <figcaption>Installation of the Jenkins Promise</figcaption>
@@ -176,8 +176,8 @@ You environment now looks like this (with some detail omitted for clarity):
 import Topology03 from "/img/docs/workshop/topology-03.png"
 ```
 
-<figure class="diagram">
-  <img class="large" src={Topology03} alt="Deployed resources with a Promise" />
+<figure className="diagram">
+  <img className="large" src={Topology03} alt="Deployed resources with a Promise" />
 
   <figcaption>Jenkins dependencies are reconciled on all workers</figcaption>
 </figure>
@@ -255,7 +255,7 @@ deliver the promised service on-demand. Through Workflows, platform teams have t
 flexibility to customise the Promise according to their specific business and
 compliance requirements in either simple Kratix Pipelines or other popular pipeline technologies (e.g. Tekton).
 
-<figure class="diagram">
+<figure className="diagram">
   <PipelineDiagram className="large"/>
   <figcaption>An example multi-stage Kratix Pipeline</figcaption>
 </figure>
@@ -282,7 +282,7 @@ configure-pipeline-jenkins-c726b   0/1     Completed   0          71s
 
 Once the Workflow completes, Kratix will write the documents it outputted (i.e. the declaration of state) to the directory within the bucket that the worker cluster is watching. You will soon see the requested Jenkins resources starting up on the worker cluster.
 
-<figure class="diagram">
+<figure className="diagram">
   <ResourceRequestDiagram className="large"/>
 </figure>
 
