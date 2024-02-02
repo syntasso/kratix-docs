@@ -14,8 +14,8 @@ import PartialPromise from '../../_partials/_promise-architecture.md';
 ```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
-👈🏾&nbsp;&nbsp; Previous: [Install Kratix](installing-kratix) <br />
-👉🏾&nbsp;&nbsp; Next: [Using a Compound Promise](multiple-promises)
+👈🏾 Previous: [Install Kratix](installing-kratix) <br />
+👉🏾 Next: [Using a Compound Promise](multiple-promises)
 
 <hr />
 
