@@ -163,12 +163,12 @@ Excellent. You have now configured the App-as-a-Service Promise to be a Compound
 
 We'll need to define an additional step in the pipeline that makes a request for a PostgreSQL service when making or updating a request for an app. We'll start by defining the pipeline stage that will run when a user wants the request a PostgreSQL service with their app.
 
-Create a `database-configure` file in the `workflows` directory and make it executable. Next, copy the contents of [this file](https://gist.github.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2) into it:
+Create a `database-configure` file in the `workflows` directory and make it executable. Next, copy the contents of [this file](https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt) into it:
 
 ```bash
 touch workflows/database-configure
 chmod +x workflows/database-configure
-curl -o workflows/database-configure --silent https://gist.github.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2
+curl -o workflows/database-configure --silent https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt
 ```
 
 Take a closer look at the script. Unlike the Ingress configured via the NGINX Controller, we will not always want to provision a PostgreSQL service with each app. The script will only provision a PostgreSQL if the resource request `spec` specifies a `dbDriver` key a value of `postgresql`:
