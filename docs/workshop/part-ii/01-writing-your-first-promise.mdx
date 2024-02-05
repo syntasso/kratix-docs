@@ -370,7 +370,7 @@ kubectl --context $PLATFORM apply --filename promise.yaml
 As part of the Promise `dependencies`, you have included the NGINX Ingress Controller. You can check that it got installed in the worker cluster correctly by running the following command:
 
 ```bash
-kubectl --context $WORKER get deployments --context $WORKER --namespace ingress-nginx
+kubectl --context $WORKER get deployments --namespace ingress-nginx
 ```
 
 It may take a couple of minutes, but you will eventually see an output similar to:

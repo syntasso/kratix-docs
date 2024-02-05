@@ -159,7 +159,7 @@ kubectl --context $PLATFORM apply --filename samples/easy-app/promise.yaml
 Validate the EasyApp promises are successfully installed:
 
 ```bash
-kubectl --context $PLATFORM get promises -w
+kubectl --context $PLATFORM get promises --watch
 ```
 
 The above command will eventually include the following output:
