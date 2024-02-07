@@ -55,7 +55,7 @@ Tekton Pipelines, Argo Workflows, plain Pods/Jobs, etc.
 
 The Kratix `Pipeline` kind is a simple wrapper around a Kubernetes Pod. It will
 automatically mount the necessary [Kratix Volumes](#volumes) and set
-[Enviromnemt Variables](#environment-variables) for the provided containers.
+[Environment Variables](#environment-variables) for the provided containers.
 
 It is defined as follows:
 

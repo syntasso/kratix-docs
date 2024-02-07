@@ -46,9 +46,13 @@ Status provides a simple way to communicate information back to the resource
 requester. Kratix will automatically inject the required fields for status into
 the `api`, you do not have to manually add these fields.
 
+Your `configure` pipeline can retrieve the existing status of a Resource by
+querying the resource as an input to the container, this helps to ensure
+that updating the status is idempotent within your [workflows](workflows).
+
 Status can also be used as a method of communicating information back to the
 `delete` pipeline, such as the name of any external resources imperatively
-created in the pipeline that need to be deleted as part of the delete pipeline
+created in the pipeline that need to be deleted as part of the delete pipeline.
 
 ## Conditions
 
