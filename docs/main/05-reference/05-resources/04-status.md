@@ -4,6 +4,8 @@ sidebar_label: Status
 description: Documentation on how to expose information from the Pipeline to the Platform user through the Resource Status field
 ---
 
+import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-flow.svg"
+
 # Status
 
 As part of your `configure` Pipeline you can optionally send information about the Resource
@@ -49,6 +51,19 @@ the `api`, you do not have to manually add these fields.
 Your `configure` pipeline can retrieve the existing status of a Resource by
 querying the resource as an input to the container, this helps to ensure
 that updating the status is idempotent within your [workflows](workflows).
+
+Let's take the example of a Promise that provisions s3 buckets and surfaces the
+name and creation time of the bucket in the resource. The first time the
+`configure` workflow ran, it would output the name of the bucket to the
+`status.yaml`, the next time the workflow ran, assuming there were no changes
+to the resource it would retrieve the name and creation time of the bucket from the
+resource and output these to the `status.yaml` again.
+
+<figure className="diagram">
+  <StatusUpdateFlowDiagram className="large"/>
+
+  <figcaption>Flow of the Status update for the app Promise</figcaption>
+</figure>
 
 Status can also be used as a method of communicating information back to the
 `delete` pipeline, such as the name of any external resources imperatively
