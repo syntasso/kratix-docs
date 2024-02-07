@@ -49,7 +49,7 @@ requester. Kratix will automatically inject the required fields for status into
 the `api`, you do not have to manually add these fields.
 
 Your `configure` pipeline can retrieve the existing status of a Resource by
-querying the resource provided in input dir `/kratix/input/object.yaml`, this helps to ensure
+querying the resource provided in the input dir `/kratix/input/object.yaml`, this helps to ensure
 that updating the status is idempotent within your [workflows](workflows).
 Let's take the example of a Promise that provisions s3 buckets and surfaces the
 name and creation time of the bucket in the resource. The first time the
