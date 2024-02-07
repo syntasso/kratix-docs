@@ -16,6 +16,8 @@ This is Part 4 of [a series](intro) illustrating how to write Kratix Promises.
 
 ---
 
+import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-flow.svg"
+
 In the previous tutorial, you learned how to access secrets and states from a Pipeline. In this section, you will learn how to surface information to users via the status of a Resource.
 
 You will:
@@ -73,7 +75,7 @@ Next, run the tests:
 ./scripts/test-pipeline resource-configure
 ```
 
-You should see the following on your local directory:
+You should see the following in your local directory:
 
 ```
 📁 app-promise
@@ -96,7 +98,7 @@ createdAt: "Wed Jan 1 15:00:00 UTC 2023"
 message: "my-app.local.gd:31338"
 ```
 
-Excellent. With that file in place, Kratix will automatically persist that information to the status of the Resource. The next time the pipeline runs, the `input/object.yaml` file will contain the `status` field with what was previously persistent.
+Excellent. With that file in place, Kratix will automatically persist that information to the status of the Resource. The next time the pipeline runs, the `input/object.yaml` file will contain the `status` field with the information persisted from the `status.yaml`.
 
 However our pipeline is not, once again, idempotent. If you run the pipeline again, you will see that the `createdAt` field is updated to the current date. You can fix this by checking the status on the resource, and only updating the status if it is not already set.
 
@@ -154,6 +156,12 @@ message: "my-app.local.gd:31338"
 ```
 
 Great! Now you have a way to persist information about your Resource, and you have a way to ensure that the information is not overwritten if it already exists.
+
+<figure className="diagram">
+  <StatusUpdateFlowDiagram className="large"/>
+
+  <figcaption>Flow of the Status update for the app Promise</figcaption>
+</figure>
 
 This time, you haven't changed the Promise at all, but rather updated the underlying pipeline image. The existing resources will automatically get the new status information on the next reconciliation.
 
