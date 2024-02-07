@@ -174,12 +174,15 @@ You platform cluster is now ready to receive Kratix!
 
 ## Install the Worker prerequisites
 
-Kratix schedules workloads to destination clusters by writing a state declaration (following the Kubernetes
-declare-and-converge pattern) to a designated State Store. When it comes to
-reconciling the declared state on the destination cluster, Kratix remains agnostic about the specific tool
-to be used on the clusters. In this tutorial, you will utilise
-[Flux](https://fluxcd.io/) on the destination cluster, and configure it to reconcile the
-state from the MinIO bucket.
+Kratix schedules workloads to
+[Destinations](../../main/reference/destinations/intro). For this workshop we
+will be using a Kubernetes cluster as our Destination by writing a state
+declaration (following the Kubernetes declare-and-converge pattern) to a
+designated State Store. When it comes to reconciling the declared state on the
+Destination cluster, Kratix remains agnostic about the specific tool to be used
+on the clusters. In this tutorial, you will utilise [Flux](https://fluxcd.io/)
+on the Destination cluster, and configure it to reconcile the state from the
+MinIO bucket.
 
 To install and configure Flux, run the following script from the Kratix
 repository:

@@ -136,7 +136,7 @@ The above command will give an output similar to:
 jenkins.marketplace.kratix.io          2024-01-26T16:16:13Z
 ```
 
-Kratix will also write a declaration of state to the State Store, informing any worker destinations that they should install the Promise Dependencies. For the Jenkins Promise, the Dependencies include the Jenkins Operator.
+Kratix will also write a declaration of state to the State Store, informing any destinations that they should install the Promise Dependencies. For the Jenkins Promise, the Dependencies include the Jenkins Operator.
 
 <figure className="diagram">
   <InstallSuccessDiagram className="large"/>

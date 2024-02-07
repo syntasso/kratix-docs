@@ -134,7 +134,7 @@ special files in this directory:
 
 - `destination-selectors.yaml` can be added to any Promise to
   further refine where the resources in `/kratix/output` will be
-  [scheduled](./multicluster-management).
+  [scheduled](./multidestination-management).
 - `status.yaml` allows the Pipeline to communicate information about the
   Resource back to the requester. See [status documentation
   for more information](./resources/status).

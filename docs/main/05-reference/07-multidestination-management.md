@@ -1,12 +1,13 @@
 ---
-title: Multi-cluster management
-sidebar_label: Multi-cluster management
+title: Multi-destination management
+sidebar_label: Multi-destination management
 description: Learn more about how Kratix schedules Promises and Resources, and how you can control the scheduling process.
 ---
 
-One of the most powerful features of Kratix is having full control over the scheduling of work
-across extensive and diverse infrastructure. For example, this could be determining which
-Kubernetes cluster (or other infrastructure) a certain workload should be deployed to.
+One of the most powerful features of Kratix is having full control over the
+scheduling of work across extensive and diverse infrastructure. For example,
+this could be determining which Kubernetes cluster or Terraform Enterprise
+instance a certain workload should be scheduled to.
 
 In Kratix, scheduling happens in two stages:
 
@@ -26,7 +27,7 @@ all Destinations registered with the Platform. When a new Destination is registe
 Kratix will also schedule all Promise Dependencies onto this new Destination.
 
 Platform teams can, however, control which Destinations receive which Promises by
-using a combination of Destination labels and Promise target selectors.
+using a combination of Destination labels and Promise Destination selectors.
 
 The `labels` in the Destination document are the standard Kubernetes
 [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/):
