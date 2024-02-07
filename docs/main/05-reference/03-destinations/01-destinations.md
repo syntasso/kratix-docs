@@ -5,10 +5,27 @@ sidebar_label: Destinations
 id: intro
 ---
 
-The Kratix Destination Custom Resource Definition (CRD) is the representation of a system where workloads
-can be scheduled to. These can be Kubernetes clusters or any other infrastructure that can be deployed to using GitOps.
-See below for the API documentation:
+The Kratix Destination Custom Resource Definition (CRD) is the representation of
+a system where Kratix can write documents to. These documents are then
+reconciled by an external tool.
 
+Some example use cases:
+- [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernets manifests) to
+  the Destination, and then a GitOps tool running on the Kubernetes cluster,
+  such as Flux or ArgoCD with pull down the documents and deploy them.
+- [Terraform](https://www.terraform.io/): There are many toolings that exists to trigger Terraform applys
+  when a new terraform file is committed to a Git repository. For example
+  [Terraform
+  Enterprise](https://www.hashicorp.com/resources/gitops-and-terraform-enterprise-a-match-made-in-heaven-at-state-farm)
+  has built in support for GitOps workflows.
+- [Ansible](https://www.ansible.com/), where an Ansible Tower can be configured to reconcile from a Git
+  repository.
+- [Backstage](https://backstage.io/), where a Backstage instance can be configured have its [Catalog
+  filled from a Git
+  repository](https://backstage.io/docs/integrations/github/discovery).
+
+
+Below is the full Spec for the Destination CRD:
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination

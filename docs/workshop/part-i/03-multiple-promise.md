@@ -85,14 +85,14 @@ If the command above display a different output, please refer back to previous
 guides.
 
 
-### Register the platform as a worker
+### Register the platform as a Destination
 
-To register the platform cluster as an available worker cluster, you will run
-through the same steps you ran during the worker cluster registration in
+To register the platform cluster as an available Destination, you will run
+through the same steps you ran during the worker cluster Destination registration in
 [Installing a Promise](installing-a-promise):
 
 * Install and configure Flux
-* Register the cluster with Kratix
+* Register the cluster as a Destination with Kratix
 
 There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](./installing-kratix#destination-setup) section. Run:
 
