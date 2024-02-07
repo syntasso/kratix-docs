@@ -6,7 +6,7 @@ id: intro
 ---
 
 The Kratix Destination Custom Resource Definition (CRD) is the representation of
-a system where Kratix can write documents to. These documents are then
+a system that Kratix can write documents to. These documents are then
 reconciled by an external tool.
 
 Some example use cases:
