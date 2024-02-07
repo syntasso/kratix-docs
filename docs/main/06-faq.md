@@ -48,7 +48,7 @@ Core Kratix functionality is evolving to utilise the best of the Kubernetes ecos
 ### How do I schedule workloads to different clusters?
 
 Good news! We've created a page in our docs around how Kratix [schedules its
-workloads](./reference/multicluster-management).
+workloads](./reference/multidestination-management).
 
 ### How does Kratix compare to other tools?
 

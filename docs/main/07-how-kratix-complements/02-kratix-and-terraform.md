@@ -33,7 +33,7 @@ To provide on-demand services, a platform team is best suited decoupling their A
 Kratix enables platform teams to declare APIs that orchestrates workloads across your infrastructure. The orchestration of infrastructure can happen in two ways in Kratix:
 
 - via a [Workflow](../reference/resources/workflows) that is executed as part of every request for a Resource (as well as on updates and periodic reconciliation)
-- via Kratix [scheduling](../reference/multicluster-management) workloads using GitOps
+- via Kratix [scheduling](../reference/multidestination-management) workloads using GitOps
 
 Kratix Workflow stages are a perfect place to execute sequential tasks such as running Terraform plans and applies, billing checks, security scans, audits, resource decoration and more. These tasks all happen automatically each time a user requests a Promise Resource.
 
