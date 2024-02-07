@@ -13,8 +13,8 @@ Some example use cases:
 - [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernets manifests) to
   the Destination, and then a GitOps tool running on the Kubernetes cluster,
   such as Flux or ArgoCD with pull down the documents and deploy them.
-- [Terraform](https://www.terraform.io/): There are many toolings that exists to trigger Terraform applys
-  when a new terraform file is committed to a Git repository. For example
+- [Terraform](https://www.terraform.io/): There are many toolings that exist to trigger Terraform applys
+  when a new Terraform file is committed to a Git repository. For example
   [Terraform
   Enterprise](https://www.hashicorp.com/resources/gitops-and-terraform-enterprise-a-match-made-in-heaven-at-state-farm)
   has built in support for GitOps workflows.
