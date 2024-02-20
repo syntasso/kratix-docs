@@ -1,0 +1,234 @@
+---
+title: Backstage Plugins
+description: Documentation for the enterprise plugins for Backstage bundled with SKE.
+sidebar_label: Backstage Plugins
+---
+
+The Backstage plugins for SKE are a set of plugins that are to provide additional
+functionality to Backstage. The plugins are:
+
+- `@syntasso/plugin-ske-backend`: The backend plugin for SKE.
+- `@syntasso/plugin-ske-frontend`: The frontend plugin for SKE.
+
+Follow the instructions below to install and configure both plugins.
+
+The instructions below assume that you have created a Backstage app. The
+commands must be executed from the root of your Backstage app. Refer to the
+[Backstage official documentation](https://backstage.io/docs/getting-started)
+for instructions on how to create a Backstage app.
+
+:::info
+
+For the plugins to work, make sure you have the following environment variable set when
+starting your Backstage app:
+
+```bash
+export NODE_OPTIONS=--no-node-snapshot
+```
+
+:::
+
+## Accessing the private npm registry
+
+### For local development {#local-development}
+
+To access the private npm registry in your local machine, you can create a
+`.npmrc` file in your home directory with the following content:
+
+```bash
+# replace the token with the provided token
+export PRIVATE_REGISTRY_TOKEN="<YOUR_TOKEN_HERE>"
+
+cat <<EOF > ~/.npmrc
+@syntasso:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${PRIVATE_REGISTRY_TOKEN}
+always-auth=true
+EOF
+```
+
+### For Docker
+
+For Docker builds, you must update the `packages/backend/Dockerfile` in your Backstage
+app so that it can access the private npm registry.
+
+Update the `RUN` command that is runnnig the `yarn install` to mount a secret, as
+described below:
+
+```Dockerfile
+RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
+    #highlight-next-line
+    --mount=type=secret,id=npmrc,target=/app/.npmrc,uid=1000,gid=1000 \
+    cat /app/.npmrc && \
+    yarn install --frozen-lockfile --production --network-timeout 300000
+```
+
+When running `yarn build-image` you now need to pass in the additional args
+`--secret id=npmrc,src=$HOME/.npmrc` to provide the npm credentials to Docker.
+Alternatively, you can update the `build-image` script in the `package.json`
+file to include the additional required flag.
+
+:::warning
+
+Make sure that the `~/.npmrc` file is in the home directory of the user that is running
+the Docker build. Refer to the [Local Development](#local-development) section for instructions.
+
+:::
+
+## Installing the front-end plugin
+
+From the root of the backstage repository, run:
+
+```bash
+yarn add @syntasso/plugin-ske-frontend --cwd packages/app
+```
+
+### Update the EntityPage
+
+In the `packages/app/src/components/catalog/EntityPage.tsx` file, add the following to the list of imports:
+
+```typescript
+import { KratixEntityPage } from "@syntasso/plugin-ske-frontend";
+```
+
+Find the line where the `const componentPage` is being declared. Add the following case
+to the `EntitySwitch`:
+
+```typescript
+<EntitySwitch.Case if={isComponentType("kratix-resource")}>
+  <KratixEntityPage>{entityWarningContent}</KratixEntityPage>
+</EntitySwitch.Case>
+```
+
+When updated, variable should look similar to this with any other additional case statements:
+
+```typescript
+const componentPage = (
+  <EntitySwitch>
+    <EntitySwitch.Case if={isComponentType("service")}>
+      {serviceEntityPage}
+    </EntitySwitch.Case>
+    <EntitySwitch.Case if={isComponentType("website")}>
+      {websiteEntityPage}
+    </EntitySwitch.Case>
+    //highlight-start
+    <EntitySwitch.Case if={isComponentType("kratix-resource")}>
+      <KratixEntityPage>{entityWarningContent}</KratixEntityPage>
+    </EntitySwitch.Case>
+    //highlight-end
+    <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
+  </EntitySwitch>
+);
+```
+
+## Installing the back-end plugin
+
+From the root of the backstage repository, run:
+
+```bash
+yarn add @syntasso/plugin-ske-backend --cwd packages/backend
+```
+
+### Configure
+
+Add the following to the `app-config.yaml` file:
+
+```yaml
+ske:
+  scm:
+    type: "github" # or "gitlab"
+    token: <YOUR_TOKEN> # github/gitlab access token
+    repoUrl: "https://github.com/my-org/my-repo" # repository url
+    path: "resources" # optional; path within the repository
+    branch: "main" # optional; branch to use, default is "main"
+```
+
+The `repoUrl` is the repository to which Backstage will push the resource
+requests; you must configure your platform to reconcile on new documents.
+
+### Add the backend route
+
+Open the `packages/backend/src/index.ts` file and add the following import:
+
+```typescript
+import { createRouter } from "@syntasso/plugin-ske-backend";
+```
+
+Then in the `main()` function, add the following near the other endpoints in the `apiRouter`:
+
+```typescript
+// in the main function...
+apiRouter.use("/techdocs", await techdocs(techdocsEnv));
+apiRouter.use("/proxy", await proxy(proxyEnv));
+apiRouter.use("/search", await search(searchEnv));
+
+//highlight-start
+const { logger } = createEnv("ske");
+apiRouter.use("/ske", await createRouter({ logger, config }));
+//highlight-end
+// ...
+```
+
+### Add the scaffolder action
+
+Open the `packages/backend/src/scaffolder.ts` file and add the SKE actions. Your
+`scaffolder.ts` should look something like this:
+
+```typescript
+import { CatalogClient } from "@backstage/catalog-client";
+import {
+  createBuiltinActions,
+  createRouter,
+} from "@backstage/plugin-scaffolder-backend";
+import { Router } from "express";
+import type { PluginEnvironment } from "../types";
+import { ScmIntegrations } from "@backstage/integration";
+
+// Import skeActions
+import { skeActions } from "@syntasso/plugin-ske-backend";
+
+export default async function createPlugin(
+  env: PluginEnvironment
+): Promise<Router> {
+  const catalogClient = new CatalogClient({
+    discoveryApi: env.discovery,
+  });
+
+  /* To preserve the builtin actions, do the following */
+  const integrations = ScmIntegrations.fromConfig(env.config);
+  const builtInActions = createBuiltinActions({
+    catalogClient,
+    integrations,
+    config: env.config,
+    reader: env.reader,
+  });
+
+  const actions = [
+    ...skeActions({ integrations, config: env.config }),
+    ...builtInActions,
+  ];
+
+  return await createRouter({
+    logger: env.logger,
+    config: env.config,
+    database: env.database,
+    reader: env.reader,
+    catalogClient,
+    identity: env.identity,
+    permissions: env.permissions,
+    actions, // <-- add the actions here
+  });
+}
+```
+
+## Using the actions
+
+Once both your front-end and back-end plugins are installed and configured, your
+backstage should now have the SKE actions available and it should be able to render
+Kratix resources in the catalog.
+
+To access the documentation for the SKE actions, check the actions documentation
+on your Backstage instance, which is available on the `/create/actions`
+endpoint.
+
+Any catalog item with `type: "kratix-resource"` will be rendered using the
+`@syntasso/plugin-ske-frontend` plugin.
