@@ -58,7 +58,6 @@ described below:
 RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
     #highlight-next-line
     --mount=type=secret,id=npmrc,target=/app/.npmrc,uid=1000,gid=1000 \
-    cat /app/.npmrc && \
     yarn install --frozen-lockfile --production --network-timeout 300000
 ```
 
@@ -170,7 +169,7 @@ apiRouter.use("/ske", await createRouter({ logger, config }));
 
 ### Add the scaffolder action
 
-Open the `packages/backend/src/scaffolder.ts` file and add the SKE actions. Your
+Open the `packages/backend/src/plugins/scaffolder.ts` file and add the SKE actions. Your
 `scaffolder.ts` should look something like this:
 
 ```typescript
@@ -183,8 +182,10 @@ import { Router } from "express";
 import type { PluginEnvironment } from "../types";
 import { ScmIntegrations } from "@backstage/integration";
 
+//highlight-start
 // Import skeActions
 import { skeActions } from "@syntasso/plugin-ske-backend";
+//highlight-end
 
 export default async function createPlugin(
   env: PluginEnvironment
@@ -202,10 +203,12 @@ export default async function createPlugin(
     reader: env.reader,
   });
 
+  //highlight-start
   const actions = [
     ...skeActions({ integrations, config: env.config }),
     ...builtInActions,
   ];
+  //highlight-end
 
   return await createRouter({
     logger: env.logger,
@@ -215,10 +218,16 @@ export default async function createPlugin(
     catalogClient,
     identity: env.identity,
     permissions: env.permissions,
+    //highlight-next-line
     actions, // <-- add the actions here
   });
 }
 ```
+
+Once both packages are added and configured, run `yarn install` from the root of
+the backstage repository to install the new packages.
+
+Your backstage instance is now ready to use the SKE plugins.
 
 ## Using the actions
 
