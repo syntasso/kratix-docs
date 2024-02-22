@@ -95,6 +95,13 @@ with read and write permissions to the repository. The token is created on the p
 not related to any individual user. Populate the `username` field with any value and
 the `password` field with the token value.
 
+#### AWS CodeCommit
+
+AWS CodeCommit supports using [basic
+auth](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html?icmpid=docs_acc_console_connect_np#setting-up-gc-iam)
+to authenticate with the repository. Populate the `username` and `password`
+field with the values generated for the HTTPS Git credentials.
+
 ---
 
 Require a different method of authentication? Get in touch with us at
