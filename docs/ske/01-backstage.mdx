@@ -32,18 +32,15 @@ export NODE_OPTIONS=--no-node-snapshot
 
 ### For local development {#local-development}
 
-To access the private npm registry in your local machine, you can create a
-`.npmrc` file in your home directory with the following content:
+To access the private npm registry in your local machine, you will need npm config in a
+local `~/.npmrc` file in your home directory. Create this file if it doesn't already
+exist, and add the following content:
 
 ```bash
-# replace the token with the provided token
-export PRIVATE_REGISTRY_TOKEN="<YOUR_TOKEN_HERE>"
-
-cat <<EOF > ~/.npmrc
+# replace <YOUR_TOKEN_HERE> with the provided token
 @syntasso:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${PRIVATE_REGISTRY_TOKEN}
+//npm.pkg.github.com/:_authToken="<YOUR_TOKEN_HERE>"
 always-auth=true
-EOF
 ```
 
 ### For Docker
@@ -51,7 +48,7 @@ EOF
 For Docker builds, you must update the `packages/backend/Dockerfile` in your Backstage
 app so that it can access the private npm registry.
 
-Update the `RUN` command that is runnnig the `yarn install` to mount a secret, as
+Update the `RUN` command that is running the `yarn install` to mount a secret, as
 described below:
 
 ```Dockerfile
