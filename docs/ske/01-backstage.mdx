@@ -195,14 +195,6 @@ apiRouter.use("/ske", await createRouter({ logger, config }));
 Open the `packages/backend/src/plugins/scaffolder.ts` file and add the SKE actions. Your
 `scaffolder.ts` should look something like this:
 
-:::tip
-
-If you are adding the plugin to a new Backstage app (or if you have not modified
-the `scaffolder.ts` file previously), you can just copy and paste the entire
-snippet below.
-
-:::
-
 ```typescript
 import { CatalogClient } from "@backstage/catalog-client";
 import {
@@ -255,8 +247,19 @@ export default async function createPlugin(
 }
 ```
 
-Once both packages are added and configured, run `yarn install` from the root of
-the backstage repository to install the new packages.
+:::tip
+
+If you are adding the plugin to a new Backstage app (or if you have not modified
+the `scaffolder.ts` file previously), you can just copy and paste the entire
+snippet below.
+
+:::
+
+Once both packages are added and configured, from the root of your Backstage app, run:
+
+```bash
+yarn install
+```
 
 Your backstage instance is now ready to use the SKE plugins.
 
