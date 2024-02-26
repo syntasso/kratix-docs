@@ -43,6 +43,18 @@ exist, and add the following content:
 always-auth=true
 ```
 
+:::info
+
+For Yarn 3+, use the following command to set a local `.yarnrc.yml` file:
+
+```bash
+export PRIVATE_REGISTRY_TOKEN="<YOUR_TOKEN_HERE>"
+
+yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthToken": "$PRIVATE_REGISTRY_TOKEN", "npmRegistryServer": "https://npm.pkg.github.com"}}'
+```
+
+:::
+
 ### For Docker
 
 For Docker builds, you must update the `packages/backend/Dockerfile` in your Backstage
@@ -83,15 +95,19 @@ yarn add @syntasso/plugin-ske-frontend --cwd packages/app
 In the `packages/app/src/components/catalog/EntityPage.tsx` file, add the following to the list of imports:
 
 ```typescript
-import { KratixEntityPage } from "@syntasso/plugin-ske-frontend";
+import { KratixPromiseEntityPage, KratixResourceEntityPage } from '@syntasso/plugin-ske-frontend';
 ```
 
 Find the line where the `const componentPage` is being declared. Add the following case
 to the `EntitySwitch`:
 
 ```typescript
-<EntitySwitch.Case if={isComponentType("kratix-resource")}>
-  <KratixEntityPage>{entityWarningContent}</KratixEntityPage>
+<EntitySwitch.Case if={isComponentType('kratix-promise')}>
+  <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
+</EntitySwitch.Case>
+
+<EntitySwitch.Case if={isComponentType('kratix-resource')}>
+  <KratixResourceEntityPage>{entityWarningContent}</KratixResourceEntityPage>
 </EntitySwitch.Case>
 ```
 
@@ -103,14 +119,21 @@ const componentPage = (
     <EntitySwitch.Case if={isComponentType("service")}>
       {serviceEntityPage}
     </EntitySwitch.Case>
+
     <EntitySwitch.Case if={isComponentType("website")}>
       {websiteEntityPage}
     </EntitySwitch.Case>
+
     //highlight-start
-    <EntitySwitch.Case if={isComponentType("kratix-resource")}>
-      <KratixEntityPage>{entityWarningContent}</KratixEntityPage>
+    <EntitySwitch.Case if={isComponentType('kratix-promise')}>
+      <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case if={isComponentType('kratix-resource')}>
+      <KratixResourceEntityPage>{entityWarningContent}</KratixResourceEntityPage>
     </EntitySwitch.Case>
     //highlight-end
+
     <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
   </EntitySwitch>
 );
@@ -216,13 +239,24 @@ export default async function createPlugin(
     identity: env.identity,
     permissions: env.permissions,
     //highlight-next-line
-    actions, // <-- add the actions here
+    actions, // <-- add this line
   });
 }
 ```
 
-Once both packages are added and configured, run `yarn install` from the root of
-the backstage repository to install the new packages.
+:::tip
+
+If you are adding the plugin to a new Backstage app (or if you have not modified
+the `scaffolder.ts` file previously), you can just copy and paste the entire
+snippet below.
+
+:::
+
+Once both packages are added and configured, from the root of your Backstage app, run:
+
+```bash
+yarn install
+```
 
 Your backstage instance is now ready to use the SKE plugins.
 
@@ -253,13 +287,13 @@ metadata:
   #highlight-start
   annotations:
     kratix.io/status: |
-      message: "Some Status Message"
-  labels:
+      {"message": "Some Status Message"}
     kratix.io/group: "marketplace.example.io" # Promise API Group
     kratix.io/version: "v1alpha1" # Promise API Version
     kratix.io/kind: Jenkins # Promise API Kind
     kratix.io/name: my-jenkins # Name of the Resource
     kratix.io/namespace: default # Namespace of the Resource
+    kratix.io/backstage-promise-template: "create-jenkins" # Name of the Scaffolder template used to create the resource
   #highlight-end
 spec:
   # highlight-next-line
