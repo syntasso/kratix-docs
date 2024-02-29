@@ -270,6 +270,54 @@ To access the documentation for the SKE actions, check the actions documentation
 on your Backstage instance, which is available on the `/create/actions`
 endpoint.
 
+### Example: Using the `ske:configure-resource` action in a Template
+
+The `ske:configure-resource` action works by pushing a generated Resource Request manifest
+to a Git repository, and can be used in a Template to make these requests from within
+Backstage. The Template allows all Promise API fields to be filled in within Backstage.
+
+An outline of a Template for generating Jenkins Resource Requests is as follows:
+
+```yaml
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  description: Jenkins as a Service
+  name: jenkins-promise-template
+  title: Jenkins
+spec:
+  lifecycle: experimental
+  owner: kratix-platform
+  parameters:
+  - properties:
+      objname:
+        description: Name for the request in the platform cluster
+        title: Name
+        type: string
+      objnamespace:
+        description: Namespace for the request in the platform cluster
+        title: Namespace
+        type: string
+    required:
+    - objname
+    - objnamespace
+    title: Jenkins Instance Metadata
+  # other properties can be added here
+  steps:
+  - action: ske:configure-resource
+    id: ske-configure-resource
+    input:
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: jenkins
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace}}
+        spec: ${{ parameters.spec | dump }}
+    name: Create a Jenkins
+  type: kratix-resource
+```
+
 ## The Kratix Catalog Entities
 
 The front-end plugin provides specific entity pages for both Kratix Promises and Kratix
@@ -298,7 +346,7 @@ metadata:
     kratix.io/api-group: marketplace.kratix.io # The Group of the resource provided by the Promise
     kratix.io/status: |
       {"message": "Some Status Message"}
-    kratix.io/backstage-promise-template: "create-jenkins" # Name of the Scaffolder template used to create the resource
+    kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
 spec:
   # highlight-next-line
   type: kratix-promise
@@ -336,7 +384,7 @@ metadata:
     kratix.io/kind: Jenkins # Promise API Kind
     kratix.io/name: my-jenkins # Name of the Resource
     kratix.io/namespace: default # Namespace of the Resource
-    kratix.io/backstage-promise-template: "create-jenkins" # Name of the Scaffolder template used to create the resource
+    kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
   #highlight-end
 spec:
   #highlight-start
