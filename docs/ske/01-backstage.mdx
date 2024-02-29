@@ -111,7 +111,8 @@ to the `EntitySwitch`:
 </EntitySwitch.Case>
 ```
 
-When updated, variable should look similar to this with any other additional case statements:
+When updated, the `componentPage` variable should look similar to this, with any other
+additional case statements:
 
 ```typescript
 const componentPage = (
@@ -155,7 +156,7 @@ Add the following to the `app-config.yaml` file:
 ske:
   scm:
     type: "github" # or "gitlab"
-    token: <YOUR_TOKEN> # github/gitlab access token
+    token: "my-access-token" # github/gitlab access token
     repoUrl: "https://github.com/my-org/my-repo" # repository url
     path: "resources" # optional; path within the repository
     branch: "main" # optional; branch to use, default is "main"
@@ -337,6 +338,7 @@ definition would look like this:
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
+  #highlight-start
   name: jenkins-promise # Name of the Promise Component
   title: Jenkins Promise # Title to be displayed in Backstage
   description: Jenkins as a Service # Description of the Promise
@@ -347,6 +349,7 @@ metadata:
     kratix.io/status: |
       {"message": "Some Status Message"}
     kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
+  #highlight-end
 spec:
   # highlight-next-line
   type: kratix-promise
@@ -393,5 +396,4 @@ spec:
     - component:default/jenkins-promise # Entity reference for the Promise Component
   #highlight-end
   # remainder of the component spec...
-  # ...
 ```
