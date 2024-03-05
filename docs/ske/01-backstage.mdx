@@ -155,12 +155,22 @@ Add the following to the `app-config.yaml` file:
 ```yaml
 ske:
   scm:
-    type: "github" # or "gitlab"
-    token: "my-access-token" # github/gitlab access token
+    token: "my-access-token" # git access token
     repoUrl: "https://github.com/my-org/my-repo" # repository url
-    path: "resources" # optional; path within the repository
-    branch: "main" # optional; branch to use, default is "main"
+    type: "github" # optional; git provider, currently one of "github" or "gitlab" (used to determine username if `username` not set)
+    username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
+    path: "resources" # optional; path within the repository (default: "")
+    branch: "main" # optional; branch to use (default: "main")
+    defaultAuthor: # optional; git author details
+      name: "my-name" # default: "SKE"
+      email: "my@email.com" # default: ske@backstage.io
 ```
+
+The back-end plugin uses basic auth to authenticate against the Git provider. If you wish
+to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the
+`username` field, and set the `token` field to the password or token. Otherwise, the
+username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username`
+or `type` must be provided.
 
 The `repoUrl` is the repository to which Backstage will push the resource
 requests; you must configure your platform to reconcile on new documents.
