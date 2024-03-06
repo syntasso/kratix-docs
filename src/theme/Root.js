@@ -46,7 +46,7 @@ export default function Root({children}) {
 			accepting, you agree to our use of such cookies. <a
 			style={{ color: "white", textDecoration: "underline" }}
 			href="https://www.kratix.io/cookie-policy">Cookie Policy</a>
-		</CookieConsent>,
-		<>{children}</>,
+		</CookieConsent>
+		<>{children}</>
 	</>;
 }
