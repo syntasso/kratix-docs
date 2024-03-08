@@ -4,4 +4,300 @@ description: Documentation for how to use the SKE Backstage Generator to automat
 sidebar_label: SKE Backstage Generator
 ---
 
-tbd
+The SKE Backstage Generator provides automated generation of the necessary Template and
+Component manifests for your Promises and requested Resources.
+
+These manifests are read by Backstage and are designed to work seamlessly with the
+SKE Backstage plugins.
+
+# Prerequisites
+
+## SKE Backstage plugins
+
+The `ske-backstage-generator` uses an action from the `ske-backend` Backstage plugin.
+This action is used within the generated Template to create a Resource Request.
+The generated Components are also used by the `ske-frontend` Backstage plugin to display
+Promise and Resource metadata.
+
+In order to utilise the Templates and Components, you should also install both the
+`ske-backend` and `ske-frontend` plugins into your Backstage instance.
+
+Instructions for doing so can be found in the Backstage SKE documentation.
+
+## Backstage Destination {#destination}
+
+You must have a Destination created with the `environment: backstage` label. See the
+[Kratix Backstage docs](https://docs.kratix.io/main/reference/backstage/intro#setting-up-kratix-with-backstage)
+for setup instructions.
+
+# How does it work?
+
+The `ske-backstage-generator` image is intended to be run as part of your Configure
+Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template
+and Component manifests, and schedule them to your [Backstage Destination](#destination).
+
+## Promise Configure
+
+In a Promise Configure workflow, two Backstage manifests will be generated:
+
+- **Promise Component:** A Backstage Component representing the Promise.
+- **Promise Template:** A Backstage Template representing the Promise API (i.e. the CRD
+  for Resources created fromt this Promise).
+
+<details>
+  <summary> _Click here_ for an example generated Promise Component </summary>
+
+  <CodeBlock language="yaml" title="Promise Component manifest">
+    apiVersion: backstage.io/v1alpha1
+    kind: Component
+    metadata:
+      name: jenkins-promise
+      title: Jenkins Promise
+      description: Jenkins as a Service
+      tags:
+      - kratix
+      annotations:
+        backstage.io/kubernetes-id: cicd
+        kratix.io/promise-name: cicd
+        kratix.io/description: Jenkins as a Service
+        kratix.io/api-name: Jenkins
+        kratix.io/api-group: marketplace.kratix.io
+        kratix.io/status: ''
+        kratix.io/backstage-promise-template: jenkins-promise-template
+      links:
+      - icon: help
+        title: Support
+        url: https://github.com/syntasso/kratix-backstage
+    spec:
+      lifecycle: production
+      owner: kratix-platform
+      type: kratix-promise
+  </CodeBlock>
+</details>
+
+<details>
+  <summary> _Click here_ for an example generated Promise Template </summary>
+
+  <CodeBlock language="yaml" title="Promise Template manifest">
+    apiVersion: scaffolder.backstage.io/v1beta3
+    kind: Template
+    metadata:
+      creationTimestamp: null
+      description: Jenkins as a Service
+      name: jenkins-promise-template
+      tags:
+      - kratix
+      - cicd-promise
+      title: Jenkins
+    spec:
+      lifecycle: experimental
+      owner: kratix-platform
+      parameters:
+      - properties:
+          objname:
+            description: Name for the request in the platform cluster
+            title: Name
+            type: string
+          objnamespace:
+            description: Namespace for the request in the platform cluster
+            title: Namespace
+            type: string
+        required:
+        - objname
+        - objnamespace
+        title: Jenkins Instance Metadata
+      - properties:
+          spec:
+            properties:
+              basicAuth:
+                properties:
+                  password:
+                    description: Password for Jenkins
+                    title: BasicAuth.Password
+                    type: string
+                  username:
+                    description: Username for Jenkins
+                    title: BasicAuth.Username
+                    type: string
+                required:
+                - username
+                - password
+                title: BasicAuth
+                type: object
+            title: ""
+            type: object
+        title: BasicAuth
+      - properties:
+          spec:
+            properties:
+              cluster:
+                properties:
+                  env:
+                    default: dev
+                    description: |-
+                      Configures and deploys this Jenkins with Environment specific configuration. Prod Jenkins comes with Backups pre-configured.
+                      Must match regular expression '^(dev|prod)$'
+                    title: Cluster.Env
+                    type: string
+                  size:
+                    default: small
+                    description: |
+                      Configures and deploys this Jenkins with Environment specific configuration. Prod Jenkins comes with Backups pre-configured.
+                    enum:
+                    - small
+                    - medium
+                    - large
+                    title: Cluster.Size
+                    type: string
+                required:
+                - env
+                - size
+                title: Cluster
+                type: object
+            title: ""
+            type: object
+        title: Cluster
+      - properties:
+          spec:
+            properties:
+              plugins:
+                description: Plugins to install in the requested Jenkins
+                items:
+                  properties:
+                    downloadURL:
+                      description: DownloadURL is the custom url from where plugin has
+                        to be downloaded.
+                      title: Plugins.DownloadURL
+                      type: string
+                    name:
+                      description: Name is the name of Jenkins plugin
+                      title: Plugins.Name
+                      type: string
+                    version:
+                      description: Version is the version of Jenkins plugin
+                      title: Plugins.Version
+                      type: string
+                  type: object
+                title: Plugins
+                type: array
+            title: ""
+            type: object
+        title: Plugins
+      steps:
+      - action: ske:configure-resource
+        id: ske-configure-resource
+        input:
+          manifest: |
+            apiVersion: marketplace.kratix.io/v1alpha1
+            kind: jenkins
+            metadata:
+              creationTimestamp: null
+              labels:
+                backstage.io/kubernetes-id: jenkins
+              name: ${{ parameters.objname }}
+              namespace: ${{ parameters.objnamespace}}
+            spec: ${{ parameters.spec | dump }}
+        name: Create a Jenkins
+      type: kratix-resource
+  </CodeBlock>
+</details>
+
+## Resource Configure
+
+In a Resource Configure workflow, a single Backstage manifest will be generated:
+
+- **Resource Component:** A Backstage Component representing the Resource.
+
+<details>
+  <summary> _Click here_ for an example generated Resource Component </summary>
+
+  <CodeBlock language="yaml" title="Resource Component manifest">
+  apiVersion: backstage.io/v1alpha1
+  kind: Component
+  metadata:
+  name: my-request-jenkins
+  title: "my-request Jenkins"
+  description: "my-request Jenkins created via cicd Promise"
+  annotations:
+    backstage.io/kubernetes-label-selector: cicd-cr=my-request
+    kratix.io/promise-name: cicd
+    kratix.io/name: my-request
+    kratix.io/namespace: default
+    kratix.io/group: marketplace.kratix.io
+    kratix.io/version: v1alpha1
+    kratix.io/kind: Jenkins
+    kratix.io/status: ''
+    kratix.io/backstage-promise-template: jenkins-promise-template
+  links:
+  - url: https://github.com/syntasso/kratix-backstage
+    title: Support
+    icon: help
+  spec:
+  type: kratix-resource
+  lifecycle: production
+  owner: kratix-platform
+  dependsOn:
+    - component:default/jenkins-promise
+  </CodeBlock>
+</details>
+
+# Pulling the `ske-backstage-generator` image
+
+The image is hosted in a private registry. To pull the image, you will need to
+authenticate using the token you have been provided with. Run the following command,
+providing your token as the password when prompted:
+
+```
+docker login ghcr.io --username syntasso-pkg
+docker pull ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+```
+
+# Using the image in Promise and Resource workflows
+
+To use the `ske-backstage-generator` image, update your Promise definition to include the
+generator as a workflow step for both the Promise Configure and Resource Configure
+workflows:
+
+```yaml
+  ...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+            name: ske-backstage-generator
+          #highlight-end
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: instance-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-configure-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+            name: ske-backstage-generator
+          #highlight-end
+```
+
+Your Kubernetes cluster must have permission to pull this image from the registry.
+
+:::info
+
+If your cluster is running in a secure environment, you may wish to pull this image and
+push it to an internal registry which your cluster has permission to pull from.
+
+:::
