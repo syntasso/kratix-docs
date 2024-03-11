@@ -2,6 +2,7 @@
 title: Configuring Backstage
 description: Documentation for how to configure Backstage
 sidebar_label: Configuring Backstage
+slug: configuring-backstage
 ---
 
 To integrate Kratix with Backstage, you need to configure both Backstate and Kratix so that they can communicate with each other.
@@ -44,7 +45,7 @@ For Backstage to get its [catalog](https://backstage.io/docs/features/software-c
 
 You can follow the [official Backstage documentation](https://backstage.io/docs/integrations/) for details on how to configure the integration according to your state store:
 
-- For S3-Compatible buckets, check [this page](https://backstage.io/docs/integrations/aws-s3/locations.
+- For S3-Compatible buckets, check [this page](https://backstage.io/docs/integrations/aws-s3/locations).
 - For Git repositories, the configuration depends on the specific provider. For GitHub integration, for example, check [this page](https://backstage.io/docs/integrations/github/locations).
 
 The following steps will guide you through the process of configuring Backstage to read its catalog from a S3-compatible bucket, and will assume you have deployed Kratix following the [quick start guide](/main/quick-start).
@@ -74,15 +75,11 @@ integrations:
   awsS3:
     - endpoint: "http://MINIO_ADDRESS"
       s3ForcePathStyle: true
-      accessKeyId: minioadmin
-      secretAccessKey: minioadmin
+      accessKeyId: ${AWS_ACCESS_KEY_ID}
+      secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
 ```
 
-:::tip
-
-For simplicity, we are hardcoding the credentials directly in the `app-config.yaml` file. For production environments you probably want to use Environment variables or a Secret Manager.
-
-:::
+Before starting your Backstage, make sure to set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables to `minioadmin` and `minioadmin`.
 
 Replace `MINIO_ADDRESS` with the address of your MinIO instance. If you are running Kratix with minikube, you can get the address by running:
 
@@ -93,7 +90,7 @@ minikube service minio -n kratix-platform-system --url
 For other environments, you can open a port-forward to the MinIO service:
 
 ```bash
-kubectl port-forward -n kratix-platform-system svc/minio 31337:9000
+kubectl port-forward -n kratix-platform-system svc/minio 31337:80
 ```
 
 and use `http://localhost:31337` as the endpoint.
@@ -119,13 +116,9 @@ catalog:
         schedule:
           frequency: { seconds: 10 }
           timeout: { seconds: 30 }
+    rules:
+    - allow: [Component, Template] # Make sure to allow at least "component" and "template" entities
 ```
-
-:::tip
-
-If you run the `@backstage/create-app` command above, you may have some example data in your catalog. You can remove them by removing the remaining keys in the `catalog` object.
-
-:::
 
 Since the AWS provider is not one of the default Backstage providers, you will need to install the AWS Catalog plugin.
 
@@ -169,7 +162,7 @@ The steps below will build from the previous section and assume you have a Krati
 
 ### Configure the State Store
 
-The quick start guide already configures a [Kratix State Store] pointing to a bucket in the MinIO instance. You can validate the setup by running the following command:
+The quick start guide already configures a [Kratix State Store](/main/reference/statestore/intro) pointing to a bucket in the MinIO instance. You can validate the setup by running the following command:
 
 ```bash
 kubectl get bucketstatestores.platform.kratix.io
@@ -231,7 +224,11 @@ spec:
 EOF
 ```
 
-Note how the `path` field matches the `path` you configured in the Backstage `app-config.yaml` file, under the `catalog`. If you are using a different deployment setup, make sure to update the configurations accordingly
+:::info
+
+The `path` field should match the `path` you configured in the Backstage `app-config.yaml` file, under the `catalog`. If you are using a different deployment setup, make sure to update the configurations accordingly.
+
+:::
 
 ## Next
 

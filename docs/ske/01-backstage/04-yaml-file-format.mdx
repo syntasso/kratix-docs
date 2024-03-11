@@ -4,17 +4,8 @@ description: Reference documentation for what the SKE Plugins expect from the Ba
 sidebar_label: YAML File Format
 ---
 
-## Using the actions
 
-Once both your front-end and back-end plugins are installed and configured, your
-backstage should now have the SKE actions available and it should be able to render
-Kratix resources in the catalog.
-
-To access the documentation for the SKE actions, check the actions documentation
-on your Backstage instance, which is available on the `/create/actions`
-endpoint.
-
-### Example: Using the `ske:configure-resource` action in a Template
+### Promise Template
 
 The `ske:configure-resource` action works by pushing a generated Resource Request manifest
 to a Git repository, and can be used in a Template to make these requests from within
@@ -46,7 +37,7 @@ spec:
         - objname
         - objnamespace
       title: Jenkins Instance Metadata
-  # other properties can be added here
+  # other properties
   steps:
     - action: ske:configure-resource
       id: ske-configure-resource
@@ -81,20 +72,22 @@ definition would look like this:
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  #highlight-start
   name: jenkins-promise # Name of the Promise Component
   title: Jenkins Promise # Title to be displayed in Backstage
   description: Jenkins as a Service # Description of the Promise
+  tags:
+    - kratix
   annotations:
+    backstage.io/kubernetes-id: cicd
     kratix.io/promise-name: cicd # The Promise's metadata.name
     kratix.io/api-name: Jenkins # The Kind of the resource provided by the Promise
     kratix.io/api-group: marketplace.kratix.io # The Group of the resource provided by the Promise
     kratix.io/status: |
       {"message": "Some Status Message"}
     kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
-  #highlight-end
 spec:
-  # highlight-next-line
+  lifecycle: production
+  owner: kratix-platform
   type: kratix-promise
   # remainder of the component spec...
 ```
@@ -117,11 +110,11 @@ Component definition for the Jenkins resource would look like this:
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  #highlight-start
   name: my-request-jenkins # Name of the Resource Component
   title: "my-request Jenkins" # Title to be displayed in Backstage
   description: "my-request Jenkins created via cicd Promise" # Description of the resource
   annotations:
+    backstage.io/kubernetes-label-selector: cicd-cr=my-request
     kratix.io/status: |
       {"message": "Some Status Message"}
     kratix.io/promise-name: cicd # The Jenkins Promise's metadata.name
@@ -131,12 +124,11 @@ metadata:
     kratix.io/name: my-jenkins # Name of the Resource
     kratix.io/namespace: default # Namespace of the Resource
     kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
-  #highlight-end
 spec:
-  #highlight-start
   type: kratix-resource
+  lifecycle: production
+  owner: kratix-platform
   dependsOn:
-    - component:default/jenkins-promise # Entity reference for the Promise Component
-  #highlight-end
+    - component:default/jenkins-promise
   # remainder of the component spec...
 ```

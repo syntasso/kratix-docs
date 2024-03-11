@@ -303,8 +303,31 @@ If you don't want to use the Flux CLI, you can check out the [Flux documentation
 
 :::
 
-### Next
+## Start your Backstage app
 
-You should now have two-way communication between Kratix and Backstage set up. You can now use the SKE actions to create and manage Kratix resources from within Backstage.
+You should now have two-way communication between Kratix and Backstage set up. You can now start your Backstage with the necessary environment variables set:
+
+```bash
+export NODE_OPTIONS=--no-node-snapshot
+export AWS_ACCESS_KEY_ID=minioadmin
+export AWS_SECRET_ACCESS_KEY=minioadmin
+yarn dev
+```
+
+:::info
+
+Make sure the port-forwarding to the MinIO instance is still running in a separate terminal.
+
+:::
+
+## Using the actions
+
+Once both your front-end and back-end plugins are installed and configured, your
+backstage should now have the SKE actions available and it should be able to render
+Kratix resources in the catalog.
+
+To access the documentation for the SKE actions, check the actions documentation
+on your Backstage instance, which is available on the `/create/actions`
+endpoint.
 
 The [next guide](./generator) will show how you can use the SKE Backstage Generator to automatically generate Backstage entities from your Promises. If you want to manually configure your Promises, check the [YAML File Format](./yaml-file-format) reference.
