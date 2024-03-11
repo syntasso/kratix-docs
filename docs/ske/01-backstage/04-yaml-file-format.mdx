@@ -1,0 +1,134 @@
+---
+title: YAML File Format
+description: Reference documentation for what the SKE Plugins expect from the Backstage Entities
+sidebar_label: YAML File Format
+---
+
+
+### Promise Template
+
+The `ske:configure-resource` action works by pushing a generated Resource Request manifest
+to a Git repository, and can be used in a Template to make these requests from within
+Backstage. The Template allows all Promise API fields to be filled in within Backstage.
+
+An outline of a Template for generating Jenkins Resource Requests is as follows:
+
+```yaml
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  description: Jenkins as a Service
+  name: jenkins-promise-template
+  title: Jenkins
+spec:
+  lifecycle: experimental
+  owner: kratix-platform
+  parameters:
+    - properties:
+        objname:
+          description: Name for the request in the platform cluster
+          title: Name
+          type: string
+        objnamespace:
+          description: Namespace for the request in the platform cluster
+          title: Namespace
+          type: string
+      required:
+        - objname
+        - objnamespace
+      title: Jenkins Instance Metadata
+  # other properties
+  steps:
+    - action: ske:configure-resource
+      id: ske-configure-resource
+      input:
+        manifest: |
+          apiVersion: marketplace.kratix.io/v1alpha1
+          kind: jenkins
+          metadata:
+            name: ${{ parameters.objname }}
+            namespace: ${{ parameters.objnamespace}}
+          spec: ${{ parameters.spec | dump }}
+      name: Create a Jenkins
+  type: kratix-resource
+```
+
+## The Kratix Catalog Entities
+
+The front-end plugin provides specific entity pages for both Kratix Promises and Kratix
+Resources. To get all features of the plugin, your Components must include a few fields
+and annotations so that the front-end plugin can render the right data.
+
+### Kratix Promise Entity
+
+Kratix Promises should be created with `type: "kratix-promise"` and a set of `kratix.io/`
+annotations which are used to convey metadata to the front-end plugin. The name, title
+and description should also be set to appropriate values.
+
+For example, considering a Promise that provides a Jenkins resource, the Component
+definition would look like this:
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: jenkins-promise # Name of the Promise Component
+  title: Jenkins Promise # Title to be displayed in Backstage
+  description: Jenkins as a Service # Description of the Promise
+  tags:
+    - kratix
+  annotations:
+    backstage.io/kubernetes-id: cicd
+    kratix.io/promise-name: cicd # The Promise's metadata.name
+    kratix.io/api-name: Jenkins # The Kind of the resource provided by the Promise
+    kratix.io/api-group: marketplace.kratix.io # The Group of the resource provided by the Promise
+    kratix.io/status: |
+      {"message": "Some Status Message"}
+    kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
+spec:
+  lifecycle: production
+  owner: kratix-platform
+  type: kratix-promise
+  # remainder of the component spec...
+```
+
+### Kratix Resource Entity
+
+Kratix Resources should be created with `type: "kratix-resource"` and a set of `kratix.io/`
+annotations which are used to convey metadata to the front-end plugin. The name, title
+and description should also be set to appropriate values.
+
+The relationship between the Resource and the Promise can be displayed in the front-end
+plugin by adding a [`dependsOn` relation](https://backstage.io/docs/features/software-catalog/well-known-relations/#dependson-and-dependencyof)
+to the spec, which references the Promise Component via an
+[entity reference](https://backstage.io/docs/features/software-catalog/references#string-references).
+
+For example, considering a Jenkins resource requested on the Promise shown above, the
+Component definition for the Jenkins resource would look like this:
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: my-request-jenkins # Name of the Resource Component
+  title: "my-request Jenkins" # Title to be displayed in Backstage
+  description: "my-request Jenkins created via cicd Promise" # Description of the resource
+  annotations:
+    backstage.io/kubernetes-label-selector: cicd-cr=my-request
+    kratix.io/status: |
+      {"message": "Some Status Message"}
+    kratix.io/promise-name: cicd # The Jenkins Promise's metadata.name
+    kratix.io/group: "marketplace.example.io" # Promise API Group
+    kratix.io/version: "v1alpha1" # Promise API Version
+    kratix.io/kind: Jenkins # Promise API Kind
+    kratix.io/name: my-jenkins # Name of the Resource
+    kratix.io/namespace: default # Namespace of the Resource
+    kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
+spec:
+  type: kratix-resource
+  lifecycle: production
+  owner: kratix-platform
+  dependsOn:
+    - component:default/jenkins-promise
+  # remainder of the component spec...
+```

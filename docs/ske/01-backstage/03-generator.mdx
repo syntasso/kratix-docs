@@ -1,0 +1,145 @@
+---
+title: SKE Backstage Generator
+description: Documentation for how to use the SKE Backstage Generator to automatically populate your backstage catalog
+sidebar_label: SKE Backstage Generator
+---
+
+The SKE Backstage Generator provides automated generation of the necessary Template and
+Component manifests for your Promises and requested Resources.
+
+These manifests are read by Backstage and are designed to work seamlessly with the
+SKE Backstage plugins.
+
+## Prerequisites
+
+### SKE Backstage plugins
+
+The `ske-backstage-generator` uses an action from the `ske-backend` Backstage plugin.
+This action is used within the generated Template to create a Resource Request.
+The generated Components are also used by the `ske-frontend` Backstage plugin to display
+Promise and Resource metadata.
+
+In order to utilise the Templates and Components, you should also install both the
+`ske-backend` and `ske-frontend` plugins into your Backstage instance.
+
+See [Configuring the Plugins](./plugins) for instructions.
+
+### Backstage Destination {#destination}
+
+You must have a Destination created with the `environment: backstage` label. See the
+[Kratix Backstage docs](./configuring-backstage#configure-a-destination-for-backstage)
+for setup instructions.
+
+## How does it work?
+
+The `ske-backstage-generator` image is intended to be run as part of your Configure
+Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template
+and Component manifests, and schedule them to your [Backstage Destination](#destination).
+
+### Promise Configure
+
+In a Promise Configure workflow, two Backstage manifests will be generated:
+
+- **Promise Component:** A Backstage Component representing the Promise.
+- **Promise Template:** A Backstage Template representing the Promise API (i.e. the CRD
+  for Resources created fromt this Promise).
+
+Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
+
+### Resource Configure
+
+In a Resource Configure workflow, a single Backstage manifest will be generated:
+
+- **Resource Component:** A Backstage Component representing the Resource.
+
+Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
+
+## Accessing the SKE Generator image
+
+The image is hosted in a private registry. To access the image, you will need to
+authenticate using the token you have been provided with. For docker, you can
+run the following command, providing your token as the password when prompted:
+
+```bash
+docker login ghcr.io --username syntasso-pkg
+```
+
+If you are using a different container engine, follow the docs for your specific
+tool.
+
+Once you have authenticated, you should be able to pull the image:
+
+```bash
+docker pull ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+```
+
+Your Kubernetes cluster must have permission to [pull this image from the
+private
+registry](https://kubernetes.io/docs/concepts/containers/images/#configuring-nodes-to-authenticate-to-a-private-registry).
+
+If you are following the [quick-start guide](./quick-start), you can load the image
+directly to the Kubernetes cache. Different tools have different commands for this. For example:
+
+```bash
+# For minikube
+minikube image load ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+
+# For KinD
+kind load docker-image ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+```
+
+For other tools, follow their specific documentation.
+
+:::info
+
+If your cluster is running in a secure environment, you may wish to pull this image and
+push it to an internal registry which your cluster has permission to pull from.
+
+:::
+
+## Using the image in your Workflows
+
+To use the `ske-backstage-generator` image, update your Promise definition to include the
+generator as a workflow step for both the Promise Configure and Resource Configure
+workflows:
+
+```yaml title="workflows section in a Promise file"
+  ...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+            name: ske-backstage-generator
+          #highlight-end
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: instance-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-configure-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+            name: ske-backstage-generator
+          #highlight-end
+```
+
+Once your Promise is updated, the generator will be run as part of your
+Workflows. If you install the Promise, you should see a Component automatically
+appearing in your Backstage instance, together with a new Template. If you use
+the Template to create a Resource, you should see the resource Component
+appearing as well as the Resource itself being created in your cluster.

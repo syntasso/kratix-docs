@@ -1,0 +1,47 @@
+---
+title: Introduction
+description: Introduction to Backstage with Kratix
+sidebar_label: Introduction
+---
+
+Backstage is a framework for building developer portals, while Kratix is a
+framework for building Platforms. Both systems can integrate with each other to
+provide an end-to-end experience for developers.
+
+With Kratix, you can automate the process of populating the Backstage catalog
+with Components and Templates. Developers can then send requests to Kratix via
+the Backstage Template to create and manage Resources.
+
+This document will give you an overview of the architecture and go through the
+steps to integrate the two systems.
+
+```mdx-code-block
+import BackstageDiagram from "/img/docs/ske/backstage-diagram.png"
+```
+
+## Architecture
+
+To integrate Kratix with Backstage, you need to configure five things:
+
+1. Make Backstage send requests to a Git repository
+2. Configure your Platform cluster to reconcile on changes to the repository
+2. Update your Promise to generate Backstage Entities in the Workflows
+3. Configure Kratix to send the Backstage Entities to a State store
+4. Configure Backstage to read its catalog from a State store
+
+The diagram below shows the architecture of the integration. The numbers in the
+diagram correspond to the steps above.
+
+<figure className="diagram">
+  <img className="large" src={BackstageDiagram} alt="Backstage and Kratix
+  diagram" />
+
+  <figcaption>Backstage and Kratix Architecture</figcaption>
+</figure>
+
+The following sections will go through each of these steps in detail.
+
+* In [Configuring Backstage](./configuring-backstage), you will learn how to setup (1) and
+  (2).
+* In [Configuring Kratix](./kratix), you will learn how to setup (4) and (5).
+* In [SKE Backstage Generator](./generator), you will learn how to automate (3).
