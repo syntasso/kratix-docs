@@ -75,6 +75,8 @@ spec:
       env: []
       envFrom: []
       volumeMounts: []
+      imagePullPolicy: # Either Always, IfNotPresent or Never
+  imagePullSecrets: []
 ```
 
 Refer to the [Kubernetes Pod Spec
