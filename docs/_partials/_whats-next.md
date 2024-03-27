@@ -69,4 +69,4 @@ If the idea of treating your platform as-a-Product is new concept to you, watch 
 
 ## Get in touch
 
-💭&nbsp;&nbsp; If learning about Kratix and platforms as products sounds intriguing and you'd like to chat with us, we'd love to hear from you. Please reach out on https://www.syntasso.io/contact-us.
+💭&nbsp;&nbsp; If learning about Kratix and platforms as products sounds intriguing and you'd like to chat with us, we'd love to hear from you. Please reach out to us at [hello@syntasso.io](mailto:hello@syntasso.io).

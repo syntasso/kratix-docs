@@ -24,7 +24,7 @@ You will:
 
 ## Workflow design patterns {#workflows-design-patterns}
 
-To recap, A [Kratix Promise](/main/reference/promises/intro) is configured with a collection of Workflows that can be triggered at different stages of the Promise or Resource lifecycle. In the previous section, you defined a Workflow for the `resource.configure` action. In that workflow, you defined a collection of Kubernetes Resources that needed to be created to fulfill the user's request.
+To recap, a [Kratix Promise](/main/reference/promises/intro) is configured with a collection of Workflows that can be triggered at different stages of the Promise or Resource lifecycle. In the previous section, you defined a Workflow for the `resource.configure` action. In that workflow, you defined a collection of Kubernetes Resources that needed to be created to fulfill the user's request.
 
 However, there's virtually no limitation to what you can do in a Workflow. You can, for example, download software, run imperative commands, wait for manual approvals and more. Pipeline stages are meant to be reused across different Promises, so you can define a Workflow once and reuse it across multiple Promises.
 
@@ -115,8 +115,6 @@ With that in place, you can go ahead and test your pipeline! Since the next tuto
 
 ```bash
 mkdir -p scripts
-touch scripts/build-pipeline scripts/test-pipeline
-chmod +x scripts/*
 
 cat << 'EOF' > scripts/build-pipeline
 #!/usr/bin/env bash
@@ -152,6 +150,8 @@ docker run \
     --volume ${metadataDir}:/kratix/metadata \
     kratix-workshop/app-pipeline-image:v1.0.0 bash -c "$command"
 EOF
+
+chmod +x scripts/*
 ```
 
 These scripts do the following:
@@ -379,7 +379,7 @@ You iterated over the Promise and added a Promise Workflow! Congratulations 🎉
 
 To recap what you achieved:
 
-1. ✅&nbsp;&nbsp;You got a deeper understand of the Workflows.
+1. ✅&nbsp;&nbsp;You got a deeper understanding of the Workflows.
 2. ✅&nbsp;&nbsp;You created a Promise Workflow.
 
 👉🏾&nbsp;&nbsp; Let's [explore accessing secrets and storing state in workflows](./secrets-and-state).

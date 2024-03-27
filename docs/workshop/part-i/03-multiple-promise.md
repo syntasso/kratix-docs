@@ -254,7 +254,7 @@ Destination Selectors:
     Environment: dev
 ```
 
-The NGINX and the PosgreSQL Promises are telling Kratix:
+The NGINX and the PostgreSQL Promises are telling Kratix:
 
 > Only install my Dependencies (which include, the NGINX Ingress Controller and the
 > PostgreSQL operator) in Destinations with the **label environment=dev**.
@@ -333,7 +333,7 @@ nginx-ingress   Available   deployment   marketplace.kratix.io/v1alpha1
 postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
 ```
 
-You could request each one of those services individually if you need
+You could request each one of those services individually if you needed
 fine-grained control of how they ought to be deployed, or you can use the
 EasyApp Promise to get an opinionated deployment of each of those. In this
 example, all you want is to run your application without much fuss.

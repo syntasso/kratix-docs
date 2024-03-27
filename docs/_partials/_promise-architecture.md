@@ -5,7 +5,7 @@ import PromiseDiagram from "/img/docs/workshop/promise-diagram.svg"
 <figure className="diagram">
   <PromiseDiagram className="medium"/>
 
-  <figcaption>A Promise in details</figcaption>
+  <figcaption>A Promise in detail</figcaption>
 </figure>
 
 At a very high-level, a Promise is made up of four parts:

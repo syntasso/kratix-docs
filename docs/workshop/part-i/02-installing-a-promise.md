@@ -23,7 +23,6 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 - [learn what Promises are](#promise-definition)
 - [install your first Kratix Promise](#install-jenkins)
-- [learn about configuring a worker cluster](#configure-worker)
 - [request a Resource from a promised service](#request-jenkins)
 
 Following the [Installing Kratix](installing-kratix) tutorial, you should now have Kratix up and running in your platform cluster. You should also have a worker cluster reconciling on the documents in the MinIO Bucket.
@@ -130,7 +129,7 @@ where the workload should run.
 kubectl --context $PLATFORM get crds | grep jenkins
 ```
 
-The above command will give an output similar to:
+The above command will give output similar to:
 
 ```shell-session
 jenkins.marketplace.kratix.io          2024-01-26T16:16:13Z
@@ -150,7 +149,7 @@ Verify that the Jenkins Operator starts in the worker cluster:
 kubectl --context $WORKER get deployments --watch
 ```
 
-The above command will give an output similar to (it may take a couple of
+The above command will give an output similar to the following (it may take a couple of
 minutes):
 
 ```shell-session

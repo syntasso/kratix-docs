@@ -126,7 +126,7 @@ import APISpectrum from "/img/docs/workshop/design-api-spectrum.svg"
 <figure className="diagram">
   <APISpectrum className="large"/>
 
-  <figcaption>The sweet spot for your organisation can be anywhere in the
+  <figcaption>The sweet spot for your organisation can be anywhere on the
   spectrum</figcaption>
 </figure>
 
@@ -237,7 +237,7 @@ If you are using Instruqt, please make sure the `promise.yaml` file is closed in
 :::
 
 ```bash
-worker-resource-builder -resources-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null; mv tmp-promise.yaml promise.yaml
+worker-resource-builder -resources-dir ./dependencies -promise promise.yaml | tee tmp-promise.yaml  >/dev/null && mv tmp-promise.yaml promise.yaml
 ```
 
 If everything goes well, the command above should not output anything. You can verify that the dependencies were added by checking the contents of the `promise.yaml` file. You should now see the contents of the `dependencies.yaml` file under the `dependencies` key.

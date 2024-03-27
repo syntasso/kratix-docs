@@ -29,7 +29,7 @@ You will:
 
 What we've focused on so far is how to define a Kratix Promise in a compelling way so that platform users choose to use the platform. A Kratix-powered platform enables users to ask for the services they need, on-demand, without having to know unnecessary business and service lifecycle requirements.
 
-What platform users need, though, is the end-to-end experience of making a simple request, understanding what's happening with the request, then ultimately making use of the service created by the request. So how do you communicate back to platform users information about their request, and how do users use the services that the platform creates?
+What platform users need, though, is the end-to-end experience of making a simple request, understanding what's happening with the request, then ultimately making use of the service created by the request. So how do you communicate information about a request back to platform users, and how do users use the services that the platform creates?
 
 There are actually a number of ways you can communicate the status of a service to the platform, and the choice comes down to the Promise and Promise Workflow author.
 
@@ -41,7 +41,7 @@ In the context of your Promise, an example of what you might want to convey back
 
 ## Status
 
-As we saw in [Promise Workflows](./promise-workflows), within the Pipeline container file system, Kratix mounts a [`/kratix/metadata`](/main/reference/resources/workflows#metadata) directory to manage important configuration that is independent of the Resources definitions for your State Store.
+As we saw in [Promise Workflows](./promise-workflows), within the Pipeline container file system, Kratix mounts a [`/kratix/metadata`](/main/reference/workflows#metadata) directory to manage important configuration that is independent of the Resources definitions for your State Store.
 
 In this section, you will focus on one of the files in the `metadata` directory: `status.yaml`.
 
@@ -158,7 +158,7 @@ message: "my-app.local.gd:31338"
 Great! Now you have a way to persist information about your Resource, and you have a way to ensure that the information is not overwritten if it already exists.
 
 <figure className="diagram">
-  <StatusUpdateFlowDiagram className="large"/>
+  <StatusUpdateFlowDiagram className="medium"/>
 
   <figcaption>Flow of the Status update for the app Promise</figcaption>
 </figure>
@@ -234,7 +234,7 @@ NAME   STATUS
 todo   todo.local.gd:31338
 ```
 
-Try retriggering the reconcilation by adding the label again. You should notice that the `Create At` field is not updated, just like you observed in the test.
+Try retriggering the reconcilation by adding the label again. You should notice that the `CreatedAt` field is not updated, just like you observed in the test.
 
 ## 🎉 &nbsp; Congratulations!
 

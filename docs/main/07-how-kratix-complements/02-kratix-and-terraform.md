@@ -37,7 +37,7 @@ Kratix enables platform teams to declare APIs that orchestrates workloads across
 
 Kratix Workflow stages are a perfect place to execute sequential tasks such as running Terraform plans and applies, billing checks, security scans, audits, resource decoration and more. These tasks all happen automatically each time a user requests a Promise Resource.
 
-If you use tools like the [Terraform Cloud Operator](https://developer.hashicorp.com/terraform/tutorials/kubernetes/kubernetes-operator) by HashiCorp or the Weaveworks [Terraform Controller](https://docs.gitops.weave.works/docs/terraform/get-started/) then you can use the scheduling portion of Kratix to create your resources.
+If you use tools like the [Terraform Cloud Operator](https://developer.hashicorp.com/terraform/tutorials/kubernetes/kubernetes-operator) by HashiCorp or the Weaveworks [Terraform Controller](https://flux-iac.github.io/tofu-controller/) then you can use the scheduling portion of Kratix to create your resources.
 
 <br/>
 

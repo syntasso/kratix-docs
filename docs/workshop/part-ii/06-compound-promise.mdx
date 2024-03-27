@@ -19,8 +19,7 @@ In the previous section, you learned how the update the status of a resource req
 
 In this section, you will gain an understanding of Compound Promises. You will:
 
-- [Configure a Compound Promises](#configuring)
-- [Learn how to use Destination Selectors in your pipeline](#destination-selectors)
+- [Learn how to Configure a Compound Promises](#configuring)
 
 ## Delivering Developer Experiences
 
@@ -46,7 +45,7 @@ To create a compound promise, you generally need three updates:
 
 ### Updating the API
 
-You want users to have control whether their app deployment should include a database or not. You decide to expose that option via a new field on the Promise API called `dbDriver`. This field will allow users to specify the database they want to use. In this tutorial, we will only build support for PostgreSQL, but the process to extend that to many other DBs would be very similar.
+You want users to have control over whether their app deployment should include a database or not. You decide to expose that option via a new field on the Promise API called `dbDriver`. This field will allow users to specify the database they want to use. In this tutorial, we will only build support for PostgreSQL, but the process to extend that to many other DBs would be very similar.
 
 As covered previously, the `spec.api` field is where you define the API for your Promise. You will need to add a new field called `dbDriver` to the `spec.api.openAPIV3Schema` field. Locate the `schema` field in your `promise.yaml` and add the following:
 
@@ -106,7 +105,7 @@ spec:
   # ...
 ```
 
-This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.1`. You can read more about Promise versioning [in the reference documentation](/main/reference/promises/releases).
+This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.1`. You can read more about Promise versioning [in the reference documentation](/main/reference/promises/releases#promise-release).
 
 Apply your newly updated promise:
 
@@ -332,7 +331,7 @@ env:
   value: my-app-db
 ```
 
-Great! It looks like everything is in place. Last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `workflows.resource.configure`:
+Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `workflows.resource.configure`:
 
 ```yaml
 # ...
