@@ -1,6 +1,6 @@
 ---
 description: Learn more about how to deploy Kratix in a prod-like environment
-title: Deployment topology
+title: Deployment Topology
 id: intro
 ---
 

@@ -1,12 +1,13 @@
 ---
-title: Multi-destination management
-sidebar_label: Multi-destination management
+title: Managing Multiple Destinations
+sidebar_label: Managing Multiple Destinations
 description: Learn more about how Kratix schedules Promises and Resources, and how you can control the scheduling process.
 ---
 
 One of the most powerful features of Kratix is having full control over the
-scheduling of work across extensive and diverse infrastructure. For example,
-this could be determining which Kubernetes cluster or Terraform Enterprise
+scheduling of work across extensive and diverse infrastructure.
+
+For example, this could be determining which Kubernetes cluster or Terraform Enterprise
 instance a certain workload should be scheduled to.
 
 In Kratix, scheduling happens in two stages:
@@ -17,8 +18,8 @@ In Kratix, scheduling happens in two stages:
    ([Scheduling Workloads](#resources))
 
 The following sections on this page document those stages. For hands-on scheduling guides,
-check the [Adding a new Worker Destination](../guides/scheduling) and [Compound
-Promise](../guides/compound-promises) pages.
+check the [Adding a new Destination](../guides/scheduling) and [Compound
+Promises](../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
 
