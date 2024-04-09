@@ -1,75 +1,77 @@
 ---
 title: Workflows
 sidebar_label: Workflows
-description: Learn more about conventions in Workflows
+description: Learn more about conventions in workflows
 id: workflows
 ---
 
-A [Kratix Promise](./promises/intro) can be configured with a series of
-Workflows defined in the Promise's `workflows` key.
+A [Kratix Promise](./promises/intro) can be configured with a series of **workflows**
+for both Promises and Resources, defined within the Promise `workflows` field.
 
-Within the Workflows, Promise writers can trigger a series of actions
-(pipelines) that must be executed when certain conditions are met in the system.
-The `workflows` is defined as follows:
+Within the workflows, Promise writers can define a series of actions that will be executed
+when certain conditions are met in the system.
+
+## Summary
+
+The supported workflows are summarised in the table below. See the other sections on this
+page for details.
+
+|                        | Trigger(s)                                                                       | Supported Pipelines         |
+|------------------------|----------------------------------------------------------------------------------|-----------------------------|
+| **Promise Configure**  | The Promise is created, updated, or reconciled                                   | Multiple, executed serially |
+| **Promise Delete**     | The Promise is deleted                                                           | Single                      |
+| **Resource Configure** | The Resource is created, updated or reconciled, or the parent Promise is updated | Multiple, executed serially |
+| **Resource Delete**    | The Resource is deleted                                                          | Single                      |
+
+An example of how `workflows` are defined within the Promise is shown below.
 
 ```yaml
 platform: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  # ...
+  ...
 spec:
-  # ...
+  ...
   workflows:
-    # lifecycle hook for Resources
     resource:
-      # lifecycle hook for creates/updates/ongoing reconciliation of Resources
       configure:
-        -  # Pipeline definition
-      # lifecycle hook for deletion of Resources
+        - # Pipeline definitions (multiple)
       delete:
-        -  # Pipeline definition
-
-    # lifecycle hook for Promises
+        - # Pipeline definition (single)
     promise:
-      # lifecycle hook for creates/updates/ongoing reconciliation of the Promise
       configure:
-        -  # Pipeline definition
-      # lifecycle hook for deletion of Promises
+        - # Pipeline definitions (multiple)
       delete:
-        -  # Pipeline definition
+        - # Pipeline definition (single)
 ```
 
-A particular workflow (for example, `resource.configure`) is an array of
-Kubernetes objects that will be executed in order. Kratix provides a built-in kind
-(`Pipeline`, see below) that makes the process of writing Workflows easier.
+A particular workflow (e.g. `resource.configure`) is an array of Kratix Pipeline objects
+that will be executed in order.
 
-:::note
+See the next section to learn how to define a Pipeline.
 
-Currently, Kratix only supports `kind: Pipeline` in the workflow definition. In
-the future, we will extend this to support any other Kubernetes Objects, like
-Tekton Pipelines, Argo Workflows, plain Pods/Jobs, etc.
+## Pipelines
 
-:::
+A Kratix `Pipeline` kind is a simple wrapper around a Kubernetes Pod.
 
-## The Pipeline kind
-
-The Kratix `Pipeline` kind is a simple wrapper around a Kubernetes Pod. It will
-automatically mount the necessary [Kratix Volumes](#volumes) and set
+Pipelines will automatically mount the necessary [Kratix Volumes](#volumes) and set
 [Environment Variables](#environment-variables) for the provided containers.
 
-It is defined as follows:
+An example Pipeline is shown below.
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Pipeline
 metadata:
-  name: # name
+  name: # Name (must be unique within the Promise)
+  namespace: # Namespace (optional)
 spec:
-  volumes: # optional
+  volumes:
+    - # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:
-    - name: # container name
-      image: # container image
-      # optional fields
+    - name: # Container name (must be unique within the Pipeline)
+      image: # Container image to run
+      # Supported fields passed through to underlying Pod spec (all optional):
       command: []
       args: []
       env: []
@@ -83,14 +85,19 @@ Refer to the [Kubernetes Pod Spec
 documentation](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec)
 for more information on the fields above.
 
-To access secrets in the pipeline, refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/secret/).
+### Secrets
+
+To access Secrets in the Pipeline, you can pass in a reference to the Pipeline container's
+`env` using `valueFrom.secretKeyRef` in the standard Kubernetes way.
 
 :::note
 
-Not all fields from the Pod spec are supported. We will add support for more
-fields in the future.
+The Secret must be accessible within the Pipeline's namespace.
 
 :::
+
+Refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/secret/)
+for more details on Secrets in Kubernetes.
 
 ## Volumes {#volumes}
 
@@ -99,51 +106,58 @@ providing a set of common volumes, as defined below.
 
 ### Input
 
-Kratix provides a input directory to the container at `/kratix/input`. This
-directory is populated with different files depending on the type of Workflow.
+Kratix provides an **input directory** to the container, mounted at `/kratix/input`. This
+directory is populated with different files depending on the type of workflow.
 
-In Promise Worflows, all containers will have access to an `object.yaml` file
-within the `/kratix/input` directory. The `object.yaml` contains the full
-Promise definition.
+#### `object.yaml`
 
-In Resource Workflows, the `object.yaml` file contains the Resource
-definition submitted to the platform.
+In all workflows, all Pipeline containers will have access to an `object.yaml` file
+within the `/kratix/input` directory.
+
+The contents of this file vary as follows:
+- **Promise workflows**: The `object.yaml` file contains the full Promise definition.
+- **Resource workflows**: The `object.yaml` file contains the Resource Request definition
+which was submitted to the Kratix platform.
+
+This is a useful way to find out information about the Kubernetes Object the Pipeline is
+being invoked for. For example, you could read the latest `status` from this input Object
+and modify the behaviour of the Pipeline accordingly.
+
+If your workflow contains multiple Pipelines, then the `object.yaml` is the only way to
+communicate between the Pipelines (e.g. via status updates).
 
 ### Output
 
-At the end of the workflow, all files present in the output volume, mounted at
-`/kratix/output`, will be written to the State Store. All containers in the
-pipeline can write to this volume, and any container can add, update, or remove
-documents from this directory.
+At the end of a Pipeline, all files present in the **output directory** mounted at
+`/kratix/output` will be written to the [State Store](./02-statestore/01-statestore.md).
 
-In Promise Workflows, if the Promise specifies additional `.spec.dependencies`,
-these will be automatically added to the directory at the beginning of the
-pipeline at `/kratix/output/static/dependencies.yaml`.
+All containers in the Pipeline can write to this volume, and any container can add, update, or remove
+documents from this directory.
 
 :::note
 
-Files written to `/kratix/output` in `delete` pipelines will be ignored.
+Files written to `/kratix/output` in `delete` Pipelines will be ignored.
 
 :::
 
 ### Metadata
 
-All containers in the `configure` Pipeline have access to
-this directory, mounted at `/kratix/metadata`.
+All containers in a `configure` Pipeline have access a shared **metadata directory**
+mounted at `/kratix/metadata`.
 
-Pipeline containers can control aspects of how Kratix behaves by creating
-special files in this directory:
+Pipeline containers can control aspects of how Kratix behaves by creating special files in
+this directory:
 
-- `destination-selectors.yaml` can be added to any Promise to
-  further refine where the resources in `/kratix/output` will be
-  [scheduled](./multidestination-management).
-- `status.yaml` allows the Pipeline to communicate information about the
-  Resource back to the requester. See [status documentation
-  for more information](./resources/status).
+- `destination-selectors.yaml` can be added to any Promise to further refine where the
+  resources in `/kratix/output` will be [scheduled](./multidestination-management).
+- `status.yaml` allows the Pipeline to communicate information about the resource back to
+  the requester. See the [status documentation for more information](./resources/status).
+
+#### Passing data between containers
 
 Kratix scans for these files and ignores all other files in the `/kratix/metadata`
 directory. If you need to pass additional information to the next container in
-the pipeline, you can safely write to the `/kratix/metadata` directory.
+the Pipeline, you can safely write to the `/kratix/metadata` directory.
 
 ## Environment Variables {#environment-variables}
 
@@ -157,6 +171,10 @@ workflow:
 | `KRATIX_WORKFLOW_TYPE`    | The type of workflow. Either `resource` or `promise`. |
 | `KRATIX_PROMISE_NAME`     | The name of the Promise. |
 
-By checking the `KRATIX_WORKFLOW_ACTION` and `KRATIX_WORKFLOW_TYPE` environment
-variables, you can write a single container that can be used in both `configure`
-and `delete` workflows.
+By checking the `KRATIX_WORKFLOW_ACTION` and `KRATIX_WORKFLOW_TYPE` environment variables,
+a container is able to discover the **context** in which it's being invoked (e.g. "I'm
+running as part of a Promise Configure workflow").
+
+This means that you could write a **single** container image to be used in all four
+workflows (`promise.configure`, `promise.delete`, `resource.configure`, and
+`resource.delete`), and switch the container's mode of operation based on the context.
