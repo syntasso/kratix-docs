@@ -23,6 +23,23 @@ Alternatively you can delete a Promise by providing the Promise definition file:
 $ kubectl delete --filename promise.yaml
 ```
 
-Deleting a Promise will take a few minutes to complete while Kratix deletes all the workloads associated with Promise. This includes any requested Resources and all the Promise's Dependencies.
+Deleting a Promise will take a few minutes to complete while Kratix deletes all the
+workloads associated with Promise, including any requested Resources and all the of the
+Promise dependencies.
 
-All workloads created by the Promise are applied to the workers using GitOps. This mean that when Kratix deletes the workloads it is removing their definitions from the Destination's State Store and is delegating the responsibility to delete them from the worker infrastructure to the GitOps or other deployment solution on the workers. This results in a small delay between the resources being declared as deleted and them being actually deleted.
+If the Promise contains a [Promise Delete workflow](../04-promises/04-workflows.md#delete-workflows),
+it will also be run during the delete process.
+
+:::info
+
+All workloads created by the Promise are applied to the end destinations using GitOps.
+
+This mean that when Kratix deletes the workloads, it is removing their definitions from
+the Destination's State Store, and is delegating the responsibility to actually delete
+them from the destination infrastructure to GitOps (or other deployment solution) on the
+destinations.
+
+This results in a small delay between the resources being declared as deleted and them
+being deleted on the end destination infrastructure.
+
+:::
