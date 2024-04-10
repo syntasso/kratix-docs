@@ -4,26 +4,56 @@ sidebar_label: Updates
 description: Documentation on how updates behave for Promises
 ---
 
-# Updates
+Kratix supports updating Promises with new specifications.
 
-Kratix supports updating Promises with new specifications. Any update to the
-Promise will result in the re-running the Configure Workflows for all resources.
-For example, if you update the Configure Workflow image version and change
-a field in the Dependencies Kratix will roll out the new Dependencies to
-Destinations and re-run all the Configure Workflows
-with the new image version.
+An update to a Promise will cause Kratix to reconcile on the new Promise definition,
+and any changes will be rolled out during this reconciliation.
+
+This may include:
+- Updating the Promise API, which rolls out an update to the underlying CRD for the
+  Resources managed by the Promise.
+- Updating the Promise or Resource workflows.
+- Updating the Promise scheduling.
+- Updating the Promise's static dependencies (the `dependencies` field in the Promise
+  spec).
+
+## Workflows
+
+Any update to the Promise will result in Kratix re-running the Promise Configure workflow,
+as well as re-running the Resource Configure workflow for all existing Resource Requests.
+
+For example, if you bump an image version for a Pipeline container in a Resource Configure
+workflow, Kratix will ensure that all Resources are re-reconciled, including re-running
+the Resource Configure workflow using the new image for every existing Resource.
+
+See [Promise Workflows](../04-promises/04-workflows.md#configure-workflows) and
+[Resource Workflows](../05-resources/02-workflows.md#configure-workflows) for
+more details.
 
 ## Scheduling
 
-When changing the scheduling of a Promise, either by modifying `.spec.destinationSelectors` or
-changing the contents of `/kratix/metadata/destination-selectors.yaml` at the end of a Workflow may result
-in a set of Destinations previously targeted from old version of the Promise no longer
-being targeted. When this happens the files written to the Destination **are not removed**, but are
-marked as `misscheduled` by Kratix and are **not updated anymore**.
+The scheduling for a Promise may be changed by modifying either:
+- `.spec.destinationSelectors` in the Promise; or
+- the contents of `/kratix/metadata/destination-selectors.yaml` at the end of a Workflow.
 
-### Example
+See [Managing Multiple Destinations](../07-multidestination-management.md) for more
+details on scheduling.
 
-If you had a Promise with the following scheduling:
+### Misscheduled workloads
+
+An update to the Promise's scheduling may result in a set of Destinations previously
+targeted from old version of the Promise no longer being targeted.
+
+When this happens, existing files written to the Destination **are not removed**, but are
+marked as `misscheduled` by Kratix and are **not updated any more**.
+
+It's up to the platform team to manually delete these resources by deleting all
+`WorkPlacement` resources marked with the `kratix.io/misscheduled` label.
+
+#### Example
+
+Take a simple Promise which creates a namespace on the scheduled Destinations, with
+scheduling to `environment: dev` as follows:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -33,16 +63,20 @@ metadata:
 spec:
   destinationSelectors:
     - matchLabels:
+        #highlight-next-line
         environment: dev
   dependencies:
     - apiVersion: v1
       kind: Namespace
       metadata:
+        #highlight-next-line
         name: foo
 ```
 
-Kratix will schedule the `foo` namespace resource to all destination with the label
-`environment: dev`. If you updated the Promise to now instead have the following spec:
+Kratix will schedule the `foo` namespace resource to all Destinations with the label
+`environment: dev` as expected.
+
+If you later update the Promise to instead have the following spec:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -52,23 +86,32 @@ metadata:
 spec:
   destinationSelectors:
     - matchLabels:
+        #highlight-next-line
         environment: prod
   dependencies:
     - apiVersion: v1
       kind: Namespace
       metadata:
+        #highlight-next-line
         name: bar
 ```
 
 Kratix will schedule the `bar` namespace to all Destinations with the label
-`environment: dev` and leave all of `environment: dev` Desintations with the old
-`foo` namespace. It's up to the platform team to manually delete these resources
-by deleting all `WorkPlacement` resources marked with the `kratix.io/misscheduled`
-label.
+`environment: prod` and leave all the `environment: dev` Destinations with the old
+`foo` namespace.
+
+The misscheduled `WorkPlacement` resources can be identified by the `misscheduled` label:
 
 ```bash
-kubectl --context kind-platform -n kratix-platform-system get workplacements.platform.kratix.io --show-labels
+> kubectl --context kind-platform -n kratix-platform-system get workplacements.platform.kratix.io --show-labels
 NAME                       AGE   LABELS
 namespace.dev-cluster-1    40s   kratix.io/misscheduled=true,kratix.io/work=namespace
 namespace.prod-cluster-1   26s   kratix.io/work=namespace
+```
+
+Cleaning them up:
+
+```bash
+> kubectl --context kind-platform -n kratix-platform-system delete workplacements.platform.kratix.io --selector kratix.io/misscheduled=true
+workplacements.platform.kratix.io "namespace.dev-cluster-1" deleted
 ```

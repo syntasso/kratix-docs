@@ -1,39 +1,30 @@
 ---
 title: Updates
 sidebar_label: Updates
-description: Documentation on how updates behave for resources
+description: Documentation on how updates behave for Resources
 ---
 
 # Updates
 
-Kratix supports updating resources with new specifications. An update to a resource
-will trigger the configure pipeline to run again, and resources outputted will replace
-all of the previously outputted resources in the StateStore.
+Kratix supports updating Resource Requests with new specifications.
 
-If an update to a resource changes the Destination (e.g. the Workflow outputs a
-different `/kratix/metadata/destination-selectors.yaml`) the change will be
-**ignored**. The Destination selected at the first the Workflow run is always
-used. To move a resource from one Destination to another you can delete and
-create it again.
+Given that the Resource workflows are defined within the parent Promise, updates to a
+Resource Request are limited to updating the request parameters in the `spec`.
 
-## Manually trigger configure Workflow
-Sometimes you may want to manually trigger a Configure Workflow for a 
-specific resource.
+## Workflows
 
-While Workflows only trigger when the contents of the resource `Spec`
-change, the Kratix will also look for the appearance of a specific label and
-trigger a Configure Workflow if it newly appears.
+Any update to the Resource will result in Kratix re-running the
+[Resource Configure](./02-workflows.md#configure-workflows) workflow.
 
-Therefore, if you add `kratix.io/manual-reconciliation: true` to any resource,
-it will immediately schedule a manual run for the Configure Workflow.
+Any files which are output by this workflow will replace all existing files associated
+with this Resource in the [StateStore](../02-statestore/01-statestore.md).
 
-Once Kratix schedules the manual workflow the label will be removed allowing
-you to add it again for any additional manual runs.
+## Scheduling
 
+If an update to a Resource changes its scheduling, the change will be **ignored**.
 
-Example to trigger the reconciliation of a `example` request of a `redis`
-Promise
+The Destination selected at the first the Workflow run is always used. To move a Resource
+from one Destination to another, you can delete and create it again.
 
-```
-kubectl label redis example kratix.io/manual-reconciliation=true
-```
+See [Managing Multiple Destinations](../07-multidestination-management.md#resources) for
+more details on scheduling.
