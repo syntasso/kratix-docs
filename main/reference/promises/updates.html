@@ -9,7 +9,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Kratix" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.92579ab0.css">
-<script src="/assets/js/runtime~main.c1e7ff8d.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.272c6de3.js" defer="defer"></script>
 <script src="/assets/js/main.be43e3a7.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -26,8 +26,9 @@ Resources managed by the Promise.</li>
 spec).</li>
 </ul>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="workflows">Workflows<a href="#workflows" class="hash-link" aria-label="Direct link to Workflows" title="Direct link to Workflows">​</a></h2>
-<p>Any update to the Promise will result in Kratix re-running the Promise Configure workflow,
-as well as re-running the Resource Configure workflow for all existing Resource Requests.</p>
+<p>Any update to the Promise <code>spec</code> will result in Kratix re-running the Promise Configure
+workflow, as well as re-running the Resource Configure workflow for all existing Resource
+Requests.</p>
 <p>For example, if you bump an image version for a Pipeline container in a Resource Configure
 workflow, Kratix will ensure that all Resources are re-reconciled, including re-running
 the Resource Configure workflow using the new image for every existing Resource.</p>
