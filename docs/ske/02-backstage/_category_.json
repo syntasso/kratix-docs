@@ -1,6 +1,6 @@
 {
   "label": "Backstage",
-  "position": 1,
+  "position": 2,
   "link": {
     "type": "generated-index",
     "description": "Documentation for configuring Backstage and Kratix"
