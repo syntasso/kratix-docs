@@ -85,6 +85,13 @@ Refer to the [Kubernetes Pod Spec
 documentation](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec)
 for more information on the fields above.
 
+:::note
+
+Not all fields from the Pod spec are supported. We will add support for more fields in
+the future.
+
+:::
+
 ### Secrets
 
 To access Secrets in the Pipeline, you can pass in a reference to the Pipeline container's

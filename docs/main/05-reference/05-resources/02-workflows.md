@@ -148,8 +148,8 @@ kubectl label redis my-redis-example kratix.io/manual-reconciliation=true
 
 ## Delete Workflows
 
-Resource Delete workflows are triggered when a Resource is deleted, and support a **single
-Pipeline**.
+Resource Delete workflows are triggered when a Resource is deleted, and currently only
+support a **single** Pipeline.
 
 This Pipeline is responsible for cleaning up resources and configurations that were set up
 by the `resource.configure` workflow.

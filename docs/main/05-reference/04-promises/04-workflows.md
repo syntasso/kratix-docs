@@ -140,8 +140,8 @@ kubectl label promises.platform.kratix.io redis kratix.io/manual-reconciliation=
 
 ## Delete Workflows
 
-Promise Delete workflows are triggered when a Promise is deleted, and support only a
-**single** Pipeline.
+Promise Delete workflows are triggered when a Promise is deleted, and currently only
+support a **single** Pipeline.
 
 This Pipeline is responsible for cleaning up resources and configurations that were set up
 by the `promise.configure` workflow.

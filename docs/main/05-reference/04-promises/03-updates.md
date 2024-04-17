@@ -19,8 +19,9 @@ This may include:
 
 ## Workflows
 
-Any update to the Promise will result in Kratix re-running the Promise Configure workflow,
-as well as re-running the Resource Configure workflow for all existing Resource Requests.
+Any update to the Promise `spec` will result in Kratix re-running the Promise Configure
+workflow, as well as re-running the Resource Configure workflow for all existing Resource
+Requests.
 
 For example, if you bump an image version for a Pipeline container in a Resource Configure
 workflow, Kratix will ensure that all Resources are re-reconciled, including re-running
