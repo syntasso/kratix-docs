@@ -101,12 +101,6 @@ The table below contains a few examples:
 | `env: dev`                  | `env: dev` <br /> `zone:eu` | ⛔️    |
 | _no label_                  | `env: dev`                  | ⛔️    |
 
-If more than one Destination matches the resulting labels, Kratix
-will randomly select within the available matching registered Destinations. If you
-prefer to be certain of a single Destination match, it is suggested that you add a
-unique identifier to all Destinations (e.g. `destinationName`) so that there can only
-ever be a single match.
-
 It is possible to _dynamically_ determine where the Promise dependencies should go during
 the Promise workflow. Check the [dynamic scheduling](#dynamic) section for more details.
 
