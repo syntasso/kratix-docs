@@ -9,7 +9,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Kratix" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.92579ab0.css">
-<script src="/assets/js/runtime~main.914ec8a6.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.868f2c2a.js" defer="defer"></script>
 <script src="/assets/js/main.2fe0c8f7.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -55,11 +55,6 @@ Destination has no <code>labels</code>, only Promises with no <code>destinationS
 will be applied.</p>
 <p>The table below contains a few examples:</p>
 <table><thead><tr><th>Destination Label</th><th>Promise Selector</th><th>Match?</th></tr></thead><tbody><tr><td><em>no label</em></td><td><em>no selector</em></td><td>✅</td></tr><tr><td><code>env: dev</code></td><td><em>no selector</em></td><td>✅</td></tr><tr><td><code>env: dev</code></td><td><code>env: dev</code></td><td>✅</td></tr><tr><td><code>env: dev</code> <br> <code>zone:eu</code></td><td><code>env: dev</code></td><td>✅</td></tr><tr><td><code>env: dev</code> <br> <code>zone:eu</code></td><td><code>env: dev</code> <br> <code>zone:eu</code></td><td>✅</td></tr><tr><td><code>env: dev</code></td><td><code>env: prod</code></td><td>⛔️</td></tr><tr><td><code>env: dev</code></td><td><code>env: dev</code> <br> <code>zone:eu</code></td><td>⛔️</td></tr><tr><td><em>no label</em></td><td><code>env: dev</code></td><td>⛔️</td></tr></tbody></table>
-<p>If more than one Destination matches the resulting labels, Kratix
-will randomly select within the available matching registered Destinations. If you
-prefer to be certain of a single Destination match, it is suggested that you add a
-unique identifier to all Destinations (e.g. <code>destinationName</code>) so that there can only
-ever be a single match.</p>
 <p>It is possible to <em>dynamically</em> determine where the Promise dependencies should go during
 the Promise workflow. Check the <a href="#dynamic">dynamic scheduling</a> section for more details.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="resources">Scheduling Resources<a href="#resources" class="hash-link" aria-label="Direct link to Scheduling Resources" title="Direct link to Scheduling Resources">​</a></h2>
