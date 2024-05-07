@@ -104,7 +104,7 @@ generator as a workflow step for both the Promise Configure and Resource Configu
 workflows:
 
 ```yaml title="workflows section in a Promise file"
-  ...
+  # ...
   workflows:
     promise:
       configure:
@@ -121,21 +121,6 @@ workflows:
           - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
             name: ske-backstage-generator
           #highlight-end
-    resource:
-      configure:
-      - apiVersion: platform.kratix.io/v1alpha1
-        kind: Pipeline
-        metadata:
-          name: instance-configure
-          namespace: default
-        spec:
-          containers:
-          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
-            name: jenkins-configure-pipeline
-          #highlight-start
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
-            name: ske-backstage-generator
-          #highlight-end
 ```
 
 Once your Promise is updated, the generator will be run as part of your
@@ -143,3 +128,87 @@ Workflows. If you install the Promise, you should see a Component automatically
 appearing in your Backstage instance, together with a new Template. If you use
 the Template to create a Resource, you should see the resource Component
 appearing as well as the Resource itself being created in your cluster.
+
+## Customising the generated Components
+
+### The Promise Component
+
+By default, the generator will create the Backstage Promise `Component` with the
+following `spec`:
+
+```yaml
+spec:
+  type: kratix-promise
+  lifecycle: production
+  owner: kratix
+```
+
+To customise these values, or to include any addionatal field (as defined in the
+[Backstage
+docs](https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component)
+you can set the following `env` variables in the workflow:
+
+* `COMPONENT_TYPE`: the value of `spec.type`
+* `COMPONENT_LIFECYCLE`: the value of `spec.lifecycle`
+* `COMPONENT_OWNER`: the value of `spec.owner`
+* `COMPONENT_SYSTEM`: the value of `spec.system`
+* `COMPONENT_SUBCOMPONENT_OF`: the value of `spec.subcomponentOf`
+* `COMPONENT_PROVIDES_APIS`: comma-separated list of values for `spec.providesApis`
+* `COMPONENT_CONSUMES_APIS`: comma-separated list of values for `spec.consumesApis`
+* `COMPONENT_DEPENDS_ON`: comma-separated list of values for `spec.dependsOn`
+
+For example, to set `spec.owner` and `spec.providesApis`, you can update your
+pipeline stage with the snippet below:
+
+```yaml title="Promise workflow with custom Component values"
+  #...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+            name: ske-backstage-generator
+            #highlight-start
+            env:
+            - name: COMPONENT_OWNER
+              value: "platform-team"
+            - name: COMPONENT_PROVIDES_APIS
+              value: "component/api/v1,component/api/v2"
+            #highlight-end
+
+```
+
+### The Resource Component
+
+The `Component` for a Resource will have the following `spec`:
+
+```yaml
+spec:
+  type: kratix-resource
+  lifecycle: production
+  owner: kratix
+```
+
+Similar to the Promise Component, you can customise these values by setting the
+same set of `env` variables defined above, but in the Resource Configure workflow.
+
+You can also customise the fields by setting the following annotations in the
+Resource object itself:
+
+* `ske.backstage.component/type`: the value of `spec.type`
+* `ske.backstage.component/lifecycle`: the value of `spec.lifecycle`
+* `ske.backstage.component/owner`: the value of `spec.owner`
+* `ske.backstage.component/system`: the value of `spec.system`
+* `ske.backstage.component/subcomponentOf`: the value of `spec.subcomponentOf`
+* `ske.backstage.component/providesApis`: comma-separated list of values for `spec.providesApis`
+* `ske.backstage.component/consumesApis`: comma-separated list of values for `spec.consumesApis`
+* `ske.backstage.component/dependsOn`: comma-separated list of values for `spec.dependsOn`
+
