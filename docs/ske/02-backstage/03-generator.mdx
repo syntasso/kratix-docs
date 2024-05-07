@@ -70,7 +70,7 @@ tool.
 Once you have authenticated, you should be able to pull the image:
 
 ```bash
-docker pull ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+docker pull ghcr.io/syntasso/ske-backstage-generator:v0.3.0
 ```
 
 Your Kubernetes cluster must have permission to [pull this image from the
@@ -82,10 +82,10 @@ directly to the Kubernetes cache. Different tools have different commands for th
 
 ```bash
 # For minikube
-minikube image load ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+minikube image load ghcr.io/syntasso/ske-backstage-generator:v0.3.0
 
 # For KinD
-kind load docker-image ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+kind load docker-image ghcr.io/syntasso/ske-backstage-generator:v0.3.0
 ```
 
 For other tools, follow their specific documentation.
@@ -118,7 +118,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
             name: ske-backstage-generator
           #highlight-end
 ```
@@ -174,7 +174,7 @@ pipeline stage with the snippet below:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.1.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
             name: ske-backstage-generator
             #highlight-start
             env:
