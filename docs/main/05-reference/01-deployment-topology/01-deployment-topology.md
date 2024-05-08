@@ -30,7 +30,7 @@ The Platform contains three important elements:
 
 When a [Kratix Promise](./promises/intro) is installed, or when a request for a
 new [Resource](./resources/intro) comes in to the Platform, Kratix will react by
-writing workloads to the Desintation's State Store.
+writing workloads to the Destination's State Store.
 
 For example, the State Store in EasyEaty's topology is a Git Repository pictured
 to the right of the platform cluster. When the _Web App Golden Path_ Promise was
