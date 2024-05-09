@@ -100,12 +100,12 @@ spec:
   #highlight-start
   requiredPromises:
   - name: postgresql
-    version: v1.0.0-beta.1
+    version: v1.0.0-beta.2
   #highlight-end
   # ...
 ```
 
-This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.1`. You can read more about Promise versioning [in the reference documentation](/main/reference/promises/releases#promise-release).
+This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.2`. You can read more about Promise versioning [in the reference documentation](/main/reference/promises/releases#promise-release).
 
 Apply your newly updated promise:
 
@@ -116,7 +116,7 @@ kubectl --context $PLATFORM apply --filename promise.yaml
 You should have observed a warning similar to the following:
 
 ```shell-session
-Warning: Requirement Promise "postgresql" at version "v1.0.0-beta.1" not installed
+Warning: Requirement Promise "postgresql" at version "v1.0.0-beta.2" not installed
 Warning: Promise will not be available until the above issue(s) is resolved
 ```
 
@@ -154,7 +154,7 @@ You should see, after a few seconds, that both promises are marked as "Available
 ```shell-session
 NAME         STATUS      KIND         API VERSION                      VERSION
 app          Available   App          workshop.kratix.io/v1
-postgresql   Available   postgresql   marketplace.kratix.io/v1alpha1   v1.0.0-beta.1
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha1   v1.0.0-beta.2
 ```
 
 Excellent. You have now configured the App-as-a-Service Promise to be a Compound Promise that requires a PostgreSQL Promise. Next, you will need to update the Resource Workflow to actually use the new promise.
