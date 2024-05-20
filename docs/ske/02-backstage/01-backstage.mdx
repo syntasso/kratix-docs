@@ -131,8 +131,7 @@ yarn --cwd packages/backend add @backstage/plugin-catalog-backend-module-aws
 
 Once you've done that, you'll also need to import the package in `packages/backend/src/index.ts`:
 
-```typescript title="packages/backend/src/index.ts"
-//highlight-next-line
+```typescript
 backend.add(import('@backstage/plugin-catalog-backend-module-aws/alpha'));
 ```
 
