@@ -83,7 +83,7 @@ the Docker build. Refer to the [Local Development](#local-development) section f
 
 :::
 
-## Installing the front-end plugin
+## Installing the frontend plugin
 
 From the root of the backstage repository, run:
 
@@ -144,7 +144,7 @@ const componentPage = (
 );
 ```
 
-## Installing the back-end plugin
+## Installing the backend plugin
 
 From the root of the backstage repository, run:
 
@@ -170,7 +170,7 @@ ske:
       email: "my@email.com" # default: ske@backstage.io
 ```
 
-The back-end plugin uses basic auth to authenticate against the Git provider. If you wish
+The backend plugin uses basic auth to authenticate against the Git provider. If you wish
 to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the
 `username` field, and set the `token` field to the password or token. Otherwise, the
 username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username`
@@ -179,93 +179,20 @@ or `type` must be provided.
 The `repoUrl` is the repository to which Backstage will push the resource
 requests; you must configure your platform to reconcile on new documents.
 
-### Add the backend route
+### Add the backend plugin
 
 Open the `packages/backend/src/index.ts` file and add the following import:
 
 ```typescript
-import { createRouter } from "@syntasso/plugin-ske-backend";
+import { scaffolderModuleSkeExtensions } from '@syntasso/plugin-ske-backend';
 ```
 
-Then in the `main()` function, add the following near the other endpoints in the `apiRouter`:
+Then registered the ske-backend plugin by adding the following:
 
 ```typescript
-// in the main function...
-apiRouter.use("/techdocs", await techdocs(techdocsEnv));
-apiRouter.use("/proxy", await proxy(proxyEnv));
-apiRouter.use("/search", await search(searchEnv));
-
-//highlight-start
-const { logger } = createEnv("ske");
-apiRouter.use("/ske", await createRouter({ logger, config }));
-//highlight-end
-// ...
+backend.add(import('@syntasso/plugin-ske-backend'));
+backend.add(scaffolderModuleSkeExtensions());
 ```
-
-### Add the scaffolder action
-
-Open the `packages/backend/src/plugins/scaffolder.ts` file and add the SKE actions. Your
-`scaffolder.ts` should look something like this:
-
-```typescript
-import { CatalogClient } from "@backstage/catalog-client";
-import {
-  createBuiltinActions,
-  createRouter,
-} from "@backstage/plugin-scaffolder-backend";
-import { Router } from "express";
-import type { PluginEnvironment } from "../types";
-import { ScmIntegrations } from "@backstage/integration";
-
-//highlight-start
-// Import skeActions
-import { skeActions } from "@syntasso/plugin-ske-backend";
-//highlight-end
-
-export default async function createPlugin(
-  env: PluginEnvironment,
-): Promise<Router> {
-  const catalogClient = new CatalogClient({
-    discoveryApi: env.discovery,
-  });
-
-  /* To preserve the builtin actions, do the following */
-  const integrations = ScmIntegrations.fromConfig(env.config);
-  const builtInActions = createBuiltinActions({
-    catalogClient,
-    integrations,
-    config: env.config,
-    reader: env.reader,
-  });
-
-  //highlight-start
-  const actions = [
-    ...skeActions({ integrations, config: env.config }),
-    ...builtInActions,
-  ];
-  //highlight-end
-
-  return await createRouter({
-    logger: env.logger,
-    config: env.config,
-    database: env.database,
-    reader: env.reader,
-    catalogClient,
-    identity: env.identity,
-    permissions: env.permissions,
-    //highlight-next-line
-    actions, // <-- add this line
-  });
-}
-```
-
-:::tip
-
-If you are adding the plugin to a new Backstage app (or if you have not modified
-the `scaffolder.ts` file previously), you can just copy and paste the entire
-snippet below.
-
-:::
 
 Once both packages are added and configured, from the root of your Backstage app, run:
 
@@ -322,7 +249,7 @@ Make sure the port-forwarding to the MinIO instance is still running in a separa
 
 ## Using the actions
 
-Once both your front-end and back-end plugins are installed and configured, your
+Once both your frontend and backend plugins are installed and configured, your
 backstage should now have the SKE actions available and it should be able to render
 Kratix resources in the catalog.
 
