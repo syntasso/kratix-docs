@@ -129,7 +129,7 @@ Since the AWS provider is not one of the default Backstage providers, you will n
 yarn --cwd packages/backend add @backstage/plugin-catalog-backend-module-aws
 ```
 
-Once you've done that, you'll also need to import the package in `packages/backend/src/index.ts`:
+Once you've done that, you'll also need to register the package in `packages/backend/src/index.ts`:
 
 ```typescript
 backend.add(import('@backstage/plugin-catalog-backend-module-aws/alpha'));
