@@ -129,31 +129,11 @@ Since the AWS provider is not one of the default Backstage providers, you will n
 yarn --cwd packages/backend add @backstage/plugin-catalog-backend-module-aws
 ```
 
-Once you've done that, you'll also need to add the segment below to `packages/backend/src/plugins/catalog.ts`:
+Once you've done that, you'll also need to import the package in `packages/backend/src/index.ts`:
 
-```typescript title="packages/backend/src/plugins/catalog.ts"
+```typescript title="packages/backend/src/index.ts"
 //highlight-next-line
-import { AwsS3EntityProvider } from "@backstage/plugin-catalog-backend-module-aws";
-
-export default async function createPlugin(
-  env: PluginEnvironment,
-): Promise<Router> {
-  const builder = await CatalogBuilder.create(env);
-
-  //highlight-start
-  builder.addEntityProvider(
-    AwsS3EntityProvider.fromConfig(env.config, {
-      logger: env.logger,
-      scheduler: env.scheduler,
-    }),
-  );
-  //highlight-end
-
-  builder.addProcessor(new ScaffolderEntitiesProcessor());
-  const { processingEngine, router } = await builder.build();
-  await processingEngine.start();
-  return router;
-}
+backend.add(import('@backstage/plugin-catalog-backend-module-aws/alpha'));
 ```
 
 ## Configuring Kratix
