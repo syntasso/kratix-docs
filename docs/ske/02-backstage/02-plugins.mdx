@@ -27,6 +27,13 @@ export NODE_OPTIONS=--no-node-snapshot
 
 :::
 
+:::info
+
+Plugins for SKE are compatible with Backstage apps created with Backstage version v1.24 or above.
+If you are running Backstage v1.23 or lower, you can check out their [migration guide](https://backstage.io/docs/backend-system/building-backends/migrating).
+
+:::
+
 ## Accessing the private npm registry
 
 The SKE plugins are distributed through a private npm registry. Please follow the steps below to enable access to it.
@@ -187,7 +194,7 @@ Open the `packages/backend/src/index.ts` file and add the following import:
 import { scaffolderModuleSkeExtensions } from '@syntasso/plugin-ske-backend';
 ```
 
-Then registered the ske-backend plugin by adding the following:
+Then registered the backend plugin by adding the following:
 
 ```typescript
 backend.add(import('@syntasso/plugin-ske-backend'));
