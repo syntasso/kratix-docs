@@ -109,6 +109,8 @@ Next, configure the AWS S3 Catalog Discovery. First, open the `app-config.yaml` 
 
 ```yaml
 catalog:
+  rules:
+    - allow: [Component, Template] # Make sure to allow at least "component" and "template" entities
   providers:
     awsS3:
       kratix-minio:
