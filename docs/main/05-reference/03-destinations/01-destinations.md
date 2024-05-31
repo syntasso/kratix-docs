@@ -60,7 +60,7 @@ spec:
 When a new Destination is registered in the platform cluster (i.e., a new Destination resource is
 created), Kratix will write to two paths in the [State
 Store](../statestore/intro):
-one for `resources`, one for `crds`. The path within the `State Store` follows the following pattern:
+one for `resources`, one for `dependencies`. The path within the `State Store` follows the following pattern:
 
 For `dependencies`:
 
@@ -123,7 +123,7 @@ spec:
 
 The above configuration would result in the following paths being written to:
 
-- `destinations/dev/default/worker-1/crds/`
+- `destinations/dev/default/worker-1/dependencies/`
 - `destinations/dev/default/worker-1/resources/`
 
 <br/>
