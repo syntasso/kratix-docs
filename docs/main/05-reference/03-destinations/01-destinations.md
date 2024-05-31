@@ -123,7 +123,7 @@ spec:
 
 The above configuration would result in the following paths being written to:
 
-- `destinations/dev/default/worker-1/crds/`
+- `destinations/dev/default/worker-1/dependencies/`
 - `destinations/dev/default/worker-1/resources/`
 
 <br/>
