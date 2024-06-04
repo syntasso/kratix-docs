@@ -59,7 +59,7 @@ export default function Root({children}) {
 			We use cookies on our website to see how you interact with it. By
 			accepting, you agree to our use of such cookies. <a
 			style={{ color: "white", textDecoration: "underline" }}
-			href="https://www.kratix.io/cookie-policy">Cookie Policy</a>
+			href="https://www.syntasso.io/cookie-policy">Cookie Policy</a>
 		</CookieConsent>
 		<>{children}</>
 	</>;
