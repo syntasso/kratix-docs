@@ -662,7 +662,7 @@ For more details, you can view the Pipeline logs with
 ```bash
 kubectl logs \
   --context $PLATFORM \
-  --selector kratix-promise-id=jenkins-default \
+  --selector kratix.io/promise-name=jenkins-default \
   --container create-jenkins-instance
 ```
 
