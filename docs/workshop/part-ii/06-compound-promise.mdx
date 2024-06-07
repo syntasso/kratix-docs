@@ -389,7 +389,7 @@ kubectl --context $PLATFORM apply --filename resource-request.yaml
 At this point, the Resource Configure workflow for the App-as-a-Service will be executed. As part of the workflow, the `database-configure` step will be executed, which will create a request for a PostgreSQL service, which, in turn, will trigger the PostgreSQL workflow. You can see the PostgreSQL pipeline getting executed (it may take a few seconds for it to appear):
 
 ```bash
-kubectl --context $PLATFORM get pods --selector kratix-promise-id=postgresql
+kubectl --context $PLATFORM get pods --selector kratix.io/promise-name=postgresql
 ```
 
 The above command will output something similar to:
