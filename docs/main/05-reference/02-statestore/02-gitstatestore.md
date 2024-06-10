@@ -21,6 +21,12 @@ spec:
   path: destinations/
   # Valid options: basicAuth, and ssh; defaults to basicAuth
   authMethod: basicAuth
+  # Optional
+  gitAuthor:
+    # The name of the author to use when committing: optional, defaults to kratix
+    name: kratix
+    # The email of the author to use when committing: optional, defaults to empty
+    email:
   # Required
   secretRef:
     # The name and namespace of the secret to use to authenticate: required
