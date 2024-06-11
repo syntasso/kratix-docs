@@ -43,5 +43,14 @@
     "categories": [
       "Security"
     ]
+  },
+  {
+    "name": "Manual Approval (via Github)",
+    "description": "A manual approval gate backed by Github issues",
+    "url": "https://github.com/syntasso/kratix-marketplace/tree/main/pipeline-marketplace-images/github-sign-off",
+    "logoUrl": "/img/marketplace/images/github.svg",
+    "categories": [
+      "Approval"
+    ]
   }
 ]
