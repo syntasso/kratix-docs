@@ -220,8 +220,8 @@ over any dynamic scheduling.
 
 The order of precedence is as follows:
 1. Promise `spec.destinationSelectors`
-2. Promise workflow `destination_selectors.yaml`
-3. Resource workflow `destination_selectors.yaml`
+2. Promise workflow `destination-selectors.yaml`
+3. Resource workflow `destination-selectors.yaml`
 :::
 
 :::important
