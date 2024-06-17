@@ -1,0 +1,392 @@
+---
+title: Hashicorp Cloud Platform
+description: Documentation for the Hashicord Cloud Platform integration
+sidebar_label: Hashicorp Cloud Platform
+---
+
+A common use-case for Kratix Promises is to schedule workloads to run on
+Terraform Cloud or Terraform Enterprise. This page provides information on how
+to:
+
+1. Configure HCP as a Kratix Destination.
+1. Write a Promise that can schedule workloads to HCP.
+1. Use the SKE Aspect to pull information out of HCP.
+
+This documentation assumes the existance of a HCP Workspace that's configured to
+apply Terraform configurations from a Git repository. Please refer to the [HCP
+documentation](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/creating)
+for more information on how to create and configure the Workspace.
+
+## Configuring the Destination
+
+Once you have a a Workspace configured to listen to a Git repository, you can
+configure Kratix to be able to send workloads to it. To do this, you will first
+need to create a GitStateStore pointing to the same Git repository you're using
+for your HCP Workspace.
+
+Create the GitStateStore, replacing the placeholders with your own values:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: workspace-repo
+spec:
+  authMethod: <AUTH METHOD>
+  branch: <BRANCH>
+  secretRef:
+    name: <SECRET NAME>
+    namespace: <NAMESPACE>
+  url: <MY WORKSPACE REPOSITORY>
+```
+
+Refer to the [GitStateStore documentation](/main/reference/statestore/gitstatestore)
+for more information on how to configure the GitStateStore.
+
+Next, create a Secret with the credentials needed to access your HCP Workspace:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hcp-credentials
+  namespace: default
+stringData:
+  organization: <HCP ORG NAME>
+  token: <HCP TOKEN>
+  workspace: <HCP WORKSPACE NAME>
+```
+
+To generate a token, refer to the [HCP
+documentation](https://www.terraform.io/docs/cloud/users-teams-organizations/api-tokens.html).
+
+You can now create a Destination, tiying everyting together:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Destination
+metadata:
+  name: hcp
+  annotations:
+    kratix.io/tf-credentials: '{"namespace": "default", "name": "hcp-credentials"}'
+  labels:
+    environment: terraform
+spec:
+  filepath:
+    mode: none
+  stateStoreRef:
+    kind: GitStateStore
+    name: workspace-repo
+```
+
+<details>
+<summary>Destination in Details</summary>
+
+There are a few important things to note about the Destination above.
+
+* The `spec.stateStoreRef` is pointing to the GitStateStore you created earlier.
+* The `spec.filepath.mode` is set to `none`. That's because HCP does not support
+  nested directories, which is how Kratix writes to the State Store by default.
+  It also means your Promise needs to output unique files as part of the
+  Pipeline, otherwise multiple requests will overwrite the same file.
+* The `metadata.annotations.kratix.io/tf-credentials` is a JSON object that
+  contains the reference to the Secret you created earlier. This is used by the
+  SKE Aspect to pull information out of HCP.
+* The `metadata.labels.environment` is set to `terraform`. This is not required.
+  You will use that label later when writing your Promise.
+
+</details>
+
+With all the resources created, you can now write a Promise that schedules workloads to HCP.
+
+## Writing a Promise
+
+HCP does not support nested directories in the State Store, so your promise
+needs to ensure the uniqueness of the files it writes.
+
+Here's an example Promise that schedules a workload to HCP:
+
+<details>
+<summary>Expand for the Example Promise</summary>
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: example-tf-promise
+spec:
+  destinationSelectors:
+    - matchLabels:
+        environment: terraform
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: terraforms.hcp.ske.io
+    spec:
+      group: hcp.ske.io
+      names:
+        kind: Terraform
+        plural: terraforms
+        singular: terraform
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+          served: true
+          storage: true
+  workflows:
+    promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: promise
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: generate-output
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    cat <<EOF > /kratix/output/main.tf
+                    output "promise-configure" {
+                      value = "some-value"
+                    }
+                    EOF
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: resource
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: generate-output
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    name=$(yq '.metadata.name' /kratix/input/object.yaml)
+                    name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
+                    cat <<EOF > /kratix/output/${name}-${namespace}.tf
+                    output "${name}-${namespace}" {
+                      value = "some-value"
+                    }
+                    EOF
+```
+</details>
+
+
+Let's break down the Promise above. It starts with the `destinationSelectors`:
+
+```yaml
+spec:
+  destinationSelectors:
+    - matchLabels:
+        environment: terraform
+```
+
+This Promise will only run on Destinations that have the label `environment:
+terraform`. This is the label we set on the Destination earlier. The value of
+the label is not important, as long as it's the same on the Destination and the
+Promise. Please refer to [Managing Multiple
+Destinations](/main/reference/multidestination-management) for more information.
+
+Next, check the `spec.promise.configure` workflow. You will find the following
+in the pipeline:
+
+```bash
+cat <<EOF > /kratix/output/main.tf
+output "promise-configure" {
+  value = "some-value"
+}
+EOF
+```
+
+Since the Promise workflow will run only once per Destination, the outputs it
+generates don't need to be unique. Your terraform code will likely to be more
+complex, but this is a simple example to get you started.
+
+Finally, check the `spec.resource.configure` workflow. You will find the
+following:
+
+```bash
+name=$(yq '.metadata.name' /kratix/input/object.yaml)
+name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
+cat <<EOF > /kratix/output/${name}-${namespace}.tf
+output "${name}-${namespace}" {
+  value = "some-value"
+}
+EOF
+```
+
+Since the Promise workflow will run once per resource, the outputs it generates
+need to be unique. The example above uses the resource's name and namespace to
+generate a unique file name. You may need to adapt your code to follow the same
+pattern.
+
+## Adding the SKE Terraform Aspect
+
+If you followed the steps above, you should now have a Promise that schedules
+workloads to HCP. However, given that the Terraform code will be planned and
+executed by HCP, the users of your Platform won't have access to the Terraform
+outputs directly.
+
+To solve this, you can use the SKE Terraform Aspect. This Aspect will pull the
+Terraform outputs from HCP and make them available in the Resource's status.
+
+To use the Aspect, you need to add it to your Promise, as a second workflow in
+the `spec.resource.configure`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+# ...
+spec:
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          # ... workflow that generates the Terraform code
+
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: output-writer
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+                name: fetch-output
+                env:
+                - name: TIMEOUT
+                  value: "30m"
+```
+
+The `TIMEOUT` environment variable should be configured to match the amount of
+time you expect the Terraform plan and apply to take. The Aspect will keep
+trying to fetch the outputs until the timeout is reached.
+
+
+:::info
+
+The `ske-tfstate-finder` image is hosted in a private registry. To access the
+image, you will need to use the access token provided by Syntasso and your
+Kubernetes cluster must have the permissions to pull images from the registry.
+
+You can also set `imagePullSecrets` in the [Pipeline
+spec](/main/reference/workflows#pipelines).
+
+:::
+
+By default, the Aspect will add the Terraform outputs in the Resource's
+`status.outputs`. If you want to customise what gets persisted, you can set the
+`SKIP_STATUS` environment variable in the Aspect's container to `true`. When the
+flag is set, the aspect will create a set of `.output` files in
+`/kratix/metadata` with the Terraform outputs. You can then use that to create
+your owk `/kratix/metadata/status.yaml`.
+
+<details>
+<summary>The Example Promise with the SKE Aspect included</summary>
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: example-tf-promise
+spec:
+  destinationSelectors:
+    - matchLabels:
+        environment: terraform
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: terraforms.hcp.ske.io
+    spec:
+      group: hcp.ske.io
+      names:
+        kind: Terraform
+        plural: terraforms
+        singular: terraform
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+          served: true
+          storage: true
+  workflows:
+    promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: promise
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: generate-output
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    cat <<EOF > /kratix/output/main.tf
+                    output "promise-configure" {
+                      value = "some-value"
+                    }
+                    EOF
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: resource
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: generate-output
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    name=$(yq '.metadata.name' /kratix/input/object.yaml)
+                    name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
+                    cat <<EOF > /kratix/output/${name}-${namespace}.tf
+                    output "${name}-${namespace}" {
+                      value = "some-value"
+                    }
+                    EOF
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: output-writer
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+                name: fetch-output
+                env:
+                - name: TIMEOUT
+                  value: "300s"
+```
+</details>
