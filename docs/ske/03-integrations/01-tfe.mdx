@@ -1,6 +1,6 @@
 ---
 title: Hashicorp Cloud Platform
-description: Documentation for the Hashicord Cloud Platform integration
+description: Documentation for the Hashicorp Cloud Platform integration
 sidebar_label: Hashicorp Cloud Platform
 ---
 
@@ -60,7 +60,7 @@ stringData:
 To generate a token, refer to the [HCP
 documentation](https://www.terraform.io/docs/cloud/users-teams-organizations/api-tokens.html).
 
-You can now create a Destination, tiying everyting together:
+You can now create a Destination, tying everything together:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -215,8 +215,8 @@ EOF
 ```
 
 Since the Promise workflow will run only once per Destination, the outputs it
-generates don't need to be unique. Your terraform code will likely to be more
-complex, but this is a simple example to get you started.
+generates need only be unique within a single Destination. Your terraform code will
+likely to be more complex, but this is a simple example to get you started.
 
 Finally, check the `spec.resource.configure` workflow. You will find the
 following:
@@ -233,8 +233,8 @@ EOF
 
 Since the Promise workflow will run once per resource, the outputs it generates
 need to be unique. The example above uses the resource's name and namespace to
-generate a unique file name. You may need to adapt your code to follow the same
-pattern.
+generate a unique filename and output name. You may need to adapt your code to follow the
+same pattern.
 
 ## Adding the SKE Terraform Aspect
 
@@ -246,8 +246,8 @@ outputs directly.
 To solve this, you can use the SKE Terraform Aspect. This Aspect will pull the
 Terraform outputs from HCP and make them available in the Resource's status.
 
-To use the Aspect, you need to add it to your Promise, as a second workflow in
-the `spec.resource.configure`:
+To use the Aspect, you need to add it to your Promise as a second Pipeline in
+the `spec.resource.configure` workflow:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -294,9 +294,18 @@ spec](/main/reference/workflows#pipelines).
 By default, the Aspect will add the Terraform outputs in the Resource's
 `status.outputs`. If you want to customise what gets persisted, you can set the
 `SKIP_STATUS` environment variable in the Aspect's container to `true`. When the
-flag is set, the aspect will create a set of `.output` files in
-`/kratix/metadata` with the Terraform outputs. You can then use that to create
-your owk `/kratix/metadata/status.yaml`.
+flag is set, the Aspect will create a set of `*-output.json` files in
+`/kratix/metadata` with the Terraform outputs. You can then use that to make
+your own updates to the status in `/kratix/metadata/status.yaml`.
+
+In the example Promise above, the Promise Configure `status.yaml` would look like this:
+
+```yaml
+...other status keys
+outputs:
+  hcp: # Destination name
+    promise-configure: "some-value" # HCP output name/value
+```
 
 <details>
 <summary>The Example Promise with the SKE Aspect included</summary>
