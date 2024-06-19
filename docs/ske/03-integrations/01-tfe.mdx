@@ -1,19 +1,20 @@
 ---
-title: Hashicorp Cloud Platform
-description: Documentation for the Hashicorp Cloud Platform integration
-sidebar_label: Hashicorp Cloud Platform
+title: Terraform Enterprise
+description: Documentation for the Terraform Enterprise/Cloud integration
+sidebar_label: Terraform Enterprise
 ---
 
-A common use-case for Kratix Promises is to schedule workloads to run on
-Terraform Cloud or Terraform Enterprise. This page provides information on how
-to:
+Kratix supports scheduling workloads via Promises to run on HCP Terraform (Terraform
+Cloud) or Terraform Enterprise.
 
-1. Configure HCP as a Kratix Destination.
-1. Write a Promise that can schedule workloads to HCP.
-1. Use the SKE Aspect to pull information out of HCP.
+This page provides information on how to:
 
-This documentation assumes the existence of a HCP Workspace that's configured to
-apply Terraform configurations from a Git repository. Please refer to the [HCP
+1. Configure TFE as a Kratix Destination.
+1. Write a Promise that can schedule workloads to TFE.
+1. Use the SKE Aspect to pull information out of TFE.
+
+This documentation assumes the existence of a Terraform Workspace that's configured to
+apply Terraform configurations from a Git repository. Please refer to the [TFE
 documentation](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/creating)
 for more information on how to create and configure the Workspace.
 
@@ -22,7 +23,7 @@ for more information on how to create and configure the Workspace.
 Once you have a a Workspace configured to listen to a Git repository, you can
 configure Kratix to be able to send workloads to it. To do this, you will first
 need to create a GitStateStore pointing to the same Git repository you're using
-for your HCP Workspace.
+for your TFE Workspace.
 
 Create the GitStateStore, replacing the placeholders with your own values:
 
@@ -43,21 +44,21 @@ spec:
 Refer to the [GitStateStore documentation](/main/reference/statestore/gitstatestore)
 for more information on how to configure the GitStateStore.
 
-Next, create a Secret with the credentials needed to access your HCP Workspace:
+Next, create a Secret with the credentials needed to access your TFE Workspace:
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: hcp-credentials
+  name: tfe-credentials
   namespace: default
 stringData:
-  organization: <HCP ORG NAME>
-  token: <HCP TOKEN>
-  workspace: <HCP WORKSPACE NAME>
+  organization: <TFE ORG NAME>
+  token: <TFE TOKEN>
+  workspace: <TFE WORKSPACE NAME>
 ```
 
-To generate a token, refer to the [HCP
+To generate a token, refer to the [TFE
 documentation](https://www.terraform.io/docs/cloud/users-teams-organizations/api-tokens.html).
 
 You can now create a Destination, tying everything together:
@@ -66,9 +67,9 @@ You can now create a Destination, tying everything together:
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination
 metadata:
-  name: hcp
+  name: tfe
   annotations:
-    kratix.io/tf-credentials: '{"namespace": "default", "name": "hcp-credentials"}'
+    kratix.io/tfe-credentials: '{"namespace": "default", "name": "tfe-credentials"}'
   labels:
     environment: terraform
 spec:
@@ -80,34 +81,34 @@ spec:
 ```
 
 <details>
-<summary>Destination in Details</summary>
+<summary>Destination in detail</summary>
 
 There are a few important things to note about the Destination above.
 
 * The `spec.stateStoreRef` is pointing to the GitStateStore you created earlier.
-* The `spec.filepath.mode` is set to `none`. That's because HCP does not support
+* The `spec.filepath.mode` is set to `none`. That's because TFE does not support
   nested directories, which is how Kratix writes to the State Store by default.
   It also means your Promise needs to output unique files as part of the
   Pipeline, otherwise multiple requests will overwrite the same file.
-* The `metadata.annotations.kratix.io/tf-credentials` is a JSON object that
+* The `metadata.annotations.kratix.io/tfe-credentials` is a JSON object that
   contains the reference to the Secret you created earlier. This is used by the
-  SKE Aspect to pull information out of HCP.
+  SKE Aspect to pull information out of TFE.
 * The `metadata.labels.environment` is set to `terraform`. This is not required.
   You will use that label later when writing your Promise.
 
 </details>
 
-With all the resources created, you can now write a Promise that schedules workloads to HCP.
+With all the resources created, you can now write a Promise that schedules workloads to TFE.
 
 ## Writing a Promise
 
-HCP does not support nested directories in the State Store, so your promise
+TFE does not support nested directories in the State Store, so your promise
 needs to ensure the uniqueness of the files it writes.
 
-Here's an example Promise that schedules a workload to HCP:
+Here's an example Promise that schedules a workload to TFE:
 
 <details>
-<summary>Expand for the Example Promise</summary>
+<summary>Example: Promise which schedules to TFE</summary>
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -122,9 +123,9 @@ spec:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
-      name: terraforms.hcp.ske.io
+      name: terraforms.tfe.ske.io
     spec:
-      group: hcp.ske.io
+      group: tfe.ske.io
       names:
         kind: Terraform
         plural: terraforms
@@ -180,7 +181,7 @@ spec:
                     name=$(yq '.metadata.name' /kratix/input/object.yaml)
                     name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
                     cat <<EOF > /kratix/output/${name}-${namespace}.tf
-                    output "${name}-${namespace}" {
+                    output "${name}-${namespace}-resource-configure" {
                       value = "some-value"
                     }
                     EOF
@@ -215,7 +216,7 @@ EOF
 ```
 
 Since the Promise workflow will run only once per Destination, the outputs it
-generates need only be unique within a single Destination. Your terraform code will
+generates need only be unique within a single Destination. Your Terraform code will
 likely to be more complex, but this is a simple example to get you started.
 
 Finally, check the `spec.resource.configure` workflow. You will find the
@@ -225,7 +226,7 @@ following:
 name=$(yq '.metadata.name' /kratix/input/object.yaml)
 name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
 cat <<EOF > /kratix/output/${name}-${namespace}.tf
-output "${name}-${namespace}" {
+output "${name}-${namespace}-resource-configure" {
   value = "some-value"
 }
 EOF
@@ -236,15 +237,15 @@ need to be unique. The example above uses the resource's name and namespace to
 generate a unique filename and output name. You may need to adapt your code to follow the
 same pattern.
 
-## Adding the SKE Terraform Aspect
+## Adding the SKE TF State Finder Aspect
 
 If you followed the steps above, you should now have a Promise that schedules
-workloads to HCP. However, given that the Terraform code will be planned and
-executed by HCP, the users of your Platform won't have access to the Terraform
+workloads to TFE. However, given that the Terraform code will be planned and
+executed by TFE, the users of your Platform won't have access to the Terraform
 outputs directly.
 
-To solve this, you can use the SKE Terraform Aspect. This Aspect will pull the
-Terraform outputs from HCP and make them available in the Resource's status.
+To solve this, you can use the SKE TF State Finder Aspect. This Aspect will pull the
+Terraform outputs from TFE and make them available in the Resource's status.
 
 To use the Aspect, you need to add it to your Promise as a second Pipeline in
 the `spec.resource.configure` workflow:
@@ -259,7 +260,7 @@ spec:
       configure:
         - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
-          # ... workflow that generates the Terraform code
+          # ... workflow that generates the Terraform configuration files
 
         - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
@@ -275,9 +276,11 @@ spec:
                   value: "30m"
 ```
 
-The `TIMEOUT` environment variable should be configured to match the amount of
+The `TIMEOUT` environment variable can be configured to match the amount of
 time you expect the Terraform plan and apply to take. The Aspect will keep
 trying to fetch the outputs until the timeout is reached.
+
+If `TIMEOUT` is not set, the default timeout is 5 minutes.
 
 
 :::info
@@ -291,24 +294,158 @@ spec](/main/reference/workflows#pipelines).
 
 :::
 
-By default, the Aspect will add the Terraform outputs in the Resource's
-`status.outputs`. If you want to customise what gets persisted, you can set the
-`SKIP_STATUS` environment variable in the Aspect's container to `true`. When the
-flag is set, the Aspect will create a set of `*-output.json` files in
-`/kratix/metadata` with the Terraform outputs. You can then use that to make
-your own updates to the status in `/kratix/metadata/status.yaml`.
+#### Pipeline Permissions
 
-In the example Promise above, the Promise Configure `status.yaml` would look like this:
+The SKE TF State Finder requires permission to list Kratix Destinations and WorkPlacements,
+and get Secrets. These permissions are bound to the Service Accounts for the Promise
+Pipeline and Resource Pipeline.
+
+To allow this, you should create the following RBAC resources:
+
+<details>
+<summary>RBAC resources for Kratix Pipelines</summary>
 
 ```yaml
-...other status keys
-outputs:
-  hcp: # Destination name
-    promise-configure: "some-value" # HCP output name/value
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ske-tfstate-finder
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+  - apiGroups:
+      - platform.kratix.io
+    resources:
+      - workplacements
+      - destinations
+    verbs:
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ske-tfstate-finder-promise-pipeline
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ske-tfstate-finder
+subjects:
+  - kind: ServiceAccount
+    name: example-tf-promise-promise-pipeline # <promise-name>-promise-pipeline
+    namespace: kratix-platform-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ske-tfstate-finder-resource-pipeline
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ske-tfstate-finder
+subjects:
+  - kind: ServiceAccount
+    name: example-tf-promise-resource-pipeline # <promise-name>-resource-pipeline
+    namespace: default
+```
+
+</details>
+
+
+### Accessing outputs in the Pipeline
+
+The Aspect will write a set of `*-output.yaml` files to
+`/kratix/metadata` containing all of the Terraform workspace outputs present at the time
+the Resource or Promise workloads were written to the State Store.
+
+The output files will look similar to the following:
+
+```yaml
+- id: wsout-usr3cvFTLCepr4CL
+  name: promise-configure
+  sensitive: false
+  type: string
+  value: some-value
+  detailedtype: string
+- id: wsout-YbSiFpvauuVTeQbV
+  name: resource-configure
+  sensitive: false
+  type: string
+  value: some-value
+  detailedtype: string
+- id: wsout-AIGhavgdsiHVnaHP
+  name: other-output
+  sensitive: false
+  type: string
+  value: some-value
+  detailedtype: string
 ```
 
 <details>
-<summary>The Example Promise with the SKE Aspect included</summary>
+<summary>Example: Accessing an output and writing it to a custom Resource status field</summary>
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+# ...
+spec:
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          # ... workflow that generates the Terraform configuration files
+
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: output-writer
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+                name: fetch-output
+# highlight-start
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: custom-status
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    file=$(find /kratix/metadata -type f -name '*-output.yaml' | head -n 1)
+                    value=$(yq e '.[] | select(.name == "promise-configure") | .value' "${file}")
+                    echo "customStatusField: ${value}" >> /kratix/metadata/status.yaml
+# highlight-end
+```
+
+This example uses the `kratix-pipeline-utility` image, which comes with `yq` pre-installed.
+It also assumes a single output file for simplicity.
+</details>
+
+### Persisting outputs to the Resource Status
+
+By default, the Aspect will add the Terraform outputs from the Resource's scheduled
+workloads to the Resource's `status.outputs`. For example, in the
+`spec.resource.configure` workflow above, and assuming the name `my-resource` in the
+default namespace, the following would be added to the Resource status:
+
+```yaml
+outputs:
+  tfe: # Destination name
+    my-resource-default-resource-configure: "some-value" # TFE output name/value
+```
+
+If you want to customise what gets persisted to the status, you can skip this step by
+setting the `SKIP_STATUS` environment variable in the Aspect's container to `"true"`.
+In this case, the `*-output.yaml` files in `/kratix/metadata` will still be written, so
+that you can access the outputs in the Pipeline.
+
+<details>
+<summary>Example: Promise with the SKE Aspect included</summary>
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -323,9 +460,9 @@ spec:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
-      name: terraforms.hcp.ske.io
+      name: terraforms.tfe.ske.io
     spec:
-      group: hcp.ske.io
+      group: tfe.ske.io
       names:
         kind: Terraform
         plural: terraforms
@@ -381,7 +518,7 @@ spec:
                     name=$(yq '.metadata.name' /kratix/input/object.yaml)
                     name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
                     cat <<EOF > /kratix/output/${name}-${namespace}.tf
-                    output "${name}-${namespace}" {
+                    output "${name}-${namespace}-resource-configure" {
                       value = "some-value"
                     }
                     EOF
