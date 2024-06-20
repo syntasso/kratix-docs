@@ -282,6 +282,98 @@ trying to fetch the outputs until the timeout is reached.
 
 If `TIMEOUT` is not set, the default timeout is 5 minutes.
 
+<details>
+<summary>Example: Promise with the SKE Aspect included</summary>
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: example-tf-promise
+spec:
+  destinationSelectors:
+    - matchLabels:
+        environment: terraform
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: terraforms.tfe.ske.io
+    spec:
+      group: tfe.ske.io
+      names:
+        kind: Terraform
+        plural: terraforms
+        singular: terraform
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+          served: true
+          storage: true
+  workflows:
+    promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: promise
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: generate-output
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    cat <<EOF > /kratix/output/main.tf
+                    output "promise-configure" {
+                      value = "some-value"
+                    }
+                    EOF
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: resource
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: generate-output
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    name=$(yq '.metadata.name' /kratix/input/object.yaml)
+                    name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
+                    cat <<EOF > /kratix/output/${name}-${namespace}.tf
+                    output "${name}-${namespace}-resource-configure" {
+                      value = "some-value"
+                    }
+                    EOF
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: output-writer
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+                name: fetch-output
+                env:
+                - name: TIMEOUT
+                  value: "300s"
+```
+</details>
 
 :::info
 
@@ -424,115 +516,4 @@ spec:
 
 This example uses the `kratix-pipeline-utility` image, which comes with `yq` pre-installed.
 It also assumes a single output file for simplicity.
-</details>
-
-### Persisting outputs to the Resource Status
-
-By default, the Aspect will add the Terraform outputs from the Resource's scheduled
-workloads to the Resource's `status.outputs`. For example, in the
-`spec.resource.configure` workflow above, and assuming the name `my-resource` in the
-default namespace, the following would be added to the Resource status:
-
-```yaml
-outputs:
-  tfe: # Destination name
-    my-resource-default-resource-configure: "some-value" # TFE output name/value
-```
-
-If you want to customise what gets persisted to the status, you can skip this step by
-setting the `SKIP_STATUS` environment variable in the Aspect's container to `"true"`.
-In this case, the `*-output.yaml` files in `/kratix/metadata` will still be written, so
-that you can access the outputs in the Pipeline.
-
-<details>
-<summary>Example: Promise with the SKE Aspect included</summary>
-
-```yaml
-apiVersion: platform.kratix.io/v1alpha1
-kind: Promise
-metadata:
-  name: example-tf-promise
-spec:
-  destinationSelectors:
-    - matchLabels:
-        environment: terraform
-  api:
-    apiVersion: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    metadata:
-      name: terraforms.tfe.ske.io
-    spec:
-      group: tfe.ske.io
-      names:
-        kind: Terraform
-        plural: terraforms
-        singular: terraform
-      scope: Namespaced
-      versions:
-        - name: v1alpha1
-          schema:
-            openAPIV3Schema:
-              type: object
-              properties:
-                spec:
-                  type: object
-                  x-kubernetes-preserve-unknown-fields: true
-          served: true
-          storage: true
-  workflows:
-    promise:
-      configure:
-        - apiVersion: platform.kratix.io/v1alpha1
-          kind: Pipeline
-          metadata:
-            name: promise
-            namespace: default
-          spec:
-            containers:
-              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
-                name: generate-output
-                command: [ "sh" ]
-                args:
-                  - -c
-                  - |
-                    cat <<EOF > /kratix/output/main.tf
-                    output "promise-configure" {
-                      value = "some-value"
-                    }
-                    EOF
-    resource:
-      configure:
-        - apiVersion: platform.kratix.io/v1alpha1
-          kind: Pipeline
-          metadata:
-            name: resource
-            namespace: default
-          spec:
-            containers:
-              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
-                name: generate-output
-                command: [ "sh" ]
-                args:
-                  - -c
-                  - |
-                    name=$(yq '.metadata.name' /kratix/input/object.yaml)
-                    name=$(yq '.metadata.namespace' /kratix/input/object.yaml)
-                    cat <<EOF > /kratix/output/${name}-${namespace}.tf
-                    output "${name}-${namespace}-resource-configure" {
-                      value = "some-value"
-                    }
-                    EOF
-        - apiVersion: platform.kratix.io/v1alpha1
-          kind: Pipeline
-          metadata:
-            name: output-writer
-            namespace: default
-          spec:
-            containers:
-              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
-                name: fetch-output
-                env:
-                - name: TIMEOUT
-                  value: "300s"
-```
 </details>
