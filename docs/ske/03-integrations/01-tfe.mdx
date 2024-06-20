@@ -50,7 +50,7 @@ Next, create a Secret with the credentials needed to access your TFE Workspace:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: tfe-credentials
+  name: tf-credentials
   namespace: default
 stringData:
   organization: <TFE ORG NAME>
@@ -69,7 +69,7 @@ kind: Destination
 metadata:
   name: tfe
   annotations:
-    kratix.io/tfe-credentials: '{"namespace": "default", "name": "tfe-credentials"}'
+    kratix.io/tf-credentials: '{"namespace": "default", "name": "tf-credentials"}'
   labels:
     environment: terraform
 spec:
@@ -90,7 +90,7 @@ There are a few important things to note about the Destination above.
   nested directories, which is how Kratix writes to the State Store by default.
   It also means your Promise needs to output unique files as part of the
   Pipeline, otherwise multiple requests will overwrite the same file.
-* The `metadata.annotations.kratix.io/tfe-credentials` is a JSON object that
+* The `metadata.annotations.kratix.io/tf-credentials` is a JSON object that
   contains the reference to the Secret you created earlier. This is used by the
   SKE Aspect to pull information out of TFE.
 * The `metadata.labels.environment` is set to `terraform`. This is not required.
