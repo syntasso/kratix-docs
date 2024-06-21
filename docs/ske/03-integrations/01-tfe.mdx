@@ -472,9 +472,9 @@ The Aspect will also write a set of `*-output.yaml` files to
 the Resource or Promise workloads were written to the State Store.
 
 To ensure uniqueness, the naming convention for the output files is
-`<workName>.<destinationName>-<hash>-output.yaml`. This is because each Kratix Pipeline
-may schedule to many TFE Destinations, and many Kratix Pipelines may schedule to a single
-TFE Destination.
+`<destinationName>-<commitSha>-output.yaml`, where `destinationName` is the name of the
+Terraform Destination from which the outputs were read, and `commitSha` is the SHA of the
+commit in which the workloads were written to the State Store.
 
 In the most common case, the `.tf` files are scheduled to a single Terraform Destination
 in a single previous Pipeline (as in the example above). When this is the case, you can
@@ -487,7 +487,7 @@ file=$(find /kratix/metadata -type f -name '*-output.yaml' | head -n 1)
 If there were multiple files, you could narrow your search by Destination name:
 
 ```
-file=$(find /kratix/metadata -type f -name '*<destinationName>*-output.yaml' | head -n 1)
+file=$(find /kratix/metadata -type f -name '<destinationName>*-output.yaml' | head -n 1)
 ```
 
 The output files will look similar to the following:
