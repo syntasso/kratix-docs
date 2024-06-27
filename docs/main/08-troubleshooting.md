@@ -10,10 +10,11 @@ description: Common issues when installing and running Kratix
 There are many reasons why a document might not appear in a destination. A
 document goes from the workflow to the destination in a few steps:
 
-1. The workflow creates a document by placing it in `/kratix/output`
+1. The workflow schedules a document by placing it in `/kratix/output`
 1. Kratix schedules this document to a destination, taking into account any
    scheduling selectors specified in
-   `/kratix/metadata/destinaion-selectors.yaml`. If no matching destination
+   `/kratix/metadata/destinaion-selectors.yaml` or the Promises static
+   `.spec.destinationSelectors`. If no matching destination
    exists it will not be scheduled until one is created.
 1. Once scheduled it writes the document to the destination, using the
    destination's auth credentials.
@@ -86,11 +87,212 @@ Lets first check:
      document from being written.
 
 
+### Documents are being scheduled to the wrong destination
+Kratix uses label selectors to match documents to destinations. If a document is
+being scheduled to the wrong destination, it is likely that the label selectors
+are not matching correctly.
+
+1. Check the labels are correctly applied to the destinations:
+
+   ```
+   kubectl get destinations --show-labels
+   ```
+
+1. Check the selectors are correctly specified to the documents. Fetch the
+   Work for the workflow and inspect the `.spec.workloadGroups[*].destinationSelectors` field.
+
+   ```
+   kubectl get work --selector kratix.io/resource-name=<request-name>
+   kubectl get work <work-name> -o jsonpath='{.spec.workloadGroups[*].destinationSelectors}'
+   ```
+
+   If this doesn't match the labels on the destination, the document will not be
+   scheduled to the destination. See the [scheduling](./05-reference/07-multidestination-management.md) documentation
+   on how to specify destination selectors.
+
 ### Kratix is not starting
-- check pod/pod logs
-- check cert manager is installed
-- check imagePullSecret
+Kratix is a Kubernetes operator and uses cert-manager to generate certificates
+for the webhooks.
 
-### Something about idempotency
+1. Check the Kratix operator status
+   ```
+   kubectl -n kratix-platform-system get pods
+   ```
+
+   If the pod is in a `Pending` state or the pod doesn't exist at all inspect
+   the deployment for any errors
+   ```
+   kubectl -n kratix-platform-system describe deployment kratix-platform-controller-manager
+   ```
+
+   If the pod is in a `CrashLoopBackOff` or `Errored` state inspect the logs for any errors
+   ```
+   kubectl -n kratix-platform-system logs <pod-name> -c manager
+   ```
+
+   If the pod is in a `ErrImagePull` state check the Kubernetes has the correct
+   network settings to pull from the container registry, and that if the image
+   is being hosted in a private registry that [`imagePullSecrets` are correctly
+   configured](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
+   ```
+   kubectl -n kratix-platform-system get deployment kratix-platform-controller-manager -o yaml | grep imagePullSecrets
+   ```
 
 
+1. If cert manager is not installed or is not working correctly
+   Kratix will not start. Check cert-manager is installed and working correctly.
+   ```
+   kubectl -n cert-manager get pods
+   ```
+
+### Resource request is not being deleted
+
+When a resource request is deleted, Kratix will run any delete pipelines
+associated and cleanup any documents that were created. Kratix uses a Kubernetes
+concept called
+[finalizers](https://kubernetes.io/docs/concepts/overview/working-with-objects/finalizers/)
+to ensure that all cleanup is done before the resource request is deleted
+completely from the system. While a resource is being deleted you will see the
+resource in a deletion state by the presence of a `.metadata.deletionTimestamp`
+field on the resource.
+
+1. Check the resource request is in a deletion state
+   ```
+   kubectl get <resource-kind> <resource-request> -o jsonpath='{.metadata.deletionTimestamp}'
+   ```
+
+When deleting Kratix completes 3 actions as part of cleanup in order, once an
+action has been finished it no longer appears in the `.metadata.finalizer`
+field. The cleanup steps Kratix completes are:
+1. `kratix.io/delete-workflows` for running the delete pipelines associated with
+   the resource request (if any)
+1. `kratix.io/work-cleanup` for cleaning up the Work/WorkPlacement resources
+   created by the resource request
+1. `kratix.io/workflows-cleanup` for cleaning up the workflows created by the
+   resource request
+
+Kratix completes these actions in order, so if a resource request is stuck in
+deletion it is likely that one of the finalizers is not being removed correctly.
+
+Check what finalizers are left
+```
+kubectl get <resource-kind> <resource-request> -o jsonpath='{.metadata.finalizers}'
+```
+
+Check what finalizer is failing (since they run in order only one is failing)
+and try to resolve the issue. If you are able to resolve the issue you can
+manually remove the finalizer from the resource by editing the resource and
+removing the finalizer from the `.metadata.finalizers`. Kratix will then
+continue to delete and work its way through the remaining finalizers.
+
+1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
+   see if the delete workflow is failing
+
+   ```
+   kubectl get pods --selector kratix.io/resource-name=<resource-request>
+   ```
+
+1. If the `kratix.io/work-cleanup` finalizer is not being removed, check to see
+   if the `Work`/`WorkPlacement` resources are failing to be deleted
+
+   ```
+   kubectl get work --selector kratix.io/resource-name=<resource-request>
+   kubectl get workplacement --selector kratix.io/resource-name=<resource-request>
+   ```
+
+1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
+   see if the workflows are failing to be deleted
+
+   ```
+   kubectl get jobs --selector kratix.io/resource-name=<resource-request>
+   ```
+
+### Promise is not being deleted
+
+When a Promise is deleted, Kratix will run any delete pipelines associated and
+cleanup any documents that were created, as well as any resource requests.
+Kratix uses a Kubernetes concept called
+[finalizers](https://kubernetes.io/docs/concepts/overview/working-with-objects/finalizers/)
+to ensure that all cleanup is done before the Promise is deleted
+completely from the system. While a Promise is being deleted you will see the
+resource in a deletion state by the presence of a `.metadata.deletionTimestamp`
+field on the resource.
+
+1. Check the Promise is in a deletion state
+   ```
+   kubectl get promise <promise-name> -o jsonpath='{.metadata.deletionTimestamp}'
+   ```
+
+When deleting Kratix completes 6 actions as part of cleanup in order, once an
+action has been finished it no longer appears in the `.metadata.finalizer`
+field. The cleanup steps Kratix completes are:
+1. `kratix.io/"delete-workflows"` for running the delete pipelines associated
+   with the Promise (if any)
+1. `kratix.io/workflows-cleanup` for cleaning up the workflows created by the
+   Promise
+1. `kratix.io/resource-request-cleanup` for cleaning up the resource requests
+   created
+1. `kratix.io/dynamic-controller-dependant-resources-cleanup` for cleaning up
+   Kubernetes resources created to manage the Promise
+1. `kratix.io/dependencies-cleanup` for cleaning up the dependencies created by
+   the Promise
+1. `kratix.io/api-crd-cleanup` for cleaning up the CRDs created by the Promise
+
+
+Kratix completes these actions in order, so if a resource request is stuck in
+deletion it is likely that one of the finalizers is not being removed correctly.
+
+Check what finalizers are left
+```
+kubectl get <resource-kind> <resource-request> -o jsonpath='{.metadata.finalizers}'
+```
+
+Check what finalizer is failing (since they run in order only one is failing)
+and try to resolve the issue. If you are able to resolve the issue you can
+manually remove the finalizer from the resource by editing the resource and
+removing the finalizer from the `.metadata.finalizers`. Kratix will then
+continue to delete and work its way through the remaining finalizers.
+
+When investigating a Promise deletion issue its worth having the logs of the
+Kratix operator open to see if there are any errors being logged
+```
+kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers\.promise"
+```
+
+1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
+   see if the delete workflow is failing and fix any issues preventing it from
+   completing.
+
+   ```
+   kubectl -n kratix-platform-system get pods --selector kratix.io/promise-name=<promise-name> --selector kratix.io/work-action=delete
+   ```
+
+1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
+   see if the workflows are failing to be deleted and manually cleanup any that
+   are.
+
+   ```
+   kubectl -n kratix-platform-system get jobs --selector kratix.io/promise-name=<promise-name>
+   ```
+
+1. If the `kratix.io/resource-request-cleanup` finalizer is not being removed,
+   check to see if the resource requests are failing to be deleted and see above
+   for how to troubleshoot a resource request deletion failing
+
+   ```
+   kubectl get <resource-kind> -A
+   ```
+
+1. If the `kratix.io/dynamic-controller-dependant-resources-cleanup` finalizer
+   is not being removed, check to see if the Kubernetes resources are failing to
+   be deleted and try to manually clean up any left.
+
+   ```
+   kubectl get configmaps,roles,rolebindings,clusterroles,clusterrolebindings -A --selector kratix.io/promise-name=<promise-name>
+   ```
+1. If the `kratix.io/api-crd-cleanup` finalizer is not being removed, check to
+   see if the CRD is failing to be deleted and try to manually delete.
+
+   ```
+   kubectl get crd --selector kratix.io/promise-name=<promise-name>
+   ```
