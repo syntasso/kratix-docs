@@ -276,8 +276,9 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    ```
 
 1. If the `kratix.io/resource-request-cleanup` finalizer is not being removed,
-   check to see if the resource requests are failing to be deleted and see above
-   for how to troubleshoot a resource request deletion failing
+   check to see if the resource requests are failing to be deleted and [resource
+   requests are not delete](#resource-request-is-not-being-deleted) for how to
+   troubleshoot a resource request deletion failing
 
    ```
    kubectl get <resource-kind> -A
@@ -296,3 +297,23 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    ```
    kubectl get crd --selector kratix.io/promise-name=<promise-name>
    ```
+
+### Workflow Pod isn't appearing (Promise/Resource)
+
+When a workflow is scheduled, Kratix will create a pod to run the workflow. If
+the specification for the workflow is invalid, Kratix will fail to create the
+Pod. Check the logs of the Kratix operator to see if there are any errors and
+fix the relating issues in the workflow.
+
+```
+kubectl -n kratix-platform-system logs <pod-name> -c manager | grep <promise/resource name>
+```
+
+### Workflow Pod stuck in CrashLoopBackOff
+
+When a workflow is scheduled, Kratix will create a pod to run the workflow. If
+the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
+times the pod will eventually go into `CrashLoopBackoff`. In this scenario
+Kratix will not try to reschedule the pod. You can force kratix to reschedule a
+new pod by trigger a [manual
+reconcilation](./reference/resources/workflows#manual-reconciliation)
