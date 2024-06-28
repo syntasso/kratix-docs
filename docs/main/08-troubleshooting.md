@@ -22,7 +22,7 @@ document goes from the Workflow to the Destination in a few steps:
    for them to appear (e.g. Kubernetes resources or terraform files)
 
 Lets first check:
-1. Did the Workflow output the documents correctly?
+1. Check the workflow outputted the documents
    - Check the Workflow logs for any errors that might not being handled
      correctly.
      You can find the pod name by running
@@ -51,7 +51,7 @@ Lets first check:
      kubectl get work <work-name> -o yaml
      ```
 
-1. Did Kratix schedule the documents to the correct Destination?
+1. Check the document is scheduled to the correct Destination
    - Check the `WorkPlacement` resource (a internal Kratix resource that gets
      created from the `Work` resource, representing the scheduling of a `Work`)
      to see if the document is listed inside it.
@@ -60,6 +60,11 @@ Lets first check:
      kubectl get workplacement --selector kratix.io/resource-name=<request-name>
      ```
 
+     If the `WorkPlacement` doesn't exist, this means no Destination was found
+     that matches the required scheduling selectors. Kratix has been unable to
+     schedule the `Work`. See [below for further steps to
+     investigate](#documents-are-being-scheduled-to-the-wrong-destination)
+
      Inspect the works `.spec.targetDestinationName` its scheduled to the
      correct Destination
 
@@ -67,7 +72,7 @@ Lets first check:
      kubectl get workplacement <workplacement-name> -o yaml | grep targetDestinationName
      ```
 
-1. Did Kratix write the document to the Destination?
+1. Check the document was successfully written to the Destination
    - Check the Destination statestore and see if it contains the desired files.
      By default the files for a workplacement will be in the directory structure
      of:
@@ -86,7 +91,7 @@ Lets first check:
      kubectl -n kratix-platform-system logs <pod-name> -c manager
      ```
 
-1. Is the system at the Destination healthy and able to accept the document?
+1. Check the system reconciling the Destination is healthy (e.g. Flux/Argo)
    - Check the Destination is healthy and able to accept the document. For
      example a Destination that is a Kubernetes cluster should have a
      healthy GitOps installation that can successfully pull from the Destination
@@ -97,7 +102,7 @@ Lets first check:
 Kratix uses [label
 selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 to match documents to Destinations. If a document is being scheduled to the
-wrong Destination, it is likely that the label selectors are not matching
+wrong Destination or no Destination at all, it is likely that the label selectors are not matching
 correctly.
 
 1. Check the labels are correctly applied to the Destinations:
@@ -119,6 +124,7 @@ correctly.
    on how to specify Destination selectors.
 
 ### Kratix is not starting
+
 Kratix is a Kubernetes operator and uses cert-manager to generate certificates
 for the webhooks.
 
@@ -307,7 +313,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    kubectl get crd --selector kratix.io/promise-name=<promise-name>
    ```
 
-### Workflow Pod isn't appearing (Promise/Resource)
+### Workflow Pod isn't appearing
 
 When a Workflow is scheduled, Kratix will create a pod to run the Workflow. If
 the specification for the Workflow is invalid, Kratix will fail to create the
