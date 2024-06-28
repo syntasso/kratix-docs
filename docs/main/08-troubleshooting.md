@@ -5,25 +5,25 @@ description: Common issues when installing and running Kratix
 
 ## Common issues
 
-### Documents are not appearing in my destination
+### Documents are not appearing in my Destination
 
-There are many reasons why a document might not appear in a destination. A
-document goes from the workflow to the destination in a few steps:
+There are many reasons why a document might not appear in a Destination. A
+document goes from the Workflow to the Destination in a few steps:
 
-1. The workflow schedules a document by placing it in `/kratix/output`
-1. Kratix schedules this document to a destination, taking into account any
+1. The Workflow schedules a document by placing it in `/kratix/output`
+1. Kratix schedules this document to a Destination, taking into account any
    scheduling selectors specified in
    `/kratix/metadata/destinaion-selectors.yaml` or the Promises static
-   `.spec.destinationSelectors`. If no matching destination
+   `.spec.destinationSelectors`. If no matching Destination
    exists it will not be scheduled until one is created.
-1. Once scheduled it writes the document to the destination, using the
-   destination's auth credentials.
-1. The system at the destination must be healthy and able to accept the document
+1. Once scheduled it writes the document to the Destination, using the
+   Destination's auth credentials.
+1. The system at the Destination must be healthy and able to accept the document
    for them to appear (e.g. Kubernetes resources or terraform files)
 
 Lets first check:
-1. Did the workflow output the documents correctly?
-   - Check the workflow logs for any errors that might not being handled
+1. Did the Workflow output the documents correctly?
+   - Check the Workflow logs for any errors that might not being handled
      correctly.
      You can find the pod name by running
 
@@ -37,7 +37,7 @@ Lets first check:
      ```
 
    - Check the `Work` resource (a internal Kratix resource that gets created to
-     contain the outputs of a workflow) to see if the document is listed inside
+     contain the outputs of a Workflow) to see if the document is listed inside
      it.
 
      ```
@@ -51,7 +51,7 @@ Lets first check:
      kubectl get work <work-name> -o yaml
      ```
 
-1. Did Kratix schedule the documents to the correct destination?
+1. Did Kratix schedule the documents to the correct Destination?
    - Check the `WorkPlacement` resource (a internal Kratix resource that gets
      created from the `Work` resource, representing the scheduling of a `Work`)
      to see if the document is listed inside it.
@@ -61,14 +61,14 @@ Lets first check:
      ```
 
      Inspect the works `.spec.targetDestinationName` its scheduled to the
-     correct destination
+     correct Destination
 
      ```
      kubectl get workplacement <workplacement-name> -o yaml | grep targetDestinationName
      ```
 
-1. Did Kratix write the document to the destination?
-   - Check the destination statestore and see if it contains the desired files.
+1. Did Kratix write the document to the Destination?
+   - Check the Destination statestore and see if it contains the desired files.
      By default the files for a workplacement will be in the directory structure
      of:
 
@@ -77,38 +77,46 @@ Lets first check:
      - Resource: `<destination-name>/resources/<namespace>/<promise-name>/<request-name>/<workflow-name>/<files>`
 
      If your Destination is of type `.spec.filepath.mode=none` then the files
-     will appear in the top-level directory of the destination.
+     will appear in the top-level directory of the Destination.
+
+     If its not appearing check the logs of the Kratix operator to see if there
+     are any errors connecting to the Destination
+
+     ```
+     kubectl -n kratix-platform-system logs <pod-name> -c manager
+     ```
 
 1. Is the system at the Destination healthy and able to accept the document?
    - Check the Destination is healthy and able to accept the document. For
-     example a Destination that is a Kubernetes cluster should have the a
-     healthy GitOps installation that can successfully pull from the statestore
-   - Check the destination's logs for any errors that might be preventing the
-     document from being written.
+     example a Destination that is a Kubernetes cluster should have a
+     healthy GitOps installation that can successfully pull from the Destination
 
 
-### Documents are being scheduled to the wrong destination
-Kratix uses label selectors to match documents to destinations. If a document is
-being scheduled to the wrong destination, it is likely that the label selectors
-are not matching correctly.
+### Documents are being scheduled to the wrong Destination
 
-1. Check the labels are correctly applied to the destinations:
+Kratix uses [label
+selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+to match documents to Destinations. If a document is being scheduled to the
+wrong Destination, it is likely that the label selectors are not matching
+correctly.
+
+1. Check the labels are correctly applied to the Destinations:
 
    ```
    kubectl get destinations --show-labels
    ```
 
 1. Check the selectors are correctly specified to the documents. Fetch the
-   Work for the workflow and inspect the `.spec.workloadGroups[*].destinationSelectors` field.
+   Work for the Workflow and inspect the `.spec.workloadGroups[*].destinationSelectors` field.
 
    ```
    kubectl get work --selector kratix.io/resource-name=<request-name>
    kubectl get work <work-name> -o jsonpath='{.spec.workloadGroups[*].destinationSelectors}'
    ```
 
-   If this doesn't match the labels on the destination, the document will not be
-   scheduled to the destination. See the [scheduling](./05-reference/07-multidestination-management.md) documentation
-   on how to specify destination selectors.
+   If this doesn't match the labels on the Destination, the document will not be
+   scheduled to the Destination. See the [scheduling](./05-reference/07-multidestination-management.md) documentation
+   on how to specify Destination selectors.
 
 ### Kratix is not starting
 Kratix is a Kubernetes operator and uses cert-manager to generate certificates
@@ -168,7 +176,7 @@ field. The cleanup steps Kratix completes are:
    the resource request (if any)
 1. `kratix.io/work-cleanup` for cleaning up the Work/WorkPlacement resources
    created by the resource request
-1. `kratix.io/workflows-cleanup` for cleaning up the workflows created by the
+1. `kratix.io/workflows-cleanup` for cleaning up the Workflows created by the
    resource request
 
 Kratix completes these actions in order, so if a resource request is stuck in
@@ -186,7 +194,7 @@ removing the finalizer from the `.metadata.finalizers`. Kratix will then
 continue to delete and work its way through the remaining finalizers.
 
 1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
-   see if the delete workflow is failing
+   see if the delete Workflow is failing
 
    ```
    kubectl get pods --selector kratix.io/resource-name=<resource-request>
@@ -201,7 +209,7 @@ continue to delete and work its way through the remaining finalizers.
    ```
 
 1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
-   see if the workflows are failing to be deleted
+   see if the Workflows are failing to be deleted
 
    ```
    kubectl get jobs --selector kratix.io/resource-name=<resource-request>
@@ -228,7 +236,7 @@ action has been finished it no longer appears in the `.metadata.finalizer`
 field. The cleanup steps Kratix completes are:
 1. `kratix.io/"delete-workflows"` for running the delete pipelines associated
    with the Promise (if any)
-1. `kratix.io/workflows-cleanup` for cleaning up the workflows created by the
+1. `kratix.io/workflows-cleanup` for cleaning up the Workflows created by the
    Promise
 1. `kratix.io/resource-request-cleanup` for cleaning up the resource requests
    created
@@ -261,7 +269,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
 ```
 
 1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
-   see if the delete workflow is failing and fix any issues preventing it from
+   see if the delete Workflow is failing and fix any issues preventing it from
    completing.
 
    ```
@@ -269,7 +277,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    ```
 
 1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
-   see if the workflows are failing to be deleted and manually cleanup any that
+   see if the Workflows are failing to be deleted and manually cleanup any that
    are.
 
    ```
@@ -301,10 +309,10 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
 
 ### Workflow Pod isn't appearing (Promise/Resource)
 
-When a workflow is scheduled, Kratix will create a pod to run the workflow. If
-the specification for the workflow is invalid, Kratix will fail to create the
+When a Workflow is scheduled, Kratix will create a pod to run the Workflow. If
+the specification for the Workflow is invalid, Kratix will fail to create the
 Pod. Check the logs of the Kratix operator to see if there are any errors and
-fix the relating issues in the workflow.
+fix the relating issues in the Workflow.
 
 ```
 kubectl -n kratix-platform-system logs <pod-name> -c manager | grep <promise/resource name>
@@ -312,7 +320,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep <promise/res
 
 ### Workflow Pod stuck in CrashLoopBackOff
 
-When a workflow is scheduled, Kratix will create a pod to run the workflow. If
+When a Workflow is scheduled, Kratix will create a pod to run the Workflow. If
 the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
 times the pod will eventually go into `CrashLoopBackoff`. In this scenario
 Kratix will not try to reschedule the pod. You can force kratix to reschedule a
@@ -321,9 +329,9 @@ reconcilation](./reference/resources/workflows#manual-reconciliation)
 
 ### Workflow Pod doesn't have k8s api access
 
-A workflow is by default given limited access to the Kubernetes API. You will
-see errors in the logs of the workflow if it is trying to access the API without
-the correct permissions. To give the workflow more access you need to create
+A Workflow is by default given limited access to the Kubernetes API. You will
+see errors in the logs of the Workflow if it is trying to access the API without
+the correct permissions. To give the Workflow more access you need to create
 additional
 [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). Check the
 [documentation for some examples](../workshop/part-ii/secrets-and-state#state)
