@@ -18,6 +18,13 @@
 		]
 	},
 	{
+		"name": "Apache Flink",
+		"description": "Stateful Computations over Data Streams",
+		"url": "https://github.com/opencredo/flink-kratix-promise",
+		"logoUrl": "/img/marketplace/flink.svg",
+		"categories": ["Data"]
+	},
+	{
 		"name": "App-as-a-Service",
 		"description": "An example Promise delivering 'App-as-a-Service'.       Check the Compound Promises docs for more information.",
 		"url": "https://github.com/syntasso/kratix/tree/main/demo/app-as-a-service",
