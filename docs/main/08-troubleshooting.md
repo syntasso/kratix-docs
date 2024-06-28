@@ -255,6 +255,7 @@ continue to delete and work its way through the remaining finalizers.
 
 When investigating a Promise deletion issue its worth having the logs of the
 Kratix operator open to see if there are any errors being logged
+
 ```
 kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers\.promise"
 ```
@@ -317,3 +318,12 @@ times the pod will eventually go into `CrashLoopBackoff`. In this scenario
 Kratix will not try to reschedule the pod. You can force kratix to reschedule a
 new pod by trigger a [manual
 reconcilation](./reference/resources/workflows#manual-reconciliation)
+
+### Workflow Pod doesn't have k8s api access
+
+A workflow is by default given limited access to the Kubernetes API. You will
+see errors in the logs of the workflow if it is trying to access the API without
+the correct permissions. To give the workflow more access you need to create
+additional
+[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). Check the
+[documentation for some examples](../workshop/part-ii/secrets-and-state#state)
