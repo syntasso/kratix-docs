@@ -15,7 +15,8 @@ document goes from the Workflow to the Destination in a few steps:
    scheduling selectors specified in
    `/kratix/metadata/destination-selectors.yaml` or the Promise's static
    `.spec.destinationSelectors`. If no matching Destination
-   exists it will not be scheduled until one is created.
+   exists it will not be scheduled until one is created. See the [scheduling
+   documentation for more info](./reference/multidestination-management)
 1. Once scheduled it writes the document to the Destination, using the
    Destination's auth credentials.
 1. The system at the Destination must be healthy and able to accept the documents
@@ -188,6 +189,7 @@ As Kratix completes these actions in order, if a resource request is stuck in
 deletion it is likely that one of the finalizers is not being removed correctly.
 
 Check which finalizers are remaining
+
 ```
 kubectl get <resource-kind> <resource-request> -o jsonpath='{.metadata.finalizers}'
 ```
@@ -254,7 +256,8 @@ field. The cleanup steps Kratix completes are:
 Kratix completes these actions in order, so if a resource request is stuck in
 deletion it is likely that one of the finalizers is not being removed correctly.
 
-Check which finalizers are remaining```
+Check which finalizers are remaining
+
 ```
 kubectl get <resource-kind> <resource-request> -o jsonpath='{.metadata.finalizers}'
 ```
