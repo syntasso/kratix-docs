@@ -1,0 +1,10 @@
+### Install Flux
+
+Install [Flux](https://fluxcd.io/). Flux will be used to pull down resources to the
+cluster from the State Store
+
+```bash
+# Install flux on the worker
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-install.yaml
+```
+

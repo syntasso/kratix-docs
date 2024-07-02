@@ -5,7 +5,11 @@ title: Others (KinD etc)
 ---
 
 ```mdx-code-block
-import PartialMultiCluster from '../../../_partials/installation/_multi-cluster.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PartialInstallKratixAndCert from '../../../_partials/installation/_install-kratix-and-cert.mdx';
+import PartialInstallFlux from '../../../_partials/installation/_install-flux.mdx';
+import PartialCheckFluxAndFinish from '../../../_partials/installation/_install-check-flux-and-finish.mdx';
 ```
 
 ## System setup
@@ -41,5 +45,95 @@ export PLATFORM="kind-platform"
 ```
 
 
-<PartialMultiCluster />
+<PartialInstallKratixAndCert />
 
+
+## Set up a worker cluster {#worker-setup}
+
+### Create worker cluster
+If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
+```bash
+kind create cluster --image kindest/node:v1.27.3 --name worker
+
+# set WORKER to point to the worker cluster context
+export WORKER="kind-worker"
+```
+
+If you are using your own pre-existing cluster, set the `WORKER` environment
+variable to the name of the kubectl context used to communicate to it.
+
+<PartialInstallFlux />
+
+### Configure Flux
+Now that Flux is installed, we need to configure it to pull down from the Kratix State Store.
+Follow the steps below that match the State Store you created previously:
+
+<Tabs className="boxedTabs" groupId="stateStore">
+<TabItem value="minio" label="Bucket (on KinD)">
+
+```bash
+# Configure Flux to pull down from MinIO
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources.yaml
+```
+
+</TabItem>
+
+<TabItem value="gitea" label="Git (on KinD)">
+
+```bash
+# Configure Flux to pull down from Gitea
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources-git.yaml
+```
+
+</TabItem>
+
+<TabItem value="custom" label="Custom">
+
+  You will need to manual configure the Flux resources to use the Git/Bucket created.
+
+  - Bucket: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources.yaml)
+    to use the endpoint, bucket and credentials for your Bucket.
+  - Git: Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-resources-git.yaml)
+    to use the url, branch, and credentials for your Git Repository.
+
+</TabItem>
+</Tabs>
+
+
+### Register cluster as a Destination with Kratix
+
+The final step is to tell Kratix that the cluster is ready to receive workloads.
+Follow the steps below that match the State Store you created previously:
+
+<Tabs className="boxedTabs" groupId="stateStore">
+<TabItem value="minio" label="Bucket (on KinD)">
+
+```bash
+# Configure Flux to pull down from MinIO
+kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml
+```
+
+</TabItem>
+
+<TabItem value="gitea" label="Git (on KinD)">
+
+```bash
+# Install flux on the worker and configure it to pull down from MinIO
+curl https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml | \
+  sed "s_BucketStateStore_GitStateStore_g" | \
+  kubectl apply --context $PLATFORM --filename -
+```
+
+</TabItem>
+
+<TabItem value="custom" label="Custom">
+
+You will need to manual configure the Destination resources to use created State Store.
+Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml),
+replacing the `spec.StateStoreRef.name`, `spec.StateStoreRef.namespace` and `spec.StateStoreRef.kind`
+to match the previously created State Store
+
+</TabItem>
+</Tabs>
+
+<PartialCheckFluxAndFinish />
