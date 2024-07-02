@@ -1,5 +1,14 @@
 [
 	{
+		"name": "Amazon RDS",
+		"description": "Amazon relational database service. Supports MySQL, PostgreSQL, and MariaDB.",
+		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/sql/aws",
+		"logoUrl": "/img/marketplace/rds.svg",
+		"categories": [
+			"Data"
+		]
+	},
+	{
 		"name": "Ansible Job Launcher",
 		"description": "Everything needed to create, execute, and manage infrastructure automation",
 		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/ansible-job-launcher",
@@ -73,6 +82,15 @@
 		"logoUrl": "/img/marketplace/elasticsearch.svg",
 		"categories": [
 			"Search"
+		]
+	},
+	{
+		"name": "Google CloudSQL",
+		"description": "Fully-managed database service for your MySQL databases on Google Cloud Platform",
+		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/sql/gcp",
+		"logoUrl": "/img/marketplace/gcp-cloudsql.svg",
+		"categories": [
+			"Data"
 		]
 	},
 	{
