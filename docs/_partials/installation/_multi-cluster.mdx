@@ -1,45 +1,7 @@
----
-description: Run Kratix
-slug: /main/guides/installing-kratix
-title: Multi cluster
----
-
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import PartialInstallCertManager from '../../../_partials/installation/_install-cert-manager.md';
-```
-
-## System setup
-
-This guide will show how to use Kratix on two Kubernetes clusters. Install the prerequisites
-listed below if they aren't already on your system. If you are using pre-existing clusters
-or want to use a different tool to provision your clusters, skip requirements 1 and 2.
-
-1. `kind` CLI / **Kubernetes-in-Docker (KinD)**:
-   Used to create and manage local Kubernetes clusters in Docker. See [the quick start guide](https://kind.sigs.k8s.io/docs/user/quick-start/) to install.
-2. `docker` CLI / **Docker**:
-   Used to orchestrate containers. `kind` (above) requires that you have Docker installed and configured. See [Get Docker](https://docs.docker.com/get-docker/) to install.
-3. `kubectl` / **Kubernetes command-line tool**:
-   The CLI for Kubernetes — allows you to run commands against Kubernetes clusters. See [the install guide](https://kubernetes.io/docs/tasks/tools/#kubectl).
-
-:::tip
-
-To get setup locally quickly with KinD clusters you can use the `./scripts/quick-start.sh`
-from the root of the [Kratix repository](https://github.com/syntasso/kratix). This provisions
-an in-cluster `MinIO` to use as the backing [State Store](/main/reference/statestore/intro).
-Alternatively you can provide the `--git` flag to create it with an in-cluster Gitea
-instance instead.
-
-:::
-
-## Set up platform cluster {#platform-setup}
-
-If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
-```bash
-kind create cluster --image kindest/node:v1.27.3 --name platform
-# set PLATFORM to point to the platform cluster context
-export PLATFORM="kind-platform"
+import PartialInstallCertManager from './_install-cert-manager.md';
 ```
 
 ## Install cert-manager
