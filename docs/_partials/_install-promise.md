@@ -30,7 +30,7 @@ Now that your system is set up, you can install your first Kratix Promise! This 
 
 1. [Install the Jenkins Promise](#install-the-jenkins-promise)
 1. [Request a new Jenkins Resource](#request-resource)
-1. [Use the Jenkins](#use-your-jenkins-resource)
+1. [Use the Jenkins](#use-your-jenkins)
 1. [Clean up environment](#cleanup)
 
 ![Overview](/img/docs/kratix_diagrams-Install_Promise.jpg)

@@ -340,7 +340,7 @@ cp /tmp/transfer/* /kratix/output/
 Pipeline images also have the capability to write back information to the
 resource requester by writing to the status. See [status documentation for more information.](../reference/resources/status)
 
-#### Package your code as a Docker image {#docker-file}
+#### Package your code as a Docker image {#dockerfile}
 
 Update the `Dockerfile` in the `configure-pipeline` directory to contain the following:
 
@@ -695,7 +695,7 @@ jenkins-my-amazing-jenkins          1/1     Running   0          1m
 <br />
 
 For verification, access the Jenkins UI in a browser, as in [previous
-steps](./installing-a-promise#use-your-jenkins-instance).
+steps](./installing-a-promise#use-your-jenkins).
 
 Let's now take a look at what you have done in more details.
 

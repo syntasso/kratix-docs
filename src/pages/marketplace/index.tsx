@@ -123,8 +123,8 @@ export function Marketplace(): JSX.Element {
           <hgroup>
             <h1>Kratix Marketplace</h1>
             <p className="text--center">
-              Community Marketplace with <Link href="#promises">Promises</Link>{" "}
-              and <Link href="#images">Pipeline images</Link> for{" "}
+              Community Marketplace with <a href="#promises">Promises</a>{" "}
+              and <a href="#images">Pipeline images</a> for{" "}
               <Link href="/">Kratix</Link>, the framework for building
               platforms.
             </p>
