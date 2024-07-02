@@ -462,17 +462,17 @@ outputs:
 
 If you want to customise what gets persisted to the status, you can skip this step by
 setting the `SKIP_STATUS` environment variable in the Aspect's container to `"true"`.
-In this case, the `*-output.yaml` files in `/kratix/metadata` will still be written, so
+In this case, the `*-tfoutput.yaml` files in `/kratix/metadata` will still be written, so
 that you can access the outputs in the Pipeline.
 
 ### Accessing outputs in the Pipeline
 
-The Aspect will also write a set of `*-output.yaml` files to
+The Aspect will also write a set of `*-tfoutput.yaml` files to
 `/kratix/metadata` containing all of the Terraform workspace outputs present at the time
 the Resource or Promise workloads were written to the State Store.
 
 To ensure uniqueness, the naming convention for the output files is
-`<destinationName>-<commitSha>-output.yaml`, where `destinationName` is the name of the
+`<destinationName>-<commitSha>-tfoutput.yaml`, where `destinationName` is the name of the
 Terraform Destination from which the outputs were read, and `commitSha` is the SHA of the
 commit in which the workloads were written to the State Store.
 
@@ -481,13 +481,13 @@ in a single previous Pipeline (as in the example above). When this is the case, 
 find the output file within the Pipeline as follows:
 
 ```
-file=$(find /kratix/metadata -type f -name '*-output.yaml' | head -n 1)
+file=$(find /kratix/metadata -type f -name '*-tfoutput.yaml' | head -n 1)
 ```
 
 If there were multiple files, you could narrow your search by Destination name:
 
 ```
-file=$(find /kratix/metadata -type f -name '<destinationName>*-output.yaml' | head -n 1)
+file=$(find /kratix/metadata -type f -name '<destinationName>*-tfoutput.yaml' | head -n 1)
 ```
 
 The output files will look similar to the following:
@@ -544,7 +544,7 @@ spec:
                 args:
                   - -c
                   - |
-                    file=$(find /kratix/metadata -type f -name '*-output.yaml' | head -n 1)
+                    file=$(find /kratix/metadata -type f -name '*-tfoutput.yaml' | head -n 1)
                     value=$(yq e '.[] | select(.name == "promise-configure") | .value' "${file}")
                     echo "customStatusField: ${value}" >> /kratix/metadata/status.yaml
 # highlight-end
