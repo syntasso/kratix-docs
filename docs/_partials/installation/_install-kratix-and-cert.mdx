@@ -1,6 +1,4 @@
 ```mdx-code-block
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 import PartialInstallCertManager from './_install-cert-manager.md';
 ```
 
@@ -10,9 +8,8 @@ import PartialInstallCertManager from './_install-cert-manager.md';
 
 ## Install Kratix
 
-If your are using your own pre-existing cluster, set the `PLATFORM` environment
-variable to the name of the kubectl context used to communicate to it. Install Kratix
-on the platform cluster.
+Install Kratix on the platform cluster.
+
 ```bash
 # Install Kratix
 kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
@@ -21,41 +18,3 @@ kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/
 You can also install and configure Kratix with Helm. For more information, see
 the [Helm Chart](https://github.com/syntasso/helm-charts) documentation.
 
-## Set up State Store
-Kratix uses GitOps to provision resources on the worker clusters. You can configure Kratix
-with multiple different GitOps repositories by creating [State Stores](/main/reference/statestore/intro).
-Kratix supports [Bucket State Store](/main/reference/statestore/bucketstatestore)
-and [Git State Store](/main/reference/statestore/gitstatestore).
-
-If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store
-
-<Tabs className="boxedTabs" groupId="stateStore">
-  <TabItem value="minio" label="Bucket (on KinD)">
-
-  ```bash
-  # Install MinIO and register it as a BucketStateStore
-  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/minio-install.yaml
-  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
-  ```
-
-  </TabItem>
-
-  <TabItem value="gitea" label="Git (on KinD)">
-
-  ```bash
-  # Install Gitea and register it as a Git State Store
-  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/gitea-install.yaml
-  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_gitstatestore.yaml
-  ```
-
-  </TabItem>
-
-  <TabItem value="custom" label="Custom">
-
-  If your aren't using KinD clusters you will need to create your own State
-  Store that is accessible by the platform and worker cluster. Follow the [docs
-  for creating State Stores](/main/reference/statestore/intro).
-
-  </TabItem>
-
-</Tabs>
