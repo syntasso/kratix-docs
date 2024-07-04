@@ -14,12 +14,12 @@ import PartialInstallStateStoreStart from  '../../../_partials/installation/_ins
 import PartialInstalConfigureFluxAndRegisterDestination from  '../../../_partials/installation/_install-configure-flux-and-register-destination.md';
 ```
 
-## Set up platform cluster {#platform-setup}
+## Set up Platform Cluster {#platform-setup}
 
-If you are not using a pre-existing cluster, create your platform cluster by
-following the GKE getting started docs [here](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview) 
+If you are not using a pre-existing cluster, create your Platform Cluster by
+following the [GKE getting started docs](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview) 
 
-Once completed login to your cluster using and set the `PLATFORM` environment
+Once completed, log in to your cluster using the `gcloud` cli and set the `PLATFORM` environment
 variable:
 
 ```bash
@@ -48,10 +48,10 @@ state store. If not you can either:
 
 ## Set up worker cluster {#worker-setup}
 
-If you are not using a pre-existing cluster, create a worker cluster following
-the same steps as [platform cluster setup](#platform-setup).
+If you are not using a pre-existing cluster, create a Worker Cluster following
+the same steps as the [Platform Cluster setup](#platform-setup).
 
-Once completed login to your cluster using and set the `WORKER` environment
+Once completed, log in to your cluster using the `gcloud` cli and set the `WORKER` environment
 variable:
 
 ```bash
