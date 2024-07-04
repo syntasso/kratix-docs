@@ -11,10 +11,16 @@ import PartialInstallCertManager from './_install-cert-manager.md';
 Install Kratix on the Platform Cluster.
 
 ```bash
-# Install Kratix
 kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
 ```
 
 You can also install and configure Kratix with Helm. For more information, see
 the [Helm Chart](https://github.com/syntasso/helm-charts) documentation.
 
+Make sure that `kratix` is ready before proceeding:
+
+```shell-session
+$ kubectl --context $PLATFORM get pods --namespace kratix-platform-system
+NAME                                                 READY   STATUS    RESTARTS   AGE
+kratix-platform-controller-manager-78d57569b-bn4t4   2/2     Running   0          25s
+```

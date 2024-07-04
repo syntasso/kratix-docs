@@ -12,6 +12,7 @@ import PartialInstallFlux from '../../../_partials/installation/_install-flux.md
 import PartialCheckFluxAndFinish from '../../../_partials/installation/_install-check-flux-and-finish.mdx';
 import PartialInstallStateStoreStart from  '../../../_partials/installation/_install-state-store-start.md';
 import PartialInstalConfigureFluxAndRegisterDestination from  '../../../_partials/installation/_install-configure-flux-and-register-destination.md';
+import PartialInstallSetupDestination from '../../../_partials/installation/_install-setup-destination.md';
 ```
 
 ## Set up Platform Cluster {#platform-setup}
@@ -24,7 +25,8 @@ variable:
 
 ```bash
 gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-name>
-export PLATFORM=<cluster-name>
+kubectl config current-context
+export PLATFORM=<platform-context-name>
 ```
 
 
@@ -45,6 +47,7 @@ state store. If not you can either:
   credentials](https://cloud.google.com/storage/docs/interoperability) for
   Kratix to use.
 
+<PartialInstallSetupDestination />
 
 ## Set up Worker Cluster {#worker-setup}
 
@@ -56,7 +59,8 @@ variable:
 
 ```bash
 gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-name>
-export WORKER=<cluster-name>
+kubectl config current-context
+export WORKER=<worker-context-name>
 ```
 
 <PartialInstallFlux />

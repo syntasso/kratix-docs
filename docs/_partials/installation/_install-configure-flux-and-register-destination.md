@@ -1,4 +1,3 @@
-
 ### Configure Flux
 
 Configure [Flux](fluxcd.io) to use the state store you created earlier:
@@ -111,31 +110,4 @@ Once filled in with the correct values, apply the resource to the platform clust
 ```bash
 kubectl apply --context $WORKER --filename <path-to-git-or-bucket-resource>
 kubectl apply --context $WORKER --filename <path-to-kustomization-resource>
-```
-
-
-
-### Register cluster as a Destination with Kratix
-
-The final step is to tell Kratix that the cluster is ready to receive workloads.
-Use the template below to create a `Worker`
-[Destination](/main/reference/destination/intro) resource:
-
-```yaml
-apiVersion: platform.kratix.io/v1alpha1
-kind: Destination
-metadata:
-  name: worker
-  labels:
-    environment: dev
-spec:
-  stateStoreRef:
-    name: default
-    kind: <BucketStateStore or GitStateStore>
-```
-
-Once filled in with the correct values, apply the resource to the platform cluster:
-
-```bash
-kubectl apply --context $PLATFORM --filename <path-to-worker-destination-resource>
 ```
