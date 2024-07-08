@@ -5,7 +5,7 @@ next section.
 To install it, run:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.yaml
+kubectl --context $PLATFORM apply --filename https://github.com/cert-manager/cert-manager/releases/download/v1.15.0/cert-manager.yaml
 ```
 
 Make sure that `cert-manager` is ready before installing Kratix:
