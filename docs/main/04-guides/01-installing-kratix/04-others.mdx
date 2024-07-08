@@ -1,13 +1,16 @@
 ---
 description: Run Kratix
-slug: /main/guides/installing-kratix
-title: Multi cluster
+slug: /main/guides/installing-kratix-others
+title: Others (KinD etc)
 ---
 
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import PartialInstallCertManager from '../../../_partials/installation/_install-cert-manager.md';
+import PartialInstallKratixAndCert from '../../../_partials/installation/_install-kratix-and-cert.mdx';
+import PartialInstallFlux from '../../../_partials/installation/_install-flux.mdx';
+import PartialCheckFluxAndFinish from '../../../_partials/installation/_install-check-flux-and-finish.mdx';
+import PartialInstallStateStoreStart from  '../../../_partials/installation/_install-state-store-start.md';
 ```
 
 ## System setup
@@ -42,28 +45,10 @@ kind create cluster --image kindest/node:v1.27.3 --name platform
 export PLATFORM="kind-platform"
 ```
 
-## Install cert-manager
 
-<PartialInstallCertManager />
+<PartialInstallKratixAndCert />
 
-## Install Kratix
-
-If your are using your own pre-existing cluster, set the `PLATFORM` environment
-variable to the name of the kubectl context used to communicate to it. Install Kratix
-on the platform cluster.
-```bash
-# Install Kratix
-kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
-```
-
-You can also install and configure Kratix with Helm. For more information, see
-the [Helm Chart](https://github.com/syntasso/helm-charts) documentation.
-
-## Set up State Store
-Kratix uses GitOps to provision resources on the worker clusters. You can configure Kratix
-with multiple different GitOps repositories by creating [State Stores](/main/reference/statestore/intro).
-Kratix supports [Bucket State Store](/main/reference/statestore/bucketstatestore)
-and [Git State Store](/main/reference/statestore/gitstatestore).
+<PartialInstallStateStoreStart />
 
 If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store
 
@@ -99,7 +84,6 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 </Tabs>
 
 
-
 ## Set up a worker cluster {#worker-setup}
 
 ### Create worker cluster
@@ -114,14 +98,7 @@ export WORKER="kind-worker"
 If you are using your own pre-existing cluster, set the `WORKER` environment
 variable to the name of the kubectl context used to communicate to it.
 
-### Install Flux
-Install [Flux](https://fluxcd.io/). Flux will be used to pull down resources to the
-cluster from the State Store
-```bash
-# Install flux on the worker
-kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-install.yaml
-```
-
+<PartialInstallFlux />
 
 ### Configure Flux
 Now that Flux is installed, we need to configure it to pull down from the Kratix State Store.
@@ -157,6 +134,7 @@ kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syn
 
 </TabItem>
 </Tabs>
+
 
 ### Register cluster as a Destination with Kratix
 
@@ -194,16 +172,4 @@ to match the previously created State Store
 </TabItem>
 </Tabs>
 
-Flux will eventually reconcile the clusters state, making the `worker` cluster ready
-to receive workloads. You can verify its readiness by observing the `kratix-worker-system`
-namespace appearing in the `worker` cluster:
-
-```shell-session
-$ kubectl --context $WORKER get namespaces
-NAME                   STATUS   AGE
-...
-kratix-worker-system   Active   1m
-...
-```
-
-🎉   **Congratulations!** Kratix is now installed! Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service offering.
+<PartialCheckFluxAndFinish />

@@ -1,0 +1,13 @@
+Flux will eventually reconcile the cluster's state, making the `worker` cluster ready
+to receive workloads. You can verify its readiness by observing the `kratix-worker-system`
+namespace appearing in the `worker` cluster:
+
+```shell-session
+$ kubectl --context $WORKER get namespaces
+NAME                   STATUS   AGE
+...
+kratix-worker-system   Active   1m
+...
+```
+
+🎉   **Congratulations!** Kratix is now installed! Jump to [Installing and using a Promise](installing-a-promise) to spin up your first as-a-service offering.

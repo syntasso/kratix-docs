@@ -1,0 +1,20 @@
+```mdx-code-block
+import PartialInstallCertManager from './_install-cert-manager.md';
+```
+
+## Install cert-manager
+
+<PartialInstallCertManager />
+
+## Install Kratix
+
+Install Kratix on the Platform Cluster.
+
+```bash
+# Install Kratix
+kubectl apply --context $PLATFORM --filename https://github.com/syntasso/kratix/releases/latest/download/kratix.yaml
+```
+
+You can also install and configure Kratix with Helm. For more information, see
+the [Helm Chart](https://github.com/syntasso/helm-charts) documentation.
+

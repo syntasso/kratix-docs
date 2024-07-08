@@ -1,0 +1,66 @@
+---
+description: Run Kratix
+slug: /main/guides/installing-kratix-GKE
+title: Google Kubernetes Engine (GKE)
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PartialInstallKratixAndCert from '../../../_partials/installation/_install-kratix-and-cert.mdx';
+import PartialInstallFlux from '../../../_partials/installation/_install-flux.mdx';
+import PartialCheckFluxAndFinish from '../../../_partials/installation/_install-check-flux-and-finish.mdx';
+import PartialInstallStateStoreStart from  '../../../_partials/installation/_install-state-store-start.md';
+import PartialInstalConfigureFluxAndRegisterDestination from  '../../../_partials/installation/_install-configure-flux-and-register-destination.md';
+```
+
+## Set up Platform Cluster {#platform-setup}
+
+If you are not using a pre-existing cluster, create your Platform Cluster by
+following the [GKE getting started docs](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview) 
+
+Once completed, log in to your cluster using the `gcloud` cli and set the `PLATFORM` environment
+variable:
+
+```bash
+gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-name>
+export PLATFORM=<cluster-name>
+```
+
+
+<PartialInstallKratixAndCert />
+
+<PartialInstallStateStoreStart />
+
+If you have a pre-existing Git repository or S3-Compatible Bucket you can use that as your
+state store. If not you can either:
+
+- Create a new Git repository on your Git provider of choice and use it as your state
+  store. See [Git State Store](/main/reference/statestore/gitstatestore) for
+  more information.
+- Create a [GCP Bucket](https://cloud.google.com/storage/docs/creating-buckets)
+  (anything that implements the S3 API will work) and then use it as your state
+  store. See [Bucket State Store](/main/reference/statestore/bucketstatestore)
+  for more information. You will have to create a set of [S3-Compatible
+  credentials](https://cloud.google.com/storage/docs/interoperability) for
+  Kratix to use.
+
+
+## Set up Worker Cluster {#worker-setup}
+
+If you are not using a pre-existing cluster, create a Worker Cluster following
+the same steps as the [Platform Cluster setup](#platform-setup).
+
+Once completed, log in to your cluster using the `gcloud` cli and set the `WORKER` environment
+variable:
+
+```bash
+gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-name>
+export WORKER=<cluster-name>
+```
+
+<PartialInstallFlux />
+
+<PartialInstalConfigureFluxAndRegisterDestination/>
+
+<PartialCheckFluxAndFinish />
