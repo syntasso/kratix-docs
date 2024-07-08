@@ -1,0 +1,68 @@
+---
+description: Run Kratix
+slug: /main/guides/installing-kratix-EKS
+title: Amazon Elastic Kubernetes Service (EKS)
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PartialInstallKratixAndCert from '../../../_partials/installation/_install-kratix-and-cert.mdx';
+import PartialInstallFlux from '../../../_partials/installation/_install-flux.mdx';
+import PartialCheckFluxAndFinish from '../../../_partials/installation/_install-check-flux-and-finish.mdx';
+import PartialInstallStateStoreStart from  '../../../_partials/installation/_install-state-store-start.md';
+import PartialInstalConfigureFluxAndRegisterDestination from  '../../../_partials/installation/_install-configure-flux-and-register-destination.md';
+import PartialInstallSetupDestination from '../../../_partials/installation/_install-setup-destination.md';
+```
+
+## Set up Platform Cluster {#platform-setup}
+
+If you are not using a pre-existing cluster, create your Platform Cluster by
+following the [EKS getting started docs](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html) 
+
+Once completed, log in to your cluster using the `aws` cli and set the `PLATFORM` environment
+variable:
+
+```bash
+aws eks update-kubeconfig --region <region-code> --name <cluster-name>
+kubectl config current-context
+export PLATFORM=<platform-context-name>
+```
+
+
+<PartialInstallKratixAndCert />
+
+<PartialInstallStateStoreStart />
+
+If you have a pre-existing Git repository or S3-Compatible Bucket you can use that as your
+state store. If not you can either:
+
+- Create a new Git repository on your Git provider of choice, including
+  [AWS CodeCommit](https://aws.amazon.com/codecommit/), and use it as your state store. See
+  [Git State Store](/main/reference/statestore/gitstatestore) for more information.
+- Create an [S3 Bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html)
+  (anything that implements the S3 API will work) and then use it as your state
+  store. See [Bucket State Store](/main/reference/statestore/bucketstatestore)
+  for more information.
+
+<PartialInstallSetupDestination />
+
+## Set up Worker Cluster {#worker-setup}
+
+If you are not using a pre-existing cluster, create a Worker Cluster following
+the same steps as the [Platform Cluster setup](#platform-setup).
+
+Once completed, log in to your cluster using the `aws` cli and set the `WORKER` environment
+variable:
+
+```bash
+aws eks update-kubeconfig --region <region-code> --name <cluster-name>
+kubectl config current-context
+export WORKER=<worker-context-name>
+```
+
+<PartialInstallFlux />
+
+<PartialInstalConfigureFluxAndRegisterDestination/>
+
+<PartialCheckFluxAndFinish />
