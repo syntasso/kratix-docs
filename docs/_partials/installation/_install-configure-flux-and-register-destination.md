@@ -1,6 +1,6 @@
 ### Configure Flux
 
-Configure [Flux](fluxcd.io) to use the state store you created earlier:
+Configure [Flux](https://fluxcd.io) to use the state store you created earlier:
 - If you are using a Git repository as your state store, follow the steps in the
   [FluxCD docs](https://fluxcd.io/flux/components/source/gitrepositories/) for
   creating a `GitRepository` resource

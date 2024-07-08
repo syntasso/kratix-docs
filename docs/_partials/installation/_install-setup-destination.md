@@ -2,7 +2,7 @@
 
 We need to register the cluster with Kratix so that it can be used as a
 destination for deploying to. Use the template below to create a
-`Worker` [Destination](/main/reference/destination/intro) resource:
+`Worker` [Destination](/main/reference/destinations/intro) resource:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
