@@ -73,6 +73,8 @@ Once you have authenticated, you should be able to pull the image:
 docker pull ghcr.io/syntasso/ske-backstage-generator:v0.3.0
 ```
 
+### Pulling the image from your cluster
+
 Your Kubernetes cluster must have permission to [pull this image from the
 private
 registry](https://kubernetes.io/docs/concepts/containers/images/#configuring-nodes-to-authenticate-to-a-private-registry).
@@ -89,6 +91,8 @@ kind load docker-image ghcr.io/syntasso/ske-backstage-generator:v0.3.0
 ```
 
 For other tools, follow their specific documentation.
+
+When using the image in your Workflows, you can define the secret you want to use for authentication within your Promise, see below for more details.
 
 :::info
 
@@ -128,6 +132,51 @@ Workflows. If you install the Promise, you should see a Component automatically
 appearing in your Backstage instance, together with a new Template. If you use
 the Template to create a Resource, you should see the resource Component
 appearing as well as the Resource itself being created in your cluster.
+
+### Authenticating against the image registry
+
+If you have not loaded the image to your Kubernetes cache or pushed it to an internal registry,
+you can define your authentication credentials via a `docker-registry` secret and refer to this secret
+in Pipeline definition in your Workflow.
+
+You can create the secret with the following command, replacing `YOUR_TOKEN` with the token you have
+been provided with:
+
+```yaml
+kubectl create secret docker-registry syntasso-registry \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=YOUR_TOKEN \
+  --namespace kratix-platform-system
+```
+
+The `imagePullSecrets` field in your Workflow can be used to refer to the new `syntasso-registry`
+secret.
+
+```yaml
+  # ...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          #highlight-start
+          imagePullSecrets:
+            - name: syntasso-registry
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+            name: ske-backstage-generator
+```
+
+This ensures that, when pulling the `ske-backstage-generator` image, Kubernetes will use the
+`syntasso-registry` secrets for authentication.
 
 ## Customising the generated Components
 
