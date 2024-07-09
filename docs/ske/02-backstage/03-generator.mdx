@@ -42,7 +42,7 @@ In a Promise Configure workflow, two Backstage manifests will be generated:
 
 - **Promise Component:** A Backstage Component representing the Promise.
 - **Promise Template:** A Backstage Template representing the Promise API (i.e. the CRD
-  for Resources created fromt this Promise).
+  for Resources created from this Promise).
 
 Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
 
@@ -56,8 +56,10 @@ Check the [YAML File Format](./yaml-file-format) for examples of these manifests
 
 ## Accessing the SKE Generator image
 
+### Pulling the image locally
+
 The image is hosted in a private registry. To access the image, you will need to
-authenticate using the token you have been provided with. For docker, you can
+authenticate using the token you have been provided with. For Docker, you can
 run the following command, providing your token as the password when prompted:
 
 ```bash
@@ -192,9 +194,9 @@ spec:
   owner: kratix
 ```
 
-To customise these values, or to include any addionatal field (as defined in the
+To customise these values, or to include any additional fields (as defined in the
 [Backstage
-docs](https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component)
+docs](https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component))
 you can set the following `env` variables in the workflow:
 
 * `COMPONENT_TYPE`: the value of `spec.type`
