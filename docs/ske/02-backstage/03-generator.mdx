@@ -152,6 +152,13 @@ kubectl create secret docker-registry syntasso-registry \
   --namespace kratix-platform-system
 ```
 
+:::info
+
+The secret must exist in the `kratix-platform-system` namespace as well as any other namespaces where users
+be able to make requests
+
+:::
+
 The `imagePullSecrets` field in your Workflow can be used to refer to the new `syntasso-registry`
 secret.
 
