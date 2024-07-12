@@ -1,6 +1,6 @@
 ---
 description: Documentation for the Kratix Destination Custom Resource
-title: Destination Custom Resource
+title: Destination
 sidebar_label: Destinations
 id: intro
 ---
@@ -48,6 +48,13 @@ spec:
   #   to this Destination if the Promise `destinationSelectors` match
   #   this Destination's labels
   strictMatchLabels: false
+
+  # Optional, defaults to `nestedByMetadata`
+  # The mode to use when writing to the State Store, valid options are:
+  #   - nestedByMetadata: Writes to the State Store in a nested structure
+  #   - none: Writes to the State Store in a flat structure
+  filepath:
+    mode: nestedByMetadata | none
 
   # Required
   stateStoreRef:
