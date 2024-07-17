@@ -58,6 +58,12 @@ workloads](./reference/multidestination-management).
 
 The big public cloud providers offer tremendous power and functionality. Unfortunately, they also require expert knowledge, experience, time, and effort to deliver results in your organisation. Running a multi-cloud multi-cluster Kubernetes-based topology, powered by Kratix and a sustainable platform team, is the best way for your application teams to leverage the power of public clouds without being "locked in" to a vendor.
 
+### What is the versioning strategy for Kratix?
+
+The Open Source releases of Kratix are currently released via [Github](https://github.com/syntasso/kratix). As of July 2024, these releases no longer have version-specific tags and release names, and are instead be mutable, released at `latest` only. The point-in-time record of the code can be validated by the commit of the release but the release itself will not detail a version. All previously versioned releases of Kratix will remain available.
+
+This has no impact on the cadence of OSS releases or the availability of bug fixes and security patches. Our enterprise offering, Syntasso Kratix Enterprise, will continue to use versioning.
+
 ### I'd like to invest/partner/buy. Who do I talk to?
 
 Please [contact Syntasso](https://www.syntasso.io/contact-us).
