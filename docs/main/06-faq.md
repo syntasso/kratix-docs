@@ -60,7 +60,7 @@ The big public cloud providers offer tremendous power and functionality. Unfortu
 
 ### What is the versioning strategy for Kratix?
 
-The Open Source releases of Kratix are currently released via [Github](https://github.com/syntasso/kratix). As of July 2024, these releases no longer have version-specific tags and release names, and are instead be mutable, released at `latest` only. The point-in-time record of the code can be validated by the commit of the release but the release itself will not detail a version. All previously versioned releases of Kratix will remain available.
+The Open Source releases of Kratix are currently released via [Github](https://github.com/syntasso/kratix). As of July 2024, these releases no longer have version-specific tags and release names, and are instead mutable, released at `latest` only. The point-in-time record of the code can be validated by the commit of the release but the release itself will not detail a version. All previously versioned releases of Kratix will remain available.
 
 This has no impact on the cadence of OSS releases or the availability of bug fixes and security patches. Our enterprise offering, Syntasso Kratix Enterprise, will continue to use versioning.
 
