@@ -18,8 +18,8 @@ In Kratix, scheduling happens in two stages:
    ([Scheduling Workloads](#resources))
 
 The following sections on this page document those stages. For hands-on scheduling guides,
-check the [Adding a new Destination](../guides/scheduling) and [Compound
-Promises](../guides/compound-promises) pages.
+check the [Adding a new Destination](../../guides/scheduling) and [Compound
+Promises](../../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
 
@@ -121,7 +121,7 @@ Check the [dynamic scheduling](#dynamic) section below for more details.
 
 ## Dynamic scheduling {#dynamic}
 
-For both the [promise](./promises/workflows) and the [resource](./resources/workflows)
+For both the [promise](../promises/workflows) and the [resource](../resources/workflows)
 workflows, Kratix mounts a metadata directory under `/kratix/metadata`. At scheduling
 time, Kratix will look for a `destination-selectors.yaml` file in that directory with the
 following format:
@@ -251,4 +251,4 @@ To enable this functionality, the following needs to be true:
   the platform cluster
 
 For detailed instructions on the above, please check the [Compound
-Promises](../guides/compound-promises) guide.
+Promises](../../guides/compound-promises) guide.

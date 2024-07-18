@@ -31,7 +31,7 @@ Alternatively you can delete a Resource by providing the Resource definition fil
 kubectl delete --filename resource-request.yaml
 ```
 
-If the Promise contains a [Resource Delete workflow](../05-resources/02-workflows.md#delete-workflows),
+If the Promise contains a [Resource Delete workflow](../resources/workflows#delete-workflows),
 it will also be run during the delete process.
 
 :::info
