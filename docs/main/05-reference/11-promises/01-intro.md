@@ -61,6 +61,7 @@ spec:
         key: value
 
   # A list of Promises that are required by the Promise
+  # All required Promises must be present and available for this promise to be made available
   requiredPromises:
     - name: required-promise-name
       version: required-promise-version
