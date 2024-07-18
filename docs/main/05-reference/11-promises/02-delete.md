@@ -27,7 +27,7 @@ Deleting a Promise will take a few minutes to complete while Kratix deletes all 
 workloads associated with Promise, including any requested Resources and all the of the
 Promise dependencies.
 
-If the Promise contains a [Promise Delete workflow](../04-promises/04-workflows.md#delete-workflows),
+If the Promise contains a [Promise Delete workflow](../promises/workflows#delete-workflows),
 it will also be run during the delete process.
 
 :::info

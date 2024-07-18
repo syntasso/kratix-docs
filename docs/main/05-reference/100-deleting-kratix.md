@@ -1,5 +1,6 @@
 ---
 title: Uninstalling Kratix
+sidebar_position: 100
 sidebar_label: Uninstalling Kratix
 description: Learn more about how to uninstall Kratix
 ---

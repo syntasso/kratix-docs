@@ -311,7 +311,7 @@ Promise gets updated or upgraded, its Dependencies are seamlessly propagated
 across the fleet. If a Destination labels change, Kratix will automatically converge on the expected system state.
 
 If you are curious to learn more about Kratix scheduling, check the
-[Multi-cluster Management](../main/reference/multidestination-management) docs.
+[Multi-cluster Management](../main/reference/destinations/multidestination-management) docs.
 
 :::
 

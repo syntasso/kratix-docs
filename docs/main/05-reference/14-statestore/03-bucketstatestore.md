@@ -109,7 +109,7 @@ spec:
 ```
 
 When running in EKS you need to ensure your security group rules allow Kratix to
-access the S3 API. If you are running the cluster in a restrictred setup you can
+access the S3 API. If you are running the cluster in a restricted setup you can
 grant the access to just the S3 API using [gateway VPC
 endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html)
 

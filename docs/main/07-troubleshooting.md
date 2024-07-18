@@ -16,7 +16,7 @@ document goes from the Workflow to the Destination in a few steps:
    `/kratix/metadata/destination-selectors.yaml` or the Promise's static
    `.spec.destinationSelectors`. If no matching Destination
    exists it will not be scheduled until one is created. See the [scheduling
-   documentation for more info](./reference/multidestination-management)
+   documentation for more info](./reference/destinations/multidestination-management)
 1. Once scheduled it writes the document to the Destination, using the
    Destination's auth credentials.
 1. The system at the Destination must be healthy and able to accept the documents
@@ -120,7 +120,7 @@ wrong Destination or no Destination at all, it is likely that the label selector
    ```
 
    If this doesn't match the labels on the Destination, the document will not be
-   scheduled to the Destination. See the [scheduling](./05-reference/07-multidestination-management.md) documentation
+   scheduled to the Destination. See the [scheduling](./reference/destinations/multidestination-management) documentation
    on how to specify Destination selectors.
 
 ### Kratix is not starting

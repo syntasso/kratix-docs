@@ -1,5 +1,6 @@
 ---
 title: Workflows
+sidebar_position: 12
 sidebar_label: Workflows
 description: Learn more about conventions in workflows
 id: workflows
@@ -136,7 +137,7 @@ communicate between the Pipelines (e.g. via status updates).
 ### Output
 
 At the end of a Pipeline, all files present in the **output directory** mounted at
-`/kratix/output` will be written to the [State Store](./02-statestore/01-statestore.md).
+`/kratix/output` will be written to the [State Store](./statestore/intro).
 
 All containers in the Pipeline can write to this volume, and any container can add, update, or remove
 documents from this directory.
@@ -156,7 +157,7 @@ Pipeline containers can control aspects of how Kratix behaves by creating specia
 this directory:
 
 - `destination-selectors.yaml` can be added to any Promise to further refine where the
-  resources in `/kratix/output` will be [scheduled](./multidestination-management).
+  resources in `/kratix/output` will be [scheduled](./destinations/multidestination-management).
 - `status.yaml` allows the Pipeline to communicate information about the resource back to
   the requester. See the [status documentation for more information](./resources/status).
 

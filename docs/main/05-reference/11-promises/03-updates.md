@@ -27,8 +27,8 @@ For example, if you bump an image version for a Pipeline container in a Resource
 workflow, Kratix will ensure that all Resources are re-reconciled, including re-running
 the Resource Configure workflow using the new image for every existing Resource.
 
-See [Promise Workflows](../04-promises/04-workflows.md#configure-workflows) and
-[Resource Workflows](../05-resources/02-workflows.md#configure-workflows) for
+See [Promise Workflows](../promises/workflows#configure-workflows) and
+[Resource Workflows](../resources/workflows#configure-workflows) for
 more details.
 
 ## Scheduling
@@ -37,7 +37,7 @@ The scheduling for a Promise may be changed by modifying either:
 - `.spec.destinationSelectors` in the Promise; or
 - the contents of `/kratix/metadata/destination-selectors.yaml` at the end of a Workflow.
 
-See [Managing Multiple Destinations](../07-multidestination-management.md) for more
+See [Managing Multiple Destinations](../destinations/multidestination-management) for more
 details on scheduling.
 
 ### Misscheduled workloads

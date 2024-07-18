@@ -1,9 +1,9 @@
 ---
-description: Documentation for using Backstage with Kratix
-title: Backstage
-sidebar_label: Backstage
-id: intro
+description: Learn more about how Kratix works with Backstage
+title: Kratix and Backstage
+id: backstage
 ---
+
 
 _[Backstage](https://backstage.io/) is a framework for building developer portals. Kratix is a framework for building platforms. It's as if they were made for each other._
 
@@ -36,16 +36,16 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 - **Decoupled architecture:**
 
   GUI architectures shine when their responsibility is limited to the UX
-  experience. Rather than define your platform orchestartation in Backstage
+  experience. Rather than define your platform orchestration in Backstage
   directly, you can have Backstage call the Kratix API which provides easier
   portability across GUIs, while still supporting the experience of more CLI-driven
-  users. Plus, decoupling enables easier refactoring of platfom implementation due to
+  users. Plus, decoupling enables easier refactoring of platform implementation due to
   stable API definitions.
 
 - **Auto-populated GUI:**
 
   Backstage GUIs must be declared, which is toil for the platform. Kratix can
-  reduce this toil by integrating [Promises](../promises/intro) with
+  reduce this toil by integrating [Promises](../reference/promises/intro) with
   Backstage by default. In addition, these GUIs can diverge from platform
   offerings if they are managed separately from the backend implementations.
   Promises that define the API and the Backstage GUI at the same time provide
@@ -97,8 +97,8 @@ Backstage supports reading objects from S3-compatible blob stores. Kratix
 also supports writing to them.
 
 To set up this integration, you'll need to create a
-[BucketStateStore](../statestore/bucketstatestore) and a
-[Destination](../destinations/intro) which points to the
+[BucketStateStore](../reference/statestore/bucketstatestore) and a
+[Destination](../reference/destinations/intro) which points to the
 directory that Backstage is configured to watch.
 
 For example, first create a `BucketStateStore` for Backstage to use:
@@ -163,11 +163,11 @@ and components, which Kratix has written to the state store.
 
 ### Create Backstage Resources with Kratix
 
-Kratix [workflows](../workflows) allow Promise authors to define pipelines that
-run at various points in the lifecycle of a [Resource](../resources/workflows) or
-[Promise](../promises/workflows). These workflows can output documents of
+Kratix [workflows](../reference/workflows) allow Promise authors to define pipelines that
+run at various points in the lifecycle of a [Resource](../reference/resources/workflows) or
+[Promise](../reference/promises/workflows). These workflows can output documents of
 _any type_, and a single workflow can schedule to
-[multiple destinations](../multidestination-management#dynamic).
+[multiple destinations](../reference/destinations/multidestination-management#dynamic).
 
 This powerful combination enables Promise authors to output many distinct types of
 resource to its own destination, all in a single workflow. In this case, we're writing
@@ -220,7 +220,7 @@ populate the UI as shown below:
 
 ![Promise in Backstage](/img/docs/backstage-promise.png)
 
-A user can then make a [Resource request](../05-resources/01-intro.md) to Kratix by
+A user can then make a [Resource request](../reference/resources/intro) to Kratix by
 clicking "Create" in the top right, selecting the Kafka form and filling out the details:
 
 ![Backstage Template](/img/docs/backstage-template.png)
@@ -273,7 +273,7 @@ echo """
 
 This results in the instance being displayed in Backstage:
 
-![Backstage Instace](/img/docs/backstage-resource.png)
+![Backstage Instance](/img/docs/backstage-resource.png)
 
 ### Support
 
