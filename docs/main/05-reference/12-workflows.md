@@ -93,10 +93,12 @@ the future.
 
 :::
 
-### ServiceAccount
+### Service Account
 
-Each pipelines runs with a unique service account, which is automatically created by Kratix.
-The Service Account is named
+Each pipelines runs with a unique [service
+account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/),
+which is automatically created by Kratix when the pipeline is triggered for the
+first time. The service account following the naming convention of
 `<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`. For example
 the below Promise would create two service accounts:
 
