@@ -93,6 +93,37 @@ the future.
 
 :::
 
+### ServiceAccount
+
+Each pipelines runs with a unique service account, which is automatically created by Kratix.
+The Service Account is named
+`<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`. For example
+the below Promise would create two service accounts:
+
+
+```yaml:
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      delete:
+        - metadata:
+            name: slack-notify
+    promise:
+      configure:
+        - metadata:
+            name: tf-workspace
+```
+
+- `env-resource-delete-slack-notify` would be created in each namespace where
+  the resource request is made
+- `env-promise-configure-tf-workspace` would be created in the
+  `kratix-platform-system` namespace
+
 ### Secrets
 
 To access Secrets in the Pipeline, you can pass in a reference to the Pipeline container's
