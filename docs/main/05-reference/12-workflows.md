@@ -113,18 +113,48 @@ spec:
   workflows:
     resource:
       delete:
-        - metadata:
-            name: slack-notify
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: slack-notify
     promise:
       configure:
-        - metadata:
-            name: tf-workspace
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: tf-workspace
 ```
 
 - `env-resource-delete-slack-notify` would be created in each namespace where
   the resource request is made
 - `env-promise-configure-tf-workspace` would be created in the
   `kratix-platform-system` namespace
+
+#### Custom Service Account
+You can provide a custom service account for the pipeline by providing the `.rbac.serviceAccount` field in the pipeline spec.
+
+```yaml
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+            name: slack-notify
+          spec:
+            rbac:
+              serviceAccount: my-service-account
+```
+
+Kratix will use this service account for the pipeline instead of the standard
+one. If it does not exist, Kratix will create it and manage its lifecycle. If it
+does exist, Kratix will not modify or delete the service account.
 
 ### Secrets
 
