@@ -93,6 +93,69 @@ the future.
 
 :::
 
+### Service Account
+
+Each pipelines runs with a unique [service
+account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/),
+which is automatically created by Kratix when the pipeline is triggered for the
+first time. The service account following the naming convention of
+`<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`. For example
+the below Promise would create two service accounts:
+
+
+```yaml:
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      delete:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: slack-notify
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: tf-workspace
+```
+
+- `env-resource-delete-slack-notify` would be created in each namespace where
+  the resource request is made
+- `env-promise-configure-tf-workspace` would be created in the
+  `kratix-platform-system` namespace
+
+#### Custom Service Account
+You can provide a custom service account for the pipeline by providing the `.rbac.serviceAccount` field in the pipeline spec.
+
+```yaml
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+            name: slack-notify
+          spec:
+            rbac:
+              serviceAccount: my-service-account
+```
+
+Kratix will use this service account for the pipeline instead of the standard
+one. If it does not exist, Kratix will create it and manage its lifecycle. If it
+does exist, Kratix will not modify or delete the service account.
+
 ### Secrets
 
 To access Secrets in the Pipeline, you can pass in a reference to the Pipeline container's
