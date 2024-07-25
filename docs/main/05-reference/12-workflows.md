@@ -143,7 +143,7 @@ spec:
           rbac:
             permissions:
               - apiGroups: [""]
-                verbs: ["*""]
+                verbs: ["*"]
                 resources: ["secrets"]
               - apiGroups: ["batch"]
                 verbs: ["get"]
