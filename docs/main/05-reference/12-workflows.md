@@ -181,7 +181,7 @@ spec:
           rbac:
             permissions:
               - apiGroups: [""]
-                verbs: ["get""]
+                verbs: ["get"]
                 resources: ["secrets"]
                 resourceNamespace: "ns-of-my-secrets"
               - apiGroups: ["batch"]
