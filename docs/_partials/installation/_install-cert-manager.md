@@ -22,7 +22,7 @@ following keys:
 ```yaml
 apiVersion: v1
 data:
-  ca.crt: # Base64 encoded Root CA certificate
+  ca.crt: # Base64 CA certificate
   tls.crt: # Base64 encoded Server certificate
   tls.key: # Base64 encoded Server private key
 kind: Secret
@@ -32,8 +32,12 @@ metadata:
 type: kubernetes.io/tls
 ```
 
-In addition to this, you need to update all occurrences of the `caBundle` field in the following
-resources to contain the base64 encoded root CA certificate:
+As part of installing Kratix we create a few resources that require the CA
+certificate. You will have to manually add the CA certificate to the resources
+mentioned below, and manually remove the cert-manager `Certificate` and `Issuer`
+resources. The following resources need to be updated to contain the Base64
+encoded CA certificate:
+
 - `MutatingWebhookConfiguration/kratix-platform-mutating-webhook-configuration`
   ```
   apiVersion: admissionregistration.k8s.io/v1
@@ -44,8 +48,9 @@ resources to contain the base64 encoded root CA certificate:
   - admissionReviewVersions:
     - v1
     clientConfig:
-      caBundle: ....
+      caBundle: .... #  there might be multiple admissionReviewVersions, ensure you update all of them
   ```
+
 - `ValidatingWebhookConfiguration/kratix-platform-validating-webhook-configuration`
   ```
   apiVersion: admissionregistration.k8s.io/v1
@@ -56,7 +61,7 @@ resources to contain the base64 encoded root CA certificate:
   - admissionReviewVersions:
     - v1
     clientConfig:
-      caBundle: ....
+      caBundle: .... #  there might be multiple admissionReviewVersions, ensure you update all of them
   ```
 - `CustomResourceDefinition/promises.platform.kratix.io`
   ```
@@ -71,7 +76,6 @@ resources to contain the base64 encoded root CA certificate:
         clientConfig:
           caBundle: ....
   ```
-
 
 </details>
 
