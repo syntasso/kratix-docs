@@ -1,0 +1,8 @@
+{
+  "label": "Reference",
+  "position": 20,
+  "link": {
+    "type": "generated-index",
+    "description": "Reference documentation for all commands available in the Kratix CLI."
+  }
+}

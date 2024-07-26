@@ -1,0 +1,157 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+def header?(sections, line)
+  section = sections.find { |key, value| line.start_with?(value) }
+  return section[0] if section
+  return ""
+end
+
+def parse_subcommands(cmd, ignored)
+  raw_cmds = cmd[:subcommands]
+  sub_cmds = raw_cmds&.map do |line|
+    head, *tail = line.split
+    { name: head, short: tail.join(" ") }
+  end
+
+  sub_cmds&.reject {|x| ignored.include?(x[:name]) } || []
+end
+
+def link_to(parent, child, short)
+  name = "#{parent}"
+  unless child.empty?
+    name += " #{child}"
+  end
+  return "* [#{name}](/main/kratix-cli/reference/#{name.gsub(" ", "-")}): #{short}"
+end
+
+def section(name, cmd, code: false, slice: 1)
+  return unless cmd[name]
+
+  if name == :subcommands
+    return <<~EOF.chomp
+    ## See Also
+
+    #{cmd[:parent_command] ? link_to(cmd[:parent_command][:name], "", cmd[:parent_command][:short]) : ""}
+    #{cmd[:subcommands].map { |c|
+    "#{link_to(cmd[:name], c[:name], c[:short])}"
+    }.join("\n")}
+    EOF
+  end
+
+  if code
+    return <<~EOF.chomp
+    ## #{name.capitalize}
+    ```
+    #{cmd[name].each_slice(slice).map{|a| a.join("\n") + (slice > 1 ? "\n" : "") }.join("\n").strip}
+    ```
+
+    EOF
+  end
+
+  <<~EOF
+    ## #{name.capitalize}
+    #{cmd[name].join("\n")}
+  EOF
+end
+
+
+def header(cmd)
+  <<~EOF
+  # #{cmd[:name]}
+  #{cmd[:short]}
+  EOF
+end
+
+def gen_doc(cmd)
+  <<~EOF
+  #{header(cmd)}
+  #{section(:description, cmd)}
+  #{section(:usage, cmd, code: true)}
+  #{section(:examples, cmd, code: true, slice: 2)}
+  #{section(:flags, cmd, code: true)}
+  #{section(:global, cmd, code: true)}
+  #{section(:subcommands, cmd)}
+  EOF
+end
+
+cmds = []
+count = 0
+sections = {
+  description: "Description",
+  usage: "Usage",
+  examples: "Examples",
+  subcommands: "Available Commands",
+  flags: "Flags",
+  global: "Global Flags"
+}
+
+ignored_commands = %w{help version completion}
+
+to_parse = [{
+  name: "kratix", short: "The Kratix CLI"
+}]
+subcommands_to_parse = []
+
+while to_parse.any?
+  c = to_parse.shift
+
+  next if ignored_commands.include?(c[:name].split.last)
+  puts "Generating documentation for command `#{c[:name]}`"
+
+  current_section = :description
+
+  cmd = {
+    name: c[:name],
+    short: c[:short],
+    level: c[:level],
+    parent_command: c[:parent_command]
+  }
+
+  IO.popen("#{c[:name]} --help") do |io|
+    lines = io.readlines
+    lines.pop
+    lines.each do |line|
+      line = line.strip
+      next if line.empty?
+
+      if (sec = header?(sections, line)) != ""
+        current_section = sec
+        next
+      end
+
+      (cmd[current_section] ||= []) << line
+    end
+  end
+  subcommands = parse_subcommands(cmd, ignored_commands)
+  cmd[:subcommands] = subcommands
+  cmds << cmd
+
+  if subcommands.any?
+    subcommands_to_parse = subcommands.each_with_index.map do |el, i|
+      {name: c[:name] + " " + el[:name], short: el[:short], :parent_command => cmd}
+    end
+    to_parse = subcommands_to_parse + to_parse
+  end
+
+  count += 1
+end
+
+puts "Total commands: #{count}"
+puts "=================="
+puts "Outputting Markdown..."
+
+doc_dir = File.join(File.dirname(__FILE__), "..", "docs", "main", "06-kratix-cli", "20-reference")
+
+#remove all files from dir
+FileUtils.rm_rf(Dir.glob("#{doc_dir}/*.md"))
+
+cmds.each_with_index do |cmd, i|
+  name = cmd[:name].split.join("-").downcase.gsub(/[^a-z0-9-]/, "")
+  puts "Writing #{name}..."
+  doc = gen_doc(cmd)
+  filepath = File.join(doc_dir, "#{"%02d" % i}_#{name}.md")
+  # FileUtils.mkdir_p(File.dirname(filepath)) unless File.directory?(File.dirname(filepath))
+  File.write(filepath, doc)
+end
