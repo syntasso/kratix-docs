@@ -77,6 +77,28 @@ encoded CA certificate:
           caBundle: ....
   ```
 
+Lastly, you need to remove the following cert-manager Issuer and Certificate from Kratix release manifest:
+
+```yaml
+---
+...
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kratix-platform-serving-cert
+  namespace: kratix-platform-system
+spec:
+...
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kratix-platform-selfsigned-issuer
+  namespace: kratix-platform-system
+spec:
+...
+```
+
 </details>
 
 To install it, run:
