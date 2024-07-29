@@ -145,7 +145,7 @@ For the Ingress, you decided to hide it altogether and provide a default configu
 
 As previously mentioned, the Kratix Promise API is defined via a Kubernetes CRD. A deep dive on CRDs is out of scope for this tutorial, but you can read more about them in the [Kubernetes documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition).
 
-To build the Promise, you can use the [Kratix CLI](/main/kratix-cli/intro). With the CLI, you can quickly initialise a Promise and define its API.
+To build the Promise, you can either write it yourself or bootstrap it with the [Kratix CLI](/main/kratix-cli/intro). In this workshop, you will use the CLI.
 
 To keep the promise all in one place, create a directory called `app-promise` and run the `init promise` command inside it:
 
@@ -163,8 +163,8 @@ cat promise.yaml
 
 Now, run the `update api` command to include the API fields you defined above:
 
-```shell-session
-kratix update api --property image:string --property service:object --property service.port:int
+```
+kratix update api --property image:string --property service.port:integer
 ```
 
 If you inspect the `promise.yaml` file again, you should see the API fields you defined
@@ -231,7 +231,7 @@ If you are using Instruqt, please make sure the `promise.yaml` file is closed in
 
 :::
 
-```shell-session
+```
 kratix update dependencies ./dependencies/
 ```
 
@@ -267,7 +267,7 @@ When a user requests a new App deployment, the `resource.configure` Workflow wil
 
 We will once again use the Kratix CLI to create the necessary files. Run the following command to bootstrap the skeleton of your Workflow:
 
-```shell-session
+```
 kratix add container resource/configure/mypipeline --image kratix-workshop/app-pipeline-image:v1.0.0
 ```
 
@@ -289,8 +289,6 @@ The command above should have created a directory structure that looks like the 
                     ├── resources
                     └── scripts
                         └── pipeline.sh
-
-9 directories, 6 files
 ```
 
 The CLI will create a basic `Dockerfile` and a `pipeline.sh` script. We will customise these files to fit our needs as we progress through the workshop. Feel free to explore them.
@@ -303,20 +301,23 @@ As we will use this same image to build several stages in the pipeline, let's re
 mv workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/{pipeline.sh,resource-configure}
 ```
 
-Make sure to update the Dockerfile to reflect the new script name:
+Make sure to update the Dockerfile to reflect the new script name. Remove the lines marked in red and add the lines marked in green:
 
-```diff
+```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/Dockerfile"
++
+- RUN apk update && apk add --no-cache yq
+- RUN apk update && apk add --no-cache yq kubectl
+
 - ADD scripts/pipeline.sh /usr/bin/pipeline.sh
-+ COPY resource-configure /usr/bin/resource-configure
++ COPY scripts/* /usr/bin/
 
 - RUN chmod +x /usr/bin/pipeline.sh
-+ RUN chmod +x /usr/bin/resource-configure
++ RUN chmod +x /usr/bin/*
 
 - CMD [ "sh", "-c", "pipeline.sh"]
-+ CMD [ "sh", "-c", "resource-configure"]
 ```
 
-Replace the contents of the `resource-configure` scruot with the following:
+Replace the contents of the `resource-configure` script with the following:
 
 ```mdx-code-block
 import ExecutePipeline from "!!raw-loader!./_partials/writing-a-promise/04-resource-configure.sh"
@@ -341,7 +342,7 @@ It's straightforward to test your pipeline using `docker run` (or equivalent). Y
 
 :::
 
-When you ran the `kratix add container` command, the CLI automatically included the `workflow` key into the Promise, with the `resource.configure` Workflow defined. As you will add more scripts to the same image, open the `promise.yaml`, set the `command` key to the script you just created.
+When you ran the `kratix add container` command, the CLI automatically included the `workflow` key into the Promise, with the `resource.configure` Workflow defined. As you will add more scripts to the same image, open the `promise.yaml` and set the `command` key to the script you just created.
 
 ```mdx-code-block
 import ResourceWorkflow from "!!raw-loader!./_partials/writing-a-promise/05-resource-workflow.yaml"
@@ -350,12 +351,6 @@ import ResourceWorkflow from "!!raw-loader!./_partials/writing-a-promise/05-reso
 <CodeBlock language="yaml" title="app-promise/promise.yaml">
   {ResourceWorkflow}
 </CodeBlock>
-
-:::info
-
-Please note that the `worker-resources-builder` might have already added a `workflows` key to your `spec`. If so, you can instead _replace_ this key with the above.
-
-:::
 
 The final step is to actually build the pipeline image and make it available in the container registry. Since you are using `kind` clusters, you can build and load the image into the cluster directly by running the following commands:
 
@@ -436,15 +431,15 @@ app    Available   App    workshop.kratix.io/v1
 
 You can see that the `app` Promise is available. Great! You can deploy your app by providing an `image` and a `service.port`.
 
-Create a file named `resource-request.yaml`:
+The CLI should've created an `example-resource.yaml` file in the `app-promise` directory. You can use this file to request a new App deployment. If the file is not there, you can create it by running the following command:
 
 ```bash
-touch resource-request.yaml
+touch example-resource.yaml
 ```
 
 Open the file in your editor and add the following content:
 
-```yaml title="app-promise/resource-request.yaml"
+```yaml title="app-promise/example-resource.yaml"
 apiVersion: workshop.kratix.io/v1
 kind: App
 metadata:
@@ -459,7 +454,7 @@ spec:
 Then, submit the request by running the following command:
 
 ```bash
-kubectl --context $PLATFORM apply --filename resource-request.yaml
+kubectl --context $PLATFORM apply --filename example-resource.yaml
 ```
 
 Kratix will receive the request and execute the workflow defined in the Promise. You can verify the workflow by running the following command:
@@ -471,8 +466,8 @@ kubectl --context $PLATFORM get pods
 The above command should output something similar to:
 
 ```shell-session
-NAME                                   READY   STATUS      RESTARTS      AGE
-configure-pipeline-app-029c3-5tmbq     0/1     Completed   0             1m
+NAME                                       READY   STATUS      RESTARTS      AGE
+kratix-app-todo-mypipeline-029c3-5tmbq     0/1     Completed   0             1m
 ```
 
 It may take a few seconds for the pod to appear, but it will eventually show as Completed. At this stage, Kratix will schedule the workflow outputs to the worker cluster. You should see the App getting deployed on the Worker with the following command:

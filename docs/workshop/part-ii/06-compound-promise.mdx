@@ -47,7 +47,19 @@ To create a compound promise, you generally need three updates:
 
 You want users to have control over whether their app deployment should include a database or not. You decide to expose that option via a new field on the Promise API called `dbDriver`. This field will allow users to specify the database they want to use. In this tutorial, we will only build support for PostgreSQL, but the process to extend that to many other DBs would be very similar.
 
-As covered previously, the `spec.api` field is where you define the API for your Promise. You will need to add a new field called `dbDriver` to the `spec.api.openAPIV3Schema` field. Locate the `schema` field in your `promise.yaml` and add the following:
+As covered previously, the `spec.api` field is where you define the API for your Promise. You will need to add a new field called `dbDriver` to the `spec.api.openAPIV3Schema` field. Run the following:
+
+```
+kratix update api --property dbDriver:string
+```
+
+The command above should add a new field in your Promise API. You can verify this by running:
+
+```bash
+cat promise.yaml | yq '.spec.api'
+```
+
+Check the `schema` field and look for the new `dbDriver` field:
 
 ```yaml title="promise.yaml"
 # ...
@@ -58,17 +70,17 @@ schema:
       spec:
         type: object
         properties:
+  #highlight-start
+          dbDriver:
+            type: string
+  #highlight-end
           service:
             type: object
             properties:
               port:
                 type: integer
-        image:
-          type: string
-#highlight-start
-        dbDriver:
-          type: string
-#highlight-end
+          image:
+            type: string
 ```
 
 Great! Users now have a way to specify the database they want to use. Next, you need to tell Kratix that this Promise is dependent on the PostgreSQL Promise.
@@ -166,9 +178,7 @@ We'll need to define an additional step in the pipeline that makes a request for
 Create a `database-configure` file in the `workflows` directory and make it executable. Next, copy the contents of [this file](https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt) into it:
 
 ```bash
-touch workflows/database-configure
-chmod +x workflows/database-configure
-curl -o workflows/database-configure --silent https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt
+curl -o workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/database-configure --silent https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt
 ```
 
 Take a closer look at the script. Unlike the Ingress configured via the NGINX Controller, we will not always want to provision a PostgreSQL service with each app. The script will only provision a PostgreSQL if the resource request `spec` specifies a `dbDriver` key a value of `postgresql`:
@@ -242,10 +252,11 @@ existingDeployment = YAML.load_file('/kratix/output/deployment.yaml')
 existingDeployment['spec']['template']['spec']['containers'][0]['env'] = env
 ```
 
-You should also ensure that the `database-configure` is available in the Pipeline image. Update `Dockerfile` to add the new `database-configure` script:
+Since the script is written in Ruby, ensure it is installed in the Docker image.
 
-```dockerfile title="app-promise/workflows/Dockerfile
-COPY database-configure /scripts/database-configure
+```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/Dockerfile"
+- RUN apk update && apk add --no-cache yq kubectl curl
++ RUN apk update && apk add --no-cache yq kubectl curl ruby
 ```
 
 Now that the script has been defined, you can test it. Since the `database-configure` manipulates both the user's input as the existing output, you need to chain the scripts in order to test it properly. Go ahead and execute the test script:
@@ -365,9 +376,9 @@ Great! Your App-as-a-Service Promise is now a Compound Promise that can request 
 
 ## Requesting a Database with your App
 
-Users can now request a database together with their Apps. Open the `resource-request.yaml` and update it to include the `dbDriver` property set to `postgresql`:
+Users can now request a database together with their Apps. Open the `example-resource.yaml` and update it to include the `dbDriver` property set to `postgresql`:
 
-```yaml title="app-promise/resource-request.yaml"
+```yaml title="app-promise/example-resource.yaml"
 apiVersion: workshop.kratix.io/v1
 kind: App
 metadata:
@@ -383,7 +394,7 @@ spec:
 Apply the updated App-as-a-Service Resource Request:
 
 ```bash
-kubectl --context $PLATFORM apply --filename resource-request.yaml
+kubectl --context $PLATFORM apply --filename example-resource.yaml
 ```
 
 At this point, the Resource Configure workflow for the App-as-a-Service will be executed. As part of the workflow, the `database-configure` step will be executed, which will create a request for a PostgreSQL service, which, in turn, will trigger the PostgreSQL workflow. You can see the PostgreSQL pipeline getting executed (it may take a few seconds for it to appear):
@@ -395,8 +406,8 @@ kubectl --context $PLATFORM get pods --selector kratix.io/promise-name=postgresq
 The above command will output something similar to:
 
 ```bash
-NAME                                        READY   STATUS      RESTARTS   AGE
-configure-pipeline-postgresql-abad9-vxgd8   0/1     Completed   0          5m4s
+NAME                                                      READY   STATUS      RESTARTS   AGE
+kratix-postgresql-tododb-instance-configure-c83f5-7j8h5   0/1     Completed   0          5m4s
 ```
 
 In a couple of minutes, if you list the running pods on your Worker:

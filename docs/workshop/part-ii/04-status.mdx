@@ -49,7 +49,7 @@ The `status.yaml` file can contain arbitrary key-value pairs. Anything you write
 
 The `message` key is a special key that is displayed as part of the `kubectl get resource` command.
 
-With that in-mind, you can update your existing `workflows/resource-configure` script to surface some information about the Resource in the `status.yaml` file. One of the things you may want to surface is, for example, the URL of the running application. You also want to expose the date the resource was created, as a human-friendly string.
+With that in-mind, you can update your existing `resource-configure` script to surface some information about the Resource in the `status.yaml` file. One of the things you may want to surface is, for example, the URL of the running application. You also want to expose the date the resource was created, as a human-friendly string.
 
 :::note
 
@@ -57,9 +57,9 @@ Kubernetes automatically adds a `metadata.creationTimestamp` field to all resour
 
 :::
 
-Add the following lines to the end of your `workflow/resource-configure` script:
+Add the following lines to the end of your `resource-configure` script:
 
-```bash
+```bash title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/resource-configure
 createdAt="$(date)"
 
 # Set the resource status
@@ -104,7 +104,7 @@ However our pipeline is not, once again, idempotent. If you run the pipeline aga
 
 Update your `workflow/resource-configure` script to the following:
 
-```bash title="workflows/resource-configure"
+```bash title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/resource-configure"
 #highlight-start
 createdAt=$(yq '.status.createdAt // ""' /kratix/input/object.yaml)
 if [ -z "$createdAt" ]; then
