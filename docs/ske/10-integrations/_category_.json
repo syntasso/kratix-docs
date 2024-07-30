@@ -1,0 +1,8 @@
+{
+  "label": "Integrations",
+  "position": 10,
+  "link": {
+    "type": "doc",
+    "id": "ske/integrations/intro"
+  }
+}
