@@ -293,7 +293,7 @@ The command above should have created a directory structure that looks like the 
 
 The CLI will create a basic `Dockerfile` and a `pipeline.sh` script. We will customise these files to fit our needs as we progress through the workshop. Feel free to explore them.
 
-The generated Dockerfile uses the `kratix-pipeline-utility` image as a base image. This image provides a set of utilities that make it easier to write Kratix Pipelines. You may also notice that image will execute a script called `pipeline.sh` when the container starts.
+The generated Dockerfile uses the `alpine` image as a base image. As you progress through the Workshop, you will install the tools you need to execute the steps. You may also notice that image will execute a script called `pipeline.sh` when the container starts.
 
 As we will use this same image to build several stages in the pipeline, let's rename the `pipeline.sh` to `resource-configure` to better reflect its purpose.
 
@@ -304,9 +304,8 @@ mv workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/sc
 Make sure to update the Dockerfile to reflect the new script name. Remove the lines marked in red and add the lines marked in green:
 
 ```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/Dockerfile"
-+
 - RUN apk update && apk add --no-cache yq
-- RUN apk update && apk add --no-cache yq kubectl
++ RUN apk update && apk add --no-cache yq kubectl
 
 - ADD scripts/pipeline.sh /usr/bin/pipeline.sh
 + COPY scripts/* /usr/bin/
