@@ -158,7 +158,7 @@ The above command should create a `promise.yaml` file in the current directory t
 ready to be installed. You can further customise it by adding dependencies and workflows.
 See the [Writing a Promise from Scratch](#from-scratch) section for more details.
 
-## From Operator
+### From Operator
 
 You can also build promises from existing Operators. To do so, run the [kratix
 init operator-promise](./reference/kratix-init-operator-promise) command.
