@@ -1,11 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -euxo pipefail
 
 name=$(yq '.metadata.name' /kratix/input/object.yaml)
 namespace=$(yq '.metadata.namespace' /kratix/input/object.yaml)
 
-cd /terraform
+cd resources
 terraform init
 
 # Check if the state exists and retrieve it if so

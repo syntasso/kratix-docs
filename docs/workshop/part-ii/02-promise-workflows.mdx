@@ -123,8 +123,8 @@ set -eu -o pipefail
 
 testdir=$(cd "$(dirname "$0")"/../test; pwd)
 
-docker build --tag kratix-workshop/app-pipeline-image:v1.0.0 $testdir/../workflows
-kind load docker-image --name platform kratix-workshop/app-pipeline-image:v1.0.0
+docker build --tag kratix-workshop/app-pipeline-image:v1.0.0 workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image
+kind load docker-image kratix-workshop/app-pipeline-image:v1.0.0 --name platform
 EOF
 
 cat <<'EOF' > scripts/test-pipeline
@@ -148,7 +148,7 @@ docker run \
     --volume ${outputDir}:/kratix/output \
     --volume ${inputDir}:/kratix/input \
     --volume ${metadataDir}:/kratix/metadata \
-    kratix-workshop/app-pipeline-image:v1.0.0 bash -c "$command"
+    kratix-workshop/app-pipeline-image:v1.0.0 sh -c "$command"
 EOF
 
 chmod +x scripts/*
@@ -163,8 +163,10 @@ At this stage, your directory structure should look like this:
 
 ```
 📂 app-promise
+├── README.md
 ├── dependencies
 │   └── dependencies.yaml
+├── example-resource.yaml
 ├── promise.yaml
 ├── scripts
 │   ├── build-pipeline
@@ -175,8 +177,14 @@ At this stage, your directory structure should look like this:
 │   ├── metadata
 │   └── output
 └── workflows
-    ├── Dockerfile
-    └── resource-configure
+    └── resource
+        └── configure
+            └── mypipeline
+                └── kratix-workshop-app-pipeline-image
+                    ├── Dockerfile
+                    ├── resources
+                    └── scripts
+                        └── resource-configure
 ```
 
 ### Run the tests
@@ -224,97 +232,88 @@ A Promise Workflow is no different from a Resource Workflow. The only difference
 * In a Promise workflow, `/kratix/input/object.yaml` will contain the Promise definition, instead of a Resource definition.
 * At the end of the workflow, any documents in `/kratix/output` will be scheduled to _all_ Destinations, instead of just one.
 
-To define this new workflow, you could go ahead and create a new Dockerfile, with a new entrypoint, and a new script. However, that would be a lot of duplication. Instead, you can reuse the same image, and just run a different script.
+Although you can do any setup you need or want in the Promise Workflow, declaring the Promise Dependencies is one of its most common uses. For that reason, you can once again rely on the Kratix CLI to create the Promise Workflow for you.
 
-Add the following line to your `Dockerfile`:
-
-```dockerfile title="app-promise/workflows/Dockerfile"
-COPY promise-configure /scripts/promise-configure
-```
-
-<details>
-
-<summary> _Click here_ for the entire Dockerfile </summary>
-
-```mdx-code-block
-import Dockerfile from "!!raw-loader!./_partials/promise-workflows/01-Dockerfile"
-```
-
-<CodeBlock language="dockerfile" title="app-promise/workflows/Dockerfile">
-    {Dockerfile}
-</CodeBlock>
-
-</details>
-
-Next, create the `promise-configure` script and make it executable:
+Run the following command:
 
 ```bash
-touch workflows/promise-configure
-chmod +x workflows/promise-configure
-```
-
-During the Promise installation, the `promise-configure` script will be executed. You want to use this script to create the Promise dependencies, and to create the Promise itself. Add the following content to the `promise-configure` script:
-
-```bash title="app-promise/workflows/promise-configure"
-#!/usr/bin/env bash
-
-set -eux
-
-echo "Downloading nginx..."
-curl -o kratix/output/nginx.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml
-```
-
-:::info
-
-The step above is exactly the same step you executed when downloading the dependencies locally. This means that every time the Promise reconciles, the script will download the latest version of the dependencies found at that URL.
-
-An alternative approach would be to include the dependencies in the Dockerfile and just copy them over in the script
-
-:::
-
-Given you will no longer need the `dependencies` directory, you can delete it:
-
-```bash
-rm -rf dependencies
+kratix update dependencies ./dependencies/ --image kratix-workshop/app-promise-pipeline:v0.1.0
 ```
 
 At this stage, your directory structure should look like this:
 
 ```
 📂 app-promise
+├── README.md
+├── dependencies
+│   └── dependencies.yaml
+├── example-resource.yaml
 ├── promise.yaml
 ├── scripts
-│   ├── build-pipeline
-│   └── test-pipeline
+│   └── ...
 ├── test
 │   └── ...
 └── workflows
-    ├── Dockerfile
-    ├── promise-configure
-    └── resource-configure
+    ├── promise
+    │   └── configure
+    │       └── dependencies
+    │           └── configure-deps
+    │               ├── Dockerfile
+    │               ├── resources
+    │               │   └── dependencies.yaml
+    │               └── scripts
+    │                   └── pipeline.sh
+    └── resource
+        └── configure
+            └── mypipeline
+                └── kratix-workshop-app-pipeline-image
+                    └── ...
 ```
+
+The pipeline script generated by the CLI is already set up to deploy the dependencies into the Destinations. Check the `pipeline.sh` script for details.
 
 ### Test the Promise workflow
 
-Similar to the resource workflow, you can test the Promise workflow by running the `test-pipeline` script:
+Before running the tests, update the `scripts/build-pipeline` script to also build and load the Promise workflow image:
 
 ```bash
-./scripts/test-pipeline promise-configure
+cat <<EOF >> scripts/build-pipeline
+docker build --tag kratix-workshop/app-promise-pipeline:v0.1.0 workflows/promise/configure/dependencies/configure-deps
+kind load docker-image kratix-workshop/app-promise-pipeline:v0.1.0 --name platform
+EOF
 ```
 
-This will build the image, run it, and verify the output. You should see a single file, `nginx.yaml`, in the `test/output` directory.
+Next, execute the script to build and load the image:
+
+```bash
+./scripts/build-pipeline
+```
+
+Similar to the resource workflow, you can test the Promise workflow with Docker. Feel free to create a script to help you with this (similar to the one you created for the resource workflow) or to run the commands manually. Run:
+
+```bash
+rm -rf test/output/*
+docker run \
+    --rm \
+    --volume ~/.kube:/root/.kube \
+    --network=host \
+    --volume ./test/output:/kratix/output \
+    --volume ./test/input:/kratix/input \
+    --volume ./test/metadata:/kratix/metadata \
+    kratix-workshop/app-promise-pipeline:v0.1.0
+```
+
+This will build the image, run it, and verify the output. You should see a single file, `dependencies.yaml`, in the `test/output` directory, with the contents of the dependencies you defined.
 
 ### Add the workflow to the Promise
 
-Now that you have a Promise workflow, you can update your Promise to use it. Replace the contents of the `promise.yaml` file with the following:
+The CLI already updated your Promise file with the Promise workflow.
 
-```mdx-code-block
-import FullPromise from "!!raw-loader!./_partials/promise-workflows/02-full-promise.yaml"
+Inspect it by running:
+
+```bash
+cat promise.yaml | yq '.spec.workflows'
 ```
-
-<CodeBlock language="yaml" title="app-promise/promise.yaml">
-    {FullPromise}
-</CodeBlock>
 
 Note how there are two `workflows` being defined now: `resource` and `promise`. The `resource` workflow will be executed when a Resource is reconciled, and the `promise` workflow will be executed when a Promise is reconciled. You can also add `resource.delete` and `promise.delete` workflows, but those are out of the scope of this tutorial.
 
@@ -335,28 +334,21 @@ kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 This pod can run to completion quite quickly so when you verify that it exists, it might already be in a `Completed` state. This reflects that the `promise.configure` workflow has finished running.
 
 ```shell-session
-NAME                                                 READY   STATUS      RESTARTS   AGE
-configure-pipeline-app-20073-6phwj                   0/1     Completed   0          19s
+NAME                                   READY   STATUS      RESTARTS   AGE
+kratix-app-dependencies-20073-6phwj    0/1     Completed   0          19s
 ```
 
-You can verify the logs to see the output of the script:
-
-```bash
-kubectl --context $PLATFORM logs --namespace kratix-platform-system -l kratix-workflow-type=promise -c download-dependencies
-```
-
-You should see output similar to the following:
-
-```bash
-+ echo 'Downloading nginx...'
-+ curl -o kratix/output/nginx.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml
-```
-
-You can also check the worker, and verify that the NGINX Ingress Controller continues to be running:
+When the `Status` is `Completed`, it means that the workflow has finished running. Check the worker, and verify that the NGINX Ingress Controller is running:
 
 ```bash
 kubectl --context $WORKER get deployments --namespace ingress-nginx
 ```
+
+:::note
+
+It may briefly disappear and reappear as the worker reconciles the state of the cluster. This is normal behavior.
+
+:::
 
 The combination of the workflows Kratix provides is very powerful. It enables platform teams to define complex workflows that can be executed at different stages of the lifecycle of a Resource or a Promise.
 

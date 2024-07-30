@@ -380,10 +380,10 @@ kubectl --context $PLATFORM get pods --watch
 
 The above command will give an output similar to:
 ```shell-session
-NAME                                        READY   STATUS      RESTARTS   AGE
-configure-pipeline-nginx-default-22ee9        0/1     Completed   0          18s
-configure-pipeline-easyapp-default-8769b      0/1     Completed   0          40s
-configure-pipeline-postgresql-default-c3516   0/1     Completed   0          18s
+NAME                                                       READY   STATUS      RESTARTS   AGE
+kratix-easyapp-example-instance-configure-43a5e-x7sdg      0/1     Completed   0          45s
+kratix-nginx-ingress-todo-instance-configure-0907d-8zs5m   0/1     Completed   0          13s
+kratix-postgresql-todo-instance-configure-6b25f-chtj6      0/1     Completed   0          13s
 ```
 
 Once the Status column reports `Completed` for all three request pipelines,

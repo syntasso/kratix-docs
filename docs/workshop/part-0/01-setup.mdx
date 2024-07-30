@@ -10,9 +10,14 @@ In this workshop, you will deploy Kratix on a local Kubernetes cluster, and depl
 Kratix workloads on another Kubernetes cluster. You will need the following
 tools:
 
+1. `kratix` CLI / **Kratix Command-line Tool**: <br />
+   Used to build the Promise in Part II. <br />
+   See [Kratix CLI documentation page](/main/kratix-cli/intro)
+   for installation instructions.
+
 1. `kind` CLI / **Kubernetes-in-Docker (KinD)**: <br />
-  Used to create and manage local Kubernetes clusters in Docker. <br />
-  See [the quick start guide](https://kind.sigs.k8s.io/docs/user/quick-start/) to install.
+   Used to create and manage local Kubernetes clusters in Docker. <br />
+   See [the quick start guide](https://kind.sigs.k8s.io/docs/user/quick-start/) to install.
 
 1. `docker` CLI / **Docker**: <br /> Used to orchestrate containers. `kind`
    requires that you have Docker installed and configured. <br /> See [Get
@@ -49,26 +54,14 @@ argument entirely.
 
 :::
 
-## Install the WorkerResourcesBuilder
-
-```mdx-code-block
-import PartialWcrBinaryDownloadTabs from '../../_partials/_wcr-binary-download-tabs.md';
-```
-
-For Part II of this workshop, you will need to install the `WorkerResourcesBuilder` binary. This is a tool that will help you inject Promise dependencies into your Promise definition. Please install the binary for your operating system:
-
-<PartialWcrBinaryDownloadTabs />
-
-Make sure to add the binary to your `PATH` environment variable.
-
 ## Docker Resources {#docker-config}
 
 In order to complete all tutorials in this series, you must allocate enough
 resources to Docker. Ensure you allocate at least:
 
-* 5 CPU
-* 12GB Memory
-* 4GB swap
+- 5 CPU
+- 12GB Memory
+- 4GB swap
 
 This can be managed through your tool of choice (e.g. Docker Desktop, Rancher, etc).
 
