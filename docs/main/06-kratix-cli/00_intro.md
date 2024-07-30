@@ -25,13 +25,14 @@ kratix --version
 
 ### Enable shell autocompletion
 
-To configure your shell to load the CLI bash completions, add to your profile:
+To configure your shell to load the CLI completions, add the completion script
+to your shell profile, replacing `SHELL` with the name of your shell:
 
 ```shell-session
-. <(kratix completion bash)
+. <(kratix completion SHELL)
 ```
 
-For a complete list of supported shells, run:
+For a list of supported shells, run:
 
 ```shell-session
 kratix completion --help
@@ -62,9 +63,9 @@ kratix init promise mysql \
 Where:
 
 - `mysql` is the name of the Promise
-- `mygroup.org` is the Group of the Promised resource
+- `mygroup.org` is the Group of the Promised API resource
 - `Database` is the Kind provided by the Promise
-- `v1alpha1` is the Version of the Promised resource
+- `v1alpha1` is the Version of the Promised API resource
 
 :::tip Splitting files
 
@@ -75,6 +76,13 @@ split the definition into multiple files, you can use the `--split` flag:
 kratix init promise mysql [flags] --split
 ```
 
+The command above will create the following files:
+
+- `api.yaml` containing the CRD definition of the Promise API.
+- `dependencies.yaml` containing the dependencies of the Promise. This file will be empty by default.
+- `workflows.yaml` containing the Workflows of the Promise. This file will be
+  created once you execute the [kratix add
+  container](./reference/kratix-add-container) command.
 :::
 
 The above command creates a `promise.yaml` in the current directly, filling the Promise
@@ -122,6 +130,14 @@ Use the `--image` flag to add a dependency as a Workflow:
 ```shell-session
 kratix update dependencies dependencies/ --image myorg/mysql-dependencies:v1.0.0
 ```
+
+:::
+
+:::note Namespaces
+
+The `update dependencies` command will automatically set the
+`metadata.namespace` to `default` if the resource itself does not have a
+namespace.
 
 :::
 
@@ -203,9 +219,25 @@ The `--operator-manifests` flag can be a single file or a directory containing t
 
 :::
 
-By default, the CLI will create a `promise.yaml` file and embed the Operator bundle in
-the `dependencies` of the Promise, which will usually make the Promise very large. You
-can move the bundle to a workflow by running:
+By default, the CLI will create a `promise.yaml` file and embed the Operator
+bundle in the `dependencies` of the Promise, which will usually make the Promise
+very large. Dependending on the size of the resulting Promise, you may get the
+following error when trying to `kubectl apply` it:
+
+```
+The Promise "mypromise" is invalid: metadata.annotations: Too long: must have at most 262144 bytes
+```
+
+:::note Create vs Apply
+
+You can use the `kubectl create` command to install your Promise, even if it's
+too large to be applied. To understand the difference between `create` and
+`apply`, refer to the [Kubernetes
+documentation](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/).
+
+:::
+
+To avoid this, you can move the Operator bundle to a Workflow by running:
 
 ```shell-session
 kratix update dependencies operator-bundle.yaml --image yourorg/your-image:tag
