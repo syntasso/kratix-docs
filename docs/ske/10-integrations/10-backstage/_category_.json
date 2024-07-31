@@ -1,0 +1,8 @@
+{
+  "label": "Backstage",
+  "position": 2,
+  "link": {
+    "type": "doc",
+    "id": "ske/integrations/backstage/intro"
+  }
+}
