@@ -93,12 +93,115 @@ the future.
 
 :::
 
-### Service Account
+### RBAC
 
-Each pipelines runs with a unique [service
-account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/),
-which is automatically created by Kratix when the pipeline is triggered for the
-first time. The service account following the naming convention of
+Each pipeline runs with its own service account and a default set of restrictive
+RBAC permissions. By default the service account is automatically created by
+Kratix and the name is deterministic. You have three options for providing
+additional [RBAC
+permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to
+the pipeline:
+- Specify in your pipeline spec additional [RBAC
+  permissions](#rbac-permissions). Kratix will automatically create the required
+  Role/ClusterRole and RoleBinding/ClusterRoleBinding
+- Use the [default service account](#service-account) Kratix creates and
+  manually create the Role/ClusterRole and RoleBinding/ClusterRoleBinding
+- Specify a [custom service account](#custom-service-account) in your pipeline
+  spec, and manage the lifecycle of the service account yourself, including
+  creating the required Role/ClusterRole and RoleBinding/ClusterRoleBinding
+
+
+:::note
+
+The namespace a resource request pipeline runs in is the same as the namespace as the resource
+request. Promise pipelines run in the `kratix-platform-system` namespace.
+
+:::
+
+#### RBAC Permissions
+
+In the pipeline spec, you can provide additional [RBAC permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to the
+pipeline pod by specifying additional
+[rules](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-example)
+in the `.spec.rbac.permissions`:
+
+```
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: slack-notify
+        spec:
+          rbac:
+            permissions:
+              - apiGroups: [""]
+                verbs: ["*"]
+                resources: ["secrets"]
+              - apiGroups: ["batch"]
+                verbs: ["get"]
+                resources: ["jobs"]
+                resourceName: ["my-job"]
+        ...
+```
+
+The above example provides the pipeline pod with the ability in its own
+namespace to have full control over the secrets, and the ability to `get` a Job
+called `my-job`.
+
+##### Cross Namespace RBAC Permissions
+You can also provide RBAC permissions across namespaces by specifying the
+`resourceNamespace` field in the RBAC permissions. This field is optional and if
+not set it defaults to the namespace of the pipeline. If set to `*`, the
+underlying ClusterRole is bound to a ClusterRoleBinding instead of a
+RoleBinding, giving the pipeline permissions across all namespaces.
+
+```
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: slack-notify
+        spec:
+          rbac:
+            permissions:
+              - apiGroups: [""]
+                verbs: ["get"]
+                resources: ["secrets"]
+                resourceNamespace: "ns-of-my-secrets"
+              - apiGroups: ["batch"]
+                verbs: ["get", "list"]
+                resources: ["jobs"]
+                resourceNamespace: "*"
+        ...
+```
+
+The above example provides the pipeline pod with the ability get the secrets in
+the `ns-of-my-secrets` namespace regardless of what namespace the pipeline runs
+in. The pipeline also has the ability to `get` and `list` Jobs across all namespaces.
+
+#### Service Account
+
+Each pipelines runs with a [service
+account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
+unique to that namespace, which is automatically created by Kratix when the
+pipeline is triggered for the first time. The service account following the
+naming convention of
 `<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`. For example
 the below Promise would create two service accounts:
 
@@ -158,8 +261,10 @@ does exist, Kratix will not modify or delete the service account.
 
 ### Secrets
 
-To access Secrets in the Pipeline, you can pass in a reference to the Pipeline container's
-`env` using `valueFrom.secretKeyRef` in the standard Kubernetes way.
+To access Secrets in the Pipeline, you can either [provide additional
+RBAC](#rbac) so that the pipeline can `kubectl get secret`  secret or pass in a
+reference to the Pipeline container's `env` using `valueFrom.secretKeyRef` in
+the standard Kubernetes way.
 
 :::note
 
