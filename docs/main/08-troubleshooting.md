@@ -340,5 +340,6 @@ A Workflow is, by default, given limited access to the Kubernetes API. You will
 see errors in the logs of the Workflow if it is trying to access the API without
 the correct permissions. To give the Workflow more access you need to create
 additional
-[RBAC permissions ](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). Check the
-[documentation for some examples](../workshop/part-ii/secrets-and-state#state)
+[RBAC permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). [Check the
+documentation](/main/reference/workflows#rbac) for how you can configure permissions for Workflows
+alongside some examples.
