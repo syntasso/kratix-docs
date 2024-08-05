@@ -268,6 +268,28 @@ spec:
             name: output-writer
             namespace: default
           spec:
+            rbac:
+              permissions:
+              - apiGroups:
+                  - ""
+                resources:
+                  - secrets
+                verbs:
+                  - get
+                resourceNamespace: "*" # if the namespace of the secret is static this can be modified
+              - apiGroups:
+                  - platform.kratix.io
+                resources:
+                  - workplacements
+                verbs:
+                  - list
+              - apiGroups:
+                  - platform.kratix.io
+                resources:
+                  - destinations
+                verbs:
+                  - list
+                resourceNamespace: "*"
             containers:
               - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
                 name: fetch-output
@@ -281,6 +303,13 @@ time you expect the Terraform plan and apply to take. The Aspect will keep
 trying to fetch the outputs until the timeout is reached.
 
 If `TIMEOUT` is not set, the default timeout is 5 minutes.
+
+The Pipeline has a set of additional `rbac.permisisons` set. It requires these
+to successfully fetch the outputs from TFE. They are used for:
+
+- Listing WorkPlacements to find the Destination associated with the Resource
+- Listing Destinations to find the credentials needed to access TFE
+- Getting the Secret with the TFE credentials
 
 <details>
 <summary>Example: Promise with the SKE Aspect included</summary>
@@ -366,6 +395,28 @@ spec:
             name: output-writer
             namespace: default
           spec:
+            rbac:
+              permissions:
+              - apiGroups:
+                  - ""
+                resources:
+                  - secrets
+                verbs:
+                  - get
+                resourceNamespace: "*" # if the namespace of the secret is static this can be modified
+              - apiGroups:
+                  - platform.kratix.io
+                resources:
+                  - workplacements
+                verbs:
+                  - list
+              - apiGroups:
+                  - platform.kratix.io
+                resources:
+                  - destinations
+                verbs:
+                  - list
+                resourceNamespace: "*"
             containers:
               - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
                 name: fetch-output
@@ -385,67 +436,6 @@ You can also set `imagePullSecrets` in the [Pipeline
 spec](/main/reference/workflows#pipelines).
 
 :::
-
-#### Pipeline Permissions
-
-The SKE TF State Finder requires permission to list Kratix Destinations and WorkPlacements,
-and get Secrets. These permissions are bound to the Service Accounts for the Promise
-Pipeline and Resource Pipeline.
-
-To allow this, you should create the following RBAC resources:
-
-<details>
-<summary>RBAC for Kratix Pipelines</summary>
-
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: ske-tfstate-finder
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - get
-  - apiGroups:
-      - platform.kratix.io
-    resources:
-      - workplacements
-      - destinations
-    verbs:
-      - list
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: ske-tfstate-finder-promise-pipeline
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: ske-tfstate-finder
-subjects:
-  - kind: ServiceAccount
-    name: example-tf-promise-promise-pipeline # <promise-name>-promise-pipeline
-    namespace: kratix-platform-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: ske-tfstate-finder-resource-pipeline
-  namespace: default
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: ske-tfstate-finder
-subjects:
-  - kind: ServiceAccount
-    name: example-tf-promise-resource-pipeline # <promise-name>-resource-pipeline
-    namespace: default
-```
-
-</details>
 
 ### Writing Resource-specific outputs to the Resource Status
 
