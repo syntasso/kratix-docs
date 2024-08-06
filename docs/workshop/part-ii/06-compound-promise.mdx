@@ -254,7 +254,7 @@ existingDeployment['spec']['template']['spec']['containers'][0]['env'] = env
 
 Since the script is written in Ruby, ensure it is installed in the Docker image.
 
-```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/Dockerfile"
+```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/Dockerfile"
 - RUN apk update && apk add --no-cache yq kubectl curl
 + RUN apk update && apk add --no-cache yq kubectl curl ruby
 ```
