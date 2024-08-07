@@ -64,6 +64,10 @@ const config = {
     {
       src: "https://app.termly.io/resource-blocker/73184dec-650a-487d-bdf0-eb8cd893e3bb?autoBlock=on",
       async: true,
+    },
+    {
+      src: "https://www.googletagmanager.com/gtm.js?id=GTM-TTC7XSMT",
+      async: true,
     }
   ],
 
