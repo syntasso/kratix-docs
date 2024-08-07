@@ -60,6 +60,13 @@ const config = {
 
   plugins: ["docusaurus-plugin-sass", require.resolve("docusaurus-plugin-image-zoom")],
 
+  scripts: [
+    {
+      src: "https://app.termly.io/resource-blocker/73184dec-650a-487d-bdf0-eb8cd893e3bb?autoBlock=on",
+      async: true,
+    }
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
