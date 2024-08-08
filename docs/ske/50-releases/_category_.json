@@ -1,8 +1,0 @@
-{
-  "label": "Releases",
-  "position": 50,
-  "link": {
-    "type": "generated-index",
-    "description": "Release information and notes for the packages available with SKE"
-  }
-}
