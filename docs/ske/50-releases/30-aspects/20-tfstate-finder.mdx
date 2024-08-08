@@ -1,0 +1,63 @@
+---
+title: Hashicorp Terraform
+description: Release information about the Hashcorp Terraform State Finder aspect
+sidebar_label: Hashicorp Terraform
+---
+
+## Overview
+
+The Hashicorp Terraform State Finder aspect is responsible for finding the
+Terraform state of a given resource. It is used to find the Terraform state of a
+given resource and write it to the status of the object.
+
+The Aspect is available as a Container image at:
+
+```
+ghcr.io/syntasso/ske-tfstate-finder:VERSION
+```
+
+Check the release notes below for information on each available version.
+
+## Release Notes
+
+### [0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.4.0/) (2024-08-07)
+
+
+#### Features
+
+* improve logging
+
+#### Bug Fixes
+
+* no longer panic on errors
+
+### 0.3.0 (2024-08-06)
+
+#### Features
+
+* always write outputs to /kratix/metadata
+* check the run status when fetching outputs from tfe
+* ske-tfstate-finder image gets all TF Destinations/WorkPlacements
+* write object-relevant outputs to status automagically
+* write tf outputs to object status
+* support finding works of promises
+
+#### Bug Fixes
+
+* check tf credentials secret key not empty
+* each pipeline now runs with separate service account
+* handle existing status entries
+* handle no tf destinations found (inc. retries)
+* handle no tf outputs
+* handle the workplacement not having a VersionID
+* improve naming of output files in pipeline
+* only get promise work when it has resource requests
+* OUTPUT_TO_STATUS -&gt; SKIP_STATUS for a better default
+* write outputs as yaml, not json
+
+### 0.2.0 (2024-07-06)
+
+
+#### Features
+
+* check the run status when fetching outputs from tfe
