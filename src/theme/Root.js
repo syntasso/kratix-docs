@@ -26,15 +26,6 @@ export default function Root({children}) {
 		heap.load("3930713230");
 	})
 
-	useEffect(() => {
-		const isConsent = getCookieConsentValue();
-		if (isConsent === "true") {
-			handleAcceptCookie();
-		} else {
-			handleDeclineCookie();
-		}
-	}, []);
-
 	return <>
 		<>{children}</>
 	</>;
