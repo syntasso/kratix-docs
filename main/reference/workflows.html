@@ -12,7 +12,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/73184dec-650a-487d-bdf0-eb8cd893e3bb?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.af7a49ed.css">
-<script src="/assets/js/runtime~main.7e6b6dcd.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.23c8d0e0.js" defer="defer"></script>
 <script src="/assets/js/main.12da337e.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -151,7 +151,7 @@ the Pipeline, you can safely write to the <code>/kratix/metadata</code> director
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="environment-variables">Environment Variables<a class="hash-link" aria-label="Direct link to Environment Variables" title="Direct link to Environment Variables" href="/main/reference/workflows#environment-variables">​</a></h2>
 <p>Kratix will set the following environment variables for all containers in the
 workflow:</p>
-<table><thead><tr><th>Variable</th><th>Description</th></tr></thead><tbody><tr><td><code>KRATIX_WORKFLOW_ACTION</code></td><td>The action that triggered the workflow. Either <code>configure</code> or <code>delete</code>.</td></tr><tr><td><code>KRATIX_WORKFLOW_TYPE</code></td><td>The type of workflow. Either <code>resource</code> or <code>promise</code>.</td></tr><tr><td><code>KRATIX_PROMISE_NAME</code></td><td>The name of the Promise.</td></tr></tbody></table>
+<table><thead><tr><th>Variable</th><th>Description</th></tr></thead><tbody><tr><td><code>KRATIX_WORKFLOW_ACTION</code></td><td>The action that triggered the workflow. Either <code>configure</code> or <code>delete</code>.</td></tr><tr><td><code>KRATIX_WORKFLOW_TYPE</code></td><td>The type of workflow. Either <code>resource</code> or <code>promise</code>.</td></tr><tr><td><code>KRATIX_PROMISE_NAME</code></td><td>The name of the Promise.</td></tr><tr><td><code>KRATIX_PIPELINE_NAME</code></td><td>The name of the Pipeline.</td></tr></tbody></table>
 <p>By checking the <code>KRATIX_WORKFLOW_ACTION</code> and <code>KRATIX_WORKFLOW_TYPE</code> environment variables,
 a container is able to discover the <strong>context</strong> in which it&#x27;s being invoked (e.g. &quot;I&#x27;m
 running as part of a Promise Configure workflow&quot;).</p>
