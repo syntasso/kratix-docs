@@ -346,6 +346,7 @@ workflow:
 | `KRATIX_WORKFLOW_ACTION`  | The action that triggered the workflow. Either `configure` or `delete`. |
 | `KRATIX_WORKFLOW_TYPE`    | The type of workflow. Either `resource` or `promise`. |
 | `KRATIX_PROMISE_NAME`     | The name of the Promise. |
+| `KRATIX_PIPELINE_NAME`    | The name of the Pipeline. |
 
 By checking the `KRATIX_WORKFLOW_ACTION` and `KRATIX_WORKFLOW_TYPE` environment variables,
 a container is able to discover the **context** in which it's being invoked (e.g. "I'm
