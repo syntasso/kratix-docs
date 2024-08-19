@@ -7,6 +7,15 @@ sidebar_label: Installation
 Syntasso Kratix Enterprise images are distributed through a private image registry. To
 install SKE on your Kubernetes cluster, follow the steps below.
 
+### Install SKE operator (pending)
+
+:::info
+
+Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
+refer to the Open-Source Kratix documentation for instructions on how to install cert-manager.
+
+:::
+
 ### Create the Pull Secret
 
 To enable your Kubernetes cluster to pull images from the private registry, you need to
@@ -33,23 +42,30 @@ and configure your nodes to authenticate directly with the private registry.
 
 :::
 
-### Apply the manifest
+### Deploy Kratix
 
-With the secret in place, you can now install Kratix Enterprise using the following command:
+With the secret in place, you can now install Kratix Enterprise by creating a 'Kratix' instance.
+Below is an example 'Kratix' instance definition:
 
-```bash
-kubectl apply --filename ske-distribution.yaml
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: kratix-example
+spec:
+  releasesBucket:
+    name: # name of the bucket containing Kratix Enterprise releases; optional
+    region: # region of the bucket; optional
+    path: # subpath within the bucket; optional
+  version: v0.1.0 # version of Kratix Enterprise to install; default to the latest release found in release bucket
 ```
 
-The `ske-distribution.yaml` file is provided by Syntasso and contains the necessary
-configurations to install Kratix Enterprise on your cluster.
+You can save the 'Kratix' instance definition to a local file and apply with kubectl.
+SKE operator will then install Kratix Enterprise and its necessary configurations.
 
-:::info
-
-Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
-refer to the Open-Source Kratix documentation for instructions on how to install cert-manager.
-
-:::
+By default, when `spec.releasesBucket` is not set, SKE operator will use the Syntasso Enterprise releases bucket.
+Note that 'Kratix' is a cluster scoped and singleton resource.
+If you try to create a second 'Kratix' instance, SKE operator will reject the request.
 
 ### Verify the installation
 
