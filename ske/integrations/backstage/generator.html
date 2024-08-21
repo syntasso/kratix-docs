@@ -12,7 +12,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/73184dec-650a-487d-bdf0-eb8cd893e3bb?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.af7a49ed.css">
-<script src="/assets/js/runtime~main.083dfdce.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.11c3f645.js" defer="defer"></script>
 <script src="/assets/js/main.12da337e.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -34,9 +34,17 @@ Promise and Resource metadata.</p>
 <a href="/ske/integrations/backstage/configuring-backstage#configure-a-destination-for-backstage">Kratix Backstage docs</a>
 for setup instructions.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="how-does-it-work">How does it work?<a class="hash-link" aria-label="Direct link to How does it work?" title="Direct link to How does it work?" href="/ske/integrations/backstage/generator#how-does-it-work">​</a></h2>
-<p>The <code>ske-backstage-generator</code> image is intended to be run as part of your Configure
-Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template
-and Component manifests, and schedule them to your <a href="/ske/integrations/backstage/generator#destination">Backstage Destination</a>.</p>
+<p>The <code>ske-backstage-generator</code> image is intended to be run as part of your
+Configure Pipeline for your Promise and Resource Workflows. It will
+auto-generate Backstage Template and Component manifests, and schedule them to
+your <a href="/ske/integrations/backstage/generator#destination">Backstage Destination</a>. <strong>You must ensure this is only run
+once across all your pipelines</strong> in a workflow.</p>
+<p>In order to
+have the full status displayed in Backstage, you should place the aspect as the
+last image in the last pipeline of your workflow. If the aspect appears more than
+once in your workflow, you will see one of the components in Backstage,
+and Backstage will emit a warning:</p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">{&quot;level&quot;:&quot;warn&quot;,&quot;message&quot;:&quot;Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml&quot;,&quot;plugin&quot;:&quot;catalog&quot;,&quot;service&quot;:&quot;backstage&quot;}</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="promise-configure">Promise Configure<a class="hash-link" aria-label="Direct link to Promise Configure" title="Direct link to Promise Configure" href="/ske/integrations/backstage/generator#promise-configure">​</a></h3>
 <p>In a Promise Configure workflow, two Backstage manifests will be generated:</p>
 <ul>
