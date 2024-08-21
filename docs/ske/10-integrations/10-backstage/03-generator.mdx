@@ -32,9 +32,19 @@ for setup instructions.
 
 ## How does it work?
 
-The `ske-backstage-generator` image is intended to be run as part of your Configure
-Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template
-and Component manifests, and schedule them to your [Backstage Destination](#destination).
+The `ske-backstage-generator` image is intended to be run as part of your
+Configure Pipeline for your Promise and Resource Workflows. It will
+auto-generate Backstage Template and Component manifests, and schedule them to
+your [Backstage Destination](#destination). **You must ensure this is only run
+once across all your pipelines** in a workflow. In order to
+have the full status displayed in Backstage, you should place the aspect as the
+last image in the last pipeline of your workflow. If you have this more than
+once in your workflow, you will see a random one of the components in Backstage,
+and Backstage will emit a warning:
+
+```
+{"level":"warn","message":"Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml","plugin":"catalog","service":"backstage"}
+```
 
 ### Promise Configure
 
