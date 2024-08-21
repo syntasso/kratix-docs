@@ -242,3 +242,25 @@ To avoid this, you can move the Operator bundle to a Workflow by running:
 ```shell-session
 kratix update dependencies operator-bundle.yaml --image yourorg/your-image:tag
 ```
+
+#### Building Workflow Containers
+
+To build a Workflow container generated with the `add container` command, run the [kratix build container](./reference/kratix-build-container) command:
+
+```shell-session
+kratix build container resource/configure/mypipeline
+```
+
+This command will build a container for the specified Workflow from the files in the `workflows` directory.
+
+:::note Multiple Containers
+
+If more than one container exists for the specified Workflow, specify the container with the `--name` flag`
+
+:::
+
+:::tip
+
+If you have added a number of containers, you can build all of them with the `--all` flag
+
+:::
