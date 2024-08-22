@@ -68,7 +68,7 @@ Status can also be used as a method of communicating information back to the
 `delete` pipeline, such as the name of any external resources imperatively
 created in the pipeline that need to be deleted as part of the delete pipeline.
 
-## Multi Pipelines
+## Multiple Pipelines
 
 The status is written at the end of **each pipeline**. If you have multiple
 pipelines in your Promise, the status will be updated at the end of each
