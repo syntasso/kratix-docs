@@ -68,6 +68,110 @@ Status can also be used as a method of communicating information back to the
 `delete` pipeline, such as the name of any external resources imperatively
 created in the pipeline that need to be deleted as part of the delete pipeline.
 
+## Multiple Pipelines
+
+The status is written at the end of **each pipeline**. If you have multiple
+pipelines in your Promise, the status will be updated at the end of each
+pipeline. This means that the status will be updated multiple times, and the
+final status will be the one written by the last pipeline.
+
+Each pipeline has access to the current status of the Resource, populated in
+the `/kratix/input/object.yaml` file. This allows you to read the current status
+to make decisions on what to write to the status file.
+
+For example, if you had two pipelines:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: iam
+spec:
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: create-user
+          namespace: default
+        spec:
+          containers:
+          - image: create-db:v0.1.0
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: populate-vault
+          namespace: default
+        spec:
+          containers:
+          - image: populate-vault:v0.1.0
+
+```
+
+And the first pipeline wrote the
+following to `/kratix/metadata/status.yaml`:
+
+```yaml
+iam:
+  user: admin
+message: User created, next step is to create vault secret for user
+```
+
+Then the second pipeline would see the following in the `/kratix/input/object.yaml`:
+
+```yaml
+apiVersion: ...
+kind: ...
+metadata:
+  ...
+spec:
+  ...
+status:
+  conditions: # this is being automatically set by Kratix
+  - lastTransitionTime: "2024-08-21T10:27:45Z"
+    message: Pipeline has not completed
+    reason: PipelineNotCompleted
+    status: "False"
+    type: PipelineCompleted
+  iam:
+    user: admin
+  message: User created, next step is to create vault secret for user
+```
+
+The second pipeline could then read the status and write the following to
+`/kratix/metadata/status.yaml`:
+
+```yaml
+message: User created and vault secret created
+iam:
+  password: <vault-ref>
+```
+
+The end status would be:
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2024-08-21T10:30:51Z"
+    message: Pipeline completed
+    reason: PipelineExecutedSuccessfully
+    status: "True"
+    type: PipelineCompleted
+  iam:
+    password: <vault-ref>
+    user: admin
+  message: User created, next step is to create vault secret for user
+
+```
+
+The status is always merged, with the lastest pipeline getting priority in case of
+conflicts. In this example the `iam` key was updated with the additional
+`password` key, and the `message` key was overwritten.
+
+The next time the `configure` workflow runs from the beginning, for example if a
+user updated the request, the status set in `/kratix/input/object.yaml` would be
+the same as the final status from the previous run of the `configure` workflow.
+
 ## Conditions
 
 Kratix follows the Kubernetes convention of using
