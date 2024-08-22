@@ -75,11 +75,11 @@ pipelines in your Promise, the status will be updated at the end of each
 pipeline. This means that the status will be updated multiple times, and the
 final status will be the one written by the last pipeline.
 
-Each pipeline has access to the current status of the Resource, its populated in
+Each pipeline has access to the current status of the Resource, populated in
 the `/kratix/input/object.yaml` file. This allows you to read the current status
 to make decisions on what to write to the status file.
 
-For example if you had two pipelines
+For example, if you had two pipelines:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -111,6 +111,7 @@ spec:
 
 And the first pipeline wrote the
 following to `/kratix/metadata/status.yaml`:
+
 ```yaml
 iam:
   user: admin
