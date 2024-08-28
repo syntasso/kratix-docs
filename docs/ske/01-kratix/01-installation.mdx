@@ -106,13 +106,48 @@ You should see the following output:
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 ske-operator-controller-manager      1/1     1            1           1h
-
 ```
 
 You can now proceed with the configuration of Kratix (i.e. registering destinations or
 installing promises). For that, refer to the Open-Source Kratix documentation.
 
-## Upgrading SKE
+## Upgrades
+
+### Upgrading the Operator
+
+To verify the version of the Operator installed, run the following command:
+
+```bash
+helm list
+```
+
+You should see the following output:
+
+```shell-session
+NAME            NAMESPACE    [...]    CHART                   APP VERSION
+ske-operator    default      [...]    ske-operator-0.8.0      v0.1.1
+```
+
+To check the available versions of the Operator, run the following command:
+
+```bash
+helm search repo syntasso/ske-operator --versions
+```
+
+To upgrade, run:
+
+```bash
+helm upgrade ske-operator syntasso/ske-operator # --version <VERSION>
+```
+
+
+:::info Not using Helm?
+
+Refer to the alternative installation method summary box above to upgrade the operator without Helm.
+
+:::
+
+### Upgrading the SKE Instance
 
 To upgrade the version of SKE being deployed by the operator, you can edit your
 Kratix instance definition and change the `version` field to the desired
@@ -120,3 +155,23 @@ version.
 
 Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
 vX.Y+1.Z first.
+
+
+## Deletes
+
+### Deleting the SKE Operator
+
+To delete the SKE operator (and any deployed SKE instance), run the following command:
+
+```bash
+helm uninstall ske-operator
+```
+
+### Deleting the SKE Instance
+
+
+To delete the SKE instance, run:
+
+```
+kubectl -n kratix-platform-system delete kratix <INSTANCE_NAME>
+```
