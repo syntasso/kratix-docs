@@ -111,3 +111,12 @@ ske-operator-controller-manager      1/1     1            1           1h
 
 You can now proceed with the configuration of Kratix (i.e. registering destinations or
 installing promises). For that, refer to the Open-Source Kratix documentation.
+
+## Upgrading SKE
+
+To upgrade the version of SKE being deployed by the operator, you can edit your
+Kratix instance definition and change the `version` field to the desired
+version.
+
+Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
+vX.Y+1.Z first.
