@@ -32,12 +32,6 @@ const config = {
 
   presets: [
     [
-      '@docusaurus/plugin-google-tag-manager',
-      {
-        containerId: 'GTM-M8KNBP6C',
-      },
-    ],
-    [
       "@docusaurus/preset-classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
@@ -59,6 +53,9 @@ const config = {
         // },
         theme: {
           customCss: require.resolve("./src/css/custom.scss"),
+        },
+        googleTagManager: {
+          containerId: 'GTM-M8KNBP6C',
         },
       }),
     ],
