@@ -54,6 +54,9 @@ const config = {
         theme: {
           customCss: require.resolve("./src/css/custom.scss"),
         },
+        googleTagManager: {
+          containerId: 'GTM-M8KNBP6C',
+        },
       }),
     ],
   ],
@@ -62,7 +65,7 @@ const config = {
 
   scripts: [
       {
-        src: "https://app.termly.io/resource-blocker/73184dec-650a-487d-bdf0-eb8cd893e3bb?autoBlock=on",
+        src: "https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on",
         async: false,
     },
   ],
