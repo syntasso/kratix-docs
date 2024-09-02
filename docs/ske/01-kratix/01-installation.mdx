@@ -7,7 +7,7 @@ sidebar_label: Installation
 Syntasso Kratix Enterprise images are distributed through a private image registry. To
 install SKE on your Kubernetes cluster, follow the steps below.
 
-### Install SKE operator
+## Install SKE operator
 
 :::info
 
@@ -56,11 +56,9 @@ kubectl create secret docker-registry syntasso-registry \
   --docker-password=<YOUR TOKEN>
 ```
 
-
 The manifests are available in the [Syntasso Releases
 Page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/ske-operator).
 Find the latest release and apply it with `kubectl`:
-
 
 ```bash
 kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske/ske-operator/v0.1.2/ske-operator-distribution.yaml
@@ -140,7 +138,6 @@ To upgrade, run:
 helm upgrade ske-operator syntasso/ske-operator # --version <VERSION>
 ```
 
-
 :::info Not using Helm?
 
 Refer to the alternative installation method summary box above to upgrade the operator without Helm.
@@ -156,7 +153,6 @@ version.
 Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
 vX.Y+1.Z first.
 
-
 ## Deletes
 
 ### Deleting the SKE Operator
@@ -169,9 +165,85 @@ helm uninstall ske-operator
 
 ### Deleting the SKE Instance
 
-
 To delete the SKE instance, run:
 
 ```
 kubectl -n kratix-platform-system delete kratix <INSTANCE_NAME>
 ```
+
+## Air-gapped installations
+
+To deploy the SKE Operator in air-gapped environments, you need to ensure that
+your Platform cluster has access to the following resources:
+
+- An image registry containing both the SKE Operator and the SKE images
+- A location where the SKE Distribution manifests can be found
+
+The following sections detail how both resources can be set up.
+
+### Image Registry
+
+The SKE Operator and SKE images are stored in the GitHub Container Registry (GHCR). To
+deploy SKE in an air-gapped environment, you need to mirror the images to a private
+registry.
+
+You must ensure that the following images are mirrored and tagged according to
+the version.
+
+- `ghcr.io/syntasso/ske-operator`
+- `ghcr.io/syntasso/ske-platform`
+- `ghcr.io/syntasso/ske-platform-pipeline-adapter`
+
+You can use a tool like [Skopeo](https://github.com/containers/skopeo) to simplify the
+process of mirroring images.
+
+### SKE Manifests
+
+The manifests for SKE deployments are available in the [Syntasso Enterprise
+Releases
+Bucket](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+If you are deploying SKE in an air-gapped environment, you need to download the
+manifests and make them available to the SKE Operator in a location accessible by
+the cluster.
+
+### Deploying the SKE Operator
+
+Once you have the images mirrored and the manifests available, you can deploy the SKE
+Operator with Helm by providing the necessary configuration:
+
+```bash
+helm install ske-operator syntasso/ske-operator \
+  --set skeLicense=<YOUR LICENSE TOKEN> \
+  --set imageRegistry.host=<YOUR REGISTRY> \
+  --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
+  --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
+  --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
+  --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
+  --set releasesBucket.name=<BUCKET NAME> \
+  --set releasesBucket.path=<BUCKET PATH> \
+  --set releasesBucket.region=<BUCKET REGION> \
+  --set skeDeployment.enabled=true \
+  --set skeDeployment.version=v0.3.0
+```
+
+:::tip
+
+Most of the configuration options are optional. You only need to provide the
+ones that you have customised to your environment.
+
+:::
+
+If your private registry requires authentication, you should also provide the
+name of the secret containing the credentials:
+
+```bash
+--set imageRegistry.imagePullSecret=<SECRET NAME>
+```
+
+:::info
+
+The `imagePullSecret` should be created in the `kratix-platform-system`
+namespace.
+
+:::
