@@ -109,7 +109,7 @@ To use the `ske-backstage-generator` image, update your Promise definition to in
 generator as a workflow step for both the Promise Configure and Resource Configure
 workflows:
 
-```yaml title="workflows section in a Promise file"
+```yaml title="Workflows section in a Promise file"
   # ...
   workflows:
     promise:
@@ -123,6 +123,21 @@ workflows:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+            name: ske-backstage-generator
+          #highlight-end
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: resource-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-resource-pipeline
           #highlight-start
           - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
             name: ske-backstage-generator
@@ -270,3 +285,151 @@ Resource object itself:
 * `ske.backstage.component/consumesApis`: comma-separated list of values for `spec.consumesApis`
 * `ske.backstage.component/dependsOn`: comma-separated list of values for `spec.dependsOn`
 
+## SKE Backstage Component Promise
+
+The SKE Backstage Component Promise provides additional functionality to the SKE Backstage
+integration by offloading management of Backstage Components and Templates from your
+Promises.
+
+The Promise can be found in the [Syntasso Enterprise
+Releases](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#promises/),
+and installed via `kubectl`:
+
+```yaml
+kubectl apply -f ske-backstage-component-promise.yaml
+```
+
+### Component updates with multiple Pipelines
+
+If your Resource workflow contains multiple Pipelines, you may wish to update the Resource
+Component in Backstage at the end of each Pipeline. For example, the Resource status could
+be updated in every Pipeline to convey the latest information about the Resource to the
+requester in Backstage.
+
+To do this, you can configure the SKE Backstage Generator to send a request to the SKE
+Backstage Component Promise in the Resource workflow by adding the `--make-request` arg to
+the SKE Backstage Generator in every Pipeline in your Resource Configure workflow, along
+with the `rbac` permissions required by the image:
+
+```yaml
+  # ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: resource-configure
+          namespace: default
+        spec:
+          #highlight-start
+          rbac:
+            permissions:
+              - apiGroups: ["syntasso.io"]
+                verbs: ["*"]
+                resources: ["backstagecomponents"]
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-resource-pipeline
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+            name: ske-backstage-generator
+          #highlight-start
+            args:
+            - --make-request
+          #highlight-end
+```
+
+Running in this mode, the SKE Backstage Generator will not directly schedule the Backstage
+documents itself. Instead, it will delegate this responsibilty to the SKE Backstage
+Component Promise.
+
+This allows the Backstage Component document to be managed per Resource, meaning Resource
+metadata such as the status can be updated across multiple Pipelines.
+
+### Generate a single Backstage catalog
+
+Using the SKE Backstage Component Promise, you can optionally choose to write a single
+`catalog-info.yaml` file for Backstage to read from, instead of the default behaviour of
+one catalog file per Promise or resource request.
+
+To do this, there are two steps required:
+- Configuring the SKE Backstage Generator to write all of the Backstage manifests in a
+single `catalog-info.yaml`.
+- Configuring your Promise to use the SKE Backstage Component Promise.
+
+First, apply the following config map to your Platform cluster:
+
+```yaml
+apiVersion: v1
+data:
+  allInOne: "true"
+kind: ConfigMap
+metadata:
+  name: ske-backstage-component-promise-config
+  namespace: kratix-platform-system
+```
+
+The `allInOne` field will be read by the SKE Backstage Component Promise, which will then
+aggregate the Backstage Component and Template files for all Promises and Resources into
+a single `catalog-info.yaml` file in the Backstage Destination.
+
+Next, configure the SKE Backstage Generator to send a request to the SKE Backstage
+Component Promise in the Resource and Promise workflows:
+
+```yaml
+  # ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: resource-configure
+          namespace: default
+        spec:
+          #highlight-start
+          rbac:
+            permissions:
+              - apiGroups: ["syntasso.io"]
+                verbs: ["*"]
+                resources: ["backstagecomponents"]
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-resource-pipeline
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+            name: ske-backstage-generator
+          #highlight-start
+            args:
+            - --make-request
+          #highlight-end
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          #highlight-start
+          rbac:
+            permissions:
+              - apiGroups: ["syntasso.io"]
+                verbs: ["*"]
+                resources: ["backstagecomponents"]
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+            name: ske-backstage-generator
+          #highlight-start
+            args:
+            - --make-request
+          #highlight-end
+```
+
+With these changes, your SKE Backstage integration will result in a single
+`catalog-info.yaml` file being written to your Backstage Destination containing all of the
+generated Component and Template manifests.
