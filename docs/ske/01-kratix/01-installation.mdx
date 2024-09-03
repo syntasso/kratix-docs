@@ -28,8 +28,8 @@ Next, install the SKE Operator:
 
 ```bash
 helm install ske-operator syntasso/ske-operator \
-  --set skeLicense=<YOUR LICENSE TOKEN> \
-  # add the following flags if you want to deploy Kratix Enterprise as well
+  --namespace kratix-platform-system \
+  --create-namespace \
   --set skeDeployment.enabled=true \
   --set skeDeployment.version=v0.3.0
 ```
@@ -194,28 +194,84 @@ the version.
 - `ghcr.io/syntasso/ske-platform`
 - `ghcr.io/syntasso/ske-platform-pipeline-adapter`
 
+:::warning Platform and Pipeline Adapter tags
+
+The tags for the `ske-platform` and the `ske-platform-pipeline-adapter` images are
+the same and must match the version of the SKE deployment you wish to install.
+
+:::
+
+You can find the available versions of the images in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+
+:::tip
+
 You can use a tool like [Skopeo](https://github.com/containers/skopeo) to simplify the
 process of mirroring images.
+
+:::
 
 ### SKE Manifests
 
 The manifests for SKE deployments are available in the [Syntasso Enterprise
-Releases
-Bucket](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
 
 If you are deploying SKE in an air-gapped environment, you need to download the
-manifests and make them available to the SKE Operator in a location accessible by
-the cluster.
+manifests and make them available to the SKE Operator in a S3-compatible bucket
+that's accessible from the Platform cluster.
+
+
+### Setting up your Platform cluster
+
+Depending on your environment configuration, you may need to create the
+secrets the Operator will use to access both the Image Registry and the
+Bucket. Those credentials must exist in the `kratix-platform-system` namespace.
+
+:::tip
+
+You may need to, first, create the namespace:
+
+```bash
+kubectl create namespace kratix-platform-system
+```
+
+:::
+
+To create the Image Registry secret, run:
+
+```bash
+kubectl create secret docker-registry <PULL SECRET NAME> \
+    --namespace "kratix-platform-system" \
+    --docker-username="yourusername" \
+    --docker-password="yourpassword" \
+    --docker-server="your.registry.address"
+```
+
+To create the Bucket secret, run:
+
+```bash
+kubectl create secret generic <BUCKET SECRET NAME> \
+    --namespace kratix-platform-system \
+    --from-literal=accessKeyID="youraccesskey" \
+    --from-literal=secretAccessKey="yoursecretkey"
+```
+
 
 ### Deploying the SKE Operator
 
-Once you have the images mirrored and the manifests available, you can deploy the SKE
-Operator with Helm by providing the necessary configuration:
+Once you have the images mirrored and the manifests available, you can deploy
+the SKE Operator with Helm by providing the necessary configuration. Please
+check the [Helm chart values
+file](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml)
+for a complete list of configuration options.
 
 ```bash
 helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
   --set skeLicense=<YOUR LICENSE TOKEN> \
   --set imageRegistry.host=<YOUR REGISTRY> \
+  --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
   --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
   --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
   --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
@@ -223,6 +279,8 @@ helm install ske-operator syntasso/ske-operator \
   --set releasesBucket.name=<BUCKET NAME> \
   --set releasesBucket.path=<BUCKET PATH> \
   --set releasesBucket.region=<BUCKET REGION> \
+  --set releasesBucket.endpoint=<BUCKET ENDPOINT> \
+  --set releasesBucket.secretName=<BUCKET SECRET NAME> \
   --set skeDeployment.enabled=true \
   --set skeDeployment.version=v0.3.0
 ```
@@ -231,19 +289,5 @@ helm install ske-operator syntasso/ske-operator \
 
 Most of the configuration options are optional. You only need to provide the
 ones that you have customised to your environment.
-
-:::
-
-If your private registry requires authentication, you should also provide the
-name of the secret containing the credentials:
-
-```bash
---set imageRegistry.imagePullSecret=<SECRET NAME>
-```
-
-:::info
-
-The `imagePullSecret` should be created in the `kratix-platform-system`
-namespace.
 
 :::
