@@ -79,6 +79,7 @@ spec:
       envFrom: []
       volumeMounts: []
       imagePullPolicy: # Either Always, IfNotPresent or Never
+      securityContext: # Optional. Can be configured directly or via kratix config
   imagePullSecrets: []
 ```
 
@@ -355,3 +356,61 @@ running as part of a Promise Configure workflow").
 This means that you could write a **single** container image to be used in all four
 workflows (`promise.configure`, `promise.delete`, `resource.configure`, and
 `resource.delete`), and switch the container's mode of operation based on the context.
+
+## Security Context
+
+A Pipeline consists of containers provided in the Promise, and 3 Kratix specific
+containers. Kratix configures its own containers in the pipeline to run with the
+following [security
+context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/):
+
+```
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+```
+
+A Pod level security context is not set and cannot currently be configured.
+
+Any user containers provided in the Promise will by default not have any security
+context set. You can set the security context for your containers by either:
+
+- Specifying the security context in the container spec, e.g.:
+  ```yaml
+  apiVersion: platform.kratix.io/v1alpha1
+  kind: Pipeline
+  metadata:
+    name: # Name (must be unique within the Promise)
+    namespace: # Namespace (optional)
+  spec:
+    containers:
+      - name: # Container name (must be unique within the Pipeline)
+        image: # Container image to run
+        securityContext:
+          # Security context fields, e.g.:
+          runAsNonRoot: false
+  ```
+
+- Specifying a global default security context in the `kratix` ConfigMap in the `kratix-platform-system` and
+  providing it the following:
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: kratix
+    namespace: kratix-platform-system
+  data:
+    config: |
+      workflows:
+        defaultContainerSecurityContext:
+          # Security context fields, e.g.:
+          runAsNonRoot: false
+  ```
+
+Any security context set in the container spec will override the global default
+security context.
