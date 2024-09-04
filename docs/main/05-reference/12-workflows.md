@@ -412,5 +412,8 @@ context set. You can set the security context for your containers by either:
           runAsNonRoot: false
   ```
 
+  The ConfigMap is loaded in when the Kratix pod starts up. Anytime the
+  ConfigMap is updated, the Kratix pod will need to be restarted.
+
 Any security context set in the container spec will override the global default
 security context.
