@@ -366,6 +366,7 @@ context](https://kubernetes.io/docs/tasks/configure-pod-container/security-conte
 
 ```
 securityContext:
+  allowPrivilegeEscalation: false
   capabilities:
     drop:
     - ALL
@@ -377,8 +378,9 @@ securityContext:
 
 A Pod level security context is not set and cannot currently be configured.
 
-Any user containers provided in the Promise will by default not have any security
-context set. You can set the security context for your containers by either:
+Any containers provided in the Promise will by default not have any security
+context set. You can set the security context for the Promise specific
+containers (not Kratix containers) by either:
 
 - Specifying the security context in the container spec, e.g.:
   ```yaml
@@ -396,8 +398,12 @@ context set. You can set the security context for your containers by either:
           runAsNonRoot: false
   ```
 
-- Specifying a global default security context in the `kratix` ConfigMap in the `kratix-platform-system` and
-  providing it the following:
+- Specifying a global default security context in the `kratix` ConfigMap in the
+  `kratix-platform-system`. The ConfigMap format is described below. The
+  ConfigMap is loaded in when the `kratix-platform-controller-manager` pod in
+  the `kratix-platform-system` starts up. Anytime the ConfigMap is updated, the
+  pod will need to be restarted to load the changes.
+
   ```yaml
   apiVersion: v1
   kind: ConfigMap
@@ -411,9 +417,6 @@ context set. You can set the security context for your containers by either:
           # Security context fields, e.g.:
           runAsNonRoot: false
   ```
-
-  The ConfigMap is loaded in when the Kratix pod starts up. Anytime the
-  ConfigMap is updated, the Kratix pod will need to be restarted.
 
 Any security context set in the container spec will override the global default
 security context.
