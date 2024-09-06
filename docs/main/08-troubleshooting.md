@@ -332,7 +332,7 @@ the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
 times the pod will eventually go into `CrashLoopBackoff`. In this scenario
 Kratix will not try to reschedule the pod. You can force Kratix to reschedule a
 new pod by triggering a [manual
-reconcilation](./reference/resources/workflows#manual-reconciliation)
+reconciliation](./reference/resources/workflows#manual-reconciliation)
 
 ### Workflow Pod doesn't have Kubernetes API access
 
