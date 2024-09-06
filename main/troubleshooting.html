@@ -15,7 +15,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.af7a49ed.css">
-<script src="/assets/js/runtime~main.3296ebdb.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.723a2fa3.js" defer="defer"></script>
 <script src="/assets/js/main.cd43fb71.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -290,7 +290,7 @@ the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
 times the pod will eventually go into <code>CrashLoopBackoff</code>. In this scenario
 Kratix will not try to reschedule the pod. You can force Kratix to reschedule a
 new pod by triggering a <a href="/main/reference/resources/workflows#manual-reconciliation">manual
-reconcilation</a></p>
+reconciliation</a></p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="workflow-pod-doesnt-have-kubernetes-api-access">Workflow Pod doesn&#x27;t have Kubernetes API access<a class="hash-link" aria-label="Direct link to Workflow Pod doesn&#x27;t have Kubernetes API access" title="Direct link to Workflow Pod doesn&#x27;t have Kubernetes API access" href="/main/troubleshooting#workflow-pod-doesnt-have-kubernetes-api-access">​</a></h3>
 <p>A Workflow is, by default, given limited access to the Kubernetes API. You will
 see errors in the logs of the Workflow if it is trying to access the API without
