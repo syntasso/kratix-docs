@@ -226,7 +226,7 @@ The order of precedence is as follows:
 
 :::important
 
-If the Promise Configure workflow creates the `/kratix/output/destination-selector.yaml`
+If the Promise Configure workflow creates the `/kratix/metadata/destination-selectors.yaml`
 with an element **without** `directory`, any subsequent Resource requests will use the
 resulting combination of labels as the default scheduling policy.
 
