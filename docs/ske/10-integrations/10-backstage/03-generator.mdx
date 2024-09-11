@@ -35,18 +35,7 @@ for setup instructions.
 The `ske-backstage-generator` image is intended to be run as part of your
 Configure Pipeline for your Promise and Resource Workflows. It will
 auto-generate Backstage Template and Component manifests, and schedule them to
-your [Backstage Destination](#destination). **You must ensure this is only run
-once across all your pipelines** in a workflow. 
-
-In order to
-have the full status displayed in Backstage, you should place the aspect as the
-last image in the last pipeline of your workflow. If the aspect appears more than
-once in your workflow, you will see one of the components in Backstage,
-and Backstage will emit a warning:
-
-```
-{"level":"warn","message":"Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml","plugin":"catalog","service":"backstage"}
-```
+your [Backstage Destination](#destination).
 
 ### Promise Configure
 
@@ -161,6 +150,17 @@ Workflows. If you install the Promise, you should see a Component automatically
 appearing in your Backstage instance, together with a new Template. If you use
 the Template to create a Resource, you should see the resource Component
 appearing as well as the Resource itself being created in your cluster.
+
+In order to have the full status of your Promise or Resource request displayed in Backstage,
+you should place the aspect as the last image in the last pipeline of your workflow.
+
+If the aspect needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
+Component Promise](##ske-backstage-component-promise). Otherwise, you will observe only one of the components
+in Backstage, and Backstage will emit a warning:
+
+```
+{"level":"warn","message":"Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml","plugin":"catalog","service":"backstage"}
+```
 
 ### Authenticating against the image registry
 
@@ -374,11 +374,11 @@ the `rbac` permissions required by the image:
           #highlight-end
 ```
 
-Running in this mode, the SKE Backstage Generator will not directly schedule the Backstage
-documents itself. Instead, it will delegate this responsibilty to the SKE Backstage
+Running in this mode, the SKE Backstage Generator will not schedule the Backstage
+documents itself. Instead, it will delegate this responsibility to the SKE Backstage
 Component Promise.
 
-This allows the Backstage Component document to be managed per Resource, meaning Resource
+This allows the Backstage Component document to be managed per-Resource, meaning Resource
 metadata such as the status can be updated across multiple Pipelines.
 
 ### Generate a single Backstage catalog
