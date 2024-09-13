@@ -216,23 +216,29 @@ This ensures that, when pulling the `ske-backstage-generator` image, Kubernetes 
 
 ## Customising the generated Components
 
-### The Promise Component
-
-By default, the generator will create the Backstage Promise `Component` with the
-following `spec`:
+By default, the generator will create the Backstage Promise `Component` with default values for the `metadata` and
+`spec` fields. For a Promise, for example, it will look like this:
 
 ```yaml
+metadata:
+  name: <Promise Kind>-promise
+  title: <Promise Kind> Promise
+  description: <Promise Kind> as a Service
+  tags:
+    - kratix
 spec:
-  type: kratix-promise
   lifecycle: production
-  owner: kratix
+  owner: kratix-platform
+  type: kratix-promise
+  # Other fields are left empty
 ```
+You can customise these values by setting the following `env` variables in the
+workflow:
 
-To customise these values, or to include any additional fields (as defined in the
-[Backstage
-docs](https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component))
-you can set the following `env` variables in the workflow:
-
+* `COMPONENT_NAME`: the value of `metadata.name`
+* `COMPONENT_TITLE`: the value of `metadata.title`
+* `COMPONENT_DESCRIPTION`: the value of `metadata.description`
+* `COMPONENT_TAGS`: comma-separated list of values for `metadata.tags`
 * `COMPONENT_TYPE`: the value of `spec.type`
 * `COMPONENT_LIFECYCLE`: the value of `spec.lifecycle`
 * `COMPONENT_OWNER`: the value of `spec.owner`
@@ -241,6 +247,21 @@ you can set the following `env` variables in the workflow:
 * `COMPONENT_PROVIDES_APIS`: comma-separated list of values for `spec.providesApis`
 * `COMPONENT_CONSUMES_APIS`: comma-separated list of values for `spec.consumesApis`
 * `COMPONENT_DEPENDS_ON`: comma-separated list of values for `spec.dependsOn`
+
+You can also customise the fields by setting the following annotations in the Promise or Resource object directly:
+
+* `ske.backstage.component/name`: the value of `metadata.name`
+* `ske.backstage.component/title`: the value of `metadata.title`
+* `ske.backstage.component/description`: the value of `metadata.description`
+* `ske.backstage.component/tags`: comma-separated list of values for `metadata.tags`
+* `ske.backstage.component/type`: the value of `spec.type`
+* `ske.backstage.component/lifecycle`: the value of `spec.lifecycle`
+* `ske.backstage.component/owner`: the value of `spec.owner`
+* `ske.backstage.component/system`: the value of `spec.system`
+* `ske.backstage.component/subcomponentOf`: the value of `spec.subcomponentOf`
+* `ske.backstage.component/providesApis`: comma-separated list of values for `spec.providesApis`
+* `ske.backstage.component/consumesApis`: comma-separated list of values for `spec.consumesApis`
+* `ske.backstage.component/dependsOn`: comma-separated list of values for `spec.dependsOn`
 
 For example, to set `spec.owner` and `spec.providesApis`, you can update your
 pipeline stage with the snippet below:
@@ -268,34 +289,7 @@ pipeline stage with the snippet below:
             - name: COMPONENT_PROVIDES_APIS
               value: "component/api/v1,component/api/v2"
             #highlight-end
-
 ```
-
-### The Resource Component
-
-The `Component` for a Resource will have the following `spec`:
-
-```yaml
-spec:
-  type: kratix-resource
-  lifecycle: production
-  owner: kratix
-```
-
-Similar to the Promise Component, you can customise these values by setting the
-same set of `env` variables defined above, but in the Resource Configure workflow.
-
-You can also customise the fields by setting the following annotations in the
-Resource object itself:
-
-* `ske.backstage.component/type`: the value of `spec.type`
-* `ske.backstage.component/lifecycle`: the value of `spec.lifecycle`
-* `ske.backstage.component/owner`: the value of `spec.owner`
-* `ske.backstage.component/system`: the value of `spec.system`
-* `ske.backstage.component/subcomponentOf`: the value of `spec.subcomponentOf`
-* `ske.backstage.component/providesApis`: comma-separated list of values for `spec.providesApis`
-* `ske.backstage.component/consumesApis`: comma-separated list of values for `spec.consumesApis`
-* `ske.backstage.component/dependsOn`: comma-separated list of values for `spec.dependsOn`
 
 ## SKE Backstage Component Promise
 
