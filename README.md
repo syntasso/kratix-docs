@@ -1,5 +1,4 @@
 # Kratix Docs
-
 Kratix documentation is built using [Docusaurus 2](https://docusaurus.io/). The live version of the documentation is available at [docs.kratix.io](https://docs.kratix.io).
 
 ## Installation
@@ -23,7 +22,7 @@ This command starts a local development server and opens up a browser window. Mo
 You can also run it in Docker:
 
 ```
-docker run -it -v `pwd`:/app -p 3000:3000 node /bin/bash -c "cd /app; yarn run start --host 0.0.0.0-"
+docker run -it -v `pwd`:/app -p 3000:3000 node /bin/bash -c "cd /app; yarn run start --host 0.0.0.0"
 ```
 
 ## Build, test, and verify

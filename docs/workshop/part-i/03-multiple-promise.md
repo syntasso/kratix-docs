@@ -39,7 +39,7 @@ those services, configured with specific parameters, on specific regions and
 resources.
 
 You want the platform to cater for both: it should be simple to get the simple
-services and it should be possible to get the specialised ones. You decide to
+services, and it should be possible to get the specialised ones. You decide to
 provide each of the individual services as a Promise. Specialist teams can then
 use the API to get the exact service they need.
 

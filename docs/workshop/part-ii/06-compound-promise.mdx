@@ -208,7 +208,7 @@ postgresqlRequest = {
 }
 ```
 
-As the the contents of `/kratix/output/platform` need to go to the Platform cluster, it explicitly states that the output needs to be directed to the Platform:
+As the contents of `/kratix/output/platform` need to go to the Platform cluster, it explicitly states that the output needs to be directed to the Platform:
 
 ```ruby
 destinationSelectorsRequest = [{
@@ -252,7 +252,7 @@ existingDeployment = YAML.load_file('/kratix/output/deployment.yaml')
 existingDeployment['spec']['template']['spec']['containers'][0]['env'] = env
 ```
 
-Since the script is written in Ruby, ensure it is installed in the Docker image.
+Since the `database-configure` script is written in Ruby, ensure it is installed in the Docker image.
 
 ```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/Dockerfile"
 - RUN apk update && apk add --no-cache yq kubectl curl
@@ -342,12 +342,12 @@ env:
   value: my-app-db
 ```
 
-Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `workflows.resource.configure`:
+Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `spec.workflows.resource.configure`:
 
 ```yaml
 # ...
 workflows:
-  resources:
+  resource:
     configure:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Pipeline
@@ -373,6 +373,25 @@ kubectl --context $PLATFORM apply --filename promise.yaml
 ```
 
 Great! Your App-as-a-Service Promise is now a Compound Promise that can request a PostgreSQL service. You can now test it by making a request for an App-as-a-Service with a PostgreSQL service.
+
+
+:::warning
+
+Before you proceed, ensure you have registered the platform cluster as a destination and labelled it appropriately. You can use this command to verify your destinations:
+
+```bash
+kubectl get destinations --show-labels
+```
+
+If you don't see the platform cluster, or it's not labelled as platform, you can follow [these steps](https://docs.kratix.io/workshop/multiple-promises#register-the-platform-as-a-destination) to register it as a destination. 
+
+```bash
+NAME               AGE     LABELS
+platform-cluster   45h     environment=platform
+worker-cluster     6d19h   environment=dev
+```
+
+:::
 
 ## Requesting a Database with your App
 

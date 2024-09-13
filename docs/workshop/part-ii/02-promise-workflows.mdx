@@ -55,7 +55,7 @@ This means you will need to write your Workflows to make sure that rerunning the
 
     Platform design requires thinking about how to divide platform offerings into right sized Promises and evaluating options for reusability and composability.
 
-    Each Promise is a the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
+    Each Promise is the encapsulation of something as-a-Service. But that doesn’t mean that all platform users will want or need all types of Promises. It can be extremely helpful to create lower level Promises for services that are composed into a number of higher level offerings. For example, a Kubernetes Promise may never be something requested by an application developer, but it may be that a number of software Promises like “environment”, or “data store” depend on a Kubernetes cluster that can be provisioned using a Promise.
 
     Promises are not the only way to create reusable components when designing your platform with Kratix. You can also create reusable Pipeline stages that can be run in a number of different Promise Workflows. For example, you may want to add default labels to certain types of resources. You can create a Pipeline stage which evaluates the resources set to be declared at the end of the Workflow and apply consistent labelling before writing.
 
@@ -346,7 +346,7 @@ kubectl --context $WORKER get deployments --namespace ingress-nginx
 
 :::note
 
-It may briefly disappear and reappear as the worker reconciles the state of the cluster. This is normal behavior.
+It may briefly disappear and reappear as the worker reconciles the state of the cluster. This is normal behaviour.
 
 :::
 

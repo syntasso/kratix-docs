@@ -168,7 +168,7 @@ If at this stage you create another Kubernetes cluster and follow similar steps 
 
 Later in this tutorial you will learn how to make certain Promises available only in certain clusters based on Promise configuration.
 
-You environment now looks like this (with some detail omitted for clarity):
+Your environment now looks like this (with some detail omitted for clarity):
 
 
 ```mdx-code-block
@@ -181,7 +181,7 @@ import Topology03 from "/img/docs/workshop/topology-03.png"
   <figcaption>Jenkins dependencies are reconciled on all workers</figcaption>
 </figure>
 
-With the both the API available in the platform, and the dependencies installed in the worker, the Jenkins Promise installation is now complete.
+With both the API available in the platform, and the dependencies installed in the worker, the Jenkins Promise installation is now complete.
 
 It is now time to switch roles for a moment, and imagine you are a developer who wants to request a new Jenkins Resource.
 
@@ -259,7 +259,7 @@ compliance requirements in either simple Kratix Pipelines or other popular pipel
   <figcaption>An example multi-stage Kratix Pipeline</figcaption>
 </figure>
 
-For instance, in an organization where all container images must undergo
+For instance, in an organisation where all container images must undergo
 vulnerability scanning, you can include a Snyk image in your Promise. Similarly,
 if you wish to receive alerts for specific events, you can include a Slack
 image.

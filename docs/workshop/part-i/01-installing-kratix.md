@@ -273,7 +273,7 @@ destinations.platform.kratix.io/worker-cluster created
 <details>
 <summary>Destinations in detail</summary>
 
-The Kratix Destination resource is the representation of a system where workloads can be scheduled to. Those system are usually other Kubernetes clusters, but can be any system that can interpret the declared state.
+The Kratix Destination resource is the representation of a system where workloads can be scheduled to. Those systems are usually other Kubernetes clusters, but can be any system that can interpret the declared state.
 
 The only required field is `spec.stateStoreRef`, which contains a reference to a State Store present in the platform. In this example, it points to the `default`
 object you created on the previous step. The `spec.StateStoreRef.kind` specifies the kind of State Store being used by this Destination.
