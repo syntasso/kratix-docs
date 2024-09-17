@@ -291,6 +291,27 @@ pipeline stage with the snippet below:
             #highlight-end
 ```
 
+## Providing a Resource Summary
+
+On the Resource Component page, it's possible to include a free-form text block
+to provide documentation about the resource.
+
+To do this, set the `ske.backstage.component/summary` annotation on the Promise object:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  #...
+  annotations:
+    ske.backstage.component/summary: |
+      Some information about this Promise.
+
+      This accepts **markdown!**
+```
+
+The text will be rendered on each Resource Component page in Backstage.
+
 ## SKE Backstage Component Promise
 
 The SKE Backstage Component Promise provides additional functionality to the SKE Backstage
