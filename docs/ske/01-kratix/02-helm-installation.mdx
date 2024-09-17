@@ -1,0 +1,293 @@
+---
+title: Installation via Helm
+description: Installing Syntasso Kratix Enterprise
+sidebar_label: Installation via Helm
+---
+
+Syntasso Kratix Enterprise images are distributed through a private image registry. To
+install SKE on your Kubernetes cluster, follow the steps below.
+
+## Install SKE operator
+
+:::info
+
+Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
+refer to [its documentation for installation instructions](https://cert-manager.io/).
+
+:::
+
+To install SKE operator using the Helm chart, start by adding the Syntasso Helm
+repository:
+
+```bash
+helm repo add syntasso https://syntasso.github.io/helm-charts
+helm repo update
+```
+
+Next, install the SKE Operator:
+
+```bash
+helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
+  --create-namespace \
+  --set skeDeployment.enabled=true \
+  --set skeDeployment.version=v0.3.0
+```
+
+<details>
+<summary>Alternative installation method</summary>
+
+If you prefer not to use Helm, you can install the SKE operator by applying the
+manifests directly.
+
+First, create the namespace where the SKE operator will be installed:
+
+```bash
+kubectl create namespace kratix-platform-system
+```
+
+Then, create a secret with your license token:
+
+```
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=kratix-platform-system \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
+```
+
+The manifests are available in the [Syntasso Releases
+Page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/ske-operator).
+Find the latest release and apply it with `kubectl`:
+
+```bash
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske/ske-operator/v0.1.2/ske-operator-distribution.yaml
+```
+
+With the Operator in place, you can now install Kratix Enterprise by creating a
+'Kratix' instance. Below is an example 'Kratix' instance definition:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: kratix-example
+spec:
+  releasesBucket:
+    name: # name of the bucket containing Kratix Enterprise releases; optional
+    region: # region of the bucket; optional
+    path: # subpath within the bucket; optional
+  version: v0.3.0 # version of Kratix Enterprise to install; default to the latest release found in release bucket
+```
+
+You can save the 'Kratix' instance definition to a local file and apply with kubectl.
+SKE operator will then install Kratix Enterprise and its necessary configurations.
+
+By default, when `spec.releasesBucket` is not set, SKE operator will use the Syntasso Enterprise releases bucket.
+Note that 'Kratix' is a cluster scoped and singleton resource.
+
+Only one instance of Kratix can be installed in a cluster.
+
+</details>
+
+### Verify the installation
+
+To verify that Kratix Enterprise has been installed successfully, run the following command:
+
+```bash
+kubectl get deployments.apps --namespace kratix-platform-system
+```
+
+You should see the following output:
+
+```shell-session
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+kratix-platform-controller-manager   1/1     1            1           1h
+ske-operator-controller-manager      1/1     1            1           1h
+```
+
+You can now proceed with the configuration of Kratix (i.e. registering destinations or
+installing promises). For that, refer to the Open-Source Kratix documentation.
+
+## Upgrades
+
+### Upgrading the Operator
+
+To verify the version of the Operator installed, run the following command:
+
+```bash
+helm list
+```
+
+You should see the following output:
+
+```shell-session
+NAME            NAMESPACE    [...]    CHART                   APP VERSION
+ske-operator    default      [...]    ske-operator-0.8.0      v0.1.1
+```
+
+To check the available versions of the Operator, run the following command:
+
+```bash
+helm search repo syntasso/ske-operator --versions
+```
+
+To upgrade, run:
+
+```bash
+helm upgrade ske-operator syntasso/ske-operator # --version <VERSION>
+```
+
+:::info Not using Helm?
+
+Refer to the alternative installation method summary box above to upgrade the operator without Helm.
+
+:::
+
+### Upgrading the SKE Instance
+
+To upgrade the version of SKE being deployed by the operator, you can edit your
+Kratix instance definition and change the `version` field to the desired
+version.
+
+Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
+vX.Y+1.Z first.
+
+## Deletes
+
+### Deleting the SKE Operator
+
+To delete the SKE operator (and any deployed SKE instance), run the following command:
+
+```bash
+helm uninstall ske-operator
+```
+
+### Deleting the SKE Instance
+
+To delete the SKE instance, run:
+
+```
+kubectl -n kratix-platform-system delete kratix <INSTANCE_NAME>
+```
+
+## Air-gapped installations
+
+To deploy the SKE Operator in air-gapped environments, you need to ensure that
+your Platform cluster has access to the following resources:
+
+- An image registry containing both the SKE Operator and the SKE images
+- A location where the SKE Distribution manifests can be found
+
+The following sections detail how both resources can be set up.
+
+### Image Registry
+
+The SKE Operator and SKE images are stored in the GitHub Container Registry (GHCR). To
+deploy SKE in an air-gapped environment, you need to mirror the images to a private
+registry.
+
+You must ensure that the following images are mirrored and tagged according to
+the version.
+
+- `ghcr.io/syntasso/ske-operator`
+- `ghcr.io/syntasso/ske-platform`
+- `ghcr.io/syntasso/ske-platform-pipeline-adapter`
+
+:::warning Platform and Pipeline Adapter tags
+
+The tags for the `ske-platform` and the `ske-platform-pipeline-adapter` images are
+the same and must match the version of the SKE deployment you wish to install.
+
+:::
+
+You can find the available versions of the images in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+
+:::tip
+
+You can use a tool like [Skopeo](https://github.com/containers/skopeo) to simplify the
+process of mirroring images.
+
+:::
+
+### SKE Manifests
+
+The manifests for SKE deployments are available in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+If you are deploying SKE in an air-gapped environment, you need to download the
+manifests and make them available to the SKE Operator in a S3-compatible bucket
+that's accessible from the Platform cluster.
+
+
+### Setting up your Platform cluster
+
+Depending on your environment configuration, you may need to create the
+secrets the Operator will use to access both the Image Registry and the
+Bucket. Those credentials must exist in the `kratix-platform-system` namespace.
+
+:::tip
+
+You may need to, first, create the namespace:
+
+```bash
+kubectl create namespace kratix-platform-system
+```
+
+:::
+
+To create the Image Registry secret, run:
+
+```bash
+kubectl create secret docker-registry <PULL SECRET NAME> \
+    --namespace "kratix-platform-system" \
+    --docker-username="yourusername" \
+    --docker-password="yourpassword" \
+    --docker-server="your.registry.address"
+```
+
+To create the Bucket secret, run:
+
+```bash
+kubectl create secret generic <BUCKET SECRET NAME> \
+    --namespace kratix-platform-system \
+    --from-literal=accessKeyID="youraccesskey" \
+    --from-literal=secretAccessKey="yoursecretkey"
+```
+
+
+### Deploying the SKE Operator
+
+Once you have the images mirrored and the manifests available, you can deploy
+the SKE Operator with Helm by providing the necessary configuration. Please
+check the [Helm chart values
+file](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml)
+for a complete list of configuration options.
+
+```bash
+helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
+  --set skeLicense=<YOUR LICENSE TOKEN> \
+  --set imageRegistry.host=<YOUR REGISTRY> \
+  --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
+  --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
+  --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
+  --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
+  --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
+  --set releasesBucket.name=<BUCKET NAME> \
+  --set releasesBucket.path=<BUCKET PATH> \
+  --set releasesBucket.region=<BUCKET REGION> \
+  --set releasesBucket.endpoint=<BUCKET ENDPOINT> \
+  --set releasesBucket.secretName=<BUCKET SECRET NAME> \
+  --set skeDeployment.enabled=true \
+  --set skeDeployment.version=v0.3.0
+```
+
+:::tip
+
+Most of the configuration options are optional. You only need to provide the
+ones that you have customised to your environment.
+
+:::

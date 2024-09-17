@@ -1,0 +1,70 @@
+---
+title: Installation via SKE CLI
+description: Installing Syntasso Kratix Enterprise
+sidebar_label: Installation via SKE CLI
+---
+
+Syntasso Kratix Enterprise images are distributed through a private image registry. To
+install SKE on your Kubernetes cluster, follow the steps below.
+
+## Install
+
+:::info
+
+Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
+refer to [its documentation for installation instructions](https://cert-manager.io/).
+
+:::
+
+The easiest way to install SKE is using the [SKE
+CLI](../50-releases/40-ske-cli.mdx). The CLI will install the SKE Operator and
+configure it to deploy SKE on your cluster. To install run:
+
+```
+ske install --access-token $SKE_LICENCE_TOKEN
+```
+
+### Verify the installation
+
+Once installation is complete you can verify what has been installed by running:
+
+```bash
+ske get version
+```
+
+You should see the following output (or similar):
+```shell-session
+Latest Available:
+SKE Operator: v0.2.0; SKE Deployment: v0.3.0
+
+Deployed:
+SKE Operator: v0.2.0; SKE Deployment: v0.3.0
+```
+
+To verify that the Operator and SKE are healthy, run the following command:
+
+```bash
+kubectl get deployments.apps --namespace kratix-platform-system
+```
+
+You should see the following output:
+
+```shell-session
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+kratix-platform-controller-manager   1/1     1            1           1h
+ske-operator-controller-manager      1/1     1            1           1h
+```
+
+You can now proceed with the configuration of Kratix (i.e. registering destinations or
+installing promises). For that, refer to the Open-Source Kratix documentation.
+
+## Upgrades
+
+Support for upgrading SKE using the SKE CLI is coming soon. In the meantime, you can
+follow the [helm upgrade](./02-helm-installation.mdx) instructions for upgrading SKE.
+
+## Air-gapped installations
+
+Support for installing SKE in air-gapped environments using the SKE CLI is coming
+soon. In the meantime, you can follow the [helm
+installation](./02-helm-installation.mdx) instructions for air-gapped environments.
