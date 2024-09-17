@@ -76,82 +76,88 @@ def gen_doc(cmd)
   EOF
 end
 
-cmds = []
-count = 0
-sections = {
-  description: "Description",
-  usage: "Usage",
-  examples: "Examples",
-  subcommands: "Available Commands",
-  flags: "Flags",
-  global: "Global Flags"
-}
 
-ignored_commands = %w{help version completion}
-
-to_parse = [{
-  name: "kratix", short: "The Kratix CLI"
-}]
-subcommands_to_parse = []
-
-while to_parse.any?
-  c = to_parse.shift
-
-  next if ignored_commands.include?(c[:name].split.last)
-  puts "Generating documentation for command `#{c[:name]}`"
-
-  current_section = :description
-
-  cmd = {
-    name: c[:name],
-    short: c[:short],
-    level: c[:level],
-    parent_command: c[:parent_command]
+def run(command, doc_dir)
+  cmds = []
+  count = 0
+  sections = {
+    description: "Description",
+    usage: "Usage",
+    examples: "Examples",
+    subcommands: "Available Commands",
+    flags: "Flags",
+    global: "Global Flags"
   }
 
-  IO.popen("#{c[:name]} --help") do |io|
-    lines = io.readlines
-    lines.pop
-    lines.each do |line|
-      line = line.strip
-      next if line.empty?
+  ignored_commands = %w{help version completion}
 
-      if (sec = header?(sections, line)) != ""
-        current_section = sec
-        next
+  to_parse = [{
+    name: command, short: "The " + command + " CLI"
+  }]
+  subcommands_to_parse = []
+
+  while to_parse.any?
+    c = to_parse.shift
+
+    next if ignored_commands.include?(c[:name].split.last)
+    puts "Generating documentation for command `#{c[:name]}`"
+
+    current_section = :description
+
+    cmd = {
+      name: c[:name],
+      short: c[:short],
+      level: c[:level],
+      parent_command: c[:parent_command]
+    }
+
+    IO.popen("#{c[:name]} --help") do |io|
+      lines = io.readlines
+      lines.pop
+      lines.each do |line|
+        line = line.strip
+        next if line.empty?
+
+        if (sec = header?(sections, line)) != ""
+          current_section = sec
+          next
+        end
+
+        (cmd[current_section] ||= []) << line
       end
-
-      (cmd[current_section] ||= []) << line
     end
-  end
-  subcommands = parse_subcommands(cmd, ignored_commands)
-  cmd[:subcommands] = subcommands
-  cmds << cmd
+    subcommands = parse_subcommands(cmd, ignored_commands)
+    cmd[:subcommands] = subcommands
+    cmds << cmd
 
-  if subcommands.any?
-    subcommands_to_parse = subcommands.each_with_index.map do |el, i|
-      {name: c[:name] + " " + el[:name], short: el[:short], :parent_command => cmd}
+    if subcommands.any?
+      subcommands_to_parse = subcommands.each_with_index.map do |el, i|
+        {name: c[:name] + " " + el[:name], short: el[:short], :parent_command => cmd}
+      end
+      to_parse = subcommands_to_parse + to_parse
     end
-    to_parse = subcommands_to_parse + to_parse
+
+    count += 1
   end
 
-  count += 1
+  puts "Total commands: #{count}"
+  puts "=================="
+  puts "Outputting Markdown..."
+
+  doc_dir = File.join(File.dirname(__FILE__), "..", doc_dir)
+
+  #remove all files from dir
+  FileUtils.rm_rf(Dir.glob("#{doc_dir}/*.md"))
+
+  cmds.each_with_index do |cmd, i|
+    name = cmd[:name].split.join("-").downcase.gsub(/[^a-z0-9-]/, "")
+    puts "Writing #{name}..."
+    doc = gen_doc(cmd)
+    filepath = File.join(doc_dir, "#{"%02d" % i}_#{name}.md")
+    # FileUtils.mkdir_p(File.dirname(filepath)) unless File.directory?(File.dirname(filepath))
+    File.write(filepath, doc)
+  end
 end
 
-puts "Total commands: #{count}"
-puts "=================="
-puts "Outputting Markdown..."
-
-doc_dir = File.join(File.dirname(__FILE__), "..", "docs", "main", "06-kratix-cli", "20-reference")
-
-#remove all files from dir
-FileUtils.rm_rf(Dir.glob("#{doc_dir}/*.md"))
-
-cmds.each_with_index do |cmd, i|
-  name = cmd[:name].split.join("-").downcase.gsub(/[^a-z0-9-]/, "")
-  puts "Writing #{name}..."
-  doc = gen_doc(cmd)
-  filepath = File.join(doc_dir, "#{"%02d" % i}_#{name}.md")
-  # FileUtils.mkdir_p(File.dirname(filepath)) unless File.directory?(File.dirname(filepath))
-  File.write(filepath, doc)
-end
+run("kratix", "docs/main/06-kratix-cli/20-reference")
+run("ske", "docs/ske/60-ske-cli/01-reference")
