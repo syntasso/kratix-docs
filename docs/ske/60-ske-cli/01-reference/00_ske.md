@@ -21,5 +21,5 @@ ske-cli [command]
 ## See Also
 
 
-* [ske get](/main/kratix-cli/reference/ske-get): Command to get information about SKE deployment
-* [ske install](/main/kratix-cli/reference/ske-install): install the latest SKE operator and SKE
+* [ske get](/ske/ske-cli/reference/ske-get): Command to get information about SKE deployment
+* [ske install](/ske/ske-cli/reference/ske-install): install the latest SKE operator and SKE

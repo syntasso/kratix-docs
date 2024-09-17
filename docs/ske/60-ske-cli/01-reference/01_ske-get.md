@@ -22,5 +22,5 @@ ske-cli get [command]
 
 ## See Also
 
-* [ske](/main/kratix-cli/reference/ske): The ske CLI
+* [ske](/ske/ske-cli/reference/ske): The ske CLI
 

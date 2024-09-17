@@ -18,24 +18,24 @@ def parse_subcommands(cmd, ignored)
   sub_cmds&.reject {|x| ignored.include?(x[:name]) } || []
 end
 
-def link_to(parent, child, short)
+def link_to(doc_dir, parent, child, short)
   name = "#{parent}"
   unless child.empty?
     name += " #{child}"
   end
-  return "* [#{name}](/main/kratix-cli/reference/#{name.gsub(" ", "-")}): #{short}"
+  return "* [#{name}](#{doc_dir}/#{name.gsub(" ", "-")}): #{short}"
 end
 
-def section(name, cmd, code: false, slice: 1)
+def section(doc_dir, name, cmd, code: false, slice: 1)
   return unless cmd[name]
 
   if name == :subcommands
     return <<~EOF.chomp
     ## See Also
 
-    #{cmd[:parent_command] ? link_to(cmd[:parent_command][:name], "", cmd[:parent_command][:short]) : ""}
+    #{cmd[:parent_command] ? link_to(doc_dir, cmd[:parent_command][:name], "", cmd[:parent_command][:short]) : ""}
     #{cmd[:subcommands].map { |c|
-    "#{link_to(cmd[:name], c[:name], c[:short])}"
+    "#{link_to(doc_dir, cmd[:name], c[:name], c[:short])}"
     }.join("\n")}
     EOF
   end
@@ -64,20 +64,20 @@ def header(cmd)
   EOF
 end
 
-def gen_doc(cmd)
+def gen_doc(doc_dir, cmd)
   <<~EOF
   #{header(cmd)}
-  #{section(:description, cmd)}
-  #{section(:usage, cmd, code: true)}
-  #{section(:examples, cmd, code: true, slice: 2)}
-  #{section(:flags, cmd, code: true)}
-  #{section(:global, cmd, code: true)}
-  #{section(:subcommands, cmd)}
+  #{section(doc_dir, :description, cmd)}
+  #{section(doc_dir, :usage, cmd, code: true)}
+  #{section(doc_dir, :examples, cmd, code: true, slice: 2)}
+  #{section(doc_dir, :flags, cmd, code: true)}
+  #{section(doc_dir, :global, cmd, code: true)}
+  #{section(doc_dir, :subcommands, cmd)}
   EOF
 end
 
 
-def run(command, doc_dir)
+def run(command, doc_dir, ref_path)
   cmds = []
   count = 0
   sections = {
@@ -152,12 +152,12 @@ def run(command, doc_dir)
   cmds.each_with_index do |cmd, i|
     name = cmd[:name].split.join("-").downcase.gsub(/[^a-z0-9-]/, "")
     puts "Writing #{name}..."
-    doc = gen_doc(cmd)
+    doc = gen_doc(ref_path,cmd)
     filepath = File.join(doc_dir, "#{"%02d" % i}_#{name}.md")
     # FileUtils.mkdir_p(File.dirname(filepath)) unless File.directory?(File.dirname(filepath))
     File.write(filepath, doc)
   end
 end
 
-run("kratix", "docs/main/06-kratix-cli/20-reference")
-run("ske", "docs/ske/60-ske-cli/01-reference")
+run("kratix", "docs/main/06-kratix-cli/20-reference", "/main/kratix-cli/reference")
+run("ske", "docs/ske/60-ske-cli/01-reference", "/ske/ske-cli/reference")

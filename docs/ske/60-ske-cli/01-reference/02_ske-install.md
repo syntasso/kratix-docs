@@ -22,5 +22,5 @@ ske-cli install --access-token=MY_TOKEN [--context] [flags]
 
 ## See Also
 
-* [ske](/main/kratix-cli/reference/ske): The ske CLI
+* [ske](/ske/ske-cli/reference/ske): The ske CLI
 
