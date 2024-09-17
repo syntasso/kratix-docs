@@ -89,7 +89,7 @@ def run(command, doc_dir, ref_path)
     global: "Global Flags"
   }
 
-  ignored_commands = %w{help version completion}
+  ignored_commands = %w{help completion}
 
   to_parse = [{
     name: command, short: "The " + command + " CLI"
