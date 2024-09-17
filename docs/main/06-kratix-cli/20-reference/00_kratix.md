@@ -1,5 +1,5 @@
 # kratix
-The Kratix CLI
+The kratix CLI
 
 ## Description
 A CLI tool for Kratix
@@ -17,9 +17,8 @@ kratix init promise promise-name --group myorg.com --kind Database
 
 ## Flags
 ```
--h, --help      help for kratix
--t, --toggle    Help message for toggle
--v, --version   version for kratix
+-h, --help     help for kratix
+-t, --toggle   Help message for toggle
 ```
 
 

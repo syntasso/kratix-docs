@@ -18,5 +18,5 @@ kratix add [command]
 
 ## See Also
 
-* [kratix](/main/kratix-cli/reference/kratix): The Kratix CLI
+* [kratix](/main/kratix-cli/reference/kratix): The kratix CLI
 * [kratix add container](/main/kratix-cli/reference/kratix-add-container): Adds a container to the named workflow

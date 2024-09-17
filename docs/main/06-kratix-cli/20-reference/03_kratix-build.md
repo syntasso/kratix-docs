@@ -18,6 +18,6 @@ kratix build [command]
 
 ## See Also
 
-* [kratix](/main/kratix-cli/reference/kratix): The Kratix CLI
+* [kratix](/main/kratix-cli/reference/kratix): The kratix CLI
+* [kratix build container](/main/kratix-cli/reference/kratix-build-container): Command to build a container image generated with 'add container'
 * [kratix build promise](/main/kratix-cli/reference/kratix-build-promise): Command to build a Kratix Promise
-* [kratix build container](/main/kratix-cli/reference/kratix-build-container): Command to build a container image

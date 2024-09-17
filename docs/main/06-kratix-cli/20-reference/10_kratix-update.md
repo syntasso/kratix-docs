@@ -18,7 +18,7 @@ kratix update [command]
 
 ## See Also
 
-* [kratix](/main/kratix-cli/reference/kratix): The Kratix CLI
+* [kratix](/main/kratix-cli/reference/kratix): The kratix CLI
 * [kratix update api](/main/kratix-cli/reference/kratix-update-api): Command to update promise API
 * [kratix update dependencies](/main/kratix-cli/reference/kratix-update-dependencies): Commands to update promise dependencies
 * [kratix update destination-selector](/main/kratix-cli/reference/kratix-update-destination-selector): Command to update destination selectors

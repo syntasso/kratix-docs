@@ -14,6 +14,9 @@ kratix update api --property PROPERTY-NAME:TYPE [flags]
 # add a new property of type string to the API
 kratix update api --property region:string
 
+# add an integer 'port' property nested into a 'service' object
+kratix update api --property service.port:integer
+
 # removes the property from the API
 kratix update api --property region-
 

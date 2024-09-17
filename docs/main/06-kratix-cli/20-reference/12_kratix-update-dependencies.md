@@ -2,17 +2,20 @@
 Commands to update promise dependencies
 
 ## Description
-Commands to update promise dependencies
+Commands to update promise dependencies, by default dependencies are stored in the Promise spec.dependencies field
 
 ## Usage
 ```
-kratix update dependencies [flags]
+kratix update dependencies PATH [flags]
 ```
 
 ## Examples
 ```
-# update promise dependencies with files in 'local-dir'
-Kratix update dependencies local-dir/
+# update promise dependencies with all files in 'local-dir'
+kratix update dependencies path/to/dir/
+
+# update promise dependencies with single file
+kratix update dependencies path/to/file.yaml
 ```
 
 ## Flags
