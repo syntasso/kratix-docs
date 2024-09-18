@@ -312,6 +312,47 @@ metadata:
 
 The text will be rendered on each Resource Component page in Backstage.
 
+=======
+## Customising the generated Templates
+
+By default, the generator will create the Backstage Template with resource namespace as a required field.
+You can customise this behaviour by setting the following `env` variables in the workflow:
+
+* `TEMPLATE_NAMESPACE`: the default value of the resource namespace
+* `TEMPLATE_NAMESPACE_FIELD_TITLE`: the name of the resource namespace field in Backstage UI
+* `TEMPLATE_NAMESPACE_FIELD_DESCRIPTION`: the description of the resource namespace field in Backstage UI
+* `TEMPLATE_HIDE_NAMESPACE`: set to `true` if you would like to hide the namespace field from the generated resource
+Template.
+Resource namespace will default to `TEMPLATE_NAMESPACE` when it is set, otherwise will be set to `default` namespace.
+
+For example, to generate the resource Template without the namespace field and set the resource namespace to `my-team`
+for all resource requests:
+
+```yaml title="Promise workflow with custom Template values"
+  #...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+            name: ske-backstage-generator
+            #highlight-start
+            env:
+            - name: TEMPLATE_NAMESPACE
+              value: "my-team"
+            - name: TEMPLATE_HIDE_NAMESPACE
+              value: "true"
+            #highlight-end
+```
+
 ## SKE Backstage Component Promise
 
 The SKE Backstage Component Promise provides additional functionality to the SKE Backstage
