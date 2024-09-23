@@ -6,14 +6,14 @@ ske get version
 
 ## Usage
 ```
-ske-cli [command]
+ske [command]
 ```
 
 
 ## Flags
 ```
 --context string   Name of the kubeconfig context to use
--h, --help             help for ske-cli
+-h, --help             help for ske
 -t, --toggle           Help message for toggle
 ```
 

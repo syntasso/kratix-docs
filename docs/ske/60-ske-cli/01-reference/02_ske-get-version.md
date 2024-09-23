@@ -10,7 +10,7 @@ SKE Operator: v0.2.0; SKE Instance: v67.1.0
 
 ## Usage
 ```
-ske-cli get version [--context] [flags]
+ske get version [--context] [flags]
 ```
 
 
