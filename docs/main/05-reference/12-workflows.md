@@ -58,6 +58,9 @@ A Kratix `Pipeline` kind is a simple wrapper around a Kubernetes Pod.
 Pipelines will automatically mount the necessary [Kratix Volumes](#volumes) and set
 [Environment Variables](#environment-variables) for the provided containers.
 
+Any `labels` and `annotations` provided in the Pipeline spec will be passed
+through to the underlying Pod spec.
+
 An example Pipeline is shown below.
 
 ```yaml
@@ -66,6 +69,8 @@ kind: Pipeline
 metadata:
   name: # Name (must be unique within the Promise)
   namespace: # Namespace (optional)
+  labels: # Labels (optional)
+  annotations: # Annotations (optional)
 spec:
   volumes:
     - # Volume definitions, in addition to `/kratix` volumes (optional)
