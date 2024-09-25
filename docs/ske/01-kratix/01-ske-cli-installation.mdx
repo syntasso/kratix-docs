@@ -64,7 +64,9 @@ TODO: Write docs for SKE CLI upgrades after completion of https://github.com/syn
 
 The upgrade will fail in the following circumstances:
 
-1. There are installed Promises which are currently `Unavailable`.
+1. There is a SKE upgrade in progress.
+2. There are installed Promises which are currently `Unavailable`.
+3. There are uncompleted pipeline jobs (from promises or resource requests).
 
 ## Air-gapped installations
 
