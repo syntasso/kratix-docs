@@ -52,6 +52,17 @@ Let's first check:
      kubectl get work <work-name> -o yaml
      ```
 
+     Please note that the `workload.content` is compressed to reduce the size of the Work, to inspect
+     the raw content of the document you can decode and decompress with `gzip` you can do the following:
+
+      ```bash
+      // Get the filepath of the first scheduled document
+      kubectl get work <work-name> -o=jsonpath='{.spec.workloadGroups[0].workloads[0].filepath}'
+
+      // Get, decode and decompress the content of the first scheduled document
+      kubectl get work <work-name> -o=jsonpath='{.spec.workloadGroups[0].workloads[0].content}' | base64 -d | gzip -d
+      ```
+
 1. Check the document is scheduled to the correct Destination
    - Check the `WorkPlacement` resource (an internal Kratix resource that is
      created from the `Work` resource, representing the scheduling of a `Work`)
@@ -61,6 +72,15 @@ Let's first check:
      kubectl get workplacement --selector kratix.io/resource-name=<request-name>
      ```
 
+     As with the `Work`, the `workload.content` in a WorkPlacement is compressed to reduce the size of the WorkPlacement, to inspect the raw content of the document you can decode and decompress with `gzip` you can do the following:
+
+      ```bash
+      // Get the filepath of the first scheduled document
+      kubectl get work <workplacement-name> -o=jsonpath='{.spec.workloads[0].filepath}'
+
+      // Get, decode and decompress the content of the first scheduled document
+      kubectl get work <workplacement-name> -o=jsonpath='{.spec.workloads[0].content}' | base64 -d | gzip -d
+      ```
      If the `WorkPlacement` doesn't exist, this means that no Destination was found
      that matches the required scheduling selectors. Kratix has been unable to
      schedule the `Work`. See [below for further steps to
