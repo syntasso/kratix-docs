@@ -76,11 +76,12 @@ Let's first check:
 
       ```bash
       // Get the filepath of the first scheduled document
-      kubectl get work <workplacement-name> -o=jsonpath='{.spec.workloads[0].filepath}'
+      kubectl get workplacement <workplacement-name> -o=jsonpath='{.spec.workloads[0].filepath}'
 
       // Get, decode and decompress the content of the first scheduled document
-      kubectl get work <workplacement-name> -o=jsonpath='{.spec.workloads[0].content}' | base64 -d | gzip -d
+      kubectl get workplacement <workplacement-name> -o=jsonpath='{.spec.workloads[0].content}' | base64 -d | gzip -d
       ```
+
      If the `WorkPlacement` doesn't exist, this means that no Destination was found
      that matches the required scheduling selectors. Kratix has been unable to
      schedule the `Work`. See [below for further steps to
