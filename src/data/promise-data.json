@@ -203,17 +203,6 @@
 		]
 	},
 	{
-		"name": "Paved Path",
-		"description": "A 'Paved Path' service with Knative and PostgreSQL.       Check the Compound Promises docs for more information.",
-		"url": "https://github.com/syntasso/kratix/tree/main/samples/paved-path-demo/",
-		"logoUrl": "/img/marketplace/pavedpath.svg",
-		"example": true,
-		"categories": [
-			"Example",
-			"Compound Promise"
-		]
-	},
-	{
 		"name": "PostgreSQL",
 		"description": "A SQL-compliant relational database management system",
 		"url": "https://github.com/syntasso/promise-postgresql",
