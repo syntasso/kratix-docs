@@ -72,8 +72,36 @@ spec:
   version: v1.1.0
   sourceRef:
     type: http
-    url: https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
+    url: https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yam
+    # secretRef: # OPTIONAL
+      # name: secret-name
+      # namespace: example-namespace
 ```
+
+#### Authenticated endpoints
+
+When fetching a URL, authorization can be provided via the `Authorization` header.
+To provide this to Kratix, add the optional `secretRef` field to the `sourceRef`.
+
+The secret must contain a key called `authorizationHeader` which is set to the full
+value of the `Authorization` header. For example, to curl from a private GitHub
+repository you could run:
+
+```bash
+curl -H 'Authorization: Bearer my-bearer-token-for-gh' https://raw.githubusercontent.com/secret-org/secret-repo/refs/heads/main/promise.yaml
+```
+
+To enable the PromiseRelease to access the same URL, you must have the following
+key:value in your secret:
+
+```yaml
+authorizationHeader: "Bearer my-bearer-token-for-gh"
+```
+
+:::note
+This header value needs to be a simple string. If you are creating the secret manually,
+make sure not to include any new lines in your base64 encoded value. You can do this
+by including `-n` in any echo command (e.g. `echo -n "Bearer my-bearer-token-for-gh" | base64`)
 
 ## Updating Promise Releases
 
