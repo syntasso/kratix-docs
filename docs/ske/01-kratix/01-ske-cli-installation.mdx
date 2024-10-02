@@ -60,13 +60,29 @@ installing promises). For that, refer to the Open-Source Kratix documentation.
 
 ## Upgrades
 
-TODO: Write docs for SKE CLI upgrades after completion of https://github.com/syntasso/enterprise-kratix/issues/95
+You can use the `ske` CLI to upgrade your SKE deployment. To upgrade, run:
 
-The upgrade will fail in the following circumstances:
+```bash
+ske upgrade [--force] [--dry-run]
+```
+
+The `ske upgrade` command will upgrade your SKE deployment to the next minor version at the latest patch.
+
+The `--dry-run` flag will run a list of pre-upgrade checks but will not perform an actual upgrade.
+
+The pre-upgrade checks will fail in the following circumstances:
 
 1. There is a SKE upgrade in progress.
 2. There are installed Promises which are currently `Unavailable`.
 3. There are uncompleted pipeline jobs (from promises or resource requests).
+
+If you would like to skip possible pre-upgrade check failures, you can provide the `--force` flag when running `ske upgrade`.
+
+:::info
+
+You are only allowed to upgrade to the next minor in each upgrade even when the `--force` flag is provided.
+
+:::
 
 ## Air-gapped installations
 
