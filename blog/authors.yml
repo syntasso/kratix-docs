@@ -1,17 +1,47 @@
-endi:
-  name: Endilie Yacop Sucipto
-  title: Maintainer of Docusaurus
-  url: https://github.com/endiliey
-  image_url: https://github.com/endiliey.png
+abby:
+  name: Abby Bangser
+  title: Engineer @ Syntasso
+  url: https://github.com/abangser
+  image_url: https://github.com/abangser.png
 
-yangshun:
-  name: Yangshun Tay
-  title: Front End Engineer @ Facebook
-  url: https://github.com/yangshun
-  image_url: https://github.com/yangshun.png
+cat:
+  name: Cat Morris
+  title: Product Manager @ Syntasso
+  url: https://github.com/catmo-syntasso
+  image_url: https://github.com/catmo-syntasso.png
 
-slorber:
-  name: Sébastien Lorber
-  title: Docusaurus maintainer
-  url: https://sebastienlorber.com
-  image_url: https://github.com/slorber.png
+chunyi:
+  name: Chunyi Lyu
+  title: Engineer @ Syntasso
+  url: https://github.com/ChunyiLyu
+  image_url: https://github.com/ChunyiLyu.png
+
+derik:
+  name: Derik Evangelista
+  title: Engineer @ Syntasso
+  url: https://github.com/kirederik
+  image_url: https://2.gravatar.com/avatar/7ac63fbda18c97f6a7fab8af157021367793187f4c5830eb722ff565c5a767e9?size=256
+
+jake:
+  name: Jake Klein
+  title: Engineer @ Syntasso
+  url: https://github.com/aclevername
+  image_url: https://github.com/aclevername.png
+
+rich:
+  name: Rich Barton-Cooper
+  title: Engineer @ Syntasso
+  url: https://github.com/richcooper95
+  image_url: https://github.com/richcooper95.png
+
+sapphire:
+  name: Sapphire Mason-Brown
+  title: Engineer @ Syntasso
+  url: https://github.com/saphmb
+  image_url: https://github.com/saphmb.png
+
+shane:
+  name: Shane Dowling
+  title: Manager @ Syntasso
+  url: https://github.com/shano
+  image_url: https://github.com/shano.png

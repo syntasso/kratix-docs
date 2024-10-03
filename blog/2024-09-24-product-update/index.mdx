@@ -1,0 +1,191 @@
+---
+slug: sept-2024-product-update
+title: "September Product Update"
+description: Kratix CLI++, Permissions, and Backstage
+authors: [cat]
+tags: [kratix, product update, backstage]
+---
+
+import ReactPlayer from 'react-player';
+
+Hi friends 😊 I'm Cat, Product Manager here at Syntasso, and I've been listening
+to you, our avid followers. "Cat, we love Kratix, and we love your team; we want
+an update!" I hear you scream, so here I am, delivering this top-quality
+content. You're welcome.
+
+Given that this is our first Kratix Product Update™ (not really ™), I wanted to
+shout about some of the great work the team has done over the last few months,
+so we're going back a bit further than we usually will… Indulge me; it was my
+birthday this month.
+
+## TL;DR
+
+<p>
+<ReactPlayer height={200} playing={true} muted={true} loop={true} url="https://media0.giphy.com/media/Emg9qPKR5hquI/giphy.mp4" />
+</p>
+
+If you only have 10 seconds spare to read this blog, these are the features you
+need to know about:
+
+* We have two CLIs now! One for building promises and one for installing SKE (Syntasso Kratix Enterprise)
+* Setting permissions just got a little bit easier
+* If you like Backstage, you’ll like what we’re up to
+
+<!-- truncate -->
+
+## Big stuff for the fans of Kratix
+
+<ReactPlayer height={200} playing={true} muted={true} loop={true} url="https://media0.giphy.com/media/yGEbmgiCJYu3u/giphy.mp4" />
+
+### Kratix Promise building CLI
+
+Like all good tools for developers, we needed a CLI - and one that is more than
+just a rat nest of bash scripts*. It's now even easier to quickly whip together
+a Promise from scratch, or your existing **operators** and **helm charts**.
+
+
+It's unbelievably easy to get started. Head over to our kratix-cli repo,
+download the latest release and go wild. You can read up on the tool in our docs
+as well!
+
+import CLIDemo from './cli-demo.mp4';
+
+<p align="center">
+<ReactPlayer controls url={CLIDemo} />
+</p>
+
+> _That's sweet!_
+>
+> — an actual quote from a customer trying out the new CLI.
+
+
+*no offence meant to rats, their nests, or bash scripts that resemble said nests
+
+
+### SKE Operator
+
+Our enterprise product, [Syntasso Kratix Enterprise
+(SKE)](https://www.syntasso.io/pricing), comes with a bunch of cool features
+that makes it mega easy to get started, including integrations with Backstage,
+Terraform Enterprise and now, super speedy installation via our [helm
+chart](https://docs.kratix.io/ske/kratix/helm-installation) and the
+[ske-cli](https://docs.kratix.io/ske/kratix/ske-cli-installation).
+
+This will pull in some really cool stuff - it can help manage  upgrading Kratix,
+check if those upgrades worked, and help you with rollbacks.
+
+If you want to try it out, ping us an email at kratix@syntasso.io, and we’ll
+hook you up 😎
+
+import SKECli from './ske-cli.mp4';
+
+<ReactPlayer muted={true} controls url={SKECli} />
+
+## Neat stuff (because security should not be YOLO!)
+
+<ReactPlayer height={200} playing={true} muted={true} loop={true} url="https://media4.giphy.com/media/HHWdyVKaKJfI8qqJKU/giphy.mp4" />
+
+### Security uplift
+
+So security is hard. We’ve made this a little bit easier in two ways.
+
+#### RBAC permissions for your pipelines
+
+You can set the RBAC permissions you want all your pipelines to have in the promise spec. There are a few ways you can do this depending on your use of service accounts and namespaces, so check out our docs.
+
+This will give you as the promise writer more control of the permissions of your pipelines without having to manually set things up after applying a promise.
+
+```yaml
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: env
+spec:
+  ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: slack-notify
+        spec:
+          rbac:
+            permissions:
+              - apiGroups: [""]
+                verbs: ["*"]
+                resources: ["secrets"]
+              - apiGroups: ["batch"]
+                verbs: ["get"]
+                resources: ["jobs"]
+                resourceName: ["my-job"]
+        ...
+```
+
+#### Security Contexts for Your Pods
+
+By default, Kratix-owned pods have security contexts set with all the privileges they need. Any containers provided by a Promise author got NOTHING. I didn’t say Kratix was a fair project.
+
+But we have just got a little fairer. You can now set security contexts for your own pods by specifying it in the container spec. Perhaps more excitingly, you can now specify a global default security context in the Kratix ConfigMap in the kratix-platform-system. Fire Configure and forget 🔥
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kratix
+  namespace: kratix-platform-system
+data:
+  config: |
+    workflows:
+      defaultContainerSecurityContext:
+        # Security context fields, e.g.:
+        runAsNonRoot: false
+```
+
+> _I think it is much better_ 👍
+>
+> — Another actual customer quote.
+
+## More control over Backstage (with Kratix)
+
+If you know anything about Syntasso, it's that we love Backstage. We even did a
+webinar with one of their product managers, the insightful Seve Kim.
+
+We believe Kratix and Backstage work so beautifully together that our SKE
+offering comes bundled with plugins that make managing Promises and Resources
+from Backstage a joyful experience. This month, we've given users even more
+control in two ways.
+
+Promise authors can now provide an "info" field as part of the Promise spec that
+will show up on your component page. This field supports markdown and has far
+too much space to let your users know whatever will make their day a little
+easier.
+
+We have also made the first page of requesting a resource more configurable - we
+know not every end user will understand what their "namespace" should be (even
+though it is very important for knowing where we should put that resource!!) so
+you can configure that to whatever makes sense for your team. You can even go
+full abstraction and get rid of it entirely and pre-populate it with whatever
+you want. The sky's the limit.
+
+```mdx-code-block
+import Backstage from "./backstage.webp"
+```
+
+<figure className="diagram">
+  <img className="large" src={Backstage} alt="Screenshot of a Kratix Backstage entity" />
+
+  <figcaption>Backstage and Kratix: Best of friends</figcaption>
+</figure>
+
+## Useful Kratix resources
+You should find the following resources helpful for your Kratix exploration:
+
+* [Kratix Github](https://github.com/syntasso/kratix)
+* [Syntasso Kratix Enterprise homepage](https://www.syntasso.io/)
+
+Shout out to the team at Port ([getport.io](http://getport.io/)) and Traefik
+([traefik.io](http://traefik.io/)) for their awesome product update blogs, which
+served as inspiration for this post.
+
+
