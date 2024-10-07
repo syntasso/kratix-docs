@@ -2,98 +2,113 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.kratix.io/blog</id>
     <title>Kratix Blog</title>
-    <updated>2021-08-26T00:00:00.000Z</updated>
+    <updated>2024-09-24T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://docs.kratix.io/blog"/>
     <subtitle>Kratix Blog</subtitle>
     <icon>https://docs.kratix.io/img/favicon.ico</icon>
     <entry>
-        <title type="html"><![CDATA[Welcome]]></title>
-        <id>https://docs.kratix.io/blog/welcome</id>
-        <link href="https://docs.kratix.io/blog/welcome"/>
-        <updated>2021-08-26T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Docusaurus blogging features are powered by the blog plugin.]]></summary>
-        <content type="html"><![CDATA[<p><a href="https://docusaurus.io/docs/blog" target="_blank" rel="noopener noreferrer">Docusaurus blogging features</a> are powered by the <a href="https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-blog" target="_blank" rel="noopener noreferrer">blog plugin</a>.</p>
-<p>Simply add Markdown files (or folders) to the <code>blog</code> directory.</p>
-<p>Regular blog authors can be added to <code>authors.yml</code>.</p>
-<p>The blog post date can be extracted from filenames, such as:</p>
+        <title type="html"><![CDATA[September Product Update]]></title>
+        <id>https://docs.kratix.io/blog/sept-2024-product-update</id>
+        <link href="https://docs.kratix.io/blog/sept-2024-product-update"/>
+        <updated>2024-09-24T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Kratix CLI++, Permissions, and Backstage]]></summary>
+        <content type="html"><![CDATA[<p>Hi friends 😊 I'm Cat, Product Manager here at Syntasso, and I've been listening
+to you, our avid followers. "Cat, we love Kratix, and we love your team; we want
+an update!" I hear you scream, so here I am, delivering this top-quality
+content. You're welcome.</p>
+<p>Given that this is our first Kratix Product Update™ (not really ™), I wanted to
+shout about some of the great work the team has done over the last few months,
+so we're going back a bit further than we usually will… Indulge me; it was my
+birthday this month.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="tldr">TL;DR<a class="hash-link" aria-label="Direct link to TL;DR" title="Direct link to TL;DR" href="https://docs.kratix.io/blog/sept-2024-product-update#tldr">​</a></h2>
+<p></p><div style="width:640px;height:200px"></div><p></p>
+<p>If you only have 10 seconds spare to read this blog, these are the features you
+need to know about:</p>
 <ul>
-<li><code>2019-05-30-welcome.md</code></li>
-<li><code>2019-05-30-welcome/index.md</code></li>
+<li>We have two CLIs now! One for building promises and one for installing SKE (Syntasso Kratix Enterprise)</li>
+<li>Setting permissions just got a little bit easier</li>
+<li>If you like Backstage, you’ll like what we’re up to</li>
 </ul>
-<p>A blog post folder can be convenient to co-locate blog post images:</p>
-<p><img decoding="async" loading="lazy" alt="Docusaurus Plushie" src="https://docs.kratix.io/assets/images/docusaurus-plushie-banner-a60f7593abca1e3eef26a9afa244e4fb.jpeg" width="1500" height="500" class="img_ev3q"></p>
-<p>The blog supports tags as well!</p>
-<p><strong>And if you don't want a blog</strong>: just delete this directory, and use <code>blog: false</code> in your Docusaurus config.</p>]]></content>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="big-stuff-for-the-fans-of-kratix">Big stuff for the fans of Kratix<a class="hash-link" aria-label="Direct link to Big stuff for the fans of Kratix" title="Direct link to Big stuff for the fans of Kratix" href="https://docs.kratix.io/blog/sept-2024-product-update#big-stuff-for-the-fans-of-kratix">​</a></h2>
+<div style="width:640px;height:200px"></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="kratix-promise-building-cli">Kratix Promise building CLI<a class="hash-link" aria-label="Direct link to Kratix Promise building CLI" title="Direct link to Kratix Promise building CLI" href="https://docs.kratix.io/blog/sept-2024-product-update#kratix-promise-building-cli">​</a></h3>
+<p>Like all good tools for developers, we needed a CLI - and one that is more than
+just a rat nest of bash scripts*. It's now even easier to quickly whip together
+a Promise from scratch, or your existing <strong>operators</strong> and <strong>helm charts</strong>.</p>
+<p>It's unbelievably easy to get started. Head over to our kratix-cli repo,
+download the latest release and go wild. You can read up on the tool in our docs
+as well!</p>
+<!-- -->
+<p align="center"></p><div style="width:640px;height:360px"></div><p></p>
+<blockquote>
+<p><em>That's sweet!</em></p>
+<p>— an actual quote from a customer trying out the new CLI.</p>
+</blockquote>
+<p>*no offence meant to rats, their nests, or bash scripts that resemble said nests</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="ske-operator">SKE Operator<a class="hash-link" aria-label="Direct link to SKE Operator" title="Direct link to SKE Operator" href="https://docs.kratix.io/blog/sept-2024-product-update#ske-operator">​</a></h3>
+<p>Our enterprise product, <a href="https://www.syntasso.io/pricing" target="_blank" rel="noopener noreferrer">Syntasso Kratix Enterprise
+(SKE)</a>, comes with a bunch of cool features
+that makes it mega easy to get started, including integrations with Backstage,
+Terraform Enterprise and now, super speedy installation via our <a href="https://docs.kratix.io/ske/kratix/helm-installation" target="_blank" rel="noopener noreferrer">helm
+chart</a> and the
+<a href="https://docs.kratix.io/ske/kratix/ske-cli-installation" target="_blank" rel="noopener noreferrer">ske-cli</a>.</p>
+<p>This will pull in some really cool stuff - it can help manage  upgrading Kratix,
+check if those upgrades worked, and help you with rollbacks.</p>
+<p>If you want to try it out, ping us an email at <a href="mailto:kratix@syntasso.io" target="_blank" rel="noopener noreferrer">kratix@syntasso.io</a>, and we’ll
+hook you up 😎</p>
+<!-- -->
+<div style="width:640px;height:360px"></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="neat-stuff-because-security-should-not-be-yolo">Neat stuff (because security should not be YOLO!)<a class="hash-link" aria-label="Direct link to Neat stuff (because security should not be YOLO!)" title="Direct link to Neat stuff (because security should not be YOLO!)" href="https://docs.kratix.io/blog/sept-2024-product-update#neat-stuff-because-security-should-not-be-yolo">​</a></h2>
+<div style="width:640px;height:200px"></div>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="security-uplift">Security uplift<a class="hash-link" aria-label="Direct link to Security uplift" title="Direct link to Security uplift" href="https://docs.kratix.io/blog/sept-2024-product-update#security-uplift">​</a></h3>
+<p>So security is hard. We’ve made this a little bit easier in two ways.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="rbac-permissions-for-your-pipelines">RBAC permissions for your pipelines<a class="hash-link" aria-label="Direct link to RBAC permissions for your pipelines" title="Direct link to RBAC permissions for your pipelines" href="https://docs.kratix.io/blog/sept-2024-product-update#rbac-permissions-for-your-pipelines">​</a></h4>
+<p>You can set the RBAC permissions you want all your pipelines to have in the promise spec. There are a few ways you can do this depending on your use of service accounts and namespaces, so check out our docs.</p>
+<p>This will give you as the promise writer more control of the permissions of your pipelines without having to manually set things up after applying a promise.</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">platform</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> platform.kratix.io/v1alpha1</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">kind</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> Promise</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">metadata</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">name</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> env</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">spec</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token punctuation" style="color:#393A34">...</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">workflows</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">resource</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token key atrule" style="color:#00a4db">configure</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">apiVersion</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> platform.kratix.io/v1alpha1</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token key atrule" style="color:#00a4db">kind</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> Pipeline</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token key atrule" style="color:#00a4db">metadata</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">          </span><span class="token key atrule" style="color:#00a4db">name</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> slack</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">notify</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token key atrule" style="color:#00a4db">spec</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">          </span><span class="token key atrule" style="color:#00a4db">rbac</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">            </span><span class="token key atrule" style="color:#00a4db">permissions</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">              </span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">apiGroups</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">""</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">                </span><span class="token key atrule" style="color:#00a4db">verbs</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">"*"</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">                </span><span class="token key atrule" style="color:#00a4db">resources</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">"secrets"</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">              </span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">apiGroups</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">"batch"</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">                </span><span class="token key atrule" style="color:#00a4db">verbs</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">"get"</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">                </span><span class="token key atrule" style="color:#00a4db">resources</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">"jobs"</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">                </span><span class="token key atrule" style="color:#00a4db">resourceName</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token string" style="color:#e3116c">"my-job"</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token punctuation" style="color:#393A34">...</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="security-contexts-for-your-pods">Security Contexts for Your Pods<a class="hash-link" aria-label="Direct link to Security Contexts for Your Pods" title="Direct link to Security Contexts for Your Pods" href="https://docs.kratix.io/blog/sept-2024-product-update#security-contexts-for-your-pods">​</a></h4>
+<p>By default, Kratix-owned pods have security contexts set with all the privileges they need. Any containers provided by a Promise author got NOTHING. I didn’t say Kratix was a fair project.</p>
+<p>But we have just got a little fairer. You can now set security contexts for your own pods by specifying it in the container spec. Perhaps more excitingly, you can now specify a global default security context in the Kratix ConfigMap in the kratix-platform-system. Fire Configure and forget 🔥</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">apiVersion</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> v1</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">kind</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> ConfigMap</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">metadata</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">name</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> kratix</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">namespace</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> kratix</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">platform</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">system</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">data</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">config</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">|</span><span class="token scalar string" style="color:#e3116c"></span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">    workflows:</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">      defaultContainerSecurityContext:</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">        # Security context fields, e.g.:</span><br></span><span class="token-line" style="color:#393A34"><span class="token scalar string" style="color:#e3116c">        runAsNonRoot: false</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<blockquote>
+<p><em>I think it is much better</em> 👍</p>
+<p>— Another actual customer quote.</p>
+</blockquote>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="more-control-over-backstage-with-kratix">More control over Backstage (with Kratix)<a class="hash-link" aria-label="Direct link to More control over Backstage (with Kratix)" title="Direct link to More control over Backstage (with Kratix)" href="https://docs.kratix.io/blog/sept-2024-product-update#more-control-over-backstage-with-kratix">​</a></h2>
+<p>If you know anything about Syntasso, it's that we love Backstage. We even did a
+webinar with one of their product managers, the insightful Seve Kim.</p>
+<p>We believe Kratix and Backstage work so beautifully together that our SKE
+offering comes bundled with plugins that make managing Promises and Resources
+from Backstage a joyful experience. This month, we've given users even more
+control in two ways.</p>
+<p>Promise authors can now provide an "info" field as part of the Promise spec that
+will show up on your component page. This field supports markdown and has far
+too much space to let your users know whatever will make their day a little
+easier.</p>
+<p>We have also made the first page of requesting a resource more configurable - we
+know not every end user will understand what their "namespace" should be (even
+though it is very important for knowing where we should put that resource!!) so
+you can configure that to whatever makes sense for your team. You can even go
+full abstraction and get rid of it entirely and pre-populate it with whatever
+you want. The sky's the limit.</p>
+<!-- -->
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/backstage-fe59b23f4aadbd35148377a85ffb7d47.webp" alt="Screenshot of a Kratix Backstage entity"><figcaption>Backstage and Kratix: Best of friends</figcaption></figure>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="useful-kratix-resources">Useful Kratix resources<a class="hash-link" aria-label="Direct link to Useful Kratix resources" title="Direct link to Useful Kratix resources" href="https://docs.kratix.io/blog/sept-2024-product-update#useful-kratix-resources">​</a></h2>
+<p>You should find the following resources helpful for your Kratix exploration:</p>
+<ul>
+<li><a href="https://github.com/syntasso/kratix" target="_blank" rel="noopener noreferrer">Kratix Github</a></li>
+<li><a href="https://www.syntasso.io/" target="_blank" rel="noopener noreferrer">Syntasso Kratix Enterprise homepage</a></li>
+</ul>
+<p>Shout out to the team at Port (<a href="http://getport.io/" target="_blank" rel="noopener noreferrer">getport.io</a>) and Traefik
+(<a href="http://traefik.io/" target="_blank" rel="noopener noreferrer">traefik.io</a>) for their awesome product update blogs, which
+served as inspiration for this post.</p>]]></content>
         <author>
-            <name>Sébastien Lorber</name>
-            <uri>https://sebastienlorber.com</uri>
+            <name>Cat Morris</name>
+            <uri>https://github.com/catmo-syntasso</uri>
         </author>
-        <author>
-            <name>Yangshun Tay</name>
-            <uri>https://github.com/yangshun</uri>
-        </author>
-        <category label="facebook" term="facebook"/>
-        <category label="hello" term="hello"/>
-        <category label="docusaurus" term="docusaurus"/>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MDX Blog Post]]></title>
-        <id>https://docs.kratix.io/blog/mdx-blog-post</id>
-        <link href="https://docs.kratix.io/blog/mdx-blog-post"/>
-        <updated>2021-08-01T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Blog posts support Docusaurus Markdown features, such as MDX.]]></summary>
-        <content type="html"><![CDATA[<p>Blog posts support <a href="https://docusaurus.io/docs/markdown-features" target="_blank" rel="noopener noreferrer">Docusaurus Markdown features</a>, such as <a href="https://mdxjs.com/" target="_blank" rel="noopener noreferrer">MDX</a>.</p>
-<div class="theme-admonition theme-admonition-tip admonition_xJq3 alert alert--success"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path></svg></span>tip</div><div class="admonitionContent_BuS1"><p>Use the power of React to create interactive blog posts.</p><div class="language-js codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-js codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">button onClick</span><span class="token operator" style="color:#393A34">=</span><span class="token punctuation" style="color:#393A34">{</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"> </span><span class="token arrow operator" style="color:#393A34">=&gt;</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">alert</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">'button clicked!'</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">}</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token maybe-class-name">Click</span><span class="token plain"> me</span><span class="token operator" style="color:#393A34">!</span><span class="token operator" style="color:#393A34">&lt;</span><span class="token operator" style="color:#393A34">/</span><span class="token plain">button</span><span class="token operator" style="color:#393A34">&gt;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div><button>Click me!</button></div></div>]]></content>
-        <author>
-            <name>Sébastien Lorber</name>
-            <uri>https://sebastienlorber.com</uri>
-        </author>
-        <category label="docusaurus" term="docusaurus"/>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Long Blog Post]]></title>
-        <id>https://docs.kratix.io/blog/long-blog-post</id>
-        <link href="https://docs.kratix.io/blog/long-blog-post"/>
-        <updated>2019-05-29T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[This is the summary of a very long blog post,]]></summary>
-        <content type="html"><![CDATA[<p>This is the summary of a very long blog post,</p>
-<p>Use a <code>&lt;!--</code> <code>truncate</code> <code>--&gt;</code> comment to limit blog post size in the list view.</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>]]></content>
-        <author>
-            <name>Endilie Yacop Sucipto</name>
-            <uri>https://github.com/endiliey</uri>
-        </author>
-        <category label="hello" term="hello"/>
-        <category label="docusaurus" term="docusaurus"/>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[First Blog Post]]></title>
-        <id>https://docs.kratix.io/blog/first-blog-post</id>
-        <link href="https://docs.kratix.io/blog/first-blog-post"/>
-        <updated>2019-05-28T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet]]></summary>
-        <content type="html"><![CDATA[<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque elementum dignissim ultricies. Fusce rhoncus ipsum tempor eros aliquam consequat. Lorem ipsum dolor sit amet</p>]]></content>
-        <author>
-            <name>Gao Wei</name>
-            <uri>https://github.com/wgao19</uri>
-        </author>
-        <category label="hola" term="hola"/>
-        <category label="docusaurus" term="docusaurus"/>
+        <category label="kratix" term="kratix"/>
+        <category label="product update" term="product update"/>
+        <category label="backstage" term="backstage"/>
     </entry>
 </feed>
