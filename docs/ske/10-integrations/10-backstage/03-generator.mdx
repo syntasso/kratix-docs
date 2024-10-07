@@ -70,10 +70,23 @@ docker login ghcr.io --username syntasso-pkg
 If you are using a different container engine, follow the docs for your specific
 tool.
 
-Once you have authenticated, you should be able to pull the image:
+Once you have authenticated, you can pull any released version of the image.
+
+:::info
+
+You can select your version from the
+[releases page](../../releases/aspects/backstage-generator). Or, if you have both
+[GH CLI](https://cli.github.com/) and [JQ CLI](https://jqlang.github.io/jq/)
+installed, you can fetch the most recent released version using the following command:
 
 ```bash
-docker pull ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+gh api orgs/syntasso/packages/container/ske-backstage-generator/versions | jq -r '.[0].metadata.container.tags[0]'
+```
+
+:::
+
+```bash
+docker pull ghcr.io/syntasso/ske-backstage-generator:VERSION
 ```
 
 ### Pulling the image from your cluster
@@ -87,10 +100,10 @@ directly to the Kubernetes cache. Different tools have different commands for th
 
 ```bash
 # For minikube
-minikube image load ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+minikube image load ghcr.io/syntasso/ske-backstage-generator:VERSION
 
 # For KinD
-kind load docker-image ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+kind load docker-image ghcr.io/syntasso/ske-backstage-generator:VERSION
 ```
 
 For other tools, follow their specific documentation.
@@ -125,7 +138,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-end
     resource:
@@ -140,7 +153,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-end
 ```
@@ -207,7 +220,7 @@ secret.
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
 ```
 
@@ -280,7 +293,7 @@ pipeline stage with the snippet below:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
             #highlight-start
             env:
@@ -320,7 +333,7 @@ for all resource requests:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.3.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
             #highlight-start
             env:
@@ -397,7 +410,7 @@ the `rbac` permissions required by the image:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.7.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-start
             args:
@@ -421,7 +434,7 @@ the `rbac` permissions required by the image:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:v0.7.0
+          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-start
             args:
