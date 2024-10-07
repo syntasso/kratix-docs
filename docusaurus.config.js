@@ -45,12 +45,12 @@ const config = {
           routeBasePath: '/',
         },
         // uncomment to add the blog section to the website
-        // blog: {
-        //   showReadingTime: true,
-        //   // Remove this to remove the "edit this page" links.
-        //   editUrl:
-        //     'https://github.com/syntasso/kratix-docs/tree/main',
-        // },
+        blog: {
+          showReadingTime: true,
+          // Remove this to remove the "edit this page" links.
+          // editUrl:
+          //   'https://github.com/syntasso/kratix-docs/tree/main',
+        },
         theme: {
           customCss: require.resolve("./src/css/custom.scss"),
         },
@@ -107,6 +107,11 @@ const config = {
           {
             to: "marketplace",
             label: "Marketplace",
+            position: "left",
+          },
+          {
+            to: "blog",
+            label: "Blog",
             position: "left",
           },
           {
