@@ -4,6 +4,11 @@ description: Installing Syntasso Kratix Enterprise
 sidebar_label: Installation via Helm
 ---
 
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
 Syntasso Kratix Enterprise images are distributed through a private image registry. To
 install SKE on your Kubernetes cluster, follow the steps below.
 
@@ -73,7 +78,7 @@ kind: Kratix
 metadata:
   name: kratix-example
 spec:
-  releasesBucket:
+  releaseStorage:
     name: # name of the bucket containing Kratix Enterprise releases; optional
     region: # region of the bucket; optional
     path: # subpath within the bucket; optional
@@ -83,7 +88,7 @@ spec:
 You can save the 'Kratix' instance definition to a local file and apply with kubectl.
 SKE operator will then install Kratix Enterprise and its necessary configurations.
 
-By default, when `spec.releasesBucket` is not set, SKE operator will use the Syntasso Enterprise releases bucket.
+By default, when `spec.releaseStorage` is not set, SKE operator will use the Syntasso Enterprise releases bucket.
 Note that 'Kratix' is a cluster scoped and singleton resource.
 
 Only one instance of Kratix can be installed in a cluster.
@@ -219,7 +224,9 @@ Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaw
 
 If you are deploying SKE in an air-gapped environment, you need to download the
 manifests and make them available to the SKE Operator in a S3-compatible bucket
-that's accessible from the Platform cluster.
+or Git repository that's accessible from the Platform cluster. The contents must
+match exactly the structure of the Syntasso Enterprise releases bucket. In Git,
+all files/directories starting with `.` are ignored.
 
 
 ### Setting up your Platform cluster
@@ -248,14 +255,31 @@ kubectl create secret docker-registry <PULL SECRET NAME> \
     --docker-server="your.registry.address"
 ```
 
-To create the Bucket secret, run:
+To create the secret to access the SKE Distribution manifests:
 
-```bash
-kubectl create secret generic <BUCKET SECRET NAME> \
-    --namespace kratix-platform-system \
-    --from-literal=accessKeyID="youraccesskey" \
-    --from-literal=secretAccessKey="yoursecretkey"
-```
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="bucket" label="Mirroring from Bucket">
+
+  ```bash
+  kubectl create secret generic <BUCKET SECRET NAME> \
+      --namespace kratix-platform-system \
+      --from-literal=accessKeyID="youraccesskey" \
+      --from-literal=secretAccessKey="yoursecretkey"
+  ```
+
+  </TabItem>
+
+  <TabItem value="git" label="Mirroring from Git Repo">
+
+  ```bash
+  kubectl create secret generic <GIT SECRET NAME> \
+      --namespace kratix-platform-system \
+      --from-literal=username="username" \
+      --from-literal=password="password"
+  ```
+
+  </TabItem>
+</Tabs>
 
 
 ### Deploying the SKE Operator
@@ -266,24 +290,51 @@ check the [Helm chart values
 file](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml)
 for a complete list of configuration options.
 
-```bash
-helm install ske-operator syntasso/ske-operator \
-  --namespace kratix-platform-system \
-  --set skeLicense=<YOUR LICENSE TOKEN> \
-  --set imageRegistry.host=<YOUR REGISTRY> \
-  --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
-  --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
-  --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
-  --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
-  --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
-  --set releasesBucket.name=<BUCKET NAME> \
-  --set releasesBucket.path=<BUCKET PATH> \
-  --set releasesBucket.region=<BUCKET REGION> \
-  --set releasesBucket.endpoint=<BUCKET ENDPOINT> \
-  --set releasesBucket.secretName=<BUCKET SECRET NAME> \
-  --set skeDeployment.enabled=true \
-  --set skeDeployment.version=v0.3.0
-```
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="bucket" label="Mirroring from Bucket">
+  ```bash
+  helm install ske-operator syntasso/ske-operator \
+    --namespace kratix-platform-system \
+    --set skeLicense=<YOUR LICENSE TOKEN> \
+    --set imageRegistry.host=<YOUR REGISTRY> \
+    --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
+    --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
+    --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
+    --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
+    --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
+    --set releaseStorage.path=<BUCKET PATH> \
+    --set releaseStorage.bucket.name=<BUCKET NAME> \
+    --set releaseStorage.bucket.region=<BUCKET REGION> \
+    --set releaseStorage.bucket.endpoint=<BUCKET ENDPOINT> \
+    --set releaseStorage.bucket.secretName=<BUCKET SECRET NAME> \
+    --set skeDeployment.enabled=true \
+    --set skeDeployment.version=v0.3.0
+  ```
+
+  </TabItem>
+
+  <TabItem value="git" label="Mirroring from Git Repo">
+
+  ```bash
+  helm install ske-operator syntasso/ske-operator \
+    --namespace kratix-platform-system \
+    --set skeLicense=<YOUR LICENSE TOKEN> \
+    --set imageRegistry.host=<YOUR REGISTRY> \
+    --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
+    --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
+    --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
+    --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
+    --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
+    --set releaseStorage.path=<PATH IN REPO TO SKE MANIFEST DIR> \
+    --set releaseStorage.git.repo=<GIT REPO URL> \
+    --set releaseStorage.git.branch=<GIT BRANCH> \
+    --set releaseStorage.git.secretName=<GIT SECRET NAME> \
+    --set skeDeployment.enabled=true \
+    --set skeDeployment.version=v0.3.0
+  ```
+
+  </TabItem>
+</Tabs>
 
 :::tip
 
