@@ -19,13 +19,15 @@ every reconciliation cycle, so changes to the ConfigMap are picked up automatica
 The SKE-Operator by default pulls in the SKE release from the [Syntasso
 Enterprise Releases
 Bucket](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#).
+
 You can configure the SKE-Operator to pull in the SKE release from a different
 Bucket, or from a Git repository by providing configuration in the
-`ske-operator` ConfigMap in the `kratix-platform-system` namespace. The Bucket
-or Git repo needs to mirror exactly the structure of the SKE release in the
-Syntasso Enterprise Releases Bucket. In the case of Git, all files starting with
-`.` are ignored. The `path` key should point to the directory in the Bucket or Git
-repo where the SKE release is stored.
+`ske-operator` ConfigMap in the `kratix-platform-system` namespace.
+
+The Bucket or Git repo needs to mirror exactly the structure of the SKE release
+in the Syntasso Enterprise Releases Bucket. In the case of Git, all files
+starting with `.` are ignored. The `path` key should point to the directory in
+the Bucket or Git repo where the SKE release is stored.
 
 #### Git
 To configure the SKE-Operator to pull in the SKE release from a Git repository:
