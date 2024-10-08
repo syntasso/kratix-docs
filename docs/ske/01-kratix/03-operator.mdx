@@ -1,0 +1,121 @@
+---
+title: Managing the SKE-Operator
+description: Managing the SKE-Operator
+sidebar_label: Managing the SKE-Operator
+---
+
+The SKE-Operator is responsible for installing and updating the SKE
+installation.
+
+## Configuration
+
+The SKE-Operator is configured using a ConfigMap named `ske-operator` in the
+`kratix-platform-system` namespace. The ConfigMap has a single key `config` that
+contains the configuration for the SKE-Operator. The ConfigMap is re-read at
+every reconciliation cycle, so changes to the ConfigMap are picked up automatically.
+
+### SKE Releases
+
+The SKE-Operator by default pulls in the SKE release from the [Syntasso
+Enterprise Releases
+Bucket](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#).
+You can configure the SKE-Operator to pull in the SKE release from a different
+Bucket, or from a Git repository by providing configuration in the
+`ske-operator` ConfigMap in the `kratix-platform-system` namespace. The Bucket
+or Git repo needs to mirror exactly the structure of the SKE release in the
+Syntasso Enterprise Releases Bucket. In the case of Git, all files starting with
+`.` are ignored. The `path` key should point to the directory in the Bucket or Git
+repo where the SKE release is stored.
+
+#### Git
+To configure the SKE-Operator to pull in the SKE release from a Git repository:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-operator
+  namespace: kratix-platform-system
+data:
+  config: |
+    releaseStorage:
+      path: ske
+      git:
+        secretName: git
+        repo: https://github.com/syntasso/release-repo-name
+        branch: main
+```
+
+This requires a Secret named `git` in the `kratix-platform-system` namespace
+with the following keys:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git
+  namespace: kratix-platform-system
+data:
+  username: # base64 encoded
+  password: # base64 encoded
+```
+
+#### S3
+
+To configure the SKE-Operator to pull in the SKE release from an S3 bucket:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-operator
+  namespace: kratix-platform-system
+data:
+  config: |
+    releaseStorage:
+      path: ske
+      bucket:
+        name: syntasso-enterprise-releases
+        region: us-west-2
+        endpoint: s3.us-west-2.amazonaws.com # optional
+        secretName: s3-access-key # optional
+```
+
+If the S3 bucket requires access keys, you need to provide the `secretName`, the
+secret should have the following keys:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-access-key
+  namespace: kratix-platform-system
+data:
+  accessKeyID: # base64 encoded
+  secretAccessKey: # base64 encoded
+```
+
+### SKE Image Registry
+
+When the SKE-Operator is deploying SKE, you may want to configure the
+SKE-Operator to reference images from a different registry than the default
+`ghcr.io/syntasso`. This can be done by providing the `imageRegistry` key in the
+`ske-operator` ConfigMap in the `kratix-platform-system` namespace.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-operator
+  namespace: kratix-platform-system
+data:
+  config: |
+    imageRegistry:
+      host: ghcr.io
+      pullSecret: ghcr-registry-secret
+      pipelineImage: myorg/ske-pipeline
+      platformImage: myorg/ske-platform
+```
+
+In the above example the SKE-Operator will pull the SKE images from
+`ghcr.io/myorg/ske-pipeline` and `ghcr.io/myorg/ske-platform`. The tag will be
+whatever the SKE release specifies.
