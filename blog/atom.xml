@@ -22,7 +22,7 @@ shout about some of the great work the team has done over the last few months,
 so we're going back a bit further than we usually will… Indulge me; it was my
 birthday this month.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="tldr">TL;DR<a class="hash-link" aria-label="Direct link to TL;DR" title="Direct link to TL;DR" href="https://docs.kratix.io/blog/sept-2024-product-update#tldr">​</a></h2>
-<p></p><div style="width:640px;height:200px"></div><p></p>
+<p style="width:640px;height:200px"></p>
 <p>If you only have 10 seconds spare to read this blog, these are the features you
 need to know about:</p>
 <ul>
@@ -40,7 +40,7 @@ a Promise from scratch, or your existing <strong>operators</strong> and <strong>
 download the latest release and go wild. You can read up on the tool in our docs
 as well!</p>
 <!-- -->
-<p align="center"></p><div style="width:640px;height:360px"></div><p></p>
+<p align="center"><span style="width:640px;height:360px"></span></p>
 <blockquote>
 <p><em>That's sweet!</em></p>
 <p>— an actual quote from a customer trying out the new CLI.</p>
@@ -58,7 +58,7 @@ check if those upgrades worked, and help you with rollbacks.</p>
 <p>If you want to try it out, ping us an email at <a href="mailto:kratix@syntasso.io" target="_blank" rel="noopener noreferrer">kratix@syntasso.io</a>, and we’ll
 hook you up 😎</p>
 <!-- -->
-<div style="width:640px;height:360px"></div>
+<span style="width:640px;height:360px"></span>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="neat-stuff-because-security-should-not-be-yolo">Neat stuff (because security should not be YOLO!)<a class="hash-link" aria-label="Direct link to Neat stuff (because security should not be YOLO!)" title="Direct link to Neat stuff (because security should not be YOLO!)" href="https://docs.kratix.io/blog/sept-2024-product-update#neat-stuff-because-security-should-not-be-yolo">​</a></h2>
 <div style="width:640px;height:200px"></div>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="security-uplift">Security uplift<a class="hash-link" aria-label="Direct link to Security uplift" title="Direct link to Security uplift" href="https://docs.kratix.io/blog/sept-2024-product-update#security-uplift">​</a></h3>
