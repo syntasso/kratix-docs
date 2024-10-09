@@ -1,0 +1,252 @@
+---
+title: Managing Air-gapped environments
+description: Installing and running Syntasso Kratix Enterprise in air-gapped environments
+sidebar_label: Air-gapped environments
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+You may want to manage SKE manifests and images within your own environment either
+due to air-gapped requirements or other security and redundancy measures.
+
+Regardless of the reason, if you want to host your own manifests and/or images you
+will need to ensure that your Platform cluster has access to the following resources:
+
+- An image registry containing the SKE Operator and additional SKE integration images
+- A location where the SKE Distribution manifests can be found
+
+The following sections detail how these resources can be set up.
+
+Depending on your environment configuration, you will be instructed how to create
+configuration and secrets the Operator requires to access both the mirrored Image
+Registry and manifest locations.
+
+All configuration and credentials must exist in the `kratix-platform-system` namespace.
+
+:::tip
+
+You may need to, first, create the namespace:
+
+```bash
+kubectl create namespace kratix-platform-system
+```
+
+:::
+
+## Image Registry
+
+The SKE Operator and SKE images are stored in the GitHub Container Registry (GHCR). You
+must ensure that the following images are mirrored to your own image registry and tagged
+according to the version.
+
+- `ghcr.io/syntasso/ske-operator`
+- `ghcr.io/syntasso/ske-platform`
+- `ghcr.io/syntasso/ske-platform-pipeline-adapter`
+
+:::warning Platform and Pipeline Adapter tags
+
+The tags for the `ske-platform` and the `ske-platform-pipeline-adapter` images are
+the same and must match the version of the SKE deployment you wish to install.
+
+:::
+
+You can find the available versions of the images in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+
+:::tip
+
+You can use a tool like [Skopeo](https://github.com/containers/skopeo) to simplify the
+process of mirroring images.
+
+:::
+
+
+### Configuring SKE to use your image registry
+
+You need provide the SKE Operator with both the credentials and location to read your
+image registry.
+
+To create the Image Registry secret, run:
+
+```bash
+kubectl create secret docker-registry <PULL SECRET NAME> \
+    --namespace "kratix-platform-system" \
+    --docker-username="<YOURUSERNAME>" \
+    --docker-password="<YOURPASSWORD>" \
+    --docker-server="<YOUR.REGISTRY.ADDRESS>"
+```
+
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="bucket" label="Mirroring from Bucket">
+
+    ```yaml
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+    name: ske-operator
+    namespace: kratix-platform-system
+    data:
+    config: |
+        releaseStorage:
+            path: ske
+            git:
+                secretName: <GIT SECRET NAME>
+                repo: https://github.com/syntasso/release-repo-name
+                branch: main
+    ```
+
+  </TabItem>
+
+  <TabItem value="git" label="Mirroring from Git Repo">
+
+    ```yaml
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+    name: ske-operator
+    namespace: kratix-platform-system
+    data:
+    config: |
+        releaseStorage:
+            path: ske
+            bucket:
+                name: syntasso-enterprise-releases
+                region: us-west-2
+                endpoint: s3.us-west-2.amazonaws.com # optional
+                secretName: s3-access-key # optional
+    ```
+
+  </TabItem>
+</Tabs>
+
+
+## SKE Manifests
+
+The manifests for SKE deployments are available in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+You need to host the manifests in your own S3-compatible bucket or Git repository that's
+accessible from the Platform cluster.
+
+The contents must match exactly the structure of the Syntasso Enterprise releases bucket.
+In Git, all files/directories starting with `.` are ignored.
+
+### Configuring SKE to read from the release registry
+
+To create the secret to access the SKE Distribution manifests:
+
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="bucket" label="Mirroring from Bucket">
+
+  ```bash
+  kubectl create secret generic <BUCKET SECRET NAME> \
+      --namespace kratix-platform-system \
+      --from-literal=accessKeyID="<YOURACCESSKEY>" \
+      --from-literal=secretAccessKey="<YOURSECRETKEY>"
+  ```
+
+  </TabItem>
+
+  <TabItem value="git" label="Mirroring from Git Repo">
+
+  ```bash
+  kubectl create secret generic <GIT SECRET NAME> \
+      --namespace kratix-platform-system \
+      --from-literal=username="<USERNAME>" \
+      --from-literal=password="<PASSWORD>"
+  ```
+
+  </TabItem>
+</Tabs>
+
+
+Once the secret is created, the SKE-Operator can be configured to reference your
+registry in place of the default `ghcr.io/syntasso`.
+
+This can be done by providing the `imageRegistry` key in the
+`ske-operator` ConfigMap in the `kratix-platform-system` namespace.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-operator
+  namespace: kratix-platform-system
+data:
+  config: |
+    imageRegistry:
+      host: ghcr.io
+      pullSecret: ghcr-registry-secret
+      pipelineImage: myorg/ske-pipeline
+      platformImage: myorg/ske-platform
+```
+
+In the above example the SKE-Operator will pull the SKE images from
+`ghcr.io/myorg/ske-pipeline` and `ghcr.io/myorg/ske-platform`. The tag will be
+continue to be managed by the operator's `version` field.
+
+
+## Deploying the SKE Operator
+
+Once you have the images mirrored and the manifests available, you can deploy
+the SKE Operator either directory or through Helm by providing the necessary configuration.
+
+Below are some example installation instructions, but for complete installation instructions
+please refer to the [helm installation](./helm-installation) docs.
+
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="bucket" label="Mirroring from Bucket">
+  ```bash
+  helm install ske-operator syntasso/ske-operator \
+    --namespace kratix-platform-system \
+    --set skeLicense=<YOUR LICENSE TOKEN> \
+    --set imageRegistry.host=<YOUR REGISTRY> \
+    --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
+    --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
+    --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
+    --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
+    --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
+    --set releaseStorage.path=<BUCKET PATH> \
+    --set releaseStorage.bucket.name=<BUCKET NAME> \
+    --set releaseStorage.bucket.region=<BUCKET REGION> \
+    --set releaseStorage.bucket.endpoint=<BUCKET ENDPOINT> \
+    --set releaseStorage.bucket.secretName=<BUCKET SECRET NAME> \
+    --set skeDeployment.enabled=true \
+    --set skeDeployment.version=<VERSION>
+  ```
+
+  </TabItem>
+
+  <TabItem value="git" label="Mirroring from Git Repo">
+
+  ```bash
+  helm install ske-operator syntasso/ske-operator \
+    --namespace kratix-platform-system \
+    --set skeLicense=<YOUR LICENSE TOKEN> \
+    --set imageRegistry.host=<YOUR REGISTRY> \
+    --set imageRegistry.imagePullSecret=<PULL SECRET NAME> \
+    --set imageRegistry.skeOperatorImage.name=<OPERATOR IMAGE NAME> \
+    --set imageRegistry.skeOperatorImage.tag=<OPERATOR IMAGE TAG> \
+    --set imageRegistry.skePlatformImage.name=<SKE PLATFORM IMAGE NAME> \
+    --set imageRegistry.skePlatformPipelineAdapterImage.name=<SKE PLATFORM PIPELINE ADAPTER IMAGE NAME> \
+    --set releaseStorage.path=<PATH IN REPO TO SKE MANIFEST DIR> \
+    --set releaseStorage.git.repo=<GIT REPO URL> \
+    --set releaseStorage.git.branch=<GIT BRANCH> \
+    --set releaseStorage.git.secretName=<GIT SECRET NAME> \
+    --set skeDeployment.enabled=true \
+    --set skeDeployment.version=<VERSION>
+  ```
+
+  </TabItem>
+</Tabs>
+
+:::tip
+
+Most of the configuration options are optional. You only need to provide the
+ones that you have customised to your environment.
+
+:::
