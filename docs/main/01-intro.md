@@ -49,5 +49,3 @@ Follow our handy guides to get started on the basics as quickly as possible:
 <br />
 
 If you can't find what you need, or need help with building your platform as a product, reach out to us on [Github](https://github.com/syntasso/kratix/) or through [Syntasso.io](https://www.syntasso.io/contact-us) and we'll be happy to help.
-
-<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=2f7703a4-9013-4c6f-b09e-894a5f3f42d6" />
