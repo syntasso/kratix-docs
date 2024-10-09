@@ -32,8 +32,8 @@ helm repo update
 
 ### Configuring your values
 
-Helm can accept values via the command line or a values file. The below examples
-show how to use the values file for common use cases.
+Helm can accept values via the command line or a values file. Refer to the examples
+below for common configuration options.
 
 :::tip
 
@@ -41,15 +41,28 @@ You can see all available configuration in the
 [helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml).
 :::
 
-#### Specific version
+#### Required configuration
 
 ```yaml
 skeLicense: LICENSE
+```
+
+#### SKE version
+
+The Helm chart version determines what version of the SKE Operator is installed.
+To configure the version of SKE that the operator will install, you can use the
+`skeDeployment.version` field as shown below.
+
+```yaml
 skeDeployment:
-  version: latest
+  version: v0.99.0
 ```
 
 #### Mirrored Image Registry
+
+Add this configuration to your helm values file if you are following
+the [air-gapped setup](./air-gapped) instructions for a self-hosted
+Image Registry.
 
 ```yaml
 imageRegistry:
@@ -65,7 +78,11 @@ imageRegistry:
 ```
 
 #### Mirrored Release Storage
-  
+
+Add this configuration to your helm values file if you are following
+the [air-gapped setup](./air-gapped) instructions for a self-hosted
+Release Storage.
+
   <Tabs className="boxedTabs" groupId="stateStore">
     <TabItem value="bucket" label="Mirroring from Bucket">
     ```yaml
@@ -96,6 +113,50 @@ imageRegistry:
     ```
     </TabItem>
   </Tabs>
+
+<details>
+  <summary>Suggested starter `values.yaml` file</summary>
+
+    ```yaml
+    skeLicense: your-token-here
+    skeDeployment:
+      version: latest
+    ```
+
+</details>
+
+<details>
+  <summary>Example air-gapped `values.yaml` file</summary>
+
+  To use this example, please set all values to your specific environment
+
+  ```yaml
+    skeLicense: your-token-here
+    skeDeployment:
+      version: latest
+    imageRegistry:
+      host: "ghcr.io"
+      imagePullSecret: "my-secret"
+      skeOperatorImage:
+        name: "syntasso/ske-operator"
+        tag: "v0.1.5"
+      skePlatformImage:
+        name: "syntasso/ske-platform"
+      skePlatformPipelineAdapterImage:
+        name: "syntasso/ske-platform-pipeline-adapter"
+    releaseStorage:
+      path: "ske"
+      git:
+        branch: main
+        repo: https://github.com/org/repo
+        secret:
+          name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
+          values:
+            username: "my-username" # instead of providing a secretName you can provide the username and password directly
+            password: "my-password"
+    ```
+
+</details>
 
 ### Installing the Operator
 
