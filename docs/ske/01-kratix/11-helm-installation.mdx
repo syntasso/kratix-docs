@@ -1,7 +1,6 @@
 ---
 title: Installation via Helm
 description: Installing Syntasso Kratix Enterprise
-sidebar_label: Installation via Helm
 ---
 
 ```mdx-code-block
@@ -13,6 +12,8 @@ Syntasso Kratix Enterprise images are distributed through a private image regist
 install SKE on your Kubernetes cluster, follow the steps below.
 
 ## Install SKE operator
+
+### Prerequisites
 
 :::info
 
@@ -29,23 +30,83 @@ helm repo add syntasso https://syntasso.github.io/helm-charts
 helm repo update
 ```
 
+### Configuring your values
+
+Helm can accept values via the command line or a values file. The below examples
+show how to use the values file for common use cases.
+
+:::tip
+
+You can see all available configuration in the
+[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml).
+:::
+
+#### Specific version
+
+```yaml
+skeLicense: LICENSE
+skeDeployment:
+  version: latest
+```
+
+#### Mirrored Image Registry
+
+```yaml
+imageRegistry:
+  host: "ghcr.io"
+  imagePullSecret: "my-secret"
+  skeOperatorImage:
+    name: "syntasso/ske-operator"
+    tag: "v0.1.5"
+  skePlatformImage:
+    name: "syntasso/ske-platform"
+  skePlatformPipelineAdapterImage:
+    name: "syntasso/ske-platform-pipeline-adapter"
+```
+
+#### Mirrored Release Storage
+  
+  <Tabs className="boxedTabs" groupId="stateStore">
+    <TabItem value="bucket" label="Mirroring from Bucket">
+    ```yaml
+    releaseStorage:
+      path: "ske"
+      bucket:
+        name: "syntasso-enterprise-releases"
+        region: "eu-west-2"
+          secret:
+            name: "my-secret" # the secret must be created in the same namespace as the operator. It must contain the following keys: accessKeyID, secretAccessKey. If provided below it is automatically created
+            values:
+              accessKeyID: "my-access"
+              secretAccessKey: "my-secret"
+    ```
+    </TabItem>
+    <TabItem value="git" label="Mirroring from Git Repo">
+    ```yaml
+    releaseStorage:
+      path: "ske"
+      git:
+        branch: main
+        repo: https://github.com/org/repo
+        secret:
+          name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
+          values:
+            username: "my-username" # instead of providing a secretName you can provide the username and password directly
+            password: "my-password"
+    ```
+    </TabItem>
+  </Tabs>
+
+### Installing the Operator
+
 Next, install the SKE Operator:
 
 ```bash
 helm install ske-operator syntasso/ske-operator \
   --namespace kratix-platform-system \
-  --create-namespace \
-  --set skeDeployment.enabled=true \
-  --set skeDeployment.version=<VERSION>
+  --create-namespace
+  --values FILE_PATH # This is optional. Only use if you are configuring custom values.
 ```
-
-:::tip
-
-Please refer to the [Helm chart values
-file](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml)
-for a complete list of configuration options.
-
-:::
 
 <details>
 <summary>Alternative installation method</summary>
@@ -124,6 +185,7 @@ ske-operator-controller-manager      1/1     1            1           1h
 
 You can now proceed with the configuration of Kratix (i.e. registering destinations or
 installing promises). For that, refer to the Open-Source Kratix documentation.
+
 
 ## Upgrades
 
