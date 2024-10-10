@@ -32,8 +32,9 @@ helm repo update
 
 ### Configuring your values
 
-Helm can accept values via the command line or a values file. Refer to the examples
-below for common configuration options.
+Helm can accept values via the a values file. Refer to the examples
+below for common configuration options. Any configuration should be placed in a
+`values.yaml` file that is then passed in to the `helm install` command.
 
 :::tip
 
@@ -44,7 +45,7 @@ You can see all available configuration in the
 #### Required configuration
 
 ```yaml
-skeLicense: LICENSE
+skeLicense: LICENSE # provided to you by Syntasso
 ```
 
 #### SKE version
@@ -93,7 +94,7 @@ Release Storage.
         region: "eu-west-2"
           secret:
             name: "my-secret" # the secret must be created in the same namespace as the operator. It must contain the following keys: accessKeyID, secretAccessKey. If provided below it is automatically created
-            values:
+            values: # optional: if you've not pre-created the secret, you can instead provide the values below and the helm chart will create it for you
               accessKeyID: "my-access"
               secretAccessKey: "my-secret"
     ```
@@ -107,7 +108,7 @@ Release Storage.
         repo: https://github.com/org/repo
         secret:
           name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
-          values:
+          values: # optional: if you've not pre-created the secret, you can instead provide the values below and the helm chart will create it for you
             username: "my-username" # instead of providing a secretName you can provide the username and password directly
             password: "my-password"
     ```
@@ -166,7 +167,7 @@ Next, install the SKE Operator:
 helm install ske-operator syntasso/ske-operator \
   --namespace kratix-platform-system \
   --create-namespace
-  --values FILE_PATH # This is optional. Only use if you are configuring custom values.
+  --values values.yaml # This is optional. Only use if you are configuring custom values.
 ```
 
 <details>
