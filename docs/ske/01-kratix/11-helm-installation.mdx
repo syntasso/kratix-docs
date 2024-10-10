@@ -88,7 +88,7 @@ Release Storage.
     <TabItem value="bucket" label="Mirroring from Bucket">
     ```yaml
     releaseStorage:
-      path: "ske"
+      path: "ske" # the path within the bucket that contains the SKE Versions
       bucket:
         name: "syntasso-enterprise-releases"
         region: "eu-west-2"
@@ -102,7 +102,7 @@ Release Storage.
     <TabItem value="git" label="Mirroring from Git Repo">
     ```yaml
     releaseStorage:
-      path: "ske"
+      path: "ske" # the path within the Git Repo that contains the SKE Versions
       git:
         branch: main
         repo: https://github.com/org/repo
@@ -209,10 +209,6 @@ kind: Kratix
 metadata:
   name: kratix-example
 spec:
-  releaseStorage:
-    name: # name of the bucket containing Kratix Enterprise releases; optional
-    region: # region of the bucket; optional
-    path: # subpath within the bucket; optional
   version: # version of Kratix Enterprise to install; default to the latest release found in release bucket
 ```
 
