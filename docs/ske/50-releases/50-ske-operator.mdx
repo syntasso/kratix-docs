@@ -1,0 +1,40 @@
+---
+title: SKE-Operator
+description: Release information about SKE-Operator
+sidebar_label: SKE-Operator
+---
+
+## Overview
+
+The SKE-Operator is the operator for managing the installation and upgrading of
+SKE.
+
+The release manifest is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/
+```
+
+The helm charts is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/
+```
+
+To see which version of the helm chart corresponds to which version of the
+SKE-Operator, please refer to the release notes below.
+
+## Release Notes
+
+### [0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.3.0/) (2024-10-10)
+
+[Released in Helm Chart version `v0.15.0`](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.15.0/)
+
+### Features
+
+* Support pulling releases from a Git Repo for air-gapped environments
+
+
+### Bug Fixes
+
+* Fix bug preventing correct version of SKE being returned from the Operator
