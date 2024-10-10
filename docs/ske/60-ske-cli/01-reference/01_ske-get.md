@@ -6,7 +6,7 @@ Command to get information about SKE deployment
 
 ## Usage
 ```
-ske-cli get [command]
+ske get [command]
 ```
 
 
