@@ -1,0 +1,308 @@
+---
+title: Installation via Helm
+description: Installing Syntasso Kratix Enterprise
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+Syntasso Kratix Enterprise images are distributed through a private image registry. To
+install SKE on your Kubernetes cluster, follow the steps below.
+
+## Install SKE operator
+
+### Prerequisites
+
+:::info
+
+Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
+refer to [its documentation for installation instructions](https://cert-manager.io/).
+
+:::
+
+To install SKE operator using the Helm chart, start by adding the Syntasso Helm
+repository:
+
+```bash
+helm repo add syntasso https://syntasso.github.io/helm-charts
+helm repo update
+```
+
+### Configuring your values
+
+Helm can accept values via the a values file. Refer to the examples
+below for common configuration options. Any configuration should be placed in a
+`values.yaml` file that is then passed in to the `helm install` command.
+
+:::tip
+
+You can see all available configuration in the
+[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml).
+:::
+
+#### Required configuration
+
+```yaml
+skeLicense: LICENSE # provided to you by Syntasso
+```
+
+#### SKE version
+
+The Helm chart version determines what version of the SKE Operator is installed.
+To configure the version of SKE that the operator will install, you can use the
+`skeDeployment.version` field as shown below.
+
+```yaml
+skeDeployment:
+  version: v0.99.0
+```
+
+#### Mirrored Image Registry
+
+Add this configuration to your helm values file if you are following
+the [air-gapped setup](./air-gapped) instructions for a self-hosted
+Image Registry.
+
+```yaml
+imageRegistry:
+  host: "ghcr.io"
+  imagePullSecret: "my-secret"
+  skeOperatorImage:
+    name: "syntasso/ske-operator"
+    tag: "v0.1.5"
+  skePlatformImage:
+    name: "syntasso/ske-platform"
+  skePlatformPipelineAdapterImage:
+    name: "syntasso/ske-platform-pipeline-adapter"
+```
+
+#### Mirrored Release Storage
+
+Add this configuration to your helm values file if you are following
+the [air-gapped setup](./air-gapped) instructions for a self-hosted
+Release Storage.
+
+  <Tabs className="boxedTabs" groupId="stateStore">
+    <TabItem value="bucket" label="Mirroring from Bucket">
+    ```yaml
+    releaseStorage:
+      path: "ske" # the path within the bucket that contains the SKE Versions
+      bucket:
+        name: "syntasso-enterprise-releases"
+        region: "eu-west-2"
+          secret:
+            name: "my-secret" # the secret must be created in the same namespace as the operator. It must contain the following keys: accessKeyID, secretAccessKey. If provided below it is automatically created
+            values: # optional: if you've not pre-created the secret, you can instead provide the values below and the helm chart will create it for you
+              accessKeyID: "my-access"
+              secretAccessKey: "my-secret"
+    ```
+    </TabItem>
+    <TabItem value="git" label="Mirroring from Git Repo">
+    ```yaml
+    releaseStorage:
+      path: "ske" # the path within the Git Repo that contains the SKE Versions
+      git:
+        branch: main
+        repo: https://github.com/org/repo
+        secret:
+          name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
+          values: # optional: if you've not pre-created the secret, you can instead provide the values below and the helm chart will create it for you
+            username: "my-username" # instead of providing a secretName you can provide the username and password directly
+            password: "my-password"
+    ```
+    </TabItem>
+  </Tabs>
+
+<details>
+  <summary>Suggested starter `values.yaml` file</summary>
+
+    ```yaml
+    skeLicense: your-token-here
+    skeDeployment:
+      version: latest
+    ```
+
+</details>
+
+<details>
+  <summary>Example air-gapped `values.yaml` file</summary>
+
+  To use this example, please set all values to your specific environment
+
+  ```yaml
+    skeLicense: your-token-here
+    skeDeployment:
+      version: latest
+    imageRegistry:
+      host: "ghcr.io"
+      imagePullSecret: "my-secret"
+      skeOperatorImage:
+        name: "syntasso/ske-operator"
+        tag: "v0.1.5"
+      skePlatformImage:
+        name: "syntasso/ske-platform"
+      skePlatformPipelineAdapterImage:
+        name: "syntasso/ske-platform-pipeline-adapter"
+    releaseStorage:
+      path: "ske"
+      git:
+        branch: main
+        repo: https://github.com/org/repo
+        secret:
+          name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
+          values:
+            username: "my-username" # instead of providing a secretName you can provide the username and password directly
+            password: "my-password"
+    ```
+
+</details>
+
+### Installing the Operator
+
+Next, install the SKE Operator:
+
+```bash
+helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
+  --create-namespace
+  --values values.yaml # This is optional. Only use if you are configuring custom values.
+```
+
+<details>
+<summary>Alternative installation method</summary>
+
+If you prefer not to use Helm, you can install the SKE operator by applying the
+manifests directly.
+
+First, create the namespace where the SKE operator will be installed:
+
+```bash
+kubectl create namespace kratix-platform-system
+```
+
+Then, create a secret with your license token:
+
+```
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=kratix-platform-system \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
+```
+
+The manifests are available in the [Syntasso Releases
+Page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/).
+Find the latest release and apply it with `kubectl`:
+
+```bash
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<VERSION>/ske-operator-distribution.yaml
+```
+
+With the Operator in place, you can now install Kratix Enterprise by creating a
+'Kratix' instance. Below is an example 'Kratix' instance definition:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: kratix-example
+spec:
+  version: # version of Kratix Enterprise to install; default to the latest release found in release bucket
+```
+
+You can save the 'Kratix' instance definition to a local file and apply with kubectl.
+SKE operator will then install Kratix Enterprise and its necessary configurations.
+
+By default, when `spec.releaseStorage` is not set, SKE operator will use the Syntasso Enterprise releases bucket.
+
+:::note
+'Kratix' is a cluster scoped and singleton resource.
+
+Only one instance of Kratix can be installed in a cluster.
+:::
+
+</details>
+
+### Verify the installation
+
+To verify that Kratix Enterprise has been installed successfully, run the following command:
+
+```bash
+kubectl get deployments.apps --namespace kratix-platform-system
+```
+
+You should see the following output:
+
+```shell-session
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+kratix-platform-controller-manager   1/1     1            1           1h
+ske-operator-controller-manager      1/1     1            1           1h
+```
+
+You can now proceed with the configuration of Kratix (i.e. registering destinations or
+installing promises). For that, refer to the Open-Source Kratix documentation.
+
+
+## Upgrades
+
+### Upgrading the Operator
+
+To verify the version of the Operator installed, run the following command:
+
+```bash
+helm list
+```
+
+You should see the following output:
+
+```shell-session
+NAME            NAMESPACE    [...]    CHART                   APP VERSION
+ske-operator    default      [...]    ske-operator-0.8.0      v0.1.1
+```
+
+To check the available versions of the Operator, run the following command:
+
+```bash
+helm search repo syntasso/ske-operator --versions
+```
+
+To upgrade, run:
+
+```bash
+helm upgrade ske-operator syntasso/ske-operator # --version <VERSION>
+```
+
+:::info Not using Helm?
+
+Refer to the alternative installation method summary box above to upgrade the operator without Helm.
+
+:::
+
+### Upgrading the SKE Instance
+
+To upgrade the version of SKE being deployed by the operator, you can edit your
+Kratix instance definition and change the `version` field to the desired
+version.
+
+Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
+vX.Y+1.Z first.
+
+## Deletes
+
+### Deleting the SKE Operator
+
+To delete the SKE operator (and any deployed SKE instance), run the following command:
+
+```bash
+helm uninstall ske-operator
+```
+
+### Deleting the SKE Instance
+
+To delete the SKE instance, run:
+
+```
+kubectl -n kratix-platform-system delete kratix <INSTANCE_NAME>
+```

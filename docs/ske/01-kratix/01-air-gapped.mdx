@@ -1,0 +1,122 @@
+---
+title: Setup for Air-gapped Environments
+description: Installing and running Syntasso Kratix Enterprise in air-gapped environments
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+You may want to manage SKE manifests and images within your own environment either
+due to air-gapped requirements or other security and redundancy measures.
+
+Regardless of the reason, if you want to host your own manifests and/or images you
+will need to ensure that your Platform cluster has access to the following resources:
+
+- An image registry containing the SKE Operator and additional SKE integration images
+- A location where the SKE Release manifests can be found
+
+Depending on your environment configuration, you will be instructed how to create
+configuration and secrets the SKE Operator requires to access both the Image
+Registry and manifest locations.
+
+
+Manifests include reference to the SKE docker images. Do not directly change the manifest
+to reference your image storage. If you need to change the image locations, you can do so
+by using the image registry configuration fields on the SKE Operator which is documented
+below.
+
+
+## Image Registry
+
+The SKE Operator and SKE images are stored in the GitHub Container Registry (GHCR).
+
+You must ensure that the following images are mirrored to your own image registry and
+tagged according to the version.
+
+- `ghcr.io/syntasso/ske-operator`
+- `ghcr.io/syntasso/ske-platform`
+- `ghcr.io/syntasso/ske-platform-pipeline-adapter`
+
+:::warning Platform and Pipeline Adapter tags
+
+The tags for the `ske-platform` and the `ske-platform-pipeline-adapter` images are
+the same and must match the version of the SKE deployment you wish to install.
+
+:::
+
+You can find the available versions of the images in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+
+:::tip
+
+You can use a tool like [Skopeo](https://github.com/containers/skopeo) to simplify the
+process of mirroring images.
+
+:::
+
+
+### Providing SKE Operator access to use your image registry
+
+You need provide the SKE Operator with both the credentials and location to read your
+image registry.
+
+To create the Image Registry secret, run:
+
+```bash
+kubectl create secret docker-registry <PULL SECRET NAME> \
+    --namespace "kratix-platform-system" \
+    --docker-username="<YOURUSERNAME>" \
+    --docker-password="<YOURPASSWORD>" \
+    --docker-server="<YOUR.REGISTRY.ADDRESS>"
+```
+
+You will need to reference this secret when installing SKE operator which is described in
+each installation guide.
+
+
+## SKE Release Storage
+
+The manifests for SKE deployments are available in the [Syntasso Enterprise
+Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
+
+You need to host the manifests in your own S3-compatible bucket or Git repository that's
+accessible from the Platform cluster.
+
+The contents must match exactly the structure of the Syntasso Enterprise releases bucket.
+
+In Git, all files/directories starting with `.` are ignored.
+
+###  Providing SKE Operator access to use your release registry
+
+To create the secret to access the SKE Release Storage:
+
+<Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="bucket" label="Mirroring from Bucket">
+
+  ```bash
+  kubectl create secret generic <BUCKET SECRET NAME> \
+      --namespace kratix-platform-system \
+      --from-literal=accessKeyID="<YOURACCESSKEY>" \
+      --from-literal=secretAccessKey="<YOURSECRETKEY>"
+  ```
+
+  </TabItem>
+
+  <TabItem value="git" label="Mirroring from Git Repo">
+
+  ```bash
+  kubectl create secret generic <GIT SECRET NAME> \
+      --namespace kratix-platform-system \
+      --from-literal=username="<USERNAME>" \
+      --from-literal=password="<PASSWORD>"
+  ```
+
+  </TabItem>
+</Tabs>
+
+
+You will need to reference this secret when installing SKE operator which is described in
+each installation guide.
