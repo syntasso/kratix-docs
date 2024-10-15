@@ -61,7 +61,7 @@ Take a moment to imagine the most valuable bundle of services that your platform
 
 ## Learn more
 
-If the idea of treating your platform as-a-Product is new concept to you, watch _ [Crossing the Platform Gap](https://youtu.be/pAk5GReIs90)_ short talk below by [Paula Kennedy](https://twitter.com/PaulaLKennedy) or read our two-part series about [Paving Golden Paths](https://www.syntasso.io/post/paving-golden-paths-on-multi-cluster-kubernetes-part-1-the-theory) on the Syntasso blog.
+If the idea of treating your platform as-a-Product is new concept to you, watch the _[Crossing the Platform Gap](https://youtu.be/pAk5GReIs90)_ short talk below by [Paula Kennedy](https://twitter.com/PaulaLKennedy) or read our two-part series about [Paving Golden Paths](https://www.syntasso.io/post/paving-golden-paths-on-multi-cluster-kubernetes-part-1-the-theory) on the Syntasso blog.
 
 <div style={{"text-align":"center"}}>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/pAk5GReIs90" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

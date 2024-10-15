@@ -107,9 +107,9 @@ Kratix and the name is deterministic. You have three options for providing
 additional [RBAC
 permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to
 the pipeline:
-- Specify in your pipeline spec additional [RBAC
-  permissions](#rbac-permissions). Kratix will automatically create the required
-  Role/ClusterRole and RoleBinding/ClusterRoleBinding
+- Specify additional [RBAC permissions](#rbac-permissions) in your pipeline spec.
+  Kratix will automatically create the required Role/ClusterRole and
+  RoleBinding/ClusterRoleBinding
 - Use the [default service account](#service-account) Kratix creates and
   manually create the Role/ClusterRole and RoleBinding/ClusterRoleBinding
 - Specify a [custom service account](#custom-service-account) in your pipeline
