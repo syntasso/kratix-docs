@@ -113,6 +113,26 @@ different actions, including, but not limited to:
 - Kratix Controller restarts
 - Changes to the Promise definition
 
+In addition to the above, the Kratix Promise Controller will reconcile on a 10 hour cadence to
+attempt to mitigate against any drift that may have occurred. During this reconciliation,
+the controller will ensure that all of the the Workflows for a given promise are re-run.
+
+:::note
+
+This reconciliation will not ensure that unchanged documents are re-written to the
+state store. The reconciliation between workflow outputs and the statestore is
+currently only triggered on change. For example, if a file has been deleted from your
+GitStateStore, but the outputs from your workflow have not changed, this will
+not be rewritten. This will be delivered in
+[issue #254](https://github.com/syntasso/kratix/issues/254) if you would like to
+follow along progress or share your requirements.
+
+:::
+
+As this reconciliation is managed by the Promise Controller, restarts of the Kratix Controller
+Manager may disrupt the regularity of this cadence meaning that the reconciliation interval
+may be greater than the expected 10 hours.
+
 ### Manual Reconciliation
 
 Sometimes you may wish to manually trigger a Configure workflow for a specific Promise.
