@@ -23,6 +23,14 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-frontend 0.11.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.11.1/) (2024-10-15)
+
+#### Bug Fixes
+
+* Fixed a bug where the "Create" button wasn't being displayed on the Promise Entity page when a custom `type` was specified.
+    - There's now a new `kratix.io/type` annotation that can be used to specify the type of the Component. Users of the SKE Backstage Generator ([v0.10.1](aspects/backstage-generator#v0.10.1)) will have this annotation automatically added to their Component YAML files.
+    - **This requires changes to your Catalog Entity page.** Please refer to the [Configuring the Plugins documentation](../integrations/backstage/plugins#update-the-entitypage) for instructions.
+
 ### [0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/v0.11.0/) (2024-09-19)
 
 #### Bug Fixes

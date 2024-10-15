@@ -106,6 +106,7 @@ In the `packages/app/src/components/catalog/EntityPage.tsx` file, add the follow
 import {
   KratixPromiseEntityPage,
   KratixResourceEntityPage,
+  isKratixType,
 } from "@syntasso/plugin-ske-frontend";
 ```
 
@@ -113,11 +114,11 @@ Find the line where the `const componentPage` is being declared. Add the followi
 to the `EntitySwitch`:
 
 ```typescript
-<EntitySwitch.Case if={isComponentType('kratix-promise')}>
+<EntitySwitch.Case if={isKratixType('promise')}>
   <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
 </EntitySwitch.Case>
 
-<EntitySwitch.Case if={isComponentType('kratix-resource')}>
+<EntitySwitch.Case if={isKratixType('resource')}>
   <KratixResourceEntityPage>{entityWarningContent}</KratixResourceEntityPage>
 </EntitySwitch.Case>
 ```
@@ -137,11 +138,11 @@ const componentPage = (
     </EntitySwitch.Case>
 
     //highlight-start
-    <EntitySwitch.Case if={isComponentType('kratix-promise')}>
+    <EntitySwitch.Case if={isKratixType('promise')}>
       <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
     </EntitySwitch.Case>
 
-    <EntitySwitch.Case if={isComponentType('kratix-resource')}>
+    <EntitySwitch.Case if={isKratixType('resource')}>
       <KratixResourceEntityPage>{entityWarningContent}</KratixResourceEntityPage>
     </EntitySwitch.Case>
     //highlight-end
