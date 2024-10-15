@@ -113,6 +113,15 @@ different actions, including, but not limited to:
 - Kratix Controller restarts
 - Changes to the Promise definition
 
+In addition to the above, the Kratix Promise Controller will reconcile on a 10 hour cadence to
+attempt to mitigate against any drift that may have occurred. During this reconciliation,
+the controller will ensure that all of the the Workflows for a given promise are re-run. It
+will not however, ensure that documents are re-written to the state store.
+
+As this reconciliation is managed by the Promise Controller, restarts of the Kratix Controller
+Manager may disrupt the regularity of this cadence meaning that the reconciliation interval
+may be greater than the expected 10 hours.
+
 ### Manual Reconciliation
 
 Sometimes you may wish to manually trigger a Configure workflow for a specific Promise.
