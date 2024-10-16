@@ -291,7 +291,7 @@ spec:
                   - list
                 resourceNamespace: "*"
             containers:
-              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+              - image: registry.syntasso.io/ske-tfstate-finder:v0.1.0
                 name: fetch-output
                 env:
                 - name: TIMEOUT
@@ -418,7 +418,7 @@ spec:
                   - list
                 resourceNamespace: "*"
             containers:
-              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+              - image: registry.syntasso.io/ske-tfstate-finder:v0.1.0
                 name: fetch-output
                 env:
                 - name: TIMEOUT
@@ -525,7 +525,7 @@ spec:
             namespace: default
           spec:
             containers:
-              - image: ghcr.io/syntasso/ske-tfstate-finder:v0.1.0
+              - image: registry.syntasso.io/ske-tfstate-finder:v0.1.0
                 name: fetch-output
 # highlight-start
               - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
