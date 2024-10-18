@@ -1,0 +1,8 @@
+{
+  "label": "Kratix Config",
+  "position": 1,
+  "link": {
+    "type": "doc",
+    "id": "main/reference/kratix-config/config"
+  }
+}

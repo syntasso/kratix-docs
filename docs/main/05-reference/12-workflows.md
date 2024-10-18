@@ -404,10 +404,7 @@ containers (not Kratix containers) by either:
   ```
 
 - Specifying a global default security context in the `kratix` ConfigMap in the
-  `kratix-platform-system`. The ConfigMap format is described below. The
-  ConfigMap is loaded in when the `kratix-platform-controller-manager` pod in
-  the `kratix-platform-system` starts up. Anytime the ConfigMap is updated, the
-  pod will need to be restarted to load the changes.
+  `kratix-platform-system`. See the [Kratix Config documentation](./kratix-config/config) for more information.
 
   ```yaml
   apiVersion: v1
