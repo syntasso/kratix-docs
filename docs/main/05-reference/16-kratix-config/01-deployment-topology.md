@@ -22,7 +22,8 @@ metadata:
   namespace: kratix-platform-system
 data:
   config: |
-    numberOfJobsToKeep: 1 # Number of old succcesful pipeline pods to keep. Default is 5
+    # Number of old successful pipeline pods to keep. Default is 5
+    numberOfJobsToKeep: 1  
     workflows:
       defaultContainerSecurityContext:
         # Security context fields, e.g.:
