@@ -194,10 +194,10 @@ Spec:
 Status:
   Conditions:
     Last Transition Time:  2024-01-31T16:15:38Z
-    Message:               Pipeline completed
-    Reason:                PipelineExecutedSuccessfully
+    Message:               Pipelines completed
+    Reason:                PipelinesExecutedSuccessfully
     Status:                True
-    Type:                  PipelineCompleted
+    Type:                  ConfigureWorkflowCompleted
   #highlight-start
   Created At:              Wed Jan 1 15:01:01 UTC 2023
   Message:                 todo.local.gd:31338
@@ -209,7 +209,9 @@ Note how the `status` field is now populated with the information you added to t
 
 :::info
 
-You may also notice that there's a condition called `PipelineCompleted`. This is a special condition that is automatically added to the status of the Resource, and set to `True` when the pipeline completes successfully.
+You may also notice that there's a condition called `ConfigureWorkflowCompleted`. This is
+a special condition that is automatically added to the status of the Resource, and set to
+`True` when the Configure workflow completes successfully.
 
 :::
 
