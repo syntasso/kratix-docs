@@ -1,33 +1,14 @@
 ---
-title: Via the Manifest
-description: Documentation on how to install the SKE-Operator via the Operator manifest directly
+title: Via Manifests
+description: Documentation on how to install the SKE-Operator via the operator manifest directly
 ---
-
-{/*
-
-```gherkin
-Acceptance
-Given that I have access the the SKE documentation
-When I review the SKE Operator Docs
-Then I can read about the role of the SKE Operator
-
-Given that I have access the the SKE documentation
-When I review the SKE Operator Docs
-Then I can read about how to configure the SKE Operator
-
-Given that I have access the the SKE documentation
-When I review the SKE Operator Docs
-Then I can read about how to provision a Kratix with the SKE Operator
-```
-
-*/}
 
 ## Pre-requisites
 
 ### Create the namespace
 
 To install the SKE Operator via the [distribution
-manifest](../releases/ske-operator), you will first need to create the
+manifest](../../releases/ske-operator), you will first need to create the
 `kratix-platform-system` namespace. This is where the SKE operator will be installed:
 
 ```bash
@@ -93,7 +74,7 @@ kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/
 
 Applying the manifest will install the SKE Operator in the
 `kratix-platform-system` namespace, together with a Kratix Custom Resource
-Definition (CRD) that allows you to manage the Kratix Enterprise installation.
+Definition (CRD) that allows you to manage the Syntasso Kratix Enterprise installation.
 
 ## Deploying SKE
 
@@ -101,7 +82,7 @@ The SKE Operator includes a custom resource definition (CRD) for managing
 SKE. Only one instance of SKE can be created by the SKE Operator in a
 given cluster.
 
-To deploy SKE, create a file with the following contents:
+To deploy SKE, create a file named `ske-instance.yaml` with the following contents:
 
 ```yaml
 apiVersion: platform.syntasso.io/v1alpha1
@@ -109,13 +90,13 @@ kind: Kratix
 metadata:
   name: my-kratix
 spec:
-  version: v0.6.0 # The desired version of SKE
+  version: v0.99.0 # The desired version of SKE
 ```
 
 Apply the file with `kubectl`:
 
 ```bash
-kubectl apply --filename <path-to-instance>.yaml
+kubectl apply --filename ske-instance.yaml
 ```
 
 The operator will then install SKE and its necessary configurations. For more
@@ -158,13 +139,15 @@ Patch versions on the same minor can be upgraded without restrictions.
 
 ## Deleting
 
-### SKE Operator
+### SKE Instance
 
-To delete the SKE Operator (and any deployed SKE instance), run the following command:
+To delete the SKE instance, run the following command:
 
 ```bash
-kubectl delete -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<VERSION>/ske-operator-distribution.yaml
+kubectl delete kratix --namespace kratix-platform-system my-kratix
 ```
+
+### SKE Operator
 
 :::warning
 
@@ -172,10 +155,8 @@ This will delete the SKE Operator and any deployed SKE instance.
 
 :::
 
-### SKE Instance
-
-To delete the SKE instance, run the following command:
+To delete the SKE Operator (and any deployed SKE instance), run the following command:
 
 ```bash
-kubectl delete kratix --namespace kratix-platform-system my-kratix
+kubectl delete -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<VERSION>/ske-operator-distribution.yaml
 ```
