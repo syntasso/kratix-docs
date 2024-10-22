@@ -259,6 +259,14 @@ Inspect it by running:
 cat promise.yaml | yq '.spec.workflows'
 ```
 
+Now, you'll need build the app-promise-pipeline image used in the `configure-deps` workflow and make it available in the container registry. Since you are
+using kind clusters, you can build and load the image into the cluster directly by running the following commands:
+
+```bash title="from the app-promise directory"
+docker build --tag kratix-workshop/app-promise-pipeline:v0.1.0 workflows/promise/configure/dependencies/configure-deps
+kind load docker-image kratix-workshop/app-promise-pipeline:v0.1.0 --name platform
+```
+
 Amazing! You are now one step away from having a working Promise. The next step is to define the Resource Workflow, that is, what must happen when a user requests a new app deployment.
 
 ### Define the Workflow {#workflow}
