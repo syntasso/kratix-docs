@@ -389,7 +389,7 @@ kratix-worker-system     Active    1m
 Once you see `kratix-worker-system` on the output,
 press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
 
-Kratix is now fully installed and configure, and can start deploying Promises and resources to your clusters.
+Kratix is now fully installed and configured, and can start deploying Promises and resources to your clusters.
 
 ## Summary
 
