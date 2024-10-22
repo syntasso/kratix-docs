@@ -84,57 +84,6 @@ minio-6f75d9fbcf-jpstv                                1/1     Running   0       
 If the command above display a different output, please refer back to previous
 guides.
 
-
-### Register the platform as a Destination
-
-To register the platform cluster as an available Destination, you will run
-through the same steps you ran during the worker cluster Destination registration in
-[Installing a Promise](installing-a-promise):
-
-* Install and configure Flux
-* Register the cluster as a Destination with Kratix
-
-There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](./installing-kratix#destination-setup) section. Run:
-
-```bash
-./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels
-```
-
-The platform cluster should now be registered with Kratix and ready to receive
-the workloads. Verify:
-
-```bash
-kubectl --context $PLATFORM get destinations
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME               AGE
-platform-cluster    1m
-worker-cluster      1h
-```
-
-Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify:
-
-```bash
-kubectl --context $PLATFORM get namespaces --watch
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME                     STATUS   AGE
-...
-kratix-platform-system   Active    1h
-//highlight-next-line
-kratix-worker-system     Active    1m
-...
-```
-
-Once you see `kratix-worker-system` on the output,
-press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
-
-You are now ready to install the EasyApp Promise.
-
 ### Install the Promise
 
 

@@ -372,8 +372,6 @@ No resources found in default namespace.
 To recap the steps you took:
 
 1. ✅&nbsp;&nbsp;Installed the Jenkins Promise
-1. ✅&nbsp;&nbsp;Created and configured a worker cluster
-1. ✅&nbsp;&nbsp;Registered the worker cluster with the platform
 1. ✅&nbsp;&nbsp;Requested a Jenkins Resource
 
 ## 🎉 &nbsp; Congratulations
