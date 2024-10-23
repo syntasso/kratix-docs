@@ -22,11 +22,11 @@ This is Part 1 of [a series](intro) illustrating how Kratix works. <br />
 
 ## What is Kratix? {#what-is-kratix}
 
-Kratix is a framework used by platform teams to build the custom platforms tailored to their organisation.
+Kratix is a framework used by platform teams to build custom platforms tailored to their organisation.
 
-### Using Kratix to build your platform you can
+### Using Kratix to build your platform allows you to
 
-- use GitOps workflow and familiar Kubernetes-native constructs.
+- use GitOps workflows and familiar Kubernetes-native constructs.
 - co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of “Promises”. This tutorial will talk more about Kratix Promises in [the next step](installing-a-promise).
 - create a flexible platform by providing your own paved paths as Promises.
 - evolve your platform easily as your business needs change.
@@ -42,8 +42,8 @@ Kratix is a framework used by platform teams to build the custom platforms tailo
 
 ## Hands on: Installing Kratix {#install-kratix}
 
-Before continuing, make sure to go back to [prerequisites](./part-0/intro)
-and follow the guide if you haven't done that already.
+Before continuing, be sure to go back to the [prerequisites](./part-0/intro)
+and follow the guide if you haven't done so already.
 
 You should also make sure you are currently in the `kratix` directory and have the following environment variables set:
 
@@ -54,7 +54,7 @@ export WORKER="kind-worker"
 
 This guide will go through the following steps:
 
-1. [Install Kratix](#kratix-setup)
+1. [Installing Kratix](#kratix-setup)
 1. [Create the Kratix State Store](#statestore-setup)
 
 ### Install Kratix {#kratix-setup}
@@ -128,7 +128,7 @@ can write. When registering a worker cluster with Kratix, you will need to
 specify the state store you intend to use. Kratix will then write to the
 specified state store when scheduling workloads for deployment on that cluster.
 
-Create a new State Store that points to the MinIO bucket we created in the previous tutorial:
+Create a new State Store that points to the MinIO bucket created in the [prerequisites](./part-0/intro):
 
 ```yaml
 cat << EOF | kubectl --context $PLATFORM apply -f -
@@ -158,7 +158,7 @@ bucketstatestore.platform.kratix.io/default created
 The State Store document contains the configuration needed to access the actual
 backing storage.
 
-In the example above, you created a new `BucketStateStore`, since a MinIO bucket
+In the example above, you created a new `BucketStateStore` as a MinIO bucket
 has been provisioned for storage, but you could use any other S3-compatible
 storage like Amazon S3 and Google Cloud Storage.
 
@@ -233,7 +233,7 @@ Although Kratix now knows about the State Store, it's not currently aware of any
 In Kratix terms, a _Destination_ is any system _converging_ on the state
 declared by Kratix.
 
-You already have created a worker cluster as part of the previous tutorial. You will now register this cluster as a Destination.
+You have already created a worker cluster as part of the prerequisites. You will now register this cluster as a Destination.
 
 :::info
 
@@ -278,7 +278,7 @@ The Kratix Destination resource is the representation of a system where workload
 The only required field is `spec.stateStoreRef`, which contains a reference to a State Store present in the platform. In this example, it points to the `default`
 object you created on the previous step. The `spec.StateStoreRef.kind` specifies the kind of State Store being used by this Destination.
 
-That means different Destinations can use different backing storage. For example, you can have a set of Destinations backed by Git, while another set of Destinations can be backed by a Bucket. Further configuration options pertaining paths are also available both in the [State Store](../main/reference/statestore/intro) and the [Destination object](../main/reference/destinations/intro).
+This means that different Destinations can use different backing storage. For example, you can have a set of Destinations backed by Git, while another set of Destinations can be backed by a Bucket. Further configuration options pertaining to paths are also available both in the [State Store](../main/reference/statestore/intro) and the [Destination object](../main/reference/destinations/intro).
 
 </details>
 
@@ -370,7 +370,7 @@ platform-cluster    1m
 worker-cluster      1h
 ```
 
-Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify:
+Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify with:
 
 ```bash
 kubectl --context $PLATFORM get namespaces --watch

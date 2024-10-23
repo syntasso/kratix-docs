@@ -221,7 +221,7 @@ NAME               AGE   LABELS
 worker-cluster      1h   environment=dev
 ```
 
-Since the worker Destination include the label, the NGINX and PostgreSQL Promise
+Since the worker Destination includes the label, the NGINX and PostgreSQL Promise
 Dependencies should be getting installed into the worker cluster. Verify:
 
 ```bash
@@ -257,7 +257,7 @@ Destinations.
 When a Destination is registered, Kratix will use the destination selectors to
 determine what should be immediately installed on the new Destination. When a
 Promise gets updated or upgraded, its Dependencies are seamlessly propagated
-across the fleet. If a Destination labels change, Kratix will automatically converge on the expected system state.
+across the fleet. If a Destination's labels change, Kratix will automatically converge on the expected system state.
 
 If you are curious to learn more about Kratix scheduling, check the
 [Multi-cluster Management](../main/reference/destinations/multidestination-management) docs.

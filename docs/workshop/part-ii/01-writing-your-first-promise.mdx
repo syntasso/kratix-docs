@@ -117,7 +117,7 @@ When designing the API for your new Promise, you can decide how much control you
 
 For example, you could allow them to configure all aspects of the underlying Deployment and Ingress rules. That option provides your users with maximum autonomy and configurability. However, it may be a lot to understand and misconfiguration of services can cause both cost and security issues in the future.
 
-On the other hand, you could go to the other end of the spectrum, hiding all the options and asking users to provide only the absolute necessary pieces of configuration. This allows for fewer configuration errors, but it also limits the flexibility of the service.
+On the other hand, you could go to the other end of the spectrum, hiding all the options and asking users to provide only the absolutely necessary pieces of configuration. This allows for fewer configuration errors, but it also limits the flexibility of the service.
 
 ```mdx-code-block
 import APISpectrum from "/img/docs/workshop/design-api-spectrum.svg"
@@ -283,7 +283,7 @@ import PromiseWorkflows from "/img/docs/workshop/part-ii-wayfinding-pipeline-onl
 
 Kratix provides several hooks for managing and customising the Promise's lifecycle. Those hooks are defined in the Promise `workflows` key. The minimum you need to define is what must happen when the platform receives a request for a new resource from the promised service. Refer to the [Workflows reference documentation](/main/reference/resources/workflows) for further details.
 
-Kratix ships with a builtin Workflow kind, `Pipeline`, which provides a straightforward way to define Workflows. You could, however, use other tools (like Tekton) in your Workflows.
+Kratix ships with a built-in Workflow kind, `Pipeline`, which provides a straightforward way to define Workflows. You could, however, use other tools (like Tekton) in your Workflows.
 
 In a nutshell, a Kratix `Pipeline` is a series of containers that will be executed, in order. In this section, you will write and configure a Kratix `Pipeline` to be executed as part of the `resource.configure` Workflow.
 
@@ -379,7 +379,7 @@ import ResourceWorkflow from "!!raw-loader!./_partials/writing-a-promise/05-reso
   {ResourceWorkflow}
 </CodeBlock>
 
-The final step is to actually build the pipeline image and make it available in the container registry. Since you are using `kind` clusters, you can build and load the image into the cluster directly by running the following commands:
+The final step is to actually build the Resource Configure Workflow's pipeline image and make it available in the container registry. Similar to when you built the Promise Configure Workflow's Pipeline image, you can build and load the image into the cluster directly by running the following commands:
 
 ```bash title="from the app-promise directory"
 docker build --tag kratix-workshop/app-pipeline-image:v1.0.0 workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image

@@ -9,7 +9,7 @@ slug: /
 # Introduction
 
 ## What is Kratix?
-Kratix is a framework used by platform teams to build the custom platforms tailored to their organisation.
+Kratix is a framework used by platform teams to build custom platforms tailored to their organisation.
 
 ### Want to see Kratix in action?
 
