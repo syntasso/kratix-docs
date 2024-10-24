@@ -129,11 +129,11 @@ spec:
   ...
 status:
   conditions: # this is being automatically set by Kratix
-  - lastTransitionTime: "2024-08-21T10:27:45Z"
-    message: Pipeline has not completed
-    reason: PipelineNotCompleted
-    status: "False"
-    type: PipelineCompleted
+    - lastTransitionTime: "2024-10-24T10:07:52Z"
+      message: Pipelines are still in progress
+      reason: PipelinesInProgress
+      status: "False"
+      type: ConfigureWorkflowCompleted
   iam:
     user: admin
   message: User created, next step is to create vault secret for user
@@ -152,11 +152,11 @@ The end status would be:
 ```yaml
 status:
   conditions:
-  - lastTransitionTime: "2024-08-21T10:30:51Z"
-    message: Pipeline completed
-    reason: PipelineExecutedSuccessfully
-    status: "True"
-    type: PipelineCompleted
+    - lastTransitionTime: "2024-10-24T09:36:04Z"
+      message: Pipelines completed
+      reason: PipelinesExecutedSuccessfully
+      status: "True"
+      type: ConfigureWorkflowCompleted
   iam:
     password: <vault-ref>
     user: admin
@@ -164,7 +164,7 @@ status:
 
 ```
 
-The status is always merged, with the lastest pipeline getting priority in case of
+The status is always merged, with the last pipeline getting priority in case of
 conflicts. In this example the `iam` key was updated with the additional
 `password` key, and the `message` key was overwritten.
 
@@ -177,7 +177,7 @@ the same as the final status from the previous run of the `configure` workflow.
 Kratix follows the Kubernetes convention of using
 [conditions](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states)
 to convey the status of a resource and to allow programmatic interactions. When
-a Resource is requested the `PipelineCompleted` condition will be set. The
+a Resource is requested the `ConfigureWorkflowCompleted` condition will be set. The
 `status` for the Pipeline will be `False` until the Pipeline is completed. For
 example when a Resource is requested for the first time the status will
 look like:
@@ -185,11 +185,11 @@ look like:
 ```yaml
 status:
   conditions:
-    - lastTransitionTime: "2023-03-07T15:50:22Z"
-      message: Pipeline has not completed
-      reason: PipelineNotCompleted
+    - lastTransitionTime: "2024-10-24T10:07:52Z"
+      message: Pipelines are still in progress
+      reason: PipelinesInProgress
       status: "False"
-      type: PipelineCompleted
+      type: ConfigureWorkflowCompleted
 ```
 
 once the Pipeline has been completed it will look like:
@@ -197,11 +197,11 @@ once the Pipeline has been completed it will look like:
 ```yaml
 status:
   conditions:
-    - lastTransitionTime: "2023-03-07T15:50:30Z"
-      message: Pipeline completed
-      reason: PipelineExecutedSuccessfully
+    - lastTransitionTime: "2024-10-24T09:36:04Z"
+      message: Pipelines completed
+      reason: PipelinesExecutedSuccessfully
       status: "True"
-      type: PipelineCompleted
+      type: ConfigureWorkflowCompleted
 ```
 
 Conditions can be used by external systems to programmatically check when a
@@ -211,7 +211,7 @@ a user can run the following to have the CLI wait for the Workflow to be
 completed:
 
 ```
-kubectl wait redis/example --for=condition=PipelineCompleted --timeout=60s
+kubectl wait redis/example --for=condition=ConfigureWorkflowCompleted --timeout=60s
 ```
 
 Once the condition is `True` the command will exit.
