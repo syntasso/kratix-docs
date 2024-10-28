@@ -150,11 +150,11 @@ Spec:
     Port:  8080
 Status:
   Conditions:
-    Last Transition Time:  2024-01-31T16:15:38Z
-    Message:               Pipeline completed
-    Reason:                PipelineExecutedSuccessfully
-    Status:                True
-    Type:                  PipelineCompleted
+    - lastTransitionTime: "2024-10-24T09:36:04Z"
+      message: Pipelines completed
+      reason: PipelinesExecutedSuccessfully
+      status: "True"
+      type: ConfigureWorkflowCompleted
   #highlight-start
   Message:                 todo.local.gd:31338
   #highlight-end
@@ -165,7 +165,7 @@ Note how the `status` field is now populated with the information you added to t
 
 :::info
 
-You may also notice that there's a condition called `PipelineCompleted`. This is a special condition that is automatically added to the status of the Resource, and set to `True` when the pipeline completes successfully.
+You may also notice that there's a condition called `ConfigureWorkflowCompleted`. This is a special condition that is automatically added to the status of the Resource, and set to `True` when the pipeline completes successfully.
 
 :::
 
