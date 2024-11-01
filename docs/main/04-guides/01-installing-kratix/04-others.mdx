@@ -50,7 +50,7 @@ export PLATFORM="kind-platform"
 
 <PartialInstallStateStoreStart />
 
-If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store
+If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store.
 
 <Tabs className="boxedTabs" groupId="stateStore">
   <TabItem value="minio" label="Bucket (on KinD)">
@@ -67,6 +67,7 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 
   ```bash
   # Generate Gitea credentials and namespace
+  # Requires `gitea` CLI: https://docs.gitea.com/installation/install-from-binary
   bash <(curl -s https://raw.githubusercontent.com/syntasso/kratix/refs/heads/main/scripts/generate-gitea-credentials.sh)
 
   # Install Gitea and register it as a Git State Store
