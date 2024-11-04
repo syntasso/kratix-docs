@@ -103,6 +103,7 @@ Check the Kubernetes documentation for further details on [Custom
 Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 and [Custom Resources
 Definition](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
+
 </details>
 
 Verify the Kratix deployment:
@@ -353,7 +354,7 @@ through similar steps you ran during the worker cluster Destination registration
 There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](./installing-kratix#destination-setup) section. Run:
 
 ```bash
-./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels
+./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels --with-label environment=platform
 ```
 
 The platform cluster should now be registered with Kratix and ready to receive
@@ -364,6 +365,7 @@ kubectl --context $PLATFORM get destinations
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME               AGE
 platform-cluster    1m
@@ -377,6 +379,7 @@ kubectl --context $PLATFORM get namespaces --watch
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME                     STATUS   AGE
 ...
@@ -402,5 +405,6 @@ To recap the steps you took:
 1. ✅&nbsp;&nbsp;Told Kratix about the worker and platform clusters, as Destinations
 
 ## 🎉 Congratulations
+
 ✅ Kratix is now installed and configured! <br />
 👉🏾 [Next you will deploy your first Promise](./installing-a-promise).
