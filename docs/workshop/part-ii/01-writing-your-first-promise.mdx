@@ -329,19 +329,19 @@ As we will use this same image to build several stages in the pipeline, let's re
 mv workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/{pipeline.sh,resource-configure}
 ```
 
-Make sure to update the Dockerfile to reflect the new script name. Remove the lines marked in red and add the lines marked in green:
+Make sure to update the Dockerfile to reflect the new script name. Replace the Dockerfile contents with the snippet below:
 
-```diff title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/Dockerfile"
-- RUN apk update && apk add --no-cache yq
-+ RUN apk update && apk add --no-cache yq kubectl
+```Dockerfile title="app-promise/workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/Dockerfile"
+FROM "alpine"
 
-- ADD scripts/pipeline.sh /usr/bin/pipeline.sh
-+ COPY scripts/* /usr/bin/
+RUN apk update && apk add --no-cache yq kubectl
 
-- RUN chmod +x /usr/bin/pipeline.sh
-+ RUN chmod +x /usr/bin/*
+COPY scripts/* /usr/bin/
+ADD resources resources
 
-- CMD [ "sh", "-c", "pipeline.sh"]
+RUN chmod +x /usr/bin/*
+
+ENTRYPOINT []
 ```
 
 Replace the contents of the `resource-configure` script with the following:

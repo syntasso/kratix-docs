@@ -147,11 +147,20 @@ docker run \
     --volume ${outputDir}:/kratix/output \
     --volume ${inputDir}:/kratix/input \
     --volume ${metadataDir}:/kratix/metadata \
+    --env MINIO_USER=minioadmin \
+    --env MINIO_PASSWORD=minioadmin \
+    --env MINIO_ENDPOINT=localhost:31337 \
     kratix-workshop/app-pipeline-image:v1.0.0 sh -c "$command"
 EOF
 
 chmod +x scripts/*
 ```
+
+:::warning
+
+If you are running the workshop on a Mac, you may need to update the `MINIO_ENDPOINT` above to `host.docker.internal:31337`.
+
+:::
 
 These scripts do the following:
 

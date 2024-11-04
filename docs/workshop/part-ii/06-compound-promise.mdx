@@ -113,7 +113,7 @@ spec:
   - name: postgresql
     version: v1.0.0-beta.2
   #highlight-end
-  # ...
+  # rest of the file
 ```
 
 This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.2`. You can read more about Promise versioning [in the reference documentation](/main/reference/promises/releases#promise-release).
@@ -331,10 +331,10 @@ workflows:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Pipeline
       metadata:
-        name: resource-configure
+        name: mypipeline
       spec:
         containers:
-          - name: create-resources
+          - name: kratix-workshop-app-pipeline-image
             # ...
           - name: create-bucket
             # ...
@@ -343,6 +343,7 @@ workflows:
             image: kratix-workshop/app-pipeline-image:v1.0.0
             command: [ database-configure ]
           #highlight-end
+status: {}
 ```
 
 Apply your newly updated promise:
@@ -362,7 +363,7 @@ Before you proceed, ensure you have registered the platform cluster as a destina
 kubectl get destinations --show-labels
 ```
 
-If you don't see the platform cluster, or it's not labelled as platform, you can follow [these steps](https://docs.kratix.io/workshop/multiple-promises#register-the-platform-as-a-destination) to register it as a destination. 
+If you don't see the platform cluster, or it's not labelled as platform, you can follow [these steps](https://docs.kratix.io/workshop/multiple-promises#register-the-platform-as-a-destination) to register it as a destination.
 
 ```bash
 NAME               AGE     LABELS
