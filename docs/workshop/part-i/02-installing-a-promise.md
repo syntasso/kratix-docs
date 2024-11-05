@@ -44,21 +44,14 @@ minio                                1/1     1            1           1h
 You should also have a `kratix-worker-system` namespace in your worker cluster:
 
 ```bash
-kubectl --context $WORKER get namespaces
+kubectl --context $WORKER get namespace kratix-worker-system
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
 NAME                   STATUS   AGE
-default                Active   41m
-flux-system            Active   39m
-//highlight-next-line
 kratix-worker-system   Active   35m
-kube-node-lease        Active   41m
-kube-public            Active   41m
-kube-system            Active   41m
-local-path-storage     Active   41m
 ```
 
 If your outputs do not align with the above, please refer back to

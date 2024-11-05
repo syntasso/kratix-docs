@@ -4,6 +4,7 @@ title: Using Compound Promises
 id: multiple-promises
 slug: ../multiple-promises
 ---
+
 ```mdx-code-block
 import CompoundPromiseDiagram from "/img/docs/workshop/compound-promise-diagram.svg"
 import PavedPathDiagram from "/img/docs/workshop/compound-promise-paved-path-diagram.svg"
@@ -75,14 +76,14 @@ kubectl --context $PLATFORM get pods --namespace kratix-platform-system
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME                                                  READY   STATUS    RESTARTS   AGE
 kratix-platform-controller-manager-7cc49f598b-zqkmz   2/2     Running   0          4h4m
-minio-6f75d9fbcf-jpstv                                1/1     Running   0          4h4m
 ```
 
-If the command above display a different output, please refer back to previous
-guides.
+If the command above does not include a ready kratix-platform-controller-manager,
+please refer back to previous guides.
 
 ### Install the Promise
 
@@ -114,115 +115,31 @@ kubectl --context $PLATFORM get promises --watch
 The above command will eventually include the following output:
 
 ```shell-session
+easyapp   Unavailable   EasyApp   example.promise.syntasso.io/v1
+easyapp   Unavailable   EasyApp   example.promise.syntasso.io/v1
+easyapp   Unavailable   EasyApp   example.promise.syntasso.io/v1
 easyapp   Available     EasyApp   example.promise.syntasso.io/v1
 ```
 
-Once you see the "Available", press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
+Once the EasyApp promise becomes "Available", you should see the sub-Promises
+getting automatically installed. If you haven't killed the watch command, you
+should see the following output appearing:
+
+```shell-session
+nginx-ingress
+postgresql
+nginx-ingress   Unavailable   deployment   marketplace.kratix.io/v1alpha1
+postgresql      Unavailable   postgresql   marketplace.kratix.io/v1alpha1
+...
+nginx-ingress   Available     deployment   marketplace.kratix.io/v1alpha1
+postgresql      Available     postgresql   marketplace.kratix.io/v1alpha1
+```
+
+Once all promises are "Available", press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-At this point, you may be asking yourself: _"Wait, wasn't the EasyApp Promise supposed to install three Promises? Why is there only one?"_
-
-That's because the EasyApp Promise makes use of the Kratix _Destination Selectors_ feature.
-
-Destination Selectors allow Promises to specify scheduling logic to determine the suitable Destinations for hosting Dependencies and workloads.
-
-You can verify the EasyApp Destination Selector by describing the Promise:
-
-```bash
-kubectl --context $PLATFORM describe promise easyapp | tail -n 30 | \
-  grep "Destination Selectors" --after-context 2 --max-count 1
-```
-
-The above command will give an output similar to:
-```shell-session
-Destination Selectors:
-  Match Labels:
-    Environment: platform
-```
-
-This means the EasyApp Promise is telling Kratix:
-
-> Only install my Dependencies (i.e., the NGINX and the PostgreSQL Promises) in
-> Destinations with the **label environment=platform**.
-
-Check the registered Destinations again, but this time ask `kubectl` to also show the Destination labels:
-
-```bash
-kubectl --context $PLATFORM get destinations --show-labels
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME               AGE   LABELS
-platform-cluster   10m   <none>
-worker-cluster      1h   environment=dev
-```
-
-<figure className="diagram">
-  <InstallErrorDiagram className="large"/>
-
-</figure>
-
-Note that the platform cluster is missing the required label. Adding the missing
-label should cause the system to converge to the desired state:
-
-```bash
-kubectl --context $PLATFORM label destination platform-cluster environment=platform; \
-kubectl --context $PLATFORM get promises --watch
-```
-
-The above command will eventually converge to an output similar to:
-```shell-session
-NAME            STATUS      KIND         API VERSION                      VERSION
-easyapp         Available   EasyApp      example.promise.syntasso.io/v1
-nginx-ingress   Available   deployment   marketplace.kratix.io/v1alpha1
-postgresql      Available   postgresql   marketplace.kratix.io/v1alpha1
-```
-
-Once you see the expected three Promises, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
-exit the watch mode.
-
-<figure className="diagram">
-  <InstallationPlatformDiagram/>
-  <figcaption>Sequence of events during the installation of a Compound Promise</figcaption>
-</figure>
-
-Once the sub-Promises are installed, their Dependencies will be scheduled to a
-Destination. The EasyApp sub-Promises are also declaring a Destination Selector.
-Verify:
-
-```bash
-kubectl --context $PLATFORM describe promise nginx-ingress |  grep "Destination Selectors:" -A 2 -m 1
-kubectl --context $PLATFORM describe promise postgresql | grep "Destination Selectors:" -A 2 -m 1
-```
-
-The above command will give an output similar to:
-```shell-session
-Destination Selectors:
-  Match Labels:
-    Environment: dev
-```
-
-The NGINX and the PostgreSQL Promises are telling Kratix:
-
-> Only install my Dependencies (which include, the NGINX Ingress Controller and the
-> PostgreSQL operator) in Destinations with the **label environment=dev**.
-
-As you may have noted before, the worker cluster is already labelled correctly.
-Verify:
-
-```bash
-kubectl --context $PLATFORM get destination worker-cluster --show-labels
-```
-
-The above command will give an output similar to:
-```shell-session
-NAME               AGE   LABELS
-worker-cluster      1h   environment=dev
-```
-
-Since the worker Destination includes the label, the NGINX and PostgreSQL Promise
-Dependencies should be getting installed into the worker cluster. Verify:
+The dependencies for the sub-Promises, on the other hands, are installed on the Worker
+destination. You can validate that by checking the deployments on the Worker:
 
 ```bash
 kubectl --context $WORKER get deployments --watch
@@ -237,8 +154,99 @@ nginx-nginx-ingress   1/1     1            1           1m
 postgres-operator     1/1     1            1           1m
 ```
 
-When the deployments eventually complete, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
-exit.
+When the deployments eventually complete, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit.
+
+## Understanding Destination Selectors
+
+You may be asking yourself: how did Kratix know it should install the
+sub-promises on the Platform cluster? And how did it know to install the NGINX
+and the PostgreSQL Promises dependencies on the Worker cluster?
+
+The answer is: **Destination Selectors**.
+
+Destination Selectors are a powerful feature in Kratix that allows Promises to
+specify where their dependencies and resources should be scheduled to. Similar
+to how Kubernetes uses labels to select resources, Kratix uses Destination
+Selectors to select Destinations.
+
+You can verify the EasyApp Destination Selectors by describing the Promise:
+
+```bash
+kubectl --context $PLATFORM describe promise easyapp | tail -n 30 | \
+  grep "Destination Selectors" --after-context 2 --max-count 1
+```
+
+The above command will give an output similar to:
+
+```shell-session
+Destination Selectors:
+  Match Labels:
+    Environment: platform
+```
+
+This tells Kratix:
+
+> Only install the EasyApp Dependencies (i.e., the NGINX and the PostgreSQL
+> Promises) in Destinations with the **label environment=platform**.
+
+So, on the Platform Destination, you should have a label `environment=platform`. Verify:
+
+```bash
+kubectl --context $PLATFORM get destination platform-cluster --show-labels
+```
+
+The above command will give an output similar to:
+
+```shell-session
+NAME               AGE   LABELS
+platform-cluster    1h   environment=platform
+```
+
+<figure className="diagram">
+  <InstallationPlatformDiagram/>
+  <figcaption>Sequence of events during the installation of a Compound Promise</figcaption>
+</figure>
+
+That explains why the NGINX and the PostgreSQL Promises were installed on the
+Platform cluster. But how did the dependencies of those Promises end up on the
+Worker cluster?
+
+Once again, Destination Selectors are the answer. Check the destination
+selectors defined in the NGINX and the PostgreSQL Promises:
+
+```bash
+kubectl --context $PLATFORM describe promise nginx-ingress |  grep "Destination Selectors:" -A 2 -m 1
+kubectl --context $PLATFORM describe promise postgresql | grep "Destination Selectors:" -A 2 -m 1
+```
+
+The above command will give an output similar to:
+
+```shell-session
+Destination Selectors:
+  Match Labels:
+    Environment: dev
+```
+
+The NGINX and the PostgreSQL Promises are telling Kratix:
+
+> Only install my Dependencies (which include, the NGINX Ingress Controller and the
+> PostgreSQL operator) in Destinations with the **label environment=dev**.
+
+Similarly, if you check the Worker Destination, you should see the label
+`environment=dev`:
+
+```bash
+kubectl --context $PLATFORM get destination worker-cluster --show-labels
+```
+
+The above command will give an output similar to:
+
+```shell-session
+NAME               AGE   LABELS
+worker-cluster      1h   environment=dev
+```
+
+The entire installation process is summarised in the diagram below:
 
 <figure className="diagram">
   <InstallationCompleteDiagram />
@@ -246,7 +254,6 @@ exit.
   <figcaption>Full sequence of events during the installation of the Compound Promise</figcaption>
 </figure>
 
-Platform users can go ahead and start using the Promises!
 
 :::info Managing a Fleet of Destinations
 
@@ -264,6 +271,7 @@ If you are curious to learn more about Kratix scheduling, check the
 
 :::
 
+Your Platform is now ready to deploy EasyApps!
 
 ## Request an EasyApp
 
@@ -275,6 +283,7 @@ kubectl --context $PLATFORM get promises
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME            STATUS      KIND         API VERSION                      VERSION
 easyapp         Available   EasyApp      example.promise.syntasso.io/v1
@@ -305,6 +314,7 @@ EOF
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 easyapp.example.promise.syntasso.io/example created
 ```
@@ -312,7 +322,6 @@ easyapp.example.promise.syntasso.io/example created
 The EasyApp Promise will take that request and generate the necessary
 requests for the sub-Promises, wiring up the application to the Postgres
 service.
-
 
 <figure className="diagram">
   <PipelineDiagram className="large"/>
@@ -322,12 +331,12 @@ service.
 
 Verify the Workflows running on the platform cluster:
 
-
 ```bash
 kubectl --context $PLATFORM get pods --watch
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME                                                       READY   STATUS      RESTARTS   AGE
 kratix-easyapp-example-instance-configure-43a5e-x7sdg      0/1     Completed   0          45s
@@ -351,6 +360,7 @@ kubectl --context $WORKER get pods --watch
 ```
 
 The above command will give an output similar to:
+
 ```shell-session
 NAME                                   READY   STATUS    RESTARTS   AGE
 #highlight-next-line
@@ -360,6 +370,13 @@ postgres-operator-79754946d-nmkhr      1/1     Running   0          10m
 #highlight-next-line
 todo-84f6b6698-vqxqm                   1/1     Running   0          74s
 ```
+
+:::note
+
+It will take a couple of minutes for the Todo App to start, and it may cycle through
+a few states, including _Error_, before it eventually succeeds.
+
+:::
 
 Once you see the `todo` and the `acid-todo-postgresql-0` pods reporting `Ready
 1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.

@@ -11,10 +11,11 @@ spec:
         - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
-            name: resource-configure
+            name: mypipeline
           spec:
             containers:
-              - name: create-resources
+              - name: kratix-workshop-app-pipeline-image
                 image: kratix-workshop/app-pipeline-image:v1.0.0
                 #highlight-next-line
                 command: [ resource-configure ]
+status: {}
