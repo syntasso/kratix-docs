@@ -80,11 +80,10 @@ The above command will give an output similar to:
 ```shell-session
 NAME                                                  READY   STATUS    RESTARTS   AGE
 kratix-platform-controller-manager-7cc49f598b-zqkmz   2/2     Running   0          4h4m
-minio-6f75d9fbcf-jpstv                                1/1     Running   0          4h4m
 ```
 
-If the command above display a different output, please refer back to previous
-guides.
+If the command above does not include a ready kratix-platform-controller-manager,
+please refer back to previous guides.
 
 ### Install the Promise
 
@@ -160,7 +159,7 @@ When the deployments eventually complete, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to 
 ## Understanding Destination Selectors
 
 You may be asking yourself: how did Kratix know it should install the
-Sub-promises on the Platform cluster? And how did it know to install the NGINX
+sub-promises on the Platform cluster? And how did it know to install the NGINX
 and the PostgreSQL Promises dependencies on the Worker cluster?
 
 The answer is: **Destination Selectors**.
@@ -371,6 +370,13 @@ postgres-operator-79754946d-nmkhr      1/1     Running   0          10m
 #highlight-next-line
 todo-84f6b6698-vqxqm                   1/1     Running   0          74s
 ```
+
+:::note
+
+It will take a couple of minutes for the Todo App to start, and it may cycle through
+a few states, including _Error_, before it eventually succeeds.
+
+:::
 
 Once you see the `todo` and the `acid-todo-postgresql-0` pods reporting `Ready
 1/1`, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
