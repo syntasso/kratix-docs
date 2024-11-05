@@ -19,13 +19,23 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.7.0/) (2024-10-30)
+
+#### Features
+
+* **Breaking Change** - Promise and Resource status condition `PipelineCompleted` is replaced by `ConfigureWorkflowCompleted`
+    to reflect success of the entire Configure workflow, rather than success of a single pipeline.
+    * You need to migrate usage of `PipelineCompleted` to `ConfigureWorkflowCompleted` after upgrading (e.g. in any automation which watches for this condition).
+* Add regular reconciliation for the Promise Configure workflow, rerunning at least every 10 hours.
+* Add support for configuring [HTTP authorization for Promise Releases](../../main/05-reference/11-promises/05-releases.md#authenticated-endpoints).
+
 ### [0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.6.0/) (2024-10-01)
 
 #### Features
 
-* **Breaking Change** - Compress the `workload.content` in `Works` and `WorkPlacements` to reduce their size 
-    * Due to the nature of this change, you may observe errors when existing Works and WorkPlacements are retrieved as they are expected to be 
-    compressed. To ensure existing `Works` and `WorkPlacements` are compressed as expected, re-run the pipelines for any deployed Promises and 
+* **Breaking Change** - Compress the `workload.content` in `Works` and `WorkPlacements` to reduce their size
+    * Due to the nature of this change, you may observe errors when existing Works and WorkPlacements are retrieved as they are expected to be
+    compressed. To ensure existing `Works` and `WorkPlacements` are compressed as expected, re-run the pipelines for any deployed Promises and
     Resource Requests.
 * Security Updates
 

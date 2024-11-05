@@ -14,7 +14,6 @@ This is Part 5 of [a series](intro) illustrating how to write Kratix Promises.
 
 <hr />
 
-
 In the previous section, you learned how the update the status of a resource request. This allowed you to equip the user with relevant information about their request, in this case, the url of their todo app.
 
 In this section, you will gain an understanding of Compound Promises. You will:
@@ -114,38 +113,12 @@ spec:
   - name: postgresql
     version: v1.0.0-beta.2
   #highlight-end
-  # ...
+  # rest of the file
 ```
 
 This states that the App-as-a-Promise needs the PostgreSQL Promise to be installed at version `v1.0.0-beta.2`. You can read more about Promise versioning [in the reference documentation](/main/reference/promises/releases#promise-release).
 
-Apply your newly updated promise:
-
-```bash
-kubectl --context $PLATFORM apply --filename promise.yaml
-```
-
-You should have observed a warning similar to the following:
-
-```shell-session
-Warning: Requirement Promise "postgresql" at version "v1.0.0-beta.2" not installed
-Warning: Promise will not be available until the above issue(s) is resolved
-```
-
-This is because the PostgreSQL promise is not currently installed. If you query the list of Promises:
-
-```bash
-kubectl --context $PLATFORM get promises
-```
-
-You should see the App promise as "Unavailable":
-
-```shell-session
-NAME   STATUS        KIND   API VERSION             VERSION
-app    Unavailable   App    workshop.kratix.io/v1
-```
-
-To fix that, run the following to install the PostgreSQL Promise:
+Before we can apply our newly updated promise, run the following to install the PostgreSQL Promise:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
@@ -155,13 +128,19 @@ kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/s
 You might have noticed that the above command uses a Promise Release to install the PostgreSQL Promise, we will not be exploring this in depth but you can look at the [documentation](/main/reference/promises/releases) for more information
 :::
 
-Kratix should automatically detect that the App Promise should now be available, since its requirements are now met. If you query the list of Promises again:
+Apply your newly updated App-as-a-Promise:
+
+```bash
+kubectl --context $PLATFORM apply --filename promise.yaml
+```
+
+If you query the list of Promises:
 
 ```bash
 kubectl --context $PLATFORM get promises
 ```
 
-You should see, after a few seconds, that both promises are marked as "Available":
+You should see both promises. After a few seconds, both promises are marked as "Available":
 
 ```shell-session
 NAME         STATUS      KIND         API VERSION                      VERSION
@@ -352,10 +331,10 @@ workflows:
     - apiVersion: platform.kratix.io/v1alpha1
       kind: Pipeline
       metadata:
-        name: resource-configure
+        name: mypipeline
       spec:
         containers:
-          - name: create-resources
+          - name: kratix-workshop-app-pipeline-image
             # ...
           - name: create-bucket
             # ...
@@ -364,6 +343,7 @@ workflows:
             image: kratix-workshop/app-pipeline-image:v1.0.0
             command: [ database-configure ]
           #highlight-end
+status: {}
 ```
 
 Apply your newly updated promise:
@@ -383,7 +363,7 @@ Before you proceed, ensure you have registered the platform cluster as a destina
 kubectl get destinations --show-labels
 ```
 
-If you don't see the platform cluster, or it's not labelled as platform, you can follow [these steps](https://docs.kratix.io/workshop/multiple-promises#register-the-platform-as-a-destination) to register it as a destination. 
+If you don't see the platform cluster, or it's not labelled as platform, you can follow [these steps](https://docs.kratix.io/workshop/multiple-promises#register-the-platform-as-a-destination) to register it as a destination.
 
 ```bash
 NAME               AGE     LABELS

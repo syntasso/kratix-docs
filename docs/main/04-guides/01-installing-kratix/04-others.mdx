@@ -50,7 +50,7 @@ export PLATFORM="kind-platform"
 
 <PartialInstallStateStoreStart />
 
-If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store
+If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store.
 
 <Tabs className="boxedTabs" groupId="stateStore">
   <TabItem value="minio" label="Bucket (on KinD)">
@@ -66,6 +66,10 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
   <TabItem value="gitea" label="Git (on KinD)">
 
   ```bash
+  # Generate Gitea credentials and namespace
+  # Requires `gitea` CLI: https://docs.gitea.com/installation/install-from-binary
+  bash <(curl -s https://raw.githubusercontent.com/syntasso/kratix/refs/heads/main/scripts/generate-gitea-credentials.sh)
+
   # Install Gitea and register it as a Git State Store
   kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/platform/gitea-install.yaml
   kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_gitstatestore.yaml
@@ -87,7 +91,7 @@ If your are using local KinD clusters you can install MinIO or Gitea as an in-cl
 ## Set up a worker cluster {#worker-setup}
 
 ### Create worker cluster
-If you are not using a pre-existing cluster, create your platform cluster locally using KinD:
+If you are not using a pre-existing cluster, create your worker cluster locally using KinD:
 ```bash
 kind create cluster --image kindest/node:v1.27.3 --name worker
 
@@ -145,7 +149,7 @@ Follow the steps below that match the State Store you created previously:
 <TabItem value="minio" label="Bucket (on KinD)">
 
 ```bash
-# Configure Flux to pull down from MinIO
+# Register the worker cluster as a Destination
 kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml
 ```
 
@@ -154,7 +158,7 @@ kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/s
 <TabItem value="gitea" label="Git (on KinD)">
 
 ```bash
-# Install flux on the worker and configure it to pull down from MinIO
+# Register the worker cluster as a Destination
 curl https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml | \
   sed "s_BucketStateStore_GitStateStore_g" | \
   kubectl apply --context $PLATFORM --filename -
@@ -167,7 +171,7 @@ curl https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platf
 You will need to manual configure the Destination resources to use created State Store.
 Download and modify this [example configuration](https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_worker.yaml),
 replacing the `spec.StateStoreRef.name`, `spec.StateStoreRef.namespace` and `spec.StateStoreRef.kind`
-to match the previously created State Store
+to match the previously created State Store.
 
 </TabItem>
 </Tabs>

@@ -56,5 +56,5 @@ PLATFORM=kind-platform
 
 </details>
 
-If you are are not continuing from the previous section, or your outputs do not align with the validation, please refer back to
+If you are not continuing from the previous section, or your outputs do not align with the validation, please refer back to
 [Installing Kratix](installing-kratix).

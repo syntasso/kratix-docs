@@ -19,7 +19,7 @@ This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
 
 <hr />
 
-**in this tutorial, you will**
+**In this tutorial, you will**
 
 - [learn what Promises are](#promise-definition)
 - [install your first Kratix Promise](#install-jenkins)
@@ -44,21 +44,14 @@ minio                                1/1     1            1           1h
 You should also have a `kratix-worker-system` namespace in your worker cluster:
 
 ```bash
-kubectl --context $WORKER get namespaces
+kubectl --context $WORKER get namespace kratix-worker-system
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
 NAME                   STATUS   AGE
-default                Active   41m
-flux-system            Active   39m
-//highlight-next-line
 kratix-worker-system   Active   35m
-kube-node-lease        Active   41m
-kube-public            Active   41m
-kube-system            Active   41m
-local-path-storage     Active   41m
 ```
 
 If your outputs do not align with the above, please refer back to
@@ -72,7 +65,7 @@ A Promise is the building block that Kratix provides to enable platform teams to
 build their platforms incrementally. Promises are what allow the platform to
 provide anything-as-a-Service and are composed of mainly three pieces:
 
-- A set of Dependencies that needs to be installed on any worker cluster
+- A set of Dependencies that need to be installed on any worker cluster
   intending to run the Promise workload.
 - An API exposing to the user of the platform the configuration options they
   have when requesting the service provided by the Promise.
@@ -164,7 +157,7 @@ jenkins-operator   1/1     1            1           11s
 Once the jenkins-operator deployment is ready, press <kbd>Ctrl</kbd>+<kbd>C</kbd>
 to exit the watch mode.
 
-If at this stage you create another Kubernetes cluster and follow similar steps of registering and configuring this new cluster, the Jenkins Promise dependencies would be automatically installed in the new cluster.
+If at this stage you create another Kubernetes cluster and follow similar steps to register and configure this new cluster, the Jenkins Promise dependencies automatically be installed in the new cluster.
 
 Later in this tutorial you will learn how to make certain Promises available only in certain clusters based on Promise configuration.
 
@@ -226,8 +219,8 @@ jenkins.marketplace.kratix.io/example created
 <details>
 <summary>🤔 How do platform users interact with the Promise API?</summary>
 
-In this example, users are interacting with the API using the `kubectl`
-directly. However, how users of your platform will, it's up to you.
+In this example, you are interacting with the API using the `kubectl` cli
+directly. However, how users of your platform will is up to you.
 
 For example, you could have [Backstage](https://www.syntasso.io/post/kratix-and-backstage-a-perfect-pair)
 on top of the API to facilitate the creation of services. Similarly,
@@ -338,7 +331,7 @@ kubectl --context $WORKER get secrets --selector app=jenkins-operator -o go-temp
 
 ## Clean up
 
-Since you will no longer need Jenkins in the remainder of this tutorial, you can go ahead and delete it.
+Since you will no longer need Jenkins for the remainder of this tutorial, you can go ahead and delete it.
 
 Delete the Jenkins Promise:
 
@@ -372,12 +365,10 @@ No resources found in default namespace.
 To recap the steps you took:
 
 1. ✅&nbsp;&nbsp;Installed the Jenkins Promise
-1. ✅&nbsp;&nbsp;Created and configured a worker cluster
-1. ✅&nbsp;&nbsp;Registered the worker cluster with the platform
 1. ✅&nbsp;&nbsp;Requested a Jenkins Resource
 
 ## 🎉 &nbsp; Congratulations
 
-✅&nbsp;&nbsp;Your Promise is now installed. <br />
+✅&nbsp;&nbsp;Your Promise has been installed and deleted. <br />
 👉🏾&nbsp;&nbsp;Next, you will learn more about [Compound
 Promises](multiple-promises)

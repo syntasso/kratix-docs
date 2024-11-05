@@ -7,7 +7,7 @@ sidebar_label: SKE-Operator
 ## Overview
 
 The SKE-Operator is the operator for managing the installation and upgrading of
-SKE. For installaton documentation see [here](/ske/kratix/intro).
+SKE. For installation documentation see [here](/ske/kratix/intro).
 
 The release manifest is available at:
 
@@ -26,19 +26,25 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
-### [0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.4.0/) (2024-10-16)
+### [0.4.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.4.1/) (2024-10-21)
 
-Released in Helm Chart [version 0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.17.0/)
+Released in Helm Chart [version 0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.21.0/)
 
-### Features
+* Update default image host to `registry.syntasso.io`
 
-* Use `registry.syntasso.io` images instead of `ghcr.io` when installing SKE
+### [0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.4.0/) (2024-10-17)
+
+Released in Helm Chart [version 0.19.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.19.0/)
+
+#### Bug Fixes
+
+* Fix bug that made the Operator version configurable as this resulted in errors during upgrades
 
 ### [0.3.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.3.1/) (2024-10-15)
 
 Released in Helm Chart [version 0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.17.0/)
 
-### Bug Fixes
+#### Bug Fixes
 
 * Fix bug preventing Kratix resources from being updated gracefully
 
@@ -46,11 +52,11 @@ Released in Helm Chart [version 0.17.0](http://syntasso-enterprise-releases.s3-w
 
 Released in Helm Chart [version 0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.16.0/)
 
-### Features
+#### Features
 
 * Support pulling releases from a Git Repo for air-gapped environments
 
 
-### Bug Fixes
+#### Bug Fixes
 
 * Fix bug preventing correct version of SKE being returned from the Operator
