@@ -64,7 +64,7 @@ authenticate using the token you have been provided with. For Docker, you can
 run the following command, providing your token as the password when prompted:
 
 ```bash
-docker login ghcr.io --username syntasso-pkg
+docker login registry.syntasso.io --username syntasso-pkg
 ```
 
 If you are using a different container engine, follow the docs for your specific
@@ -86,7 +86,7 @@ gh api orgs/syntasso/packages/container/ske-backstage-generator/versions | jq -r
 :::
 
 ```bash
-docker pull ghcr.io/syntasso/ske-backstage-generator:VERSION
+docker pull registry.syntasso.io/ske-backstage-generator:VERSION
 ```
 
 ### Pulling the image from your cluster
@@ -100,10 +100,10 @@ directly to the Kubernetes cache. Different tools have different commands for th
 
 ```bash
 # For minikube
-minikube image load ghcr.io/syntasso/ske-backstage-generator:VERSION
+minikube image load registry.syntasso.io/ske-backstage-generator:VERSION
 
 # For KinD
-kind load docker-image ghcr.io/syntasso/ske-backstage-generator:VERSION
+kind load docker-image registry.syntasso.io/ske-backstage-generator:VERSION
 ```
 
 For other tools, follow their specific documentation.
@@ -138,7 +138,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-end
     resource:
@@ -153,7 +153,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-end
 ```
@@ -186,7 +186,7 @@ been provided with:
 
 ```yaml
 kubectl create secret docker-registry syntasso-registry \
-  --docker-server=ghcr.io \
+  --docker-server=registry.syntasso.io \
   --docker-username=syntasso-pkg \
   --docker-password=YOUR_TOKEN \
   --namespace kratix-platform-system
@@ -220,7 +220,7 @@ secret.
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
 ```
 
@@ -293,7 +293,7 @@ pipeline stage with the snippet below:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
             #highlight-start
             env:
@@ -333,7 +333,7 @@ for all resource requests:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
             #highlight-start
             env:
@@ -410,7 +410,7 @@ the `rbac` permissions required by the image:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-start
             args:
@@ -434,7 +434,7 @@ the `rbac` permissions required by the image:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-start
             args:
