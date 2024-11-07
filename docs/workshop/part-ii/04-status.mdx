@@ -86,15 +86,13 @@ If you inspect the `test/metadata/status.yaml` file, you should see something li
 message: "my-app.local.gd:31338"
 ```
 
-Excellent. With that file in place, Kratix will automatically persist that information to the status of the Resource. The next time the pipeline runs, the `input/object.yaml` file will contain the `status` field with the information persisted from the `status.yaml`.
+Excellent. With that file in place, Kratix will automatically persist that
+information to the status of the Resource.
 
-Now test your changes:
-
-```bash
-./scripts/test-pipeline resource-configure
-```
-
-Inspect the `test/metadata/status.yaml` file.
+The status that persist to your resource will also be viewable the next time
+the pipeline runs by inspecting the `/kratix/input/object.yaml`. For example after
+the very first pipeline has run, all future pipelines would have an input object
+like the following:
 
 ```yaml title="test/input/object.yaml"
 apiVersion: workshop.kratix.io/v1
