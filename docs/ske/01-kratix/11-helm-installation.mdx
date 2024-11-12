@@ -171,7 +171,7 @@ configuration as follows:
 global:
   skeOperator:
     tlsConfig:
-      certManagerConfig:
+      certManager:
         disabled: true
       webhookCACert: |
         -----BEGIN CERTIFICATE-----
@@ -186,7 +186,7 @@ global:
 skeDeployment:
   enabled: true
   tlsConfig:
-    certManagerConfig:
+    certManager:
       disabled: true
     webhookCACert: |
       -----BEGIN CERTIFICATE-----
