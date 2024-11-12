@@ -17,7 +17,8 @@ install SKE on your Kubernetes cluster, follow the steps below.
 
 :::info
 
-Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
+Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster
+unless your are configuring [custom certificates](#custom-certs). Please
 refer to [its documentation for installation instructions](https://cert-manager.io/).
 
 :::
@@ -157,7 +158,7 @@ Release Storage.
 
 </details>
 
-#### Configuring TLS Certificates for SKE Operator and Deployment
+#### Configuring TLS Certificates for SKE Operator and Deployment {#custom-certs}
 
 By default, the SKE Operator and the SKE instance it deploys use cert-manager to
 manage TLS certificates for their webhooks. This default setup requires no
