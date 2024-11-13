@@ -17,7 +17,8 @@ install SKE on your Kubernetes cluster, follow the steps below.
 
 :::info
 
-Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster. Please
+Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster
+unless your are configuring [custom certificates](#custom-certs). Please
 refer to [its documentation for installation instructions](https://cert-manager.io/).
 
 :::
@@ -157,6 +158,65 @@ Release Storage.
 
 </details>
 
+#### Configuring TLS Certificates for SKE Operator and Deployment {#custom-certs}
+
+By default, the SKE Operator and the SKE instance it deploys use cert-manager to
+manage TLS certificates for their webhooks. This default setup requires no
+additional configuration. However, if you prefer not to use cert-manager, you
+can disable it and manually provide your own TLS certificates.
+
+To disable cert-manager and supply your custom certificates, update your
+configuration as follows:
+
+```yaml
+global:
+  skeOperator:
+    tlsConfig:
+      certManager:
+        disabled: true
+      webhookCACert: |
+        -----BEGIN CERTIFICATE-----
+        ...
+      webhookTLSKey: |
+        -----BEGIN PRIVATE KEY-----
+        ...
+      webhookTLSCert: |
+        -----BEGIN CERTIFICATE-----
+        ...
+
+skeDeployment:
+  enabled: true
+  tlsConfig:
+    certManager:
+      disabled: true
+    webhookCACert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+    webhookTLSKey: |
+      -----BEGIN PRIVATE KEY-----
+      ...
+    webhookTLSCert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+```
+
+Both the SKE Operator and SKE Deployment require valid TLS certificates for
+their webhook servers to securely communicate with the Kubernetes API. Below are
+the DNS names that must be included in the TLS certificates for each component.
+
+The TLS certificate for the SKE Operator's webhook server must cover the
+following DNS names:
+
+- `ske-operator-webhook-service.kratix-platform-system.svc`
+- `ske-operator-webhook-service.kratix-platform-system.svc.cluster.local`
+
+The TLS certificate for the SKE Deployment's webhook server must cover the
+following DNS names:
+
+- `kratix-platform-webhook-service.kratix-platform-system.svc`
+- `kratix-platform-webhook-service.kratix-platform-system.svc.cluster.local`
+
+
 ### Installing the Operator
 
 Next, install the SKE Operator:
@@ -165,6 +225,7 @@ Next, install the SKE Operator:
 helm install ske-operator syntasso/ske-operator \
   --namespace kratix-platform-system \
   --create-namespace \
+  --wait \
   --values values.yaml # This is optional. Only use if you are configuring custom values.
 ```
 
@@ -269,7 +330,8 @@ helm search repo syntasso/ske-operator --versions
 To upgrade, run:
 
 ```bash
-helm upgrade ske-operator syntasso/ske-operator # --version <VERSION>
+helm upgrade ske-operator syntasso/ske-operator \
+  --version <CHART VERSION> --values values.yaml
 ```
 
 :::info Not using Helm?

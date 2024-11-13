@@ -26,6 +26,26 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
+### [0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.5.0/) (2024-11-12)
+
+Released in Helm Chart [version 0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.22.0/)
+
+:::warning
+This version of the Helm chart introduces a **breaking change** in how it manages
+the Kratix CRD. To ensure a smooth upgrade, you must run the following manual
+commands before upgrading:
+
+```bash
+kubectl --context=$PLATFORM label crd kratixes.platform.syntasso.io app.kubernetes.io/managed-by=Helm
+kubectl --context=$PLATFORM annotate crd kratixes.platform.syntasso.io meta.helm.sh/release-name=ske-operator meta.helm.sh/release-namespace=kratix-platform-system
+```
+
+These steps are required to align the CRD management with the new Helm chart
+structure. Failing to perform this migration will result in upgrade failures.
+:::
+
+* Support installing SKE Operator and SKE without cert-manager
+
 ### [0.4.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.4.1/) (2024-10-21)
 
 Released in Helm Chart [version 0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.21.0/)
