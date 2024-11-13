@@ -225,6 +225,7 @@ Next, install the SKE Operator:
 helm install ske-operator syntasso/ske-operator \
   --namespace kratix-platform-system \
   --create-namespace \
+  --wait \
   --values values.yaml # This is optional. Only use if you are configuring custom values.
 ```
 
@@ -329,7 +330,8 @@ helm search repo syntasso/ske-operator --versions
 To upgrade, run:
 
 ```bash
-helm upgrade ske-operator syntasso/ske-operator # --version <VERSION>
+helm upgrade ske-operator syntasso/ske-operator \
+  --version <CHART VERSION> --values values.yaml
 ```
 
 :::info Not using Helm?
