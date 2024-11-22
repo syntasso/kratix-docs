@@ -31,6 +31,7 @@ Let's first check:
      ```
      kubectl get pods --selector kratix.io/resource-name=<request-name>
      ```
+
      Then inspect the logs for your container
 
      ```
@@ -42,7 +43,6 @@ Let's first check:
      it.
 
      ```
-
      kubectl get work --selector kratix.io/resource-name=<request-name>
      ```
 
