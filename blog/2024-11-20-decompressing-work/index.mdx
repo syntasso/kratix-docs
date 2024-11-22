@@ -1,6 +1,6 @@
 ---
 slug: from-platform-to-destination
-title: "From Platform to Destination"
+title: "How your Resources get from Promise to Destination"
 description: The journey of a document from the Platform Cluster to a Destination
 authors: [derik]
 tags: [kratix, kratix internals, debugging]
@@ -13,20 +13,27 @@ import Figure03 from "./figure03.png"
 import Figure04 from "./figure04.png"
 ```
 
+Ever wondered how Kratix actually gets your documents from the Platform Cluster
+to the correct Destination?
+
 The Kratix Team has recently introduced a
-[change](https://github.com/syntasso/kratix/pull/243) to Kratix to reduce the
-size of the Work object. While this change is mostly internal, it's a good
-opportunity to dive into how Kratix actually works and understand how a document
-moves from the Platform Cluster to a Destination.
+[change](https://github.com/syntasso/kratix/pull/243) to
+Kratix to reduce the size of the Work object. While this change is mostly
+internal, we wanted to share how the innards of Kratix work.
+
+So brace yourself to learn:
+- how Kratix moves documents from Platform to Destinations
+- what works and workplacements are
+- how to inspect works to debug your Promises
 
 You are probably already familiar with how Kratix works at a high level and with
 the diagram below:
 
 <figure className="diagram">
   <img className="large" src={Figure01} alt="High level diagram explaining how
-Kratix process requests" />
+Kratix processes requests" />
 
-  <figcaption>How Kratix processes a request</figcaption>
+  <figcaption>How Kratix processes a request to a Kubernetes Destination</figcaption>
 </figure>
 
 As illustrated above:
@@ -37,14 +44,17 @@ As illustrated above:
 3. The Workflow completes and outputs a **series of documents** to be scheduled
    to a **Destination**.
 4. These documents are written to a specific directory in the **State Store**.
-5. The **Destination** has Flux (or another tool) watching that directory and
-   picks up the new documents.
+5. In the diagram, the documents are scheduled to a Kubernetes **Destination**.
+   These type of Destination usually have Flux (or ArgoCD, or another GitOps
+   tool) watching the State Store. The tool picks up the new documents.
 6. The documents are then processed and applied to the Destination.
 7. The **App** becomes operational on the Destination.
 
-In this blog post, I'm going to expand on points (3) and (4): what happens at
-the end of the Workflow? How is the document written to the State Store?
-And how does the change linked above affect this process?
+In this post, I'm going to expand on points (3) and (4): what happens at the end
+of the Workflow? How is the document written to the State Store? And how does
+the change linked above affect this process?
+
+---
 
 {/* truncate */}
 
@@ -139,9 +149,13 @@ the `work-writer` container, and the error message isn't particularly helpful:
 etcdserver: request is too large
 ```
 
-> You may see an error message like `Request entity too large: limit is
-> 3145728`; that means you are hitting the Kubernetes API limit, not the etcd
-> one.
+:::tip
+
+You may see an error message like `Request entity too large: limit is
+3145728`; that means you are hitting the Kubernetes API limit, not the etcd
+one.
+
+:::
 
 While it takes a lot of YAML to be over 1.5MB, you can easily reach such a limit
 in your Promise. The [Prometheus
@@ -153,7 +167,7 @@ This brings us back to the [change introduced by
 gzip compression for the Workload contents before persisting the Work into etcd.
 This significantly reduces the size of the Work object (gzip documentation
 mentions an average of [70% reduction in
-size](https://www.gnu.org/software/gzip/manual/gzip.html). For the Prometheus
+size](https://www.gnu.org/software/gzip/manual/gzip.html)). For the Prometheus
 Operator, for example, the size of the Work object went from 3.7MB to about
 490KB—an 87% reduction 🎉!
 
@@ -198,10 +212,10 @@ day.
 
 ## Conclusion
 
-In this post, we've dived into the internals of Kratix to understand how a
-document moves from the Platform Cluster to a Destination. We've seen how the
+In this post, we dived into the internals of Kratix to understand how a
+document moves from the Platform Cluster to a Destination. We saw how the
 Work and WorkPlacement objects are used to schedule and write documents to the
-State Store. We've also seen how the recent change to compress the Workload
+State Store. We also saw how the recent change to compress the Workload
 contents has helped reduce the size of the Work object.
 
 We hope this post has given you a better understanding of how Kratix works under
