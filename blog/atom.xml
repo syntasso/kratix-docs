@@ -15,7 +15,7 @@
         <summary type="html"><![CDATA[The journey of a document from the Platform Cluster to a Destination]]></summary>
         <content type="html"><![CDATA[<p>Ever wondered how Kratix actually gets your documents from the Platform Cluster
 to the correct Destination?</p>
-<p>The Kratix Team has recently introduced a
+<p>The Syntasso Team has recently introduced a
 <a href="https://github.com/syntasso/kratix/pull/243" target="_blank" rel="noopener noreferrer">change</a> to
 Kratix to reduce the size of the Work object. While this change is mostly
 internal, we wanted to share how the innards of Kratix work.</p>
