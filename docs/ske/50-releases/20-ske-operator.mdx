@@ -15,7 +15,7 @@ The release manifest is available at:
 http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/
 ```
 
-The helm charts is available at:
+The helm chart is available at:
 
 ```
 http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/
@@ -25,6 +25,25 @@ To see which version of the helm chart corresponds to which version of the
 SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
+
+### [SKE Operator Helm Chart 0.26.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.26.0/)
+
+Deploys SKE Operator version [0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.6.0/)
+
+#### Features
+
+* This chart provides support for provisioning additional SKE and Kubernetes resources alongside the SKE Operator and SKE Deployment. With the
+`skeDeployment.additionalResources`, property, users can specify any additional resources that rely on the existence of a SKE Deployment
+(e.g. Destinations, BucketStateStore) whilst the higher level `additionalResources` property can be used to specify any other Kubernetes resources
+required (e.g. Secrets).
+
+### [0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.6.0/) (2024-11-21)
+
+Released in Helm Chart [version 0.25.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.25.0/)
+
+#### Bug Fixes
+
+* Fix bug to ensure Kratix Deployment readiness is properly checked before being marked as Available
 
 ### [0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.5.0/) (2024-11-12)
 
