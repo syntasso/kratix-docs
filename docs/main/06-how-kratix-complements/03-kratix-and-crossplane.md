@@ -20,8 +20,8 @@ Kratix does not aim to compete with Crossplane on cloud orchestration and it can
 
 - Creating a [Promise](../reference/promises/intro) for
   Crossplane simplifies the Crossplane installation experience.
-- Kratix provides [multi-cluster
-  support](../reference/deployment-topology) for
+- Kratix provides multi-cluster
+  support for
   free. Where Crossplane users are managing several Crossplane provider
   clusters, Kratix complements by providing the cross-cluster management of
   resources.
