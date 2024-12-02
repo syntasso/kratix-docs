@@ -1,6 +1,7 @@
 ---
 title: The Value of Kratix
 description: Explore the main benefits in using Kratix to build your Platform.
+unlisted: true
 ---
 
 # The Value of Kratix
