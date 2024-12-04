@@ -1,0 +1,8 @@
+{
+  "label": "Installing GitOps Agent",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Installing GitOps Agents on Kubernetes Destinations"
+  }
+}

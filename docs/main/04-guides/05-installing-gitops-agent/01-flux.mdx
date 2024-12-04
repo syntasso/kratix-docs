@@ -1,4 +1,39 @@
-### Configure Flux
+---
+description: Install FluxCD
+slug: /main/guides/installing-fluxcd
+title: FluxCD
+---
+
+### Install GitOps agent
+
+Kratix supports any GitOps agent that can watch a Git repository for changes, such as
+[Flux](https://fluxcd.io/flux/installation/) or [ArgoCD](https://argo-cd.readthedocs.io/en/stable/getting_started/).
+Install the GitOps agent of your choice on the worker cluster following the instructions below.
+
+To use FluxCD as the GitOps agent, you need to:
+1. Install FluxCD
+1. Configure the `GitRepository` or `Bucket` resource to point to the State Store
+1. Configure two `Kustomizations` to deploy the dependencies and resources in the State
+Store
+
+#### Pre-bundled FluxCD (Not for production)
+If you are just using this cluster for testing you can use the
+following manifest bundle that contains Kratix. (**NOT to be used for production**).
+```bash
+kubectl apply --context $WORKER --filename https://raw.githubusercontent.com/syntasso/kratix/main/hack/destination/gitops-tk-install.yaml
+```
+
+Make sure that `flux` is ready before proceeding:
+
+```shell-session
+$ kubectl --context $WORKER get pods --namespace flux-system
+NAME                                       READY   STATUS    RESTARTS   AGE
+helm-controller-5f7457c9dd-s5qzt           1/1     Running   0          18s
+kustomize-controller-5f58d55f76-hwm5w      1/1     Running   0          19s
+notification-controller-685bdc466d-5xmk8   1/1     Running   0          16s
+source-controller-86b8b57796-t6xgg         1/1     Running   0          20s
+
+### Configure GitOps agent
 
 Configure [Flux](https://fluxcd.io) to use the state store you created earlier:
 - If you are using a Git repository as your state store, follow the steps in the
