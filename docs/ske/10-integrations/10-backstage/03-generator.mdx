@@ -547,6 +547,29 @@ making the request.
 ```
 </details>
 
+#### Scheduling Backstage Components
+
+By default, `BackstageComponent` requests are scheduled to your Backstage destination.
+If you need to schedule `BackstageComponent` to destinations other than
+the default Backstage destination with label `environment: backstage`, you can set the
+`.spec.destinationSelectors` on the resource to customize its scheduling behavior.
+An example of this is shown below:
+
+```yaml
+apiVersion: syntasso.io/v1alpha1
+kind: BackstageComponent
+metadata:
+  name: A-NAME
+  namespace: NAMESPACE
+spec:
+  destinationSelectors:
+  - matchLabels:
+      environment: backstage-instance-one
+      team: billing
+- resources: |
+  ... # contents of /kratix/output/backstage/catalog-info.yaml
+```
+
 ### Generate a single Backstage catalog
 
 Using the SKE Backstage Component Promise, you can optionally choose to write a single
