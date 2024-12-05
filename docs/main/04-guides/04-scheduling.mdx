@@ -57,9 +57,11 @@ kind create cluster --image kindest/node:v1.27.3 --name worker-2
 export WORKER_2="kind-worker-2"
 ```
 
-Next, install the GitOps toolkit and create the necessary GitOps resources on the new worker cluster. The quickest
-way to do that is to run the `./scripts/install-gitops` script from the Kratix root
-directory:
+Next, install a GitOps Agent on the cluster. For local dev environments the
+quickest way to do that is to run the `./scripts/install-gitops` script from the
+Kratix root directory. If you want to do a proper installation with the GitOps
+tools of your choice, check the [GitOps Agent installation
+guide](/category/installing-gitops-agent).
 
 ```bash
 cd /path/to/kratix

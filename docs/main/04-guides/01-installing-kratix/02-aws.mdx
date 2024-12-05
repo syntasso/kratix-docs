@@ -8,10 +8,8 @@ title: Amazon Elastic Kubernetes Service (EKS)
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import PartialInstallKratixAndCert from '../../../_partials/installation/_install-kratix-and-cert.mdx';
-import PartialInstallFlux from '../../../_partials/installation/_install-flux.mdx';
-import PartialCheckFluxAndFinish from '../../../_partials/installation/_install-check-flux-and-finish.mdx';
+import PartialInstallGitOpsAgent from '../../../_partials/installation/_install-gitops-agent.mdx';
 import PartialInstallStateStoreStart from  '../../../_partials/installation/_install-state-store-start.md';
-import PartialInstalConfigureFluxAndRegisterDestination from  '../../../_partials/installation/_install-configure-flux-and-register-destination.md';
 import PartialInstallSetupDestination from '../../../_partials/installation/_install-setup-destination.md';
 ```
 
@@ -65,8 +63,4 @@ kubectl config current-context
 export WORKER=<worker-context-name>
 ```
 
-<PartialInstallFlux />
-
-<PartialInstalConfigureFluxAndRegisterDestination/>
-
-<PartialCheckFluxAndFinish />
+<PartialInstallGitOpsAgent />
