@@ -12,7 +12,8 @@ reconciled by an external tool.
 Some example use cases:
 - [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernets manifests) to
   the Destination, and then a GitOps tool running on the Kubernetes cluster,
-  such as Flux or ArgoCD with pull down the documents and deploy them.
+  such as Flux or ArgoCD with pull down the documents and deploy them. See our
+  [GitOps Agent documentation](/category/installing-gitops-agent) for more information.
 - [Terraform](https://www.terraform.io/): There are many toolings that exist to trigger Terraform applys
   when a new Terraform file is committed to a Git repository. For example
   [Terraform
