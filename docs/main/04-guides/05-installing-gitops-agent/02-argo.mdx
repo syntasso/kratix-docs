@@ -17,8 +17,8 @@ If you have already installed ArgoCD you can skip this section.
 
 For the most up to date information on installing ArgoCD, see the [ArgoCD
 documentation](https://argo-cd.readthedocs.io/en/stable/getting_started/). The
-simplest method of installaton is to use the latest ArgoCD release manifest
-from the ArgoCD GitHub:
+simplest method of installaton is to use the latest ArgoCD release manifest from
+the ArgoCD repo on GitHub:
 
 ```bash
 kubectl --context $WORKER create namespace argocd
@@ -71,7 +71,7 @@ spec:
   source:
     repoURL: https://172.18.0.2:31333/gitea_admin/kratix
     targetRevision: HEAD
-    path: ./<destination-name>/dependencies
+    path: ./<path in state store to destination>/dependencies
     directory:
       recurse: true
   destination:
@@ -92,7 +92,7 @@ spec:
   source:
     repoURL: https://172.18.0.2:31333/gitea_admin/kratix
     targetRevision: HEAD
-    path: ./<destination-name>/resources
+    path: ./<path in state store to destination>/resources
     directory:
       recurse: true
   destination:
@@ -132,9 +132,9 @@ kubectl --context $WORKER get applications -A -w
 ```
 
 You should see the `kratix-workload-resources` and `kratix-workload-dependencies`
-resources eventually get in the `Ready` state.
+resources eventually get in the `Synced` and `Healthy` state.
 ```
-NAMESPACE     NAME                           AGE   READY   STATUS
-ArgoCD-system   kratix-platform-dependencies   23s   True    Applied revision: sha256:9610eac643b6cadfd7bce31eb26abea051ae02c5f81b52de1d9d2a8458c3e0b8
-ArgoCD-system   kratix-platform-resources      23s   True    Applied revision: sha256:9610eac643b6cadfd7bce31eb26abea051ae02c5f81b52de1d9d2a8458c3e0b8
+NAMESPACE   NAME                           SYNC STATUS   HEALTH STATUS
+argocd      kratix-workload-dependencies   Synced        Healthy
+argocd      kratix-workload-resources      Synced        Healthy
 ```

@@ -15,9 +15,10 @@ install Flux to sync Kubernetes resources from your state store to your cluster.
 
 If you have already installed Flux you can skip this section.
 
-For the most up to date information on installing Flux, see the 
-[Flux documentation](https://fluxcd.io/docs/installation/). The simplest method
-of installaton is to use the latest FluxCD release manifest from the Flux GitHub:
+For the most up to date information on installing Flux, see the [Flux
+documentation](https://fluxcd.io/docs/installation/). The simplest method of
+installaton is to use the latest FluxCD release manifest from the Flux repo on
+GitHub:
 
 ```bash
 kubectl --context $WORKER apply -f https://github.com/fluxcd/flux2/releases/latest/download/install.yaml
@@ -38,7 +39,7 @@ source-controller-86b8b57796-t6xgg         1/1     Running   0          20s
 ```
 
 ## Configuring Flux
-### Configuring access to the StateStore
+### Configuring access to the State Store
 In order for FluxCD to be able to sync resources to your cluster you need to provide
 FluxCD access to read from your state store. This can be done by creating a `Bucket` or `GitRepository`
 resource depending on the type of state store you are using.
@@ -127,7 +128,7 @@ Install the `flux-statestore.yaml` resources to the worker cluster:
 kubectl apply --context $WORKER -f flux-statestore.yaml
 ```
 
-### Configuring Flux to deploy resources from the StateStore
+### Configuring Flux to deploy resources from the State Store
 
 Now that Flux is configured to read from the state store, you need to configure
 Flux to read the resources from the state store and apply them to the cluster.
@@ -161,7 +162,7 @@ spec:
   sourceRef:
     kind: <Bucket or GitRepository>
     name: <Name of Bucket/GitRepository>
-  path: ./<destination-name>/resources
+  path: ./<path in state store to destination>/resources
   validation: client
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
@@ -175,7 +176,7 @@ spec:
   sourceRef:
     kind: <Bucket or GitRepository>
     name: <Name of Bucket/GitRepository>
-  path: ./<destination-name>/dependencies
+  path: ./<path in state store to destination>/dependencies
   validation: client
 ```
 
