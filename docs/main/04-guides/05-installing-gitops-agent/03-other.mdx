@@ -6,9 +6,17 @@ title: Others
 
 If you do not wish to use Flux or ArgoCD, you can use any tool that can apply
 Kubernetes manifests declared in the state store to your cluster. Kratix will
-populate two separate directories, `resources/` and `dependencies/` within the
+populate two separate directories, `dependencies/` and `resources/` within the
 directory of the Destination in the state store. The two directories should be
 reconciled independently.
+
+The two directories are responsible for different sets of Kubernetes resources.
+Documents scheduled from the Promise Dependencies or Promise Configure Workflow
+get written to the `dependencies/` directory. Documents scheduled from the
+Resource Configure Workflows get written to the `resources/` directory. It's
+common for a dependency to occur, where something in the `dependencies/`
+directory needs to be applied before something in the `resources/` directory.
+This is why reconciling the directories independently is important.
 
 An example of a custom GitOps approach would be to configure two separate CI
 pipeline to watch separate directories in the state store repository for changes
