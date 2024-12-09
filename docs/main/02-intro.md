@@ -8,7 +8,7 @@ slug: /
 
 # Introduction
 
-Kratix is the open-source Platform Framework, that enables you to provide anything as a service, while incorporating your key business processes and managing everything as a fleet.
+Kratix is the open-source Platform Framework, that enables you to provide anything as-a-Service, while incorporating your key business processes and managing everything as a fleet.
 
 :::info
 Ready to get started? Follow our [Quick Start](01-quick-start.md) to jump right in.
@@ -16,7 +16,7 @@ Ready to get started? Follow our [Quick Start](01-quick-start.md) to jump right 
 
 ## Why Kratix?
 
-Kratix is designed and built by a team with decades of experience creating [internal developer platforms](https://www.syntasso.io/internal-developer-platforms). We've learned that great platforms address three key challenges faced by enterprise organizations: 
+Kratix is designed and built by a team with decades of experience creating [internal developer platforms](https://www.syntasso.io/internal-developer-platforms). We've learned that great platforms address three key challenges faced by enterprise organisations: 
 
 - **Slow delivery of value** because software engineers must wait weeks for other teams to process their tickets.
 - **Inconsistent application of key business rules** as teams create shadow IT systems to bypass lengthy ticket queues, introducing business risk.
@@ -26,7 +26,7 @@ A [Kratix Promise](./03-reference/11-promises/01-intro.md) enables you to provid
 
 [Workflows](./03-reference/12-workflows.md) let you embed any business rule into your Promise definition, from security scans and billing checks to manual approvals.
 
-With Kratix's built-in [Fleet Management](./03-reference/11-promises/03-updates.md) capabilities, you can maintain and upgrade all your resources with a single click.
+And with Kratix's built-in [Fleet Management](./03-reference/11-promises/03-updates.md) capabilities, you can maintain and upgrade all your resources with a single click.
 
 ![Kratix Architecture](/img/kratix-architecture.svg)
 
