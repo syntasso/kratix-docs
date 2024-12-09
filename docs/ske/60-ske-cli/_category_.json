@@ -1,7 +1,7 @@
 
 {
-  "label": "SKE CLI",
-  "position": 6,
+  "label": "CLI Reference",
+  "position": 60,
   "link": {
     "type": "doc",
     "id": "ske/ske-cli/ske-cli-intro"

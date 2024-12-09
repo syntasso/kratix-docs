@@ -1,0 +1,36 @@
+---
+title: SKE Operator
+description: Documentation about the SKE Operator
+---
+## What's the SKE Operator?
+
+The SKE operator follows the [Kubernetes operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) and provides full lifecycle support for Syntasso Kratix Enterprise.
+
+The operator has its own [releases](../releases/ske-operator) and it manages instances of SKE as defined by a [Kratix Custom Resource](#the-kratix-crd).
+
+## Features
+
+While SKE is able to be installed directly [via manifests](./installation/via-manifest),
+we highly recommend that you use the operator. Using the operator will reduce your work to
+maintain SKE and all future operational features will only be available via the operator.
+
+In specific the operator will:
+
+* Validate SKE is in a healthy state before upgrading
+* Roll out an upgrade to the next minor version
+* Validate SKE upgrades work with current Promises by:
+  * Re-running Promise workflows
+  * Re-running resource workflows
+* Provide information about the state of the upgrade once complete
+* Enable pausing of platform requests during an upgrade
+
+## The Kratix Custom Resource Definition (CRD)
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: my-kratix
+spec:
+  version: vX.Y.Z # The desired version of SKE, can be set to latest
+```
