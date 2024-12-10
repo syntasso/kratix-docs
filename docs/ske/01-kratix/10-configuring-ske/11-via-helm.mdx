@@ -232,8 +232,8 @@ helm install ske-operator syntasso/ske-operator \
 <details>
 <summary>Alternative installation method</summary>
 
-If you prefer not to use Helm, you can install the SKE operator by applying the
-manifests directly. Check [SKE Operator](./installation/via-manifest) for the instructions.
+If you prefer not to use Helm, you can install the SKE Operator by applying the
+manifests directly. Check [SKE Operator](./configuring-ske/via-manifest) for the instructions.
 
 </details>
 
@@ -299,8 +299,15 @@ To upgrade the version of SKE being deployed by the operator, you can edit your
 Kratix instance definition and change the `version` field to the desired
 version.
 
-Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
-vX.Y+1.Z first.
+The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks)
+and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the upgrade flow.
+
+:::info
+
+Upgrades from a version `vX.Y.Z` to `vX.Y+2.Z` are not supported. You must upgrade to
+`vX.Y+1.Z` first.
+
+:::
 
 ## Deletes
 

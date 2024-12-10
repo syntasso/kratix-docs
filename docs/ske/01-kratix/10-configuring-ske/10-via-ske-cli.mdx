@@ -3,8 +3,9 @@ title: Via SKE CLI
 description: Installing Syntasso Kratix Enterprise via the SKE CLI
 ---
 
-Syntasso Kratix Enterprise images are distributed through a private image registry. To
-install SKE on your Kubernetes cluster, follow the steps below.
+Syntasso Kratix Enterprise images are distributed through a private image registry.
+
+To install SKE on your Kubernetes cluster, follow the steps below.
 
 ## Air-gapped installations
 
@@ -18,11 +19,11 @@ In the meantime, you can follow the [setup for air-gapped environments](./air-ga
 
 :::info
 
-By default Syntasso Kratix Enterprise requires cert-manager to be installed on
+By default Syntasso Kratix Enterprise requires `cert-manager` to be installed on
 the cluster. Please refer to [its documentation for installation
 instructions](https://cert-manager.io/).
 
-If you wish to install SKE without cert-manager, you can do so by following the
+If you wish to install SKE without `cert-manager`, you can do so by following the
 [Helm Installation instructions](./via-helm#custom-certs).
 
 :::
@@ -71,5 +72,45 @@ installing promises). For that, refer to the [appropriate guide](/category/guide
 
 ## Upgrades
 
-Support for upgrading SKE using the SKE CLI is coming soon. In the meantime, you can
-follow the [helm upgrade](./via-helm) instructions for upgrading SKE.
+To upgrade your SKE instance via the CLI, you can run:
+
+```shell-session
+ske upgrade
+```
+
+By default, the SKE Operator will perform the following steps:
+1. Run the pre-upgrade checks to check that Kratix is safe to upgrade in its current state.
+1. Upgrade your Kratix Deployment to the new version.
+1. Wait for the Kratix Deployment to become healthy (ready and available).
+1. Trigger post-upgrade checks and wait for them to complete.
+
+### Upgrade checks
+
+The SKE Operator will perform [pre-upgrade checks](./ske-operator#pre-upgrade-checks)
+and [post-upgrade checks](./ske-operator#post-upgrade-checks) as part of the upgrade flow.
+
+To skip these checks, you can use the `--skip-all-checks` flag when starting an upgrade:
+
+```shell-session
+ske upgrade --skip-all-checks
+```
+
+:::tip
+Skipping checks can be useful when you need to upgrade SKE while its current state is
+unhealthy.
+:::
+
+### Timeouts
+
+The SKE CLI has a default 5-minute timeout for monitoring an upgrade. This can be
+configured by using the `--timeout` flag:
+
+```shell-session
+ske upgrade --timeout 10m0s
+```
+
+:::info
+The SKE CLI timeout is only enforced while monitoring an upgrade. Timing out on the CLI will not
+fail the upgrade, and progress can still be monitored by checking the status of the Kratix
+resource.
+:::

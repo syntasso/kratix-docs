@@ -6,7 +6,7 @@ ske get version
 
 ## Usage
 ```
-ske-cli [command]
+ske [command]
 ```
 
 
