@@ -1,0 +1,140 @@
+---
+description: Install ArgoCD
+slug: /main/guides/installing-argocd
+title: ArgoCD
+---
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+ArgoCD can be used as the GitOps agent for Kratix. This guide will show you how to
+install ArgoCD to sync Kubernetes resources from your state store to your cluster.
+
+## Installing ArgoCD
+
+If you have already installed ArgoCD you can skip this section.
+
+For the most up to date information on installing ArgoCD, see the [ArgoCD
+documentation](https://argo-cd.readthedocs.io/en/stable/getting_started/). The
+simplest method of installaton is to use the latest ArgoCD release manifest from
+the ArgoCD repo on GitHub:
+
+```bash
+kubectl --context $WORKER create namespace argocd
+kubectl --context $WORKER apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+If you wish to install a different way (e.g. Helm or CLI), or want to install a
+specific version, follow the instructions in the [ArgoCD
+documentation](https://argo-cd.readthedocs.io/en/stable/getting_started/).
+
+Make sure that `ArgoCD` is ready before proceeding:
+
+```shell-session
+kubectl --context $WORKER get pods -n argocd
+NAME                                                READY   STATUS    RESTARTS   AGE
+argocd-application-controller-0                     1/1     Running   0          46s
+argocd-applicationset-controller-7d6d4c75c4-wkrg7   1/1     Running   0          46s
+argocd-dex-server-6b4cddf964-8s2k8                  1/1     Running   0          46s
+argocd-notifications-controller-59dcb66475-zntc9    1/1     Running   0          46s
+argocd-redis-69f7894888-v8l76                       1/1     Running   0          46s
+argocd-repo-server-7f49794c48-x8r5q                 1/1     Running   0          46s
+argocd-server-7cfcc854-bvn7h                        1/1     Running   0          46s
+```
+
+## Configuring ArgoCD
+
+In order for ArgoCD to be able to sync resources to your cluster you need to
+create `Application` resources. These resources will point to the state store
+and will sync resources to the cluster. We recommend you create two
+`Application` resources, one for the dependencies (documents from the Promise
+Dependencies or Promise Configure Workflow) and one for the resources (documents
+from the Resource Configure Workflow).
+
+Below is an example of the `Application` resources you can use to sync resources
+from the state store to the cluster. Create a `argocd-applications.yaml` from
+the example, replacing `<destination path>` (defaults to the destination name), `<repo url>`, and authentication
+details to match your state store. See the
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#repositories)
+documentation for more information on configuring the `Application` resource.
+
+```yaml
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kratix-workload-dependencies
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: <repo url>
+    targetRevision: HEAD
+    path: ./<destination path>/dependencies
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc # in-cluster reconcile
+    namespace: default # The namespace will only be set for namespace-scoped resources without a value for .metadata.namespace
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kratix-workload-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: <repo url>
+    targetRevision: HEAD
+    path: ./<destination path>/resources
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc # in-cluster reconcile
+    namespace: default # The namespace will only be set for namespace-scoped resources without a value for .metadata.namespace
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitea
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
+  url: <repo url>
+  password: r8sA8CPHD9!bt6d
+  username: gitea_admin
+  insecure: "true"
+```
+
+Install the `argocd-applications.yaml` resources to the worker cluster:
+
+```bash
+kubectl apply --context $WORKER -f argocd-applications.yaml
+```
+
+To check that ArgoCD is correctly syncing resources from the state store to the
+cluster you can check the health of the `Application` resources:
+
+```shell-session
+kubectl --context $WORKER get applications -A -w
+```
+
+You should see the `kratix-workload-resources` and `kratix-workload-dependencies`
+resources eventually get in the `Synced` and `Healthy` state.
+```
+NAMESPACE   NAME                           SYNC STATUS   HEALTH STATUS
+argocd      kratix-workload-dependencies   Synced        Healthy
+argocd      kratix-workload-resources      Synced        Healthy
+```
