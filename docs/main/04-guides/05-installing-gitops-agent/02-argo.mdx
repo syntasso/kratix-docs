@@ -54,7 +54,7 @@ from the Resource Configure Workflow).
 
 Below is an example of the `Application` resources you can use to sync resources
 from the state store to the cluster. Create a `argocd-applications.yaml` from
-the example, replacing `<destination-name>`, the `repoURL` and authentication
+the example, replacing `<destination path>` (defaults to the destination name), `<repo url>`, and authentication
 details to match your state store. See the
 [ArgoCD](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#repositories)
 documentation for more information on configuring the `Application` resource.
@@ -69,9 +69,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://172.18.0.2:31333/gitea_admin/kratix
+    repoURL: <repo url>
     targetRevision: HEAD
-    path: ./<path in state store to destination>/dependencies
+    path: ./<destination path>/dependencies
     directory:
       recurse: true
   destination:
@@ -90,9 +90,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://172.18.0.2:31333/gitea_admin/kratix
+    repoURL: <repo url>
     targetRevision: HEAD
-    path: ./<path in state store to destination>/resources
+    path: ./<destination path>/resources
     directory:
       recurse: true
   destination:
@@ -112,7 +112,7 @@ metadata:
     argocd.argoproj.io/secret-type: repository
 stringData:
   type: git
-  url: https://172.18.0.2:31333/gitea_admin/kratix
+  url: <repo url>
   password: r8sA8CPHD9!bt6d
   username: gitea_admin
   insecure: "true"
