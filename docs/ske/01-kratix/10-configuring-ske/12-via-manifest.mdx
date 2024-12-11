@@ -1,0 +1,179 @@
+---
+title: Via Manifests
+description: Documentation on how to install the SKE-Operator via the operator manifest directly
+---
+
+## Prerequisites
+
+### Create the namespace
+
+To install the SKE Operator via the [distribution manifest](../../releases/ske-operator),
+you will first need to create the `kratix-platform-system` namespace. This is where the
+SKE operator will be installed:
+
+```bash
+kubectl create namespace kratix-platform-system
+```
+
+### Create the Operator configuration
+
+If you are not running SKE in an air-gapped environment, all you need to do is create a secret with your license token:
+
+```bash
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=kratix-platform-system \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
+```
+
+For air-gapped environments, you will need to create a ConfigMap with the following structure:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: ske-operator
+  namespace: kratix-platform-system
+data:
+  config: |
+    releaseStorage:
+      path: # path within the git repository or bucket to look for releases
+      # one of: git or bucket
+      git:
+        secretName: # the name of the secret containing the git credentials
+        repo: # the git repository to look for releases
+        branch: # the branch to look for releases
+      bucket:
+        name: # the name of the bucket to look for releases
+        endpoint: # the endpoint of the bucket
+        region: # the region of the bucket
+        secretName: # optional: the name of the secret containing the credentials to access the bucket
+    imageRegistry:
+      host: # the host of the image registry
+      pullSecret: # optional: the name of the secret containing the image registry credentials
+      platformImage: # the image of the platform
+      pipelineImage: # the image of the pipeline adapter
+```
+
+Refer to the [air-gapped installations](./air-gapped) section for more
+information on how to configure the underlying storage and image registry, as
+well as the expected structure of the referenced secrets.
+
+## Deploying the SKE Operator
+
+With all of the prerequisites in place, the platform is now ready to deploy the
+SKE Operator. Locate the desired release of the SKE-Operator and apply its
+manifest with `kubectl`:
+
+```bash
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<VERSION>/ske-operator-distribution.yaml
+```
+
+Applying the manifest will install the SKE Operator in the
+`kratix-platform-system` namespace, together with a Kratix Custom Resource
+Definition (CRD) that allows you to manage the Syntasso Kratix Enterprise installation.
+
+## Deploying SKE
+
+The SKE Operator includes a custom resource definition (CRD) for managing
+SKE. Only one instance of SKE can be created by the SKE Operator in a
+given cluster.
+
+To deploy SKE, create a file named `ske-instance.yaml` with the following contents:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: my-kratix
+spec:
+  version: v0.99.0 # The desired version of SKE
+```
+
+Apply the file with `kubectl`:
+
+```bash
+kubectl apply --filename ske-instance.yaml
+```
+
+The operator will then install SKE and its necessary configurations. For more
+information about the Kratix CRD, see the [SKE Operator](../ske-operator)
+documentation.
+
+## Upgrading SKE Operator
+
+To upgrade the SKE Operator, you can apply the new manifest directly:
+
+```bash
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<NEW-VERSION>/ske-operator-distribution.yaml
+```
+
+## Upgrading SKE
+
+To upgrade the SKE instance, you can apply a new version of the Kratix CRD:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: my-kratix
+spec:
+  version: v0.100.0 # New desired version
+```
+
+### Upgrade checks
+
+The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks)
+and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the upgrade flow.
+
+To skip these checks, you can add the
+`ske.syntasso.io/skip-all-upgrade-checks` label when updating your `.spec.version`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: my-kratix
+  #highlight-start
+  labels:
+    ske.syntasso.io/skip-all-upgrade-checks: "true"
+  #highlight-end
+spec:
+  version: v0.100.0 # New desired version
+```
+
+:::tip
+Skipping checks can be useful when you need to upgrade SKE while its current state is
+unhealthy.
+:::
+
+### Handling failures
+
+If any upgrade step fails, the SKE Operator will continue looping its reconciliation of
+the Kratix resource to pick up any manual fixes. See the section on [handling
+failures](../ske-operator#handling-failures) for more details.
+
+## Deleting SKE Operator
+
+To delete the SKE Operator (and any deployed SKE instance), run the following command:
+
+```bash
+kubectl delete -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<VERSION>/ske-operator-distribution.yaml
+```
+
+:::warning
+
+This will delete the SKE Operator and any deployed SKE instance, including all Promises
+and Resource Requests.
+
+:::
+
+## Deleting SKE Instance
+
+To delete the SKE instance, run the following command:
+
+```bash
+kubectl delete kratixes my-kratix
+```

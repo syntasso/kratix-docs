@@ -9,7 +9,7 @@ SKE successfully installed; SKE version: v0.1.0, SKE operator version: v0.2.0
 
 ## Usage
 ```
-ske-cli install --access-token=MY_TOKEN [--context] [flags]
+ske install --access-token=MY_TOKEN [--context] [flags]
 ```
 
 
