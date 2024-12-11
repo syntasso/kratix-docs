@@ -33,7 +33,7 @@ helm repo update
 
 ### Configuring your values
 
-Helm can accept values via the a values file. Refer to the examples
+Helm can accept values via the values file. Refer to the examples
 below for common configuration options. Any configuration should be placed in a
 `values.yaml` file that is then passed in to the `helm install` command.
 
@@ -304,12 +304,13 @@ and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the up
 
 :::info
 
-Upgrades from a version `vX.Y.Z` to `vX.Y+2.Z` are not supported. You must upgrade to
-`vX.Y+1.Z` first.
+It is not possible to skip upgrade checks when upgrading via Helm. If you would like to
+use this feature, we recommend that you [install via the SKE CLI](./via-ske-cli) or by
+[directly applying the manifests](./via-manifests).
 
 :::
 
-## Deletes
+## Deletions
 
 ### Deleting the SKE Operator
 

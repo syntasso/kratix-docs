@@ -3,19 +3,33 @@ title: Via SKE CLI
 description: Installing Syntasso Kratix Enterprise via the SKE CLI
 ---
 
-Syntasso Kratix Enterprise images are distributed through a private image registry.
+The easiest way to get started with SKE is to use the SKE CLI.
 
-To install SKE on your Kubernetes cluster, follow the steps below.
+The CLI will install the SKE Operator and configure it to deploy SKE on your cluster.
 
-## Air-gapped installations
+To install SKE on your Kubernetes cluster via the CLI, follow the steps below.
 
-Support for installing SKE in air-gapped environments using the SKE CLI is coming
-soon.
+:::info
 
-In the meantime, you can follow the [setup for air-gapped environments](./air-gapped) instructions and
-[install using helm](./via-helm).
+The SKE CLI needs access to the private registry which Syntasso Kratix Enterprise images
+are distributed through. Support for installing SKE in **air-gapped environments** instead
+using the SKE CLI is coming soon.
 
-## Install
+In the meantime, you can follow the [setup for air-gapped environments](./air-gapped)
+instructions, and then [install using Helm](./via-helm) or by [directly applying the manifests](./via-manifest).
+:::
+
+## Installing the SKE CLI
+
+Instructions for installing the SKE CLI can be found [here](../../ske-cli/ske-cli-intro#installation).
+
+## Installing SKE
+
+To install the SKE Operator and a SKE instance, run:
+
+```
+ske install --access-token $SKE_LICENSE_TOKEN
+```
 
 :::info
 
@@ -27,14 +41,6 @@ If you wish to install SKE without `cert-manager`, you can do so by following th
 [Helm Installation instructions](./via-helm#custom-certs).
 
 :::
-
-The easiest way to get started with SKE is to use the [SKE
-CLI](../ske-cli/ske-cli-intro). The CLI will install the SKE Operator and
-configure it to deploy SKE on your cluster. To install, run:
-
-```
-ske install --access-token $SKE_LICENSE_TOKEN
-```
 
 ### Verify the installation
 
@@ -86,8 +92,8 @@ By default, the SKE Operator will perform the following steps:
 
 ### Upgrade checks
 
-The SKE Operator will perform [pre-upgrade checks](./ske-operator#pre-upgrade-checks)
-and [post-upgrade checks](./ske-operator#post-upgrade-checks) as part of the upgrade flow.
+The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks)
+and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the upgrade flow.
 
 To skip these checks, you can use the `--skip-all-checks` flag when starting an upgrade:
 

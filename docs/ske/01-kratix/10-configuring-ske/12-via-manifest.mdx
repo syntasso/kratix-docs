@@ -3,7 +3,7 @@ title: Via Manifests
 description: Documentation on how to install the SKE-Operator via the operator manifest directly
 ---
 
-## Pre-requisites
+## Prerequisites
 
 ### Create the namespace
 
@@ -63,7 +63,7 @@ well as the expected structure of the referenced secrets.
 
 ## Deploying the SKE Operator
 
-With all of the pre-requisites in place, the platform is now ready to deploy the
+With all of the prerequisites in place, the platform is now ready to deploy the
 SKE Operator. Locate the desired release of the SKE-Operator and apply its
 manifest with `kubectl`:
 
@@ -125,8 +125,8 @@ spec:
 
 ### Upgrade checks
 
-The SKE Operator will perform [pre-upgrade checks](./ske-operator#pre-upgrade-checks)
-and [post-upgrade checks](./ske-operator#post-upgrade-checks) as part of the upgrade flow.
+The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks)
+and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the upgrade flow.
 
 To skip these checks, you can add the
 `ske.syntasso.io/skip-all-upgrade-checks` label when updating your `.spec.version`:
@@ -165,7 +165,8 @@ kubectl delete -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases
 
 :::warning
 
-This will delete the SKE Operator and any deployed SKE instance.
+This will delete the SKE Operator and any deployed SKE instance, including all Promises
+and Resource Requests.
 
 :::
 
@@ -174,5 +175,5 @@ This will delete the SKE Operator and any deployed SKE instance.
 To delete the SKE instance, run the following command:
 
 ```bash
-kubectl delete kratix --namespace kratix-platform-system my-kratix
+kubectl delete kratixes my-kratix
 ```

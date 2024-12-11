@@ -3,9 +3,7 @@ title: SKE Operator
 description: Documentation about the SKE Operator
 ---
 
-The SKE Operator follows the [Kubernetes operator
-pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) and provides
-full lifecycle support for Syntasso Kratix Enterprise (SKE).
+The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE).
 
 The operator has its own [releases](../releases/ske-operator) and it manages instances of
 SKE as defined by a [Kratix Custom Resource](#the-kratix-custom-resource-definition-crd).
@@ -13,8 +11,12 @@ SKE as defined by a [Kratix Custom Resource](#the-kratix-custom-resource-definit
 :::info
 
 While SKE is able to be installed directly via the [released SKE distribution
-manifests](../releases/ske#overview), we highly recommend that you use the SKE Operator
+manifests](../releases/ske#overview), we **highly recommend** that you use the SKE Operator
 to install and manage your SKE installation.
+
+The SKE Operator follows the [Kubernetes operator
+pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) and provides
+ongoing reconciliation of your Kratix installation against the desired distritution.
 
 Using the Operator will reduce the workload of maintaining SKE, and all future operational
 features will only be available via the Operator.
@@ -25,12 +27,13 @@ features will only be available via the Operator.
 
 The SKE Operator will:
 
+* Install a Kratix instance into your cluster, including dependencies
+* Prevent drift of Kratix resources by continuously reconciling them against the declared
+[SKE distribution](../releases/ske#overview)
 * Validate SKE is in a healthy state before upgrading with pre-upgrade checks
 * Roll out an upgrade to the next minor version at the latest patch
 * Validate an upgrade works with post-upgrade checks
 * Provide information about the status of the upgrade
-* Prevent drift of Kratix resources by continuously reconciling them against the declared
-[SKE distribution](../releases/ske#overview)
 
 ## The Kratix Custom Resource Definition (CRD)
 
@@ -85,7 +88,7 @@ The following pre-upgrade checks will run by default:
 
 :::info
 
-An additional check that that the desired version is an allowed upgrade path is **always**
+An additional check that the desired version is an allowed upgrade path is **always**
 performed.
 
 This check passes when the new version is:
