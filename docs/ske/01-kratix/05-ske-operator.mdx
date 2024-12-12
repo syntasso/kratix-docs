@@ -3,20 +3,16 @@ title: SKE Operator
 description: Documentation about the SKE Operator
 ---
 
-The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE).
+The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE) and is the
+recommended approach for installing and managing your SKE installation.
 
 The operator has its own [releases](../releases/ske-operator) and it manages instances of
 SKE as defined by a [Kratix Custom Resource](#the-kratix-custom-resource-definition-crd).
 
 :::info
 
-While SKE is able to be installed directly via the [released SKE distribution
-manifests](../releases/ske#overview), we **highly recommend** that you use the SKE Operator
-to install and manage your SKE installation.
-
-The SKE Operator follows the [Kubernetes operator
-pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/) and provides
-ongoing reconciliation of your Kratix installation against the desired distritution.
+While SKE is can be installed directly via the [released SKE distribution
+manifests](../releases/ske#overview), we **highly recommend** that you use the SKE Operator.
 
 Using the Operator will reduce the workload of maintaining SKE, and all future operational
 features will only be available via the Operator.
