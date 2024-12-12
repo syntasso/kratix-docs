@@ -1,6 +1,6 @@
 ---
-title: Installation via Helm
-description: Installing Syntasso Kratix Enterprise
+title: Via Helm
+description: Installing Syntasso Kratix Enterprise via Helm
 ---
 
 ```mdx-code-block
@@ -33,7 +33,7 @@ helm repo update
 
 ### Configuring your values
 
-Helm can accept values via the a values file. Refer to the examples
+Helm can accept values via the values file. Refer to the examples
 below for common configuration options. Any configuration should be placed in a
 `values.yaml` file that is then passed in to the `helm install` command.
 
@@ -57,7 +57,7 @@ To configure the version of SKE that the operator will install, you can use the
 
 ```yaml
 skeDeployment:
-  version: v0.99.0
+  version: v0.99.0 # select your desired version
 ```
 
 #### Mirrored Image Registry
@@ -232,61 +232,14 @@ helm install ske-operator syntasso/ske-operator \
 <details>
 <summary>Alternative installation method</summary>
 
-If you prefer not to use Helm, you can install the SKE operator by applying the
-manifests directly.
-
-First, create the namespace where the SKE operator will be installed:
-
-```bash
-kubectl create namespace kratix-platform-system
-```
-
-Then, create a secret with your license token:
-
-```
-kubectl create secret docker-registry syntasso-registry \
-  --namespace=kratix-platform-system \
-  --docker-server=registry.syntasso.io \
-  --docker-username=syntasso-pkg \
-  --docker-password=<YOUR TOKEN>
-```
-
-The manifests are available in the [Syntasso Releases
-Page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/).
-Find the latest release and apply it with `kubectl`:
-
-```bash
-kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-operator/<VERSION>/ske-operator-distribution.yaml
-```
-
-With the Operator in place, you can now install Kratix Enterprise by creating a
-'Kratix' instance. Below is an example 'Kratix' instance definition:
-
-```yaml
-apiVersion: platform.syntasso.io/v1alpha1
-kind: Kratix
-metadata:
-  name: kratix-example
-spec:
-  version: # version of Kratix Enterprise to install; default to the latest release found in release bucket
-```
-
-You can save the 'Kratix' instance definition to a local file and apply with kubectl.
-SKE operator will then install Kratix Enterprise and its necessary configurations.
-
-By default, when `spec.releaseStorage` is not set, SKE operator will use the Syntasso Enterprise releases bucket.
-
-:::note
-'Kratix' is a cluster scoped and singleton resource.
-
-Only one instance of Kratix can be installed in a cluster.
-:::
+If you prefer not to use Helm, you can install the SKE Operator by applying the
+manifests directly. Check [SKE Operator](./configuring-ske/via-manifest) for the instructions.
 
 </details>
 
 ### Verify the installation
 
-To verify that Kratix Enterprise has been installed successfully, run the following command:
+To verify that Syntasso Kratix Enterprise has been installed successfully, run the following command:
 
 ```bash
 kubectl get deployments.apps --namespace kratix-platform-system
@@ -346,10 +299,18 @@ To upgrade the version of SKE being deployed by the operator, you can edit your
 Kratix instance definition and change the `version` field to the desired
 version.
 
-Upgrades from a version vX.Y.Z to vX.Y+2.Z are not supported. You must upgrade to
-vX.Y+1.Z first.
+The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks)
+and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the upgrade flow.
 
-## Deletes
+:::info
+
+It is not possible to skip upgrade checks when upgrading via Helm. If you would like to
+use this feature, we recommend that you [install via the SKE CLI](./via-ske-cli) or by
+[directly applying the manifests](./via-manifests).
+
+:::
+
+## Deletions
 
 ### Deleting the SKE Operator
 
