@@ -8,44 +8,44 @@ slug: /
 
 # Introduction
 
-## What is Kratix?
-Kratix is a framework used by platform teams to build custom platforms tailored to their organisation.
+Kratix is the open-source Platform Framework, that enables you to provide anything as-a-Service, while incorporating your key business processes and managing everything as a fleet.
 
-### Want to see Kratix in action?
+:::info
+Ready to get started? Follow our [Quick Start](01-quick-start.md) to jump right in.
+:::
 
-Check out a video overview of our product:
-<div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ZZUD2NUCBJI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+## Why Kratix?
 
-### Using Kratix to build your platform you can:
+Kratix is designed and built by a team with decades of experience creating [internal developer platforms](https://www.syntasso.io/internal-developer-platforms). We've learned that great platforms address three key challenges faced by enterprise organisations: 
 
-* use GitOps workflow and familiar Kubernetes-native constructs.
-* co-create capabilities by providing a clear contract between application and platform teams through the definition and creation of _Promises_. Learn more about Kratix Promises [here](../main/reference/promises/intro).
-* create a flexible platform with your paved paths as Promises.
-* evolve your platform easily as your business needs change.
-* start small on a laptop and expand to multi-team, multi-cluster, multi-region, and multi-cloud with a consistent API everywhere.
+- **Slow delivery of value** because software engineers must wait weeks for other teams to process their tickets.
+- **Inconsistent application of key business rules** as teams create shadow IT systems to bypass lengthy ticket queues, introducing business risk.
+- **Tech sprawl leading to operational overhead** as SRE, DevOps, and Platform Teams spend their time maintaining services and infrastructure instead of improving them.
 
-To see how you can use Kratix to deliver compelling Platforms, including
-integration with Backstage, check the video below:
+A [Kratix Promise](./03-reference/11-promises/01-intro.md) enables you to provide anything-as-a-service, eliminating the need for engineers to wait for manual ticket processing.
 
-<div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/gdMNS3V-ogo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-</div>
+[Workflows](./03-reference/12-workflows.md) let you embed any business rule into your Promise definition, from security scans and billing checks to manual approvals.
 
-### Providing a Kratix-built platform allows your users to:
+And with Kratix's built-in [Fleet Management](./03-reference/11-promises/03-updates.md) capabilities, you can maintain and upgrade all your resources with a single click.
 
-* discover available services that are already fit-for-purpose.
-* consume services on demand using standard APIs.
-* move focus away from infrastructure toward adding product value.
-## Guides: Jump right in
+![Kratix Architecture](/img/kratix-architecture.svg)
+
+## Kratix in action
+Watch how Kratix supports teams using Backstage to provide anything-as-a-service.
+<div  align="center"><iframe width="560" height="315" src="https://www.youtube.com/embed/LlHHovxfJDg?si=326slhM8-yPPSFem" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+
+## Already using Kratix?
+
+Check out our [Troubleshooting](./08-troubleshooting.md) & [FAQ pages](./07-faq.md) if you are looking for help.
+
+Read the [Kratix blog](/blog/) - written by our awesome Product Engineers, this is where we share the more advanced Kratix patterns and our latest product features.
+
+## New to Kratix?
 
 Follow our handy guides to get started on the basics as quickly as possible:
 
-* [Installing Kratix](../category/installing-kratix)
-* [Installing and using a Promise](../main/guides/installing-a-promise)
-* [Writing a Promise](../main/guides/writing-a-promise)
+- [Installing Kratix](https://docs.kratix.io/category/installing-kratix)
+- [Installing and using a Promise](https://docs.kratix.io/main/guides/installing-a-promise)
+- [Writing a Promise](https://docs.kratix.io/main/guides/writing-a-promise)
 
-<br />
-
-If you can't find what you need, or need help with building your platform as a product, reach out to us on [Github](https://github.com/syntasso/kratix/) or through [Syntasso.io](https://www.syntasso.io/contact-us) and we'll be happy to help.
+If you can't find what you need, or need help with building your platform as a product, reach out to us on [Github](https://github.com/syntasso/kratix/) or through [Syntasso.io](https://www.syntasso.io/contact-us) and we'll be happy to help.

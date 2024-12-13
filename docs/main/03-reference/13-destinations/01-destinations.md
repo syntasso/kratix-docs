@@ -10,7 +10,7 @@ a system that Kratix can write documents to. These documents are then
 reconciled by an external tool.
 
 Some example use cases:
-- [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernets manifests) to
+- [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernetes manifests) to
   the Destination, and then a GitOps tool running on the Kubernetes cluster,
   such as Flux or ArgoCD with pull down the documents and deploy them. See our
   [GitOps Agent documentation](/category/installing-gitops-agent) for more information.

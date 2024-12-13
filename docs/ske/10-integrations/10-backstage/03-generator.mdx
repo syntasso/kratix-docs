@@ -378,7 +378,7 @@ Backstage integration by offloading management of Backstage Components and
 Templates files from your Promises. The Promise enables the following features:
 
 - Allow updates to the Backstage Component and Templates while a Pipeline is still running.
-- Allow the combination of multiple Backstage Components and Templates into a single
+- Enables the combination of multiple Backstage Components and Templates into a single
   `catalog-info.yaml` file. For some Backstage integrations, such as GitLab,
   this is a requirement.
 
@@ -395,8 +395,10 @@ the associated Component in Backstage at the end of each Pipeline. For example, 
 Resource status could be updated in every Pipeline to convey the latest information about
 the Resource to the requester in Backstage.
 
-To do this, run the SKE Backstage Generator as normal, and afterwards send a
-request to the SKE Backstage Component Promise. Example:
+To do this, run the SKE Backstage Generator as normal, then create a
+request to the SKE Backstage Component Promise within the next pipeline container. In this example the image
+`ghcr.io/syntasso/kratix-marketplace/create-backstage-component-request:v0.1.0` is responsible for generating a SKE
+Backstage Component Promise request:
 
 ```yaml
   # ...
@@ -459,8 +461,8 @@ the `ske-backstage-generator` image in the SKE Backstage Component Promise must 
 
 #### Requesting Backstage Components
 
-When creating the `BackstageComponent` requests you need to ensure you set the
-correct `.metadata.ownerReferences` on the resource to ensure its deleted when the
+When creating the `BackstageComponent` requests you need to ensure that you set the
+correct `.metadata.ownerReferences` on the resource to ensure it is deleted when the
 resource/promise is deleted. An example of this is shown below:
 
 ```yaml
@@ -547,6 +549,29 @@ making the request.
 ```
 </details>
 
+#### Scheduling Backstage Components
+
+By default, `BackstageComponent` requests are scheduled to your Backstage destination.
+If you need to schedule a `BackstageComponent` to a destination other than
+the default Backstage destination with label `environment: backstage`, you can set the
+`.spec.destinationSelectors` on the resource to customize its scheduling behavior.
+An example of this is shown below:
+
+```yaml
+apiVersion: syntasso.io/v1alpha1
+kind: BackstageComponent
+metadata:
+  name: A-NAME
+  namespace: NAMESPACE
+spec:
+  destinationSelectors:
+  - matchLabels:
+      environment: backstage-instance-one
+      team: billing
+- resources: |
+  ... # contents of /kratix/output/backstage/catalog-info.yaml
+```
+
 ### Generate a single Backstage catalog
 
 Using the SKE Backstage Component Promise, you can optionally choose to write a single
@@ -570,15 +595,15 @@ metadata:
   namespace: kratix-platform-system
 ```
 
-Then configure all of your Promises which use the SKE Backstage Generator to use the
-`--make-request` option in the Pipeline, as illustrated in the [section
+Then configure all of your Promises which use the SKE Backstage Generator to make a request
+to the SKE Backstage Component Promise within your Pipeline, as illustrated in the [section
 above](#component-updates-with-multiple-pipelines).
 
 :::info
 
 To ensure that a single `catalog-info.yaml` file is created, you must ensure that **all**
-of your Promises which use the SKE Backstage Generator are set up to use the
-`--make-request` option in **both** the Promise and Resource workflows.
+of your Promises which use the SKE Backstage Generator are set up to make a request
+to the SKE Backstage Component Promise in **both** the Promise and Resource workflows.
 
 :::
 

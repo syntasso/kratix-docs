@@ -19,6 +19,25 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.11.0/) (2024-12-04)
+
+#### Bug Fixes
+
+* Ensure canary documents respect destination file path mode. When `filepath.mode` for a given Destination is set to `none`,
+test documents are written to the root of the path, previously the files were written to nested sub-directories.
+
+### [0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.10.0/) (2024-11-27)
+
+#### Features
+
+* Introduce the `kratix.io/reconcile-resources` label for Promises. When set to true on a promise, kratix will re-reconcile all
+resource requests for that Promise
+* Detail the `status.lastSuccessfulConfigureWorkflowTime` to state when configure workflows last ran successfully
+
+#### Bug Fixes
+
+* Prevent the deletion of Destination Selectors configmaps is deleted while a resource request's Job is still in flight
+
 ### [0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.9.0/) (2024-11-12)
 
 #### Security Fixes
