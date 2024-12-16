@@ -1,6 +1,6 @@
 ---
 description: Learn about how Compound Promises can deliver complete developer experiences
-title: Using Compound Promises
+title: "Section C: Using Compound Promises"
 id: multiple-promises
 slug: ../multiple-promises
 ---

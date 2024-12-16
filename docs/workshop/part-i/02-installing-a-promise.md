@@ -1,6 +1,6 @@
 ---
 description: Create and configure a worker cluster, and install a Promise
-title: Installing a Promise
+title: "Section B: Installing a Promise"
 id: installing-a-promise
 slug: ../installing-a-promise
 ---
