@@ -15,8 +15,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.af7a49ed.css">
-<script src="/assets/js/runtime~main.154f3861.js" defer="defer"></script>
-<script src="/assets/js/main.c8a75e61.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.c63c64e8.js" defer="defer"></script>
+<script src="/assets/js/main.c7cb8a27.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -40,10 +40,11 @@ cluster.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="1-install-kratix">1. Install Kratix<a class="hash-link" aria-label="Direct link to 1. Install Kratix" title="Direct link to 1. Install Kratix" href="/main/quick-start#1-install-kratix">​</a></h2>
 <p>Install Kratix and its Dependencies with the command below:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">kubectl apply </span><span class="token parameter variable" style="color:#36acaa">--filename</span><span class="token plain"> https://github.com/syntasso/kratix/releases/latest/download/install-all-in-one.yaml</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
-<p>The above will install Kratix, MinIO, and FluxCD. MinIO will be the <a href="/main/reference/statestore/intro">State Store</a>
-for the Kratix to write to and FluxCD will watch the MinIO Bucket for any changes that need to be applied to
+<p>The above will install Kratix, MinIO, and a GitOps agent. MinIO will be the <a href="/main/reference/statestore/intro">State Store</a>
+for the Kratix to write to and the GitOps agent will watch the MinIO Bucket for any changes that need to be applied to
 the cluster. Kratix supports a variety of <a href="/main/reference/statestore/intro">State Stores</a>
 and multiple different State Stores can be used.</p>
+<p>The GitOps agent installed as part of the quick start is FluxCD. However, any GitOps tool that supports reconciling documents from a Git repository can be used, such as ArgoCD. See the <a href="/category/installing-kratix">installation</a> documentation for more information on setting up ArgoCD.</p>
 <p>You can also install Kratix via Helm. For more information, see the <a href="https://github.com/syntasso/helm-charts" target="_blank" rel="noopener noreferrer">Helm Chart</a> documentation.</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="configure">Configure<a class="hash-link" aria-label="Direct link to Configure" title="Direct link to Configure" href="/main/quick-start#configure">​</a></h3>
 <p>Once Kratix is installed, you can register Kubernetes clusters where workloads should run.
