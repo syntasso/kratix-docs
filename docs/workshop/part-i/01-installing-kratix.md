@@ -1,6 +1,6 @@
 ---
 description: Create a platform cluster, install and configure Kratix
-title: Installing Kratix
+title: "Section A: Installing Kratix"
 id: installing-kratix
 slug: ../installing-kratix
 ---
@@ -351,7 +351,10 @@ through similar steps you ran during the worker cluster Destination registration
 * Install and configure Flux
 * Register the cluster as a Destination with Kratix
 
-There's a script in the `kratix` directory that will do exactly that. This script replicates the setup you performed previously in the [Destination setup](./installing-kratix#destination-setup) section. Run:
+There's a script in the `kratix` directory that will do exactly that. This
+script includes the same [Destination
+setup](./installing-kratix#destination-setup) steps you performed previously.
+Run:
 
 ```bash
 ./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels --with-label environment=platform
