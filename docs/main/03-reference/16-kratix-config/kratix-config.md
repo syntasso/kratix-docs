@@ -34,7 +34,7 @@ data:
 
 When Kratix schedules work as part of either Promise or Resource workflows,
 by default, it uses the `PIPELINE_ADAPTER_IMG` image specified in the
-`kratix-platform-pipeline-adapter` configmap in the `kratix-platform-system` namespace. To
+`kratix-platform-wc-img-config` configmap in the `kratix-platform-system` namespace. To
 override this image, which is necessary when deploying Kratix in an air-gapped
 environment, you can update this configmap to point to an internally hosted
 version of the image.
@@ -43,7 +43,7 @@ version of the image.
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kratix-platform-pipeline-adapter-config
+  name: kratix-platform-wc-img-config
   namespace: kratix-platform-system
 ...
 //highlight-start
