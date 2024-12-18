@@ -29,3 +29,25 @@ data:
         # Security context fields, e.g.:
         runAsNonRoot: false
 ```
+
+## Kratix Pipeline Adapter Config
+
+When Kratix schedules work as part of either Promise or Resource workflows,
+by default, it uses the `PIPELINE_ADAPTER_IMG` image specified in the
+`kratix-platform-pipeline-adapter` configmap in the `kratix-platform-system` namespace. To
+override this image, which is necessary when deploying Kratix in an air-gapped
+environment, you can update this configmap to point to an internally hosted
+version of the image.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kratix-platform-pipeline-adapter-config
+  namespace: kratix-platform-system
+...
+//highlight-start
+data:
+  PIPELINE_ADAPTER_IMG: org-registry.org/team/kratix-platform-pipeline-adapter:v0.2.0
+//highlight-end
+```
