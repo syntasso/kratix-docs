@@ -16,6 +16,8 @@ spec:
             containers:
               - name: kratix-workshop-app-pipeline-image
                 image: kratix-workshop/app-pipeline-image:v1.0.0
+                # *Add the line below*
                 #highlight-next-line
                 command: [ resource-configure ]
+
 status: {}
