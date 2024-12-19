@@ -56,9 +56,7 @@ always-auth=true
 For Yarn 3+, use the following command to set a local `.yarnrc.yml` file:
 
 ```bash
-export PRIVATE_REGISTRY_TOKEN="<YOUR_TOKEN_HERE>"
-
-yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthToken": "$PRIVATE_REGISTRY_TOKEN", "npmRegistryServer": "https://npm.pkg.github.com"}}'
+yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthToken": "<YOUR TOKEN HERE>", "npmRegistryServer": "https://npm.pkg.github.com"}}'
 ```
 
 :::
