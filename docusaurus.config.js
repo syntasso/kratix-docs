@@ -73,9 +73,6 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      customFields: {
-        copyToClipboardTransform: (code) => code.replace(/\r/g, ''),
-      },
       metadata: [
         {
           name: "keywords",
