@@ -57,6 +57,13 @@ spec:
   filepath:
     mode: nestedByMetadata | none
 
+  # Optional, defaults to `none`
+  # The cleanup policy to use when deleting the Destination, valid options are:
+  #   - none: No cleanup will be performed
+  #   - all: All files in the State Store for this Destination will be deleted
+  #          when the Destination is deleted
+  cleanup: none
+
   # Required
   stateStoreRef:
     # The name of the State Store to use: required
