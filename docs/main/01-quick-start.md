@@ -51,13 +51,13 @@ cert-manager-webhook-5655dcfb4b-54r49     1/1     Running   0          19s
 <PartialConfigure />
 
 Once the system reconciles, the Kratix resources should now be visible on your
-cluster. You can verify its readiness by observing the `kratix-worker-system` namespace
+cluster. You can verify its readiness by observing the `kratix-platform-system` namespace
 appearing in the cluster (it may take a couple of minutes):
 
 ```shell-session
-$ kubectl get namespace kratix-worker-system
+$ kubectl get namespace kratix-platform-system
 NAME                   STATUS   AGE
-kratix-worker-system   Active   1m
+kratix-platform-system   Active   1m
 ```
 
 ## 2. Provide Postgres-as-a-Service via a Kratix Promise
@@ -115,7 +115,9 @@ configure-pipeline-postgresql-default-8f012    0/1     Completed   0          2m
 ```
 
 
-You are now ready to use your Postgres Resources! To validate, you can run:
+You are now ready to use your Postgres Resources! 
+
+To validate, you can access it through the `psql` environment by running:
 
 ```
 kubectl exec -it acid-example-postgresql-0 -- sh -c "
@@ -123,6 +125,31 @@ kubectl exec -it acid-example-postgresql-0 -- sh -c "
     PGUSER=$(kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.username}' | base64 -d) \
     psql bestdb"
 ```
+
+## 4. Administer your Postgres
+You can connect to the Postgres database system with administration tools like [PgAdmin](https://www.pgadmin.org/)
+
+First, forward the pod port so that it will be accessible on `localhost` at port `5432`.
+```console
+kubectl port-forward pod/acid-example-postgresql-0 5432:5432 -n default
+```
+Next, get the dayabase connection password (string upto the `%`):
+```console
+kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do \
+    -o 'jsonpath={.data.password}' | base64 -d
+# e.g. returns 
+dWECN8SybOUsFM9U4CH4DkJtZ8OgGqnzvcdDwpRzqNtiBRScc10ZSoRZccyBZ9AL%
+```
+Then in the PgAdmin tool
+- Create a localhost server
+- Connection: 
+    - Host name/address `localhost` and port `5432`
+    - maintenance database `postgres`
+    - username `postgres`
+- Parameters
+    - SSL Mode value `disable`
+- Connect to Server
+- enter password
 
 ## Clean up
 
