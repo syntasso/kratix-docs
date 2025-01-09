@@ -325,7 +325,7 @@ cat <<EOF | kubectl --context $WORKER apply --filename -
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: kratix-workload-dependencies
+  name: kratix-worker-dependencies
   namespace: flux-system
 spec:
   interval: 8s
@@ -338,13 +338,13 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: kratix-workload-resources
+  name: kratix-worker-resources
   namespace: flux-system
 spec:
   interval: 3s
   prune: true
   dependsOn:
-  - name: kratix-workload-dependencies
+  - name: kratix-worker-dependencies
   sourceRef:
     kind: Bucket
     name: kratix
@@ -355,8 +355,8 @@ EOF
 The above command will give an output similar to:
 
 ```shell-session
-kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-dependencies created
-kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-resources created
+kustomization.kustomize.toolkit.fluxcd.io/kratix-worker-dependencies created
+kustomization.kustomize.toolkit.fluxcd.io/kratix-worker-resources created
 ```
 
 You will notice that there are two Kustomizations created. When scheduling
@@ -374,7 +374,7 @@ and `name` to build the full path for that cluster within the State Store.
 
 The first Kustomization above is for dependencies (CRDs), while the second is for the other
 resources (note the `spec.path`). You can also note that the
-`kratix-workload-resources` depends on the `kratix-workload-dependencies`. That's to
+`kratix-worker-resources` depends on the `kratix-worker-dependencies`. That's to
 avoid failures when a resource documents uses a GVK being defined by a CRD
 document.
 
