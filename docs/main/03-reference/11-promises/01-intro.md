@@ -115,6 +115,22 @@ spec:
               - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
+  # Healthcheck to be performed for requests of the Promise
+  healthChecks:
+    resource:
+      # The time or interval the check should run against
+      # This can follow Cron syntax or macros such as @hourly
+      schedule: "* * * * *"
+      # A Kratix provided Pipeline that runs an ordered set of OCI compliant images
+      workflow:
+        apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: health
+        spec:
+          containers:
+            - image: ghcr.io/myorg/health-check
+              name: health
 ```
 
 It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
