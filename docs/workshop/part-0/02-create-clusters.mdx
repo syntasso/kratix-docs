@@ -276,7 +276,7 @@ stringData:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: Bucket
 metadata:
-  name: kratix-bucket
+  name: kratix
   namespace: flux-system
 spec:
   interval: 10s
@@ -293,7 +293,7 @@ The above command will give an output similar to:
 
 ```shell-session
 secret/minio-credentials created
-bucket.source.toolkit.fluxcd.io/kratix-bucket created
+bucket.source.toolkit.fluxcd.io/kratix created
 ```
 
 This tutorial will not dive into details of how to configure Flux Sources, but please read on their
@@ -309,7 +309,7 @@ The above command will give an output similar to:
 
 ```shell-session
 NAME            ENDPOINT           AGE     READY   STATUS
-kratix-bucket   172.18.0.2:31337   1h      True    stored artifact: revision 'sha256:some-sha'
+kratix   172.18.0.2:31337   1h      True    stored artifact: revision 'sha256:some-sha'
 ```
 
 Next, you must tell Flux what to do with this Source. Flux does continuous
@@ -332,7 +332,7 @@ spec:
   prune: true
   sourceRef:
     kind: Bucket
-    name: kratix-bucket
+    name: kratix
   path: ./worker-cluster/dependencies
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -347,7 +347,7 @@ spec:
   - name: kratix-workload-dependencies
   sourceRef:
     kind: Bucket
-    name: kratix-bucket
+    name: kratix
   path: ./worker-cluster/resources
 EOF
 ```
