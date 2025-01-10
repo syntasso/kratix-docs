@@ -120,6 +120,12 @@ const config = {
             className: "header-github-link",
             "aria-label": "GitHub repository",
           },
+          {
+            href: "https://kratixworkspace.slack.com",
+            position: "right",
+            className: "header-slack-link",
+            "aria-label": "Kratix Slack Workspace",
+          },
         ],
       },
       footer: {
