@@ -211,7 +211,7 @@ If you prefer to configure the worker cluster manually, follow the steps below.
 Install Flux on the worker cluster:
 
 ```bash
-kubectl --context $WORKER apply --filename https://github.com/fluxcd/flux2/releases/download/v2.0.0-rc.3/install.yaml
+kubectl --context $WORKER apply --filename https://github.com/fluxcd/flux2/releases/download/v2.4.0/install.yaml
 ```
 
 Next, Flux must be configured to read from the MinIO bucket. For that, you will create a new
@@ -276,7 +276,7 @@ stringData:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: Bucket
 metadata:
-  name: kratix-bucket
+  name: kratix
   namespace: flux-system
 spec:
   interval: 10s
@@ -293,7 +293,7 @@ The above command will give an output similar to:
 
 ```shell-session
 secret/minio-credentials created
-bucket.source.toolkit.fluxcd.io/kratix-bucket created
+bucket.source.toolkit.fluxcd.io/kratix created
 ```
 
 This tutorial will not dive into details of how to configure Flux Sources, but please read on their
@@ -309,7 +309,7 @@ The above command will give an output similar to:
 
 ```shell-session
 NAME            ENDPOINT           AGE     READY   STATUS
-kratix-bucket   172.18.0.2:31337   1h      True    stored artifact: revision 'sha256:some-sha'
+kratix   172.18.0.2:31337   1h      True    stored artifact: revision 'sha256:some-sha'
 ```
 
 Next, you must tell Flux what to do with this Source. Flux does continuous
@@ -325,29 +325,29 @@ cat <<EOF | kubectl --context $WORKER apply --filename -
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: kratix-workload-dependencies
+  name: kratix-worker-dependencies
   namespace: flux-system
 spec:
   interval: 8s
   prune: true
   sourceRef:
     kind: Bucket
-    name: kratix-bucket
+    name: kratix
   path: ./worker-cluster/dependencies
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: kratix-workload-resources
+  name: kratix-worker-resources
   namespace: flux-system
 spec:
   interval: 3s
   prune: true
   dependsOn:
-  - name: kratix-workload-dependencies
+  - name: kratix-worker-dependencies
   sourceRef:
     kind: Bucket
-    name: kratix-bucket
+    name: kratix
   path: ./worker-cluster/resources
 EOF
 ```
@@ -355,8 +355,8 @@ EOF
 The above command will give an output similar to:
 
 ```shell-session
-kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-dependencies created
-kustomization.kustomize.toolkit.fluxcd.io/kratix-workload-resources created
+kustomization.kustomize.toolkit.fluxcd.io/kratix-worker-dependencies created
+kustomization.kustomize.toolkit.fluxcd.io/kratix-worker-resources created
 ```
 
 You will notice that there are two Kustomizations created. When scheduling
@@ -374,7 +374,7 @@ and `name` to build the full path for that cluster within the State Store.
 
 The first Kustomization above is for dependencies (CRDs), while the second is for the other
 resources (note the `spec.path`). You can also note that the
-`kratix-workload-resources` depends on the `kratix-workload-dependencies`. That's to
+`kratix-worker-resources` depends on the `kratix-worker-dependencies`. That's to
 avoid failures when a resource documents uses a GVK being defined by a CRD
 document.
 
