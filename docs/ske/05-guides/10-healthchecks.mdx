@@ -1,0 +1,359 @@
+---
+title: Health checks
+description: Implementing Resource Health Checks
+sidebar_label: Health Checks
+---
+
+## Pre-requisites
+
+You will need an installation of SKE for this section. Go to [Configuring SKE](../kratix/configuring-ske/intro) and follow the appropriate guide if you haven't done so already.
+
+You will also need a configured and deployed Health Agent. You can do that by following the guide on [Configuring the Kubernetes Health Agent](../kratix/k8s-health-agent).
+
+**In this tutorial you will**
+
+1. [Define a Resource Health check in a Promise](#resource-hc)
+1. [Observe the execution of the check in the destination](#observe-hc)
+1. [Observe the health check result in the requested resource](#observe-hc-result)
+
+## Defining a Resource Health Check {#resource-hc}
+
+In this tutorial, you will define a Resource Health Check for the Redis Promise available in the Kratix Marketplace. First, download the Promise file to your local machine:
+
+```bash
+curl -Lo redis-promise.yaml https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/promise.yaml
+```
+
+Next, open the Promise file in your editor and add the `healthChecks` key to the `spec` section:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+  labels:
+    kratix.io/promise-version: v0.1.0
+spec:
+  # highlight-next-line
+  healthChecks: {}
+  api: # omitted for brevity 
+  workflows: # omitted for brevity
+```
+
+It's under `healthChecks` that you will define the checks you want to run on the destination. In this tutorial, you will define a `resource` health check. A health check is made of two main parts:
+
+* A `schedule` that specifies when and how oftenthe check should run.
+* A `workflow` that defines the task to be performed on the destination.
+
+When you define a Health Check, you are basically telling SKE to execute a task on the Destination to validate the health of the resource. Similar to how you define a Resource Workflow to instantiate a Resource, you will define a Kratix `Pipeline` to determine the resource health.
+
+But what does it mean for an instance of a Promise to be healthy? Well, this is for you to define: different promises will have different definitions. In this tutorial, we will keep things simple and define a "healthy" Redis if the Redis instance is up and running with the desired number of replicas.
+
+To do that, let's take a closer look at the Redis Promise.
+
+The [Redis Resource Configure Workflow](https://github.com/syntasso/kratix-marketplace/blob/main/redis/internal/configure-pipeline/resources/redis-instance.yaml) outputs a `RedisFailover` resource. This resource is picked up by the Redis Operator, and a series of other resources are created, including a StatefulSet that will be used to provide the Redis service. To validate the health of the resource, we will need to check the StatefulSet replicas.
+
+The Redis promise generates deterministic names for the Redis resources, based on the Object `metadata.name`. The StatefulSet, in particular, is named as `rfr-$resourceName`, where `resourceName` is the name of the Redis resource. Similar to the Resource Configure Workflow, your container will have access to the requested object in `/kratix/input/object.yaml`.
+
+With that in hand, we can write the following Health Check Workflow:
+
+```bash
+resourceName=$(yq '.metadata.name' /kratix/input/object.yaml)
+
+# Get the Redis statefulset generated from the Resource Request
+replicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.replicas}')
+readyReplicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.readyReplicas}')
+
+state="unhealthy"
+
+if [[ ${replicas} -eq ${ready} ]]; then
+  state="healthy"
+fi
+
+cat <<EOF > /kratix/output/health-status.yaml
+state: ${state}
+details:
+  replicas: ${replicas}
+  readyReplicas: ${readyReplicas}
+EOF
+```
+
+You can create a Container image and add this script to it. To keep the scope of this tutorial simple, we will inject the script directly into the Promise YAML. Update your Redis Promise with the following:
+
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+  labels:
+    kratix.io/promise-version: v0.1.0
+spec:
+  healthChecks:
+    #highlight-start
+    resource:
+      # The time or interval the the check should run against
+      # This can follow Cron syntax or macros such as @hourly
+      # In this case, the check will run every minute
+      schedule: "* * * * *"
+      workflow:
+        apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: health
+        spec:
+          containers:
+            - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+              name: redis-health
+              command: [ "sh", "-c" ]
+              args:
+                - |
+                  #!/usr/bin/env sh
+                  set -euxo pipefail
+
+                  resourceName=$(yq '.metadata.name' /kratix/input/object.yaml)
+
+                  # Get the Redis statefulset generated from the Resource Request
+                  replicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.replicas}')
+                  readyReplicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.readyReplicas}')
+
+                  state="unhealthy"
+
+                  if [[ ${replicas} -eq ${readyReplicas} ]]; then
+                    state="healthy"
+                  fi
+
+                  cat <<EOF > /kratix/output/health-status.yaml
+                  state: ${state}
+                  details:
+                    replicas: ${replicas}
+                    readyReplicas: ${readyReplicas}
+                  EOF
+    #highlight-end
+    api: # omitted for brevity 
+    workflows: # omitted for brevity
+```
+
+There's one more change you'll need to make to the Health Check Workflow: adding the necessary RBAC permissions. By default, the Health Check Workflow container will not have access to much of the Kubernetes API; if you try to execute the Health check as defined above, the workflow will fail when it tries to `kubectl get` the StatefulSet.
+
+To fix this, you need to add the following RBAC permissions to the Health Check Workflow:
+
+```yaml
+rbac:
+  permissions:
+  - apiGroups: [""]
+    verbs: ["get"]
+    resources: ["statefulsets"]
+```
+
+Now, let's update the Redis Promise to add the RBAC permissions:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+  labels:
+    kratix.io/promise-version: v0.1.0
+spec:
+  healthChecks:
+    resource:
+      schedule: "* * * * *"
+      workflow:
+        apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: health
+        spec:
+          #highlight-start
+          rbac:
+            permissions:
+              - apiGroups: [ "apps" ]
+                resources: [ "statefulsets" ]
+                verbs: [ "get" ]
+          #highlight-end
+          containers: # as above
+            - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+              name: redis-health
+              command: [ "sh", "-c" ]
+              args: # omitted for brevity
+  api: # omitted for brevity 
+  workflows: # omitted for brevity
+```
+
+<details>
+<summary>Click here for the complete Redis Promise with Health Checks</summary>
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+  namespace: default
+  labels:
+    kratix.io/promise-version: v0.1.0
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: redis.marketplace.kratix.io
+    spec:
+      group: marketplace.kratix.io
+      names:
+        kind: redis
+        plural: redis
+        singular: redis
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          schema:
+            openAPIV3Schema:
+              properties:
+                spec:
+                  properties:
+                    size:
+                      default: small
+                      description: |
+                        Size of this Redis deployment. If small, it deploy redis with a single replica; if large, deploy redis with 3 replicas.
+                      pattern: ^(small|large)$
+                      type: string
+                  type: object
+              type: object
+          served: true
+          storage: true
+  healthChecks:
+    resource:
+      schedule: "* * * * *"
+      workflow:
+        apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: health-redis
+        spec:
+          rbac:
+            permissions:
+              - apiGroups: [ "apps" ]
+                resources: [ "statefulsets" ]
+                verbs: [ "get" ]
+          containers:
+            - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+              name: health-redis
+              command: [ "sh", "-c" ]
+              args:
+                - |
+                  set -euxo pipefail
+
+                  resourceName=$(yq '.metadata.name' /kratix/input/object.yaml)
+
+                  # Get the Redis statefulset generated from the Resource Request
+                  replicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.replicas}')
+                  readyReplicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.readyReplicas}')
+
+                  state="unhealthy"
+
+                  if [[ ${replicas} -eq ${readyReplicas} ]]; then
+                    state="healthy"
+                  fi
+
+                  cat <<EOF > /kratix/output/health-status.yaml
+                  state: ${state}
+                  details:
+                    replicas: ${replicas}
+                    readyReplicas: ${readyReplicas}
+                  EOF
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: instance-configure
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-marketplace/redis-configure-pipeline:v0.1.0
+                name: redis-configure-pipeline
+    promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: promise-configure
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-marketplace/redis-configure-pipeline:v0.1.0
+                name: redis-configure-pipeline
+```
+</details>
+
+## Observe the execution of the Health Check {#observe-hc}
+
+To observe Health Checks in action, first apply the updated Promise:
+
+```bash
+kubectl apply -f redis-promise.yaml
+```
+
+Next, create a new Redis Resource request:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/resource-request.yaml
+```
+
+You should see two workflows running on your Platform cluster:
+
+```bash
+$ kubectl --context $PLATFORM get pods
+NAME                                                  READY   STATUS      RESTARTS   AGE
+kratix-redis-example-health-redis-b0dc9-9mpzw         0/1     Completed   0          9s
+kratix-redis-example-instance-configure-76877-cbv2f   0/1     Completed   0          15s
+```
+
+The `health` workflow is responsible for generating a HealthDefinition. The HealthDefinition contains the necessary information to execute the Health Check Workflow on the Destination. Refer to the [Health Definition Custom Resources](/main/reference/health-checks/health-definition) documentation for more details on a Health Definition.
+
+:::tip
+
+If you need a high-level of control and customisation over the generated HealthDefinition, you can update your Resource Configure Workflow to generate the expected HealthDefinition directly.
+
+:::
+
+Once the Health Definition gets scheduled to the Destination, you should observe a newly created CronJob on your Destination:
+
+```bash
+$ kubectl --context $WORKER get cronjobs
+NAME                                      SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+healthcheck-redis-default-example-78709   * * * * *   <none>     False     1        24s             1m
+```
+
+At the turn of the minute, you should observe new pod starting:
+
+```bash
+$ kubectl --context $WORKER get pods
+NAME                                                     READY   STATUS      RESTARTS   AGE
+healthcheck-redis-default-example-78709-28946510-5hr5c   0/1     Completed   0          25s
+redisoperator-5dc7d749d5-9wl9r                           1/1     Running     0          22m
+rfr-example-0                                            1/1     Running     0          22m
+rfs-example-845f9f8cff-ctdr7                             1/1     Running     0          22m
+```
+
+## Observe the results of the Health Check {#observe-hc-result}
+
+Now that the Health Check Workflow has run, you should now see the Health check results in your Redis resource:
+
+```bash
+kubectl --context $PLATFORM redis.marketplace.kratix.io example -oyaml
+```
+
+Towards the end, under `status`, you should see the following:
+
+```yaml
+status:
+  healthRecord:
+    state: healthy
+    details:
+      replicas: 1
+      readyReplicas: 1
+```
+
+That's it! You've successfully implemented a Resource Health Check!
+
