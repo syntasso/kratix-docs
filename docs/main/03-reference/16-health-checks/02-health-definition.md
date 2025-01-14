@@ -16,12 +16,11 @@ metadata:
   name: healthdefinition
   namespace: default
 spec:
-  name: default-promise-name-resource-name
   # A reference to the Resource Request the Health Check should be performed against
   resourceRef:
     name: request-name
     namespace: default
-  # Name of the Promise that the Resource Request belongs to.
+  # A reference the Promise the Health Check should be performed against
   promiseRef:
     name: promise-name
   # The time or interval the check should run against

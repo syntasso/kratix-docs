@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+resourceName=$(yq '.name' /kratix/input/object.yaml)
+
+# Get the Redis statefulset generated from the Resource Request
+replicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.replicas}')
+readyReplicas=$(kubectl -n default get statefulsets rfr-${resourceName} -o jsonpath='{.status.readyReplicas}')
+
+state="unhealthy"
+
+if [[ ${replicas} -eq ${readyReplicas} ]]; then
+  state="healthy"
+fi
+
+cat <<EOF > /kratix/output/health-status.yaml
+state: ${state}
+details:
+  replicas: ${replicas}
+  readyReplicas: ${readyReplicas}
+EOF
