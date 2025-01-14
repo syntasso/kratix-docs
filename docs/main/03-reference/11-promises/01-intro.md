@@ -121,7 +121,7 @@ spec:
       # The time or interval the check should run against
       # This can follow Cron syntax or macros such as @hourly
       schedule: "* * * * *"
-      # A Kratix provided Pipeline that runs an ordered set of OCI compliant images
+      # A Pipeline that runs an ordered set of OCI compliant images to perform health checks
       workflow:
         apiVersion: platform.kratix.io/v1alpha1
         kind: Pipeline

@@ -23,7 +23,7 @@ data:
   # Can be unknown, ready, unhealthy, healthy or degraded
   state: ready
   # The timestamp of the last time the Heath Check was executed
-  lastRun: "2025-01-13T09:29:37+00:00"
+  lastRun: 1531958400
   # Optional: any additional details
   details:
     example: data

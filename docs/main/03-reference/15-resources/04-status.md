@@ -238,7 +238,7 @@ data:
     name: dev-psql
     namespace: default
   state: ready
-  lastRun: "2025-01-13T09:29:37+00:00"
+  lastRun: 1531958400
   details:
     acceptingConnection: true
 ```

@@ -6,7 +6,7 @@ sidebar_label: Introduction
 
 # Defining a Healthcheck
 
-A [Kratix Promise](../promises/intro) can define a Health Check to ensure a provisioned resource meets the definition of healthy for the Promised Service. This can be configured via the `healthCheck` key in the Promise specification.
+A [Kratix Promise](../promises/intro) can define a Health Check to ensure a provisioned resource meets the definition of healthy for the Promised Service. This can be configured via the `healthChecks` key in the Promise specification.
 
 When making something available as-a-service to users via a promise, through the use of Health Checks the Platform team can provide users with confidence that the service they have requested is working.
 
