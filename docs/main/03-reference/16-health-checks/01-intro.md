@@ -1,46 +1,11 @@
 ---
-description: Documentation for the lifecycle of Health Checks
-title: Promise Resources
+description: Documentation for health checks
+title: Health Check
 sidebar_label: Introduction
 ---
 
-# Defining a Healthcheck
+A [Kratix Promise](../promises/intro) can include health checks to ensure the provisioned resource meets the definition of healthy for the Promised Service.
 
-A [Kratix Promise](../promises/intro) can define a Health Check to ensure a provisioned resource meets the definition of healthy for the Promised Service. This can be configured via the `healthChecks` key in the Promise specification.
+Imagine you have written a Promise that provisions a service that can be accessed via a HTTP endpoint. For each provisioned service, you want to ensure that the endpoint is up and running. Health checks provide a mechanism for you to validate that your provisioned resource is healthy.
 
-When making something available as-a-service to users via a promise, through the use of Health Checks the Platform team can provide users with confidence that the service they have requested is working.
-
-## Use Case
-
-Imagine you have written a Promise that provisions a service that users can access via a http endpoint. For each request, you want to ensure that a user can verify that their service is up.
-
-Within a Promise specification, you can define a Health Check that runs on a schedule, continuously validating that the endpoint for the user's instance is available and reachable.
-
-```yaml showLineNumbers
-apiVersion: platform.kratix.io/v1alpha1
-kind: Promise
-metadata:
-  name: promise-name
-spec:
-...
-  healthChecks:
-    resource:
-      schedule: "* * * * *"
-      workflow:
-        apiVersion: platform.kratix.io/v1alpha1
-        kind: Pipeline
-        metadata:
-          name: health
-        spec:
-          containers:
-            - image: ghcr.io/myorg/endpoint-checker
-              name: health
-```
-
-### Workflow
-
-Kratix Health Check Workflows consist of a single Pipeline. Refer to the [Workflows documentation](../workflows) for detailed information about how to write Kratix Pipelines.
-
-### Schedule
-
-The Schedule for a Health Check defines the time or the frequency at which the check should run. Similar to a `CronJob`, this can follow Cron syntax or a macro such as @daily or @hourly.
+For further information, check out the [Health Definition](./healthdefinition) and [Health Record](./healthrecord) documentation.

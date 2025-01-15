@@ -41,6 +41,12 @@ Let's go through the diagram in detail:
 5. The `HealthRecord` is then applied back to the Platform cluster via a GitOps agent listening to the State Store.
 6. The Health Check monitor within SKE will then process the `HealthRecord` and update the resource `status` with the results.
 
+:::warning
+
+You will need to set up the Health Agent (and its CRDs) on all Destinations that can run Health Checks.
+
+:::
+
 With that in mind, let's get started!
 
 ## Generate a Health Definition {#generate-hd}
@@ -53,8 +59,8 @@ The [HealthDefinition](/main/reference/health-checks/healthdefinition) object ha
 apiVersion: platform.kratix.io/v1alpha1
 kind: HealthDefinition
 metadata:
-  name: healthdefinition
-  namespace: default
+  name: # unique name for the health definition
+  namespace: # the healthdefinition namespace
 spec:
   resourceRef:
     name: # the resource name
@@ -84,7 +90,7 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: HealthDefinition
 metadata:
   name: ${promiseName}-${resourceName}-${namespace}
-  namespace: default
+  namespace: default # this can be any namespace that exists in the Destination
 spec:
   resourceRef:
     name: ${resourceName}
@@ -102,7 +108,7 @@ spec:
       name: healthcheck
     spec:
       containers:
-      - image: busybox
+      - image: busybox # this is a placeholder image, we will update this later with our own health check
         name: check-redis
 EOF
 ```
