@@ -18,7 +18,7 @@ You will also need a configured and deployed Health Agent. You can do that by fo
 
 ## How do Health Checks work in SKE?
 
-Health Checks are implemented in SKE via `HealthDefinition` objects. A Health Definition is the outline of the task that will be performed on a Destination to verify the health of a Resource Request. 
+Health Checks are implemented in SKE via `HealthDefinition` objects. A Health Definition is the outline of the task that will be performed on a Destination to verify the health of a Resource Request.
 
 The diagram below shows how Health Checks are processed in SKE:
 
@@ -34,10 +34,10 @@ import HCDiagram from "/img/docs/ske/guide-healthcheck-arch.png"
 
 Let's go through the diagram in detail:
 
-1. When a new resource is requested from a Promise, Kratix will do the usual and execute the Resource Configure Workflow for that Promise. 
-2. As part of the outputs of that workflow, you can include a `HealthDefinition` object, including all the necessary information to execute the Health Check Workflow on the Destination. 
-3. Once that HealthDefinition is picked up and applied at the target Destination, the Health Check agent will execute the Health Check Workflow and produce a `HealthRecord` document. 
-4. The `HealthRecord` is then written to a State Store, 
+1. When a new resource is requested from a Promise, Kratix will do the usual and execute the Resource Configure Workflow for that Promise.
+2. As part of the outputs of that workflow, you can include a `HealthDefinition` object, including all the necessary information to execute the Health Check Workflow on the Destination.
+3. Once that HealthDefinition is picked up and applied at the target Destination, the Health Check agent will execute the Health Check Workflow and produce a `HealthRecord` document.
+4. The `HealthRecord` is then written to a State Store,
 5. The `HealthRecord` is then applied back to the Platform cluster via a GitOps agent listening to the State Store.
 6. The Health Check monitor within SKE will then process the `HealthRecord` and update the resource `status` with the results.
 
@@ -65,7 +65,7 @@ spec:
   resourceRef:
     name: # the resource name
     namespace: # the resource namespace
-    
+
   promiseRef:
     name: # the name of the promise
 
@@ -137,7 +137,7 @@ metadata:
   labels:
     kratix.io/promise-version: v0.1.0
 spec:
-  api: # omitted for brevity 
+  api: # omitted for brevity
   workflows:
     resource:
       configure:
@@ -166,13 +166,13 @@ Make sure you add the container to the correct location in the Promise. The cont
 You can now apply the updated Promise:
 
 ```bash
-kubectl apply -f redis-promise.yaml
+kubectl --context $PLATFORM apply -f redis-promise.yaml
 ```
 
 Once the Promise is applied, you can send a Resource Request:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/resource-request.yaml
+kubectl --context $PLATFORM apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/resource-request.yaml
 ```
 
 At this stage, Kratix should execute the Resource Configure Workflow as expected in the Platform cluster, and you should see a new Health Definition object in your State Store. Once the Workflow finishes, you should see a CronJob scheduled in your Destination (it may take a couple of minutes for the CronJob to appear):
@@ -200,7 +200,7 @@ Since the workflow completed successfully, the SKE Health Agent running in your 
 At this stage, you should see the Health check results in your Redis resource:
 
 ```bash
-kubectl --context $PLATFORM redis.marketplace.kratix.io example -oyaml
+kubectl --context $PLATFORM get redis.marketplace.kratix.io example -oyaml
 ```
 
 Towards the end, under `status`, you should see the following:
@@ -354,7 +354,7 @@ metadata:
   labels:
     kratix.io/promise-version: v0.1.0
 spec:
-  api: # omitted for brevity 
+  api: # omitted for brevity
   workflows:
     resource:
       configure:
@@ -377,7 +377,7 @@ spec:
 You can now apply the updated Promise:
 
 ```bash
-kubectl apply -f redis-promise.yaml
+kubectl --context $PLATFORM apply -f redis-promise.yaml
 ```
 
 This should automatically trigger the Resource Workflow and apply the new HealthDefinition on the Destination.
