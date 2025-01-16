@@ -10,9 +10,9 @@ You will need:
 1. an installation of SKE. Go to [Configuring SKE](../kratix/configuring-ske/intro) and follow the appropriate guide if you haven't done so already.
 2. a configured and deployed Health Agent. You can do this by following the guide on [Configuring the Kubernetes Health Agent](../kratix/ske-health-agent).
 
-It's also recommended that you first read through the guide on [how to implement resource health checks](healthchecks) for a more detailed and step-by-step guide on how health checks work in SKE.
+It's also recommended that you first read through the guide on [how to implement resource Health Checks](healthchecks) for a more detailed and step-by-step guide on how health checks work in SKE.
 
-In this guide we will explore a Promise that runs health checks on non Kubernetes resources.
+In this guide we will explore a Promise that runs Health Checks on non Kubernetes resources.
 
 ## How to run Health Checks on resources outside of your Destination
 
@@ -49,6 +49,7 @@ spec:
 ...
           served: true
           storage: true
+  #highlight-start
   workflows:
     resource:
       configure:
@@ -73,6 +74,7 @@ spec:
                         key: secretAccessKey
               - image: ghcr.io/syntasso/kratix-marketplace/rds-generate-health-check:v0.1.0
                 name: generate-health-check
+                 #highlight-end
       delete:
 ...
 ```
