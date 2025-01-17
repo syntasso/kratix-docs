@@ -51,7 +51,7 @@ With that in mind, let's get started!
 
 ## Generate a Health Definition {#generate-hd}
 
-In this tutorial, you will define a Resource Health Check for the Redis Promise available in the Kratix Marketplace. Let's start by defining what the HealthDefinition will look like.
+In this tutorial, you will define a Resource Health Check for the Redis Promise available in the Kratix Marketplace.
 
 The [HealthDefinition](/main/reference/health-checks/healthdefinition) object has the following specification:
 
@@ -78,7 +78,7 @@ spec:
 
 In order to define a Resource Health Check, we will need to add a new container to the Resource Configure Workflow to generate the appropriate HealthDefinition.
 
-Let's start by defining a very basic Health Definition for the Redis Promise:
+A very basic Resource Health Definition for the Redis Promise could look like this:
 
 ```yaml
 resourceName=$(yq '.metadata.name' /kratix/input/object.yaml)
@@ -89,16 +89,15 @@ cat <<EOF > /kratix/output/health-definition.yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: HealthDefinition
 metadata:
-  name: ${promiseName}-${resourceName}-${namespace}
+  name: ${promiseName}-${resourceName}-${namespace} # this name needs to be unique
   namespace: default # this can be any namespace that exists in the Destination
 spec:
   resourceRef:
-    name: ${resourceName}
+    name: ${resourceName} 
     namespace: ${namespace}
   promiseRef:
     name: ${promiseName}
-  # runs every minute
-  schedule: "* * * * *"
+  schedule: "* * * * *" # runs every minute: https://crontab.guru/#*_*_*_*_*
   input: |
     name: ${resourceName}
   workflow:
@@ -113,7 +112,7 @@ spec:
 EOF
 ```
 
-As you can see, the Health Definition is defined in a file called `/kratix/output/health-definition.yaml`. Right now, it's not doing anything useful, but it should be enough to test the end-to-end wiring of the Health Check systems. For simplicity, we made the script above available in the `ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0` image as `basic-definition`.
+As you can see, the Health Definition is being persistent in `/kratix/output` as a file called `health-definition.yaml`. Right now, it's not doing anything useful, but it should be enough to test the end-to-end wiring of the Health Check systems. For simplicity, we made the script above available in the `ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0` image as `basic-definition`.
 
 :::tip
 
@@ -175,7 +174,23 @@ Once the Promise is applied, you can send a Resource Request:
 kubectl --context $PLATFORM apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/resource-request.yaml
 ```
 
-At this stage, Kratix should execute the Resource Configure Workflow as expected in the Platform cluster, and you should see a new Health Definition object in your State Store. Once the Workflow finishes, you should see a CronJob scheduled in your Destination (it may take a couple of minutes for the CronJob to appear):
+At this stage, Kratix should execute the Resource Configure Workflow as expected in the Platform cluster:
+
+```shell-session
+$ kubectl --context $PLATFORM get pods
+NAME                                                  READY   STATUS      RESTARTS   AGE
+kratix-redis-example-instance-configure-523d9-blr7b   0/1     Completed   0          10s
+```
+
+If you inspect the State Store, you should see a new Health Definition file there. On the Destination, you should see the new HealthDefinition object getting applied:
+
+```shell-session
+$ kubectl --context $WORKER get healthdefinitions
+NAME                    AGE
+redis-example-default   10s
+```
+
+The SKE Health Agent running in the Destination will react to the new HealthDefinition and schedule a CronJob to run the Health Check Workflow. You can check the CronJob (it may take a couple of minutes):
 
 ```shell-session
 $ kubectl --context $WORKER get cronjobs
@@ -183,17 +198,19 @@ NAMESPACE   NAME                                      SCHEDULE    TIMEZONE   SUS
 default     healthcheck-redis-default-example-78709   * * * * *   <none>     False     1        1s              1m
 ```
 
-The CronJob will execute the Workflow defined in the HealthDefinition. You can check the pods:
+The CronJob will eventually execute the Workflow defined in the HealthDefinition (you may need to wait a minute or two for it to appear). Eventually, you should see the pod running the Health Check Workflow:
 
 ```shell-session
 $ kubectl --context $WORKER get pods
 NAME                                                     READY   STATUS      RESTARTS   AGE
-healthcheck-redis-default-example-78709-28947855-p5kxt   0/1     Completed   0          2m39s
-healthcheck-redis-default-example-78709-28947856-srh9r   0/1     Completed   0          99s
 healthcheck-redis-default-example-78709-28947857-8t6b5   0/1     Completed   0          39s
 ```
 
-You may see one or more pods with `Completed` status. In fact, if you refer back to our HealthDefinition, you will see that we are scheduling the Health check to run every minute (see the `schedule` field).
+:::tip
+
+Since the health check is schedule to run every minute, if you keep watching the pods, you should see new ones starting at the turn of each minute.
+
+:::
 
 Since the workflow completed successfully, the SKE Health Agent running in your Destination should have written a `HealthRecord` to the State Store. Since you have a GitOps agent listening to that State Store, the Health Record will be applied back to the Platform cluster.
 
@@ -208,7 +225,6 @@ Towards the end, under `status`, you should see the following:
 ```yaml
 status:
   healthRecord:
-    lastRun: # unix timestamp
     state: healthy
 ```
 
@@ -389,14 +405,22 @@ With the new Health Definition, the CronJob on the Destination will eventually b
 ```bash
 $ kubectl --context $WORKER get pods
 NAME                                                     READY   STATUS      RESTARTS   AGE
-healthcheck-redis-default-example-78709-28946510-5hr5c   0/1     Completed   0          1s
+healthcheck-redis-default-example-78709-28951821-dgszb   0/1     Completed   0          2m25s
+healthcheck-redis-default-example-78709-28951822-nsx9q   0/1     Completed   0          85s
+healthcheck-redis-default-example-78709-28951823-2wcls   0/1     Completed   0          25s
 ```
 
 Once it completes, you should now see the Health check results in your Redis resource:
 
 ```bash
-kubectl --context $PLATFORM redis.marketplace.kratix.io example -oyaml
+kubectl --context $PLATFORM get redis.marketplace.kratix.io example -oyaml
 ```
+
+:::tip
+
+It may take a couple of minutes for the Resource status to update
+
+:::
 
 Towards the end, under `status`, you should see the following:
 
