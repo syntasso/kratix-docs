@@ -256,6 +256,7 @@ metadata:
 status:
   healthRecord:
     state: ready
+    lastRun: 1531958400
     details:
       acceptingConnections: true
 ```
