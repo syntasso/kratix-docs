@@ -1,0 +1,101 @@
+---
+title: SKE Health Agent
+description: Documentation about the SKE Health Agent
+---
+
+The SKE Health Agent is a health check agent to be installed in Kubernetes Destinations where health checks can be executed. 
+
+The Agent is released separately from SKE. Its releases can be found [here](../releases/ske-health-agent).
+
+## Features
+
+The Agent will:
+
+* Schedule the execution of Health Check Workflows from the Destination
+* Persist the data from a health check into a state store
+
+## Requirements
+
+The Agent will write the health information to a state store. The Platform cluster must have a GitOps agent listening to the state store, so the resource health can be applied back to the Platform cluster.
+
+## Install
+
+To install, run the command below, replacing VERSION with the target version:
+
+```
+kubectl apply -f https://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/<VERSION>/manifests/ske-health-agent.yaml
+```
+
+:::warning
+
+For the SKE Health Agent to work, you will need to make sure that your Destination cluster can access the Image Registry.
+
+:::
+
+You will also need to create a ConfigMap and Secret with the credentials to access the state store. The format will depend on the type os state store you wish to use. The agent currently support two different types of state stores: S3-compatible buckets and Git repositories.
+
+To configure a Git repository, create a ConfigMap and Secret with the following content:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-state-store-config
+  namespace: k8s-health-agent-system
+data:
+  stateStoreKind: "GitStateStore"
+  url: # address
+  secretName: <secret name>
+  branch: # optional (default: main)
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <secret name>
+  namespace: k8s-health-agent-system
+type: kubernetes.io/basic-auth
+stringData:
+  # for basicAuth
+  username: # username
+  password: # password / API Token
+```
+
+:::info
+
+`ssh` method for authentication is not currently supported.
+
+:::
+
+To configure a S3-compatible bucket, create a ConfigMap and Secret with the following content:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-state-store-config 
+  namespace: k8s-health-agent-system
+data:
+  stateStoreKind: "BucketStateStore"
+  endpoint: # address
+  bucketName: # bucket name
+  authMethod: # accessKey or IAM (default: accessKey)
+  secretName: <secret name> # required for accessKey
+  path: # path within the bucket; optional
+  insecure: # true or false (default: false); optional
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <secret name>
+  namespace: k8s-health-agent-system
+type: kubernetes.io/basic-auth
+stringData:
+  accessKeyID: # accessKey ID
+  secretAccessKey: # secret access key
+```
+
+:::warning
+
+The configuration should be created _after_ installing agent, otherwise the namespace will not exist.
+
+:::

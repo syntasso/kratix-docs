@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+
+resourceName=$(yq '.metadata.name' /kratix/input/object.yaml)
+namespace="$(yq '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+promiseName="redis"
+
+cat <<EOF > /kratix/output/health-definition.yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: HealthDefinition
+metadata:
+  name: ${promiseName}-${resourceName}-${namespace}
+  namespace: default
+spec:
+  resourceRef:
+    name: ${resourceName}
+    namespace: ${namespace}
+  promiseRef:
+    name: ${promiseName}
+  # runs every minute
+  schedule: "* * * * *"
+  input: |
+    name: ${resourceName}
+  workflow:
+    apiVersion: platform.kratix.io/v1alpha1
+    kind: Pipeline
+    metadata:
+      name: healthcheck
+    spec:
+      #highlight-start
+      rbac:
+        permissions:
+        - apiGroups: ["apps"]
+          verbs: ["get"]
+          resources: ["statefulsets"]
+      #highlight-end
+      containers:
+      - image: ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
+        name: check-redis
+        command: [ "check-redis"]
+EOF

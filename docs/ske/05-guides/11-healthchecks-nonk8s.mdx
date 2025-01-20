@@ -1,0 +1,167 @@
+---
+title: Health Checks for non Kubernetes resources
+description: Implementing non Kubernetes Resource Health Checks
+sidebar_label: Health Checks for non Kubernetes Resource
+---
+
+## Pre-requisites
+
+You will need:
+1. an installation of SKE. Go to [Configuring SKE](../kratix/configuring-ske/intro) and follow the appropriate guide if you haven't done so already.
+2. a configured and deployed Health Agent. You can do this by following the guide on [Configuring the Kubernetes Health Agent](../kratix/ske-health-agent).
+
+It's also recommended that you first read through the guide on [how to implement resource Health Checks](healthchecks) for a more detailed and step-by-step guide on how health checks work in SKE.
+
+In this guide we will explore a Promise that runs Health Checks on non Kubernetes resources.
+
+## How to run Health Checks on resources outside of your Destination
+
+Health Checks are implemented in SKE via `HealthDefinition` objects. As part of a Health Definition, you can provide a set of container images that encapsulate your health check logic, including making API calls to external resources that live outside of your Kubernetes Destination.
+
+## Example Promise
+
+Here we have an outline of an AWS DB Promise. This Promise provides an AWS RDS as a service.
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: aws-rds
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: rds.aws.marketplace.kratix.io
+    spec:
+      group: aws.marketplace.kratix.io
+      names:
+        kind: RDS
+        plural: rds
+        singular: rds
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          schema:
+            openAPIV3Schema:
+              properties:
+                spec:
+...
+          served: true
+          storage: true
+  #highlight-start
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: rds-configure
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-marketplace/aws-rds-pipelines:v0.1.0
+                name: configure-rds-instance
+                env:
+                  - name: AWS_ACCESS_KEY_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: aws-rds
+                        key: accessKeyID
+                  - name: AWS_SECRET_ACCESS_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: aws-rds
+                        key: secretAccessKey
+              - image: ghcr.io/syntasso/kratix-marketplace/rds-generate-health-check:v0.1.0
+                name: generate-health-check
+                 #highlight-end
+      delete:
+...
+```
+
+There are one two containers within the Resource Configure pipeline 'rds-configure'. The first container `aws-rds-pipelines` will provision and manage the RDS instance.
+While the second container `rds-health-check` can schedule a Health Definition that checks for RDS status.
+
+For reference, the generated Health Definition could look like:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: HealthDefinition
+metadata:
+  name: aws-rds-RESOURCE_NAME-RESOURCE_NS
+  namespace: default # this can be any namespace that exists in the Destination
+spec:
+  resourceRef:
+    name: RESOURCE_NAME
+    namespace: RESOURCE_NS
+  promiseRef:
+    name: aws-rds
+  schedule: @hourly
+  input: |
+    name: RESOURCE_NAME
+  workflow:
+    apiVersion: platform.kratix.io/v1alpha1
+    kind: Pipeline
+    metadata:
+      name: healthcheck
+    spec:
+      containers:
+      - image: ghcr.io/syntasso/kratix-marketplace/rds-health-check:v0.1.0
+        name: check-rds-status
+        ...
+EOF
+```
+
+This Healthcheck Definition will then be scheduled to a Destination and a Kubernetes CronJob will be created to execute container `rds-health-check` on a hourly schedule.
+
+Logic in the health check container is completely up to you, as long as the container writes the health check result to `/kratix/output/health-status.yaml` with the format:
+```
+state: # can be of unknown, ready, unhealthy, healthy, or degraded
+details: # optional additional information to set in the resource request health status
+  ...
+```
+
+To check the status of a RDS instance, you might have the container `rds-health-check` running a script that queries the instance status.
+
+For example:
+```
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# read data from the input object
+name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
+namespace="$(yq eval '.metadata.namespace' /kratix/input/object.yaml)"
+engine="$(yq eval '.spec.engine' /kratix/input/object.yaml)"
+
+region="eu-west-1"
+db_identifier="${name}-${namespace}-${engine}"
+
+aws rds describe-db-instances --db-instance-identifier ${db_identifier} --region ${region} > instance-output.json
+
+instance_status=$(jq -r '.DBInstances[0].DBInstanceStatus' instance-output.json)
+
+cat <<EOF > /kratix/metadata/status.yaml
+instanceStatus: ${instance_status}
+instanceIdentifier: ${db_identifier}
+EOF
+
+if [[ "$instanceStatus" == "available" ]]; then
+    state="healthy"
+elif [[ "$instanceStatus" == "upgrading" || "$instanceStatus" == "starting" ]]; then
+    state="degraded"
+else
+    state="unknown"
+fi
+
+cat <<EOF > /kratix/output/health-status.yaml
+state: ${state}
+details:
+  instanceStatus: ${instance_status}
+EOF
+
+```
+
+The above scripts will write the health check result to `/kratix/output/health-status.yaml`.
+The SKE health agent will then produce a Health Record and write to the registered state store.
+SKE will reconcile the Health Record and update the Resource Request health status.
