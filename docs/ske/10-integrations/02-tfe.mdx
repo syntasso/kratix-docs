@@ -291,12 +291,18 @@ spec:
                   - list
                 resourceNamespace: "*"
             containers:
-              - image: registry.syntasso.io/ske-tfstate-finder:v0.1.0
+              - image: registry.syntasso.io/syntasso/ske-tfstate-finder:v0.5.2
                 name: fetch-output
                 env:
                 - name: TIMEOUT
                   value: "30m"
 ```
+
+:::tip
+
+Check the [releases page](/ske/releases/aspects/tfstate-finder/) for the latest version of the TFE Aspect.
+
+:::
 
 The `TIMEOUT` environment variable can be configured to match the amount of
 time you expect the Terraform plan and apply to take. The Aspect will keep
@@ -418,7 +424,7 @@ spec:
                   - list
                 resourceNamespace: "*"
             containers:
-              - image: registry.syntasso.io/ske-tfstate-finder:v0.1.0
+              - image: registry.syntasso.io/syntasso/ske-tfstate-finder:v0.5.2
                 name: fetch-output
                 env:
                 - name: TIMEOUT
@@ -525,7 +531,7 @@ spec:
             namespace: default
           spec:
             containers:
-              - image: registry.syntasso.io/ske-tfstate-finder:v0.1.0
+              - image: registry.syntasso.io/syntasso/ske-tfstate-finder:v0.5.2
                 name: fetch-output
 # highlight-start
               - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1

@@ -86,7 +86,7 @@ gh api orgs/syntasso/packages/container/ske-backstage-generator/versions | jq -r
 :::
 
 ```bash
-docker pull registry.syntasso.io/ske-backstage-generator:VERSION
+docker pull registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
 ```
 
 ### Pulling the image from your cluster
@@ -100,10 +100,10 @@ directly to the Kubernetes cache. Different tools have different commands for th
 
 ```bash
 # For minikube
-minikube image load registry.syntasso.io/ske-backstage-generator:VERSION
+minikube image load registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
 
 # For KinD
-kind load docker-image registry.syntasso.io/ske-backstage-generator:VERSION
+kind load docker-image registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
 ```
 
 For other tools, follow their specific documentation.
@@ -138,7 +138,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
           #highlight-start
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-end
     resource:
@@ -153,7 +153,7 @@ workflows:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
           #highlight-start
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-end
 ```
@@ -220,7 +220,7 @@ secret.
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
 ```
 
@@ -293,7 +293,7 @@ pipeline stage with the snippet below:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
             #highlight-start
             env:
@@ -336,7 +336,7 @@ for all resource requests:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
             #highlight-start
             env:
@@ -422,7 +422,7 @@ Backstage Component Promise request:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-start
           - image:  ghcr.io/syntasso/kratix-marketplace/create-backstage-component-request:v0.1.0
@@ -446,7 +446,7 @@ Backstage Component Promise request:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: registry.syntasso.io/ske-backstage-generator:VERSION
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
             name: ske-backstage-generator
           #highlight-start
           - image:  ghcr.io/syntasso/kratix-marketplace/create-backstage-component-request:v0.1.0
