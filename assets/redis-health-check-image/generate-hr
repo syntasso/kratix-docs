@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+set -eux
+
+namespace="$(yq '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+resourceName="$(yq '.metadata.name' /kratix/input/object.yaml)"
+
+cat <<EOF > health-record.yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: HealthRecord
+metadata:
+  name: redis-${resourceName}
+  namespace: ${namespace}
+data:
+  promiseRef:
+    name: redis
+  resourceRef:
+    name: ${resourceName}
+    namespace: ${namespace}
+  state: unhealthy
+  lastRun: $(date +%s)
+  details:
+    example: some-detail
+EOF
+
+kubectl apply --filename health-record.yaml

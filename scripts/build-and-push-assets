@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eux
+
+root=$(cd $(dirname $0)/.. && pwd)
+
+docker build \
+    --platform linux/amd64 \
+    -t ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0 \
+    -f $root/assets/redis-health-check-image/Dockerfile \
+    $root/assets/redis-health-check-image
+
+docker push ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
