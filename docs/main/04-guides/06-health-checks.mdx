@@ -1,0 +1,361 @@
+---
+description: A guide for Health checks
+title: Surfacing health information
+id: resource-health
+---
+
+
+{/* 
+
+Kratix understands some status fields
+- healthStatus:
+    state: healthy | ...
+    details: {}
+
+You can use these fields to tell Kratix about the state of your resource
+
+You can use HealthRecord to make Kratix automatically update the status
+
+Check the reference docs for the CRD format
+
+Here's an example:
+
+...
+
+SKE CAN DO THINGS
+*/}
+
+
+THIS IS REAL NOT A DRILL
+
+**In this guide, you will:**
+* Learn about the `healthRecord` status field
+* Learn about the `HealthRecord` CRD
+* Write a Promise that can populate the `healthRecord` via a HealthRecord
+
+```mdx-code-block
+import PartialGuidesPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.md';
+```
+
+<PartialGuidesPreRequisites />
+
+## The Health Record Status
+
+Within the resource `status`, Kratix understands the `healthRecord` status field. In this field, Promise writers can describe the health of the resource. The field has the following format:
+
+```yaml
+status:
+  healthRecord:
+    state: healthy
+    lastRun: 1531958400
+    details:
+      key: value
+      another: value
+```
+
+The `state` subfield can have the following values:
+
+* unknown: used to indicate that the state is not known
+* healthy: the resource is healthy and ready to use
+* unhealthy: the resource is unhealthy and should be investigated
+* degraded: the resource is operational, but its functionality may be affected
+
+The `lastRun` field is a timestamp indicating the time the Health Check was last run. The timestamp is in seconds since the epoch.
+
+The `details` field is an optional field that can be used to provide additional details about the Health Check. The details are free-form and can be used to provide any information that may be relevant to the Health Check.
+
+## The HealthRecord CRD
+
+Promise writers can use `/kratix/metadata/status.yaml` to populate the `healthRecord` status field. Alternatively, they can write a HealthRecord CR and schedule it to the Platform cluster in their Pipelines.
+
+A HealthRecord details the result of a Health check. When a Health Record exists for a given Resource, Kratix will update the referenced resource status to reflect the data in the HealthRecord. It has the following format:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: HealthRecord
+metadata:
+  name: healthrecord-example
+data:
+  promiseRef:
+    name: promise-name
+  # A reference to the Resource Request the Health Check should be performed against  
+  resourceRef:
+    name: request-name
+    namespace: default
+  # The condition of the Health Check
+  # Can be unknown, ready, unhealthy, healthy or degraded
+  state: ready
+  # The timestamp of the last time the Heath Check was executed
+  lastRun: 1531958400
+  # Optional: any additional details
+  details:
+    example: data
+```
+
+:::tip
+
+You can have extenal systems generating the HealthRecord CR and, via GitOps, continuously updating the health information of the resources in your Platform.
+
+:::
+
+## Writing a HealthRecord in a Workflow
+
+Now that you understand the `healthRecord` status and the HealthRecord CRD, let's see how to use them in a Workflow. For that, you will update the Redis Promise you can find in the Marketplace. Start by downloading the Promise YAML to your local machine:
+
+```bash
+curl -Lo redis-promise.yaml https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/promise.yaml
+```
+
+You are going to update the promise as follows:
+
+* The first workflow in `resource.configure` will instantiate the Redis Promise. You will update it to also generate the HealthRecord.
+* The second workflow will wait for the resource status `healthRecord.state` to be equal to `healthy`.
+
+### The HealthRecord generator workflow
+
+To update the first workflow to also generate a HealthRecord, you will need to add a new container to the Workflow. This new container will apply a HealthRecord directly to the Platform cluster.
+
+:::tip
+
+In this guide, we will use the `kubectl` CLI to apply the HealthRecord directly. You could, instead, use the Kratix Workflow output directory and schedule it to the Platform cluster. See [Compound Promise](./compound-promises) for more details.
+
+:::
+
+The script will look like this:
+
+```bash
+namespace="$(yq '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+resourceName="$(yq '.metadata.name' /kratix/input/object.yaml)"
+
+cat <<EOF > health-record.yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: HealthRecord
+metadata:
+  name: redis-${resourceName}
+  namespace: ${namespace}
+data:
+  promiseRef:
+    name: redis
+  resourceRef:
+    name: ${resourceName}
+    namespace: ${namespace}
+  state: unhealthy
+  lastRun: $(date +%s)
+  details:
+    example: some-detail
+EOF
+
+kubectl apply --filename health-record.yaml
+```
+
+This script is available in the `ghcr.io/kratix-docs/redis-health-checks:v0.1.0` image as `generate-hr`.
+
+:::tip
+
+For simplicity, we will not execute any real check to verify the health status of the Redis instance. Instead, we will simply generate a HealthRecord with an `unhealthy` state (we will later update it to `healthy` to illustrate the concept). In your use case, you may want to run some actual verification steps to assert the status of the created resource.
+
+:::
+
+Since this workflow is using `kubectl` to apply the HealthRecord, you must ensure that the right RBAC settings are defined in the promise.
+
+Update your Promise to include the new container and the RBAC configuration:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+  labels:
+    kratix.io/promise-version: v0.1.0
+spec:
+  api: # omitted for brevity
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: instance-configure
+          spec:
+            #highlight-start
+            rbac:
+              permissions:
+                - apiGroups: ["platform.kratix.io"]
+                  resources: ["healthrecords"]
+                  verbs: ["get", "list", "create", "update", "patch"]
+            #highlight-end
+            containers:
+              - image: ghcr.io/syntasso/kratix-marketplace/redis-configure-pipeline:v0.1.0
+                name: redis-configure-pipeline
+              #highlight-start
+              - image: ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
+                name: generate-healthrecord
+                command: [ "generate-hr" ]
+              #highlight-end
+    promise: # omitted for brevity
+```
+
+:::warning
+
+Make sure you add the container to the correct location in the Promise. The container needs to be added to the `resource.configure` section, so that it is executed when a Resource Request is applied.
+
+:::
+
+### The HealthRecord waiting workflow
+
+Next, you will add a second workflow to wait for the resource to be healthy. The code will look like this:
+
+```bash
+namespace="$(yq '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+resourceName="$(yq '.metadata.name' /kratix/input/object.yaml)"
+
+while true; do
+  state="$(kubectl get redis ${resourceName} --namespace ${namespace} -o jsonpath='{.status.healthRecord.state}')"
+  if [[ ${state} == "healthy" ]]; then 
+    break
+  fi
+  echo "Waiting for resource to be healthy, current state: ${state:-"unknown"}"
+  sleep 5
+done
+
+echo "Resource is healthy"
+```
+
+This script is available in the `ghcr.io/kratix-docs/redis-health-checks:v0.1.0` image in the `wait-healthy` binary.
+
+Update the Promise with a new workflow executing this container:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+  labels:
+    kratix.io/promise-version: v0.1.0
+spec:
+  api: # omitted for brevity
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: instance-configure
+          spec:
+            rbac:
+              permissions:
+                - apiGroups: ["platform.kratix.io"]
+                  resources: ["healthrecords"]
+                  verbs: ["get", "list", "create", "update", "patch"]
+            containers:
+              - image: ghcr.io/syntasso/kratix-marketplace/redis-configure-pipeline:v0.1.0
+                name: redis-configure-pipeline
+              - image: ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
+                name: generate-healthrecord
+                command: [ "generate-hr" ]
+        #highlight-start
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: wait-status
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
+                name: wait-healthy
+                command: [ "wait-healthy" ]
+        #highlight-end
+    promise: # omitted for brevity
+```
+
+## Applying the Promise
+
+With the changes above, you can apply the Promise:
+
+```bash
+kubectl --context $PLATFORM apply -f redis-promise.yaml
+```
+
+Create a new Redis instance:
+
+```bash
+kubectl --context $PLATFORM apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/resource-request.yaml
+```
+
+## Verifying the results
+
+You can now watch the workflow execution. The first workflow runs and generate a HealthRecord with the `unhealthy` state. The second workflow starts and waits for the resource to be healthy. You can check the workflows:
+
+```bash
+$ kubectl --context $PLATFORM get pods
+NAME                                                  READY   STATUS      RESTARTS   AGE
+kratix-redis-example-instance-configure-3c020-5xxpc   0/1     Completed   0          13s
+kratix-redis-example-wait-status-13b3f-2s7q7          0/1     Init:1/3    0          6s
+```
+
+If you check the logs for the second workflow:
+
+```bash
+$ kubectl --context $PLATFORM logs kratix-redis-example-wait-status-13b3f-2s7q7 -c wait-healthy
+Waiting for resource to be healthy, current state: unhealthy
+Waiting for resource to be healthy, current state: unhealthy
+Waiting for resource to be healthy, current state: unhealthy
+Waiting for resource to be healthy, current state: unhealthy
+...
+```
+
+You can also check the HealthRecords:
+
+```bash
+$ kubectl --context $PLATFORM get healthrecords redis-example -oyaml
+apiVersion: platform.kratix.io/v1alpha1
+data:
+  details:
+    example: some-detail
+  lastRun: 1737736375
+  promiseRef:
+    name: redis
+  resourceRef:
+    name: example
+    namespace: default
+  state: unhealthy
+kind: HealthRecord
+metadata:
+  name: redis-example
+  namespace: default
+  # some details omitted for brevity
+```
+
+The Redis resource itself should also include the Record in its status:
+
+```bash
+$ kubectl --context $PLATFORM get redis.marketplace.kratix.io example -ojsonpath='{.status.healthRecord}'
+{"details":{"example":"some-detail"},"lastRun":1737736375,"state":"unhealthy"}
+```
+
+Now edit the HealthRecord and mark it as `healthy`:
+
+```bash
+kubectl patch healthrecord redis-example --patch '{"data":{"state":"healthy"}}' --type=merge
+```
+
+If you check the workflow pods now, you should see the second workflow completed (it may take a couple of seconds):
+
+```bash
+$ kubectl --context $PLATFORM get pods
+NAME                                                  READY   STATUS      RESTARTS   AGE
+kratix-redis-example-instance-configure-3c020-5xxpc   0/1     Completed   0          1m20s
+kratix-redis-example-wait-status-13b3f-2s7q7          0/1     Completed   0          1m10s
+```
+
+That means the Redis instance should now be reporting "healthy":
+
+```bash
+$ kubectl --context $PLATFORM get redis.marketplace.kratix.io example -ojsonpath='{.status.healthRecord}'
+{"details":{"example":"some-detail"},"lastRun":1737736375,"state":"healthy"}
+```
+
+## Conclusion
+
+HealthRecords offer a powerful way to directly surface health information about resources to platform users. They enable you to provide detailed insights into the state of your resources while signalling to the platform whether those resources are healthy or require attention.
+
+By integrating with GitOps tools, HealthRecords can serve as an API for external systems to update resource health statuses dynamically. For instance, tools like Kuberhealthy can be used to generate HealthRecords, which can then be stored in a GitOps repository. This approach allows seamless integration with the platform cluster, enabling real-time health status updates and improving visibility and management of resource health.

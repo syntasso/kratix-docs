@@ -1,5 +1,5 @@
 ---
-description: Documentation for the Health Definition Custom Resources
+description: Documentation for the Health Definition Custom Resource
 title: Health Definition
 sidebar_label: Health Definition
 id: healthdefinition

@@ -217,7 +217,7 @@ Once the condition is `True` the command will exit.
 
 # Health Checks
 
-When configured for a Resource, [Health Checks](../16-health-checks/01-intro.md) provide
+When configured for a Resource, [Health Checks](../healthdefinition) provide
 an indication of Resource Health and communicate this to the user via the `status` of
 the Resource.
 
