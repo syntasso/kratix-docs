@@ -10,17 +10,16 @@ installation.
 
 ## Installation
 
-To install the Kratix CLI, go to the [releases
-page](https://github.com/syntasso/kratix-cli/releases), download the latest release of
-the binary for your platform.
+To install the Kratix CLI, run
 
-Once you have downloaded the binary, you can install it by moving it to a directory in
-your PATH.
+```bash
+go install github.com/syntasso/kratix-cli/cmd/kratix@latest
+```
 
 To verify your installation, run:
 
 ```shell-session
-kratix --version
+kratix help
 ```
 
 ### Enable shell autocompletion
