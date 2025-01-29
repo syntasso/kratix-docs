@@ -1,0 +1,33 @@
+---
+title: SKE Destination
+description: Release information about SKE Destination Helm Chart
+sidebar_label: SKE Destination
+---
+
+## Overview
+
+The SKE Destination Helm Chart is a chart for installing Flux on a Kubernetes Destination and optionally installing the K8s Health Agent.
+
+The release is available via the Syntasso Helm Registry https://syntasso.github.io/helm-charts
+
+```
+helm repo add syntasso https://syntasso.github.io/helm-charts
+helm repo update
+helm install ske-destination syntasso/ske-destination -f values.yaml
+```
+
+The packaged chart is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/
+```
+
+## Release Notes
+
+### [0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.6.0/) (2025-01-29)
+
+Packaged with v0.2.0 of the K8s Health Agent
+
+#### Features
+
+* Initial release
