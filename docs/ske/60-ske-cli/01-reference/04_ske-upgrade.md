@@ -3,7 +3,8 @@
 Upgrade SKE to the next minor at the latest patch
 
 ## Description
-```
+
+```bash
  > ske upgrade
 
 Upgrading SKE from v0.9.0 to v0.10.0...
@@ -29,21 +30,20 @@ Upgrade successful!
 ```
 
 ## Usage
-```
+
+```bash
 ske upgrade [--context] [flags]
 ```
 
-
 ## Flags
-```
+
+```bash
       --dry-run            Dry run the upgrade
   -h, --help               help for upgrade
       --skip-all-checks    Skipping all pre- and post-upgrade checks; use with caution
       --timeout duration   Timeout for the upgrade (default 5m0s)
 ```
 
-
 ## See Also
 
 * [ske](/ske/ske-cli/reference/ske): The ske CLI
-

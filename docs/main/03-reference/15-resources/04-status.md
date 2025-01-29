@@ -150,6 +150,7 @@ iam:
 ```
 
 The end status would be:
+
 ```yaml
 status:
   conditions:
@@ -209,7 +210,7 @@ Configure workflow has completed. `kubectl` also has built-in support for waitin
 condition to be met. For example, after requesting a Resource, a user can run the
 following to have the CLI wait for the Workflow to be completed:
 
-```
+```bash
 kubectl wait redis/example --for=condition=ConfigureWorkflowCompleted --timeout=60s
 ```
 

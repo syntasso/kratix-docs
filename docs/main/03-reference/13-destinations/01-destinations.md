@@ -10,11 +10,12 @@ a system that Kratix can write documents to. These documents are then
 reconciled by an external tool.
 
 Some example use cases:
+
 - [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernetes manifests) to
   the Destination, and then a GitOps tool running on the Kubernetes cluster,
   such as Flux or ArgoCD with pull down the documents and deploy them. See our
   [GitOps Agent documentation](/category/installing-gitops-agent) for more information.
-- [Terraform](https://www.terraform.io/): There are many toolings that exist to trigger Terraform applys
+- [Terraform](https://www.terraform.io/): There are many toolings that exist to trigger a `teraform apply`
   when a new Terraform file is committed to a Git repository. For example
   [Terraform
   Enterprise](https://www.hashicorp.com/resources/gitops-and-terraform-enterprise-a-match-made-in-heaven-at-state-farm)
@@ -25,8 +26,8 @@ Some example use cases:
   filled from a Git
   repository](https://backstage.io/docs/integrations/github/discovery).
 
-
 Below is the full Spec for the Destination CRD:
+
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination
@@ -79,7 +80,7 @@ one for `resources`, one for `dependencies`. The path within the `State Store` f
 
 For `dependencies`:
 
-```
+```yaml
 statestore.Spec.Path/
     destination.Spec.Path/
         destination.Name/
@@ -89,7 +90,7 @@ statestore.Spec.Path/
 
 For `resources`:
 
-```
+```yaml
 statestore.Spec.Path/
     destination.Spec.Path/
         destination.Name/
@@ -101,7 +102,7 @@ statestore.Spec.Path/
 
 For example installing and requesting from a Promise that provides `Redis` as a service you would get:
 
-```
+```bash
 worker-cluster/dependencies/redis/static/dependencies.yaml
 worker-cluster/resources/default/redis/my-request/redis.yaml
 ```
