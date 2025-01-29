@@ -7,7 +7,8 @@ id: healthdefinition
 
 # Health Definition
 
-When a Promise defines a Healthcheck, Kratix will automatically create a Health Definition for that Healthcheck when a Resource Resource request is made. A Health Definition is the outline of the task that will be performed on a Destination to verify the health of a Resource Request.
+The Health Definition Custom Resource Definition (CRD) is the outline of a task that will be performed on a
+Destination to verify the health of a Resource Request.
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
