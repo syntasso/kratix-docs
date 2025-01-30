@@ -19,19 +19,34 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
-### [0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.16.0/) (2024-01-14)
+### [v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.17.0/) (2025-01-29)
+
+#### Features
+
+* Introduce the [HealthDefinition](/ske/api-reference/healthdefinition) and [HealthRecord](/main/reference/healthrecord) Custom
+  Resources that can be used to monitor the health of a Resource. Check the [Health checks guide](/ske/guides/healthchecks) for more information.
+
+#### Bug fixes
+
+* BucketStateStore can now delete files from GCS buckets.
+
+#### Security Fixes
 
 * Updated to include latest security updates
 
-### [0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.15.0/) (2024-01-08)
+### [v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.16.0/) (2024-01-14)
 
 * Updated to include latest security updates
 
-### [0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.14.0/) (2024-12-27)
+### [v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.15.0/) (2024-01-08)
 
 * Updated to include latest security updates
 
-### [0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.13.0/) (2024-12-17)
+### [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.14.0/) (2024-12-27)
+
+* Updated to include latest security updates
+
+### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.13.0/) (2024-12-17)
 
 #### Features
 
@@ -44,20 +59,20 @@ Check the release notes below for information on each available version.
 
 * Updated to include latest security updates
 
-### [0.12.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.12.0/) (2024-12-12)
+### [v0.12.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.12.0/) (2024-12-12)
 
 #### Security Fixes
 
 * Updated to include latest security updates
 
-### [0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.11.0/) (2024-12-04)
+### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.11.0/) (2024-12-04)
 
 #### Bug Fixes
 
 * Ensure canary documents respect destination file path mode. When `filepath.mode` for a given Destination is set to `none`,
 test documents are written to the root of the path, previously the files were written to nested sub-directories.
 
-### [0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.10.0/) (2024-11-27)
+### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.10.0/) (2024-11-27)
 
 #### Features
 
@@ -69,19 +84,19 @@ resource requests for that Promise
 
 * Prevent the deletion of Destination Selectors configmaps is deleted while a resource request's Job is still in flight
 
-### [0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.9.0/) (2024-11-12)
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.9.0/) (2024-11-12)
 
 #### Security Fixes
 
 * Updated to include latest security updates
 
-### [0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.8.0/) (2024-11-05)
+### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.8.0/) (2024-11-05)
 
 #### Bug Fixes
 
 * Prevent rolebindings for different resource requests in different namespaces from overriding each other.
 
-### [0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.7.0/) (2024-10-30)
+### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.7.0/) (2024-10-30)
 
 #### Features
 
@@ -91,7 +106,7 @@ resource requests for that Promise
 * Add regular reconciliation for the Promise Configure workflow, rerunning at least every 10 hours.
 * Add support for configuring [HTTP authorization for Promise Releases](../../main/03-reference/11-promises/05-releases.md#authenticated-endpoints).
 
-### [0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.6.0/) (2024-10-01)
+### [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.6.0/) (2024-10-01)
 
 #### Features
 
@@ -101,27 +116,27 @@ resource requests for that Promise
     Resource Requests.
 * Security Updates
 
-### [0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.5.0/) (2024-09-26)
+### [v0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.5.0/) (2024-09-26)
 
 #### Features
 
 * Add support for [defining labels and annotations](../../main/03-reference/12-workflows.md#pipelines) within the `spec.metadata` of a `Pipeline`
 * Security Updates
 
-### [0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.4.0) (2024-09-17)
+### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.4.0) (2024-09-17)
 
 #### Features
 
 * Add support for [specifying a default pod security context](../../main/03-reference/12-workflows.md#security-context)
 
-### [0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.3.0) (2024-08-20)
+### [v0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.3.0) (2024-08-20)
 
 #### Features
 
 * [Set KRATIX_PIPELINE_NAME env var in pipeline](https://github.com/syntasso/kratix/pull/223)
 * Security updates
 
-### [0.2.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.2.0) (2024-08-13)
+### [v0.2.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.2.0) (2024-08-13)
 
 #### Features
 
@@ -129,7 +144,7 @@ resource requests for that Promise
 * Add support for [specifying ServiceAccount in the Promise Pipeline](../../main/03-reference/12-workflows.md#service-account)
 * Security updates
 
-### [0.1.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.1.0) (2024-08-02)
+### [v0.1.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.1.0) (2024-08-02)
 
 #### Features
 
