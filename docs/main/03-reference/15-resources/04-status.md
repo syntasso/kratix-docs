@@ -216,16 +216,16 @@ kubectl wait redis/example --for=condition=ConfigureWorkflowCompleted --timeout=
 
 Once the condition is `True` the command will exit.
 
-# Health Checks
+## Health Checks
 
-When configured for a Resource, [Health Checks](../healthdefinition) provide
-an indication of Resource Health and communicate this to the user via the `status` of
-the Resource.
+When configured for a Resource, Health checks provide an indication of Resource
+Health and communicate this to the user via the `status` of the Resource.
 
-When a Health Record exists for a given Resource, detailing the result of a Health Check
-for that resource, Kratix updates the Resource to reflect this result. Let's use the example
-of a Health Check for Resource Requests of a Psql Promise. Following the completion of a
-Health Check, a `HealthRecord` detailing the result is created:
+When a [Health Record](../healthrecord) exists for a given Resource, detailing
+the result of a Health Check for that resource, Kratix updates the Resource to
+reflect this result. Let's use the example of a Health Check for Resource
+Requests of a Psql Promise. Following the completion of a Health Check, a
+`HealthRecord` detailing the result is created:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
