@@ -125,8 +125,7 @@ spec:
 
 ### Upgrade checks
 
-The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks)
-and [post-upgrade checks](../ske-operator#post-upgrade-checks) as part of the upgrade flow.
+The SKE Operator will perform [pre-upgrade checks](../ske-operator#pre-upgrade-checks) as part of the upgrade flow.
 
 To skip these checks, you can add the
 `ske.syntasso.io/skip-all-upgrade-checks` label when updating your `.spec.version`:
@@ -148,12 +147,6 @@ spec:
 Skipping checks can be useful when you need to upgrade SKE while its current state is
 unhealthy.
 :::
-
-### Handling failures
-
-If any upgrade step fails, the SKE Operator will continue looping its reconciliation of
-the Kratix resource to pick up any manual fixes. See the section on [handling
-failures](../ske-operator#handling-failures) for more details.
 
 ## Deleting SKE Operator
 

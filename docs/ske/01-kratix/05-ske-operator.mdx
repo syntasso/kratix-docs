@@ -28,7 +28,6 @@ The SKE Operator will:
 [SKE distribution](../releases/ske#overview)
 * Validate SKE is in a healthy state before upgrading with pre-upgrade checks
 * Roll out an upgrade to the next minor version at the latest patch
-* Validate an upgrade works with post-upgrade checks
 * Provide information about the status of the upgrade
 
 ## The Kratix Custom Resource Definition (CRD)
@@ -73,14 +72,11 @@ By default, the SKE Operator will perform the following steps:
 1. Run the [pre-upgrade checks](#pre-upgrade-checks) to check that Kratix is safe to upgrade in its current state.
 1. Upgrade your Kratix Deployment to the new version.
 1. Wait for the Kratix Deployment to become healthy (ready and available).
-1. Trigger [post-upgrade-checks](#post-upgrade-checks) and wait for them to complete.
 
 #### Pre-upgrade checks
 
 The following pre-upgrade checks will run by default:
 1. Check that the current Kratix installation is in `Ready` state.
-1. Check that there are no Kratix workflows in progress.
-1. Check that all Promises are in an `Available` state.
 
 :::info
 
@@ -93,74 +89,3 @@ This check passes when the new version is:
 
 Patch versions on the same minor can be upgraded without restrictions.
 :::
-
-#### Post-upgrade checks
-
-The following post-upgrade checks will run by default:
-1. Retrigger Promise Configure workflows and check they run successfully.
-1. Retrigger Resource Configure workflows and check they run successfully.
-
-:::info
-All Promises and Resources which are installed at the time the upgrade starts will
-have their Configure workflows retriggered during the post-upgrade checks.
-:::
-
-The status of the post-upgrade checks can be monitored via the Kratix status, under the
-`.status.postUpgradeStatus` key:
-
-```yaml
-apiVersion: platform.syntasso.io/v1alpha1
-kind: Kratix
-metadata:
-  name: my-kratix
-  ...
-spec:
-  version: v0.10.0
-status:
-  conditions:
-  - lastTransitionTime: "2024-12-04T23:00:22Z"
-    message: ""
-    reason: AllReplicasAvailable
-    status: "True"
-    type: KratixDeploymentReady
-  lastAppliedVersion: v0.10.0
-  #highlight-start
-  postUpgradeStatus:
-    lastTransitionTime: "2024-12-04T23:00:53Z"
-    promiseConfigureWorkflowsCheck:
-      status: Succeeded
-    resourceConfigureWorkflowsCheck:
-      resourceConfigureWorkflows:
-      - promiseName: cicd
-        resourceGVK: marketplace.kratix.io/v1alpha1, Kind=Jenkins
-        resourceName: first-jenkins
-        resourceNamespace: default
-        status: Succeeded
-      - promiseName: cicd
-        resourceGVK: marketplace.kratix.io/v1alpha1, Kind=Jenkins
-        resourceName: second-jenkins
-        resourceNamespace: default
-        status: InProgress
-      status: InProgress
-    status: InProgress
-  #highlight-end
-  ready: false
-  upgradedDeploymentReadyAt: "2024-12-04T23:00:22Z"
-```
-
-The post-upgrade status will be continually updated as the post-upgrade checks progress.
-
-#### Handling failures
-
-If any upgrade step fails, the SKE Operator will continue looping its reconciliation of
-the Kratix resource awaiting manual intervention.
-
-Once the failure is fixed, the upgrade will proceed to the next step.
-
-An example upgrade scenario might be:
-- Kratix is upgraded and the Deployment becomes healthy, but a Promise Configure workflow
-  fails.
-- The failing workflow is manually fixed and successfully rerun.
-- The SKE Operator picks up the successful Promise Configure workflow, and proceeds with
-  the remaining upgrade step.
-- The upgrade succeeds when all steps have completed successfully.
