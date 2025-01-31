@@ -33,7 +33,7 @@ And with Kratix's built-in [Fleet Management](./03-reference/11-promises/03-upda
 ## Who is Kratix for
 
 ### Platform Engineers
-Teams responsible for building and maintaining platforms often struggle to meet the growing expectations of application teams and organizations. Delivering the right services quickly, safely, and consistently is already challenging—adding Day 2 operations like upgrades and continuous improvements can lead to burnout.
+Teams responsible for building and maintaining platforms often struggle to meet the growing expectations of application teams and organisations. Delivering the right services quickly, safely, and consistently is already challenging—adding Day 2 operations like upgrades and continuous improvements can lead to burnout.
 
 With Kratix and Promises, Platform Engineers can offer anything-as-a-service, consistently enforce business rules, and streamline maintenance by managing all resources collectively, like a fleet.
 :::tip
@@ -41,7 +41,7 @@ Learn more about platform team cognitive load from [Paula Kennedy at PlatformCon
 :::
 
 ### Domain experts & Specialists (Promise Authors) 
-Many organizations have teams that specialize in specific domains, such as security, compliance, databases, or networking. These teams are responsible for ensuring that application teams follow the relevant business rules and policies.
+Many organisations have teams that specialise in specific domains, such as security, compliance, databases, or networking. These teams are responsible for ensuring that application teams follow the relevant business rules and policies.
 
 With Promises, domain specialists can guarantee that every service request adheres to compliance requirements automatically. When policies change, they only need to update a Promise once—Kratix ensures all instances of their services are updated accordingly.
 
