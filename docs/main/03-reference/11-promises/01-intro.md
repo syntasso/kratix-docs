@@ -132,7 +132,7 @@ Learn more about the requiredPromises fields in the [Compound Promise Workshop](
 It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
 
 ### API
-When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customize their resources using the available API options.
+When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customise their resources using the available API options.
 When the API request is submitted to Kratix, the Promise uses the API options to create the resources as described in the Promise.  
 For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.
 
