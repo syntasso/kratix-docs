@@ -8,7 +8,7 @@ description: Documentation for the Kratix Promise Custom Resource
 
 At the core of Kratix are Promises. Promises are a set of instructions written in YAML that will produce a [resource](../resources/intro) whenever the Promise is invoked. This means that you can run software-as-a-service from your platform. A Promise consists of an API description of how to provision the dependencies required to fulfill that promise, the workflows that define how the provisioning takes place, and destination rules that allow the Promise Author to determine where resources should go.
 
-This introduction is intended for platform engineers and people creating promises for use by the rest of their organization.
+This introduction is intended for platform engineers and people creating promises for use by the rest of their organisation.
 
 ```mdx-code-block
 import PromiseHighLevel from "/img/docs/promise-high-level.png"
