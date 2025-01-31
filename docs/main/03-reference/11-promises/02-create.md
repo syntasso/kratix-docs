@@ -5,11 +5,11 @@ description: Documentation on creating a Promise
 ---
 
 ## Getting Started
-When you start using Kratix, many people install a Marketplace Promise to experiment with. As you use it, it may become clear that you need a more customized solution.
+When you start using Kratix, many people install a Marketplace Promise to experiment with. As you use it, it may become clear that you need a more customised solution.
 
 You clone the Promise and tweak the Promise description to apply to your own environment. You then install it so the Promise is available for request.
 
-This iterative writing is useful because it allows you to use the structure of existing Promises to customize what you want for your own platform. Once you’re comfortable with modifying existing Promises, creating your own from scratch is more natural. 
+This iterative writing is useful because it allows you to use the structure of existing Promises to customise what you want for your own platform. Once you’re comfortable with modifying existing Promises, creating your own from scratch is more natural. 
 
 We suggest these examples as good starting places:
 - [Promise Marketplace](https://docs.kratix.io/marketplace)
@@ -45,7 +45,7 @@ Dependencies are all the things required for the platform to run the Promise. Fo
         name: promise-example
 ```
 
-The API is how the user creates and customizes their resources. The API can create, update, or delete promise instances. Users can also use the API to customize the Promise request in ways made available by the Promise. For example, the container image of a resource or its size. 
+The API is how the user creates and customises their resources. The API can create, update, or delete promise instances. Users can also use the API to customise the Promise request in ways made available by the Promise. For example, the container image of a resource or its size. 
 
 ```
  api:
@@ -77,7 +77,7 @@ The API is how the user creates and customizes their resources. The API can crea
           storage: true
 ```
 
-Workflows are a set series of containers executed in sequence. Putting the actions in containers allows them to be consistent and reusable. Containerizing the actions allows for maximum flexibility in language and modularity while maximizing testability.
+Workflows are a set series of containers executed in sequence. Putting the actions in containers allows them to be consistent and reusable. Containerising the actions allows for maximum flexibility in language and modularity while maximizing testability.
 
 ```
   workflows:
