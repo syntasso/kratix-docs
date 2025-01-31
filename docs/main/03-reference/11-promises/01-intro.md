@@ -79,7 +79,7 @@ spec:
               - name: pipeline-stage-1
                 image: ghcr.io/myorg/pipeline-image-2
               -  #...
-              # Tasks to be run when a Resource is deleted
+      # Tasks to be run when a Promise is deleted
       delete: 
       - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
