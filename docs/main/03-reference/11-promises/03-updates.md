@@ -4,18 +4,18 @@ sidebar_label: Updates
 description: Documentation on how updates behave for Promises
 ---
 
-Kratix supports updating Promises with new specifications.
-
 An update to a Promise will cause Kratix to reconcile on the new Promise definition,
 and any changes will be rolled out during this reconciliation.
 
-This may include:
+All elements of a promise are updatable. Any change to the Promise specification on the platform triggers all of the workflows to re-run. Changes may include:
 - Updating the Promise API, which rolls out an update to the underlying CRD for the
   Resources managed by the Promise.
 - Updating the Promise or Resource workflows.
 - Updating the Promise scheduling.
 - Updating the Promise's static dependencies (the `dependencies` field in the Promise
   spec).
+
+This central distribution of updates is a powerful way to keep your Promise-built resources current, secure, and visible over time.
 
 ## Workflows
 
