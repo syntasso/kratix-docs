@@ -77,7 +77,7 @@ The API is how the user creates and customises their resources. The API can crea
           storage: true
 ```
 
-Workflows are a set series of containers executed in sequence. Putting the actions in containers allows them to be consistent and reusable. Containerising the actions allows for maximum flexibility in language and modularity while maximizing testability.
+Workflows are a set series of containers executed in sequence. Putting the actions in containers allows them to be consistent and reusable. Containerising the actions allows for maximum flexibility in language and modularity while maximising testability.
 
 ```
   workflows:
