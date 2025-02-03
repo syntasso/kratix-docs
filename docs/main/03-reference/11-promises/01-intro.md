@@ -6,7 +6,7 @@ description: Documentation for the Kratix Promise Custom Resource
 
 # Promises
 
-At the core of Kratix are Promises. Promises are a set of instructions written in YAML that will produce a [resource](../resources/intro) whenever the Promise is invoked. This means that you can run software-as-a-service from your platform. A Promise consists of an API description of how to provision the dependencies required to fulfill that promise, the workflows that define how the provisioning takes place, and destination rules that allow the Promise Author to determine where resources should go.
+At the core of Kratix are Promises. Promises are a set of instructions written in YAML that will produce a [resource](../resources/intro) whenever the Promise is invoked. This means that you can run software-as-a-service from your platform. A Promise consists of the dependencies it must setup before the Promise can be requested, an API description of how a user can request that Promise, the workflows that define how the provisioning takes place, and destination rules that allow the Promise Author to determine where resources should go.
 
 This introduction is intended for platform engineers and people creating promises for use by the rest of their organisation.
 
@@ -140,7 +140,7 @@ For example, if the Promise describes a database, a Jenkins installation, and an
 Dependencies are everything that the Promise relies on to function. A Kratix Promise can even be built on other Kratix Promises. A dependency is the pre-requisite software to create the resource and make it operational. A dependency might be a low-level resource such as a database, a pre-defined environment, a connection, a queue, or a bundle of related items that work together.
 
 ### Workflows
-Workflows are the actions that must run in order to fulfill a Promise. They are a chain of containers that execute in sequence to fulfill the promise specifications, including responses to API specifications, notifications, business rules, and custom specifications.
+Workflows are the actions that must run in order to fulfil a Promise. They are a chain of containers that execute in sequence to fulfill the promise specifications, including responses to API specifications, notifications, business rules, and custom specifications.
 
 The Promise workflows are run as part of the Promise lifecycle, and the Resource workflows are run as part of the Resource lifecycle. Under both Promise and Resource workflows, Kratix supports two workflow types:
 - The `configure` workflows runs when either the Promise or Resource is created, updated or reconciled.

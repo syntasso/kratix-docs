@@ -5,7 +5,7 @@ description: Documentation on creating a Promise
 ---
 
 ## Getting Started
-When you start using Kratix, many people install a Marketplace Promise to experiment with. As you use it, it may become clear that you need a more customised solution.
+When getting started with Kratix, many people install a Marketplace Promise to experiment with. As you use it, it may become clear that you need a more customised solution.
 
 You clone the Promise and tweak the Promise description to apply to your own environment. You then install it so the Promise is available for request.
 
@@ -16,9 +16,9 @@ We suggest these examples as good starting places:
 - [Promise writing guide](../../../workshop/part-ii/writing-your-first-promise)
 
 ## Creating a Promise
-You create a Promise by assembling a YAML file which defines all the dependencies and workflows that the Promise will include. It also defines the API that is used to request a resource. The Promise can have a mix of static and configurable resources, or other Kratix Promises. Once the Promise is written, it needs to be installed so that the resources it refers to will be available when a user requests them.
+You create a Promise by assembling a YAML file which defines all the dependencies and workflows that the Promise will include. It also defines the API that is used to request a resource. Once the Promise is written, it needs to be installed so that the dependencies it refers to will be available when a user requests them.
 
-This example of a Promise contains all the essential elements. For Promises that have more complexity, you can see the Promise Marketplace. 
+Below is an example of a Promise contains all the essential elements. For Promises that have more complexity, you can see the Promise Marketplace. 
 
 First, there is the metadata that describes the Promise name, version, and labels. 
 
@@ -45,7 +45,7 @@ Dependencies are all the things required for the platform to run the Promise. Fo
         name: promise-example
 ```
 
-The API is how the user creates and customises their resources. The API can create, update, or delete promise instances. Users can also use the API to customise the Promise request in ways made available by the Promise. For example, the container image of a resource or its size. 
+The API is how the user creates and customises their resources. Using the API, application teams can create, update, or delete promise instances. Users can also use the API to customise the Promise request in ways made available by the Promise. For example, the container image of a resource or its size. 
 
 ```
  api:
@@ -77,7 +77,7 @@ The API is how the user creates and customises their resources. The API can crea
           storage: true
 ```
 
-Workflows are a set series of containers executed in sequence. Putting the actions in containers allows them to be consistent and reusable. Containerising the actions allows for maximum flexibility in language and modularity while maximising testability.
+Workflows are a series of containers executed in sequence. Putting the actions in containers allows them to be consistent and reusable. Containerising the actions allows for maximum flexibility in language and modularity while maximising testability.
 
 ```
   workflows:
@@ -109,4 +109,4 @@ Workflows are a set series of containers executed in sequence. Putting the actio
 
 ## Installing a Promise
 
-Installing a Promise is a simple application of the Promise YAML file to the platform cluster. The API is then available for users to call, promise-workflows execute, and the dependencies are installed and made available so that the Promise can be fulfilled when it is requested. A promise exists on the platform cluster and can be called to create an identical promise instance at any time.
+Installing a Promise is a simple application of the Promise YAML file to the platform cluster. The API is then available for users to call, promise-workflows execute, and the dependencies are installed and made available so that the Promise can be fulfilled when it is requested. A promise exists on the platform cluster and can be called to create an consistent promise instance at any time.

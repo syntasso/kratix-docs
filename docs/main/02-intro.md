@@ -48,7 +48,7 @@ With Promises, domain specialists can guarantee that every service request adher
 ### Application Developers 
 Many application teams face delays waiting for essential platform services, leading to poor developer experience (DevEx), workarounds, shadow IT, and missed deadlines. The additional concerns—such as infrastructure, networking, security policies, and billing limits—can overwhelm teams, diverting focus from delivering value.
 
-Effective platforms minimize cognitive load by offering everything-as-a-service with built-in business rules and policies. Kratix and Promises enable this while allowing Platform teams to provide services at the right level of abstraction—hiding complexity from those who don’t need to manage it.
+Effective platforms minimise cognitive load by offering everything-as-a-service with built-in business rules and policies. Kratix and Promises enable this while allowing Platform teams to provide services at the right level of abstraction—hiding complexity from those who don’t need to manage it.
 
 ## Kratix in action
 Watch how Kratix supports teams using Backstage to provide anything-as-a-service.
