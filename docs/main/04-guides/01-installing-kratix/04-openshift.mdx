@@ -1,0 +1,80 @@
+---
+description: Run Kratix
+slug: /main/guides/installing-kratix-openshift
+title: RedHat OpenShift (RHOCP)
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PartialInstallKratixAndCert from '../../../_partials/installation/_install-kratix-and-cert.mdx';
+import PartialInstallGitOpsAgent from '../../../_partials/installation/_install-gitops-agent.mdx';
+import PartialInstallStateStoreStart from  '../../../_partials/installation/_install-state-store-start.md';
+import PartialInstallSetupDestination from '../../../_partials/installation/_install-setup-destination.md';
+```
+
+<div style={{"text-align":"center"}}>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Zkh3FIGMsds?si=omdR7K0HTuvbw60P" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+## Set up Platform Cluster {#platform-setup}
+
+If you are not using a pre-existing cluster, create your Platform Cluster using
+your OpenShift console. Then login to the cluster using the `oc` cli and run the
+following to export the `PLATFORM` environment variable:
+
+```bash
+kubectl config current-context
+export PLATFORM=<platform-context-name>
+```
+
+Kratix docker images are hosted on the `syntasso.docker.scarf.sh` registry, ensure you've
+configured your cluster to [allow access to the registry](https://docs.openshift.com/container-platform/4.17/openshift_images/image-configuration.html)
+
+:::warning
+
+Some users have reported issues with accessing the
+`syntasso.docker.scarf.sh` registry even after adding it as a supported registry:
+```
+kubectl -n kratix-platform-system get pods
+NAME                                                 READY   STATUS             RESTARTS   AGE
+kratix-platform-controller-manager-7698bb84d-82dfm   0/1     ImagePullBackOff   0          95s
+minio-54f847c6c5-4t9jb                               1/1     Running            0          93s
+
+kubectl -n kratix-platform-system describe pod kratix-platform-controller-manager-7698bb84d-82dfm
+...
+Failed to pull image "syntasso.docker.scarf.sh/syntasso/kratix-platform": fetching target platform image selected from image index: reading manifest sha256:... in syntasso.docker.scarf.sh/syntasso/kratix-platform: received unexpected HTTP status: 500 Internal Server Error
+```
+
+If this event occurs, we recommend one of the following actions:
+
+1. Use the Docker Hub Registry instead. Update the image references from `syntasso.docker.scarf.sh/syntasso` to `syntasso`.
+1. Host Images in your own registry. Push the images to your own container registry and update references accordingly.
+
+The image references need to be updated in the following locations:
+  - The `kratix-platform-controller-manager` deployment in the `kratix-platform-system` namespace.
+  - The `kratix-platform-pipeline-adapter-config` ConfigMap in the `kratix-platform-system` namespace.
+
+:::
+
+
+<PartialInstallKratixAndCert />
+
+<PartialInstallStateStoreStart />
+
+<PartialInstallSetupDestination />
+
+## Set up Destination {#worker-setup}
+
+If you are not using a pre-existing cluster, create a Worker Cluster following
+the same steps as the [Platform Cluster setup](#platform-setup).
+
+Once completed, log in to your cluster using the `oc` cli and set the `WORKER` environment
+variable:
+
+```bash
+kubectl config current-context
+export WORKER=<worker-context-name>
+```
+
+<PartialInstallGitOpsAgent />
