@@ -12,7 +12,7 @@ alt="Sample architecture with Kratix and Crossplane"
 style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 />
 
-_We have written a tremendous [blog](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix) about how Kratix and Crossplane complement each other._
+_We have written a tremendous [blog](https://www.syntasso.io/post/kratix-and-crossplane) about how Kratix and Crossplane complement each other._
 
 [Kratix Promises](../reference/promises/intro) and [Crossplane Compositions](https://docs.crossplane.io/v1.13/concepts/compositions/) are similar in that they both provide declarative APIs and a facade into more complicated underlying platform orchestration.
 
