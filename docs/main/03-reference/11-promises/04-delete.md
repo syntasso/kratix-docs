@@ -3,12 +3,7 @@ description: Documentation for deleting a Kratix Promise
 title: Deleting a Promise
 sidebar_label: Deleting
 ---
-
-:::caution
-
-Deleting a Promise will cascade delete all the associated requested Resources and Dependencies.
-
-:::
+Deleting a Promise deletes both the Promise and all the resources and dependencies associated with it. Deleting a Promise runs the specific delete workflow that is declared in the Promise. Once the delete workflow runs, the resources uniquely associated with that Promise are removed from the platform and finally the Promise itself is removed from the platform.
 
 To delete a Promise, run the command below, making sure to replace the
 `<promise name>` with the Promise you want to remove:
