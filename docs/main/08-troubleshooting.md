@@ -26,13 +26,27 @@ Let's first check:
 1. The workflow outputted the documents
    - Check the Workflow logs for any errors that might not be being handled
      correctly.
-     You can find the name of the Pipeline pod by running
+     You can query the workflow pods by running
+
+     ```
+     kubectl get pods --selector kratix.io/promise-name=<name of the promise>, \
+      kratix.io/workflow-type=<promise or resource>, \
+      kratix.io/workflow-action=<configure or delete>, \
+      kratix.io/pipeline-name=<name of pipeline>, \
+      kratix.io/resource-name=<name of resource>
+     ```
+
+     Your can use as any combination of these labels depending on the workflow you
+     are querying.
+
+     You can find the name of a _specific_ Pipeline pod by running
 
      ```
      kubectl get pods --selector kratix.io/resource-name=<request-name>
      ```
 
-     Then inspect the logs for your container
+     Then inspect the logs for your container, this will be the container name of
+     the workflow Pipeline in your Promise specification
 
      ```
      kubectl logs <workflow-pod-name> -c <container-name>
