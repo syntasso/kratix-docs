@@ -549,3 +549,35 @@ spec:
 This example uses the `kratix-pipeline-utility` image, which comes with `yq` pre-installed.
 It also assumes a single output file for simplicity.
 </details>
+
+### Providing a custom SHA
+
+By default, TFE State Finder retrieves the latest Terraform outputs using the
+SHA of the commit that wrote the workloads to the State Store. If you need to
+use a different SHA, specify it in the
+`/kratix/metadata/ske-tfstate-finder-config.yaml` file before running the
+Aspect. This ensures the correct SHAs are used for fetching Terraform outputs
+from the specified Destinations.
+
+This is particularly useful when Kratix writes to a branch that is later merged
+into the main branch. In such cases—where SKE is used to submit Terraform
+configurations via pull requests instead of applying them directly—you must pass
+either the merge commit or squash commit SHA to the Aspect.
+
+If your workflows schedule to a single TFE Destination, you can provide just the
+commit SHA:
+```yaml
+overrides:
+- commitSha: 1234567890abcdef
+```
+
+If your workflows schedule to multiple TFE Destinations, you need to provide a list
+of commit SHAs for each Destination that you want to override.
+```yaml
+overrides:
+- commitSha: 1234567890abcdef
+  destination: tfe-europe
+- commitSha: ghijkl1234567890
+  destination: tfe-us
+```
+

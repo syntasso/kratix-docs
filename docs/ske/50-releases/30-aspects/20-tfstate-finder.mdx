@@ -20,6 +20,17 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.6.0/) (2025-02-07)
+
+#### Features
+
+* You can specify the exact [commit
+  SHA](/ske/integrations/tfe#providing-a-custom-sha) that should be used when
+  fetching the TF state from TFE. This is useful when you want to fetch the TF
+  state from a commit that is merged into the main branch outside of Kratix.
+* Always fetch the **latest** compatible TF state from TFE, previously the TF
+  state was fetched from the TFE Run for the commit Kratix created.
+
 ### [v0.5.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.5.2/) (2024-10-16) {#v0.5.2}
 
 **Compatibility:** SKE >= v0.6.0
