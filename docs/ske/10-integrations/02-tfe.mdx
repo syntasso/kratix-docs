@@ -552,25 +552,26 @@ It also assumes a single output file for simplicity.
 
 ### Providing a custom SHA
 
-By default TFE State Finder uses the SHA of the commit in which the workloads
-were written to the State Store to fetch the latest Terraform outputs. If you
-want to use a different SHA, you can provide them via the
-`/kratix/metadata/ske-tfstate-finder-config.yaml` file. Populate this file prior
-to running the Aspect, and it will use the SHAs for the given Destinations to
-fetch the Terraform outputs. This is useful when Kratix is writing to a branch
-and the branch is manually squash merged into the main. The use case for this is
-when you are using SKE to pull request Terraform configurations, instead of
-having them applied directly from the branch. In this scenario you need to pass
+By default, TFE State Finder retrieves the latest Terraform outputs using the
+SHA of the commit that wrote the workloads to the State Store. If you need to
+use a different SHA, specify it in the
+`/kratix/metadata/ske-tfstate-finder-config.yaml` file before running the
+Aspect. This ensures the correct SHAs are used for fetching Terraform outputs
+from the specified Destinations.
+
+This is particularly useful when Kratix writes to a branch that is later merged
+into the main branch. In such cases—where SKE is used to submit Terraform
+configurations via pull requests instead of applying them directly—you must pass
 either the merge commit or squash commit SHA to the Aspect.
 
-If your workflow schedules to a single TFE Destination, you can provide just the
+If your workflows schedule to a single TFE Destination, you can provide just the
 commit SHA:
 ```yaml
 overrides:
 - commitSha: 1234567890abcdef
 ```
 
-If your workflow schedules to multiple TFE Destinations, you need to provide a list
+If your workflows schedule to multiple TFE Destinations, you need to provide a list
 of commit SHAs for each Destination that you want to override.
 ```yaml
 overrides:
