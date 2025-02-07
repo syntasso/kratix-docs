@@ -128,6 +128,7 @@ metadata:
     environment: backstage
   name: backstage
 spec:
+  path: backstage
   stateStoreRef:
     kind: BucketStateStore
     name: backstage

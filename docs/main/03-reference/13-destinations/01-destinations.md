@@ -39,7 +39,9 @@ metadata:
   labels:
     environment: dev
 spec:
-  # Destination identifier: optional, appended path to be used within the State Store
+  # Destination identifier: required. Path within the state store to write the documents.
+  #   This path is relative to the State Store's `path`
+  #   Can be set to "." or "/" to write to the State Store `path` directory.
   path: path/in/statestore
 
   # Optional, defaults to false

@@ -255,13 +255,14 @@ cat <<EOF | kubectl --context $PLATFORM apply --filename -
 apiVersion: platform.kratix.io/v1alpha1
 kind: Destination
 metadata:
-   name: worker-cluster
-   labels:
+  name: worker-cluster
+  labels:
     environment: dev
 spec:
-   stateStoreRef:
-      name: default
-      kind: BucketStateStore
+  path: worker-cluster
+  stateStoreRef:
+    name: default
+    kind: BucketStateStore
 EOF
 ```
 
