@@ -773,4 +773,4 @@ kubectl --context $WORKER get pods
 ## 🎉 &nbsp; Congratulations!
 
 ✅&nbsp;&nbsp; You have written a Kratix Promise. <br />
-👉🏾&nbsp;&nbsp; Let's [add a new Worker](./scheduling).
+👉🏾&nbsp;&nbsp; Let's [add a new Destination](./new-destination).
