@@ -568,16 +568,16 @@ If your workflows schedule to a single TFE Destination, you can provide just the
 commit SHA:
 ```yaml
 overrides:
-- commitSha: 1234567890abcdef
+- commitSHA: 1234567890abcdef
 ```
 
 If your workflows schedule to multiple TFE Destinations, you need to provide a list
 of commit SHAs for each Destination that you want to override.
 ```yaml
 overrides:
-- commitSha: 1234567890abcdef
+- commitSHA: 1234567890abcdef
   destination: tfe-europe
-- commitSha: ghijkl1234567890
+- commitSHA: ghijkl1234567890
   destination: tfe-us
 ```
 
