@@ -12,7 +12,6 @@ metadata:
   labels:
     environment: dev
 spec:
-  path: worker
   stateStoreRef:
     name: default
     kind: <BucketStateStore or GitStateStore>
