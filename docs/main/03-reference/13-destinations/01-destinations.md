@@ -39,11 +39,12 @@ metadata:
   labels:
     environment: dev
 spec:
-  # Destination identifier: optional, appended path to be used within the State Store
+  # Path within the State Store to write to.
+  # Optional, defaults to the name of the Destination.
+  # To write straight to the root of the State Store, set it to `/`.
   path: path/in/statestore
 
-  # Optional, defaults to false
-
+  # Optional, defaults to false.
   # By default, Kratix will schedule workloads for Promises without
   #   `destinationSelectors` to all available Destinations.
   # If this property is set to true, Kratix will only schedule Workloads
@@ -73,41 +74,31 @@ spec:
     kind: BucketStateStore
 ```
 
-When a new Destination is registered in the platform cluster (i.e., a new Destination resource is
-created), Kratix will write to two paths in the [State
-Store](../statestore/intro):
-one for `resources`, one for `dependencies`. The path within the `State Store` follows the following pattern:
+When a new Destination is created in the platform cluster, Kratix will write to
+two paths in the [State Store](../statestore/intro): one for `resources`, one
+for `dependencies`. The path within the `State Store` follows the pattern:
 
 For `dependencies`:
 
-```yaml
+```
 statestore.Spec.Path/
     destination.Spec.Path/
-        destination.Name/
-            dependencies/
-                promise.Name/
+        dependencies/
+            promise.Name/
 ```
 
 For `resources`:
 
-```yaml
+```
 statestore.Spec.Path/
     destination.Spec.Path/
-        destination.Name/
-            resources/
-                resource.Namespace/
-                    promise.Name/
-                        resource.Namespace/
+        resources/
+            resource.Namespace/
+                promise.Name/
+                    resource.Namespace/
 ```
 
-For example installing and requesting from a Promise that provides `Redis` as a service you would get:
-
-```bash
-worker-cluster/dependencies/redis/static/dependencies.yaml
-worker-cluster/resources/default/redis/my-request/redis.yaml
-```
-
-For example:
+For example, for the following configuration:
 
 ```yaml
 ---
@@ -137,18 +128,18 @@ spec:
     kind: BucketStateStore
 ```
 
-The above configuration would result in the following paths being written to:
+The following directories would be created in the State Store:
 
-- `destinations/dev/default/worker-1/dependencies/`
-- `destinations/dev/default/worker-1/resources/`
+- `destinations/dev/default/dependencies/`
+- `destinations/dev/default/resources/`
 
-<br/>
-
-The paths should be used when setting up the workers to pull
-down from the `StateStore`.
+Kratix will, by default, write to unique directories within those paths depending on the
+Promise or Resource being requested. You can stop this behaviour by setting the `filepath.mode` to `none`.
 
 :::info
 
-The reason for two directories is that GitOps applies require any prerequisite workloads like CRDs to be ready before any dependent workloads are applied. By dividing the two directories you can configure your GitOps tool to manage this for you.
+Pre-requisites, like CRDs, are written to the `dependencies` subdirectory. This setup is
+often required by GitOps tools to ensure that all dependencies are ready before the
+resources themselves are applied.
 
 :::

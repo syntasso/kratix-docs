@@ -18,7 +18,7 @@ In Kratix, scheduling happens in two stages:
    ([Scheduling Workloads](#resources))
 
 The following sections on this page document those stages. For hands-on scheduling guides,
-check the [Adding a new Destination](../../guides/scheduling) and [Compound
+check the [Adding a new Destination](../../guides/new-destination) and [Compound
 Promises](../../guides/compound-promises) pages.
 
 ## Scheduling Promises {#promises}
@@ -176,13 +176,13 @@ With the following `/kratix/metadata/destination-selectors.yaml`:
 
 Kratix will schedule the documents as follows:
 
-* `document-2.yaml`, `document-3.yaml` are scheduled to destinations with the
+- `document-2.yaml`, `document-3.yaml` are scheduled to destinations with the
   `workflow=subdir` label.
-  * The scheduling config in `destination-selectors.yaml` has specifically scheduled this
+  - The scheduling config in `destination-selectors.yaml` has specifically scheduled this
     directory.
-* `document-0.yaml`, `some-dir/document-1.yaml` are scheduled to destinations with
+- `document-0.yaml`, `some-dir/document-1.yaml` are scheduled to destinations with
   the `promise=label` label.
-  * They are not contained within a directory associated with a specific scheduling, so
+  - They are not contained within a directory associated with a specific scheduling, so
     revert to the [default scheduling](#default).
 
 ### Default scheduling {#default}
@@ -219,9 +219,11 @@ In the event of a label conflict, the Promise `spec.destinationSelectors` take p
 over any dynamic scheduling.
 
 The order of precedence is as follows:
+
 1. Promise `spec.destinationSelectors`
 2. Promise workflow `destination-selectors.yaml`
 3. Resource workflow `destination-selectors.yaml`
+
 :::
 
 :::important

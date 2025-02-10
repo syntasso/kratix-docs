@@ -3,19 +3,24 @@ description: Guide on how to register a new Destination with Kratix
 title: Adding a new Destination
 ---
 
-One of the most powerful features of Kratix is its ability to react when new Destinations are added to the platform. These Destinations can represent additional Kubernetes clusters, Kubernetes namespaces, or completely different infrastructure like a Terraform Cloud account or edge compute provider. By default, any Promise installed into Kratix will schedule it's Dependencies to new Destinations joining the platform.
+One of the most powerful features of Kratix is its ability to react when new
+Destinations are added to the platform. These Destinations can represent
+additional Kubernetes clusters, Kubernetes namespaces, or completely different
+infrastructure like a Terraform Cloud account or edge compute provider. By
+default, any Promise installed into Kratix will schedule it's Dependencies to
+new Destinations joining the platform.
 
 ## Prerequisites
 
-In this section, we will register a new Kubernetes cluster as a Destination with Kratix, and
-experience the Kratix multi-cluster capabilities. Before continuing, you will need a Platform
-Kubernetes cluster running Kratix, and a second worker Kubernetes cluster to
-register with the Platform. You also need at least one Promise installed on
-the Platform.
+In this section, we will register a new Kubernetes cluster as a Destination with
+Kratix, and experience the Kratix multi-cluster capabilities. Before continuing,
+you will need a Platform Kubernetes cluster running Kratix, and a second worker
+Kubernetes cluster to register with the Platform. You also need at least one
+Promise installed on the Platform.
 
 For the context of this guide, we will assume the setup from [Installing Kratix
-with KinD](./installing-kratix-others) and that the following environment variables are
-set:
+with KinD](./installing-kratix-others) and that the following environment
+variables are set:
 
 ```bash
 export PLATFORM="kind-platform"
@@ -29,12 +34,12 @@ installed, if needed.
 
 ```shell-session
 $ kubectl --context $PLATFORM get destinations.platform.kratix.io
-NAME               AGE
-worker-1   1h
+NAME       READY
+worker-1   True
 
 $ kubectl --context $PLATFORM get promises.platform.kratix.io
-NAME              AGE
-jenkins-promise   1h
+NAME      STATUS      KIND      API VERSION                      VERSION
+jenkins   Available   jenkins   marketplace.kratix.io/v1alpha1
 ```
 
 On the worker, you should see the Jenkins Operator running:
@@ -49,8 +54,9 @@ If your setup is different, update the commands accordingly.
 
 ## Preparing the new cluster
 
-You will now add the new cluster to the Platform as a Destination and watch Kratix reconcile the
-system. For that, you need to first create the new Kubernetes cluster:
+You will now add the new cluster to the Platform as a Destination and watch
+Kratix reconcile the system. For that, you need to first create the new
+Kubernetes cluster:
 
 ```bash
 kind create cluster --image kindest/node:v1.27.3 --name worker-2
@@ -70,8 +76,8 @@ cd /path/to/kratix
 
 ## Registering the Destination
 
-You can now register your cluster with Kratix as a Destination. Create a file called `worker-2.yaml` with the
-following contents:
+You can now register your cluster with Kratix as a Destination. Create a file
+called `worker-2.yaml` with the following contents:
 
 ```yaml title="worker-2.yaml"
 apiVersion: platform.kratix.io/v1alpha1
@@ -97,9 +103,9 @@ Check the Destination was created:
 
 ```shell-session {4}
 $ kubectl --context $PLATFORM get destinations.platform.kratix.io
-NAME       AGE
-worker-1   1h
-worker-2   1h
+NAME       READY
+worker-1   True
+worker-2   True
 ```
 
 Kratix will react to the new Destination by scheduling the Jenkins Promise
@@ -112,14 +118,16 @@ NAME                                READY   STATUS    RESTARTS   AGE
 jenkins-operator-778d6fc487-c9w8f   1/1     Running   0          1h
 ```
 
-When you request a new Jenkins, the Resources will be created in one of the available Destinations, by default this is selected in a non-deterministic way.
+When you request a new Jenkins, the Resources will be created in one of the
+available Destinations, by default this is selected in a non-deterministic way.
 
 For further documentation on Destination scheduling, check the [Destination Reference
 documentation](../reference/destinations/intro).
 
-:::info
-If you are specifically interested in making a Resource location deterministic, you can check out the [scheduling workloads](../reference/destinations/multidestination-management#resources) reference.
-:::
+:::info If you are specifically interested in making a Resource location
+deterministic, you can check out the [scheduling
+workloads](../reference/destinations/multidestination-management#resources)
+reference. :::
 
 ## 🎉 Congratulations
 
