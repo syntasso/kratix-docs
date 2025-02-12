@@ -154,7 +154,7 @@ spec:
               - apiGroups: ["batch"]
                 verbs: ["get"]
                 resources: ["jobs"]
-                resourceName: ["my-job"]
+                resourceNames: ["my-job"]
         ...
 ```
 
