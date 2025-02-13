@@ -1,0 +1,4 @@
+apiVersion: internal.platform.io/v1
+kind: RubyApp
+metadata:
+  name: example-rubyapp
