@@ -17,11 +17,11 @@ Kratix processes requests" />
   <figcaption>How Kratix processes a request to a Kubernetes Destination</figcaption>
 </figure>
 
-So you read the guide TODO:link on Compound Promises and tried out the Workshop, but you are still wondering how you would _really_ go about writing a compound promise.
+So you read the [guide](/main/guides/compound-promises) on Compound Promises and tried out the Workshop, but you are still wondering how you would _really_ go about writing a compound promise.
 
 We hear you. 
 
-In this blog post, we will build a compound promise from scratch. Consider this the ultimate guide on how to build compound promises effectively.
+In this blog post, we will build a Compound Promise from scratch. Consider this the ultimate guide on how to build compound promises effectively.
 
 You will need:
 
@@ -34,7 +34,7 @@ After reading this post you will:
 
 * Learn about some basic Kratix concepts
 * Learn about Promise Releases
-* Learn how to make a Promise dependent on other Promises
+* Learn how to make a Promise dependant on other Promises
 * Learn how to transform a Compound Promise request into subrequests.
 
 Click on "read more" to continue!
@@ -43,10 +43,10 @@ Click on "read more" to continue!
 
 Before we start, let's clarify a few words we will use in abundance throughout this article:
 
-* **Promise**: the basic building block in Kratix. A Promise is the definition of something-as-a-service. If you are not sure what a Promise is, I recommend reading some of our other documentation first, like TODO
+* **Promise**: the basic building block in Kratix. A Promise is the definition of something-as-a-service. If you are not sure what a Promise is, I recommend reading some of our other documentation first, like [Installing and using a Promise](/main/guides/installing-a-promise)
 * **Workflow**: defined within a Promise, it transforms the user's request into reality
 * **Compound Promise**: a Promise that orchestrates one or more Promises. We may refer to it as "the parent promise" or "the super promise" in this article
-  * The Promises that a Compound Promise is orchestrating may be referred to as "child promise" or "sub promises"
+  * The Promises that a Compound Promise is orchestrating may be referred to as "child promises" or "sub-promises"
 
 Now that we understand each other, let's dive into, well, the reason you are here: building a compound promise. I'm going to split this article into the following sections:
 
@@ -56,12 +56,12 @@ Now that we understand each other, let's dive into, well, the reason you are her
 
 ## The experience
 
-We want to give developers a similar experience with our internal platform as
+With our internal platforms, we want to give developers a similar experience as
 they could have with a SaaS provider like Heroku or Fly.io. The biggest
-benefit of those platforms is how they make getting of the ground very easily,
+benefit of those platforms is how they make getting off the ground very easily,
 while still providing hooks for advanced users.
 
-[Deploying a Rails application to fly.io](https://fly.io/docs/rails/getting-started/existing/), for example, is basically a single command. The `flyctl` CLI will interactively ask the user if they need a PostgreSQL database and a Redis cache with their application. Depending on their answers, it will go ahead and provision those services and bind them to the application via config files or environment variables. The application will be eventually deployed and avaialble. 
+[Deploying a Rails application to fly.io](https://fly.io/docs/rails/getting-started/existing/), for example, is basically a single command. The `flyctl` CLI will interactively ask the user if they need a PostgreSQL database and a Redis cache with their application. Depending on their answers, it will go ahead and provision those services and bind them to the application via config files or environment variables. The application will eventually be deployed and available.
 
 Kratix makes building a similar experience in your internal platform as easy. While it is possible to build all of that in a single Promise, a better approach is to build smaller, single-responsibility Promises–like a dedicated PostgreSQL Promise–and then create a Promise at a higher-level of abstraction that orchestrates requesting the lower-level resources. That higher-level Promise is what we call a **Compound Promise**.
 
@@ -80,9 +80,9 @@ Generally speaking, you should consider the questions below:
    
 * Who owns the sub-Promises? 
 
-  Compound Promises are specially useful when the Platform team is curating services provided by other internal teams (or external vendors)
+  Compound Promises are especially useful when the Platform team is curating services provided by other internal teams (or external vendors)
 
-* How much complexity do you want expose your users to?
+* How much complexity do you want expose to your users?
 
   Sometimes a simple Cache Promise can get quite complicated depending on the number of configurations you want to expose. Abstracting the API into a Compound Promise allows you to enable both simple and complex use-cases.
 
@@ -108,7 +108,7 @@ spec:
 
 ## Building the Promise
 
-With the API and experience defined, let's create this Promise then. We can use the [Kratix CLI](http://localhost:3000/main/kratix-cli/intro) to speed up development. Create a new directory in your system and initialise a new Promise:
+With the API and experience defined, let's create this Promise. We can use the [Kratix CLI](/main/kratix-cli/intro) to speed up development. Create a new directory in your system and initialise a new Promise:
 
 ```bash
 mkdir rubyapp-promise && cd rubyapp-promise
