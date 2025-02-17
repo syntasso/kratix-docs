@@ -237,13 +237,15 @@ The next sections will explore how to do this.
 
 ### Scheduling to the Platform cluster
 
-Let take a moment to revisit the behaviour of installing a Promise that is _not_ a Compound Promise. The Promise is installed on the Platform cluster, which, among other things, ensures the CRDs are installed on the Platform and accessible to any resource requests. Conversely, any dependencies of the Promise are installed on the Worker Clusters to ensure that they have the necessary capabilities . This could include Kubernetes operators that are then users to provision what the Promise provides as-a-service.
+Let take a moment to revisit the behaviour of installing a normal Promise. The Promise is applied on the Platform cluster, which, among other things, ensures the Promise API (i.e., the CRD defined within the Promise) becomes available in the Platform as a CRD, which enable users to make request to those Promises. The Promise dependencies, on the other hand, are installed on any Destination that could run the workloads. The Runtime Promise we will use, for example, deploys the Nginx Controller into any Destination that can run the apps.
 
 TODO Useful diagram here?
 
-Where do Compound Promises fit in this scenario? To provision the resource of the sub-promises, the Compound Promise, within it's workflows, makes requests to the sub-promises. Because of this, like any other promise, to fulfill the requests of the sub-promises, the CRDs need to be installed on the Platform cluster. To ensure that these requests get scheduled to Platform Cluster, we can take advantage of a Kratix feature - Destination Selectors. Through the use of Destination Selectors, we can specify which Destinations - in this case, which Kubernetes cluster - to schedule the request to.
+Where do Compound Promises fit in this scenario? In the workflow of a Compound Promise, we will often create requests to the sub-promises, like we did in the pipeline script above. Those requests must be scheduled, then, to a Destination that can understand the CRD being used in the document. Since that CRD is itself installed when a Promise is installed, this setup often means the outputs of a Compound Promise workflow should be scheduled to the Platform cluster itself.
 
-Destination Selectors, through key/value pairs, define matching locations to schedule workloads to.
+TODO: Add diagram
+
+To ensure that these requests get scheduled to Platform Cluster, we can take advantage of a Kratix feature: Destination Selectors. Through the use of Destination Selectors, we can specify which Destinations - in this case, which Kubernetes cluster - to schedule the request to.
 
 Let's take a look at the `pipeline.sh` again. Within the script, we've defined a `destination-selectors.yaml` file with labels corresponding to the Destination the generated files should be scheduled to. 
 
