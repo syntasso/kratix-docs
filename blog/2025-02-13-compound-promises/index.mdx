@@ -263,7 +263,12 @@ In this declaration of the Destination Selectors we are stating that file files 
 
 #### Establishing the Platform as a Destination
 
-For the Platform Cluster to be able to run workloads, it needs to be defined as location that Kratix knows it can schedule workloads to.
+For the Platform Cluster to be able to run workloads, it needs to be defined as location that Kratix knows it can schedule workloads to. These files are then reconciled by a GitOps tool, in this case we'll be using Flux. To make the Platform Cluster a Destination, we need to:
+1. Install Flux on the cluster
+2. Create a backing StateStore
+3. Create the Destination with the appropriate labels
+
+
 
 // TODO detail setup of the platform as a destination with the above label
 
