@@ -281,6 +281,40 @@ The Secret must be accessible within the Pipeline's namespace.
 Refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/secret/)
 for more details on Secrets in Kubernetes.
 
+Example:
+```
+spec:
+  workflows:
+    resource/promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: promise
+            namespace: default
+          spec:
+            containers:
+              - image: <image>
+                name: <name>
+                env:
+                  # example static env var
+                  - name: SLACK_CHANNEL
+                    value: network-team
+                  # example secret env var
+                  - name: SLACK_WEBHOOK_URL
+                    valueFrom:
+                      secretKeyRef:
+                        # this secret needs to exists
+                        name: slack-webhook
+                        key: url
+                  # example configmap env var
+                  - name: SLACK_MSG
+                    valueFrom:
+                      configMapKeyRef:
+                        name: slack-msg
+                        key: url
+```
+
 ## Volumes {#volumes}
 
 Kratix will run each container in the `spec.containers` list in order,
