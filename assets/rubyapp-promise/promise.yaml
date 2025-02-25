@@ -68,6 +68,6 @@ spec:
           name: instance
         spec:
           containers:
-          - image: syntasso/ruby-app:v1.0.0
+          - image: ghcr.io/syntasso/kratix-docs/rubyapp-promise:v1.0.0
             name: deploy-resources
 status: {}
