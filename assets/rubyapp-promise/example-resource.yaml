@@ -1,0 +1,10 @@
+apiVersion: internal.platform.io/v1
+kind: RubyApp
+metadata:
+  name: example-rubyapp
+spec:
+  image: syntasso/example-rails-app:v1.0.0
+  database:
+    driver: postgresql
+  cache:
+    driver: redis

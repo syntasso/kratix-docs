@@ -6,37 +6,22 @@ authors: [derik]
 tags: [kratix, promises, compound promise]
 ---
 
-```mdx-code-block
-import Figure01 from "./figure01.png"
-```
-
-<figure className="diagram">
-  <img className="large" src={Figure01} alt="High level diagram explaining how
-Kratix processes requests" />
-
-  <figcaption>How Kratix processes a request to a Kubernetes Destination</figcaption>
-</figure>
 
 So you read the [guide](/main/guides/compound-promises) on Compound Promises and tried out the Workshop, but you are still wondering how you would _really_ go about writing a compound promise.
 
-We hear you. 
+We hear you.
 
 In this blog post, we will build a Compound Promise from scratch. Consider this the ultimate guide on how to build compound promises effectively.
 
-You will need:
-
-* A Kubernetes Cluster running Kratix
-// Potentially a worker and a platform
-* A text editor
-* A couple of Promises
-* A love for YAML
+You can follow this guide and build the Promise along with us, or you can use it as a reference when building your own Compound Promises. The Promise we will build is available [here](https://github.com/syntasso/kratix-docs/tree/main/assets/rubyapp-promise).
 
 After reading this post you will:
 
 * Learn about some basic Kratix concepts
-* Learn about Promise Releases
-* Learn how to make a Promise dependant on other Promises
-* Learn how to transform a Compound Promise request into subrequests.
+* Learn how to write a Compound Promise:
+  * By transforming an user's request into a series of sub-requests
+  * By sending those sub-requests to the Platform cluster (and why you need it)
+  * By defining the sub-Promises that the parent Promise depends on
 
 Click on "read more" to continue!
 
@@ -57,16 +42,22 @@ Now that we understand each other, let's dive into, well, the reason you are her
 
 ## The experience
 
-With our internal platforms, we want to give developers a similar experience as
-they could have with a SaaS provider like Heroku or Fly.io. The biggest
-benefit of those platforms is how they make getting off the ground very easily,
-while still providing hooks for advanced users.
+With our internal platforms, we want to give developers a similar experience as they could have with a SaaS provider like Heroku or Fly.io. The biggest benefit of those platforms is how they make getting off the ground very easily, while still providing hooks for advanced users.
 
 [Deploying a Rails application to fly.io](https://fly.io/docs/rails/getting-started/existing/), for example, is basically a single command. The `flyctl` CLI will interactively ask the user if they need a PostgreSQL database and a Redis cache with their application. Depending on their answers, it will go ahead and provision those services and bind them to the application via config files or environment variables. The application will eventually be deployed and available.
 
 Kratix makes building a similar experience in your internal platform as easy. While it is possible to build all of that in a single Promise, a better approach is to build smaller, single-responsibility Promises–like a dedicated PostgreSQL Promise–and then create a Promise at a higher-level of abstraction that orchestrates requesting the lower-level resources. That higher-level Promise is what we call a **Compound Promise**.
 
-//TODO: diagram
+```mdx-code-block
+import Figure01 from "./figure01.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={Figure01} alt="The high-level RubyApp Promise
+  orchestrating sub-level promises" />
+
+  <figcaption>How a Compound Promise processes requests</figcaption>
+</figure>
 
 
 :::tip[When should I use Compound Promises?]
@@ -76,10 +67,10 @@ This is a question we hear often. Compound Promises are a great way to abstract 
 Generally speaking, you should consider the questions below:
 
 * Do you want enable requests to the sub-Promises directly?
-   
+
   In our example, would people want to request a PostgreSQL database _without_ an associated application? If the answer is "yes", then you probably want to create a dedicated Database Promise, and create a Compound Promise that uses it.
-   
-* Who owns the sub-Promises? 
+
+* Who owns the sub-Promises?
 
   Compound Promises are especially useful when the Platform team is curating services provided by other internal teams (or external vendors)
 
@@ -159,19 +150,22 @@ At this point, your local `rubyapp-promise` directory should look like this:
 
 But what should our pipeline script do? It should:
 
+* Deploy the application specified with the specified image.
 * Create a PostgreSQL instance if `database.driver` is set to `postgresql`.
+  * Update the application environment variables with the PostgreSQL connection details.
 * Create a Redis instance if `cache.driver` is set to `redis`.
-* Deploy the application specified in the image.
+  * Update the application environment variables with the Redis connection details.
 
-We will divide the above into three sub-promises:
+To achieve that, the RubyApp Promise will actually orchestrate three lower-level promises:
 
 * A PostgreSQL Promise responsible for provisioning a PostgreSQL database.
 * A Redis Promise responsible for provisioning a Redis cache.
 * A Runtime Promise responsible for deploying and running the application.
 
-Today is your lucky day! All of those Promises are available in the [Kratix Marketplace](/marketplace). All our pipeline needs to do then, is generate requests to those sub-promises based on the user's request.
+Those Promises are all available in the [Kratix Marketplace](/marketplace). All the pipeline needs to do then, is generate the requests to those sub-promises based on the user's input.
 
-Open the `pipeline.sh` script in `workflows/resource/configure/instance/deploy-resources/scripts` and update it to look like this:
+Open the `pipeline.sh` script in `workflows/resource/configure/instance/deploy-resources/scripts` and update it to:
+
 
 ```bash
 #!/usr/bin/env sh
@@ -189,29 +183,44 @@ database_driver="$(yq '.spec.database.driver // ""' /kratix/input/object.yaml)"
 cache_driver="$(yq '.spec.cache.driver // ""' /kratix/input/object.yaml)"
 
 # Output the runtime request: we always want to deploy the app
-yq '.metadata.name = "'${app_name}'"' resources/runtime-request-template.yaml > /kratix/output/runtime-request.yaml
+yq ".metadata.name = \"${app_name}\" | .spec.image = \"${app_image}\"" resources/runtime-request-template.yaml > /kratix/output/runtime-request.yaml
 
 # Output the database request if the databaseDriver is set to postgresql
 if [ "$database_driver" = "postgresql" ]; then
-  yq '.metadata.name = "'${app_name}'-db"' resources/postgres-request-template.yaml > /kratix/output/postgres-request.yaml
+  yq ".metadata.name = \"${app_name}-db\" | .spec.teamId = \"${app_name}\"" resources/postgres-request-template.yaml > /kratix/output/postgres-request.yaml
 
-  # update the app env 
-  # TODO
+  # name of the secret generated by the postgres promise
+  secret_ref="${app_name}.${appName}-bestdb-postgresql.credentials.postgresql.acid.zalan.do"
+
+  # Inject PostgreSQL environment variables directly into runtime-request.yaml
+  cat <<EOF >> /kratix/output/runtime-request.yaml
+    - name: PGHOST
+      value: ${app_name}-bestdb-postgresql.default.svc.cluster.local
+    - name: DBNAME
+      value: bestdb
+    - name: PGUSER
+      valueFrom:
+        secretKeyRef:
+          name: ${secret_ref}
+          key: username
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: ${secret_ref}
+          key: password
+EOF
 fi
 
 # Output the redis request if the cacheDriver is set to redis
 if [ "$cache_driver" = "redis" ]; then
   yq '.metadata.name = "'${app_name}'-cache"' resources/redis-request-template.yaml > /kratix/output/redis-request.yaml
 
-  # update the app env 
-  # TODO
-fi
-
-cat << EOF > /kratix/metadata/destination-selectors.yaml
-- matchLabels:
-    cluster: platform
+  # Inject Redis environment variables directly into runtime-request.yaml
+  cat <<EOF >> /kratix/output/runtime-request.yaml
+    - name: REDIS_URL
+      value: ${app_name}.default.svc.cluster.local
 EOF
-
+fi
 ```
 
 You may notice that we are referencing a `resources` directory in the script. If you inspect the Dockerfile, you will see that the `resources` directory is added to the container, and it contains the contents of the local `resources` directory.
@@ -223,9 +232,10 @@ From the `rubyapp-promise` directory, run:
 ```bash
 curl -o postgres-request-template.yaml https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/resource-request.yaml
 curl -o redis-request-template.yaml https://raw.githubusercontent.com/syntasso/kratix-marketplace/refs/heads/main/redis/resource-request.yaml
-TODO: add runtime example
+curl -o runtime-request-template.yaml https://raw.githubusercontent.com/syntasso/kratix-marketplace/refs/heads/main/runtime/resource-request.yaml
 
-mv *-request-template.yaml workflows/resources/configure/instance/deploy-resources/resources/
+mkdir -p workflows/resource/configure/instance/deploy-resources/resources/
+mv *-request-template.yaml workflows/resource/configure/instance/deploy-resources/resources/
 ```
 
 There are only two things left to do in our Compound Promise:
@@ -237,36 +247,187 @@ The next sections will explore how to do this.
 
 ### Scheduling to the Platform cluster
 
-Let take a moment to revisit the behaviour of installing a normal Promise. The Promise is applied on the Platform cluster, which, among other things, ensures the Promise API (i.e., the CRD defined within the Promise) becomes available in the Platform as a CRD, which enable users to make request to those Promises. The Promise dependencies, on the other hand, are installed on any Destination that could run the workloads. The Runtime Promise we will use, for example, deploys the Nginx Controller into any Destination that can run the apps.
+Let take a moment to revisit the behaviour of installing a normal Promise. When a Promise is applied on the Platform cluster, Kratix ensures the API defined within the Promise becomes available in the Platform as a CRD, which enable users to make request to those Promises. The Promise dependencies, on the other hand, are installed on any Destination that could run the workloads. The Runtime Promise we will use, for example, deploys the Nginx Controller into any Destination that can run the apps.
 
-TODO Useful diagram here?
+```mdx-code-block
+import Figure02 from "./figure02.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={Figure02} alt="The Runtime Promise" />
+
+  <figcaption>The Runtime Promise and it's point of interaction</figcaption>
+</figure>
 
 Where do Compound Promises fit in this scenario? In the workflow of a Compound Promise, we will often create requests to the sub-promises, like we did in the pipeline script above. Those requests must be scheduled, then, to a Destination that can understand the CRD being used in the document. Since that CRD is itself installed when a Promise is installed, this setup often means the outputs of a Compound Promise workflow should be scheduled to the Platform cluster itself.
 
 TODO: Add diagram
 
-To ensure that these requests get scheduled to Platform Cluster, we can take advantage of a Kratix feature: Destination Selectors. Through the use of Destination Selectors, we can specify which Destinations - in this case, which Kubernetes cluster - to schedule the request to.
+That means we need to tell Kratix to schedule the documents generated by the RubyApp Promise workflow to the Platform cluster itself. That can be done by setting Destination Selectors in the Promise. Open your Promise file and, under `spec`, add the following:
 
-Let's take a look at the `pipeline.sh` again. Within the script, we've defined a `destination-selectors.yaml` file with labels corresponding to the Destination the generated files should be scheduled to. 
-
-```bash
-cat << EOF > /kratix/metadata/destination-selectors.yaml
-- matchLabels:
-    cluster: platform
-EOF
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  name: rubyapp
+spec:
+  #highlight-start
+  destinationSelectors:
+  - matchLabels:
+      environment: platform
+  #highlight-end
+  api: #...
 ```
 
-In this declaration of the Destination Selectors we are stating that file files generated within the workflow should be scheduled to the Destination that matches the label `cluster=platform`. However, we also need to ensure that that:
+:::tip
 
-1. workloads can be scheduled to the Platform Cluster
-2. the Platform Destination has the the required labels
+It is possible to dynamically generate the destination selectors by creating a `destination-selectors.yaml` file in the `/kratix/metadata/` directory in the Workflow. You can read more about it in [Managing Multiple Destinations](/main/reference/destinations/multidestination-management)
 
-#### Establishing the Platform as a Destination
+:::
 
-For the Platform Cluster to be able to run workloads, it needs to be defined as location that Kratix knows it can schedule workloads to.
+With the above declaration, we are telling Kratix _schedule the outputs of this Promise to a Destination with the label `cluster=platform`_. Therefore, we need to ensure that (1) there is a Destination with that label and (2) the Platform cluster itself is reconciling on the documents scheduled to that Destination.
+
+We won't go into details on how to do that in this blog post. You can find more information on how to [Registering the Platform as a Destination](/workshop/installing-kratix#register-the-platform-as-a-destination) in the Kratix workshop.
 
 // TODO detail setup of the platform as a destination with the above label
 
+:::tip
+
+To quickly get an environment compatible with the promises in this blog post,
+clone Kratix and run
+
+```bash
+make quick-start
+make prepare-platform-as-destination
+```
+
+:::
+
 ### Define the Promise requirements
 
-#### Promise Releases
+The final piece missing in our Compound Promise is the declaration of the sub-Promises it depends on. To define that, you set the `spec.requiredPromises` field in the Compount Promise document. It takes a list of sub-Promise names and versions.
+
+Let's update our RubyApp Promise to include the required sub-Promises:
+
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  name: rubyapp
+spec:
+  #highlight-start
+  requiredPromises:
+  - name: postgresql
+    version: v1.0.0-beta.2
+  - name: redis
+    version: v0.1.0
+  - name: runtime
+    version: v1.0.0
+  #highlight-end
+  destinationSelectors: #..
+  api: #...
+```
+
+If we try to install the Compound Promise now, you should get a warning:
+
+```shell-session
+$ kubectl --context $PLATFORM apply --filename rubyapp-promise.yaml
+Warning: Required Promise "postgresql" at version "v1.0.0-beta.2" not installed
+Warning: Required Promise "redis" at version "v1.0.0-beta.1" not installed
+Warning: Required Promise "runtime" at version "v0.1.0" not installed
+Warning: Promise will not be available until the above issue(s) is resolved
+promise.platform.kratix.io/rubyapp configured
+```
+
+The Compound Promise itself will remain unavailable until the requirements are satisfied.
+
+```shell-session
+$ kubectl --context $PLATFORM get promises
+NAME      STATUS        KIND      API VERSION               VERSION
+rubyapp   Unavailable   RubyApp   internal.platform.io/v1
+```
+
+To satisfy the `requiredPromises` declaration, you will to, well, install the required promises in your Platform cluster:
+
+```bash
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/redis/promise-release.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/runtime/promise-release.yaml
+```
+
+After a few seconds, you should see all the Promises available in your Platform:
+
+```shell-session
+$ kubectl --context $PLATFORM get promises
+NAME         STATUS      KIND         API VERSION                      VERSION
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha1   v1.0.0-beta.2
+redis        Available   redis        marketplace.kratix.io/v1alpha1   v0.1.0
+rubyapp      Available   RubyApp      internal.platform.io/v1
+runtime      Available   Runtime      marketplace.kratix.io/v1alpha1   v1.0.0
+```
+
+:::tip
+
+You may have noticed that we are applying a different type of resource: a Promise Release. This blog post will not go into detail on the Promise Releases, but you can find more information on them [here](/main/reference/promises/releases).
+
+:::
+
+You are now ready to send requests to your Compound Promise!
+
+## Deploying the application
+
+Now that you have everything set in the Platform, you can go ahead and deploy the your applications!
+
+For that, create a request for your RubyApp Promise:
+
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: internal.platform.io/v1
+kind: RubyApp
+metadata:
+  name: example-rubyapp
+spec:
+  image: syntasso/example-rails-app:v1.0.0 # you can use this one, or build your own
+  database:
+    driver: postgresql
+  cache:
+    driver: redis
+```
+
+Sending this request will immediately trigger the RubyApp Promise Resource workflow. That, in turn, should trigger the sub-promises workflows:
+
+```shell-session
+$ kubectl --context $PLATFORM get pods
+NAME                                                              READY   STATUS      RESTARTS   AGE
+kratix-rubyapp-example-rubyapp-instance-245f2-4w5j8               0/1     Completed   0          10m
+kratix-postgresql-example-rubyapp-db-instance-configure-cf8bwqg   0/1     Completed   0          10m
+kratix-redis-example-rubyapp-cache-instance-configure-04845m74r   0/1     Completed   0          10m
+kratix-runtime-example-rubyapp-instance-d7a3e-9lczv               0/1     Completed   0          10m
+```
+
+In a couple of minutes, in your Worker cluster, you should see the application pod running, alongside the Redis and PostgreSQL databases:
+
+```shell-session
+NAME                                              READY   STATUS    RESTARTS   AGE
+example-rubyapp-64dcfbd9c8-khs98                  1/1     Running   0          10m
+example-rubyapp-example-rubyapp-db-postgresql-0   1/1     Running   0          10m
+rfr-example-rubyapp-cache-0                       1/1     Running   0          10m
+rfs-example-rubyapp-cache-545547d5c6-d8m69        1/1     Running   0          10m
+# some other pods
+```
+
+And you can now access your application:
+
+```mdx-code-block
+import RunningApp from "./running-app.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={RunningApp} alt="Rails application running with
+  PostgreSQL and Redis " />
+
+  <figcaption>The running Rails App</figcaption>
+</figure>
