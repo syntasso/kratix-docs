@@ -173,7 +173,7 @@ To achieve that, the RubyApp Promise will actually orchestrate three lower-level
 * A Redis Promise responsible for provisioning a Redis cache.
 * A Runtime Promise responsible for deploying and running the application.
 
-Those Promises are all available in the [Kratix Marketplace](/marketplace). All the pipeline needs to do then, is generate the requests to those sub-promises based on the user's input.
+Those Promises are all available in the [Kratix Marketplace](/marketplace). All the pipeline needs to do is generate the requests to those sub-promises based on the user's input.
 
 Open the `pipeline.sh` script in `workflows/resource/configure/instance/deploy-resources/scripts` and update it to:
 
