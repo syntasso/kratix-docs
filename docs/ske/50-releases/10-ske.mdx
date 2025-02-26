@@ -19,6 +19,19 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.18.0/) (2025-02-26)
+
+#### Features
+
+* Introduces stricter validation of Promise Workflow Pipelines in the Promise webhook to ensure that
+a Job can be successfully generated from the Pipeline definition. Please note that as the validations now ensure
+that any specified fields are valid, you may be prevented from applying Promises that you were previously able to
+apply.
+* Support workload files being written to the root directory of a Destination. For a given Destination, when `spec.filepath.mode` is set to `none` and `spec.path` is not set, all Works scheduled will write to the root directory of this Destination.
+
+#### Known issues
+
+There is a known [Golang CVE](https://pkg.go.dev/vuln/GO-2025-3487) associated with an indirect dependency of SKE core. SKE is not impacted by the vulnerability. We are waiting for an upstream dependency release to update in the next version.
 ### [v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.17.0/) (2025-01-29)
 
 #### Features
