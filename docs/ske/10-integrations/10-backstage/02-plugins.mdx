@@ -127,14 +127,6 @@ additional case statements:
 ```typescript
 const componentPage = (
   <EntitySwitch>
-    <EntitySwitch.Case if={isComponentType("service")}>
-      {serviceEntityPage}
-    </EntitySwitch.Case>
-
-    <EntitySwitch.Case if={isComponentType("website")}>
-      {websiteEntityPage}
-    </EntitySwitch.Case>
-
     //highlight-start
     <EntitySwitch.Case if={isKratixType('promise')}>
       <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
@@ -145,10 +137,22 @@ const componentPage = (
     </EntitySwitch.Case>
     //highlight-end
 
+    <EntitySwitch.Case if={isComponentType("service")}>
+      {serviceEntityPage}
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case if={isComponentType("website")}>
+      {websiteEntityPage}
+    </EntitySwitch.Case>
+
     <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
   </EntitySwitch>
 );
 ```
+
+This states that for any Backstage `Component` definitions, the frontend plugin will display the custom `KratixPromiseEntityPage`
+for Components of `type` `promise` or `kratix-promise` and the `KratixResourceEntityPage` for for Components of `type`
+`resource` or `kratix-resource.
 
 ## Installing the backend plugin
 
