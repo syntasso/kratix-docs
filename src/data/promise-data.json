@@ -230,6 +230,15 @@
 		]
 	},
 	{
+		"name": "Runtime",
+		"description": "Bundle your application to run on Kubernetes.",
+		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/runtime",
+		"logoUrl": "/img/marketplace/runtime.svg",
+		"categories": [
+			"App Delivery"
+		]
+	},
+	{
 		"name": "Slack",
 		"description": "A demo Promise with an API integration in the Promise Workflow: send messages via the Slack API",
 		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/slack",
