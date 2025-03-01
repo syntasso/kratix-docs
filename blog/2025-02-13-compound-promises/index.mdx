@@ -42,10 +42,10 @@ Now that we understand each other, let's dive into, well, the reason you are her
 * Building the Compound Promise.
   * Implementing the API.
   * Implementing the workflows.
-  * Scheduling the resources.
-* Installing and managing your Compound Promise.
-  * Testing and Upgrading.
-  * Making it available to your customers.
+  * Scheduling to the Platform Cluster.
+  * Defining the Promise requirements.
+* Installing the Promise
+* Testing it all together
 
 Let's jump right in!
 
@@ -603,7 +603,7 @@ It is possible to dynamically generate the destination selectors by creating a `
 The above declaration tells Kratix to schedule the outputs of this Promise to a Destination with the label `environment=platform`. Since we configured the Platform destination with this label, we already have everything in place for the RubyApp Promise to work.
 
 
-### Define the Promise requirements
+### Defining the Promise Requirements
 
 The final piece missing in our Compound Promise is the declaration of the sub-Promises it depends on. For that, you set the `spec.requiredPromises` field in the Compount Promise document with a list of sub-Promise names and versions.
 
@@ -680,7 +680,7 @@ You may have noticed that we are applying a different type of resource: a Promis
 
 You are now ready to send requests to your Compound Promise!
 
-## Deploying the application
+## Testing it all together
 
 Now that you have everything set in the Platform, you can go ahead and deploy the your applications!
 
