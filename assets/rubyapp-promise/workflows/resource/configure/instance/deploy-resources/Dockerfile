@@ -1,11 +1,11 @@
 FROM "alpine"
 
-RUN apk update && apk add --no-cache yq
+RUN apk update && apk add --no-cache yq ruby
 
-ADD scripts/pipeline.sh /usr/bin/pipeline.sh
+ADD scripts/pipeline.rb /usr/bin/pipeline.rb
 ADD resources resources
 
-RUN chmod +x /usr/bin/pipeline.sh
+RUN chmod +x /usr/bin/pipeline.rb
 
-CMD [ "sh", "-c", "pipeline.sh" ]
+CMD [ "sh", "-c", "pipeline.rb" ]
 ENTRYPOINT []

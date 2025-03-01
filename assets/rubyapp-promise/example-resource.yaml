@@ -1,7 +1,7 @@
 apiVersion: internal.platform.io/v1
 kind: RubyApp
 metadata:
-  name: example-rubyapp
+  name: myapp
 spec:
   image: syntasso/example-rails-app:v1.0.0
   database:
