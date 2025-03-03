@@ -1,0 +1,13 @@
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: Runtime
+metadata:
+  name: example-runtime
+  namespace: default
+spec:
+  lifecycle: dev
+  image: syntasso/website
+  servicePort: 8000
+  replicas: 1
+  applicationEnv:
+  - name: hello
+    value: from-env

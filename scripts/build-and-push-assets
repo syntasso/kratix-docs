@@ -11,3 +11,16 @@ docker build \
     $root/assets/redis-health-check-image
 
 docker push ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
+
+
+rubyapp_image="ghcr.io/syntasso/kratix-docs/rubyapp-promise:v1.0.0"
+rubyapp_workflow_dir="$root/assets/rubyapp-promise/workflows/resource/configure/instance/deploy-resources"
+
+docker build \
+    --platform linux/amd64 \
+    -t ${rubyapp_image} \
+    -f ${rubyapp_workflow_dir}/Dockerfile \
+    ${rubyapp_workflow_dir}
+
+
+docker push ${rubyapp_image}
