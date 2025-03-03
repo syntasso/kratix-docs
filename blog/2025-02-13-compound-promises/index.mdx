@@ -532,7 +532,7 @@ The next sections will explore how to do this.
 
 Let take a moment to revisit the behaviour of installing a normal Promise. When a Promise is applied on the Platform cluster, Kratix ensures the API defined within the Promise becomes available in the Platform as a CRD, which enable users to make request to those Promises. The Promise dependencies, on the other hand, are installed on any Destination that could run the workloads.
 
-The Runtime Promise we will use, for example, has a dependency on the Nginx Controller. When that promise is applied, that dependency is installed into any Destination that can receive Runtime instances. When a user requests a new instance, they use the Runtime API to trigger the workflows, that will in turn generate the documents that will be scheduled to the Destination.
+The Runtime Promise we will use, for example, has a dependency on the Nginx Controller. When that promise is applied, that dependency is installed into any Destination that can receive Runtime instances. When a user requests a new instance, they use the Runtime Promise API to trigger the workflows, that will in turn generate the documents that will be scheduled to the Destination.
 
 ```mdx-code-block
 import Figure02 from "./figure02.png"
