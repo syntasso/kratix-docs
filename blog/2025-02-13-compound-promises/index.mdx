@@ -356,6 +356,14 @@ if database_driver == "postgresql" then
 end
 ```
 
+:::tip[Where is the connection details coming from?]
+
+The PostgreSQL Promise generates a Secret and a Service as part of its resource workflow. The Runtime Promise provides the `spec.applicationEnv` property, which allows us to inject environment variables directly into the application.
+
+By combining these two mechanisms, we can seamlessly construct the connection details for the application.
+
+:::
+
 #### Adding the Redis Request
 
 Finally, we do the same with the Redis Promise. It's API looks like this:
