@@ -104,7 +104,6 @@ cache: false
 
 However, thinking a bit ahead, we can imagine a scenario where users would want a different type of database (like MySQL instead of PostgreSQL), or provide some extra configuration for the it. A better API would leave the options opened, so in the future we could expand on the options. Something like this would be better:
 
-
 ```yaml
 image: myorg/ruby-app:v1.0.0
 database:
@@ -287,7 +286,7 @@ runtime_request = {
 File.write('/kratix/output/runtime-request.yaml', runtime_request.to_yaml)
 ```
 
-As you can see, we have hidden away from the RubyApp user a few options the Runtime Promise provides, like replicas and service port. In your own organisation, those options may need to be exposed at the higher-level Promise. 
+As you can see, we have hidden away from the RubyApp user a few options the Runtime Promise provides, like replicas and service port. In your own organisation, those options may need to be exposed at the higher-level Promise.
 
 #### Adding the PostgreSQL Request
 
@@ -645,7 +644,7 @@ We are now ready to install it!
 If we try to install the Compound Promise now, you should get a warning:
 
 ```shell-session
-$ kubectl --context $PLATFORM apply --filename rubyapp-promise.yaml
+$ kubectl --context $PLATFORM apply --filename promise.yaml
 Warning: Required Promise "postgresql" at version "v1.0.0-beta.2" not installed
 Warning: Required Promise "redis" at version "v1.0.0-beta.1" not installed
 Warning: Required Promise "runtime" at version "v0.1.0" not installed
@@ -733,13 +732,21 @@ rfs-myapp-redis-5cb45649b4-mx5wq                  1/1     Running       0       
 
 And you can now access your application:
 
+
+:::tip
+
+If you used the quick-start command to set up your environment, you can access the application at http://myapp.default.local.gd:31338/. Otherwise, you may need to port-forward to the application pod.
+
+You also may need a couple of refreshes to get the green checks, as the database and cache may take a few seconds to be ready.
+
+:::
+
 ```mdx-code-block
 import RunningApp from "./running-app.png"
 ```
 
 <figure className="diagram">
-  <img className="large" src={RunningApp} alt="Rails application running with
-  PostgreSQL and Redis " />
+  <img className="large" src={RunningApp} alt="Rails application running with PostgreSQL and Redis " />
 
   <figcaption>The running Rails App</figcaption>
 </figure>
