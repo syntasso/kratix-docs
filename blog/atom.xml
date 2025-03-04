@@ -8,11 +8,11 @@
     <subtitle>Kratix Blog</subtitle>
     <icon>https://docs.kratix.io/img/favicon.ico</icon>
     <entry>
-        <title type="html"><![CDATA[How to write Compound Promises in Kratix]]></title>
+        <title type="html"><![CDATA[How to write Compound Promises]]></title>
         <id>https://docs.kratix.io/blog/compound-promises</id>
         <link href="https://docs.kratix.io/blog/compound-promises"/>
         <updated>2025-02-13T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Everything you need to know about building Compound Promises in Kratix]]></summary>
+        <summary type="html"><![CDATA[Everything you need to know about building Compound Promises effectively]]></summary>
         <content type="html"><![CDATA[<p>So you read the <a href="https://docs.kratix.io/main/guides/compound-promises">guide</a> on Compound Promises and tried out the Workshop, and decided that a compound promise is the right abstraction to expose in your platform. You are about to start writing it, but you are still wondering how you would <em>really</em> go about writing one.</p>
 <p>We hear you.</p>
 <p>In this blog post, we will build a Compound Promise from scratch. Consider this the ultimate guide on how to build compound promises effectively.</p>
