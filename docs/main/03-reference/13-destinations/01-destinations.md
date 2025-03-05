@@ -143,3 +143,31 @@ often required by GitOps tools to ensure that all dependencies are ready before 
 resources themselves are applied.
 
 :::
+
+## Status
+
+A condition of type `Ready` is provided to enable waiting for the Destination to be ready. The Destination is considered
+ready when Kratix is able to write test documents successfully.
+
+See the example below showing a Destination with `Ready` condition.
+
+```
+$ kubectl describe destinations.platform.kratix.io worker-1
+Name:         worker-1
+...
+Status:
+  Conditions:
+    Last Transition Time:  2025-03-04T15:26:21Z
+    Message:               Test documents written to State Store
+    Reason:                TestDocumentsWritten
+    Status:                True
+    Type:                  Ready
+```
+
+:::info
+
+The test documents include `dependencies/kratix-canary-namespace.yaml` and `resources/kratix-canary-configmap.yaml`. When
+the `Ready` condition status is `True` and the target is a Kubernetes cluster set up to reconcile on the Destination, you
+will see a `kratix-worker-system` namespace and a `kratix-info` configmap on the target cluster.
+
+:::
