@@ -1,4 +1,4 @@
-name: update algolia
+name: Build and Push Assets
 
 on:
   push:
