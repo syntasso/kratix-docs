@@ -98,6 +98,6 @@ spec:
           containers:
           - command:
             - resource-configure
-            image: ghcr.io/syntasso/kratix-marketplace/runtime-configure-pipeline:v0.1.0
+            image: ghcr.io/syntasso/kratix-docs/runtime-configure-pipeline:v0.1.0
             name: resource-configure
 status: {}
