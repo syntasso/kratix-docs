@@ -1,7 +1,7 @@
 ---
 slug: compound-promises
-title: "How to write Compound Promises in Kratix"
-description: Everything you need to know about building Compound Promises in Kratix
+title: "How to write Compound Promises"
+description: Everything you need to know about building Compound Promises effectively
 authors: [derik]
 tags: [kratix, promises, compound promise]
 ---
@@ -65,7 +65,7 @@ And what will this Promise do? Well, provide the exact same experience to deploy
   * A Redis cache.
 * The Promise should wire the application with the connection details of the optinal services.
 
-Luckly, all the sub-promises you need to build this Compound Promise are available in the [Kratix Marketplace](/marketplace):
+Luckily, all the sub-promises you need to build this Compound Promise are available in the [Kratix Marketplace](/marketplace):
 * The Runtime Promise can deploy applications;
 * The PostgreSQL Promise can deploy PostgreSQL databases;
 * The Redis Promise can be our cache provider;
@@ -612,7 +612,7 @@ The above declaration tells Kratix to schedule the outputs of this Promise to a 
 
 ### Defining the Promise Requirements
 
-The final piece missing in our Compound Promise is the declaration of the sub-Promises it depends on. For that, you set the `spec.requiredPromises` field in the Compount Promise document with a list of sub-Promise names and versions.
+The final piece missing in our Compound Promise is the declaration of the sub-Promises it depends on. For that, you set the `spec.requiredPromises` field in the Compound Promise document with a list of sub-Promise names and versions.
 
 Let's update our RubyApp Promise to include the required sub-Promises:
 

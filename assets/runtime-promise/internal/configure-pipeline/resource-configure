@@ -44,8 +44,7 @@ kubectl create ingress ${name} \
     --output yaml > /kratix/output/${lifecycle}/ingress.yaml
 
 echo """
-- directory: ${lifecycle}
-  matchLabels:
+- matchLabels:
     environment: ${lifecycle}
 """ >> /kratix/metadata/destination-selectors.yaml
 

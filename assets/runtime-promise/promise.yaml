@@ -1,7 +1,6 @@
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  creationTimestamp: null
   labels:
     kratix.io/promise-version: v1.0.0
   name: runtime

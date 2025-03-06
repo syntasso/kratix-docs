@@ -12,7 +12,6 @@ docker build \
 
 docker push ghcr.io/syntasso/kratix-docs/redis-health-checks:v0.1.0
 
-
 rubyapp_image="ghcr.io/syntasso/kratix-docs/rubyapp-promise:v1.0.0"
 rubyapp_workflow_dir="$root/assets/rubyapp-promise/workflows/resource/configure/instance/deploy-resources"
 
@@ -22,5 +21,15 @@ docker build \
     -f ${rubyapp_workflow_dir}/Dockerfile \
     ${rubyapp_workflow_dir}
 
-
 docker push ${rubyapp_image}
+
+runtime_image="ghcr.io/syntasso/kratix-docs/runtime-configure-pipeline:v0.1.0"
+runtime_workflow_dir="$root/assets/runtime-promise/internal/configure-pipeline"
+
+docker build \
+    --platform linux/amd64 \
+    -t ${runtime_image} \
+    -f ${runtime_workflow_dir}/Dockerfile \
+    ${runtime_workflow_dir}
+
+docker push ${runtime_image}
