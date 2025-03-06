@@ -197,23 +197,25 @@ itself** (including any retry attempts).
 Kratix will not automatically reschedule/retry any Pipelines which have failed as part of a Delete
 workflow.
 
-### Manual Re-run
+### Manual Reconciliation
 
-After a pipeline failure, you may wish to manually trigger a Delete workflow for a specific Promise.
+Sometimes (e.g. after a pipeline failure) you may wish to manually trigger a Delete workflow for a specific Promise.
 
-A Delete workflow can be manually triggered for reconciliation by labelling it as follows:
+A Promise can be manually triggered for reconciliation by labelling it as follows:
 
 ```yaml
-kratix.io/manual-rerun-delete: "true"
+kratix.io/manual-reconciliation: "true"
 ```
 
 This will trigger the Promise Delete workflow to re-run.
 
+This workflow instance will terminate any in-progress Promise Delete workflow and start again.
+
 Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
 it again for any additional manual runs.
 
-See below for an example command to trigger a manual Delete workflow for a `redis` Promise.
+See below for an example command to trigger a manual reconciliation of a `redis` Promise.
 
 ```
-kubectl label promises.platform.kratix.io redis kratix.io/manual-rerun-delete=true
+kubectl label promises.platform.kratix.io redis kratix.io/manual-reconciliation=true
 ```
