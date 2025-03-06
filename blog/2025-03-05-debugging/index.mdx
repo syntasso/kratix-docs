@@ -21,7 +21,7 @@ Click on "read more" to continue!
 
 ## The end goal
 
-The Kratix Marketplace contains a Runtime Promise which deploys a Deployment configured with Nginx. By making updates to the Promise and Kratix resources, we'll highlight some common problems and the breadcrumbs you can follow to solve them.
+We'll be working with the Runtime Promise which deploys a Deployment configured with Nginx. By making updates to the Promise and Kratix resources, we'll highlight some common problems and the breadcrumbs you can follow to solve them.
 
 You can follow the steps in this post and debug in your own environment. If you want to do this, start with the Runtime Promise [here](https://github.com/syntasso/kratix-docs/tree/main/assets/runtime-promise).
 
@@ -38,6 +38,14 @@ make prepare-platform-as-destination
 
 ## Debugging Scheduling in Kratix
 
+If you're playing along, you can clone the Runtime Promise by running:
+
+```
+git clone --depth=1 https://github.com/syntasso/kratix-docs.git runtime-promise
+cd runtime-promise
+git sparse-checkout set assets/runtime-promise --no-cone
+```
+
 The runtime promise allows users to deploy an Application Runtime as a service via a Resource Request where they can edit the `lifecycle`, `image`, `servicePort` and the number of `replicas` in their deployment.
 
 ```yaml
@@ -53,7 +61,7 @@ spec:
   replicas: 1
 ```
 
-The `lifecycle` field determines which Destination the schedule the workloads to adn this maps to the label `environment=${lifecycle}` on the Destinations. Whilst working on the Promise, we want to deploy it to a `testing` Destination so the request will look as follows:
+The `lifecycle` field determines which Destination to schedule the workloads to and this maps to the label `environment=${lifecycle}` on the Destinations. Whilst working on the Promise, we want to deploy it to a `testing` Destination so the request will look as follows:
 
 ```yaml
 apiVersion: marketplace.kratix.io/v1alpha1
@@ -68,11 +76,11 @@ spec:
   replicas: 1
 ```
 
-Lets apply this request with `kubectl apply -f`.
+Create a file `example-runtime.yaml` with these contents and apply this request with `kubectl apply -f example-runtime.yaml`.
 
-We can query for the pods created as part of the workflow with selectors, this is particularly useful in busy environments with a lot of running pods:
+We can query for the pods created as part of the workflow with selectors that are added to workflow pods by default, this is particularly useful in busy environments with a lot of running pods:
 
-```
+```bash
 kubectl get pods --selector kratix.io/promise-name=runtime,\
   kratix.io/workflow-type=resource,\
   kratix.io/workflow-action=configure,\
@@ -86,13 +94,13 @@ NAME                                                  READY   STATUS      RESTAR
 kratix-runtime-example-runtime-instance-24bcb-ffh7w   0/1     Completed   0          20m
 ```
 
-As the workflow has finished running, we can check to ensure the documents were scheduled to the `testing` Destination. Run the following to get the Work associated with the `example-runtime` resource:
+As the workflow has finished running, we can check to ensure the documents were scheduled to the `testing` Destination. Like workflow pods, Works are created with a set of default labels to make querying for Works associated with given Promises and Resource Requests easier. Run the following to get the Work associated with the `example-runtime` resource:
 
 ```bash
 kubectl get work --selector kratix.io/resource-name=example-runtime -o yaml
 ```
 
-The status of the Work shows that it has not been scheduled with the following conditions:
+The status of the Work shows that it has not been scheduled:
 
 ```
 Status:
@@ -109,7 +117,7 @@ Status:
     type: Misscheduled
 ```
 
-What does this mean? Essentially, there were no Destinations matching the labels `environment=testing` in our environment. Lets review the available destinations and their labels:
+What does this mean? Essentially, there were no Destinations matching the label `environment=testing` in our environment. Lets review the available Destinations and their labels:
 
 ```bash
 NAME       READY   LABELS
@@ -193,7 +201,7 @@ NAME      READY
 testing   False
 ```
 
-Similarly, when querying the BucketStateStore
+Similarly, when querying the BucketStateStore with:
 
 ```bash
 kubectl get BucketStateStore testing --context kind-platform
@@ -212,7 +220,7 @@ Why is this the case? Lets `kubectl describe` the `testing` Destination. Run:
 kubectl describe BucketStateStore testing --context kind-platform
 ```
 
-The `status` of the BucketStateStore includes some conditions which details why it is not yet ready:
+The `status` of the BucketStateStore includes some conditions which detail why it is not yet ready:
 
 ```yaml
 Status:
@@ -233,7 +241,7 @@ Events:
   Warning  DestinationNotReady  20m   DestinationController  Failed to write test documents to Destination "testing": secret "minio" not found in namespace "default"
 ```
 
-When creating both Destinations and State Stores, Kratix checks to see that the defined locations can be written to with the provided credentials before marking them as `Ready`. We see similar a similar `status` and `event` fired for the `testing` BucketStateStore:
+When creating both Destinations and State Stores, Kratix checks to see that the defined locations can be written to with the provided credentials before marking them as `Ready`. We see a similar `status` and `event` fired for the `testing` BucketStateStore:
 
 ```bash
 Status:
@@ -250,7 +258,7 @@ Events:
   Warning  NotReady  52m   BucketStateStoreController  BucketStateStore "testing" is not ready: Error initialising writer: secret "minio" not found in namespace "default"
 ```
 
-This means that no work can be scheduled to these destinations until the problems are remedied, so lets fix the issue. Our minio credential isn't quite right, we need to edit the `testing` BucketStateStore to update the name of the secretRef from `minio` to `minio-credential`. Update the BucketStateStore and n just a few moments, both the State Store and Destination will become `Ready`
+This means that no work can be scheduled to these destinations until the problems are remedied, so lets fix the issue. Our minio credential isn't quite right, we need to edit the `testing` BucketStateStore to update the name of the secretRef from `minio` to `minio-credential`. Update the BucketStateStore and in just a few moments, both the State Store and Destination will become `Ready`
 
 ```bash
 Status:
@@ -301,9 +309,9 @@ And, more importantly, our `example-runtime` app is up and running. We can visit
 import app from "./app.png"
 ```
 
-Now that it's deployed successfully, we're now ready to build on the Runtime Promise and add the security scan as a new step when configuring resource requests.
+Now that it's deployed successfully, we're ready to build on the Runtime Promise and add the security scan as a new step when configuring resource requests.
 
-We can bootstrap this step with the [Kratix CLI's](/main/kratix-cli/intro) `add container` command. From the root of the Promise directory, you can run:
+We can bootstrap this step with the [Kratix CLI's](/main/kratix-cli/intro) `add container` command. From the root of the Runtime Promise directory, you can run:
 
 ```bash
 kratix add container resource/configure/instance \
@@ -311,7 +319,7 @@ kratix add container resource/configure/instance \
   --name security-scan
 ```
 
-This command adds a new container to the existing Resource configure workflow with the name `security-scan` and the image `ghcr.io/syntasso/kratix-docs/trivy-scan:v1.0.0`. 
+This command adds a new container to the existing resource configure workflow with the name `security-scan` and the image `ghcr.io/syntasso/kratix-docs/trivy-scan:v1.0.0`.
 
 Your directory structure should now look like this:
 
@@ -515,4 +523,4 @@ Great! The updated Runtime Promise is now running a provisioning requests that
 
 We've explored some of the common stumbling blocks that can come up when working wih Kratix - issues with scheduling, configuring Destinations - and the features of Kratix you can use to as debugging tools.
 
-Many of these are new features we've introduced following feedback from our customers so if there is a gotcha that has caught you out in the past, let us know via Github or our Community Slack - we're alway happy to hear from users.
+Many of these are new features we've introduced following feedback from our customers so if there is a gotcha that has caught you out in the past, let us know via [Github](https://github.com/syntasso/kratix) or our [Community Slack](https://kratixworkspace.slack.com/) - we're alway happy to hear from users.
