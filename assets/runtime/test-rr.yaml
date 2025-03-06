@@ -1,0 +1,10 @@
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: Runtime
+metadata:
+  name: example-runtime
+  namespace: default
+spec:
+  lifecycle: testing
+  image: syntasso/website
+  servicePort: 80
+  replicas: 1
