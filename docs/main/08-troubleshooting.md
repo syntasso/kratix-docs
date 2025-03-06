@@ -83,7 +83,7 @@ Let's first check:
      to see if the document is listed inside it.
 
      ```
-     kubectl get workplacement --selector kratix.io/resource-name=<request-name>
+     kubectl get workplacement --selector kratix.io/work=<work-name>
      ```
 
      As with the `Work`, the `workload.content` in a WorkPlacement is compressed to reduce the size of the WorkPlacement, to inspect the raw content of the document you can decode and decompress with `gzip` you can do the following:
@@ -246,7 +246,7 @@ continue to delete and work its way through the remaining finalizers.
 
    ```
    kubectl get work --selector kratix.io/resource-name=<resource-request>
-   kubectl get workplacement --selector kratix.io/resource-name=<resource-request>
+   kubectl get workplacement --selector kratix.io/work=<work-name>
    ```
 
 1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
