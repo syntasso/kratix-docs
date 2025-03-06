@@ -441,7 +441,7 @@ To use Trivy, we also need to update the generated Dockerfile to install the Tri
 ```dockerfile
 FROM "alpine"
 
-RUN apk update && apk add --no-cache yq curl
+RUN apk update && apk add --no-cache yq curl jq
 
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.3
 
@@ -503,7 +503,7 @@ and you should see output similar to:
 
 ```
 NAME                      STATUS    AGE
-runtime-example-runtime   healthy   8m12s
+runtime-example-runtime   degraded  8m12s
 ```
 
 Also, as the healthrecord reference the `example-runtime` request, the request should be updated to reflect the results in the HealthRecord. Run:
@@ -520,7 +520,7 @@ And the should see something similar to the following:
       Results:
         ...
     Last Run:                               1741248436
-    State:                                  healthy
+    State:                                  degraded
 ```
 
 Great! The updated Runtime Promise is now running a provisioning requests that 
