@@ -46,20 +46,13 @@ cd runtime-promise
 git sparse-checkout set assets/runtime-promise --no-cone
 ```
 
-The runtime promise allows users to deploy an Application Runtime as a service via a Resource Request where they can edit the `lifecycle`, `image`, `servicePort` and the number of `replicas` in their deployment.
+Let's install the Promise with:
 
-```yaml
-apiVersion: marketplace.kratix.io/v1alpha1
-kind: Runtime
-metadata:
-  name: example-runtime
-  namespace: default
-spec:
-  lifecycle: dev
-  image: syntasso/website
-  servicePort: 80
-  replicas: 1
+```bash
+kubectl apply -f promise.yaml
 ```
+
+The runtime promise allows users to deploy an Application Runtime as a service via a Resource Request where they can edit the `lifecycle`, `image`, `servicePort` and the number of `replicas` in their deployment.
 
 The `lifecycle` field determines which Destination to schedule the workloads to and this maps to the label `environment=${lifecycle}` on the Destinations. Whilst working on the Promise, we want to deploy it to a `testing` Destination so the request will look as follows:
 
@@ -82,9 +75,9 @@ We can query for the pods created as part of the workflow with selectors that ar
 
 ```bash
 kubectl get pods --selector kratix.io/promise-name=runtime,\
-  kratix.io/workflow-type=resource,\
-  kratix.io/workflow-action=configure,\
-  kratix.io/resource-name=example-runtime
+kratix.io/workflow-type=resource,\
+kratix.io/workflow-action=configure,\
+kratix.io/resource-name=example-runtime
 ```
 
 The output should look something like this:
@@ -117,7 +110,13 @@ Status:
     type: Misscheduled
 ```
 
-What does this mean? Essentially, there were no Destinations matching the label `environment=testing` in our environment. Lets review the available Destinations and their labels:
+What does this mean? Essentially, there were no Destinations matching the label `environment=testing` in our environment. Lets review the available Destinations and their labels with:
+
+```
+kubectl get destinations --show-labels
+```
+
+This produces:
 
 ```bash
 NAME       READY   LABELS
@@ -217,10 +216,10 @@ testing   False
 Why is this the case? Lets `kubectl describe` the `testing` Destination. Run:
 
 ```bash
-kubectl describe BucketStateStore testing --context kind-platform
+kubectl describe destination testing --context kind-platform
 ```
 
-The `status` of the BucketStateStore includes some conditions which detail why it is not yet ready:
+The `status` of the Destination includes some conditions which detail why it is not yet ready:
 
 ```yaml
 Status:
@@ -363,15 +362,12 @@ You'll also see an addition to the `promise.yaml`, appending the `security-scan`
             name: resource-configure
           spec:
             containers:
-              - name: create-resources
-                image: ghcr.io/syntasso/kratix-marketplace/app-as-a-service-configure-pipeline:v0.1.0
-                command: [resource-configure]
-              - name: database-configure
-                image: ghcr.io/syntasso/kratix-marketplace/app-as-a-service-configure-pipeline:v0.1.0
-                command: [database-configure]
+              - resource-configure
+              image: ghcr.io/syntasso/kratix-docs/runtime-configure-pipeline:v0.1.0
+              name: resource-configure
   #highlight-start
-              - name: security-scan
-                image: ghcr.io/syntasso/kratix-marketplace/app-as-a-service-configure-pipeline:v0.1.0
+              - image: ghcr.io/syntasso/kratix-docs/trivy-scan:v1.0.0
+                name: security-scan
   #highlight-end
 ```
 
