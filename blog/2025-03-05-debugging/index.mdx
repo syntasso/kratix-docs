@@ -258,7 +258,7 @@ Events:
   Warning  NotReady  52m   BucketStateStoreController  BucketStateStore "testing" is not ready: Error initialising writer: secret "minio" not found in namespace "default"
 ```
 
-This means that no work can be scheduled to these destinations until the problems are remedied, so lets fix the issue. Our minio credential isn't quite right, we need to edit the `testing` BucketStateStore to update the name of the secretRef from `minio` to `minio-credential`. Update the BucketStateStore and in just a few moments, both the State Store and Destination will become `Ready`
+This means that no work can be scheduled to these destinations until the problems are remedied, so lets fix the issue. Our minio credential isn't quite right, we need to edit the `testing` BucketStateStore to update the name of the secretRef from `minio` to `minio-credentials`. Update the BucketStateStore and in just a few moments, both the State Store and Destination will become `Ready`
 
 ```bash
 Status:
