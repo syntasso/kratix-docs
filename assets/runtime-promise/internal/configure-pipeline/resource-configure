@@ -21,25 +21,27 @@ if [ -n "${configMapDomain}" ]; then
     domainPort="${configMapDomainPort}"
 fi
 
+mkdir /kratix/output/${lifecycle}
+
 kubectl create deployment ${name} \
   --image=${image} --namespace=${namespace} \
   --replicas=${replicas} \
   --dry-run=client -o yaml > deployment.yaml
 
-yq '.spec.template.spec.containers[0].env = env(applicationEnv)' deployment.yaml > /kratix/output/deployment.yaml
+yq '.spec.template.spec.containers[0].env = env(applicationEnv)' deployment.yaml > /kratix/output/${lifecycle}/deployment.yaml
 
 kubectl create service nodeport ${name} \
     --namespace=${namespace} \
     --tcp=${service_port}\
     --dry-run=client \
-    --output yaml > /kratix/output/service.yaml
+    --output yaml > /kratix/output/${lifecycle}/service.yaml
 
 kubectl create ingress ${name} \
     --namespace=${namespace} \
     --class="nginx" \
     --rule="${name}.${namespace}.${domain}/*=${name}:${service_port}" \
     --dry-run=client \
-    --output yaml > /kratix/output/ingress.yaml
+    --output yaml > /kratix/output/${lifecycle}/ingress.yaml
 
 echo """
 - matchLabels:
