@@ -182,5 +182,28 @@ Kratix will trigger the Delete Pipeline exactly once.
 If a command fails during container execution, this must be handled **within the container
 itself** (including any retry attempts).
 
-Kratix will not reschedule/retry any Pipelines which have failed as part of a Delete
+Kratix will not automatically reschedule/retry any Pipelines which have failed as part of a Delete
 workflow.
+
+### Manual Reconciliation
+
+After a Resource Request has been marked for deletion, you may wish to manually trigger
+the Delete workflow (e.g. to re-run the workflow after a pipeline failure).
+
+A Resource Request can be manually triggered for reconciliation by labelling it as follows:
+
+```yaml
+kratix.io/manual-reconciliation: "true"
+```
+
+This will trigger the Resource Delete workflow to re-run immediately, terminating any
+Resource Delete workflow that is currently running.
+
+Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
+it again for any additional manual runs.
+
+See below for an example command to trigger a manual reconciliation of a `redis` Resource.
+
+```
+kubectl label redis my-redis-example kratix.io/manual-reconciliation=true
+```
