@@ -172,7 +172,7 @@ Selectors to select Destinations.
 You can verify the EasyApp Destination Selectors by describing the Promise:
 
 ```bash
-kubectl --context $PLATFORM describe promise easyapp | tail -n 30 | \
+kubectl --context $PLATFORM describe promise easyapp | tail -n 50 | \
   grep "Destination Selectors" --after-context 2 --max-count 1
 ```
 
