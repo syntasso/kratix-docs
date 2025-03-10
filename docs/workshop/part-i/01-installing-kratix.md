@@ -370,9 +370,9 @@ kubectl --context $PLATFORM get destinations
 The above command will give an output similar to:
 
 ```shell-session
-NAME               AGE
-platform-cluster    1m
-worker-cluster      1h
+NAME               READY
+platform-cluster   True
+worker-cluster     True
 ```
 
 Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify with:
