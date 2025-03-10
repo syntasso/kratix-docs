@@ -199,17 +199,16 @@ workflow.
 
 ### Manual Reconciliation
 
-After a Promise has been marked for deletion, you may wish to manually trigger the Delete
-workflow (e.g. to re-run the workflow after a pipeline failure).
-
-A Promise can be manually triggered for reconciliation by labelling it as follows:
+After a Promise has been marked for deletion, you can manually trigger the
+Delete workflow (e.g. to re-run the workflow after a pipeline failure) by
+labelling the Promise as follows:
 
 ```yaml
 kratix.io/manual-reconciliation: "true"
 ```
 
-This will trigger the Promise Delete workflow to re-run immediately, terminating any
-Promise Delete workflow that is currently running.
+This will re-run the Promise Delete workflow immediately, terminating any
+workflow that may be in progress.
 
 Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
 it again for any additional manual runs.

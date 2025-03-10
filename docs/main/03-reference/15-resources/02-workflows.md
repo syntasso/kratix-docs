@@ -187,20 +187,19 @@ workflow.
 
 ### Manual Reconciliation
 
-After a Resource Request has been marked for deletion, you may wish to manually trigger
-the Delete workflow (e.g. to re-run the workflow after a pipeline failure).
-
-A Resource Request can be manually triggered for reconciliation by labelling it as follows:
+After a Resource Request has been marked for deletion, you can manually trigger
+the Delete workflow (e.g. to re-run the workflow after a pipeline failure) by
+labelling it as follows:
 
 ```yaml
 kratix.io/manual-reconciliation: "true"
 ```
 
-This will trigger the Resource Delete workflow to re-run immediately, terminating any
-Resource Delete workflow that is currently running.
+The Resource Delete workflow will re-run immediately, terminating any other
+workflow that may be in progress.
 
-Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
-it again for any additional manual runs.
+Once Kratix schedules the manual workflow, the label will be removed, allowing
+you to add it again for any additional manual runs.
 
 See below for an example command to trigger a manual reconciliation of a `redis` Resource.
 
