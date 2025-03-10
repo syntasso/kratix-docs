@@ -343,57 +343,6 @@ import Topology02 from "/img/docs/workshop/topology-02.png"
   <figcaption>Flux reconciled and created the test resources</figcaption>
 </figure>
 
-### Register the platform as a Destination
-
-To register the platform cluster as an available Destination, you will run
-through similar steps you ran during the worker cluster Destination registration:
-
-* Install and configure Flux
-* Register the cluster as a Destination with Kratix
-
-There's a script in the `kratix` directory that will do exactly that. This
-script includes the same [Destination
-setup](./installing-kratix#destination-setup) steps you performed previously.
-Run:
-
-```bash
-./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels --with-label environment=platform
-```
-
-The platform cluster should now be registered with Kratix and ready to receive
-the workloads. Verify:
-
-```bash
-kubectl --context $PLATFORM get destinations
-```
-
-The above command will give an output similar to:
-
-```shell-session
-NAME               READY
-platform-cluster   True
-worker-cluster     True
-```
-
-Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify with:
-
-```bash
-kubectl --context $PLATFORM get namespaces --watch
-```
-
-The above command will give an output similar to:
-
-```shell-session
-NAME                     STATUS   AGE
-...
-kratix-platform-system   Active    1h
-//highlight-next-line
-kratix-worker-system     Active    1m
-...
-```
-
-Once you see `kratix-worker-system` on the output,
-press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
 
 Kratix is now fully installed and configured, and can start deploying Promises and resources to your clusters.
 
@@ -405,7 +354,7 @@ To recap the steps you took:
 
 1. ✅&nbsp;&nbsp;Installed Kratix on the platform cluster
 1. ✅&nbsp;&nbsp;Told Kratix about the MinIO bucket, as a Bucket State Store
-1. ✅&nbsp;&nbsp;Told Kratix about the worker and platform clusters, as Destinations
+1. ✅&nbsp;&nbsp;Told Kratix about the worker cluster, as a Destination
 
 ## 🎉 Congratulations
 
