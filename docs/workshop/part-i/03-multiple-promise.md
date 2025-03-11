@@ -58,8 +58,8 @@ In this tutorial, you will install and use a Compound Promise.
 
 ## Installing a Compound Promise {#write-a-compound-promise}
 
-The Compound Promise you will install can be found on the Kratix repository,
-under `samples/easy-app`. This Compound Promise encapsulate the Nginx
+The Compound Promise you will install can be found in the Kratix repository,
+under `samples/easy-app`. This Compound Promise encapsulates the Nginx
 and the Postgres Promises.
 
 Compound Promises work by including, in their list of Dependencies, other
@@ -197,7 +197,7 @@ postgresql      Available     postgresql   marketplace.kratix.io/v1alpha1
 Once all promises are "Available", press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
 exit the watch mode.
 
-The dependencies for the sub-Promises, on the other hands, are installed on the Worker
+The dependencies for the sub-Promises, on the other hand, are installed on the Worker
 destination. You can validate that by checking the deployments on the Worker:
 
 ```bash

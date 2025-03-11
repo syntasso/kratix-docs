@@ -78,7 +78,7 @@ provide anything-as-a-Service and are composed of mainly three pieces:
 Kratix positions itself as a framework for building platforms. Instead of
 thinking _Kratix or X_, think **Kratix and X**. The team has written
 extensively on how Kratix can work together with other Kubernetes tools.
-Please check [The Value of Kratix](/main/how-kratix-complements/intro)
+Please check [How Kratix Complements](/main/how-kratix-complements/intro)
 for details.
 
 </details>

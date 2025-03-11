@@ -356,7 +356,7 @@ import ExecutePipeline from "!!raw-loader!./_partials/writing-a-promise/04-resou
   {ExecutePipeline}
 </CodeBlock>
 
-As you can see, the script above uses the `kubectl` command to create a Deployment, a Service, and an Ingress. The script uses the `yq` command to extract the user's input from the `/kratix/input/object.yaml` file. The `object.yaml` file contains the input the user provided when requesting the new resource.
+As you can see, the script above uses the `kubectl` command to create a Deployment, a Service, and an Ingress. The script uses the `yq` cli to extract the user's input from the `/kratix/input/object.yaml` file. The `object.yaml` file contains the input the user provided when requesting the new resource.
 
 You may also notice that the script uses the `/kratix/output` directory to store the resources that must be created. At the end of the workflow, Kratix will deploy the resources stored in the `/kratix/output` directory to one of the available Destinations.
 
