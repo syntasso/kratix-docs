@@ -321,7 +321,10 @@ env:
   value: my-app-db
 ```
 
-Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `spec.workflows.resource.configure`:
+Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline.
+Open the promise file and include the step in the `spec.workflows.resource.configure`.
+Note that the `database-configure` container has a dependency on the existing container,
+append `database-configure` to the end of the container list to ensure it is executed last:
 
 ```yaml
 # ...
