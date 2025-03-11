@@ -110,8 +110,8 @@ metadata:
 spec:
   #highlight-start
   requiredPromises:
-  - name: postgresql
-    version: v1.0.0-beta.2
+    - name: postgresql
+      version: v1.0.0-beta.2
   #highlight-end
   # rest of the file
 ```
@@ -331,21 +331,21 @@ append `database-configure` to the end of the container list to ensure it is exe
 workflows:
   resource:
     configure:
-    - apiVersion: platform.kratix.io/v1alpha1
-      kind: Pipeline
-      metadata:
-        name: mypipeline
-      spec:
-        containers:
-          - name: kratix-workshop-app-pipeline-image
-            # ...
-          - name: create-bucket
-            # ...
-          #highlight-start
-          - name: database-configure
-            image: kratix-workshop/app-pipeline-image:v1.0.0
-            command: [ database-configure ]
-          #highlight-end
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: mypipeline
+        spec:
+          containers:
+            - name: kratix-workshop-app-pipeline-image
+              # ...
+            - name: create-bucket
+              # ...
+            #highlight-start
+            - name: database-configure
+              image: kratix-workshop/app-pipeline-image:v1.0.0
+              command: [ database-configure ]
+            #highlight-end
 status: {}
 ```
 
