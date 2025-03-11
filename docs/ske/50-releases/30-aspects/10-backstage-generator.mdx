@@ -21,11 +21,22 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-backstage-generator/v0.13.0/)(2025-03-11) {#v0.13.0}
+
+#### Bug Fixes
+
+* The SKE Backstage Generator will surface the expected conditions when the SKE-defined `Available` condition is set on a Promise. This condition is set
+on all Promises for versions of SKE greater than v0.19.0.
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
 ### [v0.12.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-backstage-generator/v0.12.1/)(2024-12-27) {#v0.12.1}
 
 #### Bug Fixes
 
-* The aspect will now properly handle `type: array` in the CRD when generating the Backstage Template entity.
+* The SKE Backstage Generator will now properly handle `type: array` in the CRD when generating the Backstage Template entity.
 
 ### Maintenance
 * Bump dependencies
