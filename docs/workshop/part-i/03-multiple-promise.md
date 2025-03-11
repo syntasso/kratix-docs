@@ -85,8 +85,67 @@ kratix-platform-controller-manager-7cc49f598b-zqkmz   2/2     Running   0       
 If the command above does not include a ready kratix-platform-controller-manager,
 please refer back to previous guides.
 
-### Install the Promise
+### Register the platform as a Destination
 
+To install a Compound Promises, the first step is to register the platform cluster
+itself as an available Destination.
+That's because the Dependencies for the Compound Promises are Promises themselves,
+therefore they need to be scheduled to the platform cluster.
+
+To register the platform cluster as an available Destination, you will run
+through similar steps you ran during the worker cluster Destination registration:
+
+* Install and configure Flux
+* Register the cluster as a Destination with Kratix
+
+There's a script in the `kratix` directory that will do exactly that. This
+script includes the same [Destination
+setup](./installing-kratix#destination-setup) steps you performed previously.
+Run:
+
+```bash
+./scripts/register-destination --name platform-cluster --context $PLATFORM --state-store default --strict-match-labels --with-label environment=platform
+```
+
+The platform cluster should now be registered with Kratix and ready to receive
+the workloads. Verify:
+
+```bash
+kubectl --context $PLATFORM get destinations
+```
+
+The above command will give an output similar to:
+
+```shell-session
+NAME               READY
+platform-cluster   True
+worker-cluster     True
+```
+
+Similar to when you registered the worker cluster, you should also see a `kratix-worker-system` namespace, indicating that Flux is correctly configured. Verify with:
+
+```bash
+kubectl --context $PLATFORM get namespaces --watch
+```
+
+The above command will give an output similar to:
+
+```shell-session
+NAME                     STATUS   AGE
+...
+kratix-platform-system   Active    1h
+//highlight-next-line
+kratix-worker-system     Active    1m
+...
+```
+
+Once you see `kratix-worker-system` on the output,
+press <kbd>Ctrl</kbd>+<kbd>C</kbd> to exit the watch mode.
+
+I've successfully registered the platform cluster as a Kratix Destination.
+We are now ready to install the compound Promise.
+
+### Install the Promise
 
 Since the EasyApp Promise declares two other Promises as its Dependencies,
 installing it will add a total of three Promises to the platform:

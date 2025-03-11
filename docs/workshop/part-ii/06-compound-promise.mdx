@@ -110,8 +110,8 @@ metadata:
 spec:
   #highlight-start
   requiredPromises:
-  - name: postgresql
-    version: v1.0.0-beta.2
+    - name: postgresql
+      version: v1.0.0-beta.2
   #highlight-end
   # rest of the file
 ```
@@ -321,28 +321,31 @@ env:
   value: my-app-db
 ```
 
-Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline. Open the promise file and include the step in the `spec.workflows.resource.configure`:
+Great! It looks like everything is in place. The last step is to actually include the `database-configure` step in the pipeline.
+Open the promise file and include the step in the `spec.workflows.resource.configure`.
+Note that the `database-configure` container has a dependency on the existing container,
+append `database-configure` to the end of the container list to ensure it is executed last:
 
 ```yaml
 # ...
 workflows:
   resource:
     configure:
-    - apiVersion: platform.kratix.io/v1alpha1
-      kind: Pipeline
-      metadata:
-        name: mypipeline
-      spec:
-        containers:
-          - name: kratix-workshop-app-pipeline-image
-            # ...
-          - name: create-bucket
-            # ...
-          #highlight-start
-          - name: database-configure
-            image: kratix-workshop/app-pipeline-image:v1.0.0
-            command: [ database-configure ]
-          #highlight-end
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: mypipeline
+        spec:
+          containers:
+            - name: kratix-workshop-app-pipeline-image
+              # ...
+            - name: create-bucket
+              # ...
+            #highlight-start
+            - name: database-configure
+              image: kratix-workshop/app-pipeline-image:v1.0.0
+              command: [ database-configure ]
+            #highlight-end
 status: {}
 ```
 
