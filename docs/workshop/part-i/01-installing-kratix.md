@@ -97,7 +97,7 @@ customisation of a particular Kubernetes installation.
 A Custom Resource Definition (CRD) is the object you create to teach your
 Kubernetes cluster about this new API.
 
-Kratix comes with multiple API extensions (CRDs), as you see above.
+Kratix comes with multiple API extensions (CRDs), as you can see above.
 
 Check the Kubernetes documentation for further details on [Custom
 Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
@@ -274,7 +274,7 @@ destinations.platform.kratix.io/worker-cluster created
 <details>
 <summary>Destinations in detail</summary>
 
-The Kratix Destination resource is the representation of a system where workloads can be scheduled to. Those systems are usually other Kubernetes clusters, but can be any system that can interpret the declared state.
+The Kratix Destination resource is the representation of a system that workloads can be scheduled to. Those systems are usually other Kubernetes clusters, but can be any system that can interpret the declared state.
 
 The only required field is `spec.stateStoreRef`, which contains a reference to a State Store present in the platform. In this example, it points to the `default`
 object you created on the previous step. The `spec.StateStoreRef.kind` specifies the kind of State Store being used by this Destination.
@@ -296,6 +296,7 @@ mc ls -r kind
 The above command will give an output similar to:
 
 ```shell-session
+[2024-01-01 15:00:00 GMT]   131B STANDARD kratix/kratix-write-probe.txt
 [2024-01-01 15:00:00 GMT]   116B STANDARD kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
 [2024-01-01 15:00:00 GMT]   206B STANDARD kratix/worker-cluster/resources/kratix-canary-configmap.yaml
 ```
@@ -345,8 +346,7 @@ import Topology02 from "/img/docs/workshop/topology-02.png"
 
 ### Register the platform as a Destination
 
-To register the platform cluster as an available Destination, you will run
-through similar steps you ran during the worker cluster Destination registration:
+As a Kubernetes cluster, the Platform cluster can also be configured as a Destination that we can schedule work to, this will be necessary later in the workshop. To register the platform cluster as an available Destination, you will run through similar steps you ran during the worker cluster Destination registration:
 
 * Install and configure Flux
 * Register the cluster as a Destination with Kratix
