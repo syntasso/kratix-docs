@@ -235,11 +235,16 @@ manually remove the finalizer from the resource by editing the resource and
 removing the finalizer from the `.metadata.finalizers`. Kratix will then
 continue to delete and work its way through the remaining finalizers.
 
-1. If the `kratix.io/delete-workflows` finalizer is not being removed, check whether the delete Workflow is failing
+1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
+   see whether the delete Workflow is failing and fix any issues preventing it from
+   completing.
 
    ```
    kubectl get pods --selector kratix.io/resource-name=<resource-request>
    ```
+
+   Once the issue is fixed, you can trigger the delete Workflow to re-run by triggering a
+   [manual reconciliation](./reference/resources/workflows#manual-reconciliation-1).
 
 1. If the `kratix.io/work-cleanup` finalizer is not being removed, check to see
    whether the `Work`/`WorkPlacement` resources are failing to be deleted
@@ -317,6 +322,9 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    ```
    kubectl -n kratix-platform-system get pods --selector kratix.io/promise-name=<promise-name> --selector kratix.io/work-action=delete
    ```
+
+   Once the issue is fixed, you can trigger the delete Workflow to re-run by triggering a
+   [manual reconciliation](./reference/resources/workflows#manual-reconciliation-1).
 
 1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
    see whether the Workflows are failing to be deleted and manually cleanup any that
