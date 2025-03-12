@@ -17,8 +17,9 @@ kratix init promise promise-name --group myorg.com --kind Database
 
 ## Flags
 ```
--h, --help     help for kratix
--t, --toggle   Help message for toggle
+-h, --help      help for kratix
+-t, --toggle    Help message for toggle
+-v, --version   version for kratix
 ```
 
 

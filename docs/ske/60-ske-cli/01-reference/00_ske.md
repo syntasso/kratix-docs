@@ -13,7 +13,7 @@ ske [command]
 ## Flags
 ```
 --context string   Name of the kubeconfig context to use
--h, --help         help for ske
+-h, --help             help for ske
 ```
 
 

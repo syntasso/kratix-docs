@@ -28,3 +28,4 @@ kratix init [command]
 * [kratix init helm-promise](/main/kratix-cli/reference/kratix-init-helm-promise): Initialize a new Promise from a Helm chart
 * [kratix init operator-promise](/main/kratix-cli/reference/kratix-init-operator-promise): Generate a Promise from a given Kubernetes Operator.
 * [kratix init promise](/main/kratix-cli/reference/kratix-init-promise): Initialize a new Promise
+* [kratix init tf-module-promise](/main/kratix-cli/reference/kratix-init-tf-module-promise): Initialize a Promise from a Terraform Module stored in Git
