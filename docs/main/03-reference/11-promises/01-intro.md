@@ -48,7 +48,7 @@ metadata:
     # optional: the version of this promise
     kratix.io/promise-version: v1.0.0
 spec:
-  # API that a Platform User will use to request an Resource from this Promise
+  # API that a Platform User will use to request a Resource from this Promise
   api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
@@ -81,7 +81,7 @@ spec:
               -  #...
       # Tasks to be run when a Promise is deleted
       delete: 
-      - apiVersion: platform.kratix.io/v1alpha1
+        - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
             name: delete-promise
@@ -106,7 +106,7 @@ spec:
               -  #...
       # Tasks to be run when a Resource is deleted
       delete: 
-      - apiVersion: platform.kratix.io/v1alpha1
+        - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
             name: delete-resource
