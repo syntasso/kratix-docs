@@ -48,7 +48,7 @@ metadata:
     # optional: the version of this promise
     kratix.io/promise-version: v1.0.0
 spec:
-  # API that a Platform User will use to request an Resource from this Promise
+  # API that a Platform User will use to request a Resource from this Promise
   api:
     apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
@@ -81,7 +81,7 @@ spec:
               -  #...
       # Tasks to be run when a Promise is deleted
       delete: 
-      - apiVersion: platform.kratix.io/v1alpha1
+        - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
             name: delete-promise
@@ -106,7 +106,7 @@ spec:
               -  #...
       # Tasks to be run when a Resource is deleted
       delete: 
-      - apiVersion: platform.kratix.io/v1alpha1
+        - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
             name: delete-resource
@@ -135,6 +135,8 @@ It's also possible to install Promises via a Promise Release. Check the [Promise
 When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customise their resources using the available API options.
 When the API request is submitted to Kratix, the Promise uses the API options to create the resources as described in the Promise.  
 For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.
+Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only.
+You can learn more about CRDs [here](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
 
 ### Dependencies
 Dependencies are everything that the Promise relies on to function. A Kratix Promise can even be built on other Kratix Promises. A dependency is the pre-requisite software to create the resource and make it operational. A dependency might be a low-level resource such as a database, a pre-defined environment, a connection, a queue, or a bundle of related items that work together.
