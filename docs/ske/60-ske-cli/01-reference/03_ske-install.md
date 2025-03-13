@@ -21,7 +21,7 @@ SKE successfully installed; SKE version: v0.1.0, SKE operator version: v0.2.0
 ## Flags
 ```
 --access-token string   Token to access SKE resources
--h, --help              help for install
+-h, --help                  help for install
 ```
 
 
