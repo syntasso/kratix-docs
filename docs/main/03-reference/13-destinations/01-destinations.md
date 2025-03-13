@@ -55,9 +55,15 @@ spec:
   # Optional, defaults to `nestedByMetadata`
   # The mode to use when writing to the State Store, valid options are:
   #   - nestedByMetadata: Writes to the State Store in a nested structure
+  #   - aggregatedYAML: Writes to the State Store in a single YAML file
   #   - none: Writes to the State Store in a flat structure
   filepath:
-    mode: nestedByMetadata | none
+    mode: nestedByMetadata | aggregatedYAML | none
+
+    # Optional; only used for `aggregatedYAML` mode
+    # The filename to use when writing to the State Store
+    # defaults to `aggregated.yaml`
+    filename: "aggregated.yaml"
 
   # Optional, defaults to `none`
   # The cleanup policy to use when deleting the Destination, valid options are:
@@ -133,8 +139,9 @@ The following directories would be created in the State Store:
 - `destinations/dev/default/dependencies/`
 - `destinations/dev/default/resources/`
 
-Kratix will, by default, write to unique directories within those paths depending on the
-Promise or Resource being requested. You can stop this behaviour by setting the `filepath.mode` to `none`.
+Kratix will, by default, write to unique directories within those paths
+depending on the Promise or Resource being requested. To stop this behaviour,
+check the `filepath.mode` field in the Destination Spec.
 
 :::info
 
