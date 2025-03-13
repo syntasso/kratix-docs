@@ -25,7 +25,6 @@ data:
     # Number of old successful pipeline pods to keep. Default is 5
     numberOfJobsToKeep: 1  
     workflows:
-      defaultImagePullPolicy: # can be `IfNotPresent`, `Always`, or `Never`
       defaultContainerSecurityContext:
         # Security context fields, e.g.:
         runAsNonRoot: false
