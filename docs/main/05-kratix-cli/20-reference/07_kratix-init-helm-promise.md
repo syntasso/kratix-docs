@@ -12,13 +12,13 @@ kratix init helm-promise PROMISE-NAME --chart-url HELM-CHART-URL --group PROMISE
 ## Examples
 ```
 # initialize a new promise from an OCI Helm Chart
-kratix init helm-promise postgresql --chart-url oci://registry-1.docker.io/bitnamicharts/postgresql [--group] [--kind] [--chart-version]
+kratix init helm-promise postgresql --chart-url oci://registry-1.docker.io/bitnamicharts/postgresql [--chart-version] --group syntasso.io --kind database
 
 # initialize a new promise from a Helm Chart repository
-kratix init helm-promise flux2 --chart-url https://fluxcd-community.github.io/helm-charts --chart-name flux2  [--group] [--kind] [--chart-version]
+kratix init helm-promise postgresql --chart-url https://fluxcd-community.github.io/helm-charts --chart-name flux2 [--chart-version] --group syntasso.io --kind database
 
 # initialize a new promise from a Helm Chart tar URL
-kratix init helm-promise podinfo --chart-url https://github.com/stefanprodan/podinfo/raw/gh-pages/podinfo-0.2.1.tgz [--group] [--kind]
+kratix init helm-promise postgresql --chart-url https://github.com/stefanprodan/podinfo/raw/gh-pages/podinfo-0.2.1.tgz --group syntasso.io --kind database
 ```
 
 ## Flags
