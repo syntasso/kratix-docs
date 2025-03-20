@@ -1,13 +1,17 @@
 # kratix init crossplane-promise
 Initialize a new Promise from a Crossplane XRD
 
+## Description
+Initialize a new Promise from a Crossplane XRD
+
 ## Usage
 ```
 kratix init crossplane-promise [flags]
 ```
 
-## Example
+## Examples
 ```
+# initialize a new promise from a Crossplane XRD and Composition
 kratix init crossplane-promise s3buckets --xrd xrd.yaml --group syntasso.io --kind S3Bucket --dir --compositions composition.yaml
 ```
 
@@ -32,3 +36,4 @@ kratix init crossplane-promise s3buckets --xrd xrd.yaml --group syntasso.io --ki
 ## See Also
 
 * [kratix init](/main/kratix-cli/reference/kratix-init): Command used to initialize Kratix resources
+
