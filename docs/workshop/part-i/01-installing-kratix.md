@@ -259,9 +259,10 @@ metadata:
    labels:
     environment: dev
 spec:
-   stateStoreRef:
-      name: default
-      kind: BucketStateStore
+  path: worker-cluster
+  stateStoreRef:
+     name: default
+     kind: BucketStateStore
 EOF
 ```
 
