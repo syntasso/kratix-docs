@@ -27,7 +27,7 @@
 	{
 		"name": "App-as-a-Service",
 		"description": "An example Promise delivering 'App-as-a-Service'.       Check the Compound Promises docs for more information.",
-		"url": "https://github.com/syntasso/kratix/tree/main/demo/app-as-a-service",
+		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/app-as-a-service",
 		"logoUrl": "/img/marketplace/app-as-a-service.svg",
 		"example": true,
 		"categories": [
