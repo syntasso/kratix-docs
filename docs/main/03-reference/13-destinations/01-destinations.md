@@ -40,7 +40,7 @@ metadata:
     environment: dev
 spec:
   # Path within the State Store to write to.
-  # Optional, defaults to the name of the Destination.
+  # Required field; In most cases, you can set it to the name of the Destination.
   # To write straight to the root of the State Store, set it to `/`.
   path: path/in/statestore
 
