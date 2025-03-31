@@ -23,6 +23,20 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.14.0/); [ske-frontend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.14.0/) (2025-03-31)
+
+#### 🚨 Breaking changes 🚨
+
+* The plugins will no longer rely on a Git repository to execute CRUD operations on the Kubernetes Cluster. Instead, they will now use the Kubernetes API to manage the resources. This enables users to get the most up-to-date information on their resources, as well as manage resources created via other means, like via `kubectl`. The migration is quite simple and only requires changes to the Backstage app config. Read the [Installing the backend plugin](/ske/integrations/backstage/plugins#installing-the-backend-plugin) documentation for more information.
+* The Backstage Component Promise is now deprecated; its features are now available within the plugins and SKE v0.21.0+.
+
+#### Features
+
+* Backend plugin now uses the Kubernetes API to fetch/create/update/delete resources
+* Support for OIDC and Service Account authentication
+* Users can now manage resource created outside backstage
+* UX improvements
+
 ### [ske-backend v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.13.0/) (2024-12-27)
 
 #### Maintenance

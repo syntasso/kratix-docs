@@ -1,0 +1,259 @@
+---
+title: SKE Component Promise
+description: Documentation for how to use the SKE Component Promise
+sidebar_label: SKE Component Promise
+---
+
+
+:::warning Deprecated
+
+The SKE Backstage Component Promise is now deprecated and its documentation will be removed soon. 
+
+The functionality it provides is now available by default with v0.14.0 version
+of the Backstage Plugins and SKE version 0.21.0.
+
+:::
+
+
+
+The SKE Backstage Component Promise provides additional functionality to the SKE
+Backstage integration by offloading management of Backstage Components and
+Templates files from your Promises. The Promise enables the following features:
+
+- Allow updates to the Backstage Component and Templates while a Pipeline is still running.
+- Enables the combination of multiple Backstage Components and Templates into a single
+  `catalog-info.yaml` file. For some Backstage integrations, such as GitLab,
+  this is a requirement.
+
+You can install the Promise via `kubectl`:
+
+```yaml
+kubectl apply -f https://syntasso-enterprise-releases.s3.eu-west-2.amazonaws.com/promises/ske-backstage-component-promise.yaml
+```
+
+## Component updates with multiple Pipelines
+
+If your Promise or Resource workflow contains multiple Pipelines, you may wish to update
+the associated Component in Backstage at the end of each Pipeline. For example, the
+Resource status could be updated in every Pipeline to convey the latest information about
+the Resource to the requester in Backstage.
+
+To do this, run the SKE Backstage Generator as normal, then create a
+request to the SKE Backstage Component Promise within the next pipeline container. In this example the image
+`ghcr.io/syntasso/kratix-marketplace/create-backstage-component-request:v0.1.0` is responsible for generating a SKE
+Backstage Component Promise request:
+
+```yaml
+  # ...
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: resource-configure
+          namespace: default
+        spec:
+          #highlight-start
+          # rbac required by new create-backstage-component-request image
+          rbac:
+            permissions:
+              - apiGroups: ["syntasso.io"]
+                verbs: ["*"]
+                resources: ["backstagecomponents"]
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-resource-pipeline
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
+            name: ske-backstage-generator
+          #highlight-start
+          - image:  ghcr.io/syntasso/kratix-marketplace/create-backstage-component-request:v0.1.0
+            name: create-backstage-component-request
+          #highlight-end
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+          namespace: default
+        spec:
+          #highlight-start
+          rbac:
+            permissions:
+              - apiGroups: ["syntasso.io"]
+                verbs: ["*"]
+                resources: ["backstagecomponents"]
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
+            name: ske-backstage-generator
+          #highlight-start
+          - image:  ghcr.io/syntasso/kratix-marketplace/create-backstage-component-request:v0.1.0
+            name: create-backstage-component-request
+          #highlight-end
+```
+
+:::note
+The versions of the `ske-backstage-generator` image used in your Promise specification and
+the `ske-backstage-generator` image in the SKE Backstage Component Promise must match
+:::
+
+### Requesting Backstage Components
+
+When creating the `BackstageComponent` requests you need to ensure that you set the
+correct `.metadata.ownerReferences` on the resource to ensure it is deleted when the
+resource/promise is deleted. An example of this is shown below:
+
+```yaml
+apiVersion: syntasso.io/v1alpha1
+kind: BackstageComponent
+metadata:
+  name: <unique-name>
+  namespace: <same namespace as the request (kratix-platform-system for promises)>
+  ownerReferences:
+  - apiVersion: <apiVersion of the parent object>
+    blockOwnerDeletion: false
+    controller: false
+    kind: <kind of the parent object>
+    name: <name of the parent object>
+    uid: <uid of the parent object>
+spec:
+- resources: |
+  ... # contents of /kratix/output/backstage/catalog-info.yaml
+```
+
+The `name` `apiVersion`, `kind` and `uid` fields under `ownerReferences` must equal
+the parent object for this request, which is the `/kratix/input/object.yaml`.
+
+The `spec.resources` needs to be a string containing the Backstage Component/Template
+YAML files.
+
+Running in this mode, the SKE Backstage Generator will not schedule the Backstage
+documents itself. Instead, it will delegate this responsibility to the SKE Backstage
+Component Promise.
+
+This allows the Backstage Component document to be managed per-Resource, meaning Resource
+metadata such as the status can be updated across multiple Pipelines.
+
+After creating the `BackstageComponent` request, you need to ensure your
+pipeline does not also schedule the same document to the Backstage Destination.
+To prevent this you can `rm -rf /kratix/output/backstage` and remove the
+`dir: backstage` entry in your `/kratix/metadata/destination-selectors.yaml` after
+making the request.
+
+<details>
+<summary>Example bash pipeline script</summary>
+
+```bash
+              - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                name: make-backstage-request
+                command: [ "sh" ]
+                args:
+                  - -c
+                  - |
+                    export name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
+                    export namespace="$(yq eval '.metadata.namespace' /kratix/input/object.yaml)"
+                    export promise_name=$KRATIX_PROMISE_NAME
+
+                    kind=$(yq eval '.kind' /kratix/input/object.yaml)
+                    api_version=$(yq eval '.apiVersion' /kratix/input/object.yaml)
+                    uid=$(yq eval '.metadata.uid' /kratix/input/object.yaml)
+                    concatenated_string="${promise_name}-${namespace}-${name}"
+                    hash=$(echo -n "$concatenated_string" | sha256sum | cut -c1-5)
+                    truncated_string=$(echo -n "$concatenated_string" | cut -c1-50)
+                    deterministic_name="${truncated_string}-${hash}"
+
+                    cd /kratix/output/
+
+                    cat <<EOF > rr.yaml
+                    apiVersion: syntasso.io/v1alpha1
+                    kind: BackstageComponent
+                    metadata:
+                      name: $deterministic_name
+                      namespace: $namespace
+                      ownerReferences:
+                      - apiVersion: $api_version
+                        blockOwnerDeletion: false
+                        controller: false
+                        kind: $kind
+                        name: $name
+                        uid: $uid
+                    spec: {}
+                    EOF
+
+                    # set .spec.resources equal to file contents of catalog-info.yaml
+                    yq eval '.spec.resources = strload("backstage/catalog-info.yaml")' -i rr.yaml
+                    kubectl apply -f rr.yaml
+                    rm -rf /kratix/output/rr.yaml /kratix/output/backstage/ /kratix/metadata/destination-selectors.yaml
+```
+</details>
+
+### Scheduling Backstage Components
+
+By default, `BackstageComponent` requests are scheduled to your Backstage destination.
+If you need to schedule a `BackstageComponent` to a destination other than
+the default Backstage destination with label `environment: backstage`, you can set the
+`.spec.destinationSelectors` on the resource to customize its scheduling behavior.
+An example of this is shown below:
+
+```yaml
+apiVersion: syntasso.io/v1alpha1
+kind: BackstageComponent
+metadata:
+  name: A-NAME
+  namespace: NAMESPACE
+spec:
+  destinationSelectors:
+  - matchLabels:
+      environment: backstage-instance-one
+      team: billing
+- resources: |
+  ... # contents of /kratix/output/backstage/catalog-info.yaml
+```
+
+## Generate a single Backstage catalog
+
+Using the SKE Backstage Component Promise, you can optionally choose to write a single
+`catalog-info.yaml` file for Backstage to read from, instead of the default behaviour of
+one catalog file per Promise or resource request.
+
+To do this, there are two steps required:
+- Configuring the SKE Backstage Generator to write all of the Backstage manifests in a
+single `catalog-info.yaml`.
+- Configuring all of your Promises to use the SKE Backstage Component Promise.
+
+First, apply the following config map to your Platform cluster:
+
+```yaml
+apiVersion: v1
+data:
+  allInOne: "true"
+kind: ConfigMap
+metadata:
+  name: ske-backstage-component-promise-config
+  namespace: kratix-platform-system
+```
+
+Then configure all of your Promises which use the SKE Backstage Generator to make a request
+to the SKE Backstage Component Promise within your Pipeline, as illustrated in the [section
+above](#component-updates-with-multiple-pipelines).
+
+:::info
+
+To ensure that a single `catalog-info.yaml` file is created, you must ensure that **all**
+of your Promises which use the SKE Backstage Generator are set up to make a request
+to the SKE Backstage Component Promise in **both** the Promise and Resource workflows.
+
+:::
+
+Configuring the `allInOne` field to `true` will cause the SKE Backstage Component Promise
+to aggregate the Backstage Component and Template files for all Promises and Resources
+into a single `catalog-info.yaml` file in the Backstage Destination.
+
+With these changes, your SKE Backstage integration will result in a single
+`catalog-info.yaml` file being written to your Backstage Destination containing all of the
+generated Component and Template manifests.

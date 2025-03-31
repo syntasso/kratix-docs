@@ -162,32 +162,46 @@ From the root of the backstage repository, run:
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
 ```
 
-### Configure
+### Configure the Kubernetes integration
 
-Add the following to the `app-config.yaml` file:
+The backend plugin will communicate with the Kubernetes cluster directly. For that, you will need to configure the Backstage Kubernetes integration. Check the [Backstage docs](https://backstage.io/docs/features/kubernetes/configuration) for detailed information.
+
+Once you configure the Kubernetes integration, you should have a `kubernetes` section in your `app-config.yaml` file similar to the following:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - url: <my platform cluster url>
+          name: kratixPlatform
+          authProvider: serviceAccount
+          skipTLSVerify: true
+          serviceAccountToken: <service-account-token>
+        - url: <another kubernetes cluster url>
+          name: someOtherCluster
+          authProvider: serviceAccount
+          serviceAccountToken: <service-account-token>
+```
+
+You must now tell the backend plugin which cluster is the platform cluster. For that, add the following section to your `app-config.yaml`:
 
 ```yaml
 ske:
-  scm:
-    token: "my-access-token" # git access token
-    repoUrl: "https://github.com/my-org/my-repo" # repository url
-    type: "github" # optional; git provider, currently one of "github" or "gitlab" (used to determine username if `username` not set)
-    username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
-    path: "catalog" # optional; path within the repository (default: "")
-    branch: "main" # optional; branch to use (default: "main")
-    defaultAuthor: # optional; git author details
-      name: "my-name" # default: "SKE"
-      email: "my@email.com" # default: ske@backstage.io
+  kubernetes:
+    # make sure this matches the name of the cluster you want to use
+    platformName: kratixPlatform 
 ```
 
-The backend plugin uses basic auth to authenticate against the Git provider. If you wish
-to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the
-`username` field, and set the `token` field to the password or token. Otherwise, the
-username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username`
-or `type` must be provided.
+If no `ske.kubernetes` section is present, the backend plugin will assume Backstage itself is running on the Platform cluster and will load the cluster configuration from the local machine/pod.
 
-The `repoUrl` is the repository to which Backstage will push the resource
-requests; you must configure your platform to reconcile on new documents.
+:::note
+
+Currently, the backend plugin only supports `clusterLocatorMethods` of type `config`. As for the authentication, it supports `authProvider: serviceAccount | oidc`.
+
+:::
 
 ### Add the backend plugin
 
@@ -211,34 +225,6 @@ yarn install
 ```
 
 Your backstage instance is now ready to use the SKE plugins.
-
-In the next section, you will configure your Platform cluster to reconcile on the documents pushed to the Git repository by the SKE actions.
-
-## Configuring the Platform
-
-This section assumes you have a Kratix instance running following the [quick start guide](/main/quick-start). Adjust the following steps to fit your installation in case you have a different setup.
-
-Following the Quick Start, you should have both Kratix and Flux running on your platform. The easiest way to configure the platform to reconcile on the documents pushed to the Git repository by the SKE actions is to use the [Flux CLI](https://fluxcd.io/flux/cmd/).
-
-If you configured SKE to use GitHub, you can use the following command to bootstrap your platform, replacing the placeholders with your own values:
-
-```bash
-export GITHUB_TOKEN=<your-github-token>
-flux bootstrap github \<
-    --owner="<org>" \
-    --repository="<repo>" \
-    --branch="<branch>" \
-    --interval="10s" \
-    --path="catalog" # must match the `ske.scm.path` in the `app-config.yaml`
-```
-
-For other Git providers (including a generic git provider), check the [Flux CLI docs](https://fluxcd.io/flux/cmd/flux_bootstrap_git/).
-
-:::tip
-
-If you don't want to use the Flux CLI, you can check out the [Flux documentation](https://fluxcd.io/docs/) for other ways to configure your platform.
-
-:::
 
 ## Start your Backstage app
 
