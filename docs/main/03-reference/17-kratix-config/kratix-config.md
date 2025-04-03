@@ -23,7 +23,15 @@ metadata:
 data:
   config: |
     # Number of old successful pipeline pods to keep. Default is 5
-    numberOfJobsToKeep: 1  
+    numberOfJobsToKeep: 1
+    # Selective cache for Secrets to limit memory usage. Please ensure Secrets used by Kratix are
+    # created with label: app.kubernetes.io/part-of=kratix. Default is false.
+    selectiveCache: false
+    # Timeout configuration of controller's leader election.
+    controllerLeaderElection:
+      leaseDuration: 15s
+      renewDeadline: 10s
+      retryPeriod: 2s
     workflows:
       defaultImagePullPolicy: # can be `IfNotPresent`, `Always`, or `Never`
       defaultContainerSecurityContext:
