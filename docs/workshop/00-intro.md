@@ -54,7 +54,7 @@ Kratix. On Part II, you will dive into writing and extending Promises.
 1. [Improving the Workflows](part-ii/promise-workflows) <br />
    Learn more about the different types of workflows that can be used within a Promise.
 
-1. [Accesing Secrets and storing state](part-ii/secrets-and-state) <br />
+1. [Accessing Secrets and storing state](part-ii/secrets-and-state) <br />
    Learn how you can access Secrets and store state from within a Kratix pipeline
 
 1. [Surfacing information via Status](part-ii/status) <br />
