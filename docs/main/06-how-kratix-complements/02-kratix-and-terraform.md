@@ -41,7 +41,7 @@ If you use tools like the [Terraform Cloud Operator](https://developer.hashicorp
 
 <br/>
 
-If this sounds interesting to you, [contact us](https://www.syntasso.io/contact-us) and we can help you get started with Kratix and Backstage.
+If this sounds interesting to you, [contact us](https://www.syntasso.io/contact-us) and we can help you get started with Kratix and Terraform.
 
 ## Additional resources
 
