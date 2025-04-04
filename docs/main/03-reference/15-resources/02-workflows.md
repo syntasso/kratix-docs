@@ -111,11 +111,10 @@ All commands which run in Configure workflows must be idempotent, as there is a 
 that they will be run multiple times a day, and may be run much more frequently depending
 on other environmental impacts (e.g. Pod restarts).
 
-The `resource.configure` workflow is regularly executed. Kubernetes reconciles on a number
-different actions, including, but not limited to:
+The `resource.configure` workflow is executed during each reconciliation. Kubernetes 
+reconciles on a number different actions, including, but not limited to:
 
 - Resource creation
-- Regular interval (10 hours, not currently configurable)
 - Kratix Controller restarts
 - Changes to the Resource definition
 - Changes to the Promise definition
