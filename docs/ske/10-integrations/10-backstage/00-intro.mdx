@@ -21,10 +21,9 @@ import BackstageDiagram from "/img/docs/ske/backstage-diagram.png"
 
 ## Architecture
 
-To integrate Kratix with Backstage, you need to configure five things:
+To integrate Kratix with Backstage, you need to configure the following:
 
-1. Make Backstage send requests to a Git repository
-2. Configure your Platform cluster to reconcile on changes to the repository
+1. Configure Backstage to communicate with your Kubernetes cluster
 2. Update your Promise to generate Backstage Entities in the Workflows
 3. Configure Kratix to send the Backstage Entities to a State Store
 4. Configure Backstage to read its catalog from a State Store
@@ -42,8 +41,8 @@ diagram correspond to the steps above.
 The following sections will go through each of these steps in detail.
 
 * In [Configuring Backstage](./configuring-backstage), you will learn how to configure
-  the communication from Kratix to Backstage (4 and 5 in the diagram).
+  the communication from Kratix to Backstage (4 and 3 in the diagram).
 * In [Configuring the Plugins](./plugins), you will learn how to set up the communication
-  from Backstage to Kratix (1 and 2 in the diagram).
+  from Backstage to Kratix (1 in the diagram).
 * In [SKE Backstage Generator](./generator), you will learn how to automate catalog population
-  in Backstage (3 in the diagram).
+  in Backstage (2 in the diagram).
