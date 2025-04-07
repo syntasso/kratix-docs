@@ -192,7 +192,7 @@ You must now tell the backend plugin which cluster is the platform cluster. For 
 ske:
   kubernetes:
     # make sure this matches the name of the cluster you want to use
-    platformName: kratixPlatform 
+    platformName: kratixPlatform
 ```
 
 If no `ske.kubernetes` section is present, the backend plugin will assume Backstage itself is running on the Platform cluster and will load the cluster configuration from the local machine/pod.
@@ -200,6 +200,13 @@ If no `ske.kubernetes` section is present, the backend plugin will assume Backst
 :::note
 
 Currently, the backend plugin only supports `clusterLocatorMethods` of type `config`. As for the authentication, it supports `authProvider: serviceAccount | oidc`.
+
+:::
+
+
+:::warning
+
+For oidc authentication, you must ensure that, in the Backstage Token, there's a `tok` field with the `accessToken` to be used to access the Kubernetes cluster.
 
 :::
 
