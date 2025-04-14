@@ -1,0 +1,92 @@
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  labels:
+    kratix.io/promise-version: v0.0.1
+  name: app
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      creationTimestamp: null
+      name: apps.workshop.kratix.io
+    spec:
+      group: workshop.kratix.io
+      names:
+        kind: App
+        plural: apps
+        singular: app
+      scope: Namespaced
+      versions:
+        - name: v1
+          schema:
+            openAPIV3Schema:
+              properties:
+                spec:
+                  properties:
+                    image:
+                      type: string
+                    service:
+                      properties:
+                        port:
+                          type: integer
+                      type: object
+                  type: object
+              type: object
+          served: true
+          storage: true
+    status:
+      acceptedNames:
+        kind: ""
+        plural: ""
+      conditions: null
+      storedVersions: null
+  workflows:
+    promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: dependencies
+          spec:
+            containers:
+              - image: kratix-workshop/app-promise-pipeline:v0.1.0
+                name: configure-deps
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: mypipeline
+          spec:
+            rbac:
+              permissions:
+                - apiGroups: [ "" ]
+                  verbs: [ "*" ]
+                  resources: [ "configmaps" ]
+            containers:
+              - image: kratix-workshop/app-pipeline-image:v1.0.0
+                name: kratix-workshop-app-pipeline-image
+                command: [ resource-configure ]
+              - name: create-bucket
+                image: kratix-workshop/app-pipeline-image:v1.0.0
+                command: [ create-bucket ]
+                env:
+                  - name: MINIO_ENDPOINT
+                    valueFrom:
+                      secretKeyRef:
+                        name: app-promise-minio-creds
+                        key: endpoint
+                  - name: MINIO_USER
+                    valueFrom:
+                      secretKeyRef:
+                        name: app-promise-minio-creds
+                        key: username
+                  - name: MINIO_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: app-promise-minio-creds
+                        key: password
+status: {}
