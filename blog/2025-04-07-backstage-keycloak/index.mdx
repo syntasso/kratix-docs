@@ -302,7 +302,7 @@ Then, run the script below:
 
 ```bash
 kubectl_config(){
-  local ENDPOINT=${ISSUER}/protocol/openid-connect/token
+  local ENDPOINT=${KEYCLOAK_URL}/protocol/openid-connect/token
   local ID_TOKEN=$(curl --silent -k -X POST $ENDPOINT \
     -d grant_type=password \
     -d client_id=kube \
@@ -324,7 +324,7 @@ kubectl_config(){
     --auth-provider=oidc \
     --auth-provider-arg=client-id=kube \
     --auth-provider-arg=client-secret=kube-client-secret \
-    --auth-provider-arg=idp-issuer-url=$ISSUER \
+    --auth-provider-arg=idp-issuer-url=$KEYCLOAK_URL \
     --auth-provider-arg=id-token=$ID_TOKEN \
     --auth-provider-arg=refresh-token=$REFRESH_TOKEN
     
