@@ -680,13 +680,12 @@ For that:
 1. Open your `app-config.yaml`
 1. Locate the `catalog.locations` section
 1. Add to the list:
-
-```yaml
-- type: url
-  target: https://github.com/syntasso/blog-backstage-oidc/blob/main/examples/ske-entities.yaml
-  rules:
-    - allow: [Template]
-```
+  ```yaml
+  - type: url
+    target: https://github.com/syntasso/blog-backstage-oidc/blob/main/examples/ske-entities.yaml
+    rules:
+      - allow: [Template]
+  ```
 
 Now you restart your Backstage instance.
 
