@@ -16,7 +16,7 @@ In this blog, we'll go through the process of setting up your Kubernetes Cluster
 
 ## Deploying Keycloak
 
-The first thing you will need is a Keycloak instance. Setting one up can be quite a complicated process, and a bit out of scope for this blog. 
+The first thing you will need is a Keycloak instance. Setting one up can be quite a complicated process, and a bit out of scope for this blog.
 
 For simplicity, we will be using a hosted Keycloak instance from [cloud-iam.com](https://cloud-iam.com/). You can sign up for a free account and get a Keycloak instance up and running in minutes. Once deployed, take note of the `realm`. You will need it on the next steps.
 
@@ -30,9 +30,9 @@ If you deploy your Keycloak instance with cloud-iam.com, you should receive the 
 
 Now that you have your Keycloak instance up and running, you will need to set up the clients for Backstage and Kubernetes. You can go through the UI and manually create them, or you can use the [Keycloak Terraform Provider](https://registry.terraform.io/providers/keycloak/keycloak/latest). You will need:
 
-* A Client for Backstage and a Client for Kubernetes
-* Users that can login to both Backstage and Kubernetes
-* The Groups that will be used to control access to the Kubernetes Cluster
+- A Client for Backstage and a Client for Kubernetes
+- Users that can login to both Backstage and Kubernetes
+- The Groups that will be used to control access to the Kubernetes Cluster
 
 The following Terraform configuration sets up the Keycloak clients, user accounts, and group-based access control. Save it to a file called `keycloak.tf` and run `terraform init && terraform apply --auto-aprove`.
 
@@ -204,8 +204,15 @@ nodes:
         hostPort: 31333
 ```
 
+You can now use the Kratix quick-start script to deploy the Cluster with OIDC and install
+Kratix on it. If you don't have the Kratix repository cloned locally, run:
 
-You can now use the Kratix quick-start script to deploy the Cluster with OIDC and install Kratix on it. From the Kratix repository, run:
+```bash
+git clone https://github.com/syntasso/kratix.git
+cd kratix
+```
+
+Now, from the Kratix repository, run:
 
 ```bash
 KIND_PLATFORM_CONFIG=/path/to/config.yaml \
@@ -224,15 +231,14 @@ kind create cluster --config config.yaml --name platform
 
 :::
 
-
-### Creating the RBAC resources 
+### Creating the RBAC resources
 
 Next, you need to give the groups the necessary permissions to access the cluster. If you check the terraform configuration, you will see that the groups defined in the `user_groups` variable: `kube-dev` and `kube-admin`.
 
 Create the necessary RBAC resources:
 
-* `kube-admin` should have `cluster-admin` role
-* `kube-dev` should have be able to read every resource, but not create, update or delete
+- `kube-admin` should have `cluster-admin` role
+- `kube-dev` should have be able to read every resource, but not create, update or delete
 
 The ClusterRole and ClusterRoleBinding resources can be defined as follows:
 
@@ -242,9 +248,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kube-admin
 subjects:
-- kind: Group
-  name: kube-admin
-  apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: kube-admin
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -258,7 +264,7 @@ rules:
   - apiGroups:
       - "*"
     resources:
-      - '*'
+      - "*"
     verbs:
       - get
       - list
@@ -269,9 +275,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kube-dev
 subjects:
-- kind: Group
-  name: kube-dev
-  apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: kube-dev
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -288,9 +294,9 @@ kubectl apply -f rbac.yaml --context kind-platform
 
 To validate the user access, you will need to:
 
-* Login with both users.
-* Check that the `user-admin` (that's part of the `kube-admin` group) user can create a resource.
-* Check that the `user-dev` (that's part of the `kube-dev` group) user can read but not create resources.
+- Login with both users.
+- Check that the `user-admin` (that's part of the `kube-admin` group) user can create a resource.
+- Check that the `user-dev` (that's part of the `kube-dev` group) user can read but not create resources.
 
 The easiest way to login is to execute the script below. First, export the KEYCLOAK_URL env variable with the Keycloak issuer URL:
 
@@ -327,7 +333,7 @@ kubectl_config(){
     --auth-provider-arg=idp-issuer-url=$KEYCLOAK_URL \
     --auth-provider-arg=id-token=$ID_TOKEN \
     --auth-provider-arg=refresh-token=$REFRESH_TOKEN
-    
+
   kubectl config set-context $1 --cluster=kind-platform --user=$1
 }
 
@@ -352,7 +358,7 @@ kubectl --context user-dev get namespace test-ns
 kubectl --context user-dev delete namespace test-ns
 # Error from server (Forbidden): namespaces "test-ns" is forbidden: User "user-dev@syntasso.io" cannot delete resource "namespaces" in API group "" in the namespace "test-ns"
 
-kubectl --context user-admin delete namespace test-ns 
+kubectl --context user-admin delete namespace test-ns
 # namespace "test-ns" deleted
 ```
 
@@ -362,11 +368,11 @@ Great! You can now move on configuring Backstage.
 
 Assuming you already have a Backstage instance, you will need to do the following changes to configure it to use Keycloak for authentication:
 
-* Create an API reference to identify the Keycloak provider.
-* Create the API factory that will handle the authentication.
-* Create the Keycloak Auth provider Resolver.
-* Configure the provider to access the Keycloak instance.
-* Add Keycloak to the sign in page so users can login with it.
+- Create an API reference to identify the Keycloak provider.
+- Create the API factory that will handle the authentication.
+- Create the Keycloak Auth provider Resolver.
+- Configure the provider to access the Keycloak instance.
+- Add Keycloak to the sign in page so users can login with it.
 
 The steps above are explained in details as part of the [OIDC provider from scratch](https://backstage.io/docs/auth/oidc) guide in the Backstage docs. Below, you will find the code snippets you will need to include in your Backstage instance.
 
@@ -393,12 +399,12 @@ import {
   SessionApi,
   createApiRef,
   ApiRef,
-} from '@backstage/core-plugin-api';
+} from "@backstage/core-plugin-api";
 
 export const keycloakOIDCAuthApiRef: ApiRef<
   OpenIdConnectApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
 > = createApiRef({
-  id: 'auth.keycloak',
+  id: "auth.keycloak",
 });
 ```
 
@@ -407,14 +413,13 @@ export const keycloakOIDCAuthApiRef: ApiRef<
 Still in the `apis.ts` file, create a new API factory and add to the `apis` array:
 
 ```js
-import { OAuth2 } from '@backstage/core-app-api';
+import { OAuth2 } from "@backstage/core-app-api";
 import {
   discoveryApiRef,
   oauthRequestApiRef,
-} from '@backstage/core-plugin-api';
+} from "@backstage/core-plugin-api";
 
 export const apis: AnyApiFactory[] = [
-  
   /* this is the new API factory */
   createApiFactory({
     api: keycloakOIDCAuthApiRef,
@@ -429,18 +434,18 @@ export const apis: AnyApiFactory[] = [
         discoveryApi,
         oauthRequestApi,
         provider: {
-          id: 'keycloak',
-          title: 'Keycloak Provider',
+          id: "keycloak",
+          title: "Keycloak Provider",
           icon: () => null,
         },
-        environment: configApi.getOptionalString('auth.environment'),
-        defaultScopes: ['openid', 'profile', 'email'],
+        environment: configApi.getOptionalString("auth.environment"),
+        defaultScopes: ["openid", "profile", "email"],
         popupOptions: {
           size: { fullscreen: true },
         },
       }),
   }),
-  
+
   /* these are the existing API factories */
   createApiFactory({
     api: scmIntegrationsApiRef,
@@ -551,22 +556,27 @@ auth:
 Finally, add Keycloak to the SignInPage component in the `packages/app/src/App.tsx` file:
 
 ```js
-import { keycloakOIDCAuthApiRef } from './apis';
+import { keycloakOIDCAuthApiRef } from "./apis";
 
 const app = createApp({
   apis,
   /* ... */
   components: {
-    SignInPage: props => (<SignInPage {...props} auto providers={
-      [
-        'guest',
-        {
-          id: 'keycloak',
-          title: 'Keycloak',
-          message: 'Sign in using Keycloak',
-          apiRef: keycloakOIDCAuthApiRef,
-        },
-      ]} />),
+    SignInPage: (props) => (
+      <SignInPage
+        {...props}
+        auto
+        providers={[
+          "guest",
+          {
+            id: "keycloak",
+            title: "Keycloak",
+            message: "Sign in using Keycloak",
+            apiRef: keycloakOIDCAuthApiRef,
+          },
+        ]}
+      />
+    ),
   },
 });
 ```
@@ -615,8 +625,8 @@ This section assumes you have a SKE License token, have access to the SKE Backst
 
 The configuration of the plugins is very straightforward. All you need to do is:
 
-* Add the Platform cluster to your app config.
-* Tell the SKE Plugins the name of the platform cluster.
+- Add the Platform cluster to your app config.
+- Tell the SKE Plugins the name of the platform cluster.
 
 Both of those changes are done via the `app-config.yaml` file.
 
@@ -655,7 +665,6 @@ Excellent. You should now have a working Backstage instance with Keycloak authen
 
 ## Testing it all together
 
-
 ### Populating the Catalog
 
 If you have SKE and Backstage fully configured, you could try to install a Promise and create a new resource via the Template. If not, you can register the template available [here](https://github.com/syntasso/blog-backstage-oidc/blob/main/examples/ske-entities.yaml) directly in your instance.
@@ -671,12 +680,13 @@ For that:
 1. Open your `app-config.yaml`
 1. Locate the `catalog.locations` section
 1. Add to the list:
-  ```yaml
-    - type: url
-      target: https://github.com/syntasso/blog-backstage-oidc/blob/main/examples/ske-entities.yaml
-      rules:
-        - allow: [Template]
-  ```
+
+```yaml
+- type: url
+  target: https://github.com/syntasso/blog-backstage-oidc/blob/main/examples/ske-entities.yaml
+  rules:
+    - allow: [Template]
+```
 
 Now you restart your Backstage instance.
 
@@ -707,7 +717,7 @@ Follow the steps and configure a new ConfigMap. Don't forget to click the `+` ic
 
   <figcaption>The ConfigMap Template</figcaption>
 </figure>
-  
+
 Proceed with the form and create the ConfigMap:
 
 <figure className="diagram">
@@ -715,7 +725,7 @@ Proceed with the form and create the ConfigMap:
 
   <figcaption>The ConfigMap created</figcaption>
 </figure>
-  
+
 At this stage, you should have a new ConfigMap in your Cluster:
 
 ```bash
@@ -731,7 +741,7 @@ Great! Now logout and login with the `user-dev` user. To logout, click `Settings
 
   <figcaption>Signing out page</figcaption>
 </figure>
-  
+
 Logged in as the `user-dev` user, try to create a new ConfigMap following the same steps.
 
 You should get a 403 error, since the `user-dev` user does not have the required permissions:
@@ -749,5 +759,7 @@ You should get a 403 error, since the `user-dev` user does not have the required
 By integrating Keycloak with both Kubernetes and Backstage, and configuring the SKE Backstage plugins to leverage OIDC tokens, we've created a seamless and secure developer experience. This setup not only simplifies authentication and authorisation but also enables fine-grained access control across your platform, allowing you to manage who-can-do-what directly from your Kubernetes cluster.
 
 Communicating directly to the Platform cluster opens up a new world of possibilities of what Kratix can now surface to Backstage. Most up-to-date status, pipeline progress, logs, and much more. We are still prioritising what we think will bring the most value, but we are very curious to hear any feedback or suggestion you might have.
+
+While article focuses on the Backstage, Kratix can be integrated with any portal or interface. For example, check out [this video](https://www.youtube.com/watch?v=7nKx4CnEvoY) to see how Kratix can integrate with [Port](https://port.io). We're also keen to hear what you are using (or planning to use) as the interface to your platform in your organisation, and hearing how could Kratix help you out.
 
 As always, ping us directly via [Github](https://github.com/syntasso/kratix) or in our [Community Slack](https://kratixworkspace.slack.com/).
