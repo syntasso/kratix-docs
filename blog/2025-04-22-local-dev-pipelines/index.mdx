@@ -33,6 +33,12 @@ As you may know, a Promise includes a set of workflows that are executed as part
 
 At the start of a Pipeline Stage, Kratix will provide, in the `/kratix/input` directory, a YAML file (`object.yaml`) representing the user's resource request. This file is the same object that the user has applied to the Platform cluster.
 
+:::tip
+
+We will only cover building and testing a Resource Request Pipeline stage in this post. A Promise Pipeline Stage has slightly different inputs, but the process to build and test is the same. Check the [Workflow Reference docs](/main/reference/workflows) for more details.
+
+:::
+
 Kratix expects the Stage to produce outputs, and those outputs are stored in either `/kratix/output` or `/kratix/metadata` (depending on the purpose; not clear? Read the [Workflows reference docs](/main/reference/workflows#volumes)).
 
 One of the main benefits of Kratix is the ability to test these Stages. In this blog post, let's assume we are building the following Pipeline stage:
@@ -63,7 +69,18 @@ with open("/kratix/output/configmap.yaml", "w") as out:
     yaml.dump(configmap, out)
 ```
 
-In the next sections, let's explore how to test this stage.
+Pipeline Stages can be tested at different levels. In the next sections, we will explore ways you could implement and test at different levels, from unit to end-to-end tests. The diagram below illustrate some of the testing strategies you could use.
+
+```mdx-code-block
+import Figure01 from "./figure01.jpg"
+```
+
+<figure className="diagram">
+  <img className="large" src={Figure01} alt="A diagram showing the different stages a pipeline stage can be tested" />
+
+  <figcaption>Testing strategies for a pipeline stage</figcaption>
+</figure>
+
 
 ### Running the pipeline stage locally
 
