@@ -23,6 +23,16 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.15.0/); [ske-frontend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.14.0/) (2025-04-16)
+
+#### Features
+
+* If `ske.mode` is set to `gitops`, the backend plugin will use the Git repository to execute CRUD operations on the Kubernetes Cluster
+    * This is to keep compatibility for existing deployments; upcoming features will only be available when the plugin is configured for direct API communication
+    * `gitops` mode will be removed in a future release
+* Compatibility with Backstage v1.37.1
+* UX improvements
+
 ### [ske-backend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.14.0/); [ske-frontend v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.13.0/) (2025-03-31)
 
 #### 🚨 Breaking changes 🚨
