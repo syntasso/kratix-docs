@@ -585,7 +585,13 @@ const app = createApp({
 
 At this stage, you should be able to sign in with Keycloak and access your Backstage instance.
 
-In a terminal, run `yarn dev` to start Backstage and open it in your browser.
+In a terminal, start your Backstage app and open it in your browser.
+
+:::tip
+
+Depending on your version of Backstage, you may need to run `yarn dev` or `yarn start` to start the app.
+
+:::
 
 You should see the Sign In page with Keycloak as an option:
 
@@ -622,6 +628,12 @@ Excellent! Final step is to configure the SKE plugins to communicate with your P
 ## Configuring the SKE plugins
 
 This section assumes you have a SKE License token, have access to the SKE Backstage plugins, and installed them in your Backstage instance (or that you have cloned the [example Backstage app](https://github.com/syntasso/blog-backstage-oidc)). If that's not your case,you can follow a step-by-step guide on how to configure the SKE Backstage plugins [here](/ske/integrations/backstage/plugins).
+
+:::tip
+
+Make sure you have the latest version of the SKE plugins installed. This post requires, at a minimum, ske-backend v0.14.0 and ske-frontend v0.13.0.
+
+:::
 
 The configuration of the plugins is very straightforward. All you need to do is:
 
