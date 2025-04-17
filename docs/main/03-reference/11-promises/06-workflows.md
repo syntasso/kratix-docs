@@ -109,13 +109,13 @@ The `promise.configure` workflow is regularly executed. Kubernetes reconciles on
 different actions, including, but not limited to:
 
 - Promise creation
-- Regular interval (10 hours, not currently configurable)
 - Kratix Controller restarts
 - Changes to the Promise definition
 
-In addition to the above, the Kratix Promise Controller will reconcile on a 10 hour cadence to
-attempt to mitigate against any drift that may have occurred. During this reconciliation,
-the controller will ensure that all of the the Workflows for a given promise are re-run.
+In addition to the above, the Kratix Promise Controller will reconcile on a regular cadence 
+(10 hours by default, [configurable](/main/reference/kratix-config/config)) to attempt to 
+mitigate against any drift that may have occurred. During this reconciliation,
+the controller will ensure that all the Workflows for a given promise are re-run.
 
 :::note
 
@@ -131,7 +131,7 @@ follow along progress or share your requirements.
 
 As this reconciliation is managed by the Promise Controller, restarts of the Kratix Controller
 Manager may disrupt the regularity of this cadence meaning that the reconciliation interval
-may be greater than the expected 10 hours.
+may be greater than the configured.
 
 ### Manual Reconciliation
 

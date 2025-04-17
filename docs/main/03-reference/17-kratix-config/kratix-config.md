@@ -27,6 +27,8 @@ data:
     # Selective cache for Secrets to limit memory usage. Please ensure Secrets used by Kratix are
     # created with label: app.kubernetes.io/part-of=kratix. Default is false.
     selectiveCache: false
+    # interval in which the Kratix runs the Promises/Resources workflows 
+    reconciliationInterval: "10h"
     # Timeout configuration of controller's leader election.
     controllerLeaderElection:
       leaseDuration: 15s

@@ -115,10 +115,14 @@ The `resource.configure` workflow is regularly executed. Kubernetes reconciles o
 different actions, including, but not limited to:
 
 - Resource creation
-- Regular interval (10 hours, not currently configurable)
 - Kratix Controller restarts
 - Changes to the Resource definition
 - Changes to the Promise definition
+
+In addition to the above, Kratix will reconcile on a regular cadence (10 hours by 
+default, [configurable](/main/reference/kratix-config/config)) to attempt to
+mitigate against any drift that may have occurred. During this reconciliation,
+Kratix will ensure that all the Workflows for a given resource are re-run.
 
 ### Manual Reconciliation
 
