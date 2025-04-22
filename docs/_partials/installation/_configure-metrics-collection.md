@@ -17,6 +17,20 @@ spec:
   endpoints:
   - path: /metrics
     port: https
+    tlsConfig:
+      ca:
+        secret:
+          key: ca.crt
+          name: metrics-server-cert
+      cert:
+        secret:
+          key: tls.crt
+          name: metrics-server-cert
+      insecureSkipVerify: false
+      keySecret:
+        key: tls.key
+        name: metrics-server-cert
+      serverName: kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc
   namespaceSelector:
     matchNames:
     - kratix-platform-system
