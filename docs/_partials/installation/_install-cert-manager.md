@@ -10,8 +10,12 @@ have it installed, skip to the next section.
    <summary> Don't want to use cert-manager? Manually provide the required
    certificates </summary>
 
-Cert-manager is used to generate a CA, and a key/cert pair which is
-configured for the following DNS names:
+Cert-manager is used to generate CA certificates and key/cert pairs for the Kratix webhook
+and Metrics Services.
+
+### Webhook Service
+
+You will need to generate a CA Certificate and key/cert pair for the following DNS names:
 - `kratix-platform-webhook-service.kratix-platform-system.svc.cluster.local`
 - `kratix-platform-webhook-service.kratix-platform-system.svc`
 
@@ -94,6 +98,45 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: kratix-platform-selfsigned-issuer
+  namespace: kratix-platform-system
+spec:
+...
+```
+
+### Metrics Service
+
+You will need to generate a CA Certificate and key/cert pair for the following DNS names:
+- `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc`
+- `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc.cluster.local`
+
+To manually provide the required certificates, you need to create the
+`metrics-server-cert` secret in the `kratix-platform-system` namespace with the
+following keys:
+
+```yaml
+apiVersion: v1
+data:
+  ca.crt: # Base64 CA certificate
+  tls.crt: # Base64 encoded Server certificate
+  tls.key: # Base64 encoded Server private key
+kind: Secret
+metadata:
+  name: metrics-server-cert
+  namespace: kratix-platform-system
+type: kubernetes.io/tls
+```
+
+This secret is referenced in the `kratix-platform-controller-manager` Deployment.
+
+Lastly, you need to remove the following cert-manager Certificate from Kratix release manifest:
+
+```yaml
+---
+...
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kratix-platform-metrics-server-cert
   namespace: kratix-platform-system
 spec:
 ...
