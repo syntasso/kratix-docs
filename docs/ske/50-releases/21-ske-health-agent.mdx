@@ -16,6 +16,19 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-heal
 
 ## Release Notes
 
+### [v0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.3.0/) (2025-04-24)
+
+Released in Helm Chart version [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.8.0/)
+Packaged with SKE Destination Helm Chart version [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-destination-helm-chart/0.8.0/)
+
+#### Bug Fix
+
+* Fixes a bug where the agent would error creating cron jobs as the generated name could hit the 52 character limit. The cron job names are now truncated.
+
+#### Maintenance
+
+* Bump dependencies
+
 ### [v0.2.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.2.1/) (2025-04-16)
 
 Released in Helm Chart version [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.7.0/)
