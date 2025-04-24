@@ -61,7 +61,7 @@ const config = {
     ],
   ],
 
-  plugins: ["docusaurus-plugin-sass", require.resolve("docusaurus-plugin-image-zoom"), "docusaurus-plugin-hotjar"],
+  plugins: ["docusaurus-plugin-sass", require.resolve("docusaurus-plugin-image-zoom")],
 
   scripts: [
       {
@@ -73,9 +73,6 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      hotjar: {
-        applicationId: 6381833,
-      },
       metadata: [
         {
           name: "keywords",
