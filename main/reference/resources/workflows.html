@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.4edd6a97.css">
-<script src="/assets/js/runtime~main.7172e443.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.5fd83b1f.js" defer="defer"></script>
 <script src="/assets/js/main.44d3eaa9.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -71,11 +71,14 @@ on other environmental impacts (e.g. Pod restarts).</p>
 different actions, including, but not limited to:</p>
 <ul>
 <li>Resource creation</li>
-<li>Regular interval (10 hours, not currently configurable)</li>
 <li>Kratix Controller restarts</li>
 <li>Changes to the Resource definition</li>
 <li>Changes to the Promise definition</li>
 </ul>
+<p>In addition to the above, Kratix will reconcile on a regular cadence (10 hours by
+default, <a href="/main/reference/kratix-config/config">configurable</a>) to attempt to
+mitigate against any drift that may have occurred. During this reconciliation,
+Kratix will ensure that all the Workflows for a given resource are re-run.</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="manual-reconciliation">Manual Reconciliation<a href="#manual-reconciliation" class="hash-link" aria-label="Direct link to Manual Reconciliation" title="Direct link to Manual Reconciliation">​</a></h3>
 <p>Sometimes you may wish to manually trigger a Configure workflow for a specific Resource
 Request.</p>
