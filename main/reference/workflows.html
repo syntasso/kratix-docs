@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.4edd6a97.css">
-<script src="/assets/js/runtime~main.f0451afb.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.7a99ab33.js" defer="defer"></script>
 <script src="/assets/js/main.44d3eaa9.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -162,7 +162,7 @@ the Pipeline, you can safely write to the <code>/kratix/metadata</code> director
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="environment-variables">Environment Variables<a href="#environment-variables" class="hash-link" aria-label="Direct link to Environment Variables" title="Direct link to Environment Variables">​</a></h2>
 <p>Kratix will set the following environment variables for all containers in the
 workflow:</p>
-<table><thead><tr><th>Variable</th><th>Description</th></tr></thead><tbody><tr><td><code>KRATIX_WORKFLOW_ACTION</code></td><td>The action that triggered the workflow. Either <code>configure</code> or <code>delete</code>.</td></tr><tr><td><code>KRATIX_WORKFLOW_TYPE</code></td><td>The type of workflow. Either <code>resource</code> or <code>promise</code>.</td></tr><tr><td><code>KRATIX_PROMISE_NAME</code></td><td>The name of the Promise.</td></tr><tr><td><code>KRATIX_PIPELINE_NAME</code></td><td>The name of the Pipeline.</td></tr></tbody></table>
+<table><thead><tr><th>Variable</th><th>Description</th></tr></thead><tbody><tr><td><code>KRATIX_WORKFLOW_ACTION</code></td><td>The action that triggered the workflow. Either <code>configure</code> or <code>delete</code>.</td></tr><tr><td><code>KRATIX_WORKFLOW_TYPE</code></td><td>The type of workflow. Either <code>resource</code> or <code>promise</code>.</td></tr><tr><td><code>KRATIX_PROMISE_NAME</code></td><td>The name of the Promise.</td></tr><tr><td><code>KRATIX_PIPELINE_NAME</code></td><td>The name of the Pipeline.</td></tr><tr><td><code>KRATIX_OBJECT_KIND</code></td><td>The kind of the object in <code>/kratix/input/object.yaml</code>.</td></tr><tr><td><code>KRATIX_OBJECT_GROUP</code></td><td>The group of the object in <code>/kratix/input/object.yaml</code>.</td></tr><tr><td><code>KRATIX_OBJECT_VERSION</code></td><td>The version of the object in <code>/kratix/input/object.yaml</code>.</td></tr><tr><td><code>KRATIX_OBJECT_NAME</code></td><td>The name of the object in <code>/kratix/input/object.yaml</code>.</td></tr><tr><td><code>KRATIX_OBJECT_NAMESPACE</code></td><td>The namespace of the object in <code>/kratix/input/object.yaml</code>.</td></tr><tr><td><code>KRATIX_CRD_PLURAL</code></td><td>The plural for the API defined in the Promise.</td></tr><tr><td><code>KRATIX_CLUSTER_SCOPED</code></td><td>A boolean for if the Promise API is cluster scoped.</td></tr></tbody></table>
 <p>By checking the <code>KRATIX_WORKFLOW_ACTION</code> and <code>KRATIX_WORKFLOW_TYPE</code> environment variables,
 a container is able to discover the <strong>context</strong> in which it&#x27;s being invoked (e.g. &quot;I&#x27;m
 running as part of a Promise Configure workflow&quot;).</p>
