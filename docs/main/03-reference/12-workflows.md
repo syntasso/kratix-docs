@@ -387,13 +387,6 @@ workflow:
 | `KRATIX_WORKFLOW_TYPE`    | The type of workflow. Either `resource` or `promise`. |
 | `KRATIX_PROMISE_NAME`     | The name of the Promise. |
 | `KRATIX_PIPELINE_NAME`    | The name of the Pipeline. |
-| `KRATIX_OBJECT_KIND`      | The kind of the object in `/kratix/input/object.yaml`. |
-| `KRATIX_OBJECT_GROUP`     | The group of the object in `/kratix/input/object.yaml`. |
-| `KRATIX_OBJECT_VERSION`   | The version of the object in `/kratix/input/object.yaml`. |
-| `KRATIX_OBJECT_NAME`      | The name of the object in `/kratix/input/object.yaml`. |
-| `KRATIX_OBJECT_NAMESPACE` | The namespace of the object in `/kratix/input/object.yaml`. |
-| `KRATIX_CRD_PLURAL`       | The plural for the API defined in the Promise. |
-| `KRATIX_CLUSTER_SCOPED`   | A boolean for if the Promise API is cluster scoped. |
 
 By checking the `KRATIX_WORKFLOW_ACTION` and `KRATIX_WORKFLOW_TYPE` environment variables,
 a container is able to discover the **context** in which it's being invoked (e.g. "I'm
