@@ -1,0 +1,358 @@
+---
+title: Port Controller
+description: Documentation for the Port integration
+sidebar_label: Port
+---
+
+Kratix supports configuring and maintaining both day 1 and day 2 integrations with
+[Port](https://www.port.io/).
+
+This page provides information on how to:
+
+1. [Install the SKE Port Controller](#install)
+1. [Setup GitHub Actions backend for Port Actions](#gha)
+1. [Configure Kratix GitOps for requests from Port Actions](#gitops)
+1. [Expose a Promise in Port](#promise-in-port)
+
+This documentation assumes both a Port account as well as a GitHub Repository with
+enough permissions to manage GitHub Actions. If required, please refer to the
+[Port](https://auth.getport.io/u/signup) and [GitHub](https://github.com/) sign-up
+pages to create accounts.
+
+
+## Install the SKE Port Controller {#install}
+
+Port provides a generic controller for pushing content from Kubernetes to the Port UI.
+By installing this via the SKE Controller you will get configuration and management of
+Kratix Promises and Resources automatically managed for you, including managing the
+backend of your choosing for the self-service actions in Port.
+
+
+### Prerequisites 
+
+To install the SKE Port Controller, you will need:
+
+* A SKE token. To request one, visit [Syntasso](https://www.syntasso.io/pricing) and click "Try SKE
+Today".
+* A Kubernetes cluster with Kratix running. The [Kratix Quick Start](../../main/quick-start)
+is an easy way to get started.
+
+
+### Configure the integration
+
+To configure the controller, you will need to create a configmap and a secret in the
+`ske-port-controller-system` namespace.
+
+Start by creating this namespace if you have not previously installed the controller.
+
+Then create local environment variables for the three required values:
+* `PORT_CLIENT_ID`
+* `PORT_CLIENT_SECRET`
+* `PORT_GITHUB_ORG`
+
+And review the remaining default configurations. If you require overriding any, set those
+local environment variables as well.
+
+* `PORT_GITHUB_REPO` (default: port-syncer)
+* `PORT_GITHUB_WORKFLOW_FILE` (default: port-action.yml)
+* `PORT_CM_NAME` (default: ske-port-k8s-exporter)
+* `PORT_CM_NAMESPACE` (default: ske-port-controller-system)
+* `PORT_SKIP_DELETE_BLUEPRINT` (default: false)
+
+Once environment variables have been set, you can create the configmap using the
+following command:
+
+```bash
+kubectl create secret generic -n ske-port-controller-system ske-port-exporter-config \
+    --from-literal="PORT_CLIENT_ID=${PORT_CLIENT_ID}" \
+    --from-literal="PORT_CLIENT_SECRET=${PORT_CLIENT_SECRET}" \
+    --from-literal="PORT_GITHUB_ORG=${PORT_GITHUB_ORG}" \
+    --from-literal="PORT_GITHUB_REPO=${PORT_GITHUB_REPO:-}" \
+    --from-literal="PORT_GITHUB_WORKFLOW_FILE=${PORT_GITHUB_WORKFLOW_FILE:-}" \
+    --from-literal="PORT_CM_NAME=${PORT_CM_NAME:-}" \
+    --from-literal="PORT_CM_NAMESPACE=${PORT_CM_NAMESPACE:-}" \
+    --from-literal="PORT_SKIP_DELETE_BLUEPRINT=${PORT_SKIP_DELETE_BLUEPRINT:-}"
+```
+
+### Access the enterprise controller image
+
+Next you can either pre-load the required image into your cluster, or define your
+authentication credentials via a docker-registry secret and refer to this secret in
+Pipeline definition in your Workflow.
+
+The release is set to use `imagePullSecret`, to access the enterprise image. To create
+the secret, replacing YOUR_TOKEN with the token you have been provided with:
+
+```
+kubectl create secret docker-registry syntasso-registry \
+  --namespace ske-port-controller-system \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=YOUR_TOKEN
+```
+
+:::tip
+If you prefer, you can load the image onto the Kubernetes nodes for local access.
+
+To pull the image, select the image at the correct version from the
+[releases page](../releases/ske-port-controller), then pull and load that image.
+
+```bash
+docker pull ghcr.io/syntasso/ske-port-controller:<VERSION>
+```
+:::
+
+
+### Install the controller
+
+Finally, to install the controller, run the command below, replacing VERSION with the
+target version from the [releases page](../releases/ske-port-controller):
+
+```
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske-port-controller/<VERSION>/install.yaml
+```
+
+## Setup GitHub Actions backend for Port Actions {#gha}
+
+Port is a user interface and depends on other tools to manage the platform orchestration
+side of things. Port provides a number of [backend integrations](https://docs.port.io/actions-and-automations/setup-backend/)
+to trigger this orchestration including GitHub Actions which is what this guide depends
+on. Therefore, the `PORT_GITHUB_REPO` must be set up to work with the Port actions.
+
+First, your repo needs its Actions to be configured to allow commits. Follow
+GitHub instructions on how to manage this setting
+[here](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests).
+
+Next, your Actions need both the `PORT_CLIENT_ID` and `PORT_CLIENT_SECRET` secrets set.
+Follow GitHub instructions on how to set these up
+[here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions).
+
+Finally, the repository must have a
+[GitHub Action workflow file](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions#workflows)
+that can generate resource requests that match the Promise CRD.
+
+Below is an example action stored in a workflow file called `port-action.yml` (the file
+name is configurable using the `PORT_GITHUB_WORKFLOW` environment variable). This example
+will support create, update, and delete flows as well as sharing log data back to Port:
+
+<details>
+  <summary>Example `port-action.yml` contents</summary>
+
+```yaml
+name: Sync control plane gitops
+permissions:
+  contents: write
+  pull-requests: write
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        required: true
+        description: "Delete, Update or create"
+        type: string
+      triggeringUser:
+        required: true
+        description: "The email of the triggering user"
+        type: string
+      runId:
+        required: true
+        description: "Port's Run ID"
+        type: string
+      manifest:
+        required: true
+        description: "The K8s manifest generated by Port"
+        type: string
+      folder:
+        required: true
+        description: Folder where the resource will be stored
+        default: "./kratix/platform/resources"
+        type: string
+
+jobs:
+  commit-to-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' 
+      - name: Update manifests folder
+        run: |
+            echo '${{ inputs.manifest }}' | jq .  > temp.json
+            yaml_data=$(yq -p json -o yaml temp.json)
+            name=$(echo '${{ inputs.manifest }}' | jq -r .metadata.name)
+            mkdir -p ${{ inputs.folder }}
+            if [ "${{ inputs.operation }}" = "DELETE" ]; then
+              rm -f "${{ inputs.folder }}/$name.yaml"
+            else
+              echo "$yaml_data" > "${{ inputs.folder }}/$name.yaml"
+            fi
+            rm -f temp.json
+      - uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{inputs.runId}} 
+          icon: GithubActions
+          logMessage: "Creating a commit with the changes of the new resource in folder ${{ inputs.folder }} 🚀"
+      - name: create commit to main 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: ${{ inputs.operation }} resource by ${{ inputs.triggeringUser }}"
+            git push origin main
+          fi
+      - uses: port-labs/port-github-action@v1
+        if: success()
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{inputs.runId}} 
+          icon: GithubActions
+          logMessage: |
+            Successfully committed request to main ✅
+      - uses: port-labs/port-github-action@v1
+        if: failure()
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          operation: PATCH_RUN
+          runId: ${{inputs.runId}} 
+          icon: GithubActions
+          logMessage: | 
+            Failed to commit request to main ❌
+            Resource may have been created outside of Port 🕵
+            Check the job run logs in Github to learn more 📜:
+              ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+```
+
+</details>
+
+
+## Configure GitOps for requests from Port Actions {#gitops}
+
+So far you have configured Port to use GitHub Actions as a backend for the Port
+self-serve actions and automations. You have then configured the GitHub Action to
+commit user requests to the defined repository.
+
+Now you will need to configure a GitOps agent to pull the repository documents into the
+cluster where Kratix runs. This will enable Kratix to respond to resources that are
+created via Port.
+
+Please refer to the guide documentation to use
+[ArgoCD](https://docs.kratix.io/main/guides/installing-argocd),
+[Flux](https://docs.kratix.io/main/guides/installing-fluxcd), or any
+[other agent](https://docs.kratix.io/main/guides/custom-gitops-agent) you prefer.
+
+Part of the configuration is making sure that the GitOps agent is reading from the
+repository that Port is writing to. An example set up when using FluxCD and the defaults
+from above can be found below.
+
+<details>
+  <summary>Example Flux Resources for Port-Syncer repository</summary>
+
+```
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kratix-port-resources
+  namespace: flux-system
+spec:
+  interval: 5s
+  url: https://github.com/${PORT_GITHUB_ORG}/${PORT_GITHUB_REPO}
+  ref:
+    branch: main
+  secretRef:
+    name: github-creds
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kratix-port-resources
+  namespace: flux-system
+spec:
+  interval: 3s
+  sourceRef:
+    kind: GitRepository
+    name: kratix-port-resources
+  path: "kratix/platform/resources/"
+  prune: true
+```
+
+</details>
+
+## Expose a Promise in Port {#promise-in-port}
+
+While many platform APIs benefit from being available, you may not want _all_ platform
+APIs in the Port UI. For this reason, Kratix uses an opt-in methodology.
+
+To expose a Promise via the Port UI, make sure to add a label
+`kratix.io/get-port: "true"` in the Kratix Promise API. For example, to expose the
+[marketplace namespace promise](https://github.com/syntasso/kratix-marketplace/tree/main/namespace),
+it would look like this:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: namespace
+  namespace: default
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: namespaces.marketplace.kratix.io
+      # highlight-start
+      labels:
+        kratix.io/get-port: "true"
+      # highlight-end
+    spec:
+      group: marketplace.kratix.io
+      names:
+        kind: namespace
+        plural: namespaces
+        singular: namespace
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          schema:
+            openAPIV3Schema:
+              properties:
+                spec:
+                  properties:
+                    clusterName:
+                      description: |
+                        The name of the cluster where the namespace should be created
+                      type: string
+                    namespaceName:
+                      description: |
+                        The name of the namespace to be created
+                      type: string
+                  required:
+                    - namespaceName
+                  type: object
+              type: object
+          served: true
+          storage: true
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: instance-configure
+            namespace: default
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-marketplace/namespace-configure-pipeline:v0.1.0
+                name: namespace-configure-pipeline
+```
