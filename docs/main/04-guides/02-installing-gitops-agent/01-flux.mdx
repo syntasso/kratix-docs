@@ -17,7 +17,7 @@ If you have already installed Flux you can skip this section.
 
 For the most up to date information on installing Flux, see the [Flux
 documentation](https://fluxcd.io/docs/installation/). The simplest method of
-installaton is to use the latest FluxCD release manifest from the Flux repo on
+installation is to use the latest FluxCD release manifest from the Flux repo on
 GitHub:
 
 ```bash
@@ -51,7 +51,7 @@ resource depending on the type of state store you are using.
     Create a `flux-statestore.yaml` for giving Flux access to the Minio
     bucket. Below is an example of a `Bucket` configured to talk to a MinIO
     instance running locally. For more information on the different
-    configuration and authentication opitions for the `Bucket` resource, see the
+    configuration and authentication options for the `Bucket` resource, see the
     [FluxCD docs](https://fluxcd.io/flux/components/source/buckets/).
 
     ```yaml
@@ -59,7 +59,7 @@ resource depending on the type of state store you are using.
     apiVersion: source.toolkit.fluxcd.io/v1beta1
     kind: Bucket
     metadata:
-      name: <state store name>
+      name: default-name
       namespace: flux-system
     spec:
       interval: 10s
@@ -74,7 +74,7 @@ resource depending on the type of state store you are using.
     kind: Secret
     metadata:
       name: minio-credentials
-      namespace: default
+      namespace: flux-system
     type: Opaque
     stringData:
       accesskey: <access key>
@@ -95,8 +95,8 @@ resource depending on the type of state store you are using.
     apiVersion: source.toolkit.fluxcd.io/v1
     kind: GitRepository
     metadata:
-      name: podinfo
-      namespace: default
+      name: default-name
+      namespace: flux-system
     spec:
       interval: 10s
       url: https://github.com/syntasso/worker-destination
@@ -108,15 +108,17 @@ resource depending on the type of state store you are using.
     apiVersion: v1
     kind: Secret
     metadata:
-    name: ssh-credentials
-    type: Opaque
-    stringData:
-    identity: |
-      -----BEGIN OPENSSH PRIVATE KEY-----
-      ...
-      -----END OPENSSH PRIVATE KEY-----
-    known_hosts: |
-      github.com ecdsa-sha2-nistp256 AAAA...
+      name: ssh-credentials
+      namespace: flux-system
+    spec:
+      type: Opaque
+      stringData:
+      identity: |
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        ...
+        -----END OPENSSH PRIVATE KEY-----
+      known_hosts: |
+        github.com ecdsa-sha2-nistp256 AAAA...
     ```
   </TabItem>
 
@@ -153,7 +155,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
   name: kratix-workload-resources
-  namespace: <Same namespace as the Bucket/GitRepository>
+  namespace: flux-system
 spec:
   interval: 3s
   prune: true
@@ -161,7 +163,7 @@ spec:
     - name: kratix-workload-dependencies
   sourceRef:
     kind: <Bucket or GitRepository>
-    name: <Name of Bucket/GitRepository>
+    name: default-name
   path: ./<path in state store to destination>/resources
   validation: client
 ---
@@ -169,13 +171,13 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
   name: kratix-workload-dependencies
-  namespace: <Same namespace as the Bucket/GitRepository>
+  namespace: flux-system
 spec:
   interval: 8s
   prune: true
   sourceRef:
     kind: <Bucket or GitRepository>
-    name: <Name of Bucket/GitRepository>
+    name: default-name
   path: ./<path in state store to destination>/dependencies
   validation: client
 ```
