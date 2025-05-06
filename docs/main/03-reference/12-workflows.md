@@ -68,7 +68,6 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: Pipeline
 metadata:
   name: # Name (must be unique within the Promise)
-  namespace: # Namespace (optional)
   labels: # Labels (optional)
   annotations: # Annotations (optional)
 spec:
@@ -291,7 +290,6 @@ spec:
           kind: Pipeline
           metadata:
             name: promise
-            namespace: default
           spec:
             containers:
               - image: <image>
@@ -427,7 +425,6 @@ containers (not Kratix containers) by either:
   kind: Pipeline
   metadata:
     name: # Name (must be unique within the Promise)
-    namespace: # Namespace (optional)
   spec:
     containers:
       - name: # Container name (must be unique within the Pipeline)

@@ -132,7 +132,6 @@ workflows:
         kind: Pipeline
         metadata:
           name: promise-configure
-          namespace: default
         spec:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
@@ -147,7 +146,6 @@ workflows:
         kind: Pipeline
         metadata:
           name: resource-configure
-          namespace: default
         spec:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
@@ -211,7 +209,6 @@ secret.
         kind: Pipeline
         metadata:
           name: promise-configure
-          namespace: default
         spec:
           #highlight-start
           imagePullSecrets:
@@ -288,7 +285,6 @@ pipeline stage with the snippet below:
         kind: Pipeline
         metadata:
           name: promise-configure
-          namespace: default
         spec:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
@@ -332,7 +328,6 @@ for all resource requests:
         kind: Pipeline
         metadata:
           name: promise-configure
-          namespace: default
         spec:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
@@ -410,7 +405,6 @@ Backstage Component Promise request:
         kind: Pipeline
         metadata:
           name: resource-configure
-          namespace: default
         spec:
           #highlight-start
           # rbac required by new create-backstage-component-request image
@@ -435,7 +429,6 @@ Backstage Component Promise request:
         kind: Pipeline
         metadata:
           name: promise-configure
-          namespace: default
         spec:
           #highlight-start
           rbac:

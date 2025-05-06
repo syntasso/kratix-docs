@@ -150,7 +150,6 @@ spec:
           kind: Pipeline
           metadata:
             name: promise
-            namespace: default
           spec:
             containers:
               - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
@@ -170,7 +169,6 @@ spec:
           kind: Pipeline
           metadata:
             name: resource
-            namespace: default
           spec:
             containers:
               - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
@@ -267,7 +265,6 @@ spec:
           kind: Pipeline
           metadata:
             name: output-writer
-            namespace: default
           spec:
             rbac:
               permissions:
@@ -360,7 +357,6 @@ spec:
           kind: Pipeline
           metadata:
             name: promise
-            namespace: default
           spec:
             containers:
               - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
@@ -380,7 +376,6 @@ spec:
           kind: Pipeline
           metadata:
             name: resource
-            namespace: default
           spec:
             containers:
               - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
@@ -400,7 +395,6 @@ spec:
           kind: Pipeline
           metadata:
             name: output-writer
-            namespace: default
           spec:
             rbac:
               permissions:
@@ -529,7 +523,6 @@ spec:
           kind: Pipeline
           metadata:
             name: output-writer
-            namespace: default
           spec:
             containers:
               - image: registry.syntasso.io/syntasso/ske-tfstate-finder:v0.5.2
