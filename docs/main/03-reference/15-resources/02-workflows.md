@@ -80,14 +80,12 @@ spec:
           kind: Pipeline
           metadata:
             name: pipeline-a # Executes first
-            namespace: default
           spec:
             ...
         - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
             name: pipeline-b # Follows pipeline-a
-            namespace: default
           spec:
             ...
 ```

@@ -96,7 +96,6 @@ spec:
         kind: Pipeline
         metadata:
           name: create-user
-          namespace: default
         spec:
           containers:
           - image: create-db:v0.1.0
@@ -104,7 +103,6 @@ spec:
         kind: Pipeline
         metadata:
           name: populate-vault
-          namespace: default
         spec:
           containers:
           - image: populate-vault:v0.1.0
