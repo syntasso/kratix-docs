@@ -212,17 +212,10 @@ For oidc authentication, you must ensure that, in the Backstage Token, there's a
 
 ### Add the backend plugin
 
-Open the `packages/backend/src/index.ts` file and add the following import:
-
-```typescript
-import { scaffolderModuleSkeExtensions } from '@syntasso/plugin-ske-backend';
-```
-
-Then register the backend plugin by adding the following:
+Open the `packages/backend/src/index.ts` file and register the backend plugin by adding the following:
 
 ```typescript
 backend.add(import('@syntasso/plugin-ske-backend'));
-backend.add(scaffolderModuleSkeExtensions);
 ```
 
 Once both packages are added and configured, from the root of your Backstage app, run:

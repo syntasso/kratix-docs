@@ -23,6 +23,32 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.16.0/); [ske-frontend v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.15.0/) (2025-05-07)
+
+#### 🚨 Breaking changes 🚨
+
+* backend: enable dynamically loading of the plugin. This means you no longer
+  need to manually add the scaffolding in your Backend app.
+
+  To migrate, locate the lines in your `packages/backend/src/index.ts` file that looks like this:
+
+  ```ts
+  import { scaffolderModuleSkeExtensions } from '@syntasso/plugin-ske-backend';
+
+  backend.add(import('@syntasso/plugin-ske-backend'));
+  backend.add(scaffolderModuleSkeExtensions);
+  ```
+
+  Update it to just:
+
+  ```ts
+  backend.add(import('@syntasso/plugin-ske-backend'));
+  ```
+
+#### Features
+
+* frontend: add compatibility with the new Frontend plugin architecture under the `alpha` sub-path.
+
 ### [ske-backend v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.15.0/); [ske-frontend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.14.0/) (2025-04-16)
 
 #### Features
