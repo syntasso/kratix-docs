@@ -1,4 +1,5 @@
 import React from "react";
+import Admonition from '@theme/Admonition';
 import Layout from "@theme/Layout";
 import styles from "./marketplace.module.scss";
 import Promises from "../../data/promise-data.json";
@@ -133,10 +134,14 @@ export function Marketplace(): JSX.Element {
               Learn more about how Kratix can power your platform{" "}
               <Link href="/">here</Link>.
             </p>
-            <p className="text--center">
-              Looking for a set of supported, enterprise-grade Promises? Check out{" "}
-              <a href="https://syntasso.io">Syntasso Kratix Enterprise (SKE)</a>.
-          </p>
+            <div  style={{ maxWidth: "720px", margin: "1rem auto", padding: "0 1rem" }}>
+              <Admonition type="info">
+                <p >
+                  Looking for supported, enterprise-grade Promises? Check out{" "}
+                  <a href="https://syntasso.io">Syntasso Kratix Enterprise (SKE)</a>.
+                </p>
+              </Admonition>
+            </div>
           </hgroup>
         </header>
 
