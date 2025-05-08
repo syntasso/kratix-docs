@@ -6,11 +6,6 @@ sidebar_label: Introduction
 slug: /
 ---
 
-:::info
-Looking for an **Enterprise solution**? Check out [Syntasso Kratix
-Enterprise (SKE)](https://syntasso.io/pricing)
-:::
-
 # Introduction to Kratix
 
 Kratix is an open-source platform framework built by
@@ -22,6 +17,12 @@ automation needed to build your platform your way.
 
 Some teams describe Kratix as a platform orchestrator, designed specifically to
 help platform teams deliver more value, faster, safer, and with less overhead.
+
+:::info
+Looking for an **Enterprise solution**? Check out [Syntasso Kratix
+Enterprise (SKE)](https://syntasso.io/pricing)
+:::
+
 
 ## Why Build Your Platform with Kratix?
 
@@ -124,7 +125,7 @@ on delivering value rather than managing complexity.
 See Kratix in action today:
 
 - 👉 [**Try the Kratix Quick Start Guide**](/main/quick-start) and experience
-Kratix firsthand.
+Kratix first-hand.
 - 👉 [**Contact Syntasso, the creators of Kratix**](https://www.syntasso.io/) to
 discuss how Kratix can benefit your organisation.
 
