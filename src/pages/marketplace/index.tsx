@@ -123,11 +123,20 @@ export function Marketplace(): JSX.Element {
           <hgroup>
             <h1>Kratix Marketplace</h1>
             <p className="text--center">
-              Community Marketplace with <a href="#promises">Promises</a>{" "}
-              and <a href="#images">Pipeline images</a> for{" "}
-              <Link href="/">Kratix</Link>, the framework for building
-              platforms.
+              Explore the community Marketplace featuring pre-built{" "}
+              <a href="#promises">Promises</a> and{" "}
+              <a href="#images">Pipeline images</a> for{" "}
+              <Link href="/">Kratix</Link>, the open-source framework that helps you
+              build flexible, composable internal developer platforms.
+              Kratix lets you rapidly deliver resources as-a-service, embed key
+              business processes, and simplify managing your platform as a unified fleet.
+              Learn more about how Kratix can power your platform{" "}
+              <Link href="/">here</Link>.
             </p>
+            <p className="text--center">
+              Looking for a set of supported, enterprise-grade Promises? Check out{" "}
+              <a href="https://syntasso.io">Syntasso Kratix Enterprise (SKE)</a>.
+          </p>
           </hgroup>
         </header>
 
