@@ -1,71 +1,131 @@
 ---
 title: Docs Introduction
-description: Introduction to Kratix and how to get started quickly. Includes guides on how to read Kratix docs and pointers to other pages.
+description: Introduction to Kratix.
 keywords: [kratix documentation]
 sidebar_label: Introduction
 slug: /
 ---
 
-# Introduction
+:::info
+Looking for an **Enterprise solution**? Check out [Syntasso Kratix
+Enterprise (SKE)](https://syntasso.io/pricing)
+:::
 
-Kratix is the open-source Platform Framework, that enables you to provide anything as-a-Service, while incorporating your key business processes and managing everything as a fleet.
+# Introduction to Kratix
+
+Kratix is an open-source platform framework built by
+[Syntasso](https://syntasso.io) to help you create an internal developer
+platform exactly the way your organisation needs it. We believe great platforms
+can't be bought off the shelf, they must be built and tailed to your
+organisations needs. Kratix provides the flexibility, integration, and
+automation needed to build your platform your way.
+
+Some teams describe Kratix as a platform orchestrator, designed specifically to
+help platform teams deliver more value, faster, safer, and with less overhead.
+
+## Why Build Your Platform with Kratix?
+
+Kratix addresses critical challenges faced by platform teams, providing clear
+benefits:
+
+### 🚀 Go Faster
+
+Developers lose productivity when forced to wait on manual processes or tickets.
+Kratix lets you offer everything as-a-service via clear APIs, which can easily
+be exposed through developer portals like Backstage. This enables developers to
+instantly self-service resources, significantly accelerating software delivery.
+
+### 🔒 Be Safer
+
+Inconsistent application of critical processes creates risks. Kratix helps you
+embed essential business rules—such as security, compliance, and
+governance—directly into automated workflows, ensuring reliable enforcement
+every time.
+
+### ⚙️ Increase Efficiency
+
+Manual management of fragmented infrastructure results in operational overhead.
+Kratix simplifies operations by managing platform resources as a unified,
+automated fleet, reducing complexity and scaling effortlessly as your
+organisation grows.
+
+:::info
+
+Want to chat to us about how Kratix can help your organisation? [Contact
+us by clicking the "Book a Demo" button on the Syntasso
+website](https://syntasso.io). 
+
+:::
+
+## How Kratix Works: Promises
+
+At Kratix's core are **Promises**—contracts between your platform and your
+application teams. Each Promise defines exactly what your platform provides
+as-a-service and includes:
+
+- **Self-Service APIs**: Clear, frictionless interfaces enabling immediate and
+autonomous resource provisioning.
+- **Embedded Workflows**: Automated processes embedded directly within each
+Promise, ensuring consistent compliance and security.
+- **Fleet Management**: Built-in reconciliation ensures resources remain
+up-to-date, simplifying management at scale.
 
 :::info
 Ready to get started? Follow our [Quick Start](01-quick-start.md) to jump right in.
 :::
 
-## Why Kratix?
+## Example: Self-Service Database Promise
 
-Kratix is designed and built by a team with decades of experience creating [internal developer platforms](https://www.syntasso.io/internal-developer-platforms). We've learned that great platforms address three key challenges faced by enterprise organisations: 
+Imagine your application development team needs a new database instance to test their application against. Today, this typically plays out in one of two ways, each problematic in its own way:
 
-- **Slow delivery of value** because software engineers must wait weeks for other teams to process their tickets.
-- **Inconsistent application of key business rules** as teams create shadow IT systems to bypass lengthy ticket queues, introducing business risk.
-- **Tech sprawl leading to operational overhead** as SRE, DevOps, and Platform Teams spend their time maintaining services and infrastructure instead of improving them.
+- **Manual bottlenecks in the Platform (Platform Team Pain):**  
+  Developers raise tickets requesting the database, placing a heavy operational burden on the platform team:
+  - Platform engineers manually provision cloud infrastructure using Terraform.
+  - Kubernetes administrators deploy and configure databases by hand.
+  - Documentation and developer portals (like Backstage) must be manually updated.
+  
+  This manual, repetitive workload creates delays, inconsistent setups, and high operational overhead, negatively impacting the platform team's efficiency.
 
-A [Kratix Promise](./03-reference/11-promises/01-intro.md) enables you to provide anything-as-a-service, eliminating the need for engineers to wait for manual ticket processing.
+- **Shadow IT and unmanaged complexity (Developer Pain):**  
+  Developers bypass platform delays by provisioning resources themselves, taking on additional operational complexity:
+  - Terraform scripts and infrastructure may be incorrectly or insecurely configured.
+  - Resources are deployed using outdated, vulnerable, or unapproved images.
+  - Infrastructure quickly becomes inconsistent, insecure, and difficult for developers to maintain effectively.
 
-[Workflows](./03-reference/12-workflows.md) let you embed any business rule into your Promise definition, from security scans and billing checks to manual approvals.
+Both scenarios result in inefficiencies, increased risk, and unsustainable complexity, either draining the platform team’s resources or overwhelming developers with infrastructure management.
 
-And with Kratix's built-in [Fleet Management](./03-reference/11-promises/03-updates.md) capabilities, you can maintain and upgrade all your resources with a single click.
+**With Kratix**, provisioning this database becomes simple and fully automated:
 
-![Kratix Architecture](/img/kratix-architecture.svg)
+- **Self-service request**: Developers request resources directly through a
+Promise API. This API can be easily integrated into developer portals, like
+Backstage, providing a familiar interface for teams.  _(Interested in a fully
+supported Backstage integration? Check out [Syntasso Kratix Enterprise
+(SKE)](https://syntasso.io/pricing))_
 
-## Who is Kratix for
+- **Promise workflow triggered**: Once the request is made, the Promise workflow
+automatically kicks in. This workflow seamlessly combines infrastructure
+provisioning (Terraform), Kubernetes resource deployment (K8s manifests), and
+your internal business processes (compliance checks, security validations).
+These workflows are then continuously reconciled, ensuring that the resources
+never drift from the desired state.
 
-### Platform Engineers
-Teams responsible for building and maintaining platforms often struggle to meet the growing expectations of application teams and organisations. Delivering the right services quickly, safely, and consistently is already challenging—adding Day 2 operations like upgrades and continuous improvements can lead to burnout.
+- **Resource management and visibility**: The completed workflow results in a
+fully managed resource within Kratix, instantly available and visible in
+developer portals like Backstage. Platform teams can easily handle ongoing
+operations (Day 2 tasks), such as resource updates or deletions, with confidence
+and consistency.
 
-With Kratix and Promises, Platform Engineers can offer anything-as-a-service, consistently enforce business rules, and streamline maintenance by managing all resources collectively, like a fleet.
-:::tip
-Learn more about platform team cognitive load from [Paula Kennedy at PlatformCon](https://www.youtube.com/watch?v=zfKwxL9KZ9I)
-:::
+What previously required days, numerous handoffs, and manual interventions is
+now completed swiftly, securely, and consistently—empowering your teams to focus
+on delivering value rather than managing complexity.
 
-### Domain experts & Specialists (Promise Authors) 
-Many organisations have teams that specialise in specific domains, such as security, compliance, databases, or networking. These teams are responsible for ensuring that application teams follow the relevant business rules and policies.
+## Ready to Build Your Platform?
 
-With Promises, domain specialists can guarantee that every service request adheres to compliance requirements automatically. When policies change, they only need to update a Promise once—Kratix ensures all instances of their services are updated accordingly.
+See Kratix in action today:
 
-### Application Developers 
-Many application teams face delays waiting for essential platform services, leading to poor developer experience (DevEx), workarounds, shadow IT, and missed deadlines. The additional concerns—such as infrastructure, networking, security policies, and billing limits—can overwhelm teams, diverting focus from delivering value.
+- 👉 [**Try the Kratix Quick Start Guide**](/main/quick-start) and experience
+Kratix firsthand.
+- 👉 [**Contact Syntasso, the creators of Kratix**](https://www.syntasso.io/) to
+discuss how Kratix can benefit your organisation.
 
-Effective platforms minimise cognitive load by offering everything-as-a-service with built-in business rules and policies. Kratix and Promises enable this while allowing Platform teams to provide services at the right level of abstraction—hiding complexity from those who don’t need to manage it.
-
-## Kratix in action
-Watch how Kratix supports teams using Backstage to provide anything-as-a-service.
-<div  align="center"><iframe width="560" height="315" src="https://www.youtube.com/embed/LlHHovxfJDg?si=326slhM8-yPPSFem" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-
-## Already using Kratix?
-
-Check out our [Troubleshooting](./08-troubleshooting.md) & [FAQ pages](./07-faq.md) if you are looking for help.
-
-Read the [Kratix blog](/blog/) - written by our awesome Product Engineers, this is where we share the more advanced Kratix patterns and our latest product features.
-
-## New to Kratix?
-
-Follow our handy guides to get started on the basics as quickly as possible:
-
-- [Installing Kratix](https://docs.kratix.io/category/installing-kratix)
-- [Installing and using a Promise](https://docs.kratix.io/main/guides/installing-a-promise)
-- [Writing a Promise](https://docs.kratix.io/main/guides/writing-a-promise)
-
-If you can't find what you need, or need help with building your platform as a product, reach out to us on [Github](https://github.com/syntasso/kratix/) or through [Syntasso.io](https://www.syntasso.io/contact-us) and we'll be happy to help.
+Build your ideal platform fast, efficient, and safe, with Kratix.
