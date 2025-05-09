@@ -23,6 +23,27 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-frontend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.16.0/) (2025-05-09)
+
+#### 🚨 Breaking changes 🚨
+
+* The React components `KratixPromiseAboutCard` and `KratixResourceAboutCard`
+  have been removed. Those two were merged into the `KratixAboutCard` Component,
+  that can be used to display information about both the Promise and Resource.
+  This is only a breaking change if you were using one of those two components
+  directly; the `KratixPromiseEntityPage` and `KratixResourceEntityPage`
+  components (which are the ones documented in the installation steps) are
+  already using the new `KratixAboutCard` component.
+
+#### Features
+
+* Two new components are available: `KratixOverviewTab` and `KratixManageTab`.
+  Those are registered with Backstage via the plugin `.provide` method, and
+  should render the inside of the `Overview` and `Manage` tabs of the Entity
+  pages.
+* The `KratixPromiseEntityPage` and `KratixResourceEntityPage` components were
+  updated to use the new `KratixOverviewTab` and `KratixManageTab` components.
+
 ### [ske-backend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.16.0/); [ske-frontend v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.15.0/) (2025-05-07)
 
 #### 🚨 Breaking changes 🚨
