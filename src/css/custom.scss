@@ -24,6 +24,22 @@
   --background-color: #fff;
 }
 
+.header-github-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-github-link::before {
+  content: '';
+  background-image: url('/img/github.svg'); /* ensure this path is correct */
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 20px; /* adjust as necessary */
+  height: 20px; /* adjust as necessary */
+  display: inline-block;
+}
+
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
   --ifm-color-primary: #d69dff;
