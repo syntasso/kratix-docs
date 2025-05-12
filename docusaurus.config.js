@@ -115,6 +115,11 @@ const config = {
             position: "left",
           },
           {
+            to: "ske",
+            label: "Enterprise",
+            position: "left",
+          },
+          {
             href: "https://github.com/syntasso/kratix",
             position: "right",
             label: "syntasso/kratix",

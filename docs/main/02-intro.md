@@ -53,7 +53,7 @@ organisation grows.
 :::info
 
 **Ready to take your platform to the next level?**
-Get two weeks of free expert consultancy when you engage with us to explore Syntasso Kratix Enterprise.
+Get two weeks of free expert consultancy when you engage with Syntasso to explore Syntasso Kratix Enterprise.
 Book a [demo call to find out more](https://www.syntasso.io/#contact-us). 
 
 :::
@@ -101,7 +101,7 @@ Both scenarios result in inefficiencies, increased risk, and unsustainable compl
 Promise API. This API can be easily integrated into developer portals, like
 Backstage, providing a familiar interface for teams.  _(Interested in a fully
 supported Backstage integration? Check out [Syntasso Kratix Enterprise
-(SKE)](https://syntasso.io/pricing))_
+(SKE)](https://www.syntasso.io/solutions/upgrade-backstage-from-portal-to-platform-with-kratix))_
 
 - **Promise workflow triggered**: Once the request is made, the Promise workflow
 automatically kicks in. This workflow seamlessly combines infrastructure
@@ -126,7 +126,7 @@ See Kratix in action today:
 
 - 👉 [**Try the Kratix Quick Start Guide**](/main/quick-start) and experience
 Kratix first-hand.
-- 👉 [**Want to see Kratix in action**? Book a demo with Syntasso](https://www.syntasso.io/#contact-us) to explore how we can support your platform goals.
+- 👉 [**Want to see Kratix in action**? Book a demo](https://www.syntasso.io/#contact-us) to explore how [Syntasso](https://www.syntasso.io/) can support your platform goals.
 
 
 Build your ideal platform fast, efficient, and safe, with Kratix.

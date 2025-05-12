@@ -58,7 +58,7 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 
 👉 Don’t want to manage all the Backstage integration complexity yourself? [Book
 a demo to see how **Syntasso Kratix Enterprise** does the hard work for
-you.](https://www.syntasso.io/#contact-us)
+you.](https://www.syntasso.io/solutions/upgrade-backstage-from-portal-to-platform-with-kratix)
 
 :::
 
