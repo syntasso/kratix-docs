@@ -19,7 +19,7 @@ Some teams describe Kratix as a platform orchestrator, designed specifically to
 help platform teams deliver more value, faster, safer, and with less overhead.
 
 :::info
-Looking for an **Enterprise solution**? Check out [Syntasso Kratix
+Looking for **Enterprise support**? Check out [Syntasso Kratix
 Enterprise (SKE)](https://syntasso.io/pricing)
 :::
 
@@ -52,9 +52,9 @@ organisation grows.
 
 :::info
 
-Want to chat to us about how Kratix can help your organisation? [Contact
-us by clicking the "Book a Demo" button on the Syntasso
-website](https://syntasso.io). 
+**Ready to take your platform to the next level?**
+Get two weeks of free expert consultancy when you engage with us to explore Syntasso Kratix Enterprise.
+Book a [demo call to find out more](https://www.syntasso.io/#contact-us). 
 
 :::
 
@@ -126,7 +126,7 @@ See Kratix in action today:
 
 - 👉 [**Try the Kratix Quick Start Guide**](/main/quick-start) and experience
 Kratix first-hand.
-- 👉 [**Contact Syntasso, the creators of Kratix**](https://www.syntasso.io/) to
-discuss how Kratix can benefit your organisation.
+- 👉 [**Want to see Kratix in action**? Book a demo with Syntasso](https://www.syntasso.io/#contact-us) to explore how we can support your platform goals.
+
 
 Build your ideal platform fast, efficient, and safe, with Kratix.

@@ -14,6 +14,7 @@ _[Backstage](https://backstage.io/) is a framework for building developer portal
   alt="Kratix logo and Backstage logo"
 />
 
+
 ## What
 
 Backstage and Kratix both believe that the most powerful platforms must be built
@@ -52,6 +53,14 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
   automatic support for iterations on your platform's offerings.
 
 ## How
+
+:::info
+
+👉 Don’t want to manage all the Backstage integration complexity yourself? [Book
+a demo to see how **Syntasso Kratix Enterprise** does the hard work for
+you.](https://www.syntasso.io/#contact-us)
+
+:::
 
 Integrating Backstage with Kratix is simple. Point Backstage at the Kratix
 platform cluster, and that's it. Kratix will then build the Backstage views as
