@@ -136,9 +136,10 @@ export function Marketplace(): JSX.Element {
             </p>
             <div  style={{ maxWidth: "720px", margin: "1rem auto", padding: "0 1rem" }}>
               <Admonition type="info">
-                <p >
-                  Looking for supported, enterprise-grade Promises? Check out{" "}
-                  <a href="https://syntasso.io">Syntasso Kratix Enterprise (SKE)</a>.
+                <p>
+                  Looking for production-ready, enterprise-grade, supported Promises?
+                  Check out <a href="https://syntasso.io/pricing">Syntasso Kratix Enterprise (SKE)</a> or 
+                  <a href="https://syntasso.io/#contact-us"> get in contact</a>.
                 </p>
               </Admonition>
             </div>
