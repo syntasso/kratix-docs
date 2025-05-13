@@ -161,6 +161,10 @@ const config = {
                 label: "Syntasso",
                 href: "https://syntasso.io",
               },
+              {
+                label: "Privacy Policy",
+                href: "https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77",
+              },
             ],
           },
         ],
