@@ -1,0 +1,40 @@
+---
+title: Generate Backstage Components
+description: Documentation for how to use the Backstage Controller to generate Backstage Components
+sidebar_label: Generate Backstage Components
+---
+
+If you have the Backstage Controller installed, you can configure your Promises to automatically generate
+Backstage components and templates. To do that, ensure your Promises are labelled with `kratix.io/backstage: true`.
+
+You can label the Promise via `kubectl`:
+
+```yaml
+kubectl label promises REPLACEWITH_PROMISE_NAME kratix.io/backstage=true
+```
+
+## Customize Backstage Component
+
+You can customize the automatically generated Backstage Components by creating a cluster-wide `BackstageEntityCustomization`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: BackstageEntityCustomization
+metadata:
+  name: my-customization
+spec:
+  destinationSelectors: # optional
+  - matchLabels:
+      environment: backstage
+  containers: # optional
+    - name: add-backstage-group
+      image: ghcr.io/syntasso/run-customization:v0.0.1
+```
+
+The containers defined in the customization will run after `ske-backstage-generator`.
+It can modify existing `catalog-info.yaml` file from `ske-backstage-generator` or it could generate new files.
+This customization will apply to all Promises with label `kratix.io/backstage: true`.
+
+Destination selectors defined in the customization will apply to all generated Backstage components.
+You can use it to make sure that generated components are only scheduled to your Backstage destinations.
+
