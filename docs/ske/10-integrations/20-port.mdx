@@ -256,7 +256,13 @@ repository that Port is writing to. An example set up when using FluxCD and the 
 from above can be found below.
 
 <details>
-  <summary>Example Flux Resources for Port-Syncer repository</summary>
+  <summary>Example Flux Resources for `port-syncer` repository</summary>
+
+  :::info
+  This example resource depends on a secret called `github-creds` to exist in the
+  `flux-system` namespace. This secret should be configured based on the
+  [FluxCD docs](https://fluxcd.io/flux/components/source/gitrepositories/#secret-reference).
+  :::
 
 ```
 ---
