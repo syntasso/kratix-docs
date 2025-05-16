@@ -23,6 +23,14 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.16.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.16.1/) (2025-05-16)
+
+#### Bug Fixes
+
+* No longer tries to parse the Backstage Access Token when not authenticating
+  with Kubenetes via OIDC. This was causing issues when both the Access Token
+  was present but not valid for Kubernetes communication.
+
 ### [ske-frontend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.16.0/) (2025-05-09)
 
 #### 🚨 Breaking changes 🚨
