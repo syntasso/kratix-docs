@@ -50,7 +50,8 @@ Check the [YAML File Format](./yaml-file-format) for examples of these manifests
 
 ### Labelling Promises for automatic file generation
 
-To generate Backstage Components and Template for your Promise, label your Promise with `kratix.io/backstage: true`.
+To generate Backstage Components and Template for your Promise, as well as Components for requests for that Promise,
+label your Promise with `kratix.io/backstage: true`.
 
 ```bash
 kubectl label promises PROMISE_NAME kratix.io/backstage=true
@@ -58,7 +59,7 @@ kubectl label promises PROMISE_NAME kratix.io/backstage=true
 
 Or add the label to the Promise spec:
 
-```
+```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
