@@ -2,8 +2,8 @@
 slug: healthcheck-progressive-rollout
 title: Kratix, healthcheck, and upgrade
 description: Progressive rollout with healthcheck
-# authors: [chunyi and chatgpt of course]
-tags: [kratix, healthcheck, upgrade]
+authors: [chunyi,derik]
+tags: [kratix, SKE, healthcheck, upgrade]
 ---
 
 Earlier this year, we introduced an exciting new capability in Kratix: health checks for resources.
@@ -19,20 +19,25 @@ A failed update could disrupt many environments simultaneously, and debugging be
 
 Platform engineers need a safer approach: progressive rollouts. But for that to work, Kratix needs a way to understand the health of each individual resource during and after an upgrade.
 
+{/* truncate */}
+
 ## Health Checks to the Rescue
 The new health check feature enables Promise authors to define custom health validation logic for the resources their Promise provisions.
 
 Here’s how it works:
 
 You include an additional pipeline stage as part of your Promise resource configure workflow configuration.
-This container outputs [HealthDefinition](), which contains structured instructions on how to perform health checks in the Destination.
+This container outputs [HealthDefinition](/ske/api-reference/healthdefinition), which contains structured instructions on how to perform health checks in the Destination.
 Kratix reads the health status and automatically updates the status of each resource request.
 
-By including a healthCheck definition, you give Kratix insight into the runtime state of each resource, whether it’s ready, degraded, or failed.
+By including a HealthDefinition, you give Kratix insight into the runtime state of each resource, whether it’s ready, degraded, or failed.
 With better visibility into Resource health, Promise authors now have the foundation for more complex orchestration, such as progress rollout.
 
+Note that HealthDefinition agent runs on Kubernetes and it's part of the [Syntasso Kratix Enterprise](/ske) offering.
+If you're not using SKE, you will need to bring your own agent to act on HealthDefinitions in your Destinations.
+
 ## Progressive Rollouts in Action
-Let’s say your Promise provisions PostgreSQL as a service You’re releasing a new version of Promise that updates some of it default configurations.
+Let’s say your Promise provisions PostgreSQL as a service. You’re installing a new version of the Promise that updates some of it default configurations.
 
 In your PostgreSQL Promise resource configure workflow, you can
 1. includes a container that outputs a HealthDefinition to check Postgres health
@@ -43,12 +48,11 @@ With Health Checks enabled and set up in your Platform and Destinations, when yo
 1. One of the Resource Configure workflow acquires the Lease
 1. Lease is only released after Health checks report a healthy status, ensuring Resources are upgraded one by one
 1. When there's a failed upgrade, Lease are never released and rollout is paused and the failed state is visible in the resource request status
-1. Kratix continues upgrading Resources one by one until all of them are ugpraded and reported healthy
+1. Kratix continues upgrading Resources one by one until all of them are upgraded and reported healthy
 
 This drastically reduces risk and improves debuggability during updates.
 
-## Conclusion
-If you’re interested in implementing health checks for your Promises, check out our a [step-by-step guide]().
-We are keen to hear how you plan to use health checks and what other upgrade strategies you are interested in.
-
-As always, feel free to drop by our Slack or GitHub for any questions and feedback.
+## What's next
+If you’re interested in implementing health checks for your Promises, check out our a [step-by-step guide](/ske/guides/healthchecks).
+We are working to add more Kratix native functionalities to make progressive upgrades easier for Promise authors,
+and are always keen to hear your thoughts and feedback. Feel free to leave a comment and drop by our Slack or GitHub.
