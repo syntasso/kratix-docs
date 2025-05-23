@@ -30,7 +30,7 @@ for setup instructions.
 ## How does it work?
 
 The SKE Backstage Controller creates a Workflow that automatically generates the Backstage components and
-templates for your Promise.
+templates for your Promise. This Workflow runs in addition to the Configure Workflow for your Promises and Requests.
 
 ### Promise Configure
 
@@ -87,9 +87,18 @@ spec:
       image: ghcr.io/syntasso/run-customization:v0.0.1
 ```
 
-The containers defined in the customization will run after the container that generates the Components and Templates.
-It can modify the existing `catalog-info.yaml` file from `ske-backstage-generator` or it can generate new files.
-This customization will apply to all Promises with label `kratix.io/backstage: true`.
+### Custom containers
+
+The containers defined in the customization will run after the `backstage-gen` container which generates the
+Components and Templates. They can be used to modify the existing `catalog-info.yaml` file created by the
+`ske-backstage-generator` or it can generate new files. This customization will apply to all Promises with label
+`kratix.io/backstage: true` as well as Resource Requests for these promises.
+
+If you want to edit the `catalog.info` or generate different files based on whether the Workflow is running for a
+Promise or Resource Request, the container can query the `KRATIX_WORKFLOW_TYPE` environment variable.
+For Promises, this is equal to `promise-backstage-gen` and for resources, `resource-backstage-gen`.
+
+### Destination Selectors
 
 By default, Destination selectors defined in the customization will apply to all generated Backstage components.
-You can use it to make sure that generated components are only scheduled to your Backstage destinations.
+You can use these to make sure that generated components are only scheduled to your Backstage destinations.
