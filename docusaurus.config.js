@@ -46,6 +46,8 @@ const config = {
         },
         // uncomment to add the blog section to the website
         blog: {
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
           showReadingTime: true,
           // Remove this to remove the "edit this page" links.
           // editUrl:
