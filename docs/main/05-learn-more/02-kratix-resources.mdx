@@ -84,7 +84,7 @@ One of the last containers executed as part of a Workflow is the `work-creator`.
 
 The Work Object contains a similar set of labels as to the Job.
 
-Once a Work is created, Kratix runs its scheduler. The scheduler looks into the Work Object and determines which [Destination](/main/reference/destinations/intro) can take which bits of the Work, since a single Work can contain multiple documents that can be scheduled to multiple destinations. Once a Destination is found, Kratix creates a WorkPlacement object that associates the Work with the Destination.
+Once a Work is created, Kratix runs its scheduler. The scheduler examines the Work Object and determines which [Destination](/main/reference/destinations/intro) should receive which parts of the Work, since a single Work can contain multiple documents that can be scheduled to multiple destinations. Once a suitable Destination is found, Kratix creates a WorkPlacement object to associate the Work with that Destination.
 
 ### WorkPlacement
 
