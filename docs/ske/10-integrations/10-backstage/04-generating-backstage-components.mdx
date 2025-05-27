@@ -4,14 +4,29 @@ description: Documentation for how to use the Backstage Controller to generate B
 sidebar_label: Generating Backstage Components
 ---
 
-If you have the Backstage Controller installed, you can configure your Promises to automatically generate
-Backstage components and templates.
+The Backstage Controller generates Backstage components and templates for Promises and Resource Requests.
 
 ## Prerequisites
 
+### Authenticating against the image registry
+
+Both the Backstage Controller image and the SKE Backstage Generator image used by the Controller are hosted in a private registry, to access
+these images when Deploying and using the Backstage Controller deployment, you will need to authenticate using the token you have been provided with.
+You can define your authentication credentials via a `docker-registry` secret named `syntasso-registry`:
+
+```yaml
+kubectl create secret docker-registry syntasso-registry \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=YOUR_TOKEN \
+  --namespace kratix-platform-system
+```
+
+Alternatively, you can host the image on an internal registry that your cluster has permission to pull from or load the image to your Kubernetes cache.
+
 ### SKE Backstage plugins
 
-The generate Backstage Templates reference an action from the `ske-backend` Backstage plugin, this action is
+The generated Backstage Templates reference an action from the `ske-backend` Backstage plugin, this action is
 used to create a Resource Request.
 The generated Components are also used by the `ske-frontend` Backstage plugin to display
 Promise and Resource metadata.
@@ -19,13 +34,23 @@ Promise and Resource metadata.
 In order to utilise the Templates and Components, you should also install both the
 `ske-backend` and `ske-frontend` plugins into your Backstage instance.
 
-See [Configuring the Plugins](./plugins) for instructions.
+See [Configuring the Plugins](./plugins) for installation instructions.
 
 ### Backstage Destination {#destination}
 
 You must have a Destination created with the `environment: backstage` label. See the
 [Kratix Backstage docs](./configuring-backstage#configure-a-destination-for-backstage)
 for setup instructions.
+
+## Installing the Backstage Controller
+
+The Controllers is released separately from SKE. Its releases can be found [here](../../releases/backstage-controller).
+
+You can apply the Controller by installing the distribution at the desired version:
+
+```bash
+kubectl apply -f http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/<VERSION>/backstage-controller.yaml
+```
 
 ## How does it work?
 
