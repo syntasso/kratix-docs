@@ -49,7 +49,7 @@ You can find all Kratix-created Service Accounts by filtering them using the `kr
 
 When a Promise is installed, Kratix spins up a dynamic controller to watch for Resource Requests on the Promise API. To ensure the Kratix Controller itself has the permissions to manage the Resources, it creates a Cluster Role (with permissions on the Promise CRD) and binds it to the Kratix Controller Service Account via a Cluster Role Binding. You can read more about Kubernetes RBAC in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
-You can find the Cluster Role and Cluster Role Binding by filtering by them by the `kratix.io/promise-name` label.
+You can find the Cluster Role and Cluster Role Binding by filtering them with the `kratix.io/promise-name` label.
 
 #### The Workflow SA RBAC
 
