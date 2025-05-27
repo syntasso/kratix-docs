@@ -18,7 +18,7 @@ Terraform and Kratix both aim to enable infrastructure as code (IaC) but at diff
 
 Terraform has a mature community that supports managing cloud and other SaaS tooling through their custom HCL programming language. Using HCL, platform teams are able to create, modify, and delete infrastructure in a declarative way.
 
-Kratix enables platform teams to create [Promises](../reference/promises/intro). Promises define an API for their users (application engineers) to easily request on-demand Resources. Promises also define any steps required to fulfil and maintain the Resources including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
+Kratix enables platform teams to create [Promises](../../reference/promises/intro). Promises define an API for their users (application engineers) to easily request on-demand Resources. Promises also define any steps required to fulfil and maintain the Resources including running Terraform or other IaC tools, validating business rules, and any additional steps like releasing software that runs on the provisioned Terraform infrastructure.
 
 ## Why
 
@@ -32,8 +32,8 @@ To provide on-demand services, a platform team is best suited decoupling their A
 
 Kratix enables platform teams to declare APIs that orchestrates workloads across your infrastructure. The orchestration of infrastructure can happen in two ways in Kratix:
 
-- via a [Workflow](../reference/resources/workflows) that is executed as part of every request for a Resource (as well as on updates and periodic reconciliation)
-- via Kratix [scheduling](../reference/destinations/multidestination-management) workloads using GitOps
+- via a [Workflow](../../reference/resources/workflows) that is executed as part of every request for a Resource (as well as on updates and periodic reconciliation)
+- via Kratix [scheduling](../../reference/destinations/multidestination-management) workloads using GitOps
 
 Kratix Workflow stages are a perfect place to execute sequential tasks such as running Terraform plans and applies, billing checks, security scans, audits, resource decoration and more. These tasks all happen automatically each time a user requests a Promise Resource.
 

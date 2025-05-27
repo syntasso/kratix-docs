@@ -1,0 +1,110 @@
+---
+title: Kratix Internal Objects
+description: Learn more about the objects Kratix creates when a Promise or Resource is requested.
+id: kratix-resources
+---
+
+Whenever a new Promise is installed, or a new Resource is requested, Kratix creates a series of Kubernetes Objects to complete the installation or to fulfill the Promise.
+
+In this page, we explore what those objects are.
+
+There are two categories of Objects that Kratix creates:
+
+1. The Objects it needs to execute the Workflows.
+1. The Objects that represent the Workflows output.
+
+The diagram below shows all of the Objects Kratix creates. We dive deeper into what they are used for later.
+
+```mdx-code-block
+import Figure01 from "@site/static/img/docs/learn-more/promise-objects-diagram.jpg"
+```
+
+<figure className="diagram">
+  <img className="large" src={Figure01} alt="A diagram showing all the Kubernetes objects created when a Promise is installed" />
+
+  <figcaption>Kubernetes Objects created by Kratix</figcaption>
+</figure>
+
+## Workflow Execution Objects
+
+To execute the Workflows, Kratix creates the following objects:
+
+### ConfigMap
+
+As you can see in the diagram above, Kratix adds a series of containers to the Pod that will be used to run the Workflow. This ConfigMap contains the information those containers need to schedule works according to the destination selectors found in the Promise.
+
+You can find all Kratix-created ConfigMaps by filtering them using the `kratix.io/promise-name` label.
+
+### ServiceAccount
+
+To run the workflows, Kratix creates a [Service Account](https://kubernetes.io/docs/concepts/security/service-accounts/) on the Resource namespace (or in the `kratix-platform-system` for Promise workflows). This Service Account is used by the Job to run the Workflow. If the `spec.serviceAccount` is set in your Workflow, Kratix does not create the Service Account and uses the one you provide.
+
+The Service Account is created the first time a Resource is requested in a particular namespace, and is deleted when the last Resource is removed from that namespace.
+
+You can find all Kratix-created Service Accounts by filtering them using the `kratix.io/promise-name` label.
+
+### RBAC Objects
+
+#### Dynamic Controller RBAC 
+
+When a Promise is installed, Kratix spins up a dynamic controller to watch for Resource Requests on the Promise API. To ensure the Kratix Controller itself has the permissions to manage the Resources, it creates a Cluster Role (with permissions on the Promise CRD) and binds it to the Kratix Controller Service Account via a Cluster Role Binding. You can read more about Kubernetes RBAC in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
+
+You can find the Cluster Role and Cluster Role Binding by filtering by them by the `kratix.io/promise-name` label.
+
+#### The Workflow SA RBAC
+
+To execute the Workflow, Kratix also gives the Workflow Service Account the right permissions. For that, it creates Roles and Role Bindings. Those objects are created on the same namespace as the Resource (or in the `kratix-platform-system` for Promise workflows).
+
+In certain occasions, Kratix also creates Cluster Roles and Cluster Role Bindings to enable the Workflow to access cluster-wide resources. This only happens when the Workflow itself requests [custom RBAC permissions](/main/reference/workflows#rbac).
+
+### Job and Pod
+
+Kratix creates one [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/) per Workflow defined in the `workflows` section. Promise workflows always run in the `kratix-platform-system` namespace, while Resource workflows run in the same namespace as the Resource.
+
+The Jobs Kratix creates have a series of labels that allow you to filter them by Promise and Resource:
+
+* `kratix.io/promise-name` contains the Promise name.
+* `kratix.io/pipeline-name` contains the name of the workflow this job belongs to.
+* `kratix.io/workflow-type` contains the type of workflow, either `promise` or `resource`.
+* `kratix.io/workflow-action` contains the type of action this workflow is performing, either `configure` or `delete`.
+
+Once a Job is created, Kubernetes creates an associated [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) to execute the containers specified in the Workflow. If you inspect the Pod, you find the containers defined in the Promise document, as well as a few containers Kratix itself injects. Those are:
+
+* The `reader`: this container is responsible for injecting the Resource object into the `/kratix/input` directory.
+* The `work-creator`: this container is responsible for creating the Work associated with the Workflow. See more about the Work in the next section.
+* The `status-writer`: this container uses the `/kratix/metadata/status.yaml` file to update the Resource status.
+
+Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting `numberOfJobsToKeep` in the [Kratix Config](/main/reference/kratix-config/config) document.
+
+## Output Objects
+
+### Works
+
+One of the last containers executed as part of a Workflow is the `work-creator`. This container is responsible for creating the Work associated with the Workflow. A Work is a Kratix Object that represents the output of the Workflow, i.e., it contains the documents the Workflow persists into `/kratix/output` as part of its execution. The Work is created in the same namespace as the Resource (or in the `kratix-platform-system` for Promise workflows).
+
+The Work Object contains a similar set of labels as to the Job.
+
+Once a Work is created, Kratix runs its scheduler. The scheduler looks into the Work Object and determines which [Destination](/main/reference/destinations/intro) can take which bits of the Work, since a single Work can contain multiple documents that can be scheduled to multiple destinations. Once a Destination is found, Kratix creates a WorkPlacement object that associates the Work with the Destination.
+
+### WorkPlacement
+
+The WorkPlacement is the last piece of the puzzle. It associates a part of the Work with a Destination. A single Work can spawn multiple WorkPlacements, depending on the [scheduling rules for the Promise](/main/reference/destinations/multidestination-management). Once a WorkPlacement is created, Kratix writes the associated documents to the [State Store](/main/reference/statestore/intro) that backs the selected Destination.
+
+It has a similar set of labels as the Work Object.
+
+On Resource deletion, all Works and the WorkPlacements associated with it are deleted.
+
+---
+
+## Summary
+
+Kratix creates and manages a set of Kubernetes Objects to execute Workflows and handle their outputs whenever a Promise is applied or Resource is requested. Understanding these objects and their relationships is key to troubleshooting and extending Kratix functionality.
+
+For more information on how these objects interact or how to customize their behavior, see the following resources:
+
+- [Workflows Reference](/main/reference/workflows)
+- [Destinations](/main/reference/destinations/intro)
+- [State Store](/main/reference/statestore/intro)
+- [Configuration](/main/reference/kratix-config/config)
+
+If you have further questions, check out our [FAQ](/main/faq) or reach out to the Kratix community.
