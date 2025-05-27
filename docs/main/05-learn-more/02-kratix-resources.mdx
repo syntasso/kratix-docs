@@ -80,7 +80,7 @@ Kratix creates a new Job every time a new workflow needs to be executed. You can
 
 ### Works
 
-One of the last containers executed as part of a Workflow is the `work-creator`. This container is responsible for creating the Work associated with the Workflow. A Work is a Kratix Object that represents the output of the Workflow, i.e., it contains the documents the Workflow persists into `/kratix/output` as part of its execution. The Work is created in the same namespace as the Resource (or in the `kratix-platform-system` for Promise workflows).
+One of the last containers executed as part of a Workflow is the `work-creator`. This container is responsible for creating the Work associated with the Workflow. A Work is a Kratix Object that represents the output of the Workflow, i.e., it contains the documents that Workflow persists into `/kratix/output` as part of its execution. The Work is created in the same namespace as the Resource (or in the `kratix-platform-system` namespace for Promise workflows).
 
 The Work Object contains a similar set of labels as to the Job.
 
