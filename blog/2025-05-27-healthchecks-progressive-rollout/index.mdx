@@ -14,7 +14,7 @@ In this blog, we’ll discuss how you can use it to support progressive rollouts
 ## What’s the Problem?
 
 When a Promise gets updated, say with a new version of a Helm chart, the standard behavior in Kratix is to reconcile and update all resource requests at once.
-That’s fine in simple dev environments. But for complex workloads, upgrading everything at once is risky.
+That’s fine in simple dev environments, but for complex workloads, upgrading everything at once is risky.
 A failed update could disrupt many environments simultaneously, and debugging becomes difficult when failures are scattered.
 
 Platform engineers need a safer approach: progressive rollouts. Instead of deploying changes to your entire fleet at once,
@@ -35,8 +35,8 @@ for example connection strings to access your database resource, or the unique I
 
 Here’s how it works:
 
-You include an additional pipeline stage as part of your Promise resource configure workflow configuration.
-This container outputs [HealthDefinition](/ske/api-reference/healthdefinition), which contains structured instructions on how to perform health checks in the Destination.
+You can simply update your existing Promise resource configure workflow to output a [HealthDefinition](/ske/api-reference/healthdefinition),
+which contains structured instructions on how to perform health checks against requested resources in a Destination or external system.
 Kratix reads the health status and automatically updates the status of each resource request.
 
 By including a HealthDefinition, you give Kratix insight into the runtime state of each resource, whether it’s ready, degraded, or failed.
@@ -52,15 +52,19 @@ import HCDiagram from "/img/docs/ske/guide-healthcheck-arch.png"
   <figcaption>How Health Checks works in SKE</figcaption>
 </figure>
 
-Note that HealthDefinition agent runs on Kubernetes and it's part of the [Syntasso Kratix Enterprise](/ske) offering.
-If you're not using SKE, you will need to bring your own agent to act on HealthDefinitions in your Destinations.
+Health Definition includes all the necessary information to execute the Health Check workflow in a Destination.
+As part of the [Syntasso Kratix Enterprise](/ske) offering, we provide a [SKE Health Agent](https://docs.kratix.io/ske/kratix/ske-health-agent) that
+can reconcile Health Definition in a Kubernetes Destination.
+If you're not using SKE, you will need to bring your own agent to act on Health Definitions.
+You can also refer to our [Surfacing health information](/main/guides/resource-health) guide on how to run health checks
+without an agent in the Platform Cluster.
 
 ## Progressive Rollouts in Action
 Let’s say your Promise provisions PostgreSQL as a service. You’re installing a new version of the Promise that updates some of it default configurations.
 
-In your PostgreSQL Promise resource configure workflow, you can
-1. include a container that outputs a HealthDefinition to check Postgres health
-1. include an additional container that uses Kubernetes Leases to ensure it only continues the workflow when it acquires the lease
+In your PostgreSQL Promise resource configure workflow, you can include a container that can
+1. output a HealthDefinition to check Postgres health
+1. use Kubernetes Leases to ensure it only continues the workflow when it acquires the lease
 
 With Health Checks enabled and set up in your Platform and Destinations, when you update the Promise:
 1. Kratix begins updating resource requests
