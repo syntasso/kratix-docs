@@ -68,7 +68,7 @@ The Jobs Kratix creates have a series of labels that allow you to filter them by
 * `kratix.io/workflow-type` contains the type of workflow, either `promise` or `resource`.
 * `kratix.io/workflow-action` contains the type of action this workflow is performing, either `configure` or `delete`.
 
-Once a Job is created, Kubernetes creates an associated [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) to execute the containers specified in the Workflow. If you inspect the Pod, you find the containers defined in the Promise document, as well as a few containers Kratix itself injects. Those are:
+Once a Job is created, Kubernetes creates an associated [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) to execute the containers specified in the Workflow. If you inspect the Pod, you'll see the containers defined in the Promise document, along with a few additional containers injected by Kratix. These includes:
 
 * The `reader`: this container is responsible for injecting the Resource object into the `/kratix/input` directory.
 * The `work-creator`: this container is responsible for creating the Work associated with the Workflow. See more about the Work in the next section.
