@@ -4,10 +4,94 @@
         <title>Kratix Blog</title>
         <link>https://docs.kratix.io/blog</link>
         <description>Kratix Blog</description>
-        <lastBuildDate>Tue, 22 Apr 2025 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 27 May 2025 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[New in Kratix: Health Checks and Progressive Rollout]]></title>
+            <link>https://docs.kratix.io/blog/healthcheck-progressive-rollout</link>
+            <guid>https://docs.kratix.io/blog/healthcheck-progressive-rollout</guid>
+            <pubDate>Tue, 27 May 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[Progressive rollout with healthcheck]]></description>
+            <content:encoded><![CDATA[<p>Earlier this year, we introduced an exciting new capability in Kratix: <a href="https://docs.kratix.io/main/guides/resource-health">health checks for resources</a>.
+This addition allows platform teams and app developer to easily observe the status of their requested workloads, without the need to switch context and find it in Destinations.</p>
+<p>In this blog, we’ll discuss how you can use it to support progressive rollouts when updating Promises.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="whats-the-problem">What’s the Problem?<a href="https://docs.kratix.io/blog/healthcheck-progressive-rollout#whats-the-problem" class="hash-link" aria-label="Direct link to What’s the Problem?" title="Direct link to What’s the Problem?">​</a></h2>
+<p>When a Promise gets updated, say with a new version of a Helm chart, the standard behavior in Kratix is to reconcile and update all resource requests at once.
+That’s fine in simple dev environments, but for complex workloads, upgrading everything at once is risky.
+A failed update could disrupt many environments simultaneously, and debugging becomes difficult when failures are scattered.</p>
+<p>Platform engineers need a safer approach: progressive rollouts. Instead of deploying changes to your entire fleet at once,
+progressive rollout allows teams to introduce updates gradually to limit the impact, gather early feedback,
+and catch potential bugs before releasing broadly.
+But for that to work, Kratix needs a way to understand the health of each individual resource during and after an upgrade.</p>
+<!-- -->
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="health-checks-to-the-rescue">Health Checks to the Rescue<a href="https://docs.kratix.io/blog/healthcheck-progressive-rollout#health-checks-to-the-rescue" class="hash-link" aria-label="Direct link to Health Checks to the Rescue" title="Direct link to Health Checks to the Rescue">​</a></h2>
+<p>Platforms are often described as a black box - you need to integrate dozens of tools into complicated data ingestion
+and dashboard platforms to understand what is happening with all your resources.
+For a long time, Platforms orchestrated by Kratix were no different. The new health check feature enables Promise authors
+to define custom health validation logic for the resources their Promise provisions, which means not only can you report
+back basic health data (ready, degraded, failed etc.) but also context relevant that can be used to drive other processes,
+for example connection strings to access your database resource, or the unique ID name of the application you've just deployed.</p>
+<p>Here’s how it works:</p>
+<p>You can simply update your existing Promise resource configure workflow to output a <a href="https://docs.kratix.io/ske/api-reference/healthdefinition">HealthDefinition</a>,
+which contains structured instructions on how to perform health checks against requested resources in a Destination or external system.
+Kratix reads the health status and automatically updates the status of each resource request.</p>
+<p>By including a HealthDefinition, you give Kratix insight into the runtime state of each resource, whether it’s ready, degraded, or failed.
+With better visibility into Resource health, Promise authors now have the foundation for more complex orchestration, such as progress rollout.</p>
+<!-- -->
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/guide-healthcheck-arch-5f1f9d697aecb27b28d3487eb7eb8182.png" alt="High-level diagram of how Health Check works in Kratix"><figcaption>How Health Checks works in SKE</figcaption></figure>
+<p>Health Definition includes all the necessary information to execute the Health Check workflow in a Destination.
+As part of the <a href="https://docs.kratix.io/ske">Syntasso Kratix Enterprise</a> offering, we provide a <a href="https://docs.kratix.io/ske/kratix/ske-health-agent" target="_blank" rel="noopener noreferrer">SKE Health Agent</a> that
+can reconcile Health Definition in a Kubernetes Destination.
+If you're not using SKE, you will need to bring your own agent to act on Health Definitions.
+You can also refer to our <a href="https://docs.kratix.io/main/guides/resource-health">Surfacing health information</a> guide on how to run health checks
+without an agent in the Platform Cluster.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="progressive-rollouts-in-action">Progressive Rollouts in Action<a href="https://docs.kratix.io/blog/healthcheck-progressive-rollout#progressive-rollouts-in-action" class="hash-link" aria-label="Direct link to Progressive Rollouts in Action" title="Direct link to Progressive Rollouts in Action">​</a></h2>
+<p>Let’s say your Promise provisions PostgreSQL as a service. You’re installing a new version of the Promise that updates some of it default configurations.</p>
+<p>In your PostgreSQL Promise resource configure workflow, you can include a container that can</p>
+<ol>
+<li>output a HealthDefinition to check Postgres health</li>
+<li>use Kubernetes Leases to ensure it only continues the workflow when it acquires the lease</li>
+</ol>
+<p>With Health Checks enabled and set up in your Platform and Destinations, when you update the Promise:</p>
+<ol>
+<li>Kratix begins updating resource requests</li>
+<li>One of the Resource Configure workflow acquires the Lease</li>
+<li>Lease is only released after Health checks report a healthy status, ensuring Resources are upgraded one by one</li>
+<li>When there's a failed upgrade, Lease are never released and rollout is paused and the failed state is visible in the resource request status</li>
+<li>Kratix continues upgrading Resources one by one until all of them are upgraded and reported healthy</li>
+</ol>
+<p>This progressive delivery strategy has a myriad of benefits:</p>
+<ol>
+<li>Mitigate risk and downtime
+By gradually exposing changes to a small percentage of users, you limit the blast radius of bugs or failures.
+If something goes wrong, the impact is contained and easier to recover from.</li>
+<li>Improve debuggability
+Smaller rollouts make it significantly easier to isolate and troubleshoot issues.
+You’re not drowning in signals from a full-scale deployment, so you can focus on specific failure cases as they arise.</li>
+<li>Fast feedback loops for experimental features.
+You can gather real-world data on performance metrics, error rates, and user feedback from a limited rollout,
+and use them to validate assumptions before proceeding further.</li>
+<li>Increased trust in your platform
+Stakeholders: developers, operators, and other users, will gain confidence in the platform when they see that changes
+are deployed safely and reliably, with safeguards in place to detect and respond to issues.</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="whats-next">What's next<a href="https://docs.kratix.io/blog/healthcheck-progressive-rollout#whats-next" class="hash-link" aria-label="Direct link to What's next" title="Direct link to What's next">​</a></h2>
+<p>With the introduction of health checks in Kratix, platform engineers and Promise authors now have a powerful tool to drive safer, smarter, and more observable upgrades.
+By embedding health logic directly into resource workflows, Kratix can track the status of each individual resource and gate rollout progression accordingly.</p>
+<p>This unlocks the ability to perform progressive rollouts - updating one resource at a time, validating its health before proceeding.
+This dramatically reduces the risk of widespread failures and makes it easier to pinpoint and debug issues when they occur.
+It also brings greater confidence and control to platform teams managing complex workloads across multiple environments.</p>
+<p>If you’re looking to improve the reliability and maintainability of your service updates, health checks are a foundational step forward.
+Check out our <a href="https://docs.kratix.io/ske/guides/healthchecks">step-by-step guide</a> to get started.
+We are working to add more Kratix native functionalities to make progressive upgrades easier for Promise authors, and are always keen to hear your thoughts and feedback.
+Let us know how you’re using them—we’d love to hear from you in our Slack or GitHub communities.</p>]]></content:encoded>
+            <category>kratix</category>
+            <category>SKE</category>
+            <category>healthcheck</category>
+            <category>upgrade</category>
+        </item>
         <item>
             <title><![CDATA[Speeding up local dev: fast feedback when building pipelines]]></title>
             <link>https://docs.kratix.io/blog/local-dev-pipelines</link>
