@@ -45,7 +45,7 @@ You can find all Kratix-created Service Accounts by filtering them using the `kr
 
 ### RBAC Objects
 
-#### Dynamic Controller RBAC 
+#### Dynamic Controller RBAC
 
 When a Promise is installed, Kratix spins up a dynamic controller to watch for Resource Requests on the Promise API. To ensure the Kratix Controller itself has the permissions to manage the Resources, it creates a Cluster Role (with permissions on the Promise CRD) and binds it to the Kratix Controller Service Account via a Cluster Role Binding. You can read more about Kubernetes RBAC in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
@@ -73,6 +73,12 @@ Once a Job is created, Kubernetes creates an associated [Pod](https://kubernetes
 * The `reader`: this container is responsible for injecting the Resource object into the `/kratix/input` directory.
 * The `work-creator`: this container is responsible for creating the Work associated with the Workflow. See more about the Work in the next section.
 * The `status-writer`: this container uses the `/kratix/metadata/status.yaml` file to update the Resource status.
+
+:::info
+
+Apart from the `status-writer`, all containers are actually set as `initContainers` to guarantee that they run in the right order.
+
+:::
 
 Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting `numberOfJobsToKeep` in the [Kratix Config](/main/reference/kratix-config/config) document.
 
