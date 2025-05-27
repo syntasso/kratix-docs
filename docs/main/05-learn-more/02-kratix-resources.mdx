@@ -37,7 +37,7 @@ You can find all Kratix-created ConfigMaps by filtering them using the `kratix.i
 
 ### ServiceAccount
 
-To run the workflows, Kratix creates a [Service Account](https://kubernetes.io/docs/concepts/security/service-accounts/) on the Resource namespace (or in the `kratix-platform-system` for Promise workflows). This Service Account is used by the Job to run the Workflow. If the `spec.serviceAccount` is set in your Workflow, Kratix does not create the Service Account and uses the one you provide.
+To run the workflows, Kratix creates a [Service Account](https://kubernetes.io/docs/concepts/security/service-accounts/) in the Resource namespace (or in the `kratix-platform-system` for Promise workflows). This Service Account is used by the Job to run the Workflow. If the `spec.rbac.serviceAccount` is set in your Workflow, Kratix does not create the Service Account and uses the one you provide.
 
 The Service Account is created the first time a Resource is requested in a particular namespace, and is deleted when the last Resource is removed from that namespace.
 
