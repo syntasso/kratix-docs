@@ -48,7 +48,7 @@ implementations, used with a Kratix-powered platform. A sample Crossplane
 Promise is under development.
 
 Check out [this
-page](../main/how-kratix-complements/crossplane) to see how
+page](../main/learn-more/how-kratix-complements/crossplane) to see how
 Kratix and Crossplane can work together. We also published [this blog
 post](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix),
 which contains more concrete examples.
