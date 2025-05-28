@@ -1,0 +1,129 @@
+---
+title: Generating Backstage Components
+description: Documentation for how to use the Backstage Controller to generate Backstage Components
+sidebar_label: Generating Backstage Components
+---
+
+The Backstage Controller generates Backstage components and templates for Promises and Resource Requests.
+
+## Prerequisites
+
+### Authenticating against the image registry
+
+Both the Backstage Controller image and the SKE Backstage Generator image used by the Controller are hosted in a private registry, to access
+these images when Deploying and using the Backstage Controller deployment, you will need to authenticate using the token you have been provided with.
+You can define your authentication credentials via a `docker-registry` secret named `syntasso-registry`:
+
+```yaml
+kubectl create secret docker-registry syntasso-registry \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=YOUR_TOKEN \
+  --namespace kratix-platform-system
+```
+
+Alternatively, you can host the image on an internal registry that your cluster has permission to pull from or load the image to your Kubernetes cache.
+
+### SKE Backstage plugins
+
+The generated Backstage Templates reference an action from the `ske-backend` Backstage plugin, this action is
+used to create a Resource Request.
+The generated Components are also used by the `ske-frontend` Backstage plugin to display
+Promise and Resource metadata.
+
+In order to utilise the Templates and Components, you should also install both the
+`ske-backend` and `ske-frontend` plugins into your Backstage instance.
+
+See [Configuring the Plugins](./plugins) for installation instructions.
+
+### Backstage Destination {#destination}
+
+You must have a Destination created with the `environment: backstage` label. See the
+[Kratix Backstage docs](./configuring-backstage#configure-a-destination-for-backstage)
+for setup instructions.
+
+## Installing the Backstage Controller
+
+The Controller is released separately from SKE. Its releases can be found [here](../../releases/backstage-controller).
+
+You can apply the Controller by installing the distribution at the desired version:
+
+```bash
+kubectl apply -f http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/<VERSION>/backstage-controller.yaml
+```
+
+## How does it work?
+
+The SKE Backstage Controller creates a Workflow that automatically generates the Backstage components and
+templates for your Promise. This Workflow runs in addition to the Configure Workflow for your Promises and Requests.
+
+### Promise Configure
+
+In a Promise Configure workflow, two Backstage manifests will be generated:
+
+- **Promise Component:** A Backstage Component representing the Promise.
+- **Promise Template:** A Backstage Template representing the Promise API (i.e. the CRD
+  for Resources created from this Promise).
+
+### Resource Configure
+
+In a Resource Configure workflow, a single Backstage manifest will be generated:
+
+- **Resource Component:** A Backstage Component representing the Resource.
+
+Check the [YAML File Format](./yaml-file-format) for examples of these manifests
+
+### Labelling Promises for automatic file generation
+
+To generate Backstage Components and Template for your Promise, as well as Components for requests for that Promise,
+label your Promise with `kratix.io/backstage: true`.
+
+```bash
+kubectl label promises PROMISE_NAME kratix.io/backstage=true
+```
+
+Or add the label to the Promise spec:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/backstage: "true"
+```
+
+## Customize Backstage Components
+
+You can customize the automatically generated Backstage Components and Templates by creating a cluster-wide 
+`BackstageEntityCustomization`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: BackstageEntityCustomization
+metadata:
+  name: my-customization
+spec:
+  destinationSelectors: # optional
+  - matchLabels:
+      environment: backstage
+  containers: # optional
+    - name: add-backstage-group
+      image: ghcr.io/syntasso/run-customization:v0.0.1
+```
+
+### Custom containers
+
+The containers defined in the customization will run after the `backstage-gen` container which generates the
+Components and Templates. They can be used to modify the existing `catalog-info.yaml` file created by the
+`ske-backstage-generator` or it can generate new files. This customization will apply to all Promises with label
+`kratix.io/backstage: true` as well as Resource Requests for these promises.
+
+If you want to edit the `catalog.info` or generate different files based on whether the Workflow is running for a
+Promise or Resource Request, the container can query the `KRATIX_WORKFLOW_TYPE` environment variable.
+For Promises, this is equal to `promise-backstage-gen` and for resources, `resource-backstage-gen`.
+
+### Destination Selectors
+
+By default, Destination selectors defined in the customization will apply to all generated Backstage components.
+You can use these to make sure that generated components are only scheduled to your Backstage destinations.
