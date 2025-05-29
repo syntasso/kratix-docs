@@ -259,7 +259,7 @@ from above can be found below.
   <summary>Example Flux Resources for `port-syncer` repository</summary>
 
   :::info
-  This example resource depends on a secret called `github-creds` to exist in the
+  This example resource depends on a secret called `git-credentials` to exist in the
   `flux-system` namespace. This secret should be configured based on the
   [FluxCD docs](https://fluxcd.io/flux/components/source/gitrepositories/#secret-reference).
   :::
@@ -277,7 +277,7 @@ spec:
   ref:
     branch: main
   secretRef:
-    name: github-creds
+    name: git-credentials
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
