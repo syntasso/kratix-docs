@@ -54,6 +54,13 @@ resource depending on the type of state store you are using.
     configuration and authentication options for the `Bucket` resource, see the
     [FluxCD docs](https://fluxcd.io/flux/components/source/buckets/).
 
+    :::info
+    This example depends on a secret called `minio-credentials` existing in the
+    `flux-system` namespace. This is only necessary if the repository is private
+    and there are a number of authentication options described in the
+    [FluxCD docs](https://fluxcd.io/flux/components/source/gitrepositories/#secret-reference).
+    :::
+
     ```yaml
     ---
     apiVersion: source.toolkit.fluxcd.io/v1beta1
@@ -90,6 +97,13 @@ resource depending on the type of state store you are using.
     authentication opitions for the `GitRepository` resource, see the [FluxCD
     docs](https://fluxcd.io/flux/components/source/gitrepositories/).
 
+    :::info
+    This example depends on a secret called `git-credentials` existing in the
+    `flux-system` namespace. This is only necessary if the repository is private
+    and there are a number of authentication options described in the
+    [FluxCD docs](https://fluxcd.io/flux/components/source/gitrepositories/#secret-reference).
+    :::
+
     ```yaml
     ---
     apiVersion: source.toolkit.fluxcd.io/v1
@@ -108,11 +122,10 @@ resource depending on the type of state store you are using.
     apiVersion: v1
     kind: Secret
     metadata:
-      name: ssh-credentials
+      name: git-credentials
       namespace: flux-system
-    spec:
-      type: Opaque
-      stringData:
+    type: Opaque
+    stringData:
       identity: |
         -----BEGIN OPENSSH PRIVATE KEY-----
         ...
