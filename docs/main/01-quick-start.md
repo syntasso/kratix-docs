@@ -4,162 +4,361 @@ title: Quick Start
 sidebar_label: Quick Start
 ---
 
-```mdx-code-block
-import PartialInstall from '@site/docs/_partials/installation/_single-cluster-install.md';
-import PartialConfigure from '@site/docs/_partials/installation/_single-cluster-configure.md';
-```
+# Quick Start
 
-One of the most powerful features of Kratix is its ability to handle requests for
-Resources, and deploy them to a specific remote location, Kubernetes or otherwise. However, Kratix also works well
-in a single Kubernetes cluster environment. This quick-start guide will walk you through the steps to
-install Kratix on a single cluster.
+This guide gives you a hands-on introduction to Kratix by demonstrating how
+Kratix provides self-service and fleet management in action through the use of
+Promises.
 
-## Prerequisite: Kubernetes cluster
+A Promise defines a service you want to offer your users, like a database,
+developer environment, or any internal capability—as-a-Service. Promises are the
+core concept of Kratix and the foundation of your platform. They are written by
+platform operators or contributors, and are consumed by the users of the
+platform, such as application developers.
 
-Kratix requires a Kubernetes cluster to run. If you don't already have a cluster, we
-recommend starting with a local cluster tool like
-[KinD](https://kind.sigs.k8s.io/docs/user/quick-start/) or
-[minikube](https://minikube.sigs.k8s.io/docs/start/).
 
-### cert-manager
+## Prerequisites
 
-Kratix requires [cert-manager](https://cert-manager.io/) to be installed in the
-cluster.
+To follow along, you'll need access to a Kubernetes cluster. Kratix works with
+any Kubernetes distribution:
 
-To install it, run:
+- Managed services like GKE, EKS, or AKS
 
-```bash
-kubectl apply --filename https://github.com/cert-manager/cert-manager/releases/download/v1.15.0/cert-manager.yaml
-```
+- On-premises clusters like OpenShift, Rancher, or vanilla Kubernetes
 
-Make sure that `cert-manager` is ready before installing Kratix:
+- Local environments like KinD or Minikube
 
-```shell-session
-$ kubectl get pods --namespace cert-manager
-NAME                                      READY   STATUS    RESTARTS   AGE
-cert-manager-7476c8fcf4-r8cnd             1/1     Running   0          19s
-cert-manager-cainjector-bdd866bd4-7d8zp   1/1     Running   0          19s
-cert-manager-webhook-5655dcfb4b-54r49     1/1     Running   0          19s
-```
+We recommend using a clean, disposable cluster for this quick start. If you're
+working in a shared or production-like environment, see the full [installation
+guide](/category/installing-kratix) to avoid configuration conflicts. The quick
+start deploys a local, insecure MinIO instance—intended only for local
+development.
 
-## 1. Install Kratix
+## Installation
 
-<PartialInstall />
+Kratix runs on Kubernetes and extends its API by introducing custom resources
+and controllers. Kratix can orchestrate resouces that are in Kubernetes, as well
+as those outside. Normally there are multiple steps to install and configure
+Kratix, bellow is a all-in-one quick-start installation experience that sets up
+everything you need, by running a single Job to install Kratix and its
+dependencies.
 
-### Configure
+<details>
+  <summary>What gets installed?</summary>
 
-<PartialConfigure />
+  The install manifest does the following:
 
-Once the system reconciles, the Kratix resources should now be visible on your
-cluster. You can verify its readiness by observing the `kratix-worker-system` namespace
-appearing in the cluster (it may take a couple of minutes):
+  1. Installs **cert-manager** to manage TLS certificates for Kratix webhooks
+  2. Deploys the **Kratix API server and controllers** in the `kratix-system` namespace
+  3. Deploys **MinIO**, a local S3-compatible bucket for storing declarative workloads
+  4. Installs and configures **Flux** to apply changes from the MinIO bucket via GitOps
+  5. Registers your Kubernetes cluster as a **Destination** so Kratix can schedule workloads to it
+</details>
 
-```shell-session
-$ kubectl get namespace kratix-worker-system
-NAME                   STATUS   AGE
-kratix-worker-system   Active   1m
-```
-
-## 2. Provide Postgres-as-a-Service via a Kratix Promise
-
-Install the sample Postgres Promise with the command below:
+Install Kratix:
 
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
+kubectl apply -f https://github.com/syntasso/kratix/releases/download/latest/kratix-quick-start-installer.yaml
 ```
 
-Installing the Promise will eventually start the Postgres Operator on your cluster. You
-can verify by running:
+After a minute the platform controller should be running:
 
-```console
-kubectl get pods
+```bash
+kubectl get pods -n kratix-platform-system
 ```
 
-It may take a few seconds, but you should eventually see something similar to:
-```console
-NAME                                 READY   STATUS    RESTARTS   AGE
-postgres-operator-7dccdbff7c-2hqhc   1/1     Running   0          1m
-```
+You should see output similar to:
 
-## 3. Self serve a Postgres
-
-Once the Postgres Operator is up and running, you can request a new Postgres Resource with
-the command below:
-
-```console
-kubectl apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/resource-request.yaml
-```
-
-You can verify the Pipeline pod by running:
-
-<!-- TODO: Verify pipeline pod name -->
-
-```shell-session
-$ kubectl get pods
-NAME                                          READY   STATUS      RESTARTS   AGE
-//highlight-next-line
-configure-pipeline-postgresql-default-8f012   0/1     Completed   0          72s
-postgres-operator-6c6dbd4459-pbcjp            1/1     Running     0          6m55s
-```
-
-Eventually, the Postgres pods will come up as well:
-
-```shell-session
-$ kubectl get pods
-NAME                                         READY   STATUS      RESTARTS   AGE
-//highlight-start
-acid-example-postgresql-0                    1/1     Running     0          113s
-//highlight-end
-postgres-operator-6c6dbd4459-pbcjp           1/1     Running     0          6m55s
-configure-pipeline-postgresql-default-8f012  0/1     Completed   0          2m17s
-```
-
-
-You are now ready to use your Postgres Resources!
-
-To validate, you can access it through the `psql` environment by running:
-
-```
-kubectl exec -it acid-example-postgresql-0 -- sh -c "
-    PGPASSWORD=$(kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d) \
-    PGUSER=$(kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.username}' | base64 -d) \
-    psql bestdb"
+```bash
+NAME                                        READY   STATUS    RESTARTS   AGE
+kratix-platform-controller-manager          1/1     Running   0          2m
 ```
 
 <details>
+  <summary><strong>Having issues? Here's how to debug the installer Job</strong></summary>
 
-<summary> Accessing Postgres locally </summary>
+If the Kratix quick-start Job fails, here are some steps to help troubleshoot the issue:
 
-The command above will execute the `psql` command directly in the Postgres container. If you want to access the Postgres instance locally, you should run the following command to open a port on your local machine:
+📋 1. Check the Job status
 
 ```bash
-kubectl port-forward pod/acid-example-postgresql-0 5432:5432 -n default
+kubectl get jobs
+kubectl describe job kratix-quick-start-installer
 ```
 
-On a separate terminal, you can get the database connection password (string upto the `%`) by running:
+Look for `failed` conditions or pod-level errors.
 
-```console
-kubectl get secret postgres.acid-example-postgresql.credentials.postgresql.acid.zalan.do \
-    -o 'jsonpath={.data.password}' | base64 -d
+🔍 2. View logs from the installer pod
+
+Find the pod name:
+
+```bash
+kubectl get pods -l job-name=kratix-quick-start-installer
 ```
 
-The username is `postgres`.
+Then get the logs:
 
-You can now connect to the Postgres database system with administration tools, like [PgAdmin](https://www.pgadmin.org/), accessing Postgres on Host `localhost` and port `5432`.
+```bash
+kubectl logs <installer-pod-name>
+```
+
+This will show exactly which step failed (e.g. cert-manager install, Kratix controller readiness, config sync).
+
+🧪 3. Check pod readiness in system namespaces
+
+Sometimes pods take longer to pull images or start up, especially in cold or constrained environments. Check system namespaces:
+
+```bash
+kubectl get pods -n cert-manager
+kubectl get pods -n kratix-platform-system
+kubectl get pods -n flux-system
+```
+
+Use `kubectl describe` on any pods stuck in `Pending` or `CrashLoopBackOff` for more detail.
+
+📦 4. Common causes
+
+- Slow image pulls or cluster resource limits
+- Webhook service not ready before config is applied
+- Missing cluster DNS or RBAC issues in custom environments
+
+🧰 5. Retry the job manually (if needed)
+
+If you'd like to re-run the installer Job:
+
+```bash
+kubectl delete job kratix-quick-start-installer
+kubectl apply -f kratix-quick-start-installer.yaml
+```
+
+This will re-run the full installation logic from scratch.
 
 </details>
 
-## Clean up
+## Publish a Promise
 
-To clean up the created resources, run:
+Right now, the platform is empty. To offer services, you publish Promises. This
+is traditionally done by platform operators or contributors.
 
-```console
-kubectl delete --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
-kubectl delete --filename https://github.com/syntasso/kratix/releases/latest/download/install-all-in-one.yaml
+Let’s start with by publishing a simple PostgreSQL Promise:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/promise.yaml
 ```
 
-## 🎉 Congratulations!
+This makes a new custom resource type available in your cluster:
 
-You have successfully installed Kratix and used it to deliver Postgres-as-a-Service to
-your platform. Check out our [guides](/category/guides) to learn more about Kratix
-capabilities.
+```bash
+kubectl get postgresqls.marketplace.kratix.io
+```
+
+You’ll see no instances yet, but the new API is now live. App developers can
+start requesting PostgreSQL instances with minimal YAML.
+
+:::info
+Want to front your platform with a Portal like Backstage? Syntasso Kratix Enterprise (SKE) makes integrations with portals simple and production-ready. [Learn more →](https://syntasso.io/pricing)
+:::
+
+### Request an Instance
+
+Now that a Promise is available, the platform consumers (often app developer) can
+now start self-serving the services that they need. The platform provides the
+abstraction so they don’t need to know how the PostgreSQL is provisioned. They simply
+fill out a custom resource request with a few fields. The platform takes
+care of the rest.
+
+Let’s look at what the Promise API exposes:
+
+```yaml
+kubectl explain postgresqls.marketplace.kratix.io.spec
+```
+
+This command provides a detailed description of the `postgresql` resource and
+what fields are available in the `spec` section. All of the fields are optional,
+with sensible defaults provided by the platform. This allows users to focus on
+what matters most to them, without getting bogged down in configuration details.
+
+Lets create a simple PostgreSQL request:
+
+```yaml
+# copy into a postgresql-request.yaml file
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
+metadata:
+  name: example
+  namespace: default
+spec:
+  teamId: "acme-org-team-a"
+  version: "16"
+  backupEnabled: false
+```
+
+Apply the request:
+
+```bash
+kubectl apply -f postgresql-request.yaml
+```
+
+This triggers Kratix to reconcile the request. It will trigger the workflows
+defined in the Promise, and schedule any declarative workloads needed. From the
+users persepective, all they have to do is watch the status of their request:
+
+```bash
+kubectl get postgresql.marketplace.kratix.io example -w
+```
+
+Eventually the request will be marked as `Ready`:
+
+```yaml
+NAME      STATUS
+dev       1Gi instance v16 deployed successfully without backups
+```
+
+Further inspection of the status will show additional details, like the
+connection information:
+
+```yaml
+kubectl get postgresql example -o yaml'
+...
+status:
+  conditions:
+  - lastTransitionTime: "2025-05-27T13:15:15Z"
+    message: Pipelines completed
+    reason: PipelinesExecutedSuccessfully
+    status: "True"
+    type: ConfigureWorkflowCompleted
+  connectionDetails:
+    credentials: 'Username and Password available in Secret: "default/postgres.acme-org-team-a-example-postgresql.credentials.postgresql.acid.zalan.do"'
+    host: acme-org-team-a-example-postgresql.default.svc.cluster.local
+  instanceName: acme-org-team-a-example-postgresql
+  lastSuccessfulConfigureWorkflowTime: "2025-05-27T13:15:15Z"
+  message: 1Gi instance v16 deployed successfully without backups
+  observedGeneration: 4
+
+```
+
+In this example, the PostgreSQL is provisioned in the Kubernetes cluster. A
+Promise can orchestrate any system or service, so you could just as easily swap
+the Promise to provision a managed database in the cloud, and provide back to
+the user the connection information for that service instead. Kratix enables you
+to build your platform your way.
+
+### Update an Instance
+
+Need to make a change? Just update the spec. For example, increasing storage:
+
+```yaml
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
+metadata:
+  name: example
+  namespace: default
+spec:
+  teamId: "acme-org-team-a"
+  version: "16"
+  # changed from false to true
+  backupEnabled: true
+```
+
+Re-apply it:
+
+```bash
+kubectl apply -f postgresql-request.yaml
+```
+
+Kratix reconciles the changes automatically—no custom scripts, no manual intervention.
+In this example, a new CronJob is created to handle backups. Wait for the update
+to complete:
+
+```bash
+kubectl get postgresqls.marketplace.kratix.io example -w
+```
+
+Eventually, the status will show the update was successful:
+
+```yaml
+NAME      STATUS
+example   1Gi instance v16 deployed successfully with backups enabled
+```
+
+If we check the CronJob, we can see that the backup job has been created:
+
+```bash
+kubectl get cronjob
+k get cronjobs
+NAME                                                SCHEDULE      TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+logical-backup-acme-org-team-a-example-postgresql   30 00 * * *   <none>     False     0        <none>          30s
+```
+
+## Manage a Fleet
+
+In order to show how Kratix can manage a fleet of instances, lets create a
+couple more PostgreSQL instances. This will demonstrate how Kratix can
+orchestrate changes across multiple instances at once:
+
+```
+kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/multiple-resource-requests.yaml
+```
+
+You should then see the new instances being created:
+```
+kubectl get pods
+AME                                    READY   STATUS    RESTARTS   AGE
+acme-org-team-a-example-postgresql-0   1/1     Running   0          2m
+acme-org-team-b-dev-postgresql-0       1/1     Running   0          5s
+acme-org-team-c-testing-postgresql-0   1/1     Running   0          5s
+```
+
+Now, let's say you want to update all instances to have a new modification. This
+could be patching a CVE in the images, updating the configuration, or even
+expanding whats deployed. You can do this by updating the Promise itself. In
+this case, lets update the Promise to increase the default replica count of the
+PostgreSQL instances from 1 to 3. This will cause all existing instances to be
+updated, and any new instances created to use the new default.
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/promise-ha.yaml
+```
+
+Kratix will roll out the update to every instance that uses the Promise.
+Platform contributors gain full control and visibility without disrupting
+application teams.
+
+After a few moments, you can observe the affect of the rolling:
+
+```bash
+kubectl get pods
+NAME                                                       READY   STATUS      RESTARTS   AGE
+acme-org-team-a-example-postgresql-0                       1/1     Running     0          3m
+acme-org-team-a-example-postgresql-1                       1/1     Running     0          14s
+acme-org-team-a-example-postgresql-2                       1/1     Running     0          9s
+acme-org-team-b-dev-postgresql-0                           1/1     Running     0          1m
+acme-org-team-b-dev-postgresql-1                           1/1     Running     0          14s
+acme-org-team-b-dev-postgresql-2                           1/1     Running     0          10s
+acme-org-team-c-testing-postgresql-0                       1/1     Running     0          1m
+acme-org-team-c-testing-postgresql-1                       1/1     Running     0          14s
+acme-org-team-c-testing-postgresql-2                       1/1     Running     0          9s
+```
+
+## Business Processes, Built In
+
+Promises can also encode your internal standards—like compliance checks, cost
+controls, or governance policies. Each request automatically includes the rules
+your org cares about.
+
+Self-service doesn’t mean a loss of control. With Kratix, it means speed **and** safety.
+
+## Summary
+
+In this quick start, you:
+
+- Installed Kratix and published a Promise
+- Created and updated a PostgreSQL instance
+- Saw how fleet-wide changes are easy
+
+If you're ready to go deeper:
+
+- [Try the Kratix Workshop →](https://docs.syntasso.io/workshop)
+- [Explore Syntasso Kratix Enterprise →](https://docs.syntasso.io/ske)
+
+👉 **Want to see how this fits your platform strategy? [Book a call with us →](https://syntasso.io/#contact-us)**
