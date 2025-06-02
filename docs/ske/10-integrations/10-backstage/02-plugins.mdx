@@ -212,7 +212,7 @@ If no `ske.kubernetes` section is present, the backend plugin will assume Backst
 
 ### Configure the Git integration
 
-:::info 
+:::info
 
 The Git integration is deprecated. By configuring Backstage with the Kubernetes integration, you will get the following benefits:
 
@@ -230,7 +230,7 @@ To configure Backstage to talk to Kubernetes via a Git repository, add the follo
 ske:
   mode: gitops
   scm:
-    token: "my-access-token" # git access token
+    token: "my-access-token" # optional; git access token
     repoUrl: "https://github.com/my-org/my-repo" # repository url
     type: "github" # optional; git provider, currently one of "github" or "gitlab" (used to determine username if `username` not set)
     username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
@@ -242,6 +242,8 @@ ske:
 ```
 
 The backend plugin uses basic auth to authenticate against the Git provider. If you wish to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the `username` field, and set the `token` field to the password or token. Otherwise, the username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username` or `type` must be provided.
+
+The `token` field may not be provided when Backstage is configured with GitHub App credentials, as the GitHub App will be used to authenticate against the Git provider.
 
 The `repoUrl` is the repository to which Backstage will push the resource requests; you must configure your platform to reconcile on new documents.
 
