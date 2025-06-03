@@ -40,16 +40,16 @@ The scheduling for a Promise may be changed by modifying either:
 See [Managing Multiple Destinations](../destinations/multidestination-management) for more
 details on scheduling.
 
-### Misscheduled workloads
+### Misplaced workloads
 
 An update to the Promise's scheduling may result in a set of Destinations previously
 targeted from old version of the Promise no longer being targeted.
 
 When this happens, existing files written to the Destination **are not removed**, but are
-marked as `misscheduled` by Kratix and are **not updated any more**.
+marked as `misplaced` by Kratix and are **not updated any more**.
 
 It's up to the platform team to manually delete these resources by deleting all
-`WorkPlacement` resources marked with the `kratix.io/misscheduled` label.
+`WorkPlacement` resources marked with the `kratix.io/misplaced` label.
 
 #### Example
 
