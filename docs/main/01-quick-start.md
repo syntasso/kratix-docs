@@ -162,11 +162,12 @@ kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/r
 Once published, a new custom resource type becomes available in your cluster:
 
 ```bash
-kubectl get postgresqls.marketplace.kratix.io
+kubectl get crds -l kratix.io/promise-name
 ```
 
-While no instances are found, this confirms the new API is available. Users can
-self-serve PostgreSQL instances providing only the values your API requires.
+This shows that the new API is available which can be used via all the `kubectl` commands
+such as get, create, or delete. This means consumers can now self-serve PostgreSQL
+instances providing only the values your API requires.
 
 :::info
 Don't want your consumers managing tabs vs spaces in YAML? All the portals on the market
@@ -188,7 +189,7 @@ Let’s look at what the Promise API exposes:
 kubectl explain postgresqls.marketplace.kratix.io.spec
 ```
 
-This command provides a detailed description of the `postgresql` resource and
+This command provides a detailed description of the `postgresql` resource type and
 what fields are available in the `spec` section. In this example, all of the fields are
 optional since the platform can provide sensible defaults. Reducing required fields
 allows consumers to focus on what matters most to them and grow into more specific
@@ -207,6 +208,7 @@ spec:
   teamId: "acme-org-team-a"
 EOF
 ```
+
 From the consumers perspective, they can watch the status of their request until it
 is ready for use. This waiting can be done through automation that results in a
 notification or be checked on by a human user:
@@ -215,7 +217,7 @@ notification or be checked on by a human user:
 kubectl get postgresql.marketplace.kratix.io example --watch
 ```
 
-Eventually the request will be marked as `Ready`:
+Eventually the request will be updated with a user friendly status:
 
 ```yaml
 NAME      STATUS
@@ -258,8 +260,8 @@ status:
 
 ```
 
-Keep in mind that these fields are how the producer communicates important information
-to the consumer since the consumer should not need to know how the database is created.
+These fields are how the producer communicates important information to the consumer
+since the consumer should not need to know how the database is created.
 
 :::tip
 These status fields are an example of how Kratix provides the framework so that you can
@@ -287,26 +289,29 @@ spec:
 EOF
 ```
 
-This time Kubernetes will indicate that the instance is `configured` instead of
-`created`. But whether it is a create or an update Kratix will reconcile the changes
-automatically without any custom scripts or manual intervention. In this example, a new
-CronJob is created to handle backups. Wait for the update to complete:
+This time after running the apply command the Kubernetes CLI will respond that the
+instance is `configured` instead of `created`. But whether it is a create or an update
+Kratix will reconcile the changes automatically without any custom scripts or manual
+intervention. In this example, a new CronJob is created to handle backups. Wait for the
+update to complete:
 
 ```bash
-kubectl get postgresqls.marketplace.kratix.io example --watch
+kubectl get postgresqls.marketplace.kratix.io example
 ```
 
-Eventually, the status will show the update was successful:
+Once the Workflow runs, the status will show the update was successful:
 
 ```bash
 NAME      STATUS
 example   1Gi instance v16 deployed successfully with backups enabled
 ```
 
-If we check the CronJob, we can see that the backup job has been created:
+A successful Workflow means that the expectation has been set, but the decoupled GitOps
+will reconcile on a schedule. So it may take a couple of minutes for the backup CronJob
+to become visible:
 
 ```bash
-kubectl get cronjob
+kubectl get cronjob --watch
 ```
 
 ```bash
@@ -333,9 +338,11 @@ kubectl get pods
 ```
 ```bash
 NAME                                   READY   STATUS    RESTARTS   AGE
+...
 acme-org-team-a-example-postgresql-0   1/1     Running   0          2m
 acme-org-team-b-dev-postgresql-0       1/1     Running   0          5s
 acme-org-team-c-testing-postgresql-0   1/1     Running   0          5s
+...
 ```
 
 Now, let's say you need to patch a CVE in the PostgreSQL images, updating the
