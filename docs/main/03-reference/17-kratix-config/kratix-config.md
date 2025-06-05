@@ -27,7 +27,7 @@ data:
     # Number of times Kubernetes retries a failing workflow Job before marking it failed.
     # Kratix does not set a default for this field, so Kubernetes uses its own
     # Job default (6) if it is omitted.
-    backoffLimit: 6
+    backoffLimit: 4
     # Selective cache for Secrets to limit memory usage. Please ensure Secrets used by Kratix are
     # created with label: app.kubernetes.io/part-of=kratix. Default is false.
     selectiveCache: false
