@@ -71,6 +71,9 @@ metadata:
   labels: # Labels (optional)
   annotations: # Annotations (optional)
 spec:
+  jobOptions:
+    # Number of times Kubernetes retries a failing workflow Job before marking it failed.
+    backoffLimit: 4
   volumes:
     - # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:
