@@ -466,9 +466,6 @@ containers (not Kratix containers) by either:
     namespace: kratix-platform-system
   data:
     config: |
-      # Number of times Kubernetes retries a failing workflow Job before marking it failed
-      # Kratix does not set a default for this field; Kubernetes uses its own Job default if omitted
-      backoffLimit: 6
       workflows:
         defaultContainerSecurityContext:
           # Security context fields, e.g.:
