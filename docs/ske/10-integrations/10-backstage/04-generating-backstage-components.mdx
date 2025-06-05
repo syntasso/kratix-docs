@@ -22,7 +22,8 @@ kubectl create secret docker-registry syntasso-registry \
   --namespace kratix-platform-system
 ```
 
-Alternatively, you can host the image on an internal registry that your cluster has permission to pull from or load the image to your Kubernetes cache.
+The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
+For any resource requests created in other namespaces, you need to create the same registry secret in them as well.
 
 ### SKE Backstage plugins
 
