@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.e08764aa.css">
-<script src="/assets/js/runtime~main.231ae23b.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d7ce8f59.js" defer="defer"></script>
 <script src="/assets/js/main.500eb652.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -48,7 +48,7 @@
 <p>You can find the Cluster Role and Cluster Role Binding by filtering them with the <code>kratix.io/promise-name</code> label.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="the-workflow-sa-rbac">The Workflow SA RBAC<a href="#the-workflow-sa-rbac" class="hash-link" aria-label="Direct link to The Workflow SA RBAC" title="Direct link to The Workflow SA RBAC">​</a></h4>
 <p>To execute the Workflow, Kratix also gives the Workflow Service Account the right permissions. For that, it creates Roles and Role Bindings. Those objects are created in the same namespace as the Resource (or in the <code>kratix-platform-system</code> namespace for Promise workflows).</p>
-<p>In certain occasions, Kratix also creates Cluster Roles and Cluster Role Bindings to enable the Workflow to access cluster-wide resources. This only happens when the Workflow itself requests <a href="/main/reference/workflows#rbac">custom RBAC permissions</a>.</p>
+<p>On certain occasions, Kratix also creates Cluster Roles and Cluster Role Bindings to enable the Workflow to access cluster-wide resources. This only happens when the Workflow itself requests <a href="/main/reference/workflows#rbac">custom RBAC permissions</a>.</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="job-and-pod">Job and Pod<a href="#job-and-pod" class="hash-link" aria-label="Direct link to Job and Pod" title="Direct link to Job and Pod">​</a></h3>
 <p>Kratix creates one <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/" target="_blank" rel="noopener noreferrer">Job</a> per Pipeline defined in the <code>workflows</code> section. Promise workflows always run in the <code>kratix-platform-system</code> namespace, while Resource workflows run in the same namespace as the Resource.</p>
 <p>The Jobs Kratix creates have a series of labels that allow you to filter them by Promise and Resource:</p>
