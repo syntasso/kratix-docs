@@ -55,7 +55,7 @@ You can find the Cluster Role and Cluster Role Binding by filtering them with th
 
 To execute the Workflow, Kratix also gives the Workflow Service Account the right permissions. For that, it creates Roles and Role Bindings. Those objects are created in the same namespace as the Resource (or in the `kratix-platform-system` namespace for Promise workflows).
 
-In certain occasions, Kratix also creates Cluster Roles and Cluster Role Bindings to enable the Workflow to access cluster-wide resources. This only happens when the Workflow itself requests [custom RBAC permissions](/main/reference/workflows#rbac).
+On certain occasions, Kratix also creates Cluster Roles and Cluster Role Bindings to enable the Workflow to access cluster-wide resources. This only happens when the Workflow itself requests [custom RBAC permissions](/main/reference/workflows#rbac).
 
 ### Job and Pod
 
