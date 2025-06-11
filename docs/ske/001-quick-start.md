@@ -402,6 +402,9 @@ If you're ready to go deeper:
 - [Try writing your own Promise in the Kratix Workshop →](/workshop/intro)  
 - [Explore Syntasso Kratix Enterprise →](/ske)  
 
+For information about our Enterprise Promise marketplace, [book
+a call with us](https://syntasso.io/#contact-us).
+
 :::tip
 **Want to see how this fits your platform strategy?** [Book a call with us →](https://syntasso.io/#contact-us)
 :::
