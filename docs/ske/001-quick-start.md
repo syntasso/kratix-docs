@@ -127,9 +127,9 @@ kubectl describe job ske-quick-start-installer -n kratix-platform-system
 🔍 2. View logs from the installer pod
 
 ```bash
-kubectl get pods -l job-name=ske-quick-start-installer -n kratix-platform-system
-kubectl -n kratix-platform-system logs <installer-pod-name>
+kubectl logs -f job/ske-quick-start-installer -n kratix-platform-system
 ```
+This will show exactly which step failed (e.g. cert-manager install, Kratix controller readiness, config sync, Backstage).
 
 🧪 3. Check pod readiness in system namespaces
 

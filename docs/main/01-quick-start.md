@@ -109,16 +109,8 @@ Look for `failed` conditions or pod-level errors.
 
 🔍 2. View logs from the installer pod
 
-Find the pod name:
-
 ```bash
-kubectl get pods -l job-name=kratix-quick-start-installer
-```
-
-Then get the logs:
-
-```bash
-kubectl logs <installer-pod-name>
+kubectl logs -f job/kratix-quick-start-installer
 ```
 
 This will show exactly which step failed (e.g. cert-manager install, Kratix controller readiness, config sync).
@@ -149,8 +141,6 @@ If you'd like to re-run the installer Job:
 kubectl delete job kratix-quick-start-installer
 kubectl apply -f kratix-quick-start-installer.yaml
 ```
-
-This will re-run the full installation logic from scratch.
 
 </details>
 
