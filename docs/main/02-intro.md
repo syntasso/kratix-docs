@@ -11,8 +11,8 @@ slug: /
 Kratix is an open-source platform framework built by
 [Syntasso](https://syntasso.io) to help you create an internal developer
 platform exactly the way your organisation needs it. We believe great platforms
-can't be bought off the shelf, they must be built and tailed to your
-organisations needs. Kratix provides the flexibility, integration, and
+can't be bought off the shelf, they must be built and tailored to your
+organisation's needs. Kratix provides the flexibility, integration, and
 automation needed to build your platform your way.
 
 Some teams describe Kratix as a platform orchestrator, designed specifically to
