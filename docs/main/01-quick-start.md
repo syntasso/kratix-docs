@@ -72,6 +72,13 @@ Install Kratix:
 kubectl apply -f https://github.com/syntasso/kratix/releases/download/latest/kratix-quick-start-installer.yaml
 ```
 
+This will deploy a job that installs SKE and its dependencies. To follow along
+with the installation process, you can watch the logs of the installer job:
+
+```bash
+kubectl logs -f job/kratix-quick-start-installer -n kratix-platform-system
+```
+
 In less than 5 minutes all dependencies will be installed and the platform controller
 should be running:
 
@@ -152,7 +159,7 @@ This will re-run the full installation logic from scratch.
 Right now, the platform is empty. To offer services, you publish Promises. This is
 traditionally done by platform operators or contributors.
 
-While Promises can be custom written, there is also a community marketplace to get
+While Promises can be custom written, there is also a community [marketplace](/marketplace) to get
 started. Start by publishing a simple marketplace PostgreSQL Promise to your platform:
 
 ```bash
@@ -232,6 +239,11 @@ Behind the scenes, Kratix is running a set of Workflows defined by the platform 
 in the Promise. These Workflows incorporate all of the business rules and required
 actions before scheduling any declarative workloads to the correct GitOps repository.
 
+You can see the workflows that were run by inspecting the Pods:
+```bash
+kubectl get pods -l kratix.io/promise-name=postgresql
+```
+
 While readiness is useful, often services demand a number of additional specifications
 for use. Further inspection of the request status will show any additional details the
 provider defined. In this case, it includes a number of fields including connection
@@ -270,9 +282,11 @@ focus on building your platform your way.
 
 ### Update an Instance
 
-Need to make a change? Platforms aren't just for quick-starts. As a consumer, if your
-requirements change just update the spec and re-submit the request. Promises are written
-to manage updates in a safe way.
+Kratix isn't a fire and forget solution; it handles the full lifecycle,
+including all day 2 operations.  For example, if your requirements change, it's
+easy to adapt. As a consumer,  you simply update the spec and re-submit the
+request. Promises are designed  to safely handle updates without requiring
+custom scripts or manual intervention.
 
 For example, introducing backups is as simple as adding another field to the request:
 
@@ -296,7 +310,7 @@ intervention. In this example, a new CronJob is created to handle backups. Wait 
 update to complete:
 
 ```bash
-kubectl get postgresqls.marketplace.kratix.io example
+kubectl get postgresqls.marketplace.kratix.io example -w
 ```
 
 Once the Workflow runs, the status will show the update was successful:
@@ -321,7 +335,7 @@ logical-backup-acme-org-team-a-example-postgresql   30 00 * * *   <none>     Fal
 
 ## Manage a Fleet
 
-And it is not just consumers who grow and change. A platform with 10s, 100s or even
+It's not just consumers who grow and change. A platform with 10s, 100s or even
 1000s of consumers needs to also manage changing requirements or even new security
 risks.
 
@@ -334,7 +348,7 @@ kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/r
 
 This will create 2 more instances as shown below:
 ```bash
-kubectl get pods
+kubectl get pods -l application=spilo
 ```
 ```bash
 NAME                                   READY   STATUS    RESTARTS   AGE
@@ -362,7 +376,7 @@ kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/r
 You can observe the roll out in action with the following command:
 
 ```bash
-kubectl get pods --watch
+kubectl get pods -l application=spilo --watch
 ```
 
 This will show a number of pods being created and completed:
