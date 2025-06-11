@@ -6,10 +6,10 @@ sidebar_label: SKE Backstage Generator
 
 :::note
 If you are using the [Backstage Controller](./generating-backstage-components) you will
-not need to use the SKE Backstage Generator directly
+not need to use the SKE Backstage Generator Pipeline Stage directly
 :::
 
-The SKE Backstage Generator provides automated generation of the necessary Template and
+The SKE Backstage Generator Pipeline Stage provides automated generation of the necessary Template and
 Component manifests for your Promises and requested Resources.
 
 These manifests are read by Backstage and are designed to work seamlessly with the
@@ -19,7 +19,7 @@ SKE Backstage plugins.
 
 ### SKE Backstage plugins
 
-The `ske-backstage-generator` uses an action from the `ske-backend` Backstage plugin.
+The `ske-backstage-generator` Stage uses an action from the `ske-backend` Backstage plugin.
 This action is used within the generated Template to create a Resource Request.
 The generated Components are also used by the `ske-frontend` Backstage plugin to display
 Promise and Resource metadata.
@@ -37,7 +37,7 @@ for setup instructions.
 
 ## How does it work?
 
-The `ske-backstage-generator` image is intended to be run as part of your
+The `ske-backstage-generator` Pipeline Stage is intended to be run as part of your
 Configure Pipeline for your Promise and Resource Workflows. It will
 auto-generate Backstage Template and Component manifests, and schedule them to
 your [Backstage Destination](#destination).
@@ -60,7 +60,7 @@ In a Resource Configure workflow, a single Backstage manifest will be generated:
 
 Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
 
-## Accessing the SKE Generator image
+## Accessing the SKE Backstage Generator Pipeline Stage
 
 ### Pulling the image locally
 
@@ -113,7 +113,7 @@ kind load docker-image registry.syntasso.io/syntasso/ske-backstage-generator:VER
 
 For other tools, follow their specific documentation.
 
-When using the image in your Workflows, you can define the secret you want to use for authentication within your Promise, see below for more details.
+When using the SKE Backstage Generator in your Workflows, you can define the secret you want to use for authentication within your Promise, see below for more details.
 
 :::info
 
@@ -122,9 +122,9 @@ push it to an internal registry which your cluster has permission to pull from.
 
 :::
 
-## Using the image in your Workflows
+## Using the SKE Backstage Generator in your Workflows
 
-To use the `ske-backstage-generator` image, update your Promise definition to include the
+To use the `ske-backstage-generator` Pipeline Stage, update your Promise definition to include the
 generator as a workflow step for both the Promise Configure and Resource Configure
 workflows:
 
@@ -168,9 +168,9 @@ the Template to create a Resource, you should see the resource Component
 appearing as well as the Resource itself being created in your cluster.
 
 In order to have the full status of your Promise or Resource request displayed in Backstage,
-you should place the aspect as the last image in the last pipeline of your workflow.
+you should place the Pipeline Stage as the last Stage in the last pipeline of your workflow.
 
-If the aspect needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
+If the Pipeline Stage needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
 Component Promise](#ske-backstage-component-promise). Otherwise, you will observe only one of the components
 in Backstage, and Backstage will emit a warning:
 
@@ -279,7 +279,7 @@ You can also customise the fields by setting the following annotations in the Pr
 * `ske.backstage.component/dependsOn`: comma-separated list of values for `spec.dependsOn`
 
 For example, to set `spec.owner` and `spec.providesApis`, you can update your
-pipeline stage with the snippet below:
+Pipeline Stage with the snippet below:
 
 ```yaml title="Promise workflow with custom Component values"
   #...

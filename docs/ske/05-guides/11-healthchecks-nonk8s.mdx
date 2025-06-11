@@ -1,7 +1,7 @@
 ---
 title: Health Checks for non Kubernetes resources
 description: Implementing non Kubernetes Resource Health Checks
-sidebar_label: Health Checks for non Kubernetes Resource
+sidebar_label: Health Checks for non Kubernetes Resources
 ---
 
 ## Pre-requisites
@@ -16,7 +16,7 @@ In this guide we will explore a Promise that runs Health Checks on non Kubernete
 
 ## How to run Health Checks on resources outside of your Destination
 
-Health Checks are implemented in SKE via `HealthDefinition` objects. As part of a Health Definition, you can provide a set of container images that encapsulate your health check logic, including making API calls to external resources that live outside of your Kubernetes Destination.
+Health Checks are implemented in SKE via `HealthDefinition` objects. As part of a Health Definition, you can provide a set of Pipeline Stages that encapsulate your health check logic, including making API calls to external resources that live outside of your Kubernetes Destination.
 
 ## Example Promise
 
@@ -80,7 +80,7 @@ spec:
 ```
 
 There are one two containers within the Resource Configure pipeline 'rds-configure'. The first container `aws-rds-pipelines` will provision and manage the RDS instance.
-While the second container `rds-health-check` can schedule a Health Definition that checks for RDS status.
+While the second container `rds-generate-health-check` can schedule a Health Definition that checks for RDS status.
 
 For reference, the generated Health Definition could look like:
 
