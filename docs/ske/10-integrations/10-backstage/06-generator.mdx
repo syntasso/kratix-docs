@@ -80,7 +80,7 @@ Once you have authenticated, you can pull any released version of the image.
 :::info
 
 You can select your version from the
-[releases page](../../releases/aspects/backstage-generator). Or, if you have both
+[releases page](../../releases/pipeline-stages/backstage-generator). Or, if you have both
 [GH CLI](https://cli.github.com/) and [JQ CLI](https://jqlang.github.io/jq/)
 installed, you can fetch the most recent released version using the following command:
 
@@ -171,7 +171,7 @@ In order to have the full status of your Promise or Resource request displayed i
 you should place the Pipeline Stage as the last Stage in the last pipeline of your workflow.
 
 If the Pipeline Stage needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
-Component Promise](#ske-backstage-component-promise). Otherwise, you will observe only one of the components
+Component Promise](./generator-promise). Otherwise, you will observe only one of the components
 in Backstage, and Backstage will emit a warning:
 
 ```
