@@ -12,7 +12,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 :::info
 
 In order to run through this page you need Syntasso Kratix Enterprise license **token**.
-Don't have one? [Request your free trial token →](https://www.syntasso.io/pricing)
+Don't have one? [Request your free trial token here](https://www.syntasso.io/pricing)
 
 :::
 
@@ -103,8 +103,13 @@ kubectl get pods -n kratix-platform-system
 And the output will be similar to:
 
 ```bash
-NAME                                        READY   STATUS    RESTARTS   AGE
-kratix-platform-controller-manager          1/1     Running   0          2m
+NAME                                                       READY   STATUS      RESTARTS   AGE
+backstage-84c6c6bc97-x9vp4                                 1/1     Running     0          48s
+backstage-controller-controller-manager-59f5dc86fd-dd8d7   1/1     Running     0          88s
+kratix-platform-controller-manager-57865f86c5-lp8bm        1/1     Running     0          88s
+minio-6c6bdc6456-hkw86                                     1/1     Running     0          88s
+ske-quick-start-installer-fmfbq                            0/1     Completed   0          113s
+
 ```
 
 <details>
@@ -115,15 +120,15 @@ If the Kratix `quick-start` Job fails, here are some steps to help troubleshoot 
 📋 1. Check the Job status
 
 ```bash
-kubectl get jobs
-kubectl describe job ske-quick-start-installer
+kubectl get jobs -n kratix-platform-system
+kubectl describe job ske-quick-start-installer -n kratix-platform-system
 ```
 
 🔍 2. View logs from the installer pod
 
 ```bash
-kubectl get pods -l job-name=ske-quick-start-installer
-kubectl logs <installer-pod-name>
+kubectl get pods -l job-name=ske-quick-start-installer -n kratix-platform-system
+kubectl -n kratix-platform-system logs <installer-pod-name>
 ```
 
 🧪 3. Check pod readiness in system namespaces
@@ -142,7 +147,7 @@ kubectl get pods -n flux-system
 🧰 5. Retry the job manually (if needed)
 
 ```bash
-kubectl delete job ske-quick-start-installer
+kubectl delete job ske-quick-start-installer -n kratix-platform-system
 kubectl apply -f ske-quick-start-installer.yaml
 ```
 
@@ -177,30 +182,29 @@ kubectl port-forward svc/backstage 7007:7007 -n kratix-platform-system
 ```
 
 Then navigate to [http://localhost:7007](http://localhost:7007) in your browser.
-You should see the Backstage UI with the Postgres Promise Component listed in
-the catalog.
+After a few moments should see the Backstage UI with the Postgres Promise Component listed in
+the catalog (you may need to refresh the page):
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/01-quick-start-catalog.png')} alt="The App Promise" />
 
-  <figcaption>Backstage catalog post-promise installation</figcaption>
 </figure>
 
 
-If you select `Templates` in the top right, you will then be able to see that
-the PostgreSQL Promise is available to be created.
+If you select `Create` in the top right, you will then be able to see that
+the PostgreSQL Template is available to be created.
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/02-quick-start-templates.png')} alt="The App Promise" />
 
-  <figcaption>Backstage templates post-promise installation</figcaption>
 </figure>
 
 ## Request an Instance (via Backstage)
 
 With the Promise published, consumers can use Backstage portal to request
-services. Fill in a request for a PostgreSQL instance using the
-PostgreSQL Promise template. Once the request is submitted, SKE will
+services. Fill in a request for a PostgreSQL instance using the PostgreSQL
+Promise template. For simplicity lets use the `default` namespace and leave all
+the fields set to their default values. Once the request is submitted, SKE will
 reconcile the request and create the instance in the cluster.
 
 
@@ -213,13 +217,16 @@ tool for the job.
 
 :::
 
-Once the instance is created, you can see the new resource in Backstage:
+Once the instance is created, you can see the new resource in Backstage by
+navigating back to the homepage:
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/03-quick-start-instance.png')} alt="The App Promise" />
 
   <figcaption></figcaption>
 </figure>
+
+If you click through to your requests you will see its details:
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/04-quick-start-instance-description.png')} alt="The App Promise" />
@@ -228,8 +235,10 @@ Once the instance is created, you can see the new resource in Backstage:
 </figure>
 
 You can see in the `status` section in the `Overview` tab that the request is
-ready and information on how to access the PostgreSQL instance is provided. All
-of this information is also available via the `kubectl` command line:
+ready and information on how to access the PostgreSQL instance is provided.
+Everything that is created is resembeld as resource in Kubernetes, Backstage is
+just a configured UI put in front of it. You can see the same information via
+the `kubectl` command line:
 
 ```bash
 kubectl get postgresqls.marketplace.kratix.io <name> -o yaml
@@ -239,14 +248,32 @@ SKE is mirroring the state of the resource in Backstage, enabling you to keep
 your Portal logic minimal and focused on the user experience, while SKE handles
 the heavy lifting of managing the resource lifecycle.
 
-Behind the scenes, Kratix is running a set of Workflows defined by the platform producer
-in the Promise. These Workflows incorporate all of the business rules and required
-actions before scheduling any declarative workloads to the correct GitOps repository.
+Behind the scenes, Kratix is running a set of Workflows defined by the platform
+producer in the Promise. These Workflows incorporate all of the business rules
+and required actions before scheduling any declarative workloads to the correct
+GitOps repository. In this case the workflow for the PostgreSQL Promise was
+quite simple, it took the users input and used this to generate the required
+Kubernetes resources to create the PostgreSQL instance. Those resources were
+then scheduled to the Platform via the GitOps repo (in this simple scenario, an
+in-cluster s3 compatible bucket using MinIO).
 
 You can see the workflows that were run by inspecting the Pods:
 ```bash
 kubectl get pods -l kratix.io/promise-name=postgresql
 ```
+
+You should see the following:
+```
+NAME                                                    READY   STATUS      RESTARTS   AGE
+kratix-postgresql-example-request-backstage-gen-9eb5e-v6zlg        0/1     Completed   0          5m21s
+kratix-postgresql-example-request-instance-configure-d8fcf-5kq7g   0/1     Completed   0          5m21s
+```
+
+The `example-request-instance-configure` Pod is the workflow thats specified in
+the Promise and is doing all of the heavy lifting of generating the Kubernetes
+resources based on the users input. The `-example-request-backstage` Pod is
+created by SKE and is used to generate the Backstage resource that is displayed
+in the Backstage UI.
 
 
 ### Update an Instance (via Backstage)
@@ -256,8 +283,8 @@ all day 2 operations.  For example, if your requirements change, it's easy to
 adapt. As a consumer,  you simply update the request and re-submit. Promises are
 designed  to safely handle updates without requiring custom scripts or manual
 intervention. Open the resource in Backstage, navigate to the `Manage` tab, edit
-the configuration, and submit.  The update will be automatically applied and
-reflected in the GitOps repo.
+the configuration, and submit. In this case lets enabled Backups by ticking the
+`BackupEnabled` box. The update will be automatically applied and reconciled.
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/05-quick-start-instance-update.png')} alt="The App Promise" />
@@ -265,7 +292,8 @@ reflected in the GitOps repo.
   <figcaption></figcaption>
 </figure>
 
-You’ll see the CronJob show up in the cluster:
+You’ll see a new CronJob show up in the cluster because the request was updated
+to enable backups:
 
 ```bash
 kubectl get cronjob --watch
@@ -289,17 +317,17 @@ to create a couple more PostgreSQL instances:
 kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/multiple-resource-requests.yaml
 ```
 
-This will create 2 more instances as shown below:
+This will create 2 more instances. You can view them in Backstage, as well as in
+cluster as shown below:
 ```bash
-kubectl get pods -l application=spilo
+kubectl get pods -l application=spilo --watch
 ```
+
 ```bash
-NAME                                   READY   STATUS    RESTARTS   AGE
-...
-acme-org-team-a-example-postgresql-0   1/1     Running   0          2m
-acme-org-team-b-dev-postgresql-0       1/1     Running   0          5s
-acme-org-team-c-testing-postgresql-0   1/1     Running   0          5s
-...
+NAME                                           READY   STATUS    RESTARTS   AGE
+acme-org-team-a-example-request-postgresql-0   1/1     Running   0          2m
+acme-org-team-b-dev-postgresql-0               1/1     Running   0          5s
+acme-org-team-c-testing-postgresql-0           1/1     Running   0          5s
 ```
 
 Now, let's say you need to patch a CVE in the PostgreSQL images, updating the
@@ -316,7 +344,8 @@ evaluate and then update all existing instances.
 kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/promise-ha.yaml
 ```
 
-You can observe the roll out in action with the following command:
+You can observe the roll out in action with the following command (it may take a
+minute or two):
 
 ```bash
 kubectl get pods -l application=spilo --watch
@@ -326,9 +355,9 @@ This will show a number of pods being created and completed:
 
 ```bash
 NAME                                                       READY   STATUS      RESTARTS   AGE
-acme-org-team-a-example-postgresql-0                       1/1     Running     0          3m
-acme-org-team-a-example-postgresql-1                       1/1     Running     0          14s
-acme-org-team-a-example-postgresql-2                       1/1     Running     0          9s
+acme-org-team-a-example-request-postgresql-0               1/1     Running     0          3m
+acme-org-team-a-example-request-postgresql-1               1/1     Running     0          14s
+acme-org-team-a-example-request-postgresql-2               1/1     Running     0          9s
 acme-org-team-b-dev-postgresql-0                           1/1     Running     0          1m
 acme-org-team-b-dev-postgresql-1                           1/1     Running     0          14s
 acme-org-team-b-dev-postgresql-2                           1/1     Running     0          10s

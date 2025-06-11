@@ -72,7 +72,7 @@ Install Kratix:
 kubectl apply -f https://github.com/syntasso/kratix/releases/download/latest/kratix-quick-start-installer.yaml
 ```
 
-This will deploy a job that installs SKE and its dependencies. To follow along
+This will deploy a job that installs Kratix and its dependencies. To follow along
 with the installation process, you can watch the logs of the installer job:
 
 ```bash
