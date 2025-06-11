@@ -60,7 +60,7 @@ In a Resource Configure workflow, a single Backstage manifest will be generated:
 
 Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
 
-## Accessing the SKE Backstage Generator Pipeline Stage
+## Accessing the SKE Backstage Generator image
 
 ### Pulling the image locally
 
@@ -168,7 +168,7 @@ the Template to create a Resource, you should see the resource Component
 appearing as well as the Resource itself being created in your cluster.
 
 In order to have the full status of your Promise or Resource request displayed in Backstage,
-you should place the Pipeline Stage as the last Stage in the last pipeline of your workflow.
+you should place the SKE Backstage Generator as the last Stage in the last pipeline of your workflow.
 
 If the Pipeline Stage needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
 Component Promise](./generator-promise). Otherwise, you will observe only one of the components
