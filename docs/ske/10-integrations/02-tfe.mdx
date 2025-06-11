@@ -11,7 +11,7 @@ This page provides information on how to:
 
 1. Configure TFE as a Kratix Destination.
 1. Write a Promise that can schedule workloads to TFE.
-1. Use the SKE Aspect to pull information out of TFE.
+1. Use the SKE Pipeline Stage to pull information out of TFE.
 
 This documentation assumes the existence of a Terraform Workspace that's configured to
 apply Terraform configurations from a Git repository. Please refer to the [TFE
@@ -236,17 +236,17 @@ need to be unique. The example above uses the resource's name and namespace to
 generate a unique filename and output name. You may need to adapt your code to follow the
 same pattern.
 
-## Adding the SKE TF State Finder Aspect
+## Adding the SKE TF State Finder Pipeline Stage
 
 If you followed the steps above, you should now have a Promise that schedules
 workloads to TFE. However, given that the Terraform code will be planned and
 executed by TFE, the users of your Platform won't have access to the Terraform
 outputs directly.
 
-To solve this, you can use the SKE TF State Finder Aspect. This Aspect will pull the
+To solve this, you can use the SKE TF State Finder Pipeline Stage. This will pull the
 Terraform outputs from TFE and make them available in the Resource's status.
 
-To use the Aspect, you need to add it to your Promise as a second Pipeline in
+To use the Stage, you need to add it to your Promise as a second Pipeline in
 the `spec.resource.configure` workflow:
 
 ```yaml
@@ -298,17 +298,17 @@ spec:
 
 :::tip
 
-Check the [releases page](/ske/releases/aspects/tfstate-finder/) for the latest version of the TFE Aspect.
+Check the [releases page](/ske/releases/pipeline-stages/tfstate-finder/) for the latest version of the TFE Pipeline Stage.
 
 :::
 
 The `TIMEOUT` environment variable can be configured to match the amount of
-time you expect the Terraform plan and apply to take. The Aspect will keep
+time you expect the Terraform plan and apply to take. The Stage will keep
 trying to fetch the outputs until the timeout is reached.
 
 If `TIMEOUT` is not set, the default timeout is 5 minutes.
 
-The Pipeline has a set of additional `rbac.permisisons` set. It requires these
+The Pipeline has a set of additional `rbac.permissions` set. It requires these
 to successfully fetch the outputs from TFE. They are used for:
 
 - Listing WorkPlacements to find the Destination associated with the Resource
@@ -316,7 +316,7 @@ to successfully fetch the outputs from TFE. They are used for:
 - Getting the Secret with the TFE credentials
 
 <details>
-<summary>Example: Promise with the SKE Aspect included</summary>
+<summary>Example: Promise with the SKE Pipeline Stage included</summary>
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -440,7 +440,7 @@ spec](/main/reference/workflows#pipelines).
 
 ### Writing Resource-specific outputs to the Resource Status
 
-By default, the Aspect will add the Terraform outputs from any `.tf` files in the
+By default, the Pipeline Stage will add the Terraform outputs from any `.tf` files in the
 Resource's scheduled workloads to the Resource's `status.outputs`. For example, in the
 `spec.resource.configure` workflow above, and assuming the name `my-resource` in the
 default namespace, the following would be added to the Resource status:
@@ -452,13 +452,13 @@ outputs:
 ```
 
 If you want to customise what gets persisted to the status, you can skip this step by
-setting the `SKIP_STATUS` environment variable in the Aspect's container to `"true"`.
+setting the `SKIP_STATUS` environment variable in the Stage's container to `"true"`.
 In this case, the `*-tfoutput.yaml` files in `/kratix/metadata` will still be written, so
 that you can access the outputs in the Pipeline.
 
 ### Accessing outputs in the Pipeline
 
-The Aspect will also write a set of `*-tfoutput.yaml` files to
+The Pipeline Stage will also write a set of `*-tfoutput.yaml` files to
 `/kratix/metadata` containing all of the Terraform workspace outputs present at the time
 the Resource or Promise workloads were written to the State Store.
 
@@ -550,13 +550,13 @@ By default, TFE State Finder retrieves the latest Terraform outputs using the
 SHA of the commit that wrote the workloads to the State Store. If you need to
 use a different SHA, specify it in the
 `/kratix/metadata/ske-tfstate-finder-config.yaml` file before running the
-Aspect. This ensures the correct SHAs are used for fetching Terraform outputs
+Pipeline Stage. This ensures the correct SHAs are used for fetching Terraform outputs
 from the specified Destinations.
 
 This is particularly useful when Kratix writes to a branch that is later merged
 into the main branch. In such cases—where SKE is used to submit Terraform
 configurations via pull requests instead of applying them directly—you must pass
-either the merge commit or squash commit SHA to the Aspect.
+either the merge commit or squash commit SHA to the Stage.
 
 If your workflows schedule to a single TFE Destination, you can provide just the
 commit SHA:

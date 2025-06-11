@@ -43,7 +43,7 @@ Check the release notes below for information on each available version.
 #### Bug Fixes
 
 * No longer tries to parse the Backstage Access Token when not authenticating
-  with Kubenetes via OIDC. This was causing issues when both the Access Token
+  with Kubernetes via OIDC. This was causing issues when both the Access Token
   was present but not valid for Kubernetes communication.
 
 ### [ske-frontend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.16.0/) (2025-05-09)
@@ -136,7 +136,7 @@ Check the release notes below for information on each available version.
 #### Bug Fixes
 
 * Fixed a bug where the "Create" button wasn't being displayed on the Promise Entity page when a custom `type` was specified.
-    - There's now a new `kratix.io/type` annotation that can be used to specify the type of the Component. Users of the SKE Backstage Generator ([v0.10.1](aspects/backstage-generator#v0.10.1)) will have this annotation automatically added to their Component YAML files.
+    - There's now a new `kratix.io/type` annotation that can be used to specify the type of the Component. Users of the SKE Backstage Generator ([v0.10.1](pipeline-stages/backstage-generator#v0.10.1)) will have this annotation automatically added to their Component YAML files.
     - **This requires changes to your Catalog Entity page.** Please refer to the [Configuring the Plugins documentation](../integrations/backstage/plugins#update-the-entitypage) for instructions.
 
 ### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/v0.11.0/) (2024-09-19)

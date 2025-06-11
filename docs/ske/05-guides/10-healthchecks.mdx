@@ -303,7 +303,7 @@ spec:
 EOF
 ```
 
-There's one more change you'll need to make to the Workflow defined in the HealthDefinition: define the RBAC permissions. By default, the Health Check Workflow container will not have access to much of the Kubernetes API; if you try to execute the Health check as defined above, the workflow will fail when it tries to `kubectl get` the StatefulSet.
+There's one more change you'll need to make to the Workflow defined in the HealthDefinition: define the RBAC permissions. By default, the Health Check Pipeline Stage will not have access to much of the Kubernetes API; if you try to execute the Health check as defined above, the workflow will fail when it tries to `kubectl get` the StatefulSet.
 
 To fix this, you need to add the following RBAC permissions to the Workflow in your HealthDefinition:
 
