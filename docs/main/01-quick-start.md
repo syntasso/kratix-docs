@@ -300,7 +300,7 @@ intervention. In this example, a new CronJob is created to handle backups. Wait 
 update to complete:
 
 ```bash
-kubectl get postgresqls.marketplace.kratix.io example -w
+kubectl get postgresqls.marketplace.kratix.io example --watch
 ```
 
 Once the Workflow runs, the status will show the update was successful:

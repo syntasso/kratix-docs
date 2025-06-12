@@ -34,9 +34,11 @@ structure  between platform _producers_ and _consumers_. Platform producers are
 often operators or  other subject matter experts who need to contribute and
 manage their services while  consumers are often application developers, data
 scientists, managers and others who  need to depend on and use the provided
-services. You will also see how SKE makes integrating with Portals like
-Backstage easy, so that consumers can request services without needing to write
-YAML or understand the underlying Kubernetes resources.
+services. You will also see how SKE reduces the time to integrate with portals like
+Backstage so that consumers can request services without needing to write
+YAML or understand the underlying Kubernetes resources. And once integrated, SKE keeps
+platform engineer costs low through a managed integration as both SKE and the portals
+release updates.
 
 ## Prerequisites
 
@@ -64,8 +66,8 @@ There are examples of SKE orchestrating SaaS products, edge compute, IoT, and ev
 mainframes.
 :::
 
-SKE comes with easy integration to existing Portal solutions such as Port and
-Backstage. To highligh this, a pre-configured Backstage instance is included in
+SKE comes with easy integration to existing portal solutions such as Port and
+Backstage. To highlight this, a pre-configured Backstage instance is included in
 the quick start.
 
 Before installing, create the namespace and secret so your cluster can access the private container registry:
@@ -171,18 +173,22 @@ Once published, a new custom resource type becomes available in your cluster:
 kubectl get crds -l kratix.io/promise-name
 ```
 
-SKE takes care of publishing all the required information into Backstage for
-you, meaning you don't need to manually configure the Backstage catalog. Lets
+This shows that the new API is available which can be used via all the `kubectl` commands
+such as get, create, or delete. This means consumers can now self-serve PostgreSQL
+instances providing only the values your API requires.
+
+And SKE also takes care of publishing all the required information into Backstage for
+you, meaning you don't need to manually configure the Backstage catalog. Let's
 take a look at the Promise we just published:
 
 
-In a seperate terminal, open a port-forward so you can access the Backstage UI:
+In a separate terminal, open a port-forward so you can access the Backstage UI:
 ```bash
 kubectl port-forward svc/backstage 7007:7007 -n kratix-platform-system
 ```
 
 Then navigate to [http://localhost:7007](http://localhost:7007) in your browser.
-After a few moments should see the Backstage UI with the Postgres Promise Component listed in
+After a few moments you should see the Backstage UI with the Postgres Promise Component listed in
 the catalog (you may need to refresh the page):
 
 <figure className="diagram">
@@ -192,7 +198,7 @@ the catalog (you may need to refresh the page):
 
 
 If you select `Create` in the top right, you will then be able to see that
-the PostgreSQL Template is available to be created.
+the PostgreSQL template is available to be chosen.
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/02-quick-start-templates.png')} alt="The App Promise" />
@@ -203,7 +209,7 @@ the PostgreSQL Template is available to be created.
 
 With the Promise published, consumers can use Backstage portal to request
 services. Fill in a request for a PostgreSQL instance using the PostgreSQL
-Promise template. For simplicity lets use the `default` namespace and leave all
+Promise template. For simplicity let's use the `default` namespace and leave all
 the fields set to their default values. Once the request is submitted, SKE will
 reconcile the request and create the instance in the cluster.
 
@@ -212,8 +218,8 @@ reconcile the request and create the instance in the cluster.
 
 SKE supports multiple ways to interact with the Platform. Whether you prefer
 using kubectl, one or more Backstage instances, or a custom UI, SKE allows all
-of them to work seamlessly—individually or in parallel—so you can use the right
-tool for the job.
+of them to work seamlessly and even in parallel so you and your users can choose the
+right tool for the job.
 
 :::
 
@@ -226,7 +232,7 @@ navigating back to the homepage:
   <figcaption></figcaption>
 </figure>
 
-If you click through to your requests you will see its details:
+Furthermore, when you click through to your requests there are all relevant details for users:
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/04-quick-start-instance-description.png')} alt="The App Promise" />
@@ -236,17 +242,25 @@ If you click through to your requests you will see its details:
 
 You can see in the `status` section in the `Overview` tab that the request is
 ready and information on how to access the PostgreSQL instance is provided.
-Everything that is created is resembeld as resource in Kubernetes, Backstage is
-just a configured UI put in front of it. You can see the same information via
+The reason SKE works across any number of interfaces is because it is a platform backend
+that stores state in Kubernetes. This keeps Backstage and any other graphical interface
+focused on the display and allows the business logic to be centralised in the platform.
+To see this in action, use the following command to view the same status information via
 the `kubectl` command line:
 
 ```bash
 kubectl get postgresqls.marketplace.kratix.io <name> -o yaml
 ```
 
-SKE is mirroring the state of the resource in Backstage, enabling you to keep
-your Portal logic minimal and focused on the user experience, while SKE handles
-the heavy lifting of managing the resource lifecycle.
+:::tip
+
+While Kratix is itself a backend, SKE brings in the automatic mirroring of platform
+state to portals such as Backstage and manages the headache of regular updates to how
+your portal and SKE integrate. This enables you to keep your Portal logic minimal and
+focused on the user experience, while SKE handles the heavy lifting of managing the
+resource lifecycle.
+
+:::
 
 Behind the scenes, Kratix is running a set of Workflows defined by the platform
 producer in the Promise. These Workflows incorporate all of the business rules
@@ -283,7 +297,7 @@ all day 2 operations.  For example, if your requirements change, it's easy to
 adapt. As a consumer,  you simply update the request and re-submit. Promises are
 designed  to safely handle updates without requiring custom scripts or manual
 intervention. Open the resource in Backstage, navigate to the `Manage` tab, edit
-the configuration, and submit. In this case lets enabled Backups by ticking the
+the configuration, and submit. In this case let's enabled Backups by ticking the
 `BackupEnabled` box. The update will be automatically applied and reconciled.
 
 <figure className="diagram">
