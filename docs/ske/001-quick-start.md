@@ -240,6 +240,50 @@ Furthermore, when you click through to your requests there are all relevant deta
   <figcaption></figcaption>
 </figure>
 
+<details>
+  <summary><strong> Whats happening in the backend?</strong></summary>
+
+  When a Promise is published, it exposes a new custom resource type in the
+  Kubernetes API. This resource type is used to request instances of the
+  service. When a template is filled out and submitted, it creates a new
+  resource of that type. In this case, the resource is a `postgresql` resource
+  type.
+
+  Let’s inspect this new API:
+
+  ```yaml
+  kubectl explain postgresqls.marketplace.kratix.io.spec
+  ```
+
+  This command provides a detailed description of the `postgresql` resource
+  type and what fields are available in the `spec` section. In this example,
+  all of the fields are optional since the platform can provide sensible
+  defaults. Reducing required fields allows consumers to focus on what matters
+  most to them and grow into more specific configuration as and when they need
+  it. You can see all these fields are mirrored in the Backstage template.
+
+  Once a request is submitted, either via Backstage or `kubectl`, it will exist
+  in the cluster as a `postgresql.marketplace.kratix.io` resource. You can
+  view the request by running:
+
+  ```bash
+  kubectl get postgresql.marketplace.kratix.io <name> --watch
+  ```
+
+  You should see the following output:
+  ```yaml
+  NAME      STATUS
+  <name>    1Gi instance v16 deployed successfully without backups
+  ```
+
+  For further inspection of all the fields, you can run:
+
+  ```bash
+  kubectl get postgresqls.marketplace.kratix.io <name> -o yaml
+  ```
+
+</details>
+
 You can see in the `status` section in the `Overview` tab that the request is
 ready and information on how to access the PostgreSQL instance is provided.
 The reason SKE works across any number of interfaces is because it is a platform backend

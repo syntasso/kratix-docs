@@ -222,12 +222,20 @@ dev       1Gi instance v16 deployed successfully without backups
 ```
 
 :::tip
+
 To exit the `watch` on the command line, use `ctrl+c`
+
 :::
 
-Behind the scenes, Kratix is running a set of Workflows defined by the platform producer
-in the Promise. These Workflows incorporate all of the business rules and required
-actions before scheduling any declarative workloads to the correct GitOps repository.
+Behind the scenes, Kratix is running a set of Workflows defined by the platform
+producer in the Promise. These Workflows incorporate all of the business rules
+and required actions before scheduling any declarative workloads to the correct
+GitOps repository. In this case the workflow for the PostgreSQL Promise was
+quite simple, it took the users input and used this to generate the required
+Kubernetes resources to create the PostgreSQL instance. Those resources were
+then scheduled to the Platform via the GitOps repo (in this simple scenario, an
+in-cluster s3 compatible bucket using MinIO).
+
 
 You can see the workflows that were run by inspecting the Pods:
 ```bash
@@ -363,7 +371,8 @@ evaluate and then update all existing instances.
 kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/promise-ha.yaml
 ```
 
-You can observe the roll out in action with the following command:
+You can observe the roll out in action with the following command (it may take a
+minute or two):
 
 ```bash
 kubectl get pods -l application=spilo --watch
