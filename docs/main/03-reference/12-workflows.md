@@ -71,6 +71,9 @@ metadata:
   labels: # Labels (optional)
   annotations: # Annotations (optional)
 spec:
+  jobOptions:
+    # Number of times Kubernetes retries a failing workflow Job before marking it failed.
+    backoffLimit: 4
   volumes:
     - # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:
@@ -93,10 +96,22 @@ for more information on the fields above.
 
 :::note
 
+
 Not all fields from the Pod spec are supported. We will add support for more fields in
 the future.
 
 :::
+
+### Job Lifecycle
+
+Kratix runs each Pipeline as a [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/).
+You can control how many completed Jobs are kept and how many times a failing Job
+is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
+
+* `numberOfJobsToKeep` sets the maximum number of successful pipeline Jobs to retain.
+* `backoffLimit` determines how many times Kubernetes retries a failing Job before
+  marking it failed. Kratix does not set a default value for this field; if omitted,
+  Kubernetes uses its own Job default.
 
 ### RBAC
 

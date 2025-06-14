@@ -81,6 +81,7 @@ Apart from the `status-writer`, all containers are actually set as `initContaine
 :::
 
 Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting `numberOfJobsToKeep` in the [Kratix Config](/main/reference/kratix-config/config) document.
+You can also configure how many times a failing workflow Job is retried by setting `backoffLimit` in the same ConfigMap. Kratix does not provide a default value for this field.
 
 ## Output Objects
 
