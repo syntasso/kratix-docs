@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.e08764aa.css">
-<script src="/assets/js/runtime~main.c7624859.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.bdd26f4a.js" defer="defer"></script>
 <script src="/assets/js/main.5604e386.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -65,7 +65,8 @@
 <li>The <code>status-writer</code>: this container uses the <code>/kratix/metadata/status.yaml</code> file to update the Resource status.</li>
 </ul>
 <div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>Apart from the <code>status-writer</code>, all containers are actually set as <code>initContainers</code> to guarantee that they run in the right order.</p></div></div>
-<p>Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting <code>numberOfJobsToKeep</code> in the <a href="/main/reference/kratix-config/config">Kratix Config</a> document.</p>
+<p>Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting <code>numberOfJobsToKeep</code> in the <a href="/main/reference/kratix-config/config">Kratix Config</a> document.
+You can also configure how many times a failing workflow Job is retried by setting <code>backoffLimit</code> in the same ConfigMap. Kratix does not provide a default value for this field.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="output-objects">Output Objects<a href="#output-objects" class="hash-link" aria-label="Direct link to Output Objects" title="Direct link to Output Objects">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="works">Works<a href="#works" class="hash-link" aria-label="Direct link to Works" title="Direct link to Works">​</a></h3>
 <p>One of the last containers executed as part of a Workflow is the <code>work-creator</code>. This container is responsible for creating the Work associated with the Workflow. A Work is a Kratix Object that represents the output of the Workflow, i.e., it contains the documents that containers in the Pipeline persist into <code>/kratix/output</code> as part of its execution. The Work is created in the same namespace as the Resource (or in the <code>kratix-platform-system</code> namespace for Promise workflows).</p>
