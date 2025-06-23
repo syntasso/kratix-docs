@@ -4,7 +4,7 @@ description: Learn about the conditions and events attached to Resource requests
 id: resource-status-events
 ---
 
-Resources expose progress information through status conditions. Common conditions include:
+Kratix follows the Kubernetes convention of using conditions to convey the status of a Resource and to allow programmatic interactions. . Common conditions include:
 
 - `ConfigureWorkflowCompleted` – all Configure workflow pipelines finished successfully.
 - `WorksSucceeded` – every Work created for the Resource completed without errors.

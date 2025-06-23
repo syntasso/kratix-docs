@@ -1,22 +1,23 @@
 ---
 title: Promise Status and Events
-description: Understand the status conditions and events generated for a Promise.
+description: Understand the status conditions and events of a Promise.
 id: promise-status-events
 ---
 
-Kratix tracks the lifecycle of each Promise using Kubernetes conditions and events. These describe what phase the Promise is in and surface any actions that may be required.
+Kratix follows the Kubernetes convention of using status and events to convey important information of a Promise.
+Promise Status describes what general condition the Promise is in and surfaces any error that has occurred.
 
 ## Conditions
 
-A Promise exposes several well known conditions:
+A Promise exposes the following list of conditions:
 
-- `RequirementsFulfilled` – Kratix has installed any prerequisites declared by the Promise.
-- `ConfigureWorkflowCompleted` – all Configure workflow pipelines executed successfully.
-- `WorksSucceeded` – every Work created for the Promise has completed.
-- `Available` – the Promise is ready to accept Resource requests.
-- `Reconciled` – the reconciler has observed the latest version of the Promise.
+- `RequirementsFulfilled` – Kratix has installed any required Promises declared by the Promise.
+- `ConfigureWorkflowCompleted` – All configure workflow pipelines executed successfully.
+- `WorksSucceeded` – All Works created for the Promise has completed.
+- `Available` – The Promise is ready to accept Resource requests.
+- `Reconciled` – Promise has been successfully reconciled; Set to true when all the above conditions are all true.
 
-Example output from `kubectl get promise <name> -o yaml`:
+Example Promise conditions from `kubectl get promise <name> -o yaml`:
 
 ```yaml
 status:
@@ -48,15 +49,33 @@ status:
     type: Reconciled
 ```
 
-Inspect the current status at any time with:
+Inspect the current Promise status at any time with:
 
 ```bash
 kubectl describe promise <name>
 ```
 
+## Common Promise Status
+
+- `apiVersion` – Shows the API version that this Promise is serving requests at.
+- `kind` – Shows the Kind that this Promise is serving.
+- `lastAvailableTime` – When this Promise becomes available.
+- `status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
+
+```yaml
+status:
+  apiVersion: test.kratix.io/v1alpha1
+  kind: Redis
+  lastAvailableTime: "2025-06-23T15:34:32Z"
+  status: Available
+  conditions:
+  ...
+```
+
 ## Events
 
-Events record important moments in the Promise lifecycle such as requirements installation, Work creation and when the Promise becomes available. They can be viewed using:
+Events record important moments in the Promise lifecycle such as requirements installation, Configure pipeline running and when the Promise becomes available.
+They can be viewed using:
 
 ```bash
 kubectl describe promise <name>
