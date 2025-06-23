@@ -176,43 +176,61 @@ the same as the final status from the previous run of the Configure workflow.
 
 Kratix follows the Kubernetes convention of using
 [conditions](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states)
-to convey the status of a Resource and to allow programmatic interactions. When
-a Resource is requested, the `ConfigureWorkflowCompleted` condition will be set. The
-`status` for the workflow will be `False` until the workflow is completed. For
-example, when a Resource is requested for the first time, the status will look like:
+to convey the status of a Resource and to allow programmatic interactions.
+Beyond the initial `ConfigureWorkflowCompleted` check, additional conditions
+surface the progress of Works associated with the Resource and when the
+controller has observed the latest version.
+
+Common conditions include:
+
+- `ConfigureWorkflowCompleted` – all Configure workflow pipelines finished successfully.
+- `WorksSucceeded` – every Work created for the Resource completed without errors.
+- `Reconciled` – the controller has observed the most recent version of the Resource.
+
+Kratix also records the timestamp of the last successful configuration in
+`status.lastSuccessfulConfigureWorkflowTime`.
+
+Example output:
 
 ```yaml
 status:
   conditions:
-    - lastTransitionTime: "2023-03-07T15:50:22Z"
-      message: Pipelines are still in progress
-      reason: PipelinesInProgress
-      status: "False"
-      type: ConfigureWorkflowCompleted
-```
-
-Once the Configure workflow has been completed, it will look like:
-
-```yaml
-status:
-  conditions:
-    - lastTransitionTime: "2023-03-07T15:50:30Z"
+    - lastTransitionTime: "2025-06-23T14:07:29Z"
       message: Pipelines completed
       reason: PipelinesExecutedSuccessfully
       status: "True"
       type: ConfigureWorkflowCompleted
+    - lastTransitionTime: "2025-06-23T14:03:24Z"
+      message: All works associated with this resource are ready
+      reason: WorksSucceeded
+      status: "True"
+      type: WorksSucceeded
+    - lastTransitionTime: "2025-06-23T14:07:32Z"
+      message: Reconciled
+      reason: Reconciled
+      status: "True"
+      type: Reconciled
+  lastSuccessfulConfigureWorkflowTime: "2025-06-23T14:07:29Z"
 ```
 
 Conditions can be used by external systems to programmatically check when a
-Configure workflow has completed. `kubectl` also has built-in support for waiting for a
-condition to be met. For example, after requesting a Resource, a user can run the
-following to have the CLI wait for the Workflow to be completed:
+workflow has completed. `kubectl` also has built‑in support for waiting for a
+condition to be met. For example, after requesting a Resource you can run:
 
 ```bash
 kubectl wait redis/example --for=condition=ConfigureWorkflowCompleted --timeout=60s
 ```
 
-Once the condition is `True` the command will exit.
+Once the condition is `True` the command will exit. Inspect all conditions and
+events with:
+
+```bash
+kubectl describe <resource> <name>
+```
+
+For a deeper discussion see the
+[Resource Status and Events](/main/learn-more/status-conditions-events/resource-status-events)
+documentation.
 
 ## Health Checks
 
