@@ -92,21 +92,20 @@ spec:
   workflows:
     resource:
       configure:
-      - apiVersion: platform.kratix.io/v1alpha1
-        kind: Pipeline
-        metadata:
-          name: create-user
-        spec:
-          containers:
-          - image: create-db:v0.1.0
-      - apiVersion: platform.kratix.io/v1alpha1
-        kind: Pipeline
-        metadata:
-          name: populate-vault
-        spec:
-          containers:
-          - image: populate-vault:v0.1.0
-
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: create-user
+          spec:
+            containers:
+              - image: create-db:v0.1.0
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: populate-vault
+          spec:
+            containers:
+              - image: populate-vault:v0.1.0
 ```
 
 And the first pipeline wrote the following to `/kratix/metadata/status.yaml`:
@@ -122,17 +121,15 @@ Then the second pipeline would see the following in the `/kratix/input/object.ya
 ```yaml
 apiVersion: ...
 kind: ...
-metadata:
-  ...
-spec:
-  ...
+metadata: ...
+spec: ...
 status:
   conditions: # this is being automatically set by Kratix
-  - lastTransitionTime: "2024-08-21T10:27:45Z"
-    message: Pipelines are still in progress
-    reason: PipelinesInProgress
-    status: "False"
-    type: ConfigureWorkflowCompleted
+    - lastTransitionTime: "2024-08-21T10:27:45Z"
+      message: Pipelines are still in progress
+      reason: PipelinesInProgress
+      status: "False"
+      type: ConfigureWorkflowCompleted
   iam:
     user: admin
   message: User created, next step is to create vault secret for user
@@ -152,16 +149,15 @@ The end status would be:
 ```yaml
 status:
   conditions:
-  - lastTransitionTime: "2024-08-21T10:30:51Z"
-    message: Pipelines completed
-    reason: PipelinesExecutedSuccessfully
-    status: "True"
-    type: ConfigureWorkflowCompleted
+    - lastTransitionTime: "2024-08-21T10:30:51Z"
+      message: Pipelines completed
+      reason: PipelinesExecutedSuccessfully
+      status: "True"
+      type: ConfigureWorkflowCompleted
   iam:
     password: <vault-ref>
     user: admin
   message: User created, next step is to create vault secret for user
-
 ```
 
 The status is always merged, with the last Pipeline prioritised in case of
@@ -191,16 +187,27 @@ status:
       type: ConfigureWorkflowCompleted
 ```
 
-Once the Configure workflow has been completed, it will look like:
+Once the Configure workflow has been completed, additional conditions are added:
 
 ```yaml
 status:
   conditions:
-    - lastTransitionTime: "2023-03-07T15:50:30Z"
+    - lastTransitionTime: "2025-06-23T14:07:29Z"
       message: Pipelines completed
       reason: PipelinesExecutedSuccessfully
       status: "True"
       type: ConfigureWorkflowCompleted
+    - lastTransitionTime: "2025-06-23T14:03:24Z"
+      message: All works associated with this resource are ready
+      reason: WorksSucceeded
+      status: "True"
+      type: WorksSucceeded
+    - lastTransitionTime: "2025-06-23T14:07:32Z"
+      message: Reconciled
+      reason: Reconciled
+      status: "True"
+      type: Reconciled
+  lastSuccessfulConfigureWorkflowTime: "2025-06-23T14:07:29Z"
 ```
 
 Conditions can be used by external systems to programmatically check when a

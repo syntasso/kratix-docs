@@ -1,0 +1,65 @@
+---
+title: Promise Status and Events
+description: Understand the status conditions and events generated for a Promise.
+id: promise-status-events
+---
+
+Kratix tracks the lifecycle of each Promise using Kubernetes conditions and events. These describe what phase the Promise is in and surface any actions that may be required.
+
+## Conditions
+
+A Promise exposes several well known conditions:
+
+- `RequirementsFulfilled` – Kratix has installed any prerequisites declared by the Promise.
+- `ConfigureWorkflowCompleted` – all Configure workflow pipelines executed successfully.
+- `WorksSucceeded` – every Work created for the Promise has completed.
+- `Available` – the Promise is ready to accept Resource requests.
+- `Reconciled` – the reconciler has observed the latest version of the Promise.
+
+Example output from `kubectl get promise <name> -o yaml`:
+
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2025-06-23T14:02:27Z"
+    message: Requirements fulfilled
+    reason: RequirementsInstalled
+    status: "True"
+    type: RequirementsFulfilled
+  - lastTransitionTime: "2025-06-23T14:07:23Z"
+    message: Pipelines completed
+    reason: PipelinesExecutedSuccessfully
+    status: "True"
+    type: ConfigureWorkflowCompleted
+  - lastTransitionTime: "2025-06-23T14:02:40Z"
+    message: All works associated with this promise are ready
+    reason: WorksSucceeded
+    status: "True"
+    type: WorksSucceeded
+  - lastTransitionTime: "2025-06-23T14:07:26Z"
+    message: Ready to fulfil resource requests
+    reason: PromiseAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2025-06-23T14:07:26Z"
+    message: Reconciled
+    reason: Reconciled
+    status: "True"
+    type: Reconciled
+```
+
+Inspect the current status at any time with:
+
+```bash
+kubectl describe promise <name>
+```
+
+## Events
+
+Events record important moments in the Promise lifecycle such as requirements installation, Work creation and when the Promise becomes available. They can be viewed using:
+
+```bash
+kubectl describe promise <name>
+```
+
+These events are useful for understanding the progression of the Promise and troubleshooting failures.

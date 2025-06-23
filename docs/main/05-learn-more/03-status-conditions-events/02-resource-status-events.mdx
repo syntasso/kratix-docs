@@ -1,0 +1,46 @@
+---
+title: Resource Status and Events
+description: Learn about the conditions and events attached to Resource requests.
+id: resource-status-events
+---
+
+Resources expose progress information through status conditions. Common conditions include:
+
+- `ConfigureWorkflowCompleted` – all Configure workflow pipelines finished successfully.
+- `WorksSucceeded` – every Work created for the Resource completed without errors.
+- `Reconciled` – the controller has observed the latest version of the Resource.
+
+A Resource also records the time of the last successful configuration in `status.lastSuccessfulConfigureWorkflowTime`.
+
+Example output:
+
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2025-06-23T14:07:29Z"
+    message: Pipelines completed
+    reason: PipelinesExecutedSuccessfully
+    status: "True"
+    type: ConfigureWorkflowCompleted
+  - lastTransitionTime: "2025-06-23T14:07:32Z"
+    message: Reconciled
+    reason: Reconciled
+    status: "True"
+    type: Reconciled
+  - lastTransitionTime: "2025-06-23T14:03:24Z"
+    message: All works associated with this resource are ready
+    reason: WorksSucceeded
+    status: "True"
+    type: WorksSucceeded
+  lastSuccessfulConfigureWorkflowTime: "2025-06-23T14:07:29Z"
+```
+
+## Events
+
+Events note important steps in the Resource lifecycle such as starting a workflow job or encountering errors. Inspect them with:
+
+```bash
+kubectl describe <resource> <name>
+```
+
+These events help in troubleshooting and automation around Resource management.
