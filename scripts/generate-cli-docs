@@ -159,5 +159,5 @@ def run(command, doc_dir, ref_path)
   end
 end
 
-run("kratix", "docs/main/05-kratix-cli/20-reference", "/main/kratix-cli/reference")
+run("kratix", "docs/main/06-kratix-cli/20-reference", "/main/kratix-cli/reference")
 run("ske", "docs/ske/60-ske-cli/01-reference", "/ske/ske-cli/reference")

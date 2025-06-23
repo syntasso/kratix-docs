@@ -1,36 +1,30 @@
 # ske upgrade
-
-Upgrade SKE to the next minor at the latest patch
+upgrade to the next SKE version
 
 ## Description
-
-```bash
- > ske upgrade
-
-Upgrading SKE from v0.9.0 to v0.10.0...
-Upgrade applied
-Waiting for SKE Deployment to be ready..............
-SKE Deployment ready, running version v0.10.0
-Waiting for SKE to be ready....
-SKE is ready, running version v0.10.0
-Upgrade successful!
-```
+upgrade to the next SKE version
 
 ## Usage
-
-```bash
+```
 ske upgrade [--context] [flags]
 ```
 
-## Flags
-
-```bash
-      --dry-run            Dry run the upgrade
-  -h, --help               help for upgrade
-      --skip-all-checks    Skipping upgrade checks; use with caution
-      --timeout duration   Timeout for the upgrade (default 5m0s)
+## Examples
 ```
+ske upgrade --context kind-platform
+Upgrading SKE from v0.4.0 to v0.5.0
+
+SKE successfully upgraded
+```
+
+## Flags
+```
+--dry-run   Dry run the upgrade
+-h, --help      help for upgrade
+```
+
 
 ## See Also
 
 * [ske](/ske/ske-cli/reference/ske): The ske CLI
+
