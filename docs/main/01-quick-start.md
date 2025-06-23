@@ -21,13 +21,13 @@ other subject matter experts who need to contribute and manage their services wh
 consumers are often application developers, data scientists, managers and others who
 need to depend on and use the provided services.
 
+
 ## Prerequisites
 
 To follow along, you'll need access to a Kubernetes cluster.
 
 We recommend using a clean, disposable cluster for this quick start and you can use any
 Kubernetes distribution including:
-
 - Managed services like GKE, EKS, or AKS
 - On-premises clusters like OpenShift, Rancher, or vanilla Kubernetes
 - Local environments like KinD or Minikube
@@ -38,7 +38,7 @@ quick start deploys a local, insecure MinIO instance—intended only for local d
 
 ## Installation
 
-Kratix extends the Kubernetes API by introducing custom resources and controllers.
+Kratix extends the Kubernetes API by introducing custom resources and controllers. 
 
 :::tip
 While Kratix runs on Kubernetes, it orchestrates resources both in and outside of Kubernetes.
@@ -52,18 +52,18 @@ quick-start that uses a single job to install Kratix with sensible defaults.
 <details>
   <summary>What gets installed?</summary>
 
-The install manifest does the following:
+  The install manifest does the following:
 
-1. Installs [**cert-manager**](https://cert-manager.io/) to manage TLS certificates for
-   Kratix webhooks
-1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/learn-more/kratix-resources)
-   in the `kratix-system` namespace
-1. Deploys [**MinIO**](https://min.io/), a local S3-compatible bucket for storing
-   declarative workloads
-1. Installs and configures [**Flux**](https://fluxcd.io/) to apply changes from the
-   MinIO bucket via GitOps
-1. Registers your Kubernetes cluster as a [**Destination**](https://docs.kratix.io/main/reference/destinations/intro)
-so Kratix can schedule workloads to it
+  1. Installs [**cert-manager**](https://cert-manager.io/) to manage TLS certificates for
+      Kratix webhooks
+  1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/learn-more/kratix-resources)
+      in the `kratix-system` namespace
+  1. Deploys [**MinIO**](https://min.io/), a local S3-compatible bucket for storing
+      declarative workloads
+  1. Installs and configures [**Flux**](https://fluxcd.io/) to apply changes from the
+      MinIO bucket via GitOps
+  1. Registers your Kubernetes cluster as a [**Destination**](https://docs.kratix.io/main/reference/destinations/intro)
+      so Kratix can schedule workloads to it
 </details>
 
 Install Kratix:
@@ -236,8 +236,8 @@ Kubernetes resources to create the PostgreSQL instance. Those resources were
 then scheduled to the Platform via the GitOps repo (in this simple scenario, an
 in-cluster s3 compatible bucket using MinIO).
 
-You can see the workflows that were run by inspecting the Pods:
 
+You can see the workflows that were run by inspecting the Pods:
 ```bash
 kubectl get pods -l kratix.io/promise-name=postgresql
 ```
@@ -252,25 +252,14 @@ kubectl get postgresqls.marketplace.kratix.io example -o yaml
 ```
 
 ```yaml
-
----
+...
 status:
   conditions:
-    - lastTransitionTime: "2025-05-27T13:15:15Z"
-      message: Pipelines completed
-      reason: PipelinesExecutedSuccessfully
-      status: "True"
-      type: ConfigureWorkflowCompleted
-    - lastTransitionTime: "2025-05-27T13:15:15Z"
-      message: All works associated with this resource are ready
-      reason: WorksSucceeded
-      status: "True"
-      type: WorksSucceeded
-    - lastTransitionTime: "2025-05-27T13:15:16Z"
-      message: Reconciled
-      reason: Reconciled
-      status: "True"
-      type: Reconciled
+  - lastTransitionTime: "2025-05-27T13:15:15Z"
+    message: Pipelines completed
+    reason: PipelinesExecutedSuccessfully
+    status: "True"
+    type: ConfigureWorkflowCompleted
   connectionDetails:
     credentials: 'Username and Password available in Secret: "default/postgres.acme-org-team-a-example-postgresql.credentials.postgresql.acid.zalan.do"'
     host: acme-org-team-a-example-postgresql.default.svc.cluster.local
@@ -278,6 +267,7 @@ status:
   lastSuccessfulConfigureWorkflowTime: "2025-05-27T13:15:15Z"
   message: 1Gi instance v16 deployed successfully without backups
   observedGeneration: 4
+
 ```
 
 These fields are how the producer communicates important information to the consumer
@@ -291,9 +281,9 @@ focus on building your platform your way.
 ### Update an Instance
 
 Kratix isn't a fire and forget solution; it handles the full lifecycle,
-including all day 2 operations. For example, if your requirements change, it's
-easy to adapt. As a consumer, you simply update the spec and re-submit the
-request. Promises are designed to safely handle updates without requiring
+including all day 2 operations.  For example, if your requirements change, it's
+easy to adapt. As a consumer,  you simply update the spec and re-submit the
+request. Promises are designed  to safely handle updates without requiring
 custom scripts or manual intervention.
 
 For example, introducing backups is as simple as adding another field to the request:
@@ -355,11 +345,9 @@ kubectl apply -f https://raw.githubusercontent.com/syntasso/promise-postgresql/r
 ```
 
 This will create 2 more instances as shown below:
-
 ```bash
 kubectl get pods -l application=spilo
 ```
-
 ```bash
 NAME                                   READY   STATUS    RESTARTS   AGE
 ...
