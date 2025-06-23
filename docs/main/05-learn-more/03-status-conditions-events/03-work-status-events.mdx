@@ -4,14 +4,18 @@ description: Understand the status conditions and events generated for Work and 
 id: work-status-events
 ---
 
-A **Work** represents the output of a workflow. Each Work is scheduled to one or more Destinations and its progress is tracked through conditions. A **WorkPlacement** ties part of a Work to a specific Destination and records whether the documents were written successfully.
+A **Work** represents the output of a workflow. Each Work is scheduled to one or more Destinations.
+Its progress is tracked through conditions.
+
+A **WorkPlacement** ties part of a Work to a specific Destination.
+Its status shows whether the documents were written successfully.
 
 ## Work Conditions
 
 Works expose the following conditions:
 
 - `ScheduleSucceeded` – set to `True` once all WorkPlacements have been created. If Kratix cannot find matching Destinations this condition is `False` with reason `UnscheduledWorkloadGroups`.
-- `Ready` – becomes `True` when every WorkPlacement has been scheduled successfully.
+- `Ready` – set to `True` when every WorkPlacement has been scheduled successfully.
 
 Example output from `kubectl get work <name> -o yaml`:
 
@@ -32,11 +36,11 @@ status:
 
 ## WorkPlacement Conditions
 
-A WorkPlacement records whether its documents were written to the Destination:
+WorkPlacements expose the following conditions:
 
-- `ScheduleSucceeded` – `True` when the WorkPlacement has been scheduled to a Destination.
+- `ScheduleSucceeded` – `True` when the WorkPlacement has been scheduled to a matching Destination.
 - `WriteSucceeded` – indicates the documents were written to the State Store backing the Destination.
-- `Ready` – `True` when the Destination accepted the documents.
+- `Ready` – `True` when both `ScheduleSucceeded` and `WriteSucceeded` are true.
 
 Example output from `kubectl get workplacement <name> -o yaml`:
 
@@ -62,11 +66,11 @@ status:
 
 ## Events
 
-Events on Works and WorkPlacements highlight scheduling progress and any issues writing to Destinations. Use:
+Events on Works and WorkPlacements highlight scheduling progress and any issues writing to Destinations.
+
+Run the following commands to inspect Works and Workplacements events:
 
 ```bash
 kubectl describe work <name>
 kubectl describe workplacement <name>
 ```
-
-to inspect recent events.

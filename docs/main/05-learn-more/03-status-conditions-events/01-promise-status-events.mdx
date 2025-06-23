@@ -12,10 +12,10 @@ Promise Status describes what general condition the Promise is in and surfaces a
 A Promise exposes the following list of conditions:
 
 - `RequirementsFulfilled` – Kratix has installed any required Promises declared by the Promise.
-- `ConfigureWorkflowCompleted` – All configure workflow pipelines executed successfully.
-- `WorksSucceeded` – All Works created for the Promise has completed.
-- `Available` – The Promise is ready to accept Resource requests.
-- `Reconciled` – Promise has been successfully reconciled; Set to true when all the above conditions are all true.
+- `ConfigureWorkflowCompleted` – all configure workflow pipelines executed successfully.
+- `WorksSucceeded` – all Works created for the Promise has completed.
+- `Available` – Promise is ready to accept Resource requests.
+- `Reconciled` – Promise has been successfully reconciled; set to true when all the above conditions are all true.
 
 Example Promise conditions from `kubectl get promise <name> -o yaml`:
 
