@@ -4,7 +4,7 @@ description: Understand the status conditions and events of a Promise.
 id: promise-status-events
 ---
 
-Kratix follows the Kubernetes convention of using status and events to convey important information of a Promise.
+Kratix follows the Kubernetes convention of using status and events to convey important information about a Promise.
 Promise Status describes what general condition the Promise is in and surfaces any error that has occurred.
 
 ## Conditions
@@ -55,7 +55,7 @@ Inspect the current Promise status at any time with:
 kubectl describe promise <name>
 ```
 
-## Common Promise Status
+## Common Promise Status Fields
 
 - `apiVersion` – Shows the API version that this Promise is serving requests at.
 - `kind` – Shows the Kind that this Promise is serving.
@@ -74,7 +74,9 @@ status:
 
 ## Events
 
-Events record important moments in the Promise lifecycle such as requirements installation, Configure pipeline running and when the Promise becomes available.
+Events record important moments in the Promise lifecycle such as when requirements are installed,
+if the configure pipeline is running and when the Promise becomes available.
+
 They can be viewed using:
 
 ```bash
