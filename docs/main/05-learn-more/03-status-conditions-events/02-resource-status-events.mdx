@@ -1,0 +1,53 @@
+---
+title: Resource Status and Events
+description: Learn about the conditions and events attached to Resource requests.
+id: resource-status-events
+---
+
+Kratix follows the Kubernetes convention of using status and events to convey the status of a Resource and to allow
+programmatic interactions.
+
+## Conditions
+
+Resources have the following list of conditions:
+
+- `ConfigureWorkflowCompleted` – all Configure workflow pipelines finished successfully.
+- `WorksSucceeded` – every Work created for the Resource has completed.
+- `Reconciled` – Resource has been successfully reconciled; set to true when all the above conditions are all true.
+
+Example output:
+
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2025-06-23T14:07:29Z"
+    message: Pipelines completed
+    reason: PipelinesExecutedSuccessfully
+    status: "True"
+    type: ConfigureWorkflowCompleted
+  - lastTransitionTime: "2025-06-23T14:07:32Z"
+    message: Reconciled
+    reason: Reconciled
+    status: "True"
+    type: Reconciled
+  - lastTransitionTime: "2025-06-23T14:03:24Z"
+    message: All works associated with this resource are ready
+    reason: WorksSucceeded
+    status: "True"
+    type: WorksSucceeded
+  lastSuccessfulConfigureWorkflowTime: "2025-06-23T14:07:29Z"
+```
+
+## Last Successful ConfigureWorkflow
+
+A Resource also records the time of the last successful Configure workflow run in `status.lastSuccessfulConfigureWorkflowTime`.
+
+## Events
+
+Events note important steps in the Resource lifecycle such as starting a workflow job or encountering errors. Inspect them with:
+
+```bash
+kubectl describe <resource> <name>
+```
+
+These events help in troubleshooting and understanding the status of your Resource requests.
