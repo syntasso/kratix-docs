@@ -14,7 +14,7 @@ style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 
 _We have written a tremendous [blog](https://www.syntasso.io/post/kratix-and-crossplane) about how Kratix and Crossplane complement each other._
 
-[Kratix Promises](../../reference/promises/intro) and [Crossplane Compositions](https://docs.crossplane.io/v1.13/concepts/compositions/) are similar in that they both provide declarative APIs and a facade into more complicated underlying platform orchestration.
+[Kratix Promises](../../reference/promises/intro) and [Crossplane Compositions](https://docs.crossplane.io/master/concepts/compositions/) are similar in that they both provide declarative APIs and a facade into more complicated underlying platform orchestration.
 
 Kratix does not aim to compete with Crossplane on cloud orchestration and it can help a platform builder already using Crossplane.
 

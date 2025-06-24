@@ -423,8 +423,8 @@ In this quick start, you:
 
 If you're ready to go deeper:
 
-- [Try writing your own Promise in the Kratix Workshop →](https://docs.syntasso.io/workshop)
-- [Explore Syntasso Kratix Enterprise →](https://docs.syntasso.io/ske)
+- [Try writing your own Promise in the Kratix Workshop →](https://docs.kratix.io/workshop)
+- [Explore Syntasso Kratix Enterprise →](https://docs.kratix.io/ske)
 
 :::tip
 **Want to see how this fits your platform strategy?** [Book a call with us →](https://syntasso.io/#contact-us)
