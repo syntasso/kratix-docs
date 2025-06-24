@@ -196,11 +196,12 @@ Once the Configure workflow has been completed, it will look like:
 ```yaml
 status:
   conditions:
-    - lastTransitionTime: "2023-03-07T15:50:30Z"
+    - lastTransitionTime: "2025-06-23T14:07:29Z"
       message: Pipelines completed
       reason: PipelinesExecutedSuccessfully
       status: "True"
       type: ConfigureWorkflowCompleted
+...
 ```
 
 Conditions can be used by external systems to programmatically check when a
@@ -212,7 +213,16 @@ following to have the CLI wait for the Workflow to be completed:
 kubectl wait redis/example --for=condition=ConfigureWorkflowCompleted --timeout=60s
 ```
 
-Once the condition is `True` the command will exit.
+Once the condition is `True` the command will exit. Inspect all conditions and
+events with:
+
+```bash
+kubectl describe <resource> <name>
+```
+
+For a deeper discussion see the
+[Resource Status and Events](/main/learn-more/status-conditions-events/resource-status-events)
+documentation.
 
 ## Health Checks
 

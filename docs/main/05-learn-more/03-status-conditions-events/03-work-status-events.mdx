@@ -1,0 +1,76 @@
+---
+title: Work, WorkPlacement Status and Events
+description: Understand the status conditions and events generated for Work and WorkPlacement objects.
+id: work-status-events
+---
+
+A **Work** represents the output of a workflow. Each Work is scheduled to one or more Destinations.
+Its progress is tracked through conditions.
+
+A **WorkPlacement** ties part of a Work to a specific Destination.
+Its status shows whether the documents were written successfully.
+
+## Work Conditions
+
+Works expose the following conditions:
+
+- `ScheduleSucceeded` – set to `True` once all WorkPlacements have been created. If Kratix cannot find matching Destinations this condition is `False` with reason `UnscheduledWorkloadGroups`.
+- `Ready` – set to `True` when every WorkPlacement has been scheduled successfully.
+
+Example output from `kubectl get work <name> -o yaml`:
+
+```yaml
+status:
+  conditions:
+    - lastTransitionTime: "2025-06-23T14:03:20Z"
+      message: All workplacements scheduled successfully
+      reason: AllWorkplacementsScheduled
+      status: "True"
+      type: ScheduleSucceeded
+    - lastTransitionTime: "2025-06-23T14:03:20Z"
+      message: Ready
+      reason: AllWorkplacementsScheduled
+      status: "True"
+      type: Ready
+```
+
+## WorkPlacement Conditions
+
+WorkPlacements expose the following conditions:
+
+- `ScheduleSucceeded` – `True` when the WorkPlacement has been scheduled to a matching Destination.
+- `WriteSucceeded` – indicates the documents were written to the State Store backing the Destination.
+- `Ready` – `True` when both `ScheduleSucceeded` and `WriteSucceeded` are true.
+
+Example output from `kubectl get workplacement <name> -o yaml`:
+
+```yaml
+status:
+  conditions:
+    - lastTransitionTime: "2025-06-23T14:03:20Z"
+      message: Scheduled to correct Destination
+      reason: ScheduledToDestination
+      status: "True"
+      type: ScheduleSucceeded
+    - lastTransitionTime: "2025-06-23T14:03:20Z"
+      message: Ready
+      reason: WorkloadsWrittenToTargetDestination
+      status: "True"
+      type: Ready
+    - lastTransitionTime: "2025-06-23T14:03:20Z"
+      message: ""
+      reason: WorkloadsWrittenToStateStore
+      status: "True"
+      type: WriteSucceeded
+```
+
+## Events
+
+Events on Works and WorkPlacements highlight scheduling progress and any issues writing to Destinations.
+
+Run the following commands to inspect Works and Workplacements events:
+
+```bash
+kubectl describe work <name>
+kubectl describe workplacement <name>
+```
