@@ -38,3 +38,16 @@ Kratix does not aim to compete with Crossplane on cloud orchestration and it can
   Crossplane is made.
 - Kratix provides GitOps out of the box so the state of Crossplane resources is
   all managed for free.
+
+## Controlling Manifest Generation
+
+When a Crossplane Composition is used through Kratix, the platform normally
+generates Kubernetes manifests for all resources created by that Composition so
+they can be stored in the configured state store. If you prefer not to generate
+these manifests, label the Composition as follows:
+
+```yaml
+compositions.core.kratix.io/manifest-generation: "disabled"
+```
+
+Removing the label or setting it to `"enabled"` restores the default behaviour.
