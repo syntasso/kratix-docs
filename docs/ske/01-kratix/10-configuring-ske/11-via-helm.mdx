@@ -313,11 +313,17 @@ use this feature, we recommend that you [install via the SKE CLI](./via-ske-cli)
 
 ### Deleting the SKE Operator
 
-To delete the SKE operator (and any deployed SKE instance), run the following command:
+To delete the SKE operator, run the following command:
 
 ```bash
 helm uninstall ske-operator
 ```
+
+:::note
+As of SKE Operator 0.13.0, deleting the SKE Operator will not delete your SKE instance, CRDs or registry secret by default. To
+delete these resources when deleting the operator, ensure the operator is deployed with `global.skeDeployment.deleteOnUninstall`
+set to `true`
+:::
 
 ### Deleting the SKE Instance
 
