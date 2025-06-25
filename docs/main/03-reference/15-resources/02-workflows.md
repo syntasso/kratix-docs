@@ -100,7 +100,7 @@ If this occurs, the workflow **halts**: no further containers are executed withi
 Pipeline, and no further Pipelines are executed in the workflow.
 
 To re-run a workflow following a Pipeline failure, you can perform a
-[manual reconciliation](#manual-reconciliation) of the Resource, which will trigger the
+[manual reconciliation](/main/learn-more/controlling-with-labels) of the Resource, which will trigger the
 workflow again from the beginning.
 
 ### Idempotency
@@ -121,32 +121,6 @@ In addition to the above, Kratix will reconcile on a regular cadence (10 hours b
 default, [configurable](/main/reference/kratix-config/config)) to attempt to
 mitigate against any drift that may have occurred. During this reconciliation,
 Kratix will ensure that all the Workflows for a given resource are re-run.
-
-### Manual Reconciliation
-
-Sometimes you may wish to manually trigger a Configure workflow for a specific Resource
-Request.
-
-In addition to the standard triggers outlined above, a Resource Request can be manually
-triggered for reconciliation by labelling it as follows:
-
-```yaml
-kratix.io/manual-reconciliation: "true"
-```
-
-This will trigger the Resource Configure workflow to run.
-
-This workflow instance will terminate any in-progress Resource Configure workflow and
-start again from the first Pipeline.
-
-Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
-it again for any additional manual runs.
-
-See below for an example command to trigger a manual reconciliation of a `redis` Resource.
-
-```
-kubectl label redis my-redis-example kratix.io/manual-reconciliation=true
-```
 
 ## Delete Workflows
 
@@ -186,25 +160,3 @@ itself** (including any retry attempts).
 
 Kratix will not automatically reschedule/retry any Pipelines which have failed as part of a Delete
 workflow.
-
-### Manual Reconciliation
-
-After a Resource Request has been marked for deletion, you can manually trigger
-the Delete workflow (e.g. to re-run the workflow after a pipeline failure) by
-labelling it as follows:
-
-```yaml
-kratix.io/manual-reconciliation: "true"
-```
-
-The Resource Delete workflow will re-run immediately, terminating any other
-workflow that may be in progress.
-
-Once Kratix schedules the manual workflow, the label will be removed, allowing
-you to add it again for any additional manual runs.
-
-See below for an example command to trigger a manual reconciliation of a `redis` Resource.
-
-```
-kubectl label redis my-redis-example kratix.io/manual-reconciliation=true
-```

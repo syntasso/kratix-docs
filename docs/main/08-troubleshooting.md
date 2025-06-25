@@ -244,7 +244,7 @@ continue to delete and work its way through the remaining finalizers.
    ```
 
    Once the issue is fixed, you can trigger the delete Workflow to re-run by triggering a
-   [manual reconciliation](./reference/resources/workflows#manual-reconciliation-1).
+   [manual reconciliation](/main/learn-more/controlling-with-labels).
 
 1. If the `kratix.io/work-cleanup` finalizer is not being removed, check to see
    whether the `Work`/`WorkPlacement` resources are failing to be deleted
@@ -324,7 +324,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    ```
 
    Once the issue is fixed, you can trigger the delete Workflow to re-run by triggering a
-   [manual reconciliation](./reference/resources/workflows#manual-reconciliation-1).
+   [manual reconciliation](/main/learn-more/controlling-with-labels).
 
 1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
    see whether the Workflows are failing to be deleted and manually cleanup any that
@@ -375,7 +375,7 @@ the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
 times the pod will eventually go into `CrashLoopBackoff`. In this scenario
 Kratix will not try to reschedule the pod. You can force Kratix to reschedule a
 new pod by triggering a [manual
-reconciliation](./reference/resources/workflows#manual-reconciliation)
+reconciliation](/main/learn-more/controlling-with-labels)
 
 ### Workflow Pod doesn't have Kubernetes API access
 

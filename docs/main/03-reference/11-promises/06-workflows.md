@@ -96,7 +96,7 @@ If this occurs, the workflow **halts**: no further containers are executed withi
 Pipeline, and no further Pipelines are executed in the workflow.
 
 To re-run a workflow following a Pipeline failure, you can perform a
-[manual reconciliation](#manual-reconciliation) of the Promise, which will trigger the
+[manual reconciliation](/main/learn-more/controlling-with-labels) of the Resource, which will trigger the
 workflow again from the beginning.
 
 ### Idempotency
@@ -132,31 +132,6 @@ follow along progress or share your requirements.
 As this reconciliation is managed by the Promise Controller, restarts of the Kratix Controller
 Manager may disrupt the regularity of this cadence meaning that the reconciliation interval
 may be greater than the configured.
-
-### Manual Reconciliation
-
-Sometimes you may wish to manually trigger a Configure workflow for a specific Promise.
-
-In addition to the standard triggers outlined above, a Promise can be manually triggered
-for reconciliation by labelling it as follows:
-
-```yaml
-kratix.io/manual-reconciliation: "true"
-```
-
-This will trigger the Promise Configure workflow to run.
-
-This workflow instance will terminate any in-progress Promise Configure workflow and start
-again from the first Pipeline.
-
-Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
-it again for any additional manual runs.
-
-See below for an example command to trigger a manual reconciliation of a `redis` Promise.
-
-```
-kubectl label promises.platform.kratix.io redis kratix.io/manual-reconciliation=true
-```
 
 ## Delete Workflows
 
@@ -196,25 +171,3 @@ itself** (including any retry attempts).
 
 Kratix will not automatically reschedule/retry any Pipelines which have failed as part of a Delete
 workflow.
-
-### Manual Reconciliation
-
-After a Promise has been marked for deletion, you can manually trigger the
-Delete workflow (e.g. to re-run the workflow after a pipeline failure) by
-labelling the Promise as follows:
-
-```yaml
-kratix.io/manual-reconciliation: "true"
-```
-
-This will re-run the Promise Delete workflow immediately, terminating any
-workflow that may be in progress.
-
-Once Kratix schedules the manual workflow, the label will be removed, allowing you to add
-it again for any additional manual runs.
-
-See below for an example command to trigger a manual reconciliation of a `redis` Promise.
-
-```
-kubectl label promises.platform.kratix.io redis kratix.io/manual-reconciliation=true
-```
