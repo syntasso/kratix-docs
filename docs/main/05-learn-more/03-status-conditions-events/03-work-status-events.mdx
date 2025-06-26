@@ -68,9 +68,21 @@ status:
 
 Events on Works and WorkPlacements highlight scheduling progress and any issues writing to Destinations.
 
-Run the following commands to inspect Works and Workplacements events:
+Run `kubectl describe` to inspect Works and Workplacements events:
 
 ```bash
 kubectl describe work <name>
+...
+Events:
+  Type     Reason                       Age              From       Message
+  ----     ------                       ----             ----       -------
+  Warning  DestinationSelectorMismatch  4s (x2 over 5s)  Scheduler  Target destination no longer matches destinationSelectors for workloadGroups:
+
 kubectl describe workplacement <name>
+...
+Events:
+  Type    Reason                        Age                   From                     Message
+  ----    ------                        ----                  ----                     -------
+  Normal  WorkloadsWrittenToStateStore  2m23s                 WorkPlacementController  successfully written to Destination: worker-1 with versionID:...
 ```
+Successful events will be of type `Normal` whereas errors will be published as `Warning` events.

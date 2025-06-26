@@ -44,10 +44,26 @@ A Resource also records the time of the last successful Configure workflow run i
 
 ## Events
 
-Events note important steps in the Resource lifecycle such as starting a workflow job or encountering errors. Inspect them with:
+Events note important steps in the Resource lifecycle such as starting a workflow job or encountering errors.
+
+Inspect them with:
 
 ```bash
 kubectl describe <resource> <name>
 ```
 
+Example Resource events:
+```
+kubectl describe <resource> <name>
+...
+Events:
+  Type     Reason              Age                From                       Message
+  ----     ------              ----               ----                       -------
+  Normal   PipelineStarted     7m13s              ResourceRequestController  Configure Pipeline started: instance-configure
+  Warning  WorksMisplaced      2m27s              ResourceRequestController  Some works associated with this resource are misplaced: [redis-example-instance-configure-b11aa]
+  Normal   WorksSucceeded      8s (x2 over 7m9s)  ResourceRequestController  All works associated with this resource are ready
+  Normal   ReconcileSucceeded  8s (x2 over 7m9s)  ResourceRequestController  Successfully reconciled
+```
+
+Successful events will be of type `Normal` whereas errors will be published as `Warning` events.
 These events help in troubleshooting and understanding the status of your Resource requests.

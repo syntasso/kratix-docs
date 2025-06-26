@@ -77,10 +77,25 @@ status:
 Events record important moments in the Promise lifecycle such as when requirements are installed,
 if the configure pipeline is running and when the Promise becomes available.
 
-They can be viewed using:
+They can be viewed by running:
 
-```bash
+```
 kubectl describe promise <name>
 ```
 
+Example Promise events:
+```bash
+kubectl describe promise <name>
+...
+Events:
+  Type    Reason                      Age                    From               Message
+  ----    ------                      ----                   ----               -------
+  Normal  PipelineStarted             7m53s                  PromiseController  Configure Pipeline started: promise-configure
+  Normal  Available                   7m43s (x2 over 7m43s)  PromiseController  Promise is available
+  Normal  WorksSucceeded              7m43s                  PromiseController  All works associated with this promise are ready
+  Normal  ReconcileSucceeded          7m43s                  PromiseController  Successfully reconciled
+  Normal  ConfigureWorkflowCompleted  7m38s (x2 over 7m43s)  PromiseController  All workflows completed
+```
+
+Successful events will be of type `Normal` whereas errors will be published as `Warning` events.
 These events are useful for understanding the progression of the Promise and troubleshooting failures.
