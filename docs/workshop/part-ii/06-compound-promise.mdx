@@ -154,10 +154,10 @@ Excellent. You have now configured the App-as-a-Service Promise to be a Compound
 
 We'll need to define an additional step in the pipeline that makes a request for a PostgreSQL service when making or updating a request for an app. We'll start by defining the pipeline stage that will run when a user wants the request a PostgreSQL service with their app.
 
-Create a `database-configure` file in the `workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts` directory and make it executable. Next, copy the contents of [this file](https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt) into it by running the following:
+Create a `database-configure` file in the `workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts` directory and make it executable. Next, copy the contents of [this file](https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/24089dfe2fef664cdea3dac0b77823816b5ca1b0/gistfile1.txt) into it by running the following:
 
 ```bash
-curl -o workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/database-configure --silent https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/34b37a7af95bd24293cc7ea3a3456cd4d58361a0/gistfile1.txt
+curl -o workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/database-configure --silent https://gist.githubusercontent.com/syntassodev/7cfae7b53bc54615cf351760a8377ba2/raw/24089dfe2fef664cdea3dac0b77823816b5ca1b0/gistfile1.txt
 ```
 
 Take a closer look at the script. Unlike the Ingress configured via the NGINX Controller, we will not always want to provision a PostgreSQL service with each app. The script will only provision a PostgreSQL if the resource request `spec` specifies a `dbDriver` key a value of `postgresql`:
