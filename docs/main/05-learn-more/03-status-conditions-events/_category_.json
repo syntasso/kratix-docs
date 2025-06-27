@@ -1,0 +1,8 @@
+{
+  "label": "Status and Events",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn more about status and events of Kratix objects."
+  }
+}
