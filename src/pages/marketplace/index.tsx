@@ -134,11 +134,11 @@ export function Marketplace(): JSX.Element {
               Learn more about how Kratix can power your platform{" "}
               <Link href="/">here</Link>.
             </p>
-            <div  style={{ maxWidth: "720px", margin: "1rem auto", padding: "0 1rem" }}>
+            <div style={{ maxWidth: "720px", margin: "1rem auto", padding: "0 1rem" }}>
               <Admonition type="info">
                 <p>
                   Looking for production-ready, enterprise-grade, supported Promises?
-                  Check out <a href="https://syntasso.io/pricing">Syntasso Kratix Enterprise (SKE)</a> or 
+                  Check out <a href="https://syntasso.io/pricing">Syntasso Kratix Enterprise (SKE)</a> or
                   <a href="https://syntasso.io/#contact-us"> get in contact</a>.
                 </p>
               </Admonition>
