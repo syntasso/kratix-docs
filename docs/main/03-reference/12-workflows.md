@@ -87,7 +87,8 @@ spec:
       volumeMounts: []
       imagePullPolicy: # Either Always, IfNotPresent or Never
       securityContext: # Optional. Can be configured directly or via kratix config
-  imagePullSecrets: []
+  imagePullSecrets:
+  - name: my-secret
 ```
 
 Refer to the [Kubernetes Pod Spec
