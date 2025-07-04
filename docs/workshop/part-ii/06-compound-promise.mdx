@@ -145,7 +145,7 @@ You should see both promises. After a few seconds, both promises are marked as "
 ```shell-session
 NAME         STATUS      KIND         API VERSION                      VERSION
 app          Available   App          workshop.kratix.io/v1
-postgresql   Available   postgresql   marketplace.kratix.io/v1alpha1   v1.0.0-beta.3
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3
 ```
 
 Excellent. You have now configured the App-as-a-Service Promise to be a Compound Promise that requires a PostgreSQL Promise. Next, you will need to update the Resource Workflow to actually use the new promise.
@@ -174,7 +174,7 @@ It then creates a Resource Request for the PostgreSQL promise:
 
 ```ruby
 postgresqlRequest = {
-  'apiVersion' => "marketplace.kratix.io/v1alpha1",
+  'apiVersion' => "marketplace.kratix.io/v1alpha2",
   'kind' => 'postgresql',
   'metadata' => {
     'name' => "#{dbName}",
