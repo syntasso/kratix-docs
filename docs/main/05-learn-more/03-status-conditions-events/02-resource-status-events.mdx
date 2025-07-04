@@ -38,9 +38,12 @@ status:
   lastSuccessfulConfigureWorkflowTime: "2025-06-23T14:07:29Z"
 ```
 
-## Last Successful ConfigureWorkflow
+## Common Resource Status Fields
 
-A Resource also records the time of the last successful Configure workflow run in `status.lastSuccessfulConfigureWorkflowTime`.
+- `lastSuccessfulConfigureWorkflowTime` – The time of the last successful Configure workflow run
+- `workflows` - The number of Promise configure workflow pipelines
+- `workflowsSucceeded` - The number of Promise configure workflow pipelines that have completed successfully
+- `workflowsFailed`- The number of Promise configure workflow pipelines that have failed
 
 ## Events
 
