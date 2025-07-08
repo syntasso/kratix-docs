@@ -311,7 +311,7 @@ continue to delete and work its way through the remaining finalizers.
 When investigating a Promise deletion issue it beneficial to have the logs of the
 Kratix operator open to see if any errors are being logged
 
-```
+```bash
 kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers\.promise"
 ```
 
@@ -319,7 +319,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    see whether the delete Workflow is failing and fix any issues preventing it from
    completing.
 
-   ```
+   ```bash
    kubectl -n kratix-platform-system get pods --selector kratix.io/promise-name=<promise-name> --selector kratix.io/work-action=delete
    ```
 
@@ -330,7 +330,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    see whether the Workflows are failing to be deleted and manually cleanup any that
    are.
 
-   ```
+   ```bash
    kubectl -n kratix-platform-system get jobs --selector kratix.io/promise-name=<promise-name>
    ```
 
@@ -339,7 +339,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    requests are not delete](#resource-request-is-not-being-deleted) for how to
    troubleshoot a resource request deletion failing
 
-   ```
+   ```bash
    kubectl get <resource-kind> -A
    ```
 
@@ -347,13 +347,14 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    is not being removed, check to see if any Kubernetes resources are failing to
    be deleted and try to manually clean up any remaining.
 
-   ```
+   ```bash
    kubectl get configmaps,roles,rolebindings,clusterroles,clusterrolebindings -A --selector kratix.io/promise-name=<promise-name>
    ```
+
 1. If the `kratix.io/api-crd-cleanup` finalizer is not being removed, check to
    see whether the CRD is failing to be deleted and try to manually delete it.
 
-   ```
+   ```bash
    kubectl get crd --selector kratix.io/promise-name=<promise-name>
    ```
 
@@ -364,7 +365,7 @@ the specification for the Workflow is invalid, Kratix will fail to create the
 Pod. Check the logs of the Kratix operator to see if there are any errors and
 fix the relating issues in the Workflow.
 
-```
+```bash
 kubectl -n kratix-platform-system logs <pod-name> -c manager | grep <promise/resource name>
 ```
 
