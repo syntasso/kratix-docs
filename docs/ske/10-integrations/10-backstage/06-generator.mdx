@@ -310,6 +310,84 @@ in the `/kratix/output/backstage/catalog-info.yaml` file.
 
 ## Customising the generated Templates
 
+By default, the generator will create the Backstage `Template` with default
+values for the `metadata` and `spec` fields, as shown below:
+
+```yaml
+metadata:
+  name: <Promise Kind>-promise
+  title: <Promise Kind> Promise
+  description: <Promise Kind> as a Service
+  tags:
+    - kratix
+    - <Promise Name>-promise
+spec:
+  lifecycle: experimental
+  owner: kratix-platform
+  type: kratix-resource
+  # steps and parameters will be generated according to the API
+```
+
+You can customise these values by setting the following `env` variables in the
+workflow:
+
+* `TEMPLATE_NAME`: the value of `metadata.name`
+* `TEMPLATE_TITLE`: the value of `metadata.title`
+* `TEMPLATE_DESCRIPTION`: the value of `metadata.description`
+* `TEMPLATE_TAGS`: comma-separated list of values for `metadata.tags`
+* `TEMPLATE_TYPE`: the value of `spec.type`
+* `TEMPLATE_LIFECYCLE`: the value of `spec.lifecycle`
+* `TEMPLATE_OWNER`: the value of `spec.owner`
+
+:::info
+
+The environment variables must be set in the generator stage in the
+`promise.configure` workflow, since that's where the Backstage Template is
+generated.
+
+:::
+
+You can also customise the fields by setting the following annotations in the
+Promise or Resource object directly:
+
+* `ske.backstage.template/name`: the value of `metadata.name`
+* `ske.backstage.template/title`: the value of `metadata.title`
+* `ske.backstage.template/description`: the value of `metadata.description`
+* `ske.backstage.template/tags`: comma-separated list of values for `metadata.tags`
+* `ske.backstage.template/type`: the value of `spec.type`
+* `ske.backstage.template/lifecycle`: the value of `spec.lifecycle`
+* `ske.backstage.template/owner`: the value of `spec.owner`
+
+
+For example, to set `metadata.title` and `spec.owner`, you can update your
+Pipeline Stage with the snippet below:
+
+```yaml title="Promise workflow with custom Template values"
+  #...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: registry.syntasso.io/syntasso/ske-backstage-generator:VERSION
+            name: ske-backstage-generator
+            #highlight-start
+            env:
+            - name: TEMPLATE_OWNER
+              value: "platform-team"
+            - name: TEMPLATE_TITLE
+              value: "My Super Service"
+            #highlight-end
+```
+
+### Customising the Steps and Parameters
+
 By default, the generator will create the Backstage Template with resource namespace as a required field.
 You can customise this behaviour by setting the following `env` variables in the workflow:
 
@@ -318,8 +396,7 @@ You can customise this behaviour by setting the following `env` variables in the
 * `TEMPLATE_NAMESPACE_FIELD_DESCRIPTION`: the description of the resource namespace field in Backstage UI
 * `TEMPLATE_SINGLE_SPEC_PAGE`: set to `true` if you would like to generate a single page for the Spec in the Template, rather than a page per `.spec.<field>`
 * `TEMPLATE_HIDE_NAMESPACE`: set to `true` if you would like to hide the namespace field from the generated resource
-Template.
-Resource namespace will default to `TEMPLATE_NAMESPACE` when it is set, otherwise will be set to `default` namespace.
+Template. Resource namespace will default to `TEMPLATE_NAMESPACE` when it is set, otherwise will be set to `default` namespace.
 
 For example, to generate the resource Template without the namespace field and set the resource namespace to `my-team`
 for all resource requests:
