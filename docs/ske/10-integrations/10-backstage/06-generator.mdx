@@ -315,8 +315,8 @@ values for the `metadata` and `spec` fields, as shown below:
 
 ```yaml
 metadata:
-  name: <Promise Kind>-promise
-  title: <Promise Kind> Promise
+  name: <Promise Kind>-promise-template
+  title: <Promise Kind>
   description: <Promise Kind> as a Service
   tags:
     - kratix
@@ -325,13 +325,12 @@ spec:
   lifecycle: experimental
   owner: kratix-platform
   type: kratix-resource
-  # steps and parameters will be generated according to the API
+  # steps and parameters will be generated based on the Promise API
 ```
 
 You can customise these values by setting the following `env` variables in the
 workflow:
 
-* `TEMPLATE_NAME`: the value of `metadata.name`
 * `TEMPLATE_TITLE`: the value of `metadata.title`
 * `TEMPLATE_DESCRIPTION`: the value of `metadata.description`
 * `TEMPLATE_TAGS`: comma-separated list of values for `metadata.tags`
@@ -350,7 +349,6 @@ generated.
 You can also customise the fields by setting the following annotations in the
 Promise or Resource object directly:
 
-* `ske.backstage.template/name`: the value of `metadata.name`
 * `ske.backstage.template/title`: the value of `metadata.title`
 * `ske.backstage.template/description`: the value of `metadata.description`
 * `ske.backstage.template/tags`: comma-separated list of values for `metadata.tags`
