@@ -4,6 +4,7 @@ sidebar_position: 12
 sidebar_label: Workflows
 description: Learn more about conventions in workflows
 id: workflows
+import CommonWorkflowFeatures from '@site/docs/_partials/workflows/common-workflow-features.md';
 ---
 
 A [Kratix Promise](./promises/intro) can be configured with a series of **workflows**
@@ -50,6 +51,8 @@ A particular workflow (e.g. `resource.configure`) is an array of Kratix Pipeline
 that will be executed in order.
 
 See the next section to learn how to define a Pipeline.
+
+<CommonWorkflowFeatures />
 
 ## Pipelines
 

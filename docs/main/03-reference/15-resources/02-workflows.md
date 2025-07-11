@@ -3,6 +3,7 @@ description: Documentation for writing Resource Workflows using Kratix Pipelines
 title: Resource Workflows
 sidebar_label: Workflows
 id: workflows
+import CommonWorkflowFeatures from '@site/docs/_partials/workflows/common-workflow-features.md';
 ---
 
 A Kratix Promise can define workflows that run for each Resource request made against it.
@@ -29,4 +30,5 @@ spec:
         - # Pipeline definition (single)
 ```
 
+<CommonWorkflowFeatures />
 

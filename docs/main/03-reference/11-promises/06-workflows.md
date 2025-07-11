@@ -2,6 +2,7 @@
 description: Documentation for writing Promise Workflows using Kratix Pipelines, covering how Kratix internally executes the Pipeline containers
 title: Promise Workflows
 sidebar_label: Workflows
+import CommonWorkflowFeatures from '@site/docs/_partials/workflows/common-workflow-features.md';
 ---
 
 A Kratix Promise can define two workflows for itself: `configure` and `delete`.
@@ -27,4 +28,6 @@ spec:
       delete:
         - # Pipeline definition (single)
 ```
+
+<CommonWorkflowFeatures />
 
