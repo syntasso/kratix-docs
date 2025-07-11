@@ -1,0 +1,157 @@
+---
+slug: introducing-ske-headlamp
+title: "Introducing the SKE Headlamp Plugin"
+description: introducing the SKE Headlamp plugin
+authors: [derik]
+tags: [kratix, SKE, headlamp]
+---
+
+Navigating Kubernetes resources can often feel like searching for a needle in a
+haystack, especially when trying to gain a comprehensive overview of everything
+deployed within your cluster. While kubectl is a familiar tool, we've heard that
+it can be complicated to visualise the entire landscape of Kratix Promises and
+Resources.
+
+To address this, we've been developing a powerful new solution: a SKE plugin
+for Headlamp, designed to provide unparalleled observability for your Kubernetes
+environments.
+
+{/* truncate */}
+
+## What's Headlamp?
+
+[Headlamp](https://headlamp.dev/) is a user-friendly Kubernetes UI focused on
+extensibility and its core purpose is to offer robust observability on top of
+Kubernetes. It provides adaptable UI & branding to create custom
+experiences with minimal effort and features RBAC-based controls, adapting to a
+user's cluster permissions. It can be run as a web app, desktop app, or
+in-cluster. Headlamp is a Cloud Native Computing Foundation project, part of the
+Kubernetes SIG UI.
+
+## Why Headlamp?
+
+While the SKE Backstage integration provides a layer of observability, it is
+much more aimed at the Platform users, not as much to the Platform teams
+building the Promises powering the Platform. Headlamp, on the other hand, offers
+a similar experience to Backstage, but much more relevant to the Platform teams.
+
+Crucially, Headlamp supports the development of custom plugins, and that's
+precisely what we've leveraged to create our Kratix plugin.
+
+## Enhanced Visibility with the Kratix Headlamp Plugin
+
+Our new plugin integrates seamlessly with your Headlamp installation, offering a
+user-friendly interface to manage and monitor your Kratix resources. Here's a
+closer look at its key features:
+
+### The Promise Views
+
+This dedicated tab provides a quick overview of all your Kratix Promises. From
+here, you can easily jump into the details of any specific Promise, such as a
+Redis Promise, and view further information. Within the Promise details, you can
+access crucial information, including:
+
+* The conditions of the Promise.
+* The last time the associated pipeline ran.
+* The ability to jump directly into the pipeline run itself.
+* Visibility into the pods that were executed as part of that pipeline.
+* Access to logs for detailed troubleshooting.
+
+```mdx-code-block
+import PromiseList from "./promise-list.png"
+import PromiseDetail from "./promise-details.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={PromiseList} alt="The Promise List view" />
+
+  <figcaption>The Promise List view</figcaption>
+</figure>
+
+<figure className="diagram">
+  <img className="large" src={PromiseDetail} alt="The Promise Details view" />
+
+  <figcaption>The Promise Details view</figcaption>
+</figure>
+
+
+### The Resource Views
+
+Complementing the Promises view, the Resources tab allows you to see all the
+Kratix resources deployed across your cluster. The plugin offers powerful
+filtering capabilities, enabling you to narrow down your view by, for example,
+Promise or Namespace
+
+Just like with Promises, you can click on any resource (e.g., an 'app cache' in
+the mobile namespace) to view its details. This includes seeing when its
+pipeline last ran, jumping into the pipeline, inspecting executed pods, and
+investigating logs for all containers involved in the execution.
+
+```mdx-code-block
+import ResourceList from "./resource-list.png"
+import ResourceDetail from "./resource-details.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={ResourceList} alt="The Resource List view" />
+
+  <figcaption>The Resource List view</figcaption>
+</figure>
+
+<figure className="diagram">
+  <img className="large" src={ResourceDetail} alt="The Resource Details view" />
+
+  <figcaption>The Resource Details view</figcaption>
+</figure>
+
+
+### The Map View: A Visual Overview
+
+Headlamp includes a very useful built-in visualisation where you can see all
+resources deployed across your cluster. We've extended this capability to
+provide a similar map view specifically for your Kratix Promises. By filtering
+for Kratix resources, you can visually explore your deployed Promises and
+understand their relationships.
+
+For instance, you can click on a Promise to see the resources it owns, like
+Resource Requests resources. Furthermore, the map view highlights associated
+jobs, such as the pipeline jobs that executed the Promise. You can also see the
+Promise's configure pipeline directly in this tree-like, map-based view,
+allowing for easy navigation and understanding of your platform's entire
+resource topology.
+
+```mdx-code-block
+import MapView from "./map-view.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={MapView} alt="The Map View view" />
+
+  <figcaption>The Map view</figcaption>
+</figure>
+
+
+
+## Try it out!
+
+:::note
+
+The Kratix Headlamp plugin is currently available for Syntasso Kratix Enterprise
+(SKE) users.
+
+:::
+
+We're excited about the potential of this new plugin to dramatically simplify
+Kubernetes observability for Kratix users. 
+
+Looking ahead, our next major focus is to introduce comprehensive visibility
+into compound promises, allowing you to easily see their sub-promises and
+associated resources. This will provide an even deeper understanding of your
+Platform.
+
+Also, wee are keen to get your feedback! What information would you like us to
+expose next? What's missing? What are some features you'd like to see? Send the
+requests our way!
+
+If you're interested in trying out a version of Headlamp with our plugin, please
+let us know! We can package it up and send it your way.
