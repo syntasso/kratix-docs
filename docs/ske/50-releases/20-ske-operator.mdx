@@ -26,11 +26,25 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
-### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.13.0/) (2025-05-25)
+### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.13.0/) (2025-07-11)
 
-Released in Helm Chart version [version 0.39.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.39.0/)
+Released in Helm Chart version [version 0.42.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.42.0/)
 
 #### Features
+
+* In rare occasions where a release version is not available, the SKE Operator
+can now handle upgrades to the next appropriate version. The version is
+determined by the `release-metadata.json` file within the release artefact.
+
+### Helm Chart [v0.42.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.42.0/)(2025-07-11)
+
+#### Features
+
+* Resource limits, nodeSelector, tolerations and affinities can now be configured for the SKE Operator deployment. Check [the values.yaml](https://github.com/syntasso/helm-charts/blob/75fba8637ac152290997ec1691aac267e5067983/ske-operator/values.yaml#L74-L85) for more information.
+
+### Helm Chart [v0.39.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.39.0/) (2025-05-25)
+
+##### Features
 
 * Deleting the SKE Operator by uninstalling the Helm Chart will no longer result in the deletion of your SKE instances, CRDs or the registry secret. To
 allow for the deletion of these resources when uninstalling the SKE Operator via the chart, the value `global.skeDeployment.deleteOnUninstall` has been introduced.
@@ -86,7 +100,7 @@ Released in Helm Chart version [version 0.29.0](http://syntasso-enterprise-relea
 
 * Enhanced support for Kratix upgrades, including post-upgrade checks written to the Kratix status
 
-### [SKE Operator Helm Chart 0.26.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.26.0/) (2024-11-26)
+### [Helm Chart v0.26.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.26.0/) (2024-11-26)
 
 Deploys SKE Operator version [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.6.0/)
 
