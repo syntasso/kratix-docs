@@ -87,6 +87,7 @@ spec:
       volumeMounts: []
       imagePullPolicy: # Either Always, IfNotPresent or Never
       securityContext: # Optional. Can be configured directly or via kratix config
+      resources: # Optional. This matches the structure of the `resource` config for a pod's container
   imagePullSecrets:
   - name: my-secret
 ```
@@ -96,11 +97,8 @@ documentation](https://kubernetes.io/docs/reference/kubernetes-api/workload-reso
 for more information on the fields above.
 
 :::note
-
-
 Not all fields from the Pod spec are supported. We will add support for more fields in
 the future.
-
 :::
 
 ### Job Lifecycle
@@ -184,7 +182,7 @@ not set it defaults to the namespace of the pipeline. If set to `*`, the
 underlying ClusterRole is bound to a ClusterRoleBinding instead of a
 RoleBinding, giving the pipeline permissions across all namespaces.
 
-```
+```yaml
 platform: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -226,8 +224,7 @@ naming convention of
 `<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`. For example
 the below Promise would create two service accounts:
 
-
-```yaml:
+```yaml
 platform: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -297,7 +294,8 @@ Refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/conf
 for more details on Secrets in Kubernetes.
 
 Example:
-```
+
+```yaml
 spec:
   workflows:
     resource/promise:
@@ -423,7 +421,7 @@ containers. Kratix configures its own containers in the pipeline to run with the
 following [security
 context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/):
 
-```
+```yaml
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -442,6 +440,7 @@ context set. You can set the security context for the Promise specific
 containers (not Kratix containers) by either:
 
 - Specifying the security context in the container spec, e.g.:
+
   ```yaml
   apiVersion: platform.kratix.io/v1alpha1
   kind: Pipeline
