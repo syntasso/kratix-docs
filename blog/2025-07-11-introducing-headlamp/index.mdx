@@ -18,7 +18,7 @@ environments.
 
 {/* truncate */}
 
-## What's Headlamp?
+## Why Headlamp?
 
 [Headlamp](https://headlamp.dev/) is a user-friendly Kubernetes UI focused on
 extensibility and its core purpose is to offer robust observability on top of
@@ -27,8 +27,6 @@ experiences with minimal effort and features RBAC-based controls, adapting to a
 user's cluster permissions. It can be run as a web app, desktop app, or
 in-cluster. Headlamp is a Cloud Native Computing Foundation project, part of the
 Kubernetes SIG UI.
-
-## Why Headlamp?
 
 While the SKE Backstage integration provides a layer of observability, it is
 much more aimed at the Platform users, not as much to the Platform teams
@@ -41,8 +39,15 @@ precisely what we've leveraged to create our Kratix plugin.
 ## Enhanced Visibility with the Kratix Headlamp Plugin
 
 Our new plugin integrates seamlessly with your Headlamp installation, offering a
-user-friendly interface to manage and monitor your Kratix resources. Here's a
-closer look at its key features:
+user-friendly interface to manage and monitor your Kratix resources. Watch the
+demo below or keep on reading for a closer look at its key features.
+
+```mdx-code-block
+import ReactPlayer from 'react-player/lazy';
+import HeadlampDemo from './headlamp-overview.mp4';
+```
+
+<ReactPlayer wrapper="span" controls url={HeadlampDemo} />
 
 ### The Promise Views
 
@@ -130,11 +135,9 @@ import MapView from "./map-view.png"
   <figcaption>The Map view</figcaption>
 </figure>
 
-
-
 ## Try it out!
 
-:::note
+:::info
 
 The Kratix Headlamp plugin is currently available for Syntasso Kratix Enterprise
 (SKE) users.
@@ -142,7 +145,7 @@ The Kratix Headlamp plugin is currently available for Syntasso Kratix Enterprise
 :::
 
 We're excited about the potential of this new plugin to dramatically simplify
-Kubernetes observability for Kratix users. 
+Kubernetes observability for Kratix users.
 
 Looking ahead, our next major focus is to introduce comprehensive visibility
 into compound promises, allowing you to easily see their sub-promises and
