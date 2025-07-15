@@ -7,8 +7,7 @@ have it installed, skip to the next section.
 
 <details>
 
-   <summary> Don't want to use cert-manager? Manually provide the required
-   certificates </summary>
+ <summary> Don't want to use cert-manager? Manually provide the required certificates </summary>
 
 Cert-manager is used to generate CA certificates and key/cert pairs for the Kratix webhook
 and Metrics Services.
