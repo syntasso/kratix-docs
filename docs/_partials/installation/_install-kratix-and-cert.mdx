@@ -4,10 +4,17 @@ import PartialInstallCertManager from './_install-cert-manager.md';
 
 ## Set up Kratix
 
-:::tip
-These instructions provide the most control with separate cert-manager and Kratix installations from source.
+:::warning
 
-If you are on an empty or disposable cluster you may prefer to use the [quick start](../../main/quick-start) job which manages both together with sensible defaults.
+These instructions are intended for teams preparing to install Kratix in semi-permanent
+or permanent environments.
+
+If you are just getting started and have access to a disposable/empty cluster we highly
+recommend you get started with the [quick start](../../main/quick-start) instructions
+which can be used on all Kubernetes clusters and configures a Kratix and its first
+Destination and State Store backed by MinIO which is configured for learning but is not
+robust or durable enough for production use.
+
 :::
 
 ### Install cert-manager

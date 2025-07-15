@@ -12,7 +12,7 @@ have it installed, skip to the next section.
 Cert-manager is used to generate CA certificates and key/cert pairs for the Kratix webhook
 and Metrics Services.
 
-### Webhook Service
+#### Webhook Service
 
 You will need to generate a CA Certificate and key/cert pair for the following DNS names:
 - `kratix-platform-webhook-service.kratix-platform-system.svc.cluster.local`
@@ -102,7 +102,7 @@ spec:
 ...
 ```
 
-### Metrics Service
+#### Metrics Service
 
 You will need to generate a CA Certificate and key/cert pair for the following DNS names:
 - `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc`

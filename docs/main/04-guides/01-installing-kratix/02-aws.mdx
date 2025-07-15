@@ -35,35 +35,15 @@ export PLATFORM=<platform-context-name>
 
 <PartialInstallKratixAndCert />
 
-<PartialInstallStateStoreStart />
+### Configure a Destination and State Store
 
-If you have a pre-existing Git repository or S3-Compatible Bucket you can use that as your
-state store. If not you can either:
+Once Kratix is installed, you will want to configure a Destination it can schedule your
+workflow outputs to and a State Store to store that Destination's content.
 
-- Create a new Git repository on your Git provider of choice, including
-  [AWS CodeCommit](https://aws.amazon.com/codecommit/), and use it as your state store. See
-  [Git State Store](/main/reference/statestore/gitstatestore) for more information.
-- Create an [S3 Bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/creating-bucket.html)
-  (anything that implements the S3 API will work) and then use it as your state
-  store. See [Bucket State Store](/main/reference/statestore/bucketstatestore)
-  for more information.
+For generic instructions, please visit the [State Store](https://docs.kratix.io/main/reference/statestore/intro)
+and [Destination](https://docs.kratix.io/main/reference/destinations/intro) pages.
 
-<PartialInstallSetupDestination />
-
-## Set up Worker Cluster {#worker-setup}
-
-If you are not using a pre-existing cluster, create a Worker Cluster following
-the same steps as the [Platform Cluster setup](#platform-setup).
-
-Once completed, log in to your cluster using the `aws` cli and set the `WORKER` environment
-variable:
-
-```bash
-aws eks update-kubeconfig --region <region-code> --name <cluster-name>
-kubectl config current-context
-export WORKER=<worker-context-name>
-```
-
-<PartialInstallGitOpsAgent />
+To use a AWS S3 Bucket as your State Store, you can refer to the [Kratix Examples repository](https://github.com/syntasso/kratix-examples) which provides easy
+install scripts.
 
 <PartialConfigureMetricsCollection />

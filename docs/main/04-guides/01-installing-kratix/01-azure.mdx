@@ -35,35 +35,15 @@ export PLATFORM=<platform-context-name>
 
 <PartialInstallKratixAndCert />
 
-<PartialInstallStateStoreStart />
+### Configure a Destination and State Store
 
-If you have a pre-existing Git repository or S3-Compatible Bucket you can use that as your
-state store. If not you can either:
+Once Kratix is installed, you will want to configure a Destination it can schedule your
+workflow outputs to and a State Store to store that Destination's content.
 
-- Create a new Git repository on your Git provider of choice, including [Azure
-  Repos](https://azure.microsoft.com/en-gb/products/devops/repos), and use it as
-  your state store. See [Git State
-  Store](/main/reference/statestore/gitstatestore) for more information.
-- Use an external S3-compatible bucket. Since Azure itself does not provide an
-  S3-compatible service, you can use a different cloud provider or a self hosted
-  solution such as [MinIO](https://min.io/).
+For generic instructions, please visit the [State Store](https://docs.kratix.io/main/reference/statestore/intro)
+and [Destination](https://docs.kratix.io/main/reference/destinations/intro) pages.
 
-<PartialInstallSetupDestination />
-
-## Set up Worker Cluster {#worker-setup}
-
-If you are not using a pre-existing cluster, create a Worker Cluster following
-the same steps as the [Platform Cluster setup](#platform-setup).
-
-Once completed, log in to your cluster using the `az` cli and set the `WORKER` environment
-variable:
-
-```bash
-az aks get-credentials --resource-group $RESOURCE_GROUP_NAME --name $CLUSTER_NAME
-kubectl config current-context
-export WORKER=<worker-context-name>
-```
-
-<PartialInstallGitOpsAgent />
+To use a Azure DevOps Repository as your State Store, you can refer to the [Kratix Examples repository](https://github.com/syntasso/kratix-examples) which provides easy
+install scripts.
 
 <PartialConfigureMetricsCollection />
