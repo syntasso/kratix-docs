@@ -75,18 +75,35 @@ spec:
     # Number of times Kubernetes retries a failing workflow Job before marking it failed.
     backoffLimit: 4
   volumes:
-    - # Volume definitions, in addition to `/kratix` volumes (optional)
+    - name: myvolume # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:
-    - name: # Container name (must be unique within the Pipeline)
-      image: # Container image to run
+    - name: mycontainer # Container name (must be unique within the Pipeline)
+      image: registry.example.com/myorg/myimage:latest # Container image to run
       # Supported fields passed through to underlying Pod spec (all optional):
-      command: []
-      args: []
-      env: []
-      envFrom: []
-      volumeMounts: []
-      imagePullPolicy: # Either Always, IfNotPresent or Never
+      command: [ "echo" ]
+      args: [ "Hello, World!" ]
+      env:
+      - name: MY_ENV_VAR # Static environment variable
+        value: my-value
+      envFrom:
+      - configMapRef:
+          name: my-configmap # Reference to a ConfigMap to load env vars from
+      resources:
+        claims:
+        - name: myclaim # Resource claim to use for the container
+          request: myclaim-request # Request for the resource claim
+        requests: # Resource requests for the container
+          memory: "64Mi" # Memory request
+          cpu: "250m" # CPU request
+        limits: # Resource limits for the container
+          memory: "128Mi" # Memory limit
+          cpu: "500m" # CPU limit
+      volumeMounts:
+      - name: myvolume # Volume mount definitions, in addition to `/kratix` volumes
+        mountPath: /path/in/container # Path in the container to mount the volume
+      imagePullPolicy: IfNotPresent # Either Always, IfNotPresent or Never
       securityContext: # Optional. Can be configured directly or via kratix config
+        runAsNonRoot: false
   imagePullSecrets:
   - name: my-secret
 ```
