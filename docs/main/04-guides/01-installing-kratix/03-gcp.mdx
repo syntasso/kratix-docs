@@ -20,16 +20,29 @@ import PartialConfigureMetricsCollection from '../../../_partials/installation/_
 
 ## Set up Platform Cluster {#platform-setup}
 
-If you are not using a pre-existing cluster, create your Platform Cluster by
-following the [GKE getting started docs](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview) 
+Start by setting the key variables in your terminal. These should match any pre-existing cluster you plan to use, else they will be used to create one for you:
+```bash
+export GCP_PLATFORM_CLUSTER_NAME=
+export GCP_ZONE=
+export GCP_PROJECT_NAME=
+```
 
-Once completed, log in to your cluster using the `gcloud` cli and set the `PLATFORM` environment
-variable:
+If you are not using a pre-existing cluster, create a default GKE Platform Cluster by running:
 
 ```bash
-gcloud container clusters get-credentials <cluster-name> --zone <zone> --project <project-name>
+gcloud container clusters create ${GCP_PLATFORM_CLUSTER_NAME} --zone ${GCP_ZONE} --project "${GCP_PROJECT_NAME}"
+```
+
+:::info
+If you want other configurations set, please follow the [GKE getting started docs](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview).
+:::
+
+Once a GKE cluster is ready for use, use the command below to authorize to the cluster:
+
+```bash
+gcloud container clusters get-credentials "${GCP_PLATFORM_CLUSTER_NAME}" --zone "${GCP_ZONE}" --project "${GCP_PROJECT_NAME}"
 kubectl config current-context
-export PLATFORM=<platform-context-name>
+export PLATFORM=$(kubectl config current-context)
 ```
 
 
