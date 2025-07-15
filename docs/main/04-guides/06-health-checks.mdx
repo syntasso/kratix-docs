@@ -15,26 +15,45 @@ import PartialGuidesPreRequisites from '@site/docs/_partials/_generic_prereqs_gu
 
 <PartialGuidesPreRequisites />
 
-## The Health Record Status
+## The Health Status
 
-Within the resource `status`, Kratix understands the `healthRecord` status field. In this field, Promise writers can describe the health of the resource. The field has the following format:
+Within the resource `status`, Kratix understands the `healthStatus` field. In this field, Promise writers can describe the health of the resource. The field has the following format:
 
 ```yaml
 status:
-  healthRecord:
+  healthStatus:
     state: healthy
-    lastRun: 1531958400
-    details:
-      key: value
-      another: value
+    healthRecords:
+    - state: healthy
+      lastRun: 1531958400
+      details:
+        readyReplicas: 2
+      source:
+        name: healthrecord-example
+        namespace: default
 ```
+
+The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`.
+
+The `healthRecords` list contains detailed health information about each of the checks against the resource.
 
 The `state` subfield can have the following values:
 
+* ready: the resource is ready to use
+* healthy: the resource is healthy
 * unknown: used to indicate that the state is not known
-* healthy: the resource is healthy and ready to use
-* unhealthy: the resource is unhealthy and should be investigated
 * degraded: the resource is operational, but its functionality may be affected
+* unhealthy: the resource is unhealthy and should be investigated
+
+The healthStatus state will be determined by the least desirable state of the health records. For example, if one health record is `unhealthy` and another is `healthy`, the overall state will be `unhealthy`.
+
+| HealthRecord 1                       | HealthRecord 2                                                                       | HealthStatus         |
+|------------------------|----------------------------------------------------------------------------------|-----------------------------|
+| Ready  | Healthy                                   | Healthy |
+| **Promise Delete**     | The Promise is deleted                                                           | Single                      |
+| **Resource Configure** | The Resource is created, updated or reconciled, or the parent Promise is updated | Multiple, executed serially |
+| **Resource Delete**    | The Resource is deleted                                                          | Single                      |
+
 
 The `lastRun` field is a timestamp indicating the time the Health Check was last run. The timestamp is in seconds since the epoch.
 
