@@ -2,11 +2,109 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.kratix.io/blog</id>
     <title>Kratix Blog</title>
-    <updated>2025-05-27T00:00:00.000Z</updated>
+    <updated>2025-07-11T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://docs.kratix.io/blog"/>
     <subtitle>Kratix Blog</subtitle>
     <icon>https://docs.kratix.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Introducing the SKE Headlamp Plugin]]></title>
+        <id>https://docs.kratix.io/blog/introducing-ske-headlamp</id>
+        <link href="https://docs.kratix.io/blog/introducing-ske-headlamp"/>
+        <updated>2025-07-11T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[introducing the SKE Headlamp plugin]]></summary>
+        <content type="html"><![CDATA[<p>Navigating Kubernetes resources can often feel like searching for a needle in a
+haystack, especially when trying to gain a comprehensive overview of everything
+deployed within your cluster. While kubectl is a familiar tool, we've heard that
+it can be complicated to visualise the entire landscape of Kratix Promises and
+Resources.</p>
+<p>To address this, we've been developing a powerful new solution: a SKE plugin
+for Headlamp, designed to provide unparalleled observability for your Kubernetes
+environments.</p>
+<!-- -->
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-headlamp">Why Headlamp?<a href="https://docs.kratix.io/blog/introducing-ske-headlamp#why-headlamp" class="hash-link" aria-label="Direct link to Why Headlamp?" title="Direct link to Why Headlamp?">​</a></h2>
+<p><a href="https://headlamp.dev/" target="_blank" rel="noopener noreferrer">Headlamp</a> is a user-friendly Kubernetes UI focused on
+extensibility and its core purpose is to offer robust observability on top of
+Kubernetes. It provides adaptable UI &amp; branding to create custom
+experiences with minimal effort and features RBAC-based controls, adapting to a
+user's cluster permissions. It can be run as a web app, desktop app, or
+in-cluster. Headlamp is a Cloud Native Computing Foundation project, part of the
+Kubernetes SIG UI.</p>
+<p>While the SKE Backstage integration provides a layer of observability, it is
+much more aimed at the Platform users, not as much to the Platform teams
+building the Promises powering the Platform. Headlamp, on the other hand, offers
+a similar experience to Backstage, but much more relevant to the Platform teams.</p>
+<p>Crucially, Headlamp supports the development of custom plugins, and that's
+precisely what we've leveraged to create our Kratix plugin.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="enhanced-visibility-with-the-kratix-headlamp-plugin">Enhanced Visibility with the Kratix Headlamp Plugin<a href="https://docs.kratix.io/blog/introducing-ske-headlamp#enhanced-visibility-with-the-kratix-headlamp-plugin" class="hash-link" aria-label="Direct link to Enhanced Visibility with the Kratix Headlamp Plugin" title="Direct link to Enhanced Visibility with the Kratix Headlamp Plugin">​</a></h2>
+<p>Our new plugin integrates seamlessly with your Headlamp installation, offering a
+user-friendly interface to manage and monitor your Kratix resources. Watch the
+demo below or keep on reading for a closer look at its key features.</p>
+<!-- -->
+<span style="width:640px;height:360px"></span>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="the-promise-views">The Promise Views<a href="https://docs.kratix.io/blog/introducing-ske-headlamp#the-promise-views" class="hash-link" aria-label="Direct link to The Promise Views" title="Direct link to The Promise Views">​</a></h3>
+<p>This dedicated tab provides a quick overview of all your Kratix Promises. From
+here, you can easily jump into the details of any specific Promise, such as a
+Redis Promise, and view further information. Within the Promise details, you can
+access crucial information, including:</p>
+<ul>
+<li>The conditions of the Promise.</li>
+<li>The last time the associated pipeline ran.</li>
+<li>The ability to jump directly into the pipeline run itself.</li>
+<li>Visibility into the pods that were executed as part of that pipeline.</li>
+<li>Access to logs for detailed troubleshooting.</li>
+</ul>
+<!-- -->
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/promise-list-4c231536b0c6bd16d5fdf6d3c82b3faf.png" alt="The Promise List view"><figcaption>The Promise List view</figcaption></figure>
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/promise-details-8174b8af3c8fa0a8395042be233588ad.png" alt="The Promise Details view"><figcaption>The Promise Details view</figcaption></figure>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="the-resource-views">The Resource Views<a href="https://docs.kratix.io/blog/introducing-ske-headlamp#the-resource-views" class="hash-link" aria-label="Direct link to The Resource Views" title="Direct link to The Resource Views">​</a></h3>
+<p>Complementing the Promises view, the Resources tab allows you to see all the
+Kratix resources deployed across your cluster. The plugin offers powerful
+filtering capabilities, enabling you to narrow down your view by, for example,
+Promise or Namespace</p>
+<p>Just like with Promises, you can click on any resource (e.g., an 'app cache' in
+the mobile namespace) to view its details. This includes seeing when its
+pipeline last ran, jumping into the pipeline, inspecting executed pods, and
+investigating logs for all containers involved in the execution.</p>
+<!-- -->
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/resource-list-4b8f320ca2bff78e5177b569c6a684cc.png" alt="The Resource List view"><figcaption>The Resource List view</figcaption></figure>
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/resource-details-f2b23948417bc60dc07701f1538fe670.png" alt="The Resource Details view"><figcaption>The Resource Details view</figcaption></figure>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="the-map-view-a-visual-overview">The Map View: A Visual Overview<a href="https://docs.kratix.io/blog/introducing-ske-headlamp#the-map-view-a-visual-overview" class="hash-link" aria-label="Direct link to The Map View: A Visual Overview" title="Direct link to The Map View: A Visual Overview">​</a></h3>
+<p>Headlamp includes a very useful built-in visualisation where you can see all
+resources deployed across your cluster. We've extended this capability to
+provide a similar map view specifically for your Kratix Promises. By filtering
+for Kratix resources, you can visually explore your deployed Promises and
+understand their relationships.</p>
+<p>For instance, you can click on a Promise to see the resources it owns, like
+its Resource Requests. Furthermore, the map view highlights associated
+jobs, such as the pipeline jobs that executed the Promise. You can also see the
+Promise's configure pipeline directly in this tree-like, map-based view,
+allowing for easy navigation and understanding of your platform's entire
+resource topology.</p>
+<!-- -->
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/map-view-c5b6c451e65af0b969bc0518bf3eff75.png" alt="The Map View view"><figcaption>The Map view</figcaption></figure>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="try-it-out">Try it out!<a href="https://docs.kratix.io/blog/introducing-ske-headlamp#try-it-out" class="hash-link" aria-label="Direct link to Try it out!" title="Direct link to Try it out!">​</a></h2>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>The Kratix Headlamp plugin is currently available for Syntasso Kratix Enterprise
+(SKE) users.</p></div></div>
+<p>We're excited about the potential of this new plugin to dramatically simplify
+Kubernetes observability for Kratix users.</p>
+<p>Looking ahead, our next major focus is to introduce comprehensive visibility
+into compound promises, allowing you to easily see their sub-promises and
+associated resources. This will provide an even deeper understanding of your
+Platform.</p>
+<p>Also, we are keen to get your feedback! What information would you like us to
+expose next? What's missing? What are some features you'd like to see? Send the
+requests our way!</p>
+<p>If you're interested in trying out a version of Headlamp with our plugin, please
+let us know! We can package it up and send it your way.</p>]]></content>
+        <author>
+            <name>Derik Evangelista</name>
+            <uri>https://github.com/kirederik</uri>
+        </author>
+        <category label="kratix" term="kratix"/>
+        <category label="SKE" term="SKE"/>
+        <category label="headlamp" term="headlamp"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[New in Kratix: Health Checks and Progressive Rollout]]></title>
         <id>https://docs.kratix.io/blog/healthcheck-progressive-rollout</id>
