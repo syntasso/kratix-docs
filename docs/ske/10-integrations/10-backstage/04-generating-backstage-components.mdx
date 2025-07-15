@@ -102,8 +102,7 @@ metadata:
 
 ## Customize Backstage Components
 
-You can customize the automatically generated Backstage Components and Templates by creating a cluster-wide
-`BackstageEntityCustomization`:
+You can customize the automatically generated Backstage Components and Templates by creating `BackstageEntityCustomization`:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -111,6 +110,47 @@ kind: BackstageEntityCustomization
 metadata:
   name: my-customization
 spec:
+  entityGenerationOptions:
+    promise:
+      component: # options for the generated Promise Component
+        name: my-name # Value for metadata.name
+        title: my-title # Value for metadata.title
+        description: my-description # Value for metadata.description
+        tags: tag1,tag2 # Values for metadata.tags
+        type: my-type # Value for spec.type
+        lifecycle: my-lifeCycle # Value for spec.lifecycle
+        owner: my-owner # Value for spec.owner
+        system: my-system # Value for spec.system
+        subComponentOf: parent-resource # Value for spec.subcomponentOf
+        providesAPIs: api1,api2 # Values for spec.providesAPIs
+        consumesAPIs: api3,api4 # Values for spec.consumesAPIs
+        dependsOn: dependency1,dependency2 # Values for spec.dependsOn
+      template: # options for the generated Promise Template
+        hideNamespace: false # Whether to hide the namespace field
+        defaultNamespace: default # Default namespace to use
+        namespaceFieldTitle: Namespace # Title for the namespace field
+        namespaceFieldDescription: "Your team's namespace" # Description for the namespace field
+        singleSpecPage: false # Whether to generate a single spec page for the template
+        title: my-title # Value for metadata.title
+        description: my-description # Value for metadata.description
+        tags: tag1,tag2 # Values for metadata.tags
+        type: my-type # Value for spec.type
+        lifecycle: my-lifeCycle # Value for spec.lifecycle
+        owner: my-owner # Value for spec.owner
+    resource:
+      component:
+        name: my-name # Value for metadata.name
+        title: my-title # Value for metadata.title
+        description: my-description # Value for metadata.description
+        tags: tag1,tag2 # Values for metadata.tags
+        type: my-type # Value for spec.type
+        lifecycle: my-lifeCycle # Value for spec.lifecycle
+        owner: my-owner # Value for spec.owner
+        system: my-system # Value for spec.system
+        subComponentOf: parent-resource # Value for spec.subcomponentOf
+        providesAPIs: api1,api2 # Values for spec.providesAPIs
+        consumesAPIs: api3,api4 # Values for spec.consumesAPIs
+        dependsOn: dependency1,dependency2 # Values for spec.dependsOn
   destinationSelectors: # optional
   - matchLabels:
       environment: backstage
@@ -119,14 +159,39 @@ spec:
       image: ghcr.io/syntasso/run-customization:v0.0.1
 ```
 
+Once you have created the `BackstageEntityCustomization`, you can label your
+Promise with `kratix.io/backstage-customization: my-customization` to apply the
+customization to the Promise and its Resource Requests:
+
+```bash
+kubectl label promises PROMISE_NAME kratix.io/backstage-customization=my-customization
+```
+
+:::tip
+
+Backstage Customizations are cluster-wide resources, so ensure create them with
+unique names
+
+:::
+
+
+
+
 ### Custom containers
 
 The containers defined in the customization will run after the `backstage-gen` container which generates the
 Components and Templates. They can be used to modify the existing `catalog-info.yaml` file created by the
 `ske-backstage-generator` or it can generate new files. This customization will apply to all Promises with label
-`kratix.io/backstage: true` as well as Resource Requests for these promises.
+`kratix.io/backstage: "true"` as well as Resource Requests for these promises.
 
-If you want to edit the `catalog.info` or generate different files based on whether the Workflow is running for a
+:::info
+
+If you want to a particular Resource Request to _not_ have a Backstage Component
+generated, you can label the Resource Request with `kratix.io/backstage: "false"`.
+
+:::
+
+If you want to edit the Entities or generate different files based on whether the Workflow is running for a
 Promise or Resource Request, the container can query the `KRATIX_WORKFLOW_TYPE` environment variable.
 For Promises, this is equal to `promise-backstage-gen` and for resources, `resource-backstage-gen`.
 
