@@ -224,8 +224,17 @@ Towards the end, under `status`, you should see the following:
 
 ```yaml
 status:
-  healthRecord:
+  healthStatus:
     state: healthy
+    healthRecords:
+    - state: healthy
+      lastRun: 1738158772
+      details:
+        info: message
+      source:
+        name: healthrecord-example
+        namespace: default
+      state: healthy
 ```
 
 Great! That proves the Health Check is working end-to-end.
@@ -426,11 +435,17 @@ Towards the end, under `status`, you should see the following:
 
 ```yaml
 status:
-  healthRecord:
+  healthStatus:
     state: healthy
-    details:
-      replicas: 1
-      readyReplicas: 1
+    healthRecords:
+    - state: healthy
+      lastRun: 1738158772
+      details:
+        replicas: 1
+        readyReplicas: 1
+      source:
+        name: healthrecord-example
+        namespace: default
 ```
 
 That's it! You've successfully implemented a Resource Health Check!
