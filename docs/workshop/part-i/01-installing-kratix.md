@@ -297,7 +297,6 @@ mc ls -r kind
 The above command will give an output similar to:
 
 ```shell-session
-[2024-01-01 15:00:00 GMT]   131B STANDARD kratix/kratix-write-probe.txt
 [2024-01-01 15:00:00 GMT]   116B STANDARD kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
 [2024-01-01 15:00:00 GMT]   206B STANDARD kratix/worker-cluster/resources/kratix-canary-configmap.yaml
 ```
