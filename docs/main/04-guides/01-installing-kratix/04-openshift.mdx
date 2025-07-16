@@ -14,10 +14,6 @@ import PartialInstallSetupDestination from '../../../_partials/installation/_ins
 import PartialConfigureMetricsCollection from '../../../_partials/installation/_configure-metrics-collection.md';
 ```
 
-<div style={{"text-align":"center"}}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Zkh3FIGMsds?si=omdR7K0HTuvbw60P" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-
 ## Set up Platform Cluster {#platform-setup}
 
 If you are not using a pre-existing cluster, create your Platform Cluster using
@@ -30,7 +26,7 @@ export PLATFORM=<platform-context-name>
 ```
 
 Kratix docker images are hosted on the `syntasso.docker.scarf.sh` registry, ensure you've
-configured your cluster to [allow access to the registry](https://docs.openshift.com/container-platform/4.17/openshift_images/image-configuration.html)
+configured your cluster to [allow access to the registry](https://docs.openshift.com/container-platform/4.17/openshift_images/image-configuration.html).
 
 :::warning
 
@@ -58,7 +54,6 @@ The image references need to be updated in the following locations:
 
 :::
 
-
 <PartialInstallKratixAndCert />
 
 <PartialInstallStateStoreStart />
@@ -79,5 +74,13 @@ export WORKER=<worker-context-name>
 ```
 
 <PartialInstallGitOpsAgent />
+
+:::tip
+
+Some GitOps Agents may require additional configuration to work with OpenShift.
+Please check the documentation for your specific GitOps Agent for any additional
+steps.
+
+:::
 
 <PartialConfigureMetricsCollection />
