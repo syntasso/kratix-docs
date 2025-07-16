@@ -15,28 +15,50 @@ import PartialGuidesPreRequisites from '@site/docs/_partials/_generic_prereqs_gu
 
 <PartialGuidesPreRequisites />
 
-## The Health Record Status
+## The Health Status
 
-Within the resource `status`, Kratix understands the `healthRecord` status field. In this field, Promise writers can describe the health of the resource. The field has the following format:
+Within the resource `status`, Kratix understands the `healthStatus` field. In this field, Promise writers can describe the health of the resource. The field has the following format:
 
 ```yaml
 status:
-  healthRecord:
+  healthStatus:
     state: healthy
-    lastRun: 1531958400
-    details:
-      key: value
-      another: value
+    healthRecords:
+    - state: healthy
+      lastRun: 1531958400
+      details:
+        readyReplicas: 2
+      source:
+        name: healthrecord-example
+        namespace: default
 ```
 
-The `state` subfield can have the following values:
+The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`.
 
+The `healthStatus.state` subfield can have the following values:
+
+* ready: the resource is ready to use
+* healthy: the resource is healthy
 * unknown: used to indicate that the state is not known
-* healthy: the resource is healthy and ready to use
-* unhealthy: the resource is unhealthy and should be investigated
 * degraded: the resource is operational, but its functionality may be affected
+* unhealthy: the resource is unhealthy and should be investigated
 
-The `lastRun` field is a timestamp indicating the time the Health Check was last run. The timestamp is in seconds since the epoch.
+The `healthStatus` state will be determined by the least desirable state of the health records for the request. For example, if one health record is `unhealthy` and another is `healthy`, the overall state will be `unhealthy`.
+
+| HealthRecord 1  | HealthRecord 2   | healthStatus.state |
+|-----------------|------------------|--------------------|
+| `ready`         | `healthy`        | `healthy`          |
+| `healthy`       | `unknown`        | `unknown`          |
+| `unknown`       | `degraded`       | `degraded`         |
+| `degraded`      | `unhealthy`      | `unhealthy`        |
+
+### The Health Records List
+
+The `healthRecords` list details each of the `healthRecords` that conveys health information about the resource.
+
+For each Health Record, the `lastRun` field is a timestamp indicating the time the Health Check was last run. The timestamp is in seconds since the epoch.
+
+The `source` field provides information about the `healthRecord` that corresponds to the entry in the list.
 
 The `details` field is an optional field that can be used to provide additional details about the Health Check. The details are free-form and can be used to provide any information that may be relevant to the Health Check.
 
@@ -70,7 +92,7 @@ data:
 
 :::tip
 
-You can have extenal systems generating the HealthRecord CR and, via GitOps, continuously updating the health information of the resources in your Platform.
+You can have external systems generating the HealthRecord CR and, via GitOps, continuously updating the health information of the resources in your Platform.
 
 :::
 
@@ -326,8 +348,8 @@ kratix-redis-example-wait-status-13b3f-2s7q7          0/1     Completed   0     
 That means the Redis instance should now be reporting "healthy":
 
 ```bash
-$ kubectl --context $PLATFORM get redis.marketplace.kratix.io example -ojsonpath='{.status.healthRecord}'
-{"details":{"example":"some-detail"},"lastRun":1737736375,"state":"healthy"}
+$ kubectl --context $PLATFORM get redis.marketplace.kratix.io example -ojsonpath='{.status.healthStatus}'
+{"healthRecords":[{"details":{"example":"some-detail"},"lastRun":1531958400,"source":{"name":"redis-example","namespace":"default"},"state":"healthy"}],"state":"healthy"}
 ```
 
 ## Conclusion
