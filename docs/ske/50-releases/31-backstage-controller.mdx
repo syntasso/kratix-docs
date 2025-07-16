@@ -16,6 +16,21 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstag
 
 ## Release Notes
 
+
+### [v0.2.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/v0.2.0/) (2025-07-16)
+
+#### Features
+
+* Introduce `entityGenerationOptions` to the `BackstageEntityCustomization`
+  resource. See [Backstage Entity Customization](/ske/integrations/backstage/generating-backstage-components#customize-backstage-components) for more details.
+* Promises must now declare the BackstageEntityCustomization they want to use
+  via the `kratix.io/backstage-customization` label.
+* Resources created with the label `kratix.io/backstage` set to `"false"` won't
+  be processed by the Backstage Controller. This allows users to exclude
+  specific resources from having entities in Backstage, such as the resources
+  created by Compound Promises.
+
+
 ### [v0.1.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/v0.1.2/) (2025-06-05)
 
 #### Fix
