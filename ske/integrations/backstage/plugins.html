@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.354d01d5.css">
-<script src="/assets/js/runtime~main.bb7d776d.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.7f2fc674.js" defer="defer"></script>
 <script src="/assets/js/main.3cd6fd19.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -78,7 +78,7 @@ for Components of <code>type</code> <code>promise</code> or <code>kratix-promise
 <p>The plugin can communicate with Kubernetes in two ways:</p>
 <ul>
 <li>Via the Kubernetes API (recommended)</li>
-<li>Via a Git repository (deprecated)</li>
+<li>Via a Git repository</li>
 </ul>
 <p>The following section will cover the first option. If you&#x27;d like to use the Git integration, you can skip to the <a href="#configure-the-git-integration">Configure the Git integration</a> section.</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="configure-the-kubernetes-integration">Configure the Kubernetes integration<a href="#configure-the-kubernetes-integration" class="hash-link" aria-label="Direct link to Configure the Kubernetes integration" title="Direct link to Configure the Kubernetes integration">​</a></h3>
@@ -90,7 +90,9 @@ for Components of <code>type</code> <code>promise</code> or <code>kratix-promise
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>warning</div><div class="admonitionContent_BuS1"><p>For oidc authentication, you must ensure that, in the Backstage Token, there&#x27;s a <code>tok</code> field with the <code>accessToken</code> to be used to access the Kubernetes cluster.</p></div></div>
 <p>If no <code>ske.kubernetes</code> section is present, the backend plugin will assume Backstage itself is running on the Platform cluster and will load the cluster configuration from the local machine/pod.</p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="configure-the-git-integration">Configure the Git integration<a href="#configure-the-git-integration" class="hash-link" aria-label="Direct link to Configure the Git integration" title="Direct link to Configure the Git integration">​</a></h3>
-<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>The Git integration is deprecated. By configuring Backstage with the Kubernetes integration, you will get the following benefits:</p><ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>The Git integration is not as feat complete as the Kuberntes integration. By
+configuring Backstage with the Kubernetes integration, you will get the
+following benefits:</p><ul>
 <li>Real-time status updates for the Promises and resources</li>
 <li>Resources can be managed via different interfaces, for example, via kubectl directly.</li>
 </ul><p>If you have configured the Kubernetes integration, continue to <a href="#add-the-backend-plugin">add the Backend plugin</a>.</p></div></div>
