@@ -8,5 +8,4 @@ remove the existing Kratix setup. By default, only one SKE or Kratix instance ca
 Kubernetes leader election will delete the former deployment automatically. If that doesn't happen, you can manually
 delete the former deployment. This will have no effect on your running Promises or Resources.
 
-Keep in mind that [pre-upgrade checks](/ske/kratix/ske-operator#pre-upgrade-checks) won’t be run, because the SKE
-instance is created from scratch. Also, all the Kratix resources (e.g. Promises, Resources, etc.) will be reconciled.
+Keep in mind that pre-upgrade checks won’t run, because the SKE instance is created from scratch. Also, all the Kratix resources (e.g. Promises, Resources, etc.) will be reconciled.
