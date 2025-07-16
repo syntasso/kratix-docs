@@ -65,27 +65,35 @@ kind: Kratix
 metadata:
   name: my-kratix
 spec:
-  version: v0.100.0 # New desired version
+  version: latest # Or new desired version
 ```
 
+:::tip
+
+If you set the `spec.version` to `latest`, the SKE Operator may automatically
+upgrade your Kratix instance to the latest compatible version of SKE, whenever a
+new version is available and a reconciliation loop is triggered.
+
+At this moment, the SKE Operator will not automatically check for new versions.
+
+:::
+
 By default, the SKE Operator will perform the following steps:
-1. Run the [pre-upgrade checks](#pre-upgrade-checks) to check that Kratix is safe to upgrade in its current state.
-1. Upgrade your Kratix Deployment to the new version.
+1. Validate that the current Kratix installation is in a healthy state.
+1. Upgrade your Kratix Deployment to the next compatible version.
 1. Wait for the Kratix Deployment to become healthy (ready and available).
-
-#### Pre-upgrade checks
-
-The following pre-upgrade checks will run by default:
-1. Check that the current Kratix installation is in `Ready` state.
+1. Repeat the above steps until the desired version is reached.
 
 :::info
 
-An additional check that the desired version is an allowed upgrade path is **always**
-performed.
+The Operator will stop the upgrade process if:
 
-This check passes when the new version is:
-- On the same major version as the current version
-- At most 1 minor version ahead of the current version
+1. A new major is reached, or
+1. No valid upgrade path is found.
 
 Patch versions on the same minor can be upgraded without restrictions.
+
+Downgrades are not currently supported by the SKE Operator.
+
 :::
+

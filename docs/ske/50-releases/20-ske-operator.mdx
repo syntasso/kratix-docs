@@ -26,6 +26,17 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
+### [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.14.0/) (2025-07-16)
+
+Released in Helm Chart version [version 0.43.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.43.0/)
+
+#### Features
+
+* The SKE Operator will now iterate over the available versions when upgrading
+  SKE. For example, if your installation is on version `v0.29.0`, and you set
+  the version to `v0.31.0`, the SKE Operator will first upgrade to `v0.30.0` and
+  then to `v0.31.0`. This ensures a smooth upgrade process.
+
 ### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.13.0/) (2025-07-11)
 
 Released in Helm Chart version [version 0.42.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.42.0/)
