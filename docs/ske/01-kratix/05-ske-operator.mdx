@@ -42,6 +42,15 @@ metadata:
   name: my-kratix
 spec:
   version: vX.Y.Z # The desired version of SKE, can be set to latest
+  deploymentConfig:
+    resources: # set to customize resource requests&limits for kratix deployment
+      # limits and requests must be valid Kubernetes resource quantities
+      limits:
+        memory:
+        cpu:
+      requests:
+        memory:
+        cpu:
 ```
 
 The Kratix resource is the owner of all resources installed as part of the [SKE
