@@ -8,11 +8,25 @@ sidebar_label: Quick Start (Enterprise)
 import useBaseUrl from '@docusaurus/useBaseUrl';
 ```
 
-
 :::info
 
-In order to run through this page you need Syntasso Kratix Enterprise license **token**.
-Don't have one? [Request your free trial token here](https://www.syntasso.io/pricing)
+This guide walks you through a **quick-start, development-only installation** of
+Syntasso Kratix Enterprise (SKE) with a **pre-configured Backstage**.  It is
+intended for **temporary testing on disposable clusters** and **is not suitable
+for production** use.
+
+⚠️ This setup:
+- Runs permissive workloads
+- Lacks production hardening
+- Should **never be used in production environments**
+
+For production-ready deployment, see the [Syntasso Kratix Enterprise (SKE) Full Installation guide](/ske/kratix/configuring-ske/intro) to set up a **secure, compliant, and long-term platform**.
+
+:::
+
+:::info
+🛂 To complete this guide, you’ll need a valid Syntasso Kratix Enterprise **license token**.  
+Don’t have one? [Request your free trial token here](https://www.syntasso.io/pricing)
 
 :::
 
