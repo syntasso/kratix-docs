@@ -59,7 +59,7 @@ data:
     app:
       title: Backstage Dev Build By Syntasso
       # OPTIONAL: If your using a different nodeport, modify the baseUrl to match the nodeport
-      #                     The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+      # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
       baseUrl: http://localhost:31340
     organization:
       name: app-config
@@ -311,7 +311,7 @@ kubectl apply -f backstage.yaml
   ```sh
   kubectl port-forward service/backstage -n kratix-platform-system 7007:7007
   ```
-Then navigate to:  `http://localhost:7007`
+  Then navigate to:  `http://localhost:7007`
 
 ---
 
@@ -319,5 +319,5 @@ Then navigate to:  `http://localhost:7007`
 
 Now that Backstage is running:
 
-- Follow the [Backstage Destination](https://docs.kratix.io/ske/integrations/backstage/configuring-backstage#configuring-kratix) documentation to configure Kratix to manage the component an template configuration.
+- Follow the [Backstage Destination](https://docs.kratix.io/ske/integrations/backstage/configuring-backstage#configuring-kratix) documentation to configure Kratix to manage the component and template configuration.
 - Use and configure automatic [access to your Promises in Backstage](/ske/integrations/backstage/generating-backstage-components).
