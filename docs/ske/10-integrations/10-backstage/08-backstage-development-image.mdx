@@ -1,0 +1,287 @@
+---
+title: Backstage Development Image
+description: Setting up a development Backstage image
+sidebar_label: Backstage Development Image
+---
+
+:::warning
+
+**NOT FOR PRODUCTION**
+
+This is a development image that is useful for getting started quickly in a
+development environment. It is not suitable for production use and should be
+used only for development and testing purposes.
+
+:::
+
+# Backstage Development Image
+
+To help you get started quickly with the [Syntasso Kratix Enterprise (SKE)
+Backstage plugins](/ske/integrations/backstage/plugins), we provide a pre-built
+Backstage image that includes the plugins and is ready to run on Kubernetes.
+This is the same image used in the [SKE Quick Start](/ske/quick-start).
+
+:::note
+
+This image is highly opinionated and configured specifically to work with an
+S3-compatible bucket. If you require support for a different storage backend or
+need more customization, refer to the [Configuring
+Backstage](/ske/integrations/backstage/configuring-backstage) documentation.
+
+:::
+
+## Configuration
+
+
+Before installing Backstage, you'll need to configure the instance. The Backstage application requires access to:
+
+- A Kubernetes token to authenticate with the Platform cluster. By default, it
+is configured to use a `ServiceAccount` token
+- A [BucketStateStore](/main/reference/statestore/bucketstatestore) as the data
+source.
+
+Below is an example `app-config.yaml` that demonstrates:
+
+- Reading the Kubernetes token from a `ServiceAccount`
+- Connecting to a MinIO bucket instance
+- Exposing Backstage on NodePort `31340` (optional—see port-forwarding below for
+an alternative)
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backstage
+  namespace: kratix-platform-system
+data:
+  config: |
+    app:
+      title: Backstage Dev Build By Syntasso
+      # if your using a nodeport, modify the baseUrl to match the nodeport. Otherwise ignore
+      baseUrl: http://localhost:31340
+    organization:
+      name: app-config
+    backend:
+      baseUrl: http://localhost:31340
+      listen:
+        port: 7007
+        host: 0.0.0.0
+      csp:
+        upgrade-insecure-requests: false
+        connect-src: ["'self'", "http:", "https:"]
+      cors:
+        origin: http://localhost:31340
+        methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+        credentials: true
+      database:
+        client: better-sqlite3
+        connection: ":memory:"
+      cache:
+        store: memory
+      auth:
+        dangerouslyDisableDefaultAuthPolicy: true
+    integrations:
+      awsS3:
+        - accessKeyId: ${AWS_ACCESS_KEY_ID}
+          secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+          # Modify as required
+          endpoint: 'http://minio.kratix-platform-system.svc.cluster.local'
+          s3ForcePathStyle: true
+    techdocs:
+      builder: "local"
+      generator:
+        runIn: "docker"
+      publisher:
+        type: "local"
+    catalog:
+      import:
+        entityFilename: catalog-info.yaml
+        pullRequestBranchName: backstage-integration
+      rules:
+        - allow:
+            [Domain, Component, System, API, Resource, Location, Group, Template]
+      locations:
+        - type: file
+          target: ../../examples/template/template-ske.yaml
+          rules:
+            - allow: [Template]
+        - type: file
+          target: ../../examples/entities.yaml
+          rules:
+            - allow:
+                [
+                  Domain,
+                  Component,
+                  System,
+                  API,
+                  Resource,
+                  Location,
+                  Group,
+                  Template,
+                ]
+        - type: file
+          target: ../../examples/org.yaml
+          rules:
+            - allow: [User, Group]
+      providers:
+        awsS3:
+          kratix-minio:
+            # Modify as required
+            bucketName: kratix
+            prefix: backstage/
+            region: us-east-1
+            schedule:
+              frequency: { seconds: 10 }
+              timeout: { seconds: 20 }
+    kubernetes:
+      serviceLocatorMethod:
+        type: multiTenant
+      clusterLocatorMethods:
+        - type: config
+          clusters:
+            - url: "https://kubernetes.default.svc.cluster.local"
+              name: platform
+              authProvider: serviceAccount
+              serviceAccountToken: ${SA_TOKEN}
+              skipTLSVerify: true
+    ske:
+      kubernetes:
+        platformName: platform
+```
+
+
+
+To use your own bucket, modify the `integrations.awsS3` and
+`catalog.providers.awsS3` sections in `app-config.yaml` accordingly. The
+provided values assume a MinIO instance running in the `kratix-platform-system`
+namespace with a bucket named `kratix`.
+
+Once updated, create the `ConfigMap` in the `kratix-platform-system` namespace.
+
+## Installation
+
+After configuring and creating the `ConfigMap`, you can deploy Backstage with
+the following manifest. This example includes references to Kubernetes Secrets
+for MinIO credentials and the Kubernetes ServiceAccount token. Update these
+values as needed to match your environment and bucket provider.
+
+```yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: backstage
+  name: backstage
+  namespace: kratix-platform-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      serviceAccountName: backstage
+      imagePullSecrets:
+      - name: syntasso-registry
+      containers:
+      - env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: accessKeyID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: secretAccessKey
+        - name: SA_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: backstage-token
+              key: token
+        image: registry.syntasso.io/syntasso/backstage-dev-build:v0.12.0-rc49
+        imagePullPolicy: IfNotPresent
+        name: backstage
+        ports:
+        - containerPort: 7007
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /config
+          name: config
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: config
+            path: app-config.yaml
+          name: backstage
+        name: config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backstage
+  namespace: kratix-platform-system
+spec:
+  ports:
+    - port: 7007
+      protocol: TCP
+  selector:
+    app: backstage
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: backstage
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: backstage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: backstage
+subjects:
+- kind: ServiceAccount
+  name: backstage
+  namespace: kratix-platform-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backstage
+  namespace: kratix-platform-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backstage-token
+  namespace: kratix-platform-system
+  annotations:
+    kubernetes.io/service-account.name: backstage
+type: kubernetes.io/service-account-token
+```
+
+You now have a working Backstage instance. Follow the [Backstage
+Destination](https://docs.kratix.io/ske/integrations/backstage/configuring-backstage#configuring-kratix)
+to setup Kratix to be able to communicate with Backstage, and then you are good
+to start [integrating it with your
+Promises](/ske/integrations/backstage/generating-backstage-components) 
