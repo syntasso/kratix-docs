@@ -5,49 +5,50 @@ sidebar_label: Backstage Development Image
 ---
 
 :::warning
-
 **NOT FOR PRODUCTION**
 
-This is a development image that is useful for getting started quickly in a
-development environment. It is not suitable for production use and should be
-used only for development and testing purposes.
-
+This is a development image that is useful for getting started quickly in a development environment. It is not suitable for production use and should be used only for development and testing purposes.
 :::
 
 # Backstage Development Image
 
-To help you get started quickly with the [Syntasso Kratix Enterprise (SKE)
-Backstage plugins](/ske/integrations/backstage/plugins), we provide a pre-built
-Backstage image that includes the plugins and is ready to run on Kubernetes.
-This is the same image used in the [SKE Quick Start](/ske/quick-start).
+## Overview
 
-:::note
+This guide walks you through deploying a development Backstage instance with Syntasso Kratix Enterprise (SKE) plugins pre-installed.
 
-This image is highly opinionated and configured specifically to work with an
-S3-compatible bucket. If you require support for a different storage backend or
-need more customization, refer to the [Configuring
-Backstage](/ske/integrations/backstage/configuring-backstage) documentation.
+It is:
+- ✅ Ideal for local testing and development
+- 🚫 **Not** suitable for production environments or long term use
+- ⚠️ Pre-packaged with fixed assumptions around Kubernetes and S3-compatible storage (not flexible or configurable)
 
-:::
+For more advanced or production-ready customization, see the [Configuring Backstage](/ske/integrations/backstage/configuring-backstage) documentation.
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- A running **Kubernetes cluster**
+- Access to an **S3-compatible bucket** (e.g., MinIO or S3)
+
+---
 
 ## Configuration
 
+### What You Need to Configure
 
-Before installing Backstage, you'll need to configure the instance. The Backstage application requires access to:
+Below is an example `ConfigMap` for Backstage that includes the necessary
+configurations to run with Syntasso Kratix. This needs to be modified to suit
+your environment:
 
-- A Kubernetes token to authenticate with the Platform cluster. By default, it
-is configured to use a `ServiceAccount` token
-- A [BucketStateStore](/main/reference/statestore/bucketstatestore) as the data
-source.
+- To modify to use your own Bucket update the `endpoint` and `bucketName` in
+`integrations.awsS3` and `catalog.providers.awsS3`
 
-Below is an example `app-config.yaml` that demonstrates:
+- If you plan to expose Backstage by ingress or NodePort, make sure `baseUrl` and `cors.origin` match your setup. If you plan to use `kubectl port-forward` to access Backtage, the default values can remain unchanged.
 
-- Reading the Kubernetes token from a `ServiceAccount`
-- Connecting to a MinIO bucket instance
-- Exposing Backstage on NodePort `31340` (optional—see port-forwarding below for
-an alternative)
 
-```
+```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -82,6 +83,7 @@ data:
         dangerouslyDisableDefaultAuthPolicy: true
     integrations:
       awsS3:
+          # We will show how to configure the source of these environment variables later
         - accessKeyId: ${AWS_ACCESS_KEY_ID}
           secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
           # Modify as required
@@ -150,20 +152,26 @@ data:
 ```
 
 
+Once you've finished modifying, create the `ConfigMap` in your Kubernetes cluster:
 
-To use your own bucket, modify the `integrations.awsS3` and
-`catalog.providers.awsS3` sections in `app-config.yaml` accordingly. The
-provided values assume a MinIO instance running in the `kratix-platform-system`
-namespace with a bucket named `kratix`.
+```bash
+kubectl apply -f configmap.yaml
+```
 
-Once updated, create the `ConfigMap` in the `kratix-platform-system` namespace.
+---
 
 ## Installation
 
-After configuring and creating the `ConfigMap`, you can deploy Backstage with
-the following manifest. This example includes references to Kubernetes Secrets
-for MinIO credentials and the Kubernetes ServiceAccount token. Update these
-values as needed to match your environment and bucket provider.
+Once your `ConfigMap` is ready, all thats left is to deploy Backstage with the
+provided manifest below. The manifest will need to be updated to:
+
+- Reference the Bucket secret
+
+- Any ingress modifications you may want to make, such as using as NodePort.
+
+- ClusterRole modifications if you want to limit what Backstage can access. It
+needs access to all Promises and all Promise APIs. By default it has
+cluster-wide access to all resources.
 
 ```yaml
 ---
@@ -192,16 +200,19 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
+              # update this to your MinIO or S3 bucket credentials
               name: minio-credentials
               key: accessKeyID
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
+              # update this to your MinIO or S3 bucket credentials
               name: minio-credentials
               key: secretAccessKey
         - name: SA_TOKEN
           valueFrom:
             secretKeyRef:
+              # leave as is, this secret gets created by the manifest
               name: backstage-token
               key: token
         image: registry.syntasso.io/syntasso/backstage-dev-build:v0.12.0-rc49
@@ -247,6 +258,7 @@ kind: ClusterRole
 metadata:
   name: backstage
 rules:
+# Modify these rules to limit what Backstage can access
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]
@@ -280,8 +292,27 @@ metadata:
 type: kubernetes.io/service-account-token
 ```
 
-You now have a working Backstage instance. Follow the [Backstage
-Destination](https://docs.kratix.io/ske/integrations/backstage/configuring-backstage#configuring-kratix)
-to setup Kratix to be able to communicate with Backstage, and then you are good
-to start [integrating it with your
-Promises](/ske/integrations/backstage/generating-backstage-components) 
+Once modified and saved, apply the manifest to your cluster:
+
+```bash
+kubectl apply -f backstage.yaml
+```
+
+## Accessing Backstage
+
+- If using **NodePort** or **Ingress**, visit your corresponding address, e.g: `http://localhost:31340`
+
+- If using **port-forwarding**, run the following command in your terminal:
+  ```sh
+  kubectl port-forward service/backstage -n kratix-platform-system 7007:7007
+  ```
+Then navigate to:  `http://localhost:7007`
+
+---
+
+## Next Steps
+
+Now that Backstage is running:
+
+- Follow the [Backstage Destination](https://docs.kratix.io/ske/integrations/backstage/configuring-backstage#configuring-kratix) documentation to setup Kratix to communicate with it.
+- Start [integrating it with your Promises](/ske/integrations/backstage/generating-backstage-components).
