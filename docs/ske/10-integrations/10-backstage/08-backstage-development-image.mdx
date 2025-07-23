@@ -45,7 +45,7 @@ your environment:
 - To modify to use your own Bucket update the `endpoint` and `bucketName` in
 `integrations.awsS3` and `catalog.providers.awsS3`
 
-- If you plan to expose Backstage by ingress or NodePort, make sure `baseUrl` and `cors.origin` match your setup. If you plan to use `kubectl port-forward` to access Backtage, the default values can remain unchanged.
+- By default Backstage is setup to be accessible via `kubectl port-forward`. If you plan to expose Backstage by ingress or NodePort, make sure `baseUrl` and `cors.origin` match your setup. 
 
 
 ```yaml
@@ -88,7 +88,7 @@ data:
         - accessKeyId: ${AWS_ACCESS_KEY_ID}
           secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
           # OPTIONAL: Modify to match the endpoint for your S3 compatible bucket.
-          #                      The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+          # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
           endpoint: 'http://minio.kratix-platform-system.svc.cluster.local'
           s3ForcePathStyle: true
     techdocs:
@@ -131,7 +131,7 @@ data:
         awsS3:
           kratix-minio:
           # OPTIONAL: Modify to match your bucket name and configuration.
-          #                     The default setting works with the Kratix quickstart setup: https://docs.kratix.io/ske/quick-start
+          # The default setting works with the Kratix quickstart setup: https://docs.kratix.io/ske/quick-start
             bucketName: kratix
             prefix: backstage/
             region: us-east-1
@@ -204,14 +204,14 @@ spec:
           valueFrom:
             secretKeyRef:
               # OPTIONAL: Modify to match the secret for access to your bucket.
-              #                     The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+              # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
               name: minio-credentials
               key: accessKeyID
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
               # OPTIONAL: Modify to match the secret for access to your bucket.
-              #                     The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+              # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
               name: minio-credentials
               key: secretAccessKey
         - name: SA_TOKEN
@@ -263,7 +263,7 @@ kind: ClusterRole
 metadata:
   name: backstage
 rules:
-              # OPTIONAL: These are broad security settings, you can limit backstage permissions here.
+  # OPTIONAL: These are broad security settings, you can limit backstage permissions here.
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]
