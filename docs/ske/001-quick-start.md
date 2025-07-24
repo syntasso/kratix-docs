@@ -85,7 +85,7 @@ kubectl create secret docker-registry syntasso-registry \
 Then apply the SKE installer manifest:
 
 ```bash
-kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske/v0.28.0-rc3/dev-only/ske-quick-start-installer.yaml
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/ske/v0.31.0/dev-only/ske-quick-start-installer.yaml
 ```
 
 This will deploy a job that installs SKE and its dependencies. To follow along
