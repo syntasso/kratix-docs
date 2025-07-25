@@ -81,13 +81,22 @@ installing promises). For that, refer to the [appropriate guide](/category/guide
 To upgrade your SKE instance via the CLI, you can run:
 
 ```shell-session
-ske upgrade
+ske upgrade [--version <desired version>]
 ```
 
 By default, the SKE Operator will perform the following steps:
 1. Run the pre-upgrade checks to check that Kratix is safe to upgrade in its current state.
-1. Upgrade your Kratix Deployment to the new version.
+1. Upgrade your Kratix Deployment to the new version. If no version is
+   specified, it will upgrade to the next minor version.
 1. Wait for the Kratix Deployment to become healthy (ready and available).
+
+:::tip
+
+If the specified version is not the next minor, the SKE Operator will perform
+the upgrade to all the minors in between. Check the [Operator
+docs](/ske/kratix/ske-operator#upgrade) for more details.
+
+:::
 
 ### Upgrade checks
 
