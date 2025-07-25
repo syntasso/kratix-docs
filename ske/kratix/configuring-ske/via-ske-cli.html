@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.354d01d5.css">
-<script src="/assets/js/runtime~main.4f7c22e0.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.e6db8348.js" defer="defer"></script>
 <script src="/assets/js/main.f50173d8.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -52,13 +52,17 @@ instructions</a>.</p><p>If you wish to install SKE without <code>cert-manager</c
 installing promises). For that, refer to the <a href="/category/guides">appropriate guide</a>.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="upgrades">Upgrades<a href="#upgrades" class="hash-link" aria-label="Direct link to Upgrades" title="Direct link to Upgrades">​</a></h2>
 <p>To upgrade your SKE instance via the CLI, you can run:</p>
-<div class="language-shell-session codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-shell-session codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token output">ske upgrade</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<div class="language-shell-session codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-shell-session codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token output">ske upgrade [--version &lt;desired version&gt;]</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
 <p>By default, the SKE Operator will perform the following steps:</p>
 <ol>
 <li>Run the pre-upgrade checks to check that Kratix is safe to upgrade in its current state.</li>
-<li>Upgrade your Kratix Deployment to the new version.</li>
+<li>Upgrade your Kratix Deployment to the new version. If no version is
+specified, it will upgrade to the next minor version.</li>
 <li>Wait for the Kratix Deployment to become healthy (ready and available).</li>
 </ol>
+<div class="theme-admonition theme-admonition-tip admonition_xJq3 alert alert--success"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path></svg></span>tip</div><div class="admonitionContent_BuS1"><p>If the specified version is not the next minor, the SKE Operator will perform
+the upgrade to all the minors in between. Check the <a href="/ske/kratix/ske-operator#upgrade">Operator
+docs</a> for more details.</p></div></div>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="upgrade-checks">Upgrade checks<a href="#upgrade-checks" class="hash-link" aria-label="Direct link to Upgrade checks" title="Direct link to Upgrade checks">​</a></h3>
 <p>The SKE Operator will perform pre-upgrade checks as part of the upgrade flow.</p>
 <p>To skip these checks, you can use the <code>--skip-all-checks</code> flag when starting an upgrade:</p>
