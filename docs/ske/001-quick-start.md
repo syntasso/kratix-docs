@@ -47,9 +47,15 @@ To follow along, you'll need access to a Kubernetes cluster.
 We recommend using a clean, disposable cluster for this quick start and you can
 use any  Kubernetes distribution including:
 
-- Managed services like GKE, EKS, or AKS  
-- On-premises clusters like OpenShift, Rancher, or vanilla Kubernetes  
-- Local environments like KinD or Minikube  
+- Managed services like GKE, EKS, or AKS
+- On-premises clusters like OpenShift, Rancher, or vanilla Kubernetes
+- Local environments like KinD or Minikube
+
+:::caution
+The quick start installs `cert-manager` and `Flux` for you. If either is already
+present on the cluster, the installation will fail. Ensure they are not installed
+before continuing.
+:::
 
 If you're working in a shared or production-like environment, see the full
 [installation guide](/ske/kratix/configuring-ske/intro) to avoid configuration
@@ -101,6 +107,36 @@ should be running:
 ```bash
 kubectl get pods -n kratix-platform-system
 ```
+
+:::note OpenShift
+Flux requires additional configuration when running on OpenShift. Apply the
+Security Context Constraint from Flux and patch each controller with the
+following JSON:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/openshift/scc.yaml
+
+cat <<'EOF' > flux-patch.json
+[
+  {
+    "op": "remove",
+    "path": "/spec/template/spec/securityContext"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/template/spec/containers/0/securityContext",
+    "value": {
+      "runAsUser": 65534
+    }
+  }
+]
+EOF
+
+for d in source-controller kustomize-controller helm-controller notification-controller; do
+  kubectl patch deployment $d -n flux-system --type=json --patch "$(cat flux-patch.json)"
+done
+```
+:::
 
 And the output will be similar to:
 
