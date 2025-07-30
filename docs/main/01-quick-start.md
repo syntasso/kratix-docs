@@ -4,7 +4,19 @@ title: Quick Start
 sidebar_label: Quick Start
 ---
 
-# Quick Start
+:::info
+
+This guide is for **quick-starting the latest OSS version of the Kratix
+project** in a local, insecure, and non-configurable environment, great for
+exploration, not suitable for production.
+
+Depending on your goals, you might instead want to:
+
+- 👉 [OSS Full Installation](/category/installing-kratix): for long-lived environments with full configuration
+- 👉 [Syntasso Kratix Enterprise (SKE) Quick Start](/ske/quick-start): for quick experimentation on a disposable cluster using enterprise features such as Backstage.
+- 👉 [Syntasso Kratix Enterprise (SKE) Full Installation](/ske/kratix/configuring-ske/intro): for setting up a **production enteprise grade**, secure, and compliant platform with full enterprise capabilities.
+
+:::
 
 This guide gives you a hands-on introduction to Kratix. In less than 30 minutes
 and with minimal dependencies you will see how Kratix Promises deliver self-service
