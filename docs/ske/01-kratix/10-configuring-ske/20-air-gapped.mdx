@@ -21,11 +21,27 @@ Depending on your environment configuration, you will be instructed how to creat
 configuration and secrets the SKE Operator requires to access both the Image
 Registry and manifest locations.
 
-
 Manifests include reference to the SKE docker images. Do not directly change the manifest
 to reference your image storage. If you need to change the image locations, you can do so
 by using the image registry configuration fields on the SKE Operator which is documented
 below.
+
+
+:::note
+
+The user associated with your SKE licence is `syntasso-pkg`. To pull the images
+from the Syntasso Registry, first login with:
+
+```bash
+docker login --username syntasso-pkg registry.syntasso.io
+```
+
+You will be prompted for a password. The password is your Licence Key.
+
+Once you have logged in, you can pull the images using the `docker pull`
+command.
+
+:::
 
 
 ## Image Registry
