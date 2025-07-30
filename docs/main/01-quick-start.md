@@ -18,8 +18,6 @@ Depending on your goals, you might instead want to:
 
 :::
 
-# Quick Start
-
 This guide gives you a hands-on introduction to Kratix. In less than 30 minutes
 and with minimal dependencies you will see how Kratix Promises deliver self-service
 to enable quick time to value while also enabling fleet management to maintain that

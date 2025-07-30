@@ -30,8 +30,6 @@ Don’t have one? [Request your free trial token here](https://www.syntasso.io/p
 
 :::
 
-# Quick Start (Enterprise Edition)
-
 This guide gives you a hands-on introduction to [**Syntasso Kratix
 Enterprise**](https://syntasso.io/pricing) (SKE). In less than 30 minutes  and with
 minimal dependencies, you will see how Kratix Promises deliver self-service  to
