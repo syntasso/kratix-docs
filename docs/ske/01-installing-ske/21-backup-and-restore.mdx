@@ -1,0 +1,21 @@
+---
+title: Backup and restore
+description: Backing up and restoring your SKE instance
+---
+
+Backing up and restoring your SKE instance is a critical part of ensuring the availability and durability of your data. It also provides a safety net for when you need to recover from a disaster.
+
+The backup and restore procedure will be different depending on where your Platform cluster is running. Below are the documentation for the major providers:
+
+* [Amazon EKS](https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/)
+* [Google GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/concepts/backup-for-gke)
+* [Microsoft AKS](https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-backup)
+* [RedHat OpenShift](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/backup_and_restore/control-plane-backup-and-restore)
+
+When restoring from a backup, keep in mind that the ordering of how the SKE objects are applied is important (the same applies for Flux and Cert Manager). The controller pod will not successfully start in the absence of their CRDs. Similarly, the resource requests will not successfully apply in the absence of the corresponding Promises.
+
+For Velero-based backups, the right order can be enforced with Velero backups with the `--include-resources` flag (for example, `--include-resources=customresourcedefinitions`). Check the [Velero Resource Filtering](https://velero.io/docs/main/resource-filtering) docs for more detailed explanation.
+
+For GKE, it's is possible to define pairs of resoruces that much be restored in a given order. Check [the GKE docs](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order) for more details.
+
+Ordering cannot be enforced by the Velero-backed Azure restore. Instead the restore needs to be applied more than once.
