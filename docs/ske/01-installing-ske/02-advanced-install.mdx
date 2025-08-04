@@ -12,7 +12,7 @@ import TabItem from '@theme/TabItem';
 ## The SKE Operator
 
 The recommended approach to install and manage your SKE installation is to use
-the SKE Operator. Beyond full lifecycle support, it provides a simpler interface
+the SKE Operator. As well as full lifecycle support, it provides a simpler interface
 to customise and secure your SKE instance.
 
 The operator has its own [releases](/ske/releases/ske-operator) and it manages
@@ -33,11 +33,9 @@ The SKE CLI is the command-line interface to install and manage an instance of S
 
 :::info
 
-It needs access to the private registry where the SKE images are distributed
-through. Support for installing SKE in **air-gapped environments** instead using
-the SKE CLI is coming soon.
+The SKE CLI requires access to the private registry where the SKE images are distributed in order to work. 
 
-In the meantime, you can install [using Helm](#via-helm-chart) and follow the [setup for air-gapped environments](./air-gapped).
+**For air-gapped and other locked-down environments**, install [using Helm](#via-helm-chart) and follow the [setup for air-gapped environments](./air-gapped).
 
 :::
 

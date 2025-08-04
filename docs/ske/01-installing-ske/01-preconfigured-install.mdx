@@ -15,8 +15,8 @@ Don't have one? [Request your free trial token here](https://www.syntasso.io/pri
 
 :::
 
-This guide walks you through a **quick-start, preconfigured installation** of
-Syntasso Kratix Enterprise (SKE) with a **pre-configured Backstage**.  It is not
+This guide walks you through a **preconfigured installation** of
+Syntasso Kratix Enterprise (SKE) with a **preconfigured Backstage**. It is the fastest way to get started with SKE. It is not
 intended for production use, but rather to get you started and experimenting
 quickly. Check the [advanced installation](/ske/installing-ske/advanced-setup)
 guide for alternatives for production use.
@@ -25,7 +25,7 @@ guide for alternatives for production use.
 
 To install SKE using this guide, you'll need access to a Kubernetes cluster.
 
-We recommend using a clean, disposable cluster for this quick start and you can
+We recommend using a clean, disposable cluster for this preconfigured installation and you can
 use any Kubernetes distribution including:
 
 - Managed services like GKE, EKS, or AKS
@@ -33,14 +33,14 @@ use any Kubernetes distribution including:
 - Local environments like KinD or Minikube
 
 :::caution
-The quick start installs `cert-manager` and `Flux` for you. If either is already
+The preconfigured installation installs `cert-manager` and `Flux` for you. If either is already
 present on the cluster, the installation will fail. Ensure they are not installed
 before continuing.
 :::
 
 If you're working in a shared or production-like environment, see the full
 [installation guide](/ske/installing-ske/intro) to avoid configuration
-conflicts. The  quick start deploys a local, insecure MinIO instance—intended
+conflicts. The  preconfigured installation deploys a local, insecure MinIO instance—intended
 only for local development.
 
 ## Installation
@@ -54,8 +54,8 @@ mainframes.
 :::
 
 SKE comes with easy integration to existing portal solutions such as Port and
-Backstage. To highlight this, a pre-configured Backstage instance is included in
-the quick start.
+Backstage. To highlight this, a preconfigured Backstage instance is included in
+the preconfigured installation.
 
 Before installing, create the namespace and secret so your cluster can access the private container registry:
 
@@ -465,7 +465,7 @@ safety.
 
 ## Summary
 
-In this quick start, you:
+In this installation, you:
 
 - Installed Syntasso Kratix Enterprise  
 - Published a Marketplace Promise  
