@@ -13,7 +13,7 @@ exploration, not suitable for production.
 Depending on your goals, you might instead want to:
 
 - 👉 [OSS Full Installation](/category/installing-kratix): for long-lived environments with full configuration
-- 👉 [Syntasso Kratix Enterprise (SKE) Quick Start](/ske/installing-ske/dev-setup): for quick experimentation on a disposable cluster using enterprise features such as Backstage.
+- 👉 [Syntasso Kratix Enterprise (SKE) Quick Start](/ske/installing-ske/preconfigured-install): for quick experimentation on a disposable cluster using enterprise features such as Backstage.
 - 👉 [Syntasso Kratix Enterprise (SKE) Full Installation](/ske/installing-ske/intro): for setting up a **production enteprise grade**, secure, and compliant platform with full enterprise capabilities.
 
 :::

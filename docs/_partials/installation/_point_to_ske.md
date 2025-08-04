@@ -4,7 +4,7 @@ This guide is for **installing the latest OSS version of the Kratix project**
 
 Depending on your goals, you might instead want to:
 
-- 👉 Install [Syntasso Kratix Enterprise (SKE) Quick Start](/ske/installing-ske/dev-setup):
+- 👉 Install [Syntasso Kratix Enterprise (SKE) Quick Start](/ske/installing-ske/preconfigured-install):
 quick experimentation on a disposable cluster using enterprise features.
 
 - 👉 Install [Syntasso Kratix Enterprise (SKE) (Full
