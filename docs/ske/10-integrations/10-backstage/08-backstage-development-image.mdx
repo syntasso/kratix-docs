@@ -59,7 +59,7 @@ data:
     app:
       title: Backstage Dev Build By Syntasso
       # OPTIONAL: If your using a different nodeport, modify the baseUrl to match the nodeport
-      # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+      # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/dev-setup
       baseUrl: http://localhost:31340
     organization:
       name: app-config
@@ -88,7 +88,7 @@ data:
         - accessKeyId: ${AWS_ACCESS_KEY_ID}
           secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
           # OPTIONAL: Modify to match the endpoint for your S3 compatible bucket.
-          # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+          # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/dev-setup
           endpoint: 'http://minio.kratix-platform-system.svc.cluster.local'
           s3ForcePathStyle: true
     techdocs:
@@ -131,7 +131,7 @@ data:
         awsS3:
           kratix-minio:
           # OPTIONAL: Modify to match your bucket name and configuration.
-          # The default setting works with the Kratix quickstart setup: https://docs.kratix.io/ske/quick-start
+          # The default setting works with the Kratix quickstart setup: https://docs.kratix.io/ske/installing-ske/dev-setup
             bucketName: kratix
             prefix: backstage/
             region: us-east-1
@@ -204,14 +204,14 @@ spec:
           valueFrom:
             secretKeyRef:
               # OPTIONAL: Modify to match the secret for access to your bucket.
-              # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+              # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/dev-setup
               name: minio-credentials
               key: accessKeyID
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
               # OPTIONAL: Modify to match the secret for access to your bucket.
-              # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/quick-start
+              # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/dev-setup
               name: minio-credentials
               key: secretAccessKey
         - name: SA_TOKEN

@@ -1,13 +1,13 @@
 ---
 title: SKE Operator
-description: Documentation about the SKE Operator
+description: Reference for the SKE Operator
 ---
 
 The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE) and is the
 recommended approach for installing and managing your SKE installation.
 
 The operator has its own [releases](../releases/ske-operator) and it manages instances of
-SKE as defined by a [Kratix Custom Resource](#the-kratix-custom-resource-definition-crd).
+SKE as defined by a [Kratix Custom Resource](#kratix-crd).
 
 :::info
 
@@ -30,7 +30,8 @@ The SKE Operator will:
 * Roll out an upgrade to the next minor version at the latest patch
 * Provide information about the status of the upgrade
 
-## The Kratix Custom Resource Definition (CRD)
+
+## The Kratix CRD {#kratix-crd}
 
 The Kratix CRD is the resource definition corresponding to a Kratix installation. This
 resource is managed by the SKE Operator.
@@ -46,63 +47,13 @@ spec:
     resources: # set to customize resource requests&limits for kratix deployment
       # limits and requests must be valid Kubernetes resource quantities
       limits:
-        memory:
-        cpu:
+        memory: 500Mi
+        cpu: 300Mi
       requests:
-        memory:
-        cpu:
+        memory: 500Mi
+        cpu: 300Mi
 ```
 
 The Kratix resource is the owner of all resources installed as part of the [SKE
 distribution](../releases/ske#overview), and ensures that their state always matches the
 definition in the distribution manifest.
-
-## Managing Kratix via the SKE Operator
-
-### Install
-
-Syntasso Kratix Enterprise supports many ways of installing a Kratix instance. See
-[Configuring SKE](./configuring-ske/intro) for details.
-
-### Upgrade
-
-To upgrade the SKE instance, you can apply a new version to the Kratix CRD:
-
-```yaml
-apiVersion: platform.syntasso.io/v1alpha1
-kind: Kratix
-metadata:
-  name: my-kratix
-spec:
-  version: latest # Or new desired version
-```
-
-:::tip
-
-If you set the `spec.version` to `latest`, the SKE Operator may automatically
-upgrade your Kratix instance to the latest compatible version of SKE, whenever a
-new version is available and a reconciliation loop is triggered.
-
-At this moment, the SKE Operator will not automatically check for new versions.
-
-:::
-
-By default, the SKE Operator will perform the following steps:
-1. Validate that the current Kratix installation is in a healthy state.
-1. Upgrade your Kratix Deployment to the next compatible version.
-1. Wait for the Kratix Deployment to become healthy (ready and available).
-1. Repeat the above steps until the desired version is reached.
-
-:::info
-
-The Operator will stop the upgrade process if:
-
-1. A new major is reached, or
-1. No valid upgrade path is found.
-
-Patch versions on the same minor can be upgraded without restrictions.
-
-Downgrades are not currently supported by the SKE Operator.
-
-:::
-

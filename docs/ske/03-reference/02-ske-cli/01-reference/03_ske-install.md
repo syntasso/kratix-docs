@@ -27,5 +27,5 @@ SKE successfully installed; SKE version: v0.1.0, SKE operator version: v0.2.0
 
 ## See Also
 
-* [ske](/ske/ske-cli/reference/ske): The ske CLI
+* [ske](/ske/reference/ske-cli/reference/ske): The ske CLI
 
