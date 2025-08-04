@@ -1,7 +1,7 @@
 ---
-description: Quickest way to test Syntasso Kratix Enterprise (SKE)
-title: Quick Start (Enterprise)
-sidebar_label: Quick Start (Enterprise)
+description: Install SKE via a preconfigured Job
+title: Preconfigured installation
+sidebar_label: Preconfigured installation
 ---
 
 ```mdx-code-block
@@ -10,68 +10,37 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 :::info
 
-This guide walks you through a **quick-start, development-only installation** of
-Syntasso Kratix Enterprise (SKE) with a **pre-configured Backstage**.  It is
-intended for **temporary testing on disposable clusters** and **is not suitable
-for production** use.
-
-⚠️ This setup:
-- Runs permissive workloads
-- Lacks production hardening
-- Should **never be used in production environments**
-
-For production-ready deployment, see the [Syntasso Kratix Enterprise (SKE) Full Installation guide](/ske/kratix/configuring-ske/intro) to set up a **secure, compliant, and long-term platform**.
+In order to run through this page you need Syntasso Kratix Enterprise license **token**.
+Don't have one? [Request your free trial token here](https://www.syntasso.io/pricing)
 
 :::
 
-:::info
-🛂 To complete this guide, you’ll need a valid Syntasso Kratix Enterprise **license token**.  
-Don’t have one? [Request your free trial token here](https://www.syntasso.io/pricing)
-
-:::
-
-This guide gives you a hands-on introduction to [**Syntasso Kratix
-Enterprise**](https://syntasso.io/pricing) (SKE). In less than 30 minutes  and with
-minimal dependencies, you will see how Kratix Promises deliver self-service  to
-enable quick time to value while also enabling fleet management to maintain that
-speed and efficiency.
-
-Platforms need to provide a wide range of services to their users. Some
-examples include databases (i.e. individual infrastructure), developer
-environments  (i.e. paved roads), CI/CD pipelines (i.e. any internal
-capability-as-a-Service).
-
-In this quick start you will learn about a Kratix Promise which provides the
-structure  between platform _producers_ and _consumers_. Platform producers are
-often operators or  other subject matter experts who need to contribute and
-manage their services while  consumers are often application developers, data
-scientists, managers and others who  need to depend on and use the provided
-services. You will also see how SKE reduces the time to integrate with portals like
-Backstage so that consumers can request services without needing to write
-YAML or understand the underlying Kubernetes resources. And once integrated, SKE keeps
-platform engineer costs low through a managed integration as both SKE and the portals
-release updates.
+This guide walks you through a **preconfigured installation** of
+Syntasso Kratix Enterprise (SKE) with a **preconfigured Backstage**. It is the fastest way to get started with SKE. It is not
+intended for production use, but rather to get you started and experimenting
+quickly. Check the [advanced installation](/ske/installing-ske/advanced-install)
+guide for alternatives for production use.
 
 ## Prerequisites
 
-To follow along, you'll need access to a Kubernetes cluster.
+To install SKE using this guide, you'll need access to a Kubernetes cluster.
 
-We recommend using a clean, disposable cluster for this quick start and you can
-use any  Kubernetes distribution including:
+We recommend using a clean, disposable cluster for this preconfigured installation and you can
+use any Kubernetes distribution including:
 
 - Managed services like GKE, EKS, or AKS
 - On-premises clusters like OpenShift, Rancher, or vanilla Kubernetes
 - Local environments like KinD or Minikube
 
 :::caution
-The quick start installs `cert-manager` and `Flux` for you. If either is already
+The preconfigured installation installs `cert-manager` and `Flux` for you. If either is already
 present on the cluster, the installation will fail. Ensure they are not installed
 before continuing.
 :::
 
 If you're working in a shared or production-like environment, see the full
-[installation guide](/ske/kratix/configuring-ske/intro) to avoid configuration
-conflicts. The  quick start deploys a local, insecure MinIO instance—intended
+[installation guide](/ske/installing-ske/intro) to avoid configuration
+conflicts. The  preconfigured installation deploys a local, insecure MinIO instance—intended
 only for local development.
 
 ## Installation
@@ -85,8 +54,8 @@ mainframes.
 :::
 
 SKE comes with easy integration to existing portal solutions such as Port and
-Backstage. To highlight this, a pre-configured Backstage instance is included in
-the quick start.
+Backstage. To highlight this, a preconfigured Backstage instance is included in
+the preconfigured installation.
 
 Before installing, create the namespace and secret so your cluster can access the private container registry:
 
@@ -496,7 +465,7 @@ safety.
 
 ## Summary
 
-In this quick start, you:
+In this installation, you:
 
 - Installed Syntasso Kratix Enterprise  
 - Published a Marketplace Promise  

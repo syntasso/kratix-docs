@@ -35,5 +35,5 @@ ske upgrade --context kind-platform --version v0.10.0
 
 ## See Also
 
-* [ske](/ske/ske-cli/reference/ske): The ske CLI
+* [ske](/ske/reference/ske-cli/reference/ske): The ske CLI
 

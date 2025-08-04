@@ -1,9 +1,9 @@
 {
-    "label": "Configuring SKE",
+    "label": "Installing SKE",
     "position": 1,
     "collapsed": false,
     "link": {
       "type": "doc",
-      "id": "ske/kratix/configuring-ske/intro"
+      "id": "ske/installing-ske/intro"
     }
 }

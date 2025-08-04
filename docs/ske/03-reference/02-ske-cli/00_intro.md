@@ -10,9 +10,7 @@ installation.
 
 ## Installation
 
-To install the Kratix CLI, go to the [releases
-page](../50-releases/40-ske-cli.mdx), download the latest release of
-the binary for your platform.
+To install the Kratix CLI, go to the [releases page](/ske/releases/ske-cli), download the latest release of the binary for your platform.
 
 Once you have downloaded the binary, you can install it by moving it to a directory in
 your PATH.

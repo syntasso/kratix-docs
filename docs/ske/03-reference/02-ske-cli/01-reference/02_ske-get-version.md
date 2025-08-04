@@ -28,5 +28,5 @@ SKE Operator: v0.2.0; SKE Instance: v67.1.0
 
 ## See Also
 
-* [ske get](/ske/ske-cli/reference/ske-get): Command to get information about SKE deployment
+* [ske get](/ske/reference/ske-cli/reference/ske-get): Command to get information about SKE deployment
 
