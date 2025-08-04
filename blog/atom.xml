@@ -131,7 +131,7 @@ to define custom health validation logic for the resources their Promise provisi
 back basic health data (ready, degraded, failed etc.) but also context relevant that can be used to drive other processes,
 for example connection strings to access your database resource, or the unique ID name of the application you've just deployed.</p>
 <p>Here’s how it works:</p>
-<p>You can simply update your existing Promise resource configure workflow to output a <a href="https://docs.kratix.io/ske/api-reference/healthdefinition">HealthDefinition</a>,
+<p>You can simply update your existing Promise resource configure workflow to output a <a href="https://docs.kratix.io/ske/reference/healthdefinition">HealthDefinition</a>,
 which contains structured instructions on how to perform health checks against requested resources in a Destination or external system.
 Kratix reads the health status and automatically updates the status of each resource request.</p>
 <p>By including a HealthDefinition, you give Kratix insight into the runtime state of each resource, whether it’s ready, degraded, or failed.
