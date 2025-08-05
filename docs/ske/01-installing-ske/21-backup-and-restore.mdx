@@ -14,7 +14,7 @@ The backup and restore procedure will be different depending on where your Platf
 
 When restoring from a backup, keep in mind that the ordering of how the SKE objects are applied is important (the same applies for Flux and Cert Manager). The controller pods will not successfully start in the absence of their CRDs. Similarly, the resource requests will not successfully apply in the absence of the corresponding Promises.
 
-For Velero-based backups, the right order can be enforced with Velero backups with the `--include-resources` flag (for example, `--include-resources=customresourcedefinitions`). Check the [Velero Resource Filtering](https://velero.io/docs/main/resource-filtering) docs for more detailed explanation.
+For Velero-based backups, the right order can be enforced with the `--include-resources` flag (for example, `--include-resources=customresourcedefinitions`). Check the [Velero Resource Filtering](https://velero.io/docs/main/resource-filtering) docs for more detailed explanation.
 
 For GKE, it is possible to define pairs of resources that must be restored in a given order. Check [the GKE docs](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order) for more details.
 
