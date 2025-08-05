@@ -12,7 +12,7 @@ The backup and restore procedure will be different depending on where your Platf
 * [Microsoft AKS](https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-backup)
 * [RedHat OpenShift](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/backup_and_restore/control-plane-backup-and-restore)
 
-When restoring from a backup, keep in mind that the ordering of how the SKE objects are applied is important (the same applies for Flux and Cert Manager). The controller pod will not successfully start in the absence of their CRDs. Similarly, the resource requests will not successfully apply in the absence of the corresponding Promises.
+When restoring from a backup, keep in mind that the ordering of how the SKE objects are applied is important (the same applies for Flux and Cert Manager). The controller pods will not successfully start in the absence of their CRDs. Similarly, the resource requests will not successfully apply in the absence of the corresponding Promises.
 
 For Velero-based backups, the right order can be enforced with Velero backups with the `--include-resources` flag (for example, `--include-resources=customresourcedefinitions`). Check the [Velero Resource Filtering](https://velero.io/docs/main/resource-filtering) docs for more detailed explanation.
 
