@@ -16,6 +16,6 @@ When restoring from a backup, keep in mind that the ordering of how the SKE obje
 
 For Velero-based backups, the right order can be enforced with Velero backups with the `--include-resources` flag (for example, `--include-resources=customresourcedefinitions`). Check the [Velero Resource Filtering](https://velero.io/docs/main/resource-filtering) docs for more detailed explanation.
 
-For GKE, it's is possible to define pairs of resoruces that much be restored in a given order. Check [the GKE docs](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order) for more details.
+For GKE, it is possible to define pairs of resources that must be restored in a given order. Check [the GKE docs](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order) for more details.
 
 Ordering cannot be enforced by the Velero-backed Azure restore. Instead the restore needs to be applied more than once.
