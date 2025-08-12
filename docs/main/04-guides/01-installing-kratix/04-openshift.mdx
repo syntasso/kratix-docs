@@ -29,13 +29,13 @@ kubectl config current-context
 export PLATFORM=<platform-context-name>
 ```
 
-Kratix docker images are hosted on the `syntasso.docker.scarf.sh` registry, ensure you've
+Kratix docker images are hosted on the `syntasso-community.docker.reo.dev` registry, ensure you've
 configured your cluster to [allow access to the registry](https://docs.openshift.com/container-platform/4.17/openshift_images/image-configuration.html).
 
 :::warning
 
 Some users have reported issues with accessing the
-`syntasso.docker.scarf.sh` registry even after adding it as a supported registry:
+`syntasso-community.docker.reo.dev` registry even after adding it as a supported registry:
 ```
 kubectl -n kratix-platform-system get pods
 NAME                                                 READY   STATUS             RESTARTS   AGE
@@ -44,12 +44,12 @@ minio-54f847c6c5-4t9jb                               1/1     Running            
 
 kubectl -n kratix-platform-system describe pod kratix-platform-controller-manager-7698bb84d-82dfm
 ...
-Failed to pull image "syntasso.docker.scarf.sh/syntasso/kratix-platform": fetching target platform image selected from image index: reading manifest sha256:... in syntasso.docker.scarf.sh/syntasso/kratix-platform: received unexpected HTTP status: 500 Internal Server Error
+Failed to pull image "syntasso-community.docker.reo.dev/syntasso/kratix-platform": fetching target platform image selected from image index: reading manifest sha256:... in syntasso-community.docker.reo.dev/syntasso/kratix-platform: received unexpected HTTP status: 500 Internal Server Error
 ```
 
 If this event occurs, we recommend one of the following actions:
 
-1. Use the Docker Hub Registry instead. Update the image references from `syntasso.docker.scarf.sh/syntasso` to `syntasso`.
+1. Use the Docker Hub Registry instead. Update the image references from `syntasso-community.docker.reo.dev/syntasso` to `syntasso`.
 1. Host Images in your own registry. Push the images to your own container registry and update references accordingly.
 
 The image references need to be updated in the following locations:
