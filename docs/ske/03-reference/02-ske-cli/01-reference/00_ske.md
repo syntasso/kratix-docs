@@ -22,4 +22,4 @@ ske [command]
 
 * [ske get](/ske/reference/ske-cli/reference/ske-get): Command to get information about SKE deployment
 * [ske install](/ske/reference/ske-cli/reference/ske-install): install the latest SKE operator and SKE
-* [ske upgrade](/ske/reference/ske-cli/reference/ske-upgrade): upgrade to the next SKE version
+* [ske upgrade](/ske/reference/ske-cli/reference/ske-upgrade): Upgrade to the next SKE version

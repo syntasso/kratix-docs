@@ -23,4 +23,4 @@ ske get [command]
 ## See Also
 
 * [ske](/ske/reference/ske-cli/reference/ske): The ske CLI
-* [ske get version](/ske/reference/ske-cli/reference/ske-get-version): get version information about SKE deployment and latest SKE release
+* [ske get version](/ske/reference/ske-cli/reference/ske-get-version): get information about the deployed and available versions of SKE and the SKE Operator

@@ -1,8 +1,8 @@
 # ske get version
-get version information about SKE deployment and latest SKE release
+get information about the deployed and available versions of SKE and the SKE Operator
 
 ## Description
-get version information about SKE deployment and latest SKE release
+get information about the deployed and available versions of SKE and the SKE Operator
 
 ## Usage
 ```
@@ -14,10 +14,20 @@ ske get version [--context] [flags]
 # ske get version [--context kind-platform]
 Deployed:
 
-SKE Operator: v0.1.0; SKE Instance: v4.2.0
-There are new releases available:
+SKE Operator: v0.5.0
+SKE Deployment: v0.8.0
 
-SKE Operator: v0.2.0; SKE Instance: v67.1.0
+Latest Available:
+SKE Operator:
+
+v0.5.2
+v0.6.6
+
+v0.7.2
+SKE Deployment:
+
+v0.9.1
+v0.10.3
 ```
 
 ## Flags
