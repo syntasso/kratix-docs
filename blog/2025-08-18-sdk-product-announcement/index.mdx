@@ -1,0 +1,85 @@
+---
+slug: sdk-product-announcement
+title: "Introducing the Kratix Promise-writing SDKs: Faster, Easier, More Testable"
+description: New Kratix Promise-writing SDKs in Python and Golang
+authors: [cat]
+tags: [kratix, product announcement, sdks, python, golang]
+---
+
+import ReactPlayer from 'react-player/lazy';
+```mdx-code-block
+import SDKContract from "./sdk-contract.png"
+```
+
+:::danger[New feature? WOW!] 
+These SDKs excel at everything from bootstrapping the initial Promise for your organisation's platform to ensuring consistency and testability across all the Promises your platform teams create.
+:::
+
+Defining and building platform APIs and services is no easy task in general. Platform engineers who adopt Kratix and 
+create bespoke services – which we call [“Promises”](https://docs.kratix.io/main/reference/promises/intro)  – often 
+encounter a significant "wall of bash" when starting their journey towards taming their underlying IaC config, YAML, and API calls. 
+
+<!-- truncate -->
+Our community has shared with us the challenges of bootstrapping custom Promise workflows. They often resort to bash scripts 
+for simplicity, only to hit the proverbial brick wall when adding more functionality, running tests, or managing repetitive 
+code for common tasks like validation or file I/O interactions.
+
+This is why we are thrilled to announce the launch of our brand-new Promise-writing Software Development Kits (SDKs) in 
+[Python](https://github.com/syntasso/kratix-python) and [Golang](https://github.com/syntasso/kratix-go). These completely 
+remove the complexity of common Promise-specific interactions for every team writing promises. 
+Available to everyone in the Kratix community, these SDKs also serve as a template for teams to create their own SDKs in the 
+language of their choice and share them with the community!
+
+## Why Create Promise-writing SDK for Kratix?
+
+We believe it should be easy to write Promise stages in the language of your choosing, focusing only on the business logic 
+unique to your organisation and Promise. No more rewriting everything in a more testable language three months down the line, 
+once you realise bash doesn’t quite cut it.
+
+Our new Promise writing SDK directly tackles those pains head-on. It empowers platform engineers to focus solely on the unique 
+business logic that truly matters to your organisation in a language that your team knows like the back of their hands. This 
+SDK simplifies those common, repetitive tasks that previously required significant manual coding, such as:
+- **Handling file I/O interactions and validation:** Crucial for ensuring data integrity and simplifying the process of writing 
+to output directories, ensuring anything you output will be in the right format.
+- **Reading Promise and Resource inputs:** The SDK automatically parses YAML inputs, dynamically loading custom inputs as object 
+properties, completely eliminating manual coding for Promise developers.
+- **Interacting with Kratix-specific components:** It simplifies access to API fields as environment variables and fetching 
+resource request details for compound Promises, making complex interactions simple.
+- **Clear, mockable interfaces:** Promises can now be unit tested via these interfaces, improving feedback cycles and reducing 
+risk to your platform when new promises are added.
+
+
+## Extending the Kratix CLI: SDKs, Specifications, and Contracts
+
+<figure className="diagram">
+  <img className="large" src={SDKContract} alt="Screenshot of the Kratix Promise-writing SDK Contract" />
+  <figcaption>Some of the functions available in the Python and Golang SDKs</figcaption>
+</figure>
+
+The SDK is built around a clear, open-source contract. It is written in Markdown and can be found in 
+the [Kratix repo](https://github.com/syntasso/kratix/blob/main/sdk/contract.md). This contract isn't 
+just a guide; it's a specification to encourage and support community contributions of SDKs in various languages, 
+ensuring consistency and parity across implementations. Each SDK will live in its own open-source repository, making 
+it simple for the community to consume and contribute.
+
+And finally, to make things even easier, we’ve integrated these SDKs into our 
+[Promise-writing CLI](https://docs.kratix.io/main/kratix-cli/intro), meaning you can pre-load your generated Promises 
+with pipeline stages in Go or Python. In the video below, our team shows how to use the CLI to build your own, 
+bespoke Python promise in under 3 minutes!
+
+```mdx-code-block
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Q817NcogqK0?si=cMyRk61vtg0k1w9m" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+```
+
+The Promise-writing SDK is a significant step towards reducing the time it takes to write Promises, 
+which massively increases their testability, too! We’re excited to see the community rally around this 
+initiative, and to support them, we'll be working hard to integrate examples and documentation into the 
+Kratix CLI and our workshops, making the onboarding experience unbelievably easy.
+
+## Get Hands-on with the Kratix SDKs: Feedback is Welcomed!
+
+Join our [Slack community](https://kratixworkspace.slack.com/), where we’ve created a channel for the 
+Promise-writing SDKs (creatively named #promise-writing-sdks) to get feedback, share ideas and support 
+community members who want to build one in the language of their choice. If you want to get hands-on right 
+away, check out the [Python](https://github.com/syntasso/kratix-python) and [Go](https://github.com/syntasso/kratix-go) 
+SDK repositories on GitHub, or the contract in the [Kratix.io](https://www.Kratix.io) repo and let us know your thoughts!
