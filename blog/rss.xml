@@ -4,10 +4,71 @@
         <title>Kratix Blog</title>
         <link>https://docs.kratix.io/blog</link>
         <description>Kratix Blog</description>
-        <lastBuildDate>Fri, 11 Jul 2025 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 18 Aug 2025 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[Introducing the Kratix Promise-writing SDKs: Faster, Easier, More Testable]]></title>
+            <link>https://docs.kratix.io/blog/sdk-product-announcement</link>
+            <guid>https://docs.kratix.io/blog/sdk-product-announcement</guid>
+            <pubDate>Mon, 18 Aug 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[New Kratix Promise-writing SDKs in Python and Golang]]></description>
+            <content:encoded><![CDATA[<div class="theme-admonition theme-admonition-danger admonition_xJq3 alert alert--danger"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"></path></svg></span>New feature? WOW!</div><div class="admonitionContent_BuS1"><p>These SDKs excel at everything from bootstrapping the initial Promise for your organisation's platform to ensuring consistency and testability across all the Promises your platform teams create.</p></div></div>
+<p>Defining and building platform APIs and services is no easy task in general. Platform engineers who adopt Kratix and
+create bespoke services – which we call <a href="https://docs.kratix.io/main/reference/promises/intro" target="_blank" rel="noopener noreferrer">“Promises”</a>  – often
+encounter a significant "wall of bash" when starting their journey towards taming their underlying IaC config, YAML, and API calls.</p>
+<p>Our community has shared the challenges of bootstrapping custom Promise workflows with us. They often resort to bash scripts
+for simplicity, only to hit the proverbial brick wall when adding more functionality, running tests, or managing repetitive
+code for common tasks like validation or file I/O interactions.</p>
+<p>This is why we are thrilled to announce the launch of our brand-new Promise-writing Software Development Kits (SDKs) in
+<a href="https://github.com/syntasso/kratix-python" target="_blank" rel="noopener noreferrer">Python</a> and <a href="https://github.com/syntasso/kratix-go" target="_blank" rel="noopener noreferrer">Golang</a>. These completely
+remove the complexity of common Promise-specific interactions for every team writing promises.
+Available to everyone in the Kratix community, these SDKs also serve as a template for teams to create their own SDKs in the
+language of their choice and share them with the community!</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-create-promise-writing-sdk-for-kratix">Why Create Promise-writing SDK for Kratix?<a href="https://docs.kratix.io/blog/sdk-product-announcement#why-create-promise-writing-sdk-for-kratix" class="hash-link" aria-label="Direct link to Why Create Promise-writing SDK for Kratix?" title="Direct link to Why Create Promise-writing SDK for Kratix?">​</a></h2>
+<p>We believe it should be easy to write Promise stages in the language of your choosing, focusing only on the business logic
+unique to your organisation and Promise. No more rewriting everything in a more testable language three months down the line,
+once you realise bash doesn’t quite cut it.</p>
+<p>Our new Promise-writing SDK directly tackles those pains head-on. It empowers platform engineers to focus solely on the unique
+business logic that truly matters to your organisation in a language that your team knows like the back of their hands. This
+SDK simplifies those common, repetitive tasks that previously required significant manual coding, such as:</p>
+<ul>
+<li><strong>Handling file I/O interactions and validation:</strong> Crucial for ensuring data integrity and simplifying the process of writing
+to output directories, ensuring anything you output will be in the right format.</li>
+<li><strong>Reading Promise and Resource inputs:</strong> The SDK automatically parses YAML inputs, dynamically loading custom inputs as object
+properties, completely eliminating manual coding for Promise developers.</li>
+<li><strong>Clear, mockable interfaces:</strong> Promises can now be unit tested via these interfaces, improving feedback cycles and reducing
+risk to your platform when new promises are added.</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="extending-the-kratix-cli-sdks-specifications-and-contracts">Extending the Kratix CLI: SDKs, Specifications, and Contracts<a href="https://docs.kratix.io/blog/sdk-product-announcement#extending-the-kratix-cli-sdks-specifications-and-contracts" class="hash-link" aria-label="Direct link to Extending the Kratix CLI: SDKs, Specifications, and Contracts" title="Direct link to Extending the Kratix CLI: SDKs, Specifications, and Contracts">​</a></h2>
+<figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/sdk-contract-404c380666c9f62779d8956cc21f1857.png" alt="Screenshot of the Kratix Promise-writing SDK Contract"><figcaption>Some of the functions available in the Python and Golang SDKs</figcaption></figure>
+<p>The SDK is built around a clear, open-source contract. It is written in Markdown and can be found in
+the <a href="https://github.com/syntasso/kratix/blob/main/sdk/contract.md" target="_blank" rel="noopener noreferrer">Kratix repo</a>. This contract isn't
+just a guide; it's a specification to encourage and support community contributions of SDKs in various languages,
+ensuring consistency and parity across implementations. Each SDK will live in its own open-source repository, making
+it simple for the community to consume and contribute.</p>
+<p>And finally, to make things even easier, we’ve integrated these SDKs into our
+<a href="https://docs.kratix.io/main/kratix-cli/intro" target="_blank" rel="noopener noreferrer">Promise-writing CLI</a>, meaning you can pre-load your generated Promises
+with pipeline stages in Go or Python. In the video below, our team shows how to use the CLI to build your own,
+bespoke Python promise in under 3 minutes!</p>
+<div style="text-align:center;margin:10px 0"><iframe width="560" height="315" src="https://www.youtube.com/embed/Q817NcogqK0?si=cMyRk61vtg0k1w9m" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p>The Promise-writing SDK is a significant step towards reducing the time it takes to write Promises,
+which massively increases their testability, too! We’re excited to see the community rally around this
+initiative, and to support them, we'll be working hard to integrate examples and documentation into the
+Kratix CLI and our workshops, making the onboarding experience unbelievably easy.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="get-hands-on-with-the-kratix-sdks-feedback-is-welcomed">Get Hands-on with the Kratix SDKs: Feedback is Welcomed!<a href="https://docs.kratix.io/blog/sdk-product-announcement#get-hands-on-with-the-kratix-sdks-feedback-is-welcomed" class="hash-link" aria-label="Direct link to Get Hands-on with the Kratix SDKs: Feedback is Welcomed!" title="Direct link to Get Hands-on with the Kratix SDKs: Feedback is Welcomed!">​</a></h2>
+<p>Join our <a href="https://kratixworkspace.slack.com/" target="_blank" rel="noopener noreferrer">Slack community</a>, where we’ve created a channel for the
+Promise-writing SDKs (creatively named #promise-writing-sdks) to get feedback, share ideas and support
+community members who want to build one in the language of their choice. If you want to get hands-on right
+away, check out the <a href="https://github.com/syntasso/kratix-python" target="_blank" rel="noopener noreferrer">Python</a> and <a href="https://github.com/syntasso/kratix-go" target="_blank" rel="noopener noreferrer">Go</a>
+SDK repositories on GitHub, or the contract in the <a href="https://github.com/syntasso/kratix" target="_blank" rel="noopener noreferrer">Kratix.io</a> repo and let us know your thoughts!</p>]]></content:encoded>
+            <category>kratix</category>
+            <category>product announcement</category>
+            <category>sdks</category>
+            <category>python</category>
+            <category>golang</category>
+        </item>
         <item>
             <title><![CDATA[Introducing the SKE Headlamp Plugin]]></title>
             <link>https://docs.kratix.io/blog/introducing-ske-headlamp</link>
