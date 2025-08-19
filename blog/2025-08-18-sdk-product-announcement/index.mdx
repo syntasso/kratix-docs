@@ -20,7 +20,7 @@ create bespoke services – which we call [“Promises”](https://docs.kratix.i
 encounter a significant "wall of bash" when starting their journey towards taming their underlying IaC config, YAML, and API calls. 
 
 <!-- truncate -->
-Our community has shared with us the challenges of bootstrapping custom Promise workflows. They often resort to bash scripts 
+Our community has shared the challenges of bootstrapping custom Promise workflows with us. They often resort to bash scripts 
 for simplicity, only to hit the proverbial brick wall when adding more functionality, running tests, or managing repetitive 
 code for common tasks like validation or file I/O interactions.
 
@@ -36,15 +36,13 @@ We believe it should be easy to write Promise stages in the language of your cho
 unique to your organisation and Promise. No more rewriting everything in a more testable language three months down the line, 
 once you realise bash doesn’t quite cut it.
 
-Our new Promise writing SDK directly tackles those pains head-on. It empowers platform engineers to focus solely on the unique 
+Our new Promise-writing SDK directly tackles those pains head-on. It empowers platform engineers to focus solely on the unique 
 business logic that truly matters to your organisation in a language that your team knows like the back of their hands. This 
 SDK simplifies those common, repetitive tasks that previously required significant manual coding, such as:
 - **Handling file I/O interactions and validation:** Crucial for ensuring data integrity and simplifying the process of writing 
 to output directories, ensuring anything you output will be in the right format.
 - **Reading Promise and Resource inputs:** The SDK automatically parses YAML inputs, dynamically loading custom inputs as object 
 properties, completely eliminating manual coding for Promise developers.
-- **Interacting with Kratix-specific components:** It simplifies access to API fields as environment variables and fetching 
-resource request details for compound Promises, making complex interactions simple.
 - **Clear, mockable interfaces:** Promises can now be unit tested via these interfaces, improving feedback cycles and reducing 
 risk to your platform when new promises are added.
 
@@ -82,4 +80,4 @@ Join our [Slack community](https://kratixworkspace.slack.com/), where we’ve cr
 Promise-writing SDKs (creatively named #promise-writing-sdks) to get feedback, share ideas and support 
 community members who want to build one in the language of their choice. If you want to get hands-on right 
 away, check out the [Python](https://github.com/syntasso/kratix-python) and [Go](https://github.com/syntasso/kratix-go) 
-SDK repositories on GitHub, or the contract in the [Kratix.io](https://www.Kratix.io) repo and let us know your thoughts!
+SDK repositories on GitHub, or the contract in the [Kratix.io](https://github.com/syntasso/kratix) repo and let us know your thoughts!
