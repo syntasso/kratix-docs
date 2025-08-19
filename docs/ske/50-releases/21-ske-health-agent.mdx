@@ -16,6 +16,24 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-heal
 
 ## Release Notes
 
+### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.4.0/) (2025-08-19)
+
+Released in Helm Chart version [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.13.0/)
+
+#### Features
+
+* Job history can now be configured via the `SUCCESSFUL_JOBS_HISTORY_LIMIT` and
+  `FAILED_JOBS_HISTORY_LIMIT` environment variables. Those can be set in the
+  Deployment manifest.
+* Improve the health agent deployment labels, making it less likely to clash
+  with other deployments in the same namespace.
+* Bumped the Deployment resources limits and requests.
+
+#### Maintenance
+
+* Remove `sh` from the Health Adapter image.
+* Bump dependencies.
+
 ### [v0.3.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.3.3/) (2025-06-23)
 
 Released in Helm Chart version [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.11.0/)
