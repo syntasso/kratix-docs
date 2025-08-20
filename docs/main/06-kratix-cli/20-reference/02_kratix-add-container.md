@@ -23,9 +23,10 @@ kratix add container promise/configure/pipeline0 --image syntasso/postgres-resou
 
 ## Flags
 ```
--d, --dir string     Directory to read promise.yaml from. Default to current working directory. (default ".")
--h, --help           help for container
--i, --image string   The image used by this container.
+-d, --dir string        Directory to read promise.yaml from. Default to current working directory. (default ".")
+-h, --help              help for container
+-i, --image string      The image used by this container.
+-l, --language string   Language to use for the pipeline script. Currently supports Bash, Go and Python. (default "bash")
 ```
 
 
