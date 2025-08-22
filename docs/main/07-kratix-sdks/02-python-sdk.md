@@ -16,6 +16,12 @@ An overview of the Python Promise-writing SDK.
 - **Destination Selectors**: Configure where resources should be deployed
 - **Environment Variables**: Access workflow context (action, type, promise name, pipeline name)
 
+## Installation
+
+```bash
+pip install git+https://github.com/syntasso/kratix-python.git
+```
+
 ## Usage
 
 ```python

@@ -17,6 +17,12 @@ An overview of the Go Promise-writing SDK.
 - **Environment Variables**: Access workflow context (action, type, promise name, pipeline name)
 - **Testing Support**: Built-in testing utilities and mocks to support unit testing
 
+## Installation
+
+```bash
+go get github.com/syntasso/kratix-go
+```
+
 ## Usage
 
 ```go
