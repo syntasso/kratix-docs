@@ -23,8 +23,8 @@ import kratix_sdk as ks
 
 def main():
     sdk = ks.KratixSDK()
-        resource = sdk.read_resource_input()
-        print(f'Name" {resource.get_name()}')
+    resource = sdk.read_resource_input()
+    print(f'Name" {resource.get_name()}')
 
 if __name__ == '__main__':
     main()
