@@ -1,0 +1,8 @@
+{
+  "label": "Promise SDKs",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "The Promise-writing SDKs make writing Promises for Kratix easier. With the SDKs, you can write your bespoke Pipeline stages in the language of your choice."
+  }
+}
