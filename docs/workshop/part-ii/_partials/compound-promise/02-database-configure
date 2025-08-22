@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+
+import kratix_sdk as ks
+import yaml
+
+def create_postgresql_request(name, namespace, teamId, dbName):
+    """
+    Create a request for a PostgreSQL database
+    """
+    postgresqlRequest = {
+        "apiVersion": "marketplace.kratix.io/v1alpha2",
+        "kind": "postgresql",
+        "metadata": {
+            "name": name,
+            "namespace": namespace
+        },
+        "spec": {
+            "teamId": teamId,
+            "dbName": dbName,
+        }
+    }
+    return postgresqlRequest
+
+def create_deployment_env(teamId, dbName):
+    """
+    Create a list of environment variables for the deployment, these are the
+    variables that will be used to connect to the PostgreSQL database
+    """
+
+    # The PostgreSQL Operator generates a secret with the following format:
+    secretRef = f"{teamId}.{teamId}-{dbName}-postgresql.credentials.postgresql.acid.zalan.do"
+    env = [
+        {
+            "name": "PGPASSWORD",
+            "valueFrom": {
+                "secretKeyRef": { "name": secretRef, "key": "password" }
+            }
+        },
+        {
+            "name": "PGUSER",
+            "valueFrom": {
+                "secretKeyRef": { "name": secretRef, "key": "username" }
+            }
+        },
+        {
+            "name": "PGHOST",
+            "value": f"{teamId}-{dbName}-postgresql.default.svc.cluster.local"
+        },
+        { "name": "DBNAME", "value": dbName }
+    ]
+    return env
+
+def main():
+    # Initialise the sdk
+    sdk = ks.KratixSDK()
+
+    # Read the resource input
+    resource = sdk.read_resource_input()
+
+    # Get the database driver from the resource spec
+    try:
+        dbDriver = resource.get_value("spec.dbDriver")
+    except:
+        dbDriver = None
+
+    if dbDriver is None:
+        print("No database driver specified, skipping")
+        exit(0)
+
+    if dbDriver != "postgresql":
+        print("Unsupported db driver: {dbDriver}")
+        print("Supported drivers: postgresql")
+        exit(1)
+
+    print("Postgresql database driver detected, including database resources")
+
+    # Get the name and namespace of the resource
+    name = resource.get_name()
+    namespace = resource.get_namespace()
+
+    teamId = f"{name}team"
+    dbName = f"{name}db"
+
+    # Create a request for a PostgreSQL database
+    postgresqlRequest = create_postgresql_request(name, namespace, teamId, dbName)
+    destinationSelectors: List[ks.DestinationSelector] = [
+        ks.DestinationSelector(
+            directory="platform",
+            match_labels={"environment": "platform"}
+        )
+    ]
+
+    # Update the existing deployment with the new db credentials
+    with open("/kratix/output/deployment.yaml", "r") as f:
+        existingDeployment = yaml.safe_load(f)
+    existingDeployment["spec"]["template"]["spec"]["containers"][0]["env"] = create_deployment_env(teamId, dbName)
+
+    # Write the updated deployment to the output directory
+    data = yaml.safe_dump(existingDeployment).encode("utf-8")
+    sdk.write_output("deployment.yaml", data)
+
+    ## Send the PostgreSQL request to the platform cluster
+    sdk.write_output("platform/postgresql.yaml", yaml.safe_dump(postgresqlRequest).encode("utf-8"))
+    sdk.write_destination_selectors(destinationSelectors)
+
+if __name__ == "__main__":
+    main()
