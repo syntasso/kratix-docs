@@ -10,8 +10,8 @@ An overview of the Python Promise-writing SDK.
 
 ## Features
 
-- **Resource Management**: Read and write Kratix resources and promises with convenient accessors
-- **Composable status management**: Get, set, or remove nested status fields
+- **Resource Management**: Read and write Kratix resources and promises
+- **Status Handling**: Update resource status and write status files
 - **Output Generation**: Write workflow outputs to files
 - **Destination Selectors**: Configure where resources should be deployed
 - **Environment Variables**: Access workflow context (action, type, promise name, pipeline name)

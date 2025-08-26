@@ -10,12 +10,12 @@ An overview of the Go Promise-writing SDK.
 
 ## Features
 
-- **Resource Management**: Read and write Kratix resources and promises via helpful abstractions
+- **Resource Management**: Read and write Kratix resources and promises
 - **Status Handling**: Update resource status and write status files
 - **Output Generation**: Write workflow outputs to files
 - **Destination Selectors**: Configure where resources should be deployed
 - **Environment Variables**: Access workflow context (action, type, promise name, pipeline name)
-- **Testing Support**: Built-in testing utilities and mocks to support unit testing
+- **Testing Support**: Built-in testing utilities and mocks
 
 ## Installation
 
