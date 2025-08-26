@@ -56,8 +56,82 @@ The Controller is released separately from SKE. Its releases can be found [here]
 You can apply the Controller by installing the distribution at the desired version:
 
 ```bash
-kubectl apply -f http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/<VERSION>/backstage-controller.yaml
+kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/backstage-controller/<VERSION>/backstage-controller.yaml
 ```
+
+### Installing the Backstage Controller in Air-gapped Environments
+
+You may want to manage the Backstage Controller images within your own environment either
+due to air-gapped requirements or other security measures.
+
+To do this, you will need to set up image mirroring and configure the Backstage Controller distribution to pull images
+from your own registry.
+
+You must ensure that the following images are mirrored to your own image registry and tagged according to the version.
+
+- `registry.syntasso.io/syntasso/backstage-controller`
+- `registry.syntasso.io/syntasso/ske-backstage-generator`
+
+To configure the Backstage Controller, you will need to modify the Backstage Controller distribution manifest:
+
+1. download the Backstage Controller distribution at your desired version:
+```bash
+curl -o backstage-controller.yaml --silent http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/backstage-controller/<VERSION>/backstage-controller.yaml
+```
+
+2. modify the Backstage Controller image used in the distribution manifest:
+
+Look for the `backstage-controller-controller-manager` Deployment in the manifest and edit its container image
+
+```yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage-controller-controller-manager
+  namespace: kratix-platform-system
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backstage-controller
+      control-plane: kratix-backstage-controller-manager
+  template:
+    spec:
+      containers:
+      - command:
+        - /manager
+        env:
+        - name: PIPELINE_ADAPTER_IMG
+          valueFrom:
+            configMapKeyRef:
+              key: PIPELINE_ADAPTER_IMG
+              name: kratix-platform-pipeline-adapter-config
+        #highlight-start
+        image: registry.syntasso.io/syntasso/backstage-controller:v0.2.3 ## Update to your own registry image
+        #highlight-end
+...
+```
+
+3. modify the SKE backstage generator image used by the Backstage controller:
+
+Look for `backstage-controller-config` ConfigMap and modify the `SKE_BACKSTAGE_GENERATOR_IMG` value
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    control-plane: kratix-backstage-controller-manager
+  name: backstage-controller-config
+  namespace: kratix-platform-system
+data:
+  #highlight-start
+  SKE_BACKSTAGE_GENERATOR_IMG: ghcr.io/syntasso/ske-backstage-generator:v0.17.0 ## Update to your own registry image
+  #highlight-end
+  ...
+```
+
+Your edited distribution manifest is now ready to be applied!
 
 ## How does it work?
 
