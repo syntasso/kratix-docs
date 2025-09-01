@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkkratix_docs=self.webpackChunkkratix_docs||[]).push([[1940],{2944:a=>{a.exports=JSON.parse('{"tag":{"label":"SKE","permalink":"/blog/tags/ske","allTagsPath":"/blog/tags","count":2,"unlisted":false},"listMetadata":{"permalink":"/blog/tags/ske","page":1,"postsPerPage":10,"totalPages":1,"totalCount":2,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
