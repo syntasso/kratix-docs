@@ -22,92 +22,10 @@ Resource](/ske/reference/ske-operator#kratix-crd).
 
 To install the SKE Operator and instantiate a new SKE instance, we provide several mechanisms:
 
-* [With the SKE CLI](#via-ske-cli), you can get both the SKE Operator and SKE up and running with minimal effort.
 * [With the SKE Operator Helm Chart](#via-helm-chart), you can deploy the Operator and SKE with all the customisations you need, including air-gapped environments.
 * [With the SKE Operator manifest and the Kratix CRD](#via-manifests), you have direct access to the files being deployed, and can customise it manually.
 
 The sections below cover each one of these methods of installation.
-
-## Via the SKE CLI {#via-ske-cli}
-
-The SKE CLI is the command-line interface to install and manage an instance of Syntasso Kratix Enterprise (SKE). Follow the steps below to install the CLI and deploy SKE with it.
-
-:::info
-
-The SKE CLI requires access to the private registry where the SKE images are distributed in order to work. 
-
-**For air-gapped and other locked-down environments**, install [using Helm](#via-helm-chart) and follow the [setup for air-gapped environments](./air-gapped).
-
-:::
-
-### Install the SKE CLI
-
-To install the Kratix CLI, go to the [releases
-page](../releases/ske-cli), download the latest release of the binary
-for your platform.
-
-Once you have downloaded the binary, you can install it by moving it to a directory in
-your PATH.
-
-To verify your installation, run:
-
-```shell-session
-ske --version
-```
-
-### Install SKE Operator and SKE
-
-:::info
-
-By default Syntasso Kratix Enterprise requires `cert-manager` to be installed on
-the cluster. Please refer to [its documentation for installation
-instructions](https://cert-manager.io/).
-
-If you wish to install SKE without `cert-manager`, you can do so by following the
-[Helm Installation instructions](#via-helm-chart).
-
-:::
-
-To install the SKE Operator and a SKE instance, run:
-
-```
-ske install --access-token $SKE_LICENSE_TOKEN
-```
-
-### Verify the installation
-
-Once installation is complete you can verify what has been installed by running:
-
-```bash
-ske get version
-```
-
-You should see the following output (or similar):
-
-```shell-session
-Latest Available:
-SKE Operator: v0.2.0; SKE Deployment: v0.3.0
-
-Deployed:
-SKE Operator: v0.2.0; SKE Deployment: v0.3.0
-```
-
-To verify that the Operator and SKE are healthy, run the following command:
-
-```bash
-kubectl get deployments.apps --namespace kratix-platform-system
-```
-
-You should see the following output:
-
-```shell-session
-NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
-kratix-platform-controller-manager   1/1     1            1           1h
-ske-operator-controller-manager      1/1     1            1           1h
-```
-
-You can now proceed with the configuration of Kratix (i.e. registering destinations or
-installing promises). For that, refer to the [appropriate guide](/category/guides).
 
 ## Via the Helm Chart {#via-helm-chart}
 
