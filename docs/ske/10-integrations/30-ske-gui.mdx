@@ -1,0 +1,67 @@
+---
+title: SKE GUI
+description: Documentation for the SKE GUI
+sidebar_label: SKE GUI
+---
+
+Headlamp is a easy-to-use UI for viewing and managing Kubernetes resources. With the Headlamp SKE Plugin, you can
+view your Kratix Promises and Resources in the Headlamp UI.
+
+This page provides information on how to:
+
+1. [Install SKE GUI](#install)
+1. [Displaying Promises](#promises)
+1. [Displaying Resources](#resources)
+1. [Visualizing Kratix Objects](#map)
+
+
+## Install SKE GUI {#install}
+
+To install SKE GUI using the Helm chart, start by adding the Syntasso Helm
+repository:
+
+```bash
+helm repo add syntasso https://syntasso.github.io/helm-charts
+helm repo update
+```
+
+### Configure values
+
+Helm can accept values via the values file. Refer to the examples
+below for common configuration options. Any configuration should be placed in a
+`values.yaml` file that is then passed in to the `helm install` command.
+
+:::tip
+
+You can see all available configuration in the
+[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
+
+:::
+
+#### The SKE license
+
+To run the GUI, you need a license token. If you've already installed SKE using the ske-operator chart,
+you will have a SKE token that you can use for the SKE GUI. There's nothing you need to customize in the values file.
+
+You need to customize the values file if:
+1. the Kubernetes Secret containing your SKE token is not called `syntasso-registry`
+2. you don't have SKE installed in your environment
+
+In your values file, you can set the `skeLicense` field to the license token provided to you by Syntasso.
+You can use an existing Secret for the licence token.
+
+```yaml
+skeLicense: LICENSE # provided to you by Syntasso
+imageRegistry:
+  imagePullSecret: null # when set to null, a secret "syntasso-registry" will be created as part of this chart
+  # imagePullSecret: "my-own-secret" # use an existing secret; no need to set skeLicense in this case
+```
+
+## Displaying the Promises in Headlamp {#promises}
+
+When you open the Headlamp UI, click on the cluster that you want to view your Kratix Promises and Resources. You
+will see the "Kratix" sidebar entry in the left sidebar. When you click on this entry, you will see a list of all
+the Kratix Promises.
+
+If you want to create a new Promise, click on the plus icon near to the Promises heading. You can enter the Promise
+manifest in the opened YAML editor. Then click on the "Apply" button to create the Promise.
