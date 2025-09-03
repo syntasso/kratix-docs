@@ -4,8 +4,8 @@ description: Documentation for the SKE GUI
 sidebar_label: SKE GUI
 ---
 
-Headlamp is a easy-to-use UI for viewing and managing Kubernetes resources. With the Headlamp SKE Plugin, you can
-view your Kratix Promises and Resources in the Headlamp UI.
+The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
+It introduces a clear, unified view of your entire platform, giving platform engineers visibility into resources and their states at a glance.
 
 This page provides information on how to:
 
@@ -25,19 +25,6 @@ helm repo add syntasso https://syntasso.github.io/helm-charts
 helm repo update
 ```
 
-### Configure values
-
-Helm can accept values via the values file. Refer to the examples
-below for common configuration options. Any configuration should be placed in a
-`values.yaml` file that is then passed in to the `helm install` command.
-
-:::tip
-
-You can see all available configuration in the
-[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
-
-:::
-
 #### The SKE license
 
 To run the GUI, you need a license token. If you've already installed SKE using the ske-operator chart,
@@ -55,6 +42,53 @@ skeLicense: LICENSE # provided to you by Syntasso
 imageRegistry:
   imagePullSecret: null # when set to null, a secret "syntasso-registry" will be created as part of this chart
   # imagePullSecret: "my-own-secret" # use an existing secret; no need to set skeLicense in this case
+  # you might want to create your own secret if you are using an internal image registry that requires authentication
+```
+
+### Configure values
+
+Helm can accept values via the values file. Any configuration should be placed in a
+`values.yaml` file that is then passed in to the `helm install` command.
+
+:::tip
+
+You can see all available configuration in the
+[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
+
+:::
+
+### Install the SKE GUI
+
+Next, install the SKE GUI:
+
+```bash
+helm install ske-gui syntasso/ske-gui \
+  --namespace kratix-platform-system \
+  --create-namespace \ # Optional; only use if `kratix-platform-system` namespace does not exist
+  --wait \
+  --values values.yaml # Optional; only use if you are configuring custom values.
+```
+
+#### Install the SKE GUI in Air-gapped Environments
+
+You may want to manage the SKE GUI image within your own environment either
+due to air-gapped requirements or other security measures.
+
+To do this, you will need to set up image mirroring and configure the SKE GUI helm chart to pull images
+from your own registry.
+
+You must ensure that the following images are mirrored to your own image registry and tagged according to the version.
+
+- `registry.syntasso.io/syntasso/ske-gui`
+
+#### Verify your installation
+
+You can check out the created deployment by running:
+
+```bash
+❯ kubectl -n kratix-platform-system get deployment ske-gui
+NAME      READY   UP-TO-DATE   AVAILABLE   AGE
+ske-gui   1/1     1            1           154m
 ```
 
 ## The Promise Views {#promises}
