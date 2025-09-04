@@ -7,64 +7,81 @@ sidebar_label: SKE GUI
 The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
 It introduces a clear, unified view of your entire platform, giving platform engineers visibility into resources and their states at a glance.
 
-This page provides information on how to:
+This page provides information on how to install the SKE GUI. For documentation on how to use the GUI, please refer to []().
 
-1. [Install SKE GUI](#install)
-1. [Displaying Promises](#promises)
-1. [Displaying Resources](#resources)
-1. [Visualizing Kratix Objects](#map)
+## Installation Steps
 
+The GUI is released separately from SKE. Its releases can be found [in the SKE GUI release page](../../releases/ske-gui).
 
-## Install SKE GUI {#install}
+SKE GUI can be installed using the [helm chart](https://github.com/syntasso/helm-charts/tree/main/ske-gui).
 
-To install SKE GUI using the Helm chart, start by adding the Syntasso Helm
-repository:
+To install SKE GUI using the Helm chart, start by adding the Syntasso Helm repository:
 
 ```bash
 helm repo add syntasso https://syntasso.github.io/helm-charts
 helm repo update
 ```
 
-#### The SKE license
-
-To run the GUI, you need a license token. If you've already installed SKE using the ske-operator chart,
-you will have a SKE token that you can use for the SKE GUI. There's nothing you need to customize in the values file.
-
-You need to customize the values file if:
-1. the Kubernetes Secret containing your SKE token is not called `syntasso-registry`
-2. you don't have SKE installed in your environment
-
-In your values file, you can set the `skeLicense` field to the license token provided to you by Syntasso.
-You can use an existing Secret for the licence token.
-
-```yaml
-skeLicense: LICENSE # provided to you by Syntasso
-imageRegistry:
-  imagePullSecret: null # when set to null, a secret "syntasso-registry" will be created as part of this chart
-  # imagePullSecret: "my-own-secret" # use an existing secret; no need to set skeLicense in this case
-  # you might want to create your own secret if you are using an internal image registry that requires authentication
-```
-
 ### Configure values
 
-Helm can accept values via the values file. Any configuration should be placed in a
-`values.yaml` file that is then passed in to the `helm install` command.
+Helm can accept values via the values file. Any configuration should be placed in a values.yaml file that is then passed in to the helm install command.
+For all available configurations, please refer to the default values file in [SKE GUI chart](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
 
-:::tip
+Below are instructions on how you could use the values file to configure SKE license and image registry.
 
-You can see all available configuration in the
-[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
+#### The SKE license
 
-:::
+SKE GUI image is hosted in a private registry.
+To access the SKE GUI image, you will need to authenticate using the token you have been provided with by Syntasso.
 
-### Install the SKE GUI
+The SKE GUI chart will, be default, use a secret named `syntasso-registry` in the `kratix-platform-system` namespace. This secret is created and managed by the SKE operator helm chart.
+If you wish to create a different image pull secret, you can run the following command:
 
-Next, install the SKE GUI:
+```bash
+kubectl create secret docker-registry YOUR-SECRET-NAME \
+  --namespace=kratix-platform-system \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
+```
+
+The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
+To use this secret in SKE GUI chart, you can customize `imageRegistry.imagePullSecret` in your values file.
+
+```yaml
+# Configuration for the image registry
+# Update these values if you are using a private image registry
+imageRegistry:
+  imagePullSecret: YOUR-SECRET-NAME
+# ...
+```
+
+#### Image registry for Air-gapped Environments
+
+You may want to manage the GUI image within your own environment either due to air-gapped requirements or other security measures.
+
+To do this, you will need to set up image mirroring and configure the SKE GUI chart to pull image
+from your own registry.
+
+You must ensure that image `registry.syntasso.io/syntasso/ske-gui` is mirrored to your own image registry and tagged according to the version.
+
+You can then customize `imageRegistry.host` in your values file:
+
+```yaml
+# Configuration for the image registry
+# Update these values if you are using a private image registry
+imageRegistry:
+  host: "my-org.registry.io"
+# ...
+```
+
+### Deploy the SKE GUI
+
+Next, install the SKE GUI by running:
 
 ```bash
 helm install ske-gui syntasso/ske-gui \
   --namespace kratix-platform-system \
-  --create-namespace \ # Optional; only use if `kratix-platform-system` namespace does not exist
   --wait \
   --values values.yaml # Optional; only use if you are configuring custom values.
 ```
@@ -83,7 +100,7 @@ You must ensure that the following images are mirrored to your own image registr
 
 #### Verify your installation
 
-You can check out the created deployment by running:
+You can check out the created SKE GUI deployment by running:
 
 ```bash
 ❯ kubectl -n kratix-platform-system get deployment ske-gui
