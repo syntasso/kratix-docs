@@ -1,13 +1,13 @@
 ---
-title: SKE GUI
-description: Documentation for the SKE GUI
-sidebar_label: SKE GUI
+title: SKE GUI installation
+description: Documentation for how to install the SKE GUI
+sidebar_label: SKE GUI installation
 ---
 
 The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
 It introduces a clear, unified view of your entire platform, giving platform engineers visibility into resources and their states at a glance.
 
-This page provides information on how to install the SKE GUI. For documentation on how to use the GUI, please refer to []().
+This page provides information on how to install the SKE GUI. For documentation on how to use the GUI, please refer to [SKE GUI usage guide](../../guides/ske-gui).
 
 ## Installation Steps
 
@@ -108,35 +108,5 @@ NAME      READY   UP-TO-DATE   AVAILABLE   AGE
 ske-gui   1/1     1            1           154m
 ```
 
-## The Promise Views {#promises}
-
-When you open the SKE GUI, click on the cluster that you want to view your Kratix Promises and Resources. You
-will see the "Kratix" sidebar entry in the left sidebar. When you click on this entry, you will see a list of all
-the Kratix Promises.
-
-From here, you can easily jump into the details of any specific Promise and view further information.
-Within the Promise details, you can access crucial information, including:
-* The status conditions of the Promise.
-* The last time the associated pipeline ran.
-* The ability to jump directly into the pipeline run itself.
-* Visibility into the pods that were executed as part of that pipeline.
-* Access to Kratix internal objects such as Works and Workplacements.
-
-If you want to create a new Promise, click on the plus icon near to the Promises heading. You can enter the Promise
-manifest in the opened YAML editor. Then click on the "Apply" button to create the Promise.
-
-## The Resource Views {#resources}
-
-Complementing the Promises view, the Resources tab allows you to see all the Kratix resources deployed across your cluster.
-With filtering capabilities, you can narrow down your view by, for example, Promise or Namespace
-
-Just like with Promises, you can click on any resource to view its details.
-This includes seeing when its pipeline last ran, jumping into the pipeline, inspecting executed pods, and investigating
-logs for all containers involved in the execution.
-
-## Kratix Objects Overview {#map}
-
-The map view visualizes all your deployed Promises and can help you understand their relationships.
-
-Within the map view, you can click on a Promise to see the resources it owns, like its Resource Requests.
-Furthermore, the map view highlights associated jobs, such as the pipeline jobs that executed the Promise.
+Your SKE GUI installation is complete and ready to use!
+Refer to the [SKE GUI usage guide](../../guides/ske-gui) for instructions on how to navigate the UI.
