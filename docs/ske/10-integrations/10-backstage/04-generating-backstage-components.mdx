@@ -59,7 +59,7 @@ Below are instructions on how you could use the values file to configure SKE lic
 Both the Backstage Controller image and the SKE Backstage Generator image used by the Controller are hosted in a private registry, to access
 these images, you will need to authenticate using the token you have been provided with.
 
-The Backstage Controller chart will use secret `syntasso-registry`, which is created and managed by the ske operator helm chart.
+The Backstage Controller chart will, be default, use a secret named `syntasso-registry` in the `kratix-platform-system` namespace. This secret is created and managed by the SKE operator helm chart.
 If you wish to create a different image pull secret, you can run the following command:
 
 ```bash
