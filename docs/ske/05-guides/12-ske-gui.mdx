@@ -26,6 +26,17 @@ Within the Promise details, you can access crucial information, including:
 If you want to create a new Promise, click on the plus icon near to the Promises heading. You can enter the Promise
 manifest in the opened YAML editor. Then click on the "Apply" button to create the Promise.
 
+```mdx-code-block
+import PromiseList from "./gui-promise-list-view.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={PromiseList} alt="The Promise List view" />
+
+  <figcaption>Promise List view shows all installed Promises in your platform</figcaption>
+</figure>
+
+
 ## The Resource Views {#resources}
 
 Complementing the Promises view, the Resources tab allows you to see all the Kratix resources deployed across your cluster.
@@ -35,9 +46,40 @@ Just like with Promises, you can click on any resource to view its details.
 This includes seeing when its pipeline last ran, jumping into the pipeline, inspecting executed pods, and investigating
 logs for all containers involved in the execution.
 
+```mdx-code-block
+import ResourceList from "./gui-resource-list-view.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={ResourceList} alt="The Resource List" />
+
+  <figcaption>Resource List view shows resource requests of all Promises</figcaption>
+</figure>
+
+
+```mdx-code-block
+import ResourceDetails from "./gui-resource-detail-view.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={ResourceDetails} alt="Resource Details" />
+
+  <figcaption>Details of an example MongoDB resource request</figcaption>
+</figure>
+
 ## Kratix Objects Overview {#map}
 
 The map view visualizes all your deployed Promises and can help you understand their relationships.
 
 Within the map view, you can click on a Promise to see the resources it owns, like its Resource Requests.
 Furthermore, the map view highlights associated jobs, such as the pipeline jobs that executed the Promise.
+
+```mdx-code-block
+import MapView from "./gui-map-view.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={MapView} alt="The Map View" />
+
+  <figcaption>Map view of an example MongoDB Promise</figcaption>
+</figure>
