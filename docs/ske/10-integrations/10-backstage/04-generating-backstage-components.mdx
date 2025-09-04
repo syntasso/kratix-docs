@@ -8,22 +8,15 @@ The Backstage Controller generates Backstage components and templates for Promis
 
 ## Prerequisites
 
-### Authenticating against the image registry
+### SKE installation
 
-Both the Backstage Controller image and the SKE Backstage Generator image used by the Controller are hosted in a private registry, to access
-these images when Deploying and using the Backstage Controller deployment, you will need to authenticate using the token you have been provided with.
-You can define your authentication credentials via a `docker-registry` secret named `syntasso-registry`:
+Backstage Controller has dependency on SKE. If you haven't installed SKE, please refer to the [SKE installation guide](../../installing-ske/intro).
 
-```yaml
-kubectl create secret docker-registry syntasso-registry \
-  --docker-server=registry.syntasso.io \
-  --docker-username=syntasso-pkg \
-  --docker-password=YOUR_TOKEN \
-  --namespace kratix-platform-system
-```
+:::warning
 
-The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
-For any resource requests created in other namespaces, you need to create the same registry secret in them as well.
+You will need SKE `0.28.0` or later for Backstage Controller to work.
+
+:::
 
 ### SKE Backstage plugins
 
@@ -43,23 +36,52 @@ You must have a Destination created with the `environment: backstage` label. See
 [Kratix Backstage docs](./configuring-backstage#configure-a-destination-for-backstage)
 for setup instructions.
 
-:::warning
-
-You will need SKE `0.28.0` or later for Backstage Controller to work.
-
-:::
-
 ## Installing the Backstage Controller
 
 The Controller is released separately from SKE. Its releases can be found [here](../../releases/backstage-controller).
 
-You can apply the Controller by installing the distribution at the desired version:
+The Controller can be installed using the [helm chart](https://github.com/syntasso/helm-charts/tree/main/backstage-controller).
+
+You will need to start by adding the Syntasso Helm repository:
+```bash
+helm repo add syntasso https://syntasso.github.io/helm-charts
+helm repo update
+```
+### Configure values
+
+Helm can accept values via the values file. Any configuration should be placed in a values.yaml file that is then passed in to the helm install command.
+For all available configurations, please refer to the default values file in [Backstage Controller chart](https://github.com/syntasso/helm-charts/blob/main/backstage-controller/values.yaml).
+
+Below are instructions on how you could use the values file to configure SKE license and image registry.
+
+#### The SKE license
+
+Both the Backstage Controller image and the SKE Backstage Generator image used by the Controller are hosted in a private registry, to access
+these images, you will need to authenticate using the token you have been provided with.
+
+The Backstage Controller chart will, be default, use a secret named `syntasso-registry` in the `kratix-platform-system` namespace. This secret is created and managed by the SKE operator helm chart.
+If you wish to create a different image pull secret, you can run the following command:
 
 ```bash
-kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/backstage-controller/<VERSION>/backstage-controller.yaml
+kubectl create secret docker-registry YOUR-SECRET-NAME \
+  --namespace=kratix-platform-system \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
 ```
 
-### Installing the Backstage Controller in Air-gapped Environments
+The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
+To use this secret in Backstage Controller chart, you can customize `imageRegistry.imagePullSecret` in your values file.
+
+```yaml
+# Configuration for the image registry
+# Update these values if you are using a private image registry
+imageRegistry:
+  imagePullSecret: YOUR-SECRET-NAME
+# ...
+```
+
+#### Image registry for Air-gapped Environments
 
 You may want to manage the Backstage Controller images within your own environment either
 due to air-gapped requirements or other security measures.
@@ -72,66 +94,26 @@ You must ensure that the following images are mirrored to your own image registr
 - `registry.syntasso.io/syntasso/backstage-controller`
 - `registry.syntasso.io/syntasso/ske-backstage-generator`
 
-To configure the Backstage Controller, you will need to modify the Backstage Controller distribution manifest:
-
-1. download the Backstage Controller distribution at your desired version:
-```bash
-curl -o backstage-controller.yaml --silent http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/backstage-controller/<VERSION>/backstage-controller.yaml
-```
-
-2. modify the Backstage Controller image used in the distribution manifest:
-
-Look for the `backstage-controller-controller-manager` Deployment in the manifest and edit its container image
+You can then customize `imageRegistry.host` in your values file:
 
 ```yaml
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backstage-controller-controller-manager
-  namespace: kratix-platform-system
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: backstage-controller
-      control-plane: kratix-backstage-controller-manager
-  template:
-    spec:
-      containers:
-      - command:
-        - /manager
-        env:
-        - name: PIPELINE_ADAPTER_IMG
-          valueFrom:
-            configMapKeyRef:
-              key: PIPELINE_ADAPTER_IMG
-              name: kratix-platform-pipeline-adapter-config
-        #highlight-start
-        image: registry.syntasso.io/syntasso/backstage-controller:v0.2.3 ## Update to your own registry image
-        #highlight-end
+# Configuration for the image registry
+# Update these values if you are using a private image registry
+imageRegistry:
+  host: "my-org.registry.io"
 ...
 ```
 
-3. modify the SKE backstage generator image used by the Backstage controller:
+### Deploy the Backstage Controller
 
-Look for `backstage-controller-config` ConfigMap and modify the `SKE_BACKSTAGE_GENERATOR_IMG` value
+Next, install Backstage Controller by running:
 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  labels:
-    control-plane: kratix-backstage-controller-manager
-  name: backstage-controller-config
-  namespace: kratix-platform-system
-data:
-  #highlight-start
-  SKE_BACKSTAGE_GENERATOR_IMG: ghcr.io/syntasso/ske-backstage-generator:v0.17.0 ## Update to your own registry image
-  #highlight-end
-  ...
+```bash
+helm install backstage-controller syntasso/backstage-controller \
+  --namespace kratix-platform-system \
+  --wait \
+  --values values.yaml # This is optional. Only use if you are configuring custom values.
 ```
-
-Your edited distribution manifest is now ready to be applied!
 
 ## How does it work?
 
