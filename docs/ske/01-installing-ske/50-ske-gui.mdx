@@ -7,13 +7,11 @@ sidebar_label: SKE GUI
 The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
 It introduces a clear, unified view of your entire platform, giving platform engineers visibility into resources and their states at a glance.
 
-This page provides information on how to install the SKE GUI. For documentation on how to use the GUI, please refer to [SKE GUI usage guide](../../guides/ske-gui).
+This page provides information on how to install the SKE GUI. For documentation on how to use the GUI, please refer to [SKE GUI usage guide](/ske/guides/ske-gui).
 
 ## Installation Steps
 
-The GUI is released separately from SKE. Its releases can be found [in the SKE GUI release page](../../releases/ske-gui).
-
-SKE GUI can be installed using the [helm chart](https://github.com/syntasso/helm-charts/tree/main/ske-gui).
+The GUI is released separately from SKE. Its releases can be found [in the SKE GUI release page](/ske/releases/ske-gui) and it can be installed using the [helm chart](https://github.com/syntasso/helm-charts/tree/main/ske-gui).
 
 To install SKE GUI using the Helm chart, start by adding the Syntasso Helm repository:
 
@@ -35,11 +33,9 @@ You can see all available configuration in the
 
 #### The SKE license
 
-SKE GUI image is hosted in a private registry.
-To access the SKE GUI image, you will need to authenticate using the token you have been provided with by Syntasso.
+SKE GUI image is hosted in a private registry. To access the SKE GUI image, you will need to authenticate using the token you have been provided with by Syntasso.
 
-The SKE GUI chart will, be default, use a secret named `syntasso-registry` in the `kratix-platform-system` namespace. This secret is created and managed by the SKE operator helm chart.
-If you wish to create a different image pull secret, you can run the following command:
+The SKE GUI chart will, by default, use a secret named `syntasso-registry` in the `kratix-platform-system` namespace. This secret is created and managed by the SKE operator helm chart. If you wish to create a different image pull secret, you can run the following command:
 
 ```bash
 kubectl create secret docker-registry YOUR-SECRET-NAME \
@@ -50,7 +46,7 @@ kubectl create secret docker-registry YOUR-SECRET-NAME \
 ```
 
 The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
-To use this secret in SKE GUI chart, you can customize `imageRegistry.imagePullSecret` in your values file.
+To use this secret in SKE GUI chart, you can customise `imageRegistry.imagePullSecret` in your values file.
 
 ```yaml
 # Configuration for the image registry
@@ -69,7 +65,7 @@ from your own registry.
 
 You must ensure that image `registry.syntasso.io/syntasso/ske-gui` is mirrored to your own image registry and tagged according to the version.
 
-You can then customize `imageRegistry.host` in your values file:
+You can then customise `imageRegistry.host` in your values file:
 
 ```yaml
 # Configuration for the image registry
@@ -81,9 +77,8 @@ imageRegistry:
 
 #### Token to access SKE GUI
 
-The helm chart creates a service account in the "kratix-platform-system" namespace with permission to access SKE GUI by default.
-If you do not wish to create such service account, or you would like to give the service account a custom name,
-you can customize in the values files:
+The helm chart creates a service account in the `kratix-platform-system` namespace with permission to access the SKE GUI. If you do not wish to create such service account, or you would like to give the service account a custom name,
+you can customise in the values file:
 
 ```yaml
 # ...
@@ -121,7 +116,6 @@ Next, install the SKE GUI by running:
 ```bash
 helm install purple-platform syntasso/ske-gui \
   --namespace kratix-platform-system \
-  --wait \
   --values values.yaml # Optional; only use if you are configuring custom values.
 ```
 
@@ -137,13 +131,13 @@ ske-gui   1/1     1            1           154m
 
 #### Access the GUI
 
-To access the GUI, you could port forward using SKE GUI service, run:
+To access the GUI, you could port forward using the ske-gui service. For that, run:
 
 ```bash
 kubectl -n kratix-platform-system port-forward svc/ske-gui 8080:80
 ```
 
-Alternatively, if you have created an ingress server with the helm chart. You can also access the GUI through your configured hosts.
+If you have created an ingress server with the helm chart, you can access the GUI through your configured hosts.
 
 There will be a prompt for you to enter a token to access the GUI, if you have created a service account with the helm chart,
 you can generate a valid token by running:
@@ -152,4 +146,4 @@ kubectl -n kratix-platform-system create token ske-gui-admin
 ```
 
 Your SKE GUI installation is complete and ready to use!
-Refer to the [SKE GUI usage guide](../../guides/ske-gui) for instructions on how to navigate the UI.
+Refer to the [SKE GUI usage guide](/ske/guides/ske-gui) for instructions on how to navigate the UI.
