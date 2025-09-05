@@ -1,7 +1,7 @@
 ---
-title: SKE GUI installation
+title: SKE GUI
 description: Documentation for how to install the SKE GUI
-sidebar_label: SKE GUI installation
+sidebar_label: SKE GUI
 ---
 
 The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
@@ -25,9 +25,13 @@ helm repo update
 ### Configure values
 
 Helm can accept values via the values file. Any configuration should be placed in a values.yaml file that is then passed in to the helm install command.
-For all available configurations, please refer to the default values file in [SKE GUI chart](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
 
-Below are instructions on how you could use the values file to configure SKE license and image registry.
+:::tip
+
+You can see all available configuration in the
+[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml).
+
+:::
 
 #### The SKE license
 
@@ -75,28 +79,51 @@ imageRegistry:
 # ...
 ```
 
+#### Token to access SKE GUI
+
+The helm chart creates a service account in the "kratix-platform-system" namespace with permission to access SKE GUI by default.
+If you do not wish to create such service account, or you would like to give the service account a custom name,
+you can customize in the values files:
+
+```yaml
+# ...
+serviceAccount:
+  create: true # default to true; set to false to skip SA creation
+  name: "my-gui-sa" # default to `ske-gui-admin`
+# ...
+```
+
+#### Ingress server for SKE GUI
+
+With the SKE GUI deployed in-cluster, you can choose to expose it through an ingress server.
+The helm chart will not set up ingress by default. You need to turn it on in the values file and provide necessary configurations
+for the ingress server. For example:
+```yaml
+# ...
+ingress:
+  enabled: true # Set to true to enable ingress server
+  hosts:
+    - host: ske.myplatform.io
+      paths:
+        - path: /
+          type: Prefix
+  tls:
+    - secretName: my-ske-tls-secret # an existing secret with TLS certificates
+      hosts:
+        - "ske.myplatform.io"
+# ...
+```
+
 ### Deploy the SKE GUI
 
 Next, install the SKE GUI by running:
 
 ```bash
-helm install ske-gui syntasso/ske-gui \
+helm install purple-platform syntasso/ske-gui \
   --namespace kratix-platform-system \
   --wait \
   --values values.yaml # Optional; only use if you are configuring custom values.
 ```
-
-#### Install the SKE GUI in Air-gapped Environments
-
-You may want to manage the SKE GUI image within your own environment either
-due to air-gapped requirements or other security measures.
-
-To do this, you will need to set up image mirroring and configure the SKE GUI helm chart to pull images
-from your own registry.
-
-You must ensure that the following images are mirrored to your own image registry and tagged according to the version.
-
-- `registry.syntasso.io/syntasso/ske-gui`
 
 #### Verify your installation
 
@@ -106,6 +133,22 @@ You can check out the created SKE GUI deployment by running:
 ❯ kubectl -n kratix-platform-system get deployment ske-gui
 NAME      READY   UP-TO-DATE   AVAILABLE   AGE
 ske-gui   1/1     1            1           154m
+```
+
+#### Access the GUI
+
+To access the GUI, you could port forward using SKE GUI service, run:
+
+```bash
+kubectl -n kratix-platform-system port-forward svc/ske-gui 8080:80
+```
+
+Alternatively, if you have created an ingress server with the helm chart. You can also access the GUI through your configured hosts.
+
+There will be a prompt for you to enter a token to access the GUI, if you have created a service account with the helm chart,
+you can generate a valid token by running:
+```bash
+kubectl -n kratix-platform-system create token ske-gui-admin
 ```
 
 Your SKE GUI installation is complete and ready to use!
