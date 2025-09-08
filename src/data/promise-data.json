@@ -1,5 +1,14 @@
 [
 	{
+		"name": "AI Model Access",
+		"description": "Manage budget, guardrails, and access to AI models like OpenAI's GPT-4 and GPT-3.5 using OpenWebUI and LiteLLM",
+		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/ai",
+		"logoUrl": "/img/marketplace/ai.svg",
+		"categories": [
+			"AI"
+		]
+	},
+	{
 		"name": "Amazon RDS",
 		"description": "Amazon relational database service. Supports MySQL, PostgreSQL, and MariaDB.",
 		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/sql/aws",
