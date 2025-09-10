@@ -334,7 +334,7 @@ RUN apk update && apk add --no-cache yq kubectl
 COPY scripts/* /usr/local/bin/
 ADD resources resources
 
-RUN find /usr/bin -type f -exec chmod +x {} \;
+RUN chmod +x /usr/local/bin/*
 
 # Fix for when running workshop on Windows machine
 RUN apk update && apk add --no-cache dos2unix
