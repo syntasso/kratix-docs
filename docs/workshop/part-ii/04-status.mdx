@@ -134,7 +134,7 @@ Annotations:  <none>
 API Version:  workshop.kratix.io/v1
 Kind:         App
 Metadata:
-  Creation Timestamp:  2024-01-31T15:27:43Z
+  Creation Timestamp:  2025-09-09T16:07:10Z
   Finalizers:
     kratix.io/work-cleanup
     kratix.io/workflows-cleanup
@@ -148,11 +148,21 @@ Spec:
     Port:  8080
 Status:
   Conditions:
-    - lastTransitionTime: "2024-10-24T09:36:04Z"
-      message: Pipelines completed
-      reason: PipelinesExecutedSuccessfully
-      status: "True"
-      type: ConfigureWorkflowCompleted
+    Last Transition Time:                   2025-09-09T16:17:20Z
+    Message:                                Pipelines completed
+    Reason:                                 PipelinesExecutedSuccessfully
+    Status:                                 True
+    Type:                                   ConfigureWorkflowCompleted
+    Last Transition Time:                   2025-09-09T16:17:22Z
+    Message:                                Reconciled
+    Reason:                                 Reconciled
+    Status:                                 True
+    Type:                                   Reconciled
+    Last Transition Time:                   2025-09-09T16:07:18Z
+    Message:                                All works associated with this resource are ready
+    Reason:                                 WorksSucceeded
+    Status:                                 True
+    Type:                                   WorksSucceeded
   #highlight-start
   Message:                 todo.local.gd:31338
   #highlight-end
@@ -178,8 +188,8 @@ kubectl --context $PLATFORM get apps.workshop.kratix.io
 The above command should output the following:
 
 ```shell-session
-NAME   STATUS
-todo   todo.local.gd:31338
+NAME   MESSAGE               STATUS
+todo   todo.local.gd:31338   Reconciled
 ```
 
 ## Bonus Challenge
