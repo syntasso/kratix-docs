@@ -389,9 +389,9 @@ kubectl get destinations --show-labels
 If you don't see the platform cluster, or it's not labelled as platform, you can follow [these steps](https://docs.kratix.io/workshop/multiple-promises#register-the-platform-as-a-destination) to register it as a destination.
 
 ```bash
-NAME               AGE     LABELS
-platform-cluster   45h     environment=platform
-worker-cluster     6d19h   environment=dev
+NAME               READY   LABELS
+platform-cluster   True    environment=platform
+worker-cluster     True    environment=dev
 ```
 
 :::

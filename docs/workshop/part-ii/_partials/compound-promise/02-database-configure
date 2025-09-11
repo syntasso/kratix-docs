@@ -21,14 +21,14 @@ def create_postgresql_request(name, namespace, teamId, dbName):
     }
     return postgresqlRequest
 
-def create_deployment_env(teamId, dbName):
+def create_deployment_env(teamId, name, dbName):
     """
     Create a list of environment variables for the deployment, these are the
     variables that will be used to connect to the PostgreSQL database
     """
 
     # The PostgreSQL Operator generates a secret with the following format:
-    secretRef = f"{teamId}.{teamId}-{dbName}-postgresql.credentials.postgresql.acid.zalan.do"
+    secretRef = f"{teamId}.{teamId}-{name}-postgresql.credentials.postgresql.acid.zalan.do"
     env = [
         {
             "name": "PGPASSWORD",
@@ -44,7 +44,7 @@ def create_deployment_env(teamId, dbName):
         },
         {
             "name": "PGHOST",
-            "value": f"{teamId}-{dbName}-postgresql.default.svc.cluster.local"
+            "value": f"{teamId}-{name}-postgresql.default.svc.cluster.local"
         },
         { "name": "DBNAME", "value": dbName }
     ]
@@ -93,7 +93,7 @@ def main():
     # Update the existing deployment with the new db credentials
     with open("/kratix/output/deployment.yaml", "r") as f:
         existingDeployment = yaml.safe_load(f)
-    existingDeployment["spec"]["template"]["spec"]["containers"][0]["env"] = create_deployment_env(teamId, dbName)
+    existingDeployment["spec"]["template"]["spec"]["containers"][0]["env"] = create_deployment_env(teamId, name, dbName)
 
     # Write the updated deployment to the output directory
     data = yaml.safe_dump(existingDeployment).encode("utf-8")
