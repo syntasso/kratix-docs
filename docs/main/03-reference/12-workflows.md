@@ -492,3 +492,22 @@ containers (not Kratix containers) by either:
 
 Any security context set in the container spec will override the global default
 security context.
+
+## Workflows namespace
+
+Promise workflows will run in the `kratix-platform-system` namespace. Resource workflows will run in the same
+namespace as the resource request. If you would like to have all workflows of a given Promise
+to run in a specific namespace, regardless where resource requests are created, you can set
+`spec.workflows.config.pipelineNamespace`.
+
+```yaml
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  ...
+spec:
+  ...
+  workflows:
+    config:
+      pipelineNamespace: team-a # optional; needs to be an existing namespace, or else the Promise will fail to install
+```
