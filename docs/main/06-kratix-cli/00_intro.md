@@ -16,9 +16,9 @@ installation.
 
 <Tabs className="boxedTabs" groupId="stateStore">
   <TabItem value="go" label="Installing with Go">
-    Run: 
+    Run:
     ```go
-    go install github.com/syntasso/kratix-cli/cmd/kratix@latest 
+    go install github.com/syntasso/kratix-cli/cmd/kratix@latest
     ```
   </TabItem>
   <TabItem value="direct" label="Direct download">
@@ -168,16 +168,16 @@ You can build promises straight from Helm charts. To do so, run the [kratix init
 helm-promise](./reference/kratix-init-helm-promise) command, providing the Chart
 URL. The CLI will auto-generate the Promise API based on the Helm chart values.
 
-For example, consider the [bitnami/mysql Helm
-chart](https://github.com/bitnami/charts/tree/main/bitnami/mysql). To create a
+For example, consider the [jenkins/jenkinsci Helm
+chart](https://artifacthub.io/packages/helm/jenkinsci/jenkins). To create a
 Promise from this chart, run:
 
 ```shell-session
-kratix init helm-promise mysql \
+kratix init helm-promise jenkins \
   --group mygroup.org \
-  --kind Database \
+  --kind JenkinsCI \
   --version v1alpha1 \
-  --chart-url oci://registry-1.docker.io/bitnamicharts/mysql
+  --chart-url oci://ghcr.io/jenkinsci/helm-charts/jenkins
 ```
 
 The above command should create a `promise.yaml` file in the current directory that's
