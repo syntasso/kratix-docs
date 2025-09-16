@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkratix_docs=self.webpackChunkkratix_docs||[]).push([[1809],{1809:(s,k,c)=>{c.r(k)}}]);
