@@ -497,7 +497,7 @@ security context.
 
 Promise workflows will run in the `kratix-platform-system` namespace. Resource workflows will run in the same
 namespace as the resource request. If you would like to have all workflows of a given Promise
-to run in a specific namespace, regardless where resource requests are created, you can set
+to run in a specific namespace, regardless of where resource requests are created, you can set
 `spec.workflows.config.pipelineNamespace`.
 
 ```yaml
