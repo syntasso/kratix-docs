@@ -203,7 +203,7 @@ It then updates the app deployment with the details of the database:
 
 ```python
 # inside the create_deployment_env function
-secretRef = f"{teamId}.{teamId}-{dbName}-postgresql.credentials.postgresql.acid.zalan.do"
+secretRef = f"{teamId}.{teamId}-{name}-postgresql.credentials.postgresql.acid.zalan.do"
 env = [
     {
         "name": "PGPASSWORD",
@@ -219,7 +219,7 @@ env = [
     },
     {
         "name": "PGHOST",
-        "value": f"{teamId}-{dbName}-postgresql.default.svc.cluster.local"
+        "value": f"{teamId}-{name}-postgresql.default.svc.cluster.local"
     },
     { "name": "DBNAME", "value": dbName }
 ]
