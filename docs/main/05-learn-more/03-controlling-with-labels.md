@@ -27,7 +27,7 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 kratix.io/paused: "true"
 ```
 
-This label suspends reconciliation for the Promises and Resource Requests it is applied to. Any workflows
+This label can be applied to Promises to suspend reconciliation for the Promises and all its Resource Requests. Any workflows
 already running continue until completion, but Kratix will not schedule new
 workflows while the label is present.
 
