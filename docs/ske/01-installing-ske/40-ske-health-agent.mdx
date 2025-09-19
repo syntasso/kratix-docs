@@ -3,7 +3,8 @@ title: SKE Health Agent
 description: Documentation about the SKE Health Agent
 ---
 
-The SKE Health Agent is a health check agent to be installed in Kubernetes Destinations where health checks can be executed. 
+The SKE Health Agent is a health check agent to be installed in Kubernetes Destinations
+where health checks can be executed.
 
 The Agent is released separately from SKE. Its releases can be found [here](../releases/ske-health-agent).
 
@@ -16,14 +17,44 @@ The Agent will:
 
 ## Requirements
 
-The Agent will write the health information to a state store. The Platform cluster must have a GitOps agent listening to the state store, so the resource health can be applied back to the Platform cluster.
+The Agent will write the health information to a state store.
+The Platform cluster must have a GitOps agent listening to the state store,
+so the resource health can be applied back to the Platform cluster.
 
 ## Install
 
-To install, run the command below, replacing VERSION with the target version:
+The health agent is released separately from SKE. Its releases can be found
+[in the SKE Health Agent release page](/ske/releases/ske-health-agent)
+and it can be installed using the [helm chart](https://github.com/syntasso/helm-charts/tree/main/k8s-health-agent).
 
+To install the agent using the Helm chart, start by adding the Syntasso Helm repository:
+
+```bash
+helm repo add syntasso https://syntasso.github.io/helm-charts
+helm repo update
 ```
-kubectl apply -f http://s3.eu-west-2.amazonaws.com/syntasso-enterprise-releases/k8s-health-agent/<VERSION>/k8s-health-agent.yaml
+
+### Configure values
+
+Helm can accept values via the values file. Any configuration should be placed in a values.yaml file
+that is then passed in to the helm install command.
+
+:::tip
+
+You can see all available configuration in the
+[helm chart repository](https://github.com/syntasso/helm-charts/blob/main/k8s-health-agent/values.yaml).
+
+:::
+
+### The SKE license
+
+SKE Health Agent images are hosted in a private registry. To access these images, you will need to authenticate using
+the token you have been provided with by Syntasso.
+
+In your values file, you can set the `skeLicense` field to the license token provided to you by Syntasso.
+
+```yaml
+skeLicense: LICENSE # provided to you by Syntasso
 ```
 
 :::warning
@@ -32,7 +63,32 @@ For the SKE Health Agent to work, you will need to make sure that your Destinati
 
 :::
 
-You will also need to create a ConfigMap and Secret with the credentials to access the state store. The format will depend on the type os state store you wish to use. The agent currently support two different types of state stores: S3-compatible buckets and Git repositories.
+### Image registry for Air-gapped Environments
+
+You may want to manage the agent images within your own environment either due to air-gapped requirements
+or other security measures.
+
+To do this, you will need to set up image mirroring and configure the SKE Health Agent chart to pull image
+from your own registry.
+
+You must ensure that images listed below are mirrored to your own image registry and tagged according to the version:
+- `registry.syntasso.io/syntasso/k8s-health-agent`
+- `registry.syntasso.io/syntasso/health-check-adapter`
+
+You can then customise `imageRegistry.host` in your values file:
+
+```yaml
+# Configuration for the image registry
+# Update these values if you are using a private image registry
+imageRegistry:
+  host: "my-org.registry.io"
+# ...
+```
+### Set up access to the State Store
+
+You will need to create a ConfigMap and Secret with the credentials to access the state store.
+The format will depend on the type os state store you wish to use.
+The agent currently support two different types of state stores: S3-compatible buckets and Git repositories.
 
 To configure a Git repository, create a ConfigMap and Secret with the following content:
 
