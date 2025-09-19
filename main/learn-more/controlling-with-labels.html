@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.ee7c28fc.css">
-<script src="/assets/js/runtime~main.c78449a6.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.224dbe4b.js" defer="defer"></script>
 <script src="/assets/js/main.26525aae.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -39,7 +39,7 @@
 <p>The label is removed automatically once Kratix schedules the manual run so it can be applied again later.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="pausing-reconciliation">Pausing Reconciliation<a href="#pausing-reconciliation" class="hash-link" aria-label="Direct link to Pausing Reconciliation" title="Direct link to Pausing Reconciliation">​</a></h2>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">kratix.io/paused: &quot;true&quot;</span><br></span></code></pre></div></div>
-<p>This label suspends reconciliation for the Promises and Resource Requests it is applied to. Any workflows
+<p>This label can be applied to Promises to suspend reconciliation for the Promises and all their Resource Requests. Any workflows
 already running continue until completion, but Kratix will not schedule new
 workflows while the label is present.</p>
 <p>Pausing a promise will stop Kratix from triggering workflows for any resource requests for that Promise. It also means that any updates to the Promise will not be carried out until it has been unpaused.</p>
