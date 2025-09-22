@@ -84,6 +84,15 @@ imageRegistry:
   host: "my-org.registry.io"
 # ...
 ```
+
+### Deploy the agent
+
+Next, install the agent by running:
+
+```bash
+helm install health-agent syntasso/k8s-health-agent --values values.yaml
+```
+
 ### Set up access to the State Store
 
 You will need to create a ConfigMap and Secret with the credentials to access the state store.
