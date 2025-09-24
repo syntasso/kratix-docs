@@ -25,10 +25,10 @@ As you go through building your own Promise, you will explore each of these four
 ### Promise API
 
 In this tutorial, you are going to develop a database Promise that delivers Postgres as a service.
-We will use the [Kratix cli](main/kratix-cli) for promise writing. Please install the cli before continuing.
+We will use the [Kratix CLI](/main/kratix-cli/intro) for promise writing. Please install the CLI before continuing.
 
 We will first start by initializing the Promise directory. Create an empty directory and run the following
-Kratix cli command:
+Kratix CLI command:
 
 ```bash
 kratix init promise database  --group demo.kratix.io --kind Database
@@ -103,7 +103,7 @@ curl -o deps/postgresql.crd.yaml --silent https://raw.githubusercontent.com/synt
 curl -o deps/postgresteam.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresteam.crd.yaml
 ```
 
-Next, we will use the Kratix cli to add a Promise Configure workflow to our database Promise, so these dependencies are
+Next, we will use the Kratix CLI to add a Promise Configure workflow to our database Promise, so these dependencies are
 installed when we install the Promise.
 
 ```bash
@@ -117,13 +117,17 @@ docker build -t kratix-guide/database-promise-pipeline:v0.1.0 workflows/promise/
 kind load docker-image kratix-guide/database-promise-pipeline:v0.1.0 --name platform
 ```
 
+:::info
+Always remember to load new images into your environment when using kind!
+:::
+
 ### Resource Configure Workflows
 
-With Promise dependencies in place, we are now ready to fulfill resource requests.
+With our Promise dependencies in place, we are now ready to fulfill resource requests.
 When a user makes a request of this database Promise, the Resource Configure workflow will execute,
-and we will need to provision a postgres database in this workflow.
+and we will need to provision a Postgres database in this workflow.
 
-To start, we can use the Kratix cli again to add a container to the Resource Configure workflow:
+To start, we can use the Kratix CLI again to add a container to the Resource Configure workflow:
 ```
 kratix add container resource/configure/database-configure --image kratix-guide/database-resource-pipeline:v0.1.0 --language python
 ```
@@ -180,6 +184,10 @@ Let's build and load this image into our local environment:
 docker build -t kratix-guide/database-resource-pipeline:v0.1.0 workflows/resource/configure/database-configure/kratix-guide-database-resource-pipeline
 kind load docker-image kratix-guide/database-resource-pipeline:v0.1.0 --name platform
 ```
+
+:::info
+Always remember to load new images into your environment when using kind!
+:::
 
 ### Using the Promise
 
