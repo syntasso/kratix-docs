@@ -12,7 +12,7 @@ Kratix exposes a set of labels that alter the standard reconciliation behaviour 
 kratix.io/manual-reconciliation: "true"
 ```
 
-Adding this label to a Promise or Resource Request forces Kratix to rerun the relevant workflow outside of the normal reconciliation triggers.
+Adding this label to a Promise or Resource Request forces Kratix to rerun the relevant workflow outside the normal reconciliation triggers.
 
 - **Promise Configure workflow** – applying the label reruns the Configure workflow from the beginning, terminating any in-progress run.
 - **Promise Delete workflow** – after a Promise is marked for deletion, setting the label immediately reruns the Delete workflow.
@@ -27,19 +27,36 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 kratix.io/paused: "true"
 ```
 
-This label can be applied to Promises to suspend reconciliation for the Promises and all their Resource Requests. Any workflows
-already running continue until completion, but Kratix will not schedule new
+This label can be applied to Promises or Resource Request to suspend reconciliation for the Promises or Resource Requests.
+Any workflows already running continue until completion, but Kratix will not schedule new
 workflows while the label is present.
 
-Pausing a promise will stop Kratix from triggering workflows for any resource requests for that Promise. It also means that any updates to the Promise will not be carried out until it has been unpaused.
+Pausing a promise will stop Kratix from triggering workflows for any resource requests for that Promise.
+It also means that any updates to the Promise will not be carried out until it has been unpaused.
 
-When the label is removed, Kratix will re-reconcile the affected objects.
+When the label is removed, Kratix will re-reconcile the affected objects:
+* For a promise, Kratix will run the promise configure workflows, and re-reconcile all existing resources.
+* For a resource request, Kratix will run its configure workflows.
 
 Pausing affects both configuration and deletion:
 
 - **Configure workflows** – changes to the object will not trigger any workflows until it is unpaused.
 - **Delete workflows** – if the object is marked for deletion while paused, the
   delete workflow will only be triggered when the label is removed.
+
+When an object is paused, it's status condition will reflect the 'paused' state until the label is removed:
+```yaml
+status:
+  apiVersion: marketplace.kratix.io/v1alpha1
+  conditions:
+  - lastTransitionTime: "2025-09-22T13:17:27Z"
+    message: Paused
+    reason: PausedReconciliation
+    status: Unknown
+    type: Reconciled
+```
+
+A paused promise will also be marked as `Unavailable`.
 
 ### Compound Promises
 
