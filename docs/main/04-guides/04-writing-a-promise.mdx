@@ -1,0 +1,259 @@
+---
+description: Guide on how to write and package a Kratix Promise
+title: Writing a Promise
+---
+import PartialPreRequisites from '../../_partials/_generic_prereqs_guides.md';
+
+<PartialPreRequisites/>
+
+In [Installing and using a Promise](./installing-a-promise) you learned about what a Kratix Promise is, and how to install an existing Promise.
+In this guide, we are about to write our very first promise and use it.
+
+## Promise Architecture
+
+Before jumping into writing a Promise, here is a quick review of the Promise Architecture.
+
+```mdx-code-block
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import PartialPromise from '../../_partials/_promise-architecture.md';
+```
+
+<PartialPromise />
+
+As you go through building your own Promise, you will explore each of these four sections in detail.
+
+### Promise API
+
+In this tutorial, you are going to develop a database Promise that delivers Postgres as a service.
+We will use the [Kratix CLI](/main/kratix-cli/intro) for promise writing. Please install the CLI before continuing.
+
+We will first start by initializing the Promise directory. Create an empty directory and run the following
+Kratix CLI command:
+
+```bash
+kratix init promise database  --group demo.kratix.io --kind Database
+```
+This will scaffold a Promise definition `promise.yaml` and a resource request `example-resource.yaml` within the directory.
+
+Next, we can start thinking about the promise by designing the Promise API.
+For example, you might want to require parameters, validate users input, and set certain defaults.
+For now, we are going to start with a simple API by asking users to give us the size of the database they are requesting.
+
+Run `kratix update api` command to add this new property to the database Promise API.
+
+```bash
+kratix update api --property size:string
+```
+
+If you inspect your promise definition now, you can see the field `size` has been added to the API:
+```bash
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  labels:
+    kratix.io/promise-version: v0.0.1
+  name: database
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      creationTimestamp: null
+      name: databases.test.kratix.io
+    spec:
+      group: test.kratix.io
+      names:
+        kind: Database
+        plural: databases
+        singular: database
+      scope: Namespaced
+      versions:
+      - name: v1alpha1
+        schema:
+          openAPIV3Schema:
+            properties:
+              spec:
+                properties:
+                  size:
+                    type: string # what we added
+                type: object
+            type: object
+...
+  workflows:
+    promise: {}
+    resource: {}
+status: {}
+```
+
+That's all we need for Promise API in this guide. Let's continue to talk about Promise dependencies.
+
+### Promise Dependencies
+
+We will use an OSS Postgres Operator to deploy a Postgres database.
+First, let's download the dependencies into a local directory.
+
+```bash
+# run within your Promise development directory
+
+mkdir deps
+curl -o deps/operator.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/operator.yaml
+curl -o deps/operatorconfiguration.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/operatorconfiguration.crd.yaml
+curl -o deps/postgresql.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresql.crd.yaml
+curl -o deps/postgresteam.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresteam.crd.yaml
+```
+
+Next, we will use the Kratix CLI to add a Promise Configure workflow to our database Promise, so these dependencies are
+installed when we install the Promise.
+
+```bash
+kratix update dependencies ./deps/ --image kratix-guide/database-promise-pipeline:v0.1.0
+```
+
+We also need to build and load this image into our local environment:
+
+```bash
+docker build -t kratix-guide/database-promise-pipeline:v0.1.0 workflows/promise/configure/dependencies/configure-deps
+kind load docker-image kratix-guide/database-promise-pipeline:v0.1.0 --name platform
+```
+
+:::info
+Always remember to load new images into your environment when using kind!
+:::
+
+### Resource Configure Workflows
+
+With our Promise dependencies in place, we are now ready to fulfill resource requests.
+When a user makes a request of this database Promise, the Resource Configure workflow will execute,
+and we will need to provision a Postgres database in this workflow.
+
+To start, we can use the Kratix CLI again to add a container to the Resource Configure workflow:
+```
+kratix add container resource/configure/database-configure --image kratix-guide/database-resource-pipeline:v0.1.0 --language python
+```
+
+Take a look at the file `workflows/resource/configure/database-configure/kratix-guide-database-resource-pipeline/scripts/pipeline.py`
+
+This is our Resource Configure script, and it's written in Python using the [Kratix Python SDK](/main/kratix-sdks/python).
+Let's replace the boilerplate in the script so it generates a Postgres database for us:
+
+```python
+import kratix_sdk as ks
+import yaml
+
+def main():
+    sdk = ks.KratixSDK()
+    resource = sdk.read_resource_input()
+    name = resource.get_name()
+    size = resource.get_value("spec.size")
+
+    manifest = {
+        "apiVersion": "acid.zalan.do/v1",
+        "kind": "postgresql",
+        "metadata": {"name": name, "namespace": "default"},
+        "spec": {
+        	"teamId": "kratix",
+			"enableLogicalBackup": True,
+        	"volume": {
+            	"size": size
+        	},
+        	"numberOfInstances": 2,
+                "users": {
+                     "team-a": ["superuser", "createdb"]
+                },
+        	"postgresql": {
+            	"version": "16"
+        	}
+		}
+    }
+    data = yaml.safe_dump(manifest).encode("utf-8")
+    sdk.write_output("database.yaml", data)
+
+    status = ks.Status()
+    status.set("teamId", "kratix")
+    sdk.write_status(status)
+
+
+if __name__ == '__main__':
+    main()
+```
+
+Let's build and load this image into our local environment:
+
+```bash
+docker build -t kratix-guide/database-resource-pipeline:v0.1.0 workflows/resource/configure/database-configure/kratix-guide-database-resource-pipeline
+kind load docker-image kratix-guide/database-resource-pipeline:v0.1.0 --name platform
+```
+
+:::info
+Again, always remember to load new images into your environment when using kind!
+:::
+
+### Using the Promise
+
+We are ready to install our database Promise! Install the Promise by running:
+```bash
+kubectl apply -f promise.yaml --context $PLATFORM
+```
+
+You can check on the installation of the Promise by running:
+
+```bash
+kubectl get promise database --context $PLATFORM -w
+
+NAME       STATUS        KIND       API VERSION               VERSION
+database   Unavailable   Database   test.kratix.io/v1alpha1   v0.0.1
+database   Available     Database   test.kratix.io/v1alpha1   v0.0.1
+```
+
+Once this Promise becomes available, we can make a resource request.
+Take a look at `example-resource.yaml` and set a size for this Postgres database:
+
+```yaml
+apiVersion: test.kratix.io/v1alpha1
+kind: Database
+metadata:
+  name: example-database
+spec:
+  size: "1Gi"
+```
+
+You can now make a request:
+```bash
+kubectl apply -f example-resource.yaml --context $PLATFORM
+```
+
+Now that the request is made, let's check the status of this resource:
+```bash
+kubectl describe databases.test.kratix.io example-database --context $PLATFORM
+
+Spec:
+  Size:  1Gi
+Status:
+  Conditions:
+    Message:                                Reconciled
+    Reason:                                 Reconciled
+    Status:                                 True
+    Type:                                   Reconciled
+...
+  Message:                                  Resource requested
+  Observed Generation:                      1
+  Team Id:                                  kratix
+...
+Events:
+  Type    Reason              Age   From                       Message
+  ----    ------              ----  ----                       -------
+  Normal  PipelineStarted     9s    ResourceRequestController  Configure Pipeline started: database-configure
+  Normal  WorksSucceeded      1s    ResourceRequestController  All works associated with this resource are ready
+  Normal  ReconcileSucceeded  1s    ResourceRequestController  Successfully reconciled
+```
+
+Finally, you can also take a look at the provisioned database by targeting the destination
+```bash
+kubectl get pods --context $WORKER
+
+NAME                                 READY   STATUS    RESTARTS   AGE
+example-database-0                   1/1     Running   0          2m35s
+example-database-1                   1/1     Running   0          2m12s
+postgres-operator-578ff5d886-mkqxg   1/1     Running   0          4m35s
+```
