@@ -163,7 +163,7 @@ pipeline pod by specifying additional
 [rules](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-example)
 in the `.spec.rbac.permissions`:
 
-```
+```yaml
 platform: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -201,7 +201,7 @@ not set it defaults to the namespace of the pipeline. If set to `*`, the
 underlying ClusterRole is bound to a ClusterRoleBinding instead of a
 RoleBinding, giving the pipeline permissions across all namespaces.
 
-```
+```yaml
 platform: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -243,8 +243,7 @@ naming convention of
 `<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`. For example
 the below Promise would create two service accounts:
 
-
-```yaml:
+```yaml
 platform: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -314,7 +313,8 @@ Refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/conf
 for more details on Secrets in Kubernetes.
 
 Example:
-```
+
+```yaml
 spec:
   workflows:
     resource/promise:
@@ -440,7 +440,7 @@ containers. Kratix configures its own containers in the pipeline to run with the
 following [security
 context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/):
 
-```
+```yaml
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
