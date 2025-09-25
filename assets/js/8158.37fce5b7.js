@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkkratix_docs=self.webpackChunkkratix_docs||[]).push([[8158],{48158:(a,c,s)=>{s.r(c),s.d(c,{DocSearchModal:()=>e.a1});var e=s(55600)}}]);
