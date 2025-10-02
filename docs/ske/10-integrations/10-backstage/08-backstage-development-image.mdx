@@ -4,6 +4,11 @@ description: Setting up a development Backstage image
 sidebar_label: Backstage Development Image
 ---
 
+```mdx-code-block
+import useBaseUrl from '@docusaurus/useBaseUrl';
+```
+
+
 :::warning
 **NOT FOR PRODUCTION**
 
@@ -56,6 +61,10 @@ metadata:
   namespace: kratix-platform-system
 data:
   config: |
+    auth:
+      environment: development
+      providers:
+        guest: {}
     app:
       title: Backstage Dev Build By Syntasso
       # OPTIONAL: If your using a different nodeport, modify the baseUrl to match the nodeport
@@ -220,7 +229,7 @@ spec:
               # Do not edit, this secret gets created within this manifest
               name: backstage-token
               key: token
-        image: registry.syntasso.io/syntasso/backstage-dev-build:v0.12.0-rc49
+        image: registry.syntasso.io/syntasso/backstage-dev-build:latest
         imagePullPolicy: IfNotPresent
         name: backstage
         ports:
@@ -311,7 +320,9 @@ kubectl apply -f backstage.yaml
   ```sh
   kubectl port-forward service/backstage -n kratix-platform-system 7007:7007
   ```
-  Then navigate to:  `http://localhost:7007`
+Then navigate to:  `http://localhost:7007`. You can login using the legacy guest token method by click `ok` on the pop up when selecting the Guest login method.
+<img align="right" src={useBaseUrl('/img/backstage-login.png')} />
+
 
 ---
 
