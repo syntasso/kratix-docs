@@ -46,7 +46,8 @@ kratix update api --property size:string
 ```
 
 If you inspect your promise definition now, you can see the field `size` has been added to the API:
-```bash
+
+```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
@@ -74,16 +75,17 @@ spec:
           openAPIV3Schema:
             properties:
               spec:
+                #highlight-start
                 properties:
                   size:
-                    type: string # what we added
+                    type: string
+                #highlight-end
                 type: object
             type: object
-...
+  # ...
   workflows:
     promise: {}
     resource: {}
-status: {}
 ```
 
 That's all we need for Promise API in this guide. Let's continue to talk about Promise dependencies.
@@ -118,7 +120,7 @@ kind load docker-image kratix-guide/database-promise-pipeline:v0.1.0 --name plat
 ```
 
 :::info
-Always remember to load new images into your environment when using kind!
+Always remember to load new images into your environment when using KinD!
 :::
 
 ### Resource Configure Workflows
@@ -128,7 +130,8 @@ When a user makes a request of this database Promise, the Resource Configure wor
 and we will need to provision a Postgres database in this workflow.
 
 To start, we can use the Kratix CLI again to add a container to the Resource Configure workflow:
-```
+
+```bash
 kratix add container resource/configure/database-configure --image kratix-guide/database-resource-pipeline:v0.1.0 --language python
 ```
 
@@ -152,19 +155,19 @@ def main():
         "kind": "postgresql",
         "metadata": {"name": name, "namespace": "default"},
         "spec": {
-        	"teamId": "kratix",
-			"enableLogicalBackup": True,
-        	"volume": {
-            	"size": size
-        	},
-        	"numberOfInstances": 2,
-                "users": {
-                     "team-a": ["superuser", "createdb"]
-                },
-        	"postgresql": {
-            	"version": "16"
-        	}
-		}
+            "teamId": "kratix",
+            "enableLogicalBackup": True,
+            "volume": {
+                "size": size
+            },
+            "numberOfInstances": 2,
+            "users": {
+                "team-a": ["superuser", "createdb"]
+            },
+            "postgresql": {
+                "version": "16"
+            }
+        }
     }
     data = yaml.safe_dump(manifest).encode("utf-8")
     sdk.write_output("database.yaml", data)
@@ -172,7 +175,6 @@ def main():
     status = ks.Status()
     status.set("teamId", "kratix")
     sdk.write_status(status)
-
 
 if __name__ == '__main__':
     main()
@@ -186,10 +188,11 @@ kind load docker-image kratix-guide/database-resource-pipeline:v0.1.0 --name pla
 ```
 
 :::info
-Again, always remember to load new images into your environment when using kind!
+Again, always remember to load new images into your environment when using KinD!
 :::
 
 ### Using the Promise
+
 
 We are ready to install our database Promise! Install the Promise by running:
 ```bash
@@ -198,9 +201,8 @@ kubectl apply -f promise.yaml --context $PLATFORM
 
 You can check on the installation of the Promise by running:
 
-```bash
-kubectl get promise database --context $PLATFORM -w
-
+```shell-session
+$ kubectl get promise database --context $PLATFORM -w
 NAME       STATUS        KIND       API VERSION               VERSION
 database   Unavailable   Database   test.kratix.io/v1alpha1   v0.0.1
 database   Available     Database   test.kratix.io/v1alpha1   v0.0.1
@@ -224,9 +226,9 @@ kubectl apply -f example-resource.yaml --context $PLATFORM
 ```
 
 Now that the request is made, let's check the status of this resource:
-```bash
-kubectl describe databases.test.kratix.io example-database --context $PLATFORM
 
+```shell-session
+$ kubectl describe databases.test.kratix.io example-database --context $PLATFORM
 Spec:
   Size:  1Gi
 Status:
@@ -249,11 +251,15 @@ Events:
 ```
 
 Finally, you can also take a look at the provisioned database by targeting the destination
-```bash
-kubectl get pods --context $WORKER
 
+```shell-session
+$ kubectl get pods --context $WORKER
 NAME                                 READY   STATUS    RESTARTS   AGE
 example-database-0                   1/1     Running   0          2m35s
 example-database-1                   1/1     Running   0          2m12s
 postgres-operator-578ff5d886-mkqxg   1/1     Running   0          4m35s
 ```
+## 🎉 Congratulations
+
+✅&nbsp;&nbsp; You have created your first Promise!.<br />
+👉🏾&nbsp;&nbsp; You can now explore [Compound Promises](./compound-promises).
