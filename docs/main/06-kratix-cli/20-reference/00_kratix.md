@@ -29,4 +29,5 @@ kratix init promise promise-name --group myorg.com --kind Database
 * [kratix add](/main/kratix-cli/reference/kratix-add): Command to add to Kratix resources
 * [kratix build](/main/kratix-cli/reference/kratix-build): Command to build kratix resources
 * [kratix init](/main/kratix-cli/reference/kratix-init): Command used to initialize Kratix resources
+* [kratix platform](/main/kratix-cli/reference/kratix-platform): A command to interact with the deployed Kratix
 * [kratix update](/main/kratix-cli/reference/kratix-update): Command to update kratix resources

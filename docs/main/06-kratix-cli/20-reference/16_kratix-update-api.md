@@ -3,11 +3,13 @@ Command to update promise API
 
 ## Description
 Command to update the Promise API.
+
 It can be used to update the API GVK, or to add/remove properties to the API.
 The --group, --kind, --version, and --plural flags are used to update the API
 GVK. The --property flag is used to add or remove properties from the API. The
 format is PROPERTY-NAME:TYPE. Valid types are string, number, integer, object,
 and boolean.
+
 For object types, the property name can be nested using the '.' character.
 To remove a property, append a '-' to the property name.
 
