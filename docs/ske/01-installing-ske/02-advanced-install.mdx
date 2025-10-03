@@ -86,8 +86,6 @@ You can see all available configuration in the
         name: "syntasso/ske-operator"
       skePlatformImage:
         name: "syntasso/ske-platform"
-      skePlatformPipelineAdapterImage:
-        name: "syntasso/ske-platform-pipeline-adapter"
     releaseStorage:
       path: "ske"
       git:
@@ -195,8 +193,6 @@ imageRegistry:
     name: "syntasso/ske-operator"
   skePlatformImage:
     name: "syntasso/ske-platform"
-  skePlatformPipelineAdapterImage:
-    name: "syntasso/ske-platform-pipeline-adapter"
 ```
 
 **Release Storage**
@@ -316,7 +312,6 @@ data:
       host: # the host of the image registry
       pullSecret: # optional: the name of the secret containing the image registry credentials
       platformImage: # the image of the platform
-      pipelineImage: # the image of the pipeline adapter
 ```
 
 Refer to the [air-gapped installations](./air-gapped) section for more
