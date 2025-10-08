@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.ee7c28fc.css">
-<script src="/assets/js/runtime~main.0a924a28.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.4c4fd261.js" defer="defer"></script>
 <script src="/assets/js/main.33a09f7c.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -40,6 +40,16 @@ capabilities.</p>
 </ul></div></div>
 <div style="text-align:center"><iframe width="560" height="315" src="https://www.youtube.com/embed/PSm_C4-dIvM?si=TKFs_AHVtKFkHJq6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="platform-setup">Set up Platform Cluster<a href="#platform-setup" class="hash-link" aria-label="Direct link to Set up Platform Cluster" title="Direct link to Set up Platform Cluster">​</a></h2>
+<p>Kratix has a very lightweight footprint, defaulting to <code>100m</code> CPU and <code>256Mi</code>
+memory within Kubernetes. The sizing of the underlying platform cluster is
+primarily driven by the level of concurrency you need to support, as each
+resource reconciliation runs its own Pod and consumes approximately <code>200m</code> CPU and
+<code>256Mi</code> memory.</p>
+<p>For proof-of-value or initial deployments, we generally recommend starting with
+a cluster of at least 4 vCPUs and <code>16GiB</code> of memory. This configuration provides
+sufficient headroom for Kratix to manage workloads effectively while allowing
+for meaningful parallelisation. As your usage grows, you can scale the cluster
+vertically to accommodate increased demand.</p>
 <p>If you are not using a pre-existing cluster, create your Platform Cluster by
 following the <a href="https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html" target="_blank" rel="noopener noreferrer">EKS getting started docs</a></p>
 <p>Once completed, log in to your cluster using the <code>aws</code> cli and set the <code>PLATFORM</code> environment
