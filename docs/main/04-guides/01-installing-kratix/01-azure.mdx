@@ -13,6 +13,7 @@ import PartialInstallStateStoreStart from  '../../../_partials/installation/_ins
 import PartialInstallSetupDestination from '../../../_partials/installation/_install-setup-destination.md';
 import PartialConfigureMetricsCollection from '../../../_partials/installation/_configure-metrics-collection.md';
 import PartialPointToSke from '../../../_partials/installation/_point_to_ske.md';
+import PartialPlatformSize from '../../../_partials/installation/_platform_size.md';
 ```
 
 <PartialPointToSke />
@@ -23,8 +24,11 @@ import PartialPointToSke from '../../../_partials/installation/_point_to_ske.md'
 
 ## Set up Platform Cluster {#platform-setup}
 
+<PartialPlatformSize />
+
 If you are not using a pre-existing cluster, create your Platform Cluster by
 following the [AKS getting started docs](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal?tabs=azure-cli)
+
 
 Once completed, log in to your cluster using the `az` cli and set the `PLATFORM` environment
 variable:
