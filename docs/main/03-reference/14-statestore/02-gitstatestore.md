@@ -131,7 +131,7 @@ stringData:
 Kratix authenticates to GitHub using a short-lived installation access token, generated via your GitHub App credentials.
 It automatically refreshes this token before expiry and no manual token rotation is required.
 
-You can find the `appID` and `installationID` in your GitHub App settings or by using  [the GitHub REST API](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28).
+You can find the `appID` in your GitHub App settings. To get the `installationID`, use [the GitHub REST API](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app).
 Ensure your GitHub App has **Contents (Read & Write)** permission to the target repository.
 
 For more information about installing GitHub Apps, see [Installing GitHub Apps](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps).
