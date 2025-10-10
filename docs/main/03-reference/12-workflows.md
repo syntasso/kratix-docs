@@ -435,7 +435,7 @@ workflows (`promise.configure`, `promise.delete`, `resource.configure`, and
 
 ## Security Context
 
-A Pipeline consists of containers provided in the Promise, and **three** Kratix specific
+A Pipeline consists of containers provided in the Promise, and **three** Kratix-specific
 containers. Kratix configures its own containers in the pipeline to run with the
 following [security
 context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/):
