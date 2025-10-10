@@ -72,7 +72,7 @@ spec:
   version: v1.1.0
   sourceRef:
     type: http
-    url: https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yam
+    url: https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
     # secretRef: # OPTIONAL
       # name: secret-name
       # namespace: example-namespace
