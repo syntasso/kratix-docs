@@ -131,7 +131,7 @@ is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
   marking it failed. Kratix does not set a default value for this field; if omitted,
   Kubernetes uses its own Job default.
 
-### RBAC
+### Role-based Access Control (RBAC)
 
 Each pipeline runs with its own service account and a default set of restrictive
 RBAC permissions. By default the service account is automatically created by
@@ -435,7 +435,7 @@ workflows (`promise.configure`, `promise.delete`, `resource.configure`, and
 
 ## Security Context
 
-A Pipeline consists of containers provided in the Promise, and 3 Kratix specific
+A Pipeline consists of containers provided in the Promise, and **three** Kratix-specific
 containers. Kratix configures its own containers in the pipeline to run with the
 following [security
 context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/):

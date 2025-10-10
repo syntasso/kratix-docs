@@ -120,7 +120,7 @@ the controller will ensure that all the Workflows for a given promise are re-run
 :::note
 
 This reconciliation will not ensure that unchanged documents are re-written to the
-state store. The reconciliation between workflow outputs and the statestore is
+state store. The reconciliation between workflow outputs and the state store is
 currently only triggered on change. For example, if a file has been deleted from your
 GitStateStore, but the outputs from your workflow have not changed, this will
 not be rewritten. This will be delivered in

@@ -5,6 +5,7 @@ Kratix documentation is built using [Docusaurus 2](https://docusaurus.io/). The 
 ## Installation
 
 ```bash
+corepack enable
 yarn install
 ```
 

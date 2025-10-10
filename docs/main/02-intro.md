@@ -99,9 +99,7 @@ Both scenarios result in inefficiencies, increased risk, and unsustainable compl
 
 - **Self-service request**: Developers request resources directly through a
 Promise API. This API can be easily integrated into developer portals, like
-Backstage, providing a familiar interface for teams.  _(Interested in a fully
-supported Backstage integration? Check out [Syntasso Kratix Enterprise
-(SKE)](https://www.syntasso.io/solutions/upgrade-backstage-from-portal-to-platform-with-kratix))_
+Backstage, providing a familiar interface for teams.
 
 - **Promise workflow triggered**: Once the request is made, the Promise workflow
 automatically kicks in. This workflow seamlessly combines infrastructure
@@ -119,6 +117,11 @@ and consistency.
 What previously required days, numerous handoffs, and manual interventions is
 now completed swiftly, securely, and consistently—empowering your teams to focus
 on delivering value rather than managing complexity.
+
+:::info
+Interested in a fully supported Backstage integration? Check out [Syntasso Kratix Enterprise
+(SKE)](https://www.syntasso.io/solutions/upgrade-backstage-from-portal-to-platform-with-kratix)
+:::
 
 ## Ready to Build Your Platform?
 

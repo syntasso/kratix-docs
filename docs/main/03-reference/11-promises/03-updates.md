@@ -7,7 +7,7 @@ description: Documentation on how updates behave for Promises
 An update to a Promise will cause Kratix to reconcile on the new Promise definition,
 and any changes will be rolled out during this reconciliation.
 
-All elements of a promise are updatable. Any change to the Promise specification on the platform triggers all of the workflows to re-run. Changes may include:
+All elements of a Promise are updatable. Any change to the Promise specification on the platform triggers all of the workflows to re-run. Changes may include:
 - Updating the Promise API, which rolls out an update to the underlying CRD for the
   Resources managed by the Promise.
 - Updating the Promise or Resource workflows.
@@ -24,7 +24,7 @@ workflow, as well as re-running the Resource Configure workflow for all existing
 Requests.
 
 For example, if you bump an image version for a Pipeline container in a Resource Configure
-workflow, Kratix will ensure that all Resources are re-reconciled, including re-running
+workflow, Kratix will ensure that all Resources are reconciled again, including re-running
 the Resource Configure workflow using the new image for every existing Resource.
 
 See [Promise Workflows](../promises/workflows#configure-workflows) and
