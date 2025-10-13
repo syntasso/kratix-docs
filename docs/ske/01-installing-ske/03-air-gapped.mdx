@@ -60,8 +60,18 @@ Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaw
 
 :::tip
 
-You can use a tool like [Skopeo](https://github.com/containers/skopeo) to simplify the
-process of mirroring images.
+You can use [Skopeo](https://github.com/containers/skopeo) to mirror container
+images between registries. When using Skopeo, **always reference the Syntasso
+registry via `ghcr.io` rather than `registry.syntasso.io`**, because Skopeo does not
+correctly follow redirect responses used by the latter.
+
+
+Below is an example of copying the image `registry.syntasso.io/syntasso/ske-operator:v0.17.0` to
+your own registry, substituting ghcr.io as the source:
+
+```bash
+skopeo copy --retry-times=2 --all --src-creds=syntasso-pkg:${SYNTASSO_TOKEN} --dest-creds=${MIRROR_USERNAME}:${MIRROR_PWD} docker://ghcr.io/syntasso/ske-operator:v0.17.0 docker://registry.my-org.com/syntasso/ske-operator:v0.17.0
+```
 
 :::
 
