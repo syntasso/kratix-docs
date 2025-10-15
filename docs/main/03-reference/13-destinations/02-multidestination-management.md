@@ -245,12 +245,12 @@ instead of simple databases or services.
 
 To enable this functionality, the following needs to be true:
 
-- The platform cluster must register itself as a worker cluster
-- The GitOps toolkit must be installed in the platform cluster
+- The Platform cluster must register itself as a worker cluster
+- The GitOps toolkit must be installed in the Platform cluster
 - The Compound Promise must instruct Kratix to install its Dependencies (i.e. the other
-  Promises) in the platform cluster
+  Promises) in the Platform cluster
 - Optionally, the sub-Promises may instruct Kratix to install their Dependencies outside
-  the platform cluster
+  the Platform cluster
 
 For detailed instructions on the above, please check the [Compound
 Promises](../../guides/compound-promises) guide.
