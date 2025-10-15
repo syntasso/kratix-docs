@@ -110,9 +110,11 @@ field with the values generated for the HTTPS Git credentials.
 
 ---
 
+:::info
 Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
+:::
 
 ## Status
 

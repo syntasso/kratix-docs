@@ -18,6 +18,8 @@ write to. Checkout the docs for the supported State Stores:
 
 <br />
 
+:::info
 Require a different type of `StateStore`? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
+:::
