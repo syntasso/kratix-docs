@@ -9,7 +9,7 @@ src={require("@site/static/img/docs/Treasure_Trove-Final_Thoughts-Single_Promise
 alt="Single Kratix Promise"
 />
 
-Platform teams in any form add tremendous value to an organisation. They reduce cognitive load for application teams, which enables those teams to have faster "flow".
+Platform teams in any form add tremendous value to an organisation. They reduce cognitive load for application teams, which enables those teams to have faster 'flow'.
 
 However, reducing cognitive load for application teams generally, in our experience, increases toil for platform team members. The closer a platform team gets to effective enablement of application teams, the higher the likelihood is that, behind the scenes, platform team members are stretched beyond capacity.
 
@@ -23,7 +23,7 @@ But through a Slack message, you happen to learn that four application teams are
 
 ### ...optimised for scale...
 
-However after learning about the four "shadow IT" Postgres databases, you poll application teams and realise the problem is bigger than you thought. Now you need to manually intervene in each team's backlog to audit the situation and ensure each database is healthy and compliant.
+However after learning about the four 'shadow IT' Postgres databases, you poll application teams and realise the problem is bigger than you thought. Now you need to manually intervene in each team's backlog to audit the situation and ensure each database is healthy and compliant.
 
 ### ...pre-configured to meet your business requirements...
 
@@ -49,7 +49,7 @@ src={require('@site/static/img/docs/Treasure_Trove-Final_Thoughts-Higher_Level_P
 alt="Higher level Promise"
 />
 
-The value of your platform increases dramatically when you offer application teams tailored Golden Paths. A ["Golden Path"](https://www.syntasso.io/post/paving-golden-paths-on-multi-cluster-kubernetes-part-1-the-theory) is the opinionated and supported path to "build something". Imagine a complete development environment setup&mdash;networking, integration, security, governance, compliance, and deployment&mdash;all available on demand. By paving a Golden Path the platform team makes doing the right thing easy for application teams.
+The value of your platform increases dramatically when you offer application teams tailored Golden Paths. A [“Golden Path”](https://www.syntasso.io/post/paving-golden-paths-on-multi-cluster-kubernetes-part-1-the-theory) is the opinionated and supported path to “build something”. Imagine a complete development environment setup&mdash;networking, integration, security, governance, compliance, and deployment&mdash;all available on demand. By paving a Golden Path the platform team makes doing the right thing easy for application teams.
 
 Creating a Golden Path on Kratix is easy: decide on, define, and install the individual Promises that are required, then define a higher-level Promise that brings those individual Promises together.
 
