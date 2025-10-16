@@ -26,6 +26,18 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
+### [v0.18.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.18.1/) (2025-10-14)
+
+Released in Helm Chart version [version 0.48.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.48.0/)
+
+#### Features
+
+* Support for ensuring the proper Pipeline Adapter ConfigMap is applied during upgrades.
+
+#### Known issues
+
+* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE Operator. SKE Operator is not impacted by the vulnerability. We are waiting for an upstream dependency release to update in the next version.
+
 ### [v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.17.0/) (2025-10-07)
 
 Released in Helm Chart version [version 0.47.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.47.0/)

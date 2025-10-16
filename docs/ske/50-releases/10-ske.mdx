@@ -19,6 +19,24 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.38.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.38.0/) (2025-10-21)
+
+:::warning
+
+To upgrade to this version, you will need to update your SKE Operator to v0.18.1 or later.
+
+:::
+
+#### Features
+
+* Support for GithubApp on GitStateStore authentication methods, as documented [here](/main/reference/statestore/gitstatestore#github-app).
+* Structured logs and log levels can now be configured via the Kratix Config. See the [Kratix Config](/main/reference/kratix-config/config) for more information.
+* Kratix can now emit traces via [OpenTelemetry](https://opentelemetry.io/). See the [Kratix Config](/main/reference/kratix-config/config) for more information.
+
+#### Known issues
+
+* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE core. SKE is not impacted by the vulnerability. We are waiting for an upstream dependency release to update in the next version.
+
 ### [v0.37.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.37.0/) (2025-10-07)
 
 :::warning
