@@ -29,7 +29,14 @@ status:
       details:
         readyReplicas: 2
       source:
-        name: healthrecord-example
+        name: healthrecord-example-record-1
+        namespace: default
+    - state: healthy
+      lastRun: 1531958500
+      details:
+        readyReplicas: 4
+      source:
+        name: healthrecord-example-record-2
         namespace: default
 ```
 
@@ -37,13 +44,13 @@ The `healthStatus` field contains a `state` subfield and a list of `healthRecord
 
 The `healthStatus.state` subfield can have the following values:
 
-* ready: the resource is ready to use
-* healthy: the resource is healthy
-* unknown: used to indicate that the state is not known
-* degraded: the resource is operational, but its functionality may be affected
-* unhealthy: the resource is unhealthy and should be investigated
+* **ready**: the resource is ready to use
+* **healthy**: the resource is healthy
+* **unknown**: used to indicate that the state is not known
+* **degraded**: the resource is operational, but its functionality may be affected
+* **unhealthy**: the resource is unhealthy and should be investigated
 
-The `healthStatus` state will be determined by the least desirable state of the health records for the request. For example, if one health record is `unhealthy` and another is `healthy`, the overall state will be `unhealthy`.
+The `healthStatus` state will be determined by the **least desirable state of the health records for the request**. For example, if one health record is `unhealthy` and another is `healthy`, the overall state will be `unhealthy`.
 
 | HealthRecord 1  | HealthRecord 2   | healthStatus.state |
 |-----------------|------------------|--------------------|
@@ -64,7 +71,7 @@ The `details` field is an optional field that can be used to provide additional 
 
 ## The HealthRecord CRD
 
-Promise writers can use `/kratix/metadata/status.yaml` to populate the `healthRecord` status field. Alternatively, they can write a HealthRecord CR and schedule it to the Platform cluster in their Pipelines.
+Promise writers can use `/kratix/metadata/status.yaml` to populate the `healthRecord` status field. Alternatively, they can write a HealthRecord CustomResource and schedule it to the Platform cluster in their Pipelines.
 
 A HealthRecord details the result of a Health check. When a Health Record exists for a given Resource, Kratix will update the referenced resource status to reflect the data in the HealthRecord. It has the following format:
 
@@ -92,7 +99,7 @@ data:
 
 :::tip
 
-You can have external systems generating the HealthRecord CR and, via GitOps, continuously updating the health information of the resources in your Platform.
+You can have external systems generating the HealthRecord CustomResource and, via GitOps, continuously updating the health information of the resources in your Platform.
 
 :::
 
