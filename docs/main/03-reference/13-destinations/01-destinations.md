@@ -15,11 +15,11 @@ Some example use cases:
   the Destination, and then a GitOps tool running on the Kubernetes cluster,
   such as Flux or ArgoCD with pull down the documents and deploy them. See our
   [GitOps Agent documentation](/category/installing-gitops-agent) for more information.
-- [Terraform](https://www.terraform.io/): There are many toolings that exist to trigger a `teraform apply`
-  when a new Terraform file is committed to a Git repository. For example
+- [Terraform](https://www.terraform.io/): There are many tools that can trigger a `terraform apply`
+  when a new Terraform file is committed to a Git repository. For example,
   [Terraform
   Enterprise](https://www.hashicorp.com/resources/gitops-and-terraform-enterprise-a-match-made-in-heaven-at-state-farm)
-  has built in support for GitOps workflows.
+  has built-in support for GitOps workflows.
 - [Ansible](https://www.ansible.com/), where an Ansible Tower can be configured to reconcile from a Git
   repository.
 - [Backstage](https://backstage.io/), where a Backstage instance can be configured have its [Catalog
@@ -87,21 +87,21 @@ for `dependencies`. The path within the `State Store` follows the pattern:
 For `dependencies`:
 
 ```
-statestore.Spec.Path/
-    destination.Spec.Path/
-        dependencies/
-            promise.Name/
+statestore.spec.path/
+├── destination.spec.path/
+    ├── dependencies/
+        ├── promise.name/
 ```
 
 For `resources`:
 
 ```
-statestore.Spec.Path/
-    destination.Spec.Path/
-        resources/
-            resource.Namespace/
-                promise.Name/
-                    resource.Namespace/
+statestore.spec.path/
+├── destination.spec.path/
+    ├── resources/
+        ├── resource.mamespace/
+            ├── promise.name/
+                ├── resource.namespace/
 ```
 
 For example, for the following configuration:
@@ -134,10 +134,23 @@ spec:
     kind: BucketStateStore
 ```
 
-The following directories would be created in the State Store:
+The following directories would be created in the State Store (that is, the bucket `kratix.s3.amazonaws.com`):
 
 - `destinations/dev/default/dependencies/`
 - `destinations/dev/default/resources/`
+
+:::info
+
+Here's a breakdown of the path structure and their relationship to the example above:
+
+```text
+destinations/      ← statestore.spec.path
+├── dev/           ← destination.spec.path
+    ├── default/   ← destination.spec.path
+        ├── resources/        ← fixed name
+        ├── dependencies/        ← fixed name
+```
+:::
 
 Kratix will, by default, write to unique directories within those paths
 depending on the Promise or Resource being requested. To stop this behaviour,

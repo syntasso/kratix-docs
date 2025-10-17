@@ -72,7 +72,7 @@ spec:
   version: v1.1.0
   sourceRef:
     type: http
-    url: https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yam
+    url: https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
     # secretRef: # OPTIONAL
       # name: secret-name
       # namespace: example-namespace
@@ -98,10 +98,10 @@ key:value in your secret:
 authorizationHeader: "Bearer my-bearer-token-for-gh"
 ```
 
-:::note
+:::warning
 
 This header value needs to be a simple string. If you are creating the secret manually,
-make sure not to include any new lines in your base64 encoded value. You can do this
+ensure you do include any new lines in your base64-encoded value. You can do this
 by including `-n` in any echo command (e.g. `echo -n "Bearer my-bearer-token-for-gh" | base64`)
 
 :::

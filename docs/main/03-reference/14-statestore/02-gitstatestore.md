@@ -30,7 +30,7 @@ spec:
   # Required
   secretRef:
     # The name and namespace of the secret to use to authenticate: required
-    name: gitea-credentials
+    name: git-credentials
     namespace: default
   # The address of the git repository. If auth method is basic auth, use `http`/`https` format: required
   # if your using ssh auth then ensure its of the format git@github.com:<org>/<repo>.git
@@ -110,9 +110,11 @@ field with the values generated for the HTTPS Git credentials.
 
 ---
 
+:::info
 Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
+:::
 
 ## Status
 

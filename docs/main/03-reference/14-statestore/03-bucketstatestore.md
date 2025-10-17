@@ -40,10 +40,9 @@ to use some of the available providers below:
 - [GCS S3-compatible storage](https://cloud.google.com/storage/docs/interoperability)
 - [MinIO](https://min.io/docs/minio/linux/reference/minio-mc/mc-mb.html)
 
-For other providers see there documentation for setting up the bucket and credentials.
+For other providers, please check their documentation for setting up a bucket and its credentials.
 
 ## Auth
-
 
 The `.spec.authMethod` key is used to determine which authentication method
 should be used when communicating to the S3-Compatible API. There are two
@@ -115,15 +114,17 @@ endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.h
 
 ---
 
+:::info
 Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
+:::
 
 ## Status
 
 The status of the BucketStateStore can be `Ready` or `NotReady` based on Kratix's availability to write to the State Store.
 
-A condition of type `Ready` is also provided to enable waiting for the State Store to be ready.
+A [condition](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-conditions) of type `Ready` is also provided to enable waiting for the State Store to be ready.
 
 An example is provided below showing a BucketStateStore coming online, including events detailing any status changes.
 

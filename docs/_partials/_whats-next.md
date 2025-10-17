@@ -11,7 +11,7 @@ alt="Single Kratix Promise"
 
 Platform teams in any form add tremendous value to an organisation. They reduce cognitive load for application teams, which enables those teams to have faster 'flow'.
 
-However, reducing cognitive load for application teams generally, in our experience, increases toil for platform team members. The closer a platform team gets to effective enablement of application teams, the higher the likelihood is that behind the scenes, platform team members are stretched beyond capacity.
+However, reducing cognitive load for application teams generally, in our experience, increases toil for platform team members. The closer a platform team gets to effective enablement of application teams, the more likely it is that behind the scenes, platform team members are stretched beyond capacity.
 
 Here is an experience you might have on a platform team as you work to support your application teams who need data storage for their applications.
 
