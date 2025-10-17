@@ -141,9 +141,3 @@ Events:
   Warning  NotReady  2m32s  GitStateStoreController  GitStateStore "default" is not ready: Error writing test file: repository not found: Repository not found
   Normal   Ready     2m21s  GitStateStoreController  GitStateStore "default" is ready
 ```
-
-:::info
-
-Kratix determines whether it can write to the State Store by writing a `kratix-write-probe.txt` file under the State Store's `.spec.path` filepath.
-
-:::

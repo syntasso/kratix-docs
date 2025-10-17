@@ -144,9 +144,3 @@ Events:
   ----    ------  ----  ----                        -------
   Normal  Ready   11m   BucketStateStoreController  BucketStateStore "default" is ready
 ```
-
-:::info
-
-Kratix determines whether it can write to the State Store by writing a `kratix-write-probe.txt` file under the State Store's `.spec.path` filepath.
-
-:::
