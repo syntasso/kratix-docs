@@ -101,7 +101,7 @@ authorizationHeader: "Bearer my-bearer-token-for-gh"
 :::warning
 
 This header value needs to be a simple string. If you are creating the secret manually,
-make sure not to include any new lines in your base64-encoded value. You can do this
+ensure you do include any new lines in your base64-encoded value. You can do this
 by including `-n` in any echo command (e.g. `echo -n "Bearer my-bearer-token-for-gh" | base64`)
 
 :::
