@@ -19,7 +19,7 @@ spec:
   branch: main
   # The top-level path in the git repository to write to: optional
   path: destinations/
-  # Valid options: basicAuth, and ssh; defaults to basicAuth
+  # Valid options: basicAuth, ssh, and githubApp; defaults to basicAuth
   authMethod: basicAuth
   # Optional
   gitAuthor:
@@ -32,7 +32,7 @@ spec:
     # The name and namespace of the secret to use to authenticate: required
     name: git-credentials
     namespace: default
-  # The address of the git repository. If auth method is basic auth, use `http`/`https` format: required
+  # The address of the git repository. If auth method is basic auth or githubApp, use `http`/`https` format: required
   # if your using ssh auth then ensure its of the format git@github.com:<org>/<repo>.git
   url: https://github.com/syntasso/kratix-repo
 ```
@@ -40,7 +40,7 @@ spec:
 ## Auth
 
 Kratix uses the credentials contained in the `secretRef` to authenticate with the
-Git storage. Kratix currently supports using `basicAuth` or `ssh`.
+Git storage. Kratix currently supports using `basicAuth`, `ssh` or `githubApp`.
 
 ### SSH
 When `authMethod` is equal to `ssh` Kratix will check the secret for `sshPrivateKey` and `knownHosts`
@@ -107,6 +107,34 @@ AWS CodeCommit supports using [basic
 auth](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html?icmpid=docs_acc_console_connect_np#setting-up-gc-iam)
 to authenticate with the repository. Populate the `username` and `password`
 field with the values generated for the HTTPS Git credentials.
+
+### Github App
+
+When `authMethod` is set to `githubApp`, Kratix uses a GitHub App installation for authentication.
+The referenced Secret must contain the `appID`, `installationID`, and `privateKey`.
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: # name
+  namespace: # namespace
+type: Opaque
+stringData:
+  appID: "<GitHub App ID>"
+  installationID: "<Installation ID>"
+  privateKey: |
+    -----BEGIN RSA PRIVATE KEY-----
+    ...
+    -----END RSA PRIVATE KEY-----
+```
+
+Kratix authenticates to GitHub using a short-lived installation access token, generated via your GitHub App credentials.
+It automatically refreshes this token before expiry and no manual token rotation is required.
+
+You can find the `appID` in your GitHub App settings. To get the `installationID`, use [the GitHub REST API](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app).
+Ensure your GitHub App has **Contents (Read & Write)** permission to the target repository.
+
+For more information about installing GitHub Apps, see [Installing GitHub Apps](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps).
 
 ---
 
