@@ -44,13 +44,25 @@ data:
       defaultContainerSecurityContext:
         # Security context fields, e.g.:
         runAsNonRoot: false
+    
+    logging:
+      level: "info" # one of info, warning, debug, trace
+      structured: false # if true, emit logs as json
+
+    telemetry:
+      enabled: false
+      endpoint: grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4317 # exporter endpoint
+      protocol: grpc # or http
+      insecure: true
+      headers: # additional headers if required
+        authorization: "Bearer <grafana-api-token>"
 ```
 
 ## Kratix Pipeline Adapter Config
 
 When Kratix schedules work as part of either Promise or Resource workflows,
-by default, it uses the `WC_IMG` image specified in the
-`kratix-platform-wc-img-config` configmap in the `kratix-platform-system` namespace. To
+by default, it uses the `PIPELINE_ADAPTER_IMG` image specified in the
+`kratix-platform-pipeline-adapter-config` configmap in the `kratix-platform-system` namespace. To
 override this image, which is necessary when deploying Kratix in an air-gapped
 environment, you can update this configmap to point to an internally hosted
 version of the image.
@@ -59,11 +71,11 @@ version of the image.
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kratix-platform-wc-img-config
+  name: kratix-platform-pipeline-adapter-config
   namespace: kratix-platform-system
 ...
 //highlight-start
 data:
-  WC_IMG: org-registry.org/team/kratix-platform-pipeline-adapter:v0.2.0
+  PIPELINE_ADAPTER_IMG: org-registry.org/team/kratix-platform-pipeline-adapter:v0.2.0
 //highlight-end
 ```
