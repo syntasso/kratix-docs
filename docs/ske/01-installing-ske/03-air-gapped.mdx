@@ -66,11 +66,11 @@ registry via `ghcr.io` rather than `registry.syntasso.io`**, because Skopeo does
 correctly follow redirect responses used by the latter.
 
 
-Below is an example of copying the image `registry.syntasso.io/syntasso/ske-operator:v0.17.0` to
+Below is an example of copying the image `registry.syntasso.io/syntasso/ske-operator:latest` to
 your own registry, substituting ghcr.io as the source:
 
 ```bash
-skopeo copy --retry-times=2 --all --src-creds=syntasso-pkg:${SYNTASSO_TOKEN} --dest-creds=${MIRROR_USERNAME}:${MIRROR_PWD} docker://ghcr.io/syntasso/ske-operator:v0.17.0 docker://registry.my-org.com/syntasso/ske-operator:v0.17.0
+skopeo copy --retry-times=2 --all --src-creds=syntasso-pkg:${SYNTASSO_TOKEN} --dest-creds=${MIRROR_USERNAME}:${MIRROR_PWD} docker://ghcr.io/syntasso/ske-operator:latest docker://registry.my-org.com/syntasso/ske-operator:latest
 ```
 
 :::
