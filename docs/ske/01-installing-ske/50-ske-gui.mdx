@@ -92,6 +92,31 @@ serviceAccount:
 # ...
 ```
 
+#### Configure OIDC for SKE GUI
+
+You can optionally enable OpenID Connect (OIDC) authentication for the SKE GUI. This allows you to integrate your existing identity provider and use single sign-on (SSO) to access the GUI.
+
+To configure OIDC, update the following values in your `values.yaml`:
+
+```yaml
+# ...
+oidc:
+  issuerUrl: "https://your-identity-provider/realms/example"
+  clientId: "your-client-id"
+  clientSecret: "your-client-secret" # stored in a Kubernetes Secret that is automatically created by the chart
+  # SKE GUI requests the profile and email scopes by default. More scopes can be added by using the following value.
+  # scopes: profile,email
+# ...
+```
+
+This configuration enables the SKE GUI to authenticate users against your chosen OIDC identity provider (for example, Keycloak, Google Identity, or Okta).
+
+:::warning
+You must tell your OIDC provider the callback URL that SKE GUI will use after login. This is your SKE GUI URL, plus `/oidc-callback`, for example:
+
+`https://YOUR_URL/oidc-callback`
+:::
+
 #### Ingress server for SKE GUI
 
 With the SKE GUI deployed in-cluster, you can choose to expose it through an ingress server.
@@ -148,6 +173,14 @@ you can generate a valid token by running:
 ```bash
 kubectl -n kratix-platform-system create token ske-gui-admin
 ```
+
+If you have configured [OIDC authentication](#configure-oidc-for-ske-gui) in your `values.yaml`, you can instead sign in using your identity provider credentials. When OIDC is enabled, the SKE GUI will automatically redirect to your OIDC login page, and you won’t need to generate or provide a service account token manually.
+
+:::note
+
+The Kubernetes cluster where Kratix is installed must be configured with the same OIDC provider and have the required permissions to display Kratix resources.
+
+:::
 
 Your SKE GUI installation is complete and ready to use!
 Refer to the [SKE GUI usage guide](/ske/guides/ske-gui) for instructions on how to navigate the UI.
