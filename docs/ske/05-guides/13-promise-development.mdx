@@ -69,7 +69,7 @@ curl -o dependencies/postgresql.crd.yaml --silent https://raw.githubusercontent.
 curl -o dependencies/postgresteam.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresteam.crd.yaml
 ```
 
-Now, we can add a Promise configure workflow using Kratix CLI:
+Now, we can add a Promise configure workflow using the Kratix CLI:
 
 ```bash
 kratix update dependencies ./dependencies/ --image kratix-demo/promise-pipeline:v0.1.0
