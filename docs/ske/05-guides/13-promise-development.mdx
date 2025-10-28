@@ -7,14 +7,14 @@ sidebar_label: Promise Development
 ## Pre-requisites
 
 You will need:
-1. an installation of SKE. Go to [Configuring SKE](/ske/installing-ske/intro) and follow the appropriate guide if you haven't done so already.
+1. An installation of SKE. Go to [Configuring SKE](/ske/installing-ske/intro) and follow the appropriate guide if you haven't done so already.
 2. [kratix CLI](/main/kratix-cli/intro) and the [SKE Testing Framework Plugin](/ske/promise-testing-framework/intro).
 
-In this guide we will write a Postgres Promise using the kratix CLI and the SKE Testing Framework.
+In this guide we will write a Postgres Promise following the SKE Promise Testing Framework, using the Kratix CLI and the SKE Testing Plugin.
 
 ## Initialize Promise with an API
 
-It's best we work on our Promise in an empty directory:
+It's best if we work on our Promise in an empty directory:
 
 ```bash
 mkdir -p ~/db-promise && cd ~/db-promise
@@ -37,7 +37,7 @@ Now, run the `kratix update api` command to add an API field so we can configure
 kratix update api --property size:string
 ```
 
-You can take a look of the updated Promise API by running:
+You can take a look at the updated Promise API by running:
 
 ```bash
 cat promise.yaml | yq '.spec.api'
@@ -56,7 +56,7 @@ mkdir -p dependencies
 ```
 As previously mentioned, this Promise is a Postgres Promise.
 When resource requests are created, the Promise will create a Postgres database using an OSS Postgres Operator.
-We need to have the Postgres Operator installed on Destinations prior to any user making requests.
+We need to have the Postgres Operator installed on Destinations before any user makes requests.
 
 That's exactly what Kratix dependencies are for: to define the resources that need to be created when the Promise is installed.
 
@@ -125,7 +125,7 @@ Your directory structure should look like the following:
                         └── pipeline.py
 ```
 
-The CLI will create a basic Dockerfile and a `pipeline.py` Python script. Feel free to take a look what the Dockerfile looks like.
+The CLI will create a basic Dockerfile and a `pipeline.py` Python script. Feel free to take a look at what the Dockerfile looks like.
 
 We will customize the `pipeline.py` script to deploy a database.
 
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     main()
 ```
 
-Let's take a closer look at the script itself to see what its doing.
+Let's take a closer look at the script itself to see what it's doing.
 
 The script imports [Kratix Python SDK](/main/kratix-sdks/python) and YAML library:
 ```python
@@ -214,7 +214,7 @@ You can stay in the same `db-promise` directory and run:
 mkdir expected-output
 ```
 
-Inside directory `expected-output`, create a file `database.yaml` with content:
+Inside directory `expected-output`, create a file called `database.yaml` with the following content:
 ```yaml
 apiVersion: acid.zalan.do/v1
 kind: postgresql
@@ -241,7 +241,7 @@ Next, you need to define the input for the test. Create an `input` directory:
 mkdir input
 ```
 
-Inside the directory `input/` create a file `object.yaml` containing:
+Inside the directory `input/`, create a file called `object.yaml` with the following content:
 ```yaml
 apiVersion: demo.kratix.io/v1beta1
 kind: Database
@@ -261,7 +261,7 @@ kratix test pipeline resource/configure/database-configure -i input -o expected-
 
 Our test has failed, and let's fix it 😀
 
-Earlier in the Promise API, we defined the property `size`, but we have failed to use the input in the script `pipeline.py`.
+Earlier in the Promise API, we defined the property `size`, but we failed to use the input in the script `pipeline.py`.
 It's using a hardcoded value:
 ```python
             "volume": {
@@ -282,7 +282,7 @@ Once you have edited `pipeline.py`, you can re-run the test:
 kratix test pipeline resource/configure/database-configure -i input -o expected-output --build
 ```
 
-Pipeline test should now pass and you will see outputs similar to:
+The pipeline test should now pass, and you will see outputs similar to:
 
 ```bash
 ❯ kratix test pipeline resource/configure/database-configure -i input -o expected-output --build
@@ -303,7 +303,7 @@ Let's install the Promise and request a database.
 
 ## Use Database Promise
 
-We should first build and push the Resource Configure Workflow so its image can be pulled in your Kubernetes Cluster.
+We should first build and push the Resource Configure Workflow so its image can be pulled into your Kubernetes cluster.
 If you are using a KinD cluster, you can build and load the image by running:
 
 ```bash
@@ -317,11 +317,11 @@ kubectl apply -f promise.yaml
 ```
 
 After the Promise becomes available, you can create a Postgres database, using the resource request we generated for
-our test input, or a different set of configuration:
+our test input, or a different set of configurations:
 
 `kubectl apply -f input/object.yaml`
 
-You can target the Destination see the StatefulSet created for your Postgres database:
+You can target the Destination to see the StatefulSet created for your Postgres database:
 ```bash
 kubectl get statefulset
 NAME    READY   AGE
@@ -330,4 +330,4 @@ grape   0/2     6s
 
 ## 🎉 Congratulations
 
-✅&nbsp;&nbsp; That's it! You've successfully created and written tests for your Database Promise.<br />
+✅&nbsp;&nbsp; That's it! You've successfully created and tested your Database Promise.<br />
