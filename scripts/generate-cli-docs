@@ -43,7 +43,7 @@ def section(doc_dir, name, cmd, code: false, slice: 1)
   if code
     return <<~EOF.chomp
     ## #{name.capitalize}
-    ```
+    ```bash
     #{cmd[name].each_slice(slice).map{|a| a.join("\n") + (slice > 1 ? "\n" : "") }.join("\n").strip}
     ```
 
@@ -160,4 +160,4 @@ def run(command, doc_dir, ref_path)
 end
 
 run("kratix", "docs/main/06-kratix-cli/20-reference", "/main/kratix-cli/reference")
-run("ske", "docs/ske/03-reference/02-ske-cli/01-reference", "/ske/reference/ske-cli/reference")
+run("kratix-test", "docs/ske/02-promise-testing-framework/reference", "/ske/promise-testing-framework/reference")
