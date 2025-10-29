@@ -5,7 +5,7 @@ sidebar_label: Promise Testing Framework
 ---
 
 The Promise Testing Framework paves the way for easy testing of Kratix Promises, providing fast feedback and confidence in your Pipelines and Stages
-without needing to deploy your Promise.
+without needing to deploy your Promise to a Kubernetes Cluster.
 
 Available as plugin to the [Kratix CLI](/main/kratix-cli/intro), the framework provides validation of the expected behaviour when Pipelines and Pipeline Stages run and validation of
 the outputs generated when Pipelines and individual stages run to completion.
@@ -16,9 +16,28 @@ You must have the `kratix` CLI installed at version `0.9.0` or later.
 
 ## Installing the Testing Framework
 
-Download the latest `kratix-test` plugin binary from the [SKE Releases Bucket](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#promise-testing-framework/). Place the binary anywhere on your `PATH`.
+Install the latest version of the [gh cli](https://github.com/cli/cli).
 
-As a the binary is in your path, is should be visible when you run:
+Download the latest `kratix-test` plugin binary:
+
+```
+# Fetch the latest release tag
+LATEST_RELEASE=$(gh release list --repo syntasso/enterprise-releases --limit 100 --json tagName,createdAt \
+  --jq '. | sort_by(.createdAt) | reverse | map(select(.tagName | startswith("kratix-test"))) | .[0].tagName')
+
+# Must be one of darwin_amd64, darwin_arm64, linux_amd64
+ARCH=
+
+# Download the release
+gh release download $LATEST_RELEASE \
+  --repo syntasso/enterprise-releases \
+  --pattern 'kratix-test_$ARCH' \
+  --output kratix-test_$ARCH
+```
+
+Place the binary anywhere in your `PATH`.
+
+As the binary is in your path, is should be visible when you run:
 
 ```bash
 kratix plugin list
@@ -33,7 +52,7 @@ kratix test --help
 You should see output similar to:
 
 ```bash
-A command for testing Kratix Promise stages
+A command for testing Kratix Promise Pipelines and Stages
 
 Usage:
   test [command]
@@ -79,7 +98,7 @@ Given your Promise was generated with the Kratix CLI, the directory structure sh
                         └── pipeline.sh
 ```
 
-When structured in this format, both the `kratix test stage` and `kratix test pipeline` can identify the appropriate image to
+When structured in this format, both the `kratix test stage` and `kratix test pipeline` commands can identify the appropriate image to
 run or build when performing tests against the specified Pipeline or Pipeline Stage. If your directory is not structured in this way, the
 tests may fail to find the correct container image to run.
 
@@ -138,7 +157,7 @@ your promise does not need to match the above directory structure.
 
 ### Testing a Pipeline
 
-To test a Pipeline by running each of its stages in sequence, you can use the `kratix test pipeline command`. For the above example, we could run:
+To test a Pipeline by running each of its stages in sequence, you can use the `kratix test pipeline` command. For the above example, we could run:
 
 ```bash
 kratix test pipeline promise/configure/setup \

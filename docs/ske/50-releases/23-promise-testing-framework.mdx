@@ -8,14 +8,19 @@ sidebar_label: Promise Testing Framework
 
 Available as plugin to the [Kratix CLI](/main/kratix-cli/intro), the Promise testing Framework provides validation of the expected behaviour when Pipelines and Pipeline Stages run and validation of the outputs generated when Pipelines and individual stages run to completion.
 
-The release binary is available at:
+The release binary can be downloaded with the `gh` cli:
 
 ```
-http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#promse-testing-framework/
+gh release download $LATEST_RELEASE \
+  --repo syntasso/enterprise-releases \
+  --pattern 'kratix-test_$ARCH' \
+  --output kratix-test_$ARCH
 ```
+
+The available architectures are `darwin_amd64`, `darwin_arm64` and `linux_amd64`
 
 ## Release Notes
 
-### [v0.1.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#promise-testing-framework/v0.3.0/) (DATE)
+### v0.1.1 (28-10-2025)
 
 The first release of the [Promise Testing Framework](/ske/promise-testing-framework/intro).
