@@ -1,0 +1,333 @@
+---
+title: Building and Testing a Database Promise
+description: Step-by-step guide to create and test a Database Promise using Kratix CLI and SKE testing plugin
+sidebar_label: Promise Development
+---
+
+## Pre-requisites
+
+You will need:
+1. An installation of SKE. Go to [Configuring SKE](/ske/installing-ske/intro) and follow the appropriate guide if you haven't done so already.
+2. [kratix CLI](/main/kratix-cli/intro) and the [SKE Testing Framework Plugin](/ske/promise-testing-framework/intro).
+
+In this guide we will write a Postgres Promise following the SKE Promise Testing Framework, using the Kratix CLI and the SKE Testing Plugin.
+
+## Initialize Promise with an API
+
+It's best if we work on our Promise in an empty directory:
+
+```bash
+mkdir -p ~/db-promise && cd ~/db-promise
+```
+
+Initialize our database Promise by running:
+```bash
+kratix init promise database --group demo.kratix.io --version v1beta1 --kind Database
+```
+
+The command above should generate a `promise.yaml` file in the current directory. You can check it out by running:
+
+```bash
+cat promise.yaml
+```
+
+Now, run the `kratix update api` command to add an API field so we can configure the size of the database:
+
+```bash
+kratix update api --property size:string
+```
+
+You can take a look at the updated Promise API by running:
+
+```bash
+cat promise.yaml | yq '.spec.api'
+```
+
+Great! Your Promise now has an API. You can move on to the next step: defining the dependencies.
+
+## Workflows
+
+### Promise Dependencies
+
+First, let's create a subdirectory in your db-promise directory called `dependencies`:
+
+```bash
+mkdir -p dependencies
+```
+As previously mentioned, this Promise is a Postgres Promise.
+When resource requests are created, the Promise will create a Postgres database using an OSS Postgres Operator.
+We need to have the Postgres Operator installed on Destinations before any user makes requests.
+
+That's exactly what Kratix dependencies are for: to define the resources that need to be created when the Promise is installed.
+
+Let's download dependencies for our Postgres Promise and save them in `dependencies/`
+
+```bash
+curl -o dependencies/operator.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/operator.yaml
+curl -o dependencies/operatorconfiguration.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/operatorconfiguration.crd.yaml
+curl -o dependencies/postgresql.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresql.crd.yaml
+curl -o dependencies/postgresteam.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresteam.crd.yaml
+```
+
+Now, we can add a Promise configure workflow using the Kratix CLI:
+
+```bash
+kratix update dependencies ./dependencies/ --image kratix-demo/promise-pipeline:v0.1.0
+```
+
+To install the Promise later, don't forget to build and push the image.
+
+If you are using local KinD clusters, you can build and load this image:
+
+```bash
+docker build -t kratix-demo/promise-pipeline:v0.1.0 workflows/promise/configure/dependencies/configure-deps && kind load docker-image kratix-demo/promise-pipeline:v0.1.0 -n platform
+```
+
+Amazing! The next step is to define the Resource Workflow.
+
+### Define Resource Configure Workflow
+
+We will once again use the Kratix CLI to create the necessary files.
+Run the following command to bootstrap the skeleton of your Workflow:
+
+```bash
+kratix add container resource/configure/database-configure --image kratix-demo/resource-pipeline:v0.1.0 --language python
+```
+
+Your directory structure should look like the following:
+
+```bash
+❯ tree
+.
+├── example-resource.yaml
+├── promise.yaml
+├── README.md
+└── workflows
+    ├── promise
+    │   └── configure
+    │       └── dependencies
+    │           └── configure-deps
+    │               ├── Dockerfile
+    │               ├── resources
+    │               │   ├── operator.yaml
+    │               │   ├── operatorconfiguration.crd.yaml
+    │               │   ├── postgresql.crd.yaml
+    │               │   └── postgresteam.crd.yaml
+    │               └── scripts
+    │                   └── pipeline.sh
+    └── resource
+        └── configure
+            └── database-configure
+                └── kratix-demo-resource-pipeline
+                    ├── Dockerfile
+                    ├── resources
+                    └── scripts
+                        └── pipeline.py
+```
+
+The CLI will create a basic Dockerfile and a `pipeline.py` Python script. Feel free to take a look at what the Dockerfile looks like.
+
+We will customize the `pipeline.py` script to deploy a database.
+
+Replace the `pipeline.py` script generated with the following content:
+
+```python
+import kratix_sdk as ks
+import yaml
+
+def main():
+    sdk = ks.KratixSDK()
+    resource = sdk.read_resource_input()
+
+    manifest = {
+        "apiVersion": "acid.zalan.do/v1",
+        "kind": "postgresql",
+        "metadata": {"name": resource.get_name(), "namespace": "default"},
+        "spec": {
+            "teamId": "kratix",
+            "enableLogicalBackup": True,
+            "volume": {
+                "size": "1Gi", # we will fix this in testing
+            },
+            "numberOfInstances": 2,
+                "users": {
+                     "team-a": ["superuser", "createdb"]
+                },
+            "postgresql": {
+                "version": "16"
+            }
+        }
+    }
+    data = yaml.safe_dump(manifest).encode("utf-8")
+    sdk.write_output("database.yaml", data)
+
+    status = ks.Status()
+    status.set("version", 16)
+    status.set("teamId", "kratix")
+    sdk.write_status(status)
+
+
+if __name__ == '__main__':
+    main()
+```
+
+Let's take a closer look at the script itself to see what it's doing.
+
+The script imports [Kratix Python SDK](/main/kratix-sdks/python) and YAML library:
+```python
+import kratix_sdk as ks
+import yaml
+```
+
+It then reads the incoming resource request and initializes the Kratix SDK:
+```python
+    sdk = ks.KratixSDK()
+    resource = sdk.read_resource_input()
+```
+
+It generates a manifest for the Postgres database, using the resource request name as the Postgres name,
+and writes the manifest to the Kratix output directory for scheduling:
+
+```python
+    manifest = {
+        "apiVersion": "acid.zalan.do/v1",
+        "kind": "postgresql",
+        "metadata": {"name": resource.get_name(), "namespace": "default"},
+        "spec": {
+        ...
+        }
+    }
+    data = yaml.safe_dump(manifest).encode("utf-8")
+    sdk.write_output("database.yaml", data)
+```
+
+Great! You now have a Resource Configure Workflow defined.
+
+### Test Resource Configure Workflow
+
+Before you can test the workflow, you need to define the expected result.
+
+First, let's create the expected output for our test.
+
+You can stay in the same `db-promise` directory and run:
+```bash
+mkdir expected-output
+```
+
+Inside directory `expected-output`, create a file called `database.yaml` with the following content:
+```yaml
+apiVersion: acid.zalan.do/v1
+kind: postgresql
+metadata:
+  name: grape
+  namespace: default
+spec:
+  enableLogicalBackup: true
+  numberOfInstances: 2
+  postgresql:
+    version: '16'
+  teamId: kratix
+  users:
+    team-a:
+    - superuser
+    - createdb
+  volume:
+    size: 10Gi
+
+```
+
+Next, you need to define the input for the test. Create an `input` directory:
+```bash
+mkdir input
+```
+
+Inside the directory `input/`, create a file called `object.yaml` with the following content:
+```yaml
+apiVersion: demo.kratix.io/v1beta1
+kind: Database
+metadata:
+  name: grape
+spec:
+  size: "10Gi"
+```
+
+With the input and the expected output defined, we are ready for the test.
+
+Use the `kratix test pipeline` command to build the image and test the Pipeline:
+
+```bash
+kratix test pipeline resource/configure/database-configure -i input -o expected-output --build
+```
+
+Our test has failed, and let's fix it 😀
+
+Earlier in the Promise API, we defined the property `size`, but we failed to use the input in the script `pipeline.py`.
+It's using a hardcoded value:
+```python
+            "volume": {
+                "size": "1Gi", # we will fix in testing
+            },
+```
+
+You can fix it by using `size` from the resource request manifest:
+```python
+            "volume": {
+                "size": resource.get_value("spec.size")
+            },
+```
+
+Once you have edited `pipeline.py`, you can re-run the test:
+
+```bash
+kratix test pipeline resource/configure/database-configure -i input -o expected-output --build
+```
+
+The pipeline test should now pass, and you will see outputs similar to:
+
+```bash
+❯ kratix test pipeline resource/configure/database-configure -i input -o expected-output --build
+Running
+Building kratix-demo/resource-pipeline:v0.1.0
+...
+
+Validating
+- Comparing expected-output/database.yaml to /var/folders/0x/6h6jc4dn5tj1hg2b29rpjw8m0000gp/T/test-outputs4228172337/database.yaml
+
+
+Cleaning up
+Success (1 assertion(s))
+```
+
+Awesome. You now have a Database Promise that can create Postgres with a configurable size.
+Let's install the Promise and request a database.
+
+## Use Database Promise
+
+We should first build and push the Resource Configure Workflow so its image can be pulled into your Kubernetes cluster.
+If you are using a KinD cluster, you can build and load the image by running:
+
+```bash
+docker build -t kratix-demo/resource-pipeline:v0.1.0 workflows/resource/configure/database-configure/kratix-demo-resource-pipeline && kind load docker-image kratix-demo/resource-pipeline:v0.1.0 -n platform
+```
+
+We are now ready to install the Promise, targeting the Platform cluster:
+
+```bash
+kubectl apply -f promise.yaml
+```
+
+After the Promise becomes available, you can create a Postgres database, using the resource request we generated for
+our test input, or a different set of configurations:
+
+`kubectl apply -f input/object.yaml`
+
+You can target the Destination to see the StatefulSet created for your Postgres database:
+```bash
+kubectl get statefulset
+NAME    READY   AGE
+grape   0/2     6s
+```
+
+## 🎉 Congratulations
+
+✅&nbsp;&nbsp; That's it! You've successfully created and tested your Database Promise.<br />
