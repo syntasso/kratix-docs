@@ -57,6 +57,11 @@ In your values file, you can set the `skeLicense` field to the license token pro
 skeLicense: LICENSE # provided to you by Syntasso
 ```
 
+This will generate a Kubernetes Secret in the `k8s-health-agent-system`
+namespace that will be used to authenticate to the image registry. You can use
+your own image pull secret by setting the `imageRegistry.imagePullSecret` field
+instead.
+
 :::warning
 
 For the SKE Health Agent to work, you will need to make sure that your Destination cluster can access the Image Registry.
@@ -82,6 +87,7 @@ You can then customise `imageRegistry.host` in your values file:
 # Update these values if you are using a private image registry
 imageRegistry:
   host: "my-org.registry.io"
+  imagePullSecret: "secret-name"
 # ...
 ```
 
@@ -136,7 +142,7 @@ To configure a S3-compatible bucket, create a ConfigMap and Secret with the foll
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: health-state-store-config 
+  name: health-state-store-config
   namespace: k8s-health-agent-system
 data:
   stateStoreKind: "BucketStateStore"
