@@ -102,7 +102,7 @@ helm install health-agent syntasso/k8s-health-agent --values values.yaml
 ### Set up access to the State Store
 
 You will need to create a ConfigMap and Secret with the credentials to access the state store.
-The format will depend on the type os state store you wish to use.
+The format will depend on the type of state store you wish to use.
 The agent currently support two different types of state stores: S3-compatible buckets and Git repositories.
 
 To configure a Git repository, create a ConfigMap and Secret with the following content:
