@@ -114,7 +114,7 @@ metadata:
   name: health-state-store-config
   namespace: k8s-health-agent-system
 data:
-  stateStoreKind: "GitStateStore"
+  stateStoreKind: GitStateStore
   url: # address
   secretName: <secret name>
   branch: # optional (default: main)
@@ -145,23 +145,22 @@ metadata:
   name: health-state-store-config
   namespace: k8s-health-agent-system
 data:
-  stateStoreKind: "BucketStateStore"
+  stateStoreKind: BucketStateStore
   endpoint: # address
   bucketName: # bucket name
   authMethod: # accessKey or IAM (default: accessKey)
   secretName: <secret name> # required for accessKey
   path: # path within the bucket; optional
-  insecure: # true or false (default: false); optional
+  insecure: # "true" or "false" (default: "false"); optional string
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: <secret name>
   namespace: k8s-health-agent-system
-type: kubernetes.io/basic-auth
 stringData:
-  accessKeyID: # accessKey ID
-  secretAccessKey: # secret access key
+  accessKeyID: # Access Key ID
+  secretAccessKey: # Secret Access Key
 ```
 
 :::warning
