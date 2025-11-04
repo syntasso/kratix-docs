@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.ee7c28fc.css">
-<script src="/assets/js/runtime~main.330befb7.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.44dfb21e.js" defer="defer"></script>
 <script src="/assets/js/main.d5e8ea90.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -132,7 +132,9 @@ GitOps repository. In this case the workflow for the PostgreSQL Promise was
 quite simple, it took the users input and used this to generate the required
 Kubernetes resources to create the PostgreSQL instance. Those resources were
 then scheduled to the Platform via the GitOps repo (in this simple scenario, an
-in-cluster s3 compatible bucket using MinIO).</p>
+in-cluster s3 compatible bucket using MinIO). GitOps can take some time to
+sync, so it may take up to a minute or two before you see the Pod for the
+PostgreSQL instance</p>
 <p>You can see the workflows that were run by inspecting the Pods:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">kubectl get pods </span><span class="token parameter variable" style="color:#36acaa">-l</span><span class="token plain"> kratix.io/promise-name</span><span class="token operator" style="color:#393A34">=</span><span class="token plain">postgresql</span><br></span></code></pre></div></div>
 <p>While readiness is useful, often services demand a number of additional specifications
