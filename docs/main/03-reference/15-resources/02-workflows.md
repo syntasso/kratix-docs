@@ -156,14 +156,17 @@ spec:
 Kratix will create a single Delete Pipeline Job when deletion is initiated. If a failure occurs
 within a pod created by the Job, new pods for  the Job will continue to be created until the
 `backoffLimit` for the Job has been reached and the Job fails. Kratix will not attempt to
-create any additional Jobs after this point and the Resource deletion will not complete without
+create any additional Delete Pipeline Job after this point and the Resource deletion will not complete without
 further intervention.
 
 Kratix will create a new Pipeline Job when:
 
-- The Promise is updated
+- The Resource or Promise is updated
 - A [Manual Reconciliation](/main/learn-more/controlling-with-labels#manual-reconciliation)
 is triggered
+
+This means that if the failing Pipeline Job can be fixed by applying an update to the Promise,
+this change can be applied to the Promise and a Delete Job reflecting this change will run.
 
 If a command intermittently fails during container execution, this should be handled **within
 the container itself** (including any retry attempts). This reduces the risk of such
