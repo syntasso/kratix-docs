@@ -154,7 +154,7 @@ spec:
 ### Pipeline Failures
 
 Kratix will create a single Delete Pipeline Job when deletion is initiated. If a failure occurs
-within a pod created by the Job, new pods for  the Job will continue to be created until the
+within a pod created by the Job, new pods for the Job will continue to be created until the
 `backoffLimit` for the Job has been reached and the Job fails. Kratix will not attempt to
 create any additional Delete Pipeline Job after this point and the Resource deletion will not complete without
 further intervention.
