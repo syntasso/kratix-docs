@@ -166,7 +166,7 @@ Kratix will create a new Pipeline Job when:
 is triggered
 
 This means that if the failing Pipeline Job can be fixed by applying an update to the Promise,
-this change can be applied to the Promise and a Delete Job reflecting this change will run.
+this change can be applied to the Promise or the Resource Request and a Delete Job reflecting this change will run.
 
 If a command intermittently fails during container execution, this should be handled **within
 the container itself** (including any retry attempts). This reduces the risk of such
