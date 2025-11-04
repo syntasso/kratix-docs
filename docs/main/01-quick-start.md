@@ -246,7 +246,9 @@ GitOps repository. In this case the workflow for the PostgreSQL Promise was
 quite simple, it took the users input and used this to generate the required
 Kubernetes resources to create the PostgreSQL instance. Those resources were
 then scheduled to the Platform via the GitOps repo (in this simple scenario, an
-in-cluster s3 compatible bucket using MinIO).
+in-cluster s3 compatible bucket using MinIO). GitOps can take some time to
+sync, so it may take up to a minute or two before you see the Pod for the
+PostgreSQL instance
 
 
 You can see the workflows that were run by inspecting the Pods:
