@@ -165,7 +165,7 @@ Kratix will create a new Pipeline Job when:
 - A [Manual Reconciliation](/main/learn-more/controlling-with-labels#manual-reconciliation)
 is triggered
 
-This means that if the failing Pipeline Job can be fixed by applying an update to the Promise,
+This means that if the failing Pipeline Job can be fixed by applying an update to the Promise or the Resource Request,
 this change can be applied to the Promise or the Resource Request and a Delete Job reflecting this change will run.
 
 If a command intermittently fails during container execution, this should be handled **within
