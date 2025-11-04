@@ -57,24 +57,37 @@ tagged according to the version.
 You can find the available versions of the images in the [Syntasso Enterprise
 Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
 
+<details>
+<summary>
 
-:::tip
+How to: Push the images to your internal registry
 
-You can use [Skopeo](https://github.com/containers/skopeo) to mirror container
-images between registries. When using Skopeo, **always reference the Syntasso
-registry via `ghcr.io` rather than `registry.syntasso.io`**, because Skopeo does not
-correctly follow redirect responses used by the latter.
+</summary>
 
-
-Below is an example of copying the image `registry.syntasso.io/syntasso/ske-operator:latest` to
-your own registry, substituting ghcr.io as the source:
+Log in to the Syntasso registry
 
 ```bash
-skopeo copy --retry-times=2 --all --src-creds=syntasso-pkg:${SYNTASSO_TOKEN} --dest-creds=${MIRROR_USERNAME}:${MIRROR_PWD} docker://ghcr.io/syntasso/ske-operator:latest docker://registry.my-org.com/syntasso/ske-operator:latest
+docker login registry.syntasso.io -u syntasso-pkg -p {SYNTASSO_TOKEN}
 ```
 
-:::
+Pull the images at the desired tag
 
+```bash
+docker pull registry.syntasso.io/syntasso/ske-platform:latest
+```
+
+Tag the image to be pushed to your internal registry
+
+```bash
+docker tag registry.syntasso.io/syntasso/ske-platform:latest ${INTERNAL_REGISTRY}/syntasso/ske-platform:latest
+```
+
+Push the image to the internal registry
+
+```bash
+docker push ${INTERNAL_REGISTRY}/syntasso/ske-platform:latest
+```
+</details>
 
 ### Providing SKE Operator access to use your image registry
 
