@@ -181,4 +181,4 @@ this change can be applied to the Promise and a Delete Job reflecting this chang
 
 If a command intermittently fails during container execution, this should be handled **within
 the container itself** (including any retry attempts). This reduces the risk of such
-commands causing the delete pipeline pod, and eventually the Job as whole, to fail.
+commands causing the delete pipeline Pod, and eventually the Job as whole, to fail.
