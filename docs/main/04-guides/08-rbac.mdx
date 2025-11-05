@@ -1,0 +1,51 @@
+---
+description: RBAC
+title: RBAC
+id: rbac
+---
+
+Kratix leverages the Kubernetes Role-Based Access Control (RBAC) system to
+manage permissions and access control within the platform. RBAC allows
+administrators to define roles and assign them to users or groups, specifying
+what actions they can perform on various resources. To gain an understanding of
+how Kubernetes RBAC works, please refer to the official Kubernetes documentation on
+[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). This guide
+assumes familiarity with Kubernetes RBAC concepts. If you are new to RBAC, it is
+recommended to review the Kubernetes documentation before proceeding.
+
+## RBAC in Kratix
+
+Everything Kratix exposes is represented as a [Custom Resource Definition
+(CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
+in Kubernetes. Therefore to restrict access to Kratix functionality, you will
+create Roles and RoleBindings (or ClusterRoles and ClusterRoleBindings) that
+reference these CRDs. The CRDs of note that come out of the box with Kratix are:
+
+- [`Promise`](/main/reference/promises/intro) - The definition of a Service to
+  be offered on the platform
+- [`Work`](/main/learn-more/kratix-resources#output-objects) - The definition
+  of the declarative workloads that need to be scheduled
+- [`WorkPlacement`](/main/learn-more/kratix-resources#output-objects) - The
+  defintion of a scheduled workload.
+- [`GitStateStore`/`BucketStateStore`](/main/reference/statestore/intro) -
+  Definitions of State Stores that Kratix can use to write declarative
+  documents to.
+- [`Destination`](/main/guides/new-destination) - Definitions of Destinations
+  that Kratix can schedule workloads to.
+
+All of the above CRDs are of note for the Platform Engineer, and generally are not ever
+accessed by end users of the platform. Therefore, it is recommended to
+restrict access to these CRDs to only Platform Engineers and trusted
+automation.
+
+Users of the platform will generally only need access to read Promises
+to understand what Services are available to them, and resource requests to
+the CRD that represents the Service being offered (e.g. `Database` CRD for the
+Database Promises). Therefore, it is recommended to create Roles and
+RoleBindings that only allow access to these resources for end users of the
+platform.
+
+## Example RBAC
+
+### Platform Engineer Role
+Lets imagine 
