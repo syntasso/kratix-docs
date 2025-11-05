@@ -19,6 +19,26 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.39.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.39.0/) (2025-11-05)
+
+#### Features
+
+* The introduction of OpenTelemetry metrics detailing the scheduling of documents in Kratix.
+* The introduction of log levels in the Kratix Controllers. The log levels default to `info` and the desired log level can be configured via the [Kratix Config](/main/reference/kratix-config/config).
+* This release introduces the short names `wp` and `dest` for `workPlacements` and `Destinations` respectively.
+* Better GitStateStore authentication: Kratix now automatically retries authentication after trimming trailing whitespace from secrets.
+
+#### Fixes
+
+* Improve the OpenTelemetry tracing by only tracing Kratix-related API operations.
+* Improve the log levels to ensure messages are logged at the correct level of severity.
+* Improve the OpenTelemetry tracing to detail the `kratix.action` within the trace attributes.
+* Update WorkPlacements to ensure they are not re-reconciled unnecessarily.
+
+#### Security Fixes
+
+* Updated to include latest security updates including the previously mentioned [vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE core.
+
 ### [v0.38.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.38.0/) (2025-10-21)
 
 :::warning
