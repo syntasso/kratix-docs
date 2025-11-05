@@ -157,14 +157,11 @@ This role does not allow:
 
 ## Example RBAC for Users of the Platform
 
-**Who this is for:** Application Developers or CI pipelines that consume Promises.  
-These users interact with the CRDs that Promises create but should not modify Kratix internals.
-
----
-
 ### Option A. Full access to all resources within one group
 
-Developers can create and manage any resource type under `services.internal.acme.org`, which includes `Database` and `VM`.
+Example with broad access within a single API group. Developers can create and
+manage any resource type under `services.internal.acme.org`, which includes
+`Database` and `VM`.
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -186,8 +183,6 @@ rules:
 **This role does *not* allow:**
 - Access to CRDs in other API groups (e.g. any kinds belonging to `goldenpaths` or `networking`).
 - Access to Kratix system resources like `Promise` or `Destination`.
-
----
 
 ### Option B. Fine-grained control across groups
 
@@ -249,6 +244,8 @@ rules:
 - Reading or modifying any other objects in the cluster.
 
 ---
+
+The above is not an exhaustive list of possibilities. You can mix and match rules to create Roles that fit your organisational needs. Always follow the principle of least privilege when assigning permissions.
 
 ## When to use Roles vs. ClusterRoles
 
