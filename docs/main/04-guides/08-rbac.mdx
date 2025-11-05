@@ -1,6 +1,6 @@
 ---
-description: RBAC
-title: RBAC
+description: Role Based Access Control (RBAC) in Kratix
+title: Role Based Access Control (RBAC) in Kratix
 id: rbac
 ---
 
@@ -34,11 +34,8 @@ reference these CRDs. The CRDs of note that come out of the box with Kratix are:
   that Kratix can schedule workloads to (cluster-scoped).
 
 
-The CRDs above are primarily for Platform Engineers. End users should not
-interact with them. Limit these resources to Platform Engineers and trusted
-automation.
-
-End users typically need two capabilities:
+The CRDs above are primarily for Platform Engineers. End users usually interact
+with them. End users typically need two capabilities:
 
 1. Read Promises to discover available Platform offerings
 
@@ -101,12 +98,20 @@ roles to users or groups.
 
 ## Example RBAC for Platform Engineers
 
-**Who this is for:** Platform Engineers who install Kratix, write and manage Promises, and operate the Kratix control plane.
+**Who this is for:** Platform Engineers who write and manage Promises, and operate the Kratix control plane.
 
 These users need to:
 - Manage Kratix resources (e.g. `Promise`, `Work`, `Destination`).
 - Access the Custom Resources the Promise is exposing, to do actions like testing the services they install.
 - Read and manage the resources Kratix creates (e.g. Pods created for Workflows).
+
+:::warning
+
+Below *is just an example*. Your actual Platform Engineer role may differ based
+on your organisational needs and the Promises you have installed. Always follow
+the principle of least privilege when assigning permissions.
+
+:::
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -120,6 +125,7 @@ rules:
   verbs: ["*"] # full access
 
 # manage all Promise-installed kinds
+# these are examples, adjust to match your actual Promises
 - apiGroups:
   - "services.internal.acme.org"
   - "goldenpaths.internal.acme.org"
@@ -175,13 +181,13 @@ metadata:
   namespace: team-a
 rules:
 - apiGroups: ["services.internal.acme.org"]
-  resources: ["*"]
+  resources: ["*"] # This would be equivalent to ["databases","vms"]
   verbs: ["get","list","watch","create","update","patch","delete"]
 ```
 
 **This role allows:**
 
-- Manage VMs and Databases.
+- Manage `VMs` and `Databases`.
 - Automatically covering new resource kinds added later under the same group. For example, if a new `Cache` kind is added under `services.internal.acme.org`, developers with this role can manage it without needing to update the Role.
 
 **This role does *not* allow:**
@@ -250,6 +256,11 @@ rules:
 ---
 
 The above is not an exhaustive list of possibilities. You can mix and match rules to create Roles that fit your organisational needs. Always follow the principle of least privilege when assigning permissions.
+
+:::note
+Remember to create corresponding RoleBindings or ClusterRoleBindings to assign these Roles or ClusterRoles to users, groups, or service accounts
+:::
+
 
 ## When to use Roles vs. ClusterRoles
 
