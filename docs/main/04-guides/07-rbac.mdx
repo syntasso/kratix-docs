@@ -1,0 +1,302 @@
+---
+description: Role Based Access Control (RBAC)
+title: Role Based Access Control (RBAC)
+id: rbac
+---
+
+Kratix leverages the Kubernetes Role-Based Access Control (RBAC) system to
+manage permissions and access control within the Platform. RBAC allows
+administrators to define roles and assign them to users or groups, specifying
+what actions they can perform on various resources. To gain an understanding of
+how Kubernetes RBAC works, please refer to the official Kubernetes documentation on
+[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). This guide
+assumes familiarity with Kubernetes RBAC concepts. If you are new to RBAC, it is
+recommended to review the Kubernetes documentation before proceeding.
+
+## RBAC in Kratix
+
+Everything Kratix exposes is represented as a [Custom Resource Definition
+(CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
+in Kubernetes. Therefore to restrict access to Kratix functionality, you will
+create `Role` and `RoleBindings` (or `ClusterRoles` and `ClusterRoleBindings`) that
+reference these CRDs. The CRDs of note that come out of the box with Kratix are:
+
+- [`Promise`](/main/reference/promises/intro) - The definition of a Service to
+  be offered on the Platform (cluster-scoped).
+- [`Work`](/main/learn-more/kratix-resources#output-objects) - The definition
+  of the declarative workloads that need to be scheduled (namespace-scoped).
+- [`WorkPlacement`](/main/learn-more/kratix-resources#output-objects) - The
+  definition of a scheduled workload (namespace-scoped).
+- [`GitStateStore`/`BucketStateStore`](/main/reference/statestore/intro) -
+  Definitions of State Stores that Kratix can use to write declarative
+  documents to (cluster-scoped).
+- [`Destination`](/main/guides/new-destination) - Definitions of Destinations
+  that Kratix can schedule workloads to (cluster-scoped).
+
+
+The CRDs above are primarily for Platform Engineers. End users usually interact
+with them. End users typically need two capabilities:
+
+1. Read Promises to discover available Platform offerings
+
+1. Create and manage the Promise-specific request kinds that represent their
+workloads for example, a Promise that provides a database will introduce a
+`Database` CRD
+
+Create Roles that grant only these permissions and bind them to the relevant
+users or service accounts. Prefer least privilege. Avoid granting access to
+Kratix control-plane CRDs outside the Platform team. Below are some examples
+of how to set up RBAC for different user roles.
+
+## Example RBAC
+
+Before diving into examples, recall that every resource in Kubernetes is identified by a **Group**, **Version**, and **Kind (GVK)**.  
+
+- **Group** groups related APIs together, e.g. `services.internal.acme.org`.  
+- **Version** represents the API version, e.g. `v1alpha1`.  
+- **Kind** is the resource type, e.g. `Database`.  
+
+When you define a Promise, you decide the group, version, and kind of the CRDs
+that Kratix installs.  RBAC rules reference these GVKs by *group* and *kind*.
+Every organisation will decide to slice up their groups and kinds differently
+based on their needs. There is no one-size-fits-all approach.
+
+For this example, imagine a Platform with the following Promises:
+
+```
+kubectl get promise
+NAME           STATUS        KIND              API VERSION
+database       Available     Database          services.internal.acme.org/v1alpha1
+vm             Available     VM                services.internal.acme.org/v1alpha1
+app            Available     App               goldenpaths.internal.acme.org/v1alpha1
+environment    Available     Environment       goldenpaths.internal.acme.org/v1alpha1
+loadbalancer   Available     LoadBalancer      networking.internal.acme.org/v1alpha1
+```
+
+This is exposing the following set of CRDs:
+
+```
+Group: services.internal.acme.org
+Kinds:
+  - Database        (plural: Databases)
+  - VM              (plural: VMs)
+
+Group: goldenpaths.internal.acme.org
+Kinds:
+  - App             (plural: Apps)
+  - Environment     (plural: Environments)
+
+Group: networking.internal.acme.org
+Kinds:
+  - LoadBalancer    (plural: LoadBalancers)
+```
+
+With this in mind, below are some example RBAC configurations for different
+types of users. Note we are only showing the Roles/ClusterRoles here; you
+would also need to create RoleBindings/ClusterRoleBindings to assign these
+roles to users or groups.
+
+## Example RBAC for Platform Engineers
+
+**Who this is for:** Platform Engineers who write and manage Promises, and operate the Kratix control plane.
+
+These users need to:
+- Manage Kratix resources (e.g. `Promise`, `Work`, `Destination`).
+- Access the Custom Resources the Promise is exposing, to do actions like testing the services they install.
+- Read and manage the resources Kratix creates (e.g. `Pods` created for Workflows).
+
+:::warning
+
+Below *is just an example*. You will need to adjust the API groups and
+resources to match the actual Promises in your Platform. You may also want to
+adjust the verbs to be more restrictive based on your organisational needs.
+Always follow the principle of least privilege.
+
+:::
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: platform-engineer
+rules:
+# manage Kratix core platform resources
+- apiGroups: ["platform.kratix.io"]
+  resources: ["promises","works","workplacements","gitstatestores","bucketstatestores","destinations"] # this could be just ["*"] if preferred
+  verbs: ["*"] # full access
+
+# manage all Promise-installed kinds
+# these are examples, adjust to match your actual Promises
+- apiGroups:
+  - "services.internal.acme.org"
+  - "goldenpaths.internal.acme.org"
+  - "networking.internal.acme.org"
+  resources: ["*"]
+  verbs: ["*"]
+
+# read-only CRDs installed by Promises, as the Promise itself manages these
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get","list","watch"]
+
+
+# read-only access to common runtime and RBAC objects across the cluster
+# for example accessing Pods created for Workflows and reading the logs
+- apiGroups: [""]  # core API group
+  resources: ["pods", "pods/log","configmaps"]
+  verbs: ["get","list","watch"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get","list","watch"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles","rolebindings","clusterroles","clusterrolebindings"]
+  verbs: ["get","list","watch"]
+```
+
+This role allows:
+	-	Installing and updating Promises and all other Kratix control-plane resources.
+
+  -	Managing any Promise-defined resource across the cluster.
+
+  -	Read-only viewing of `CRDs`, `Pods`, `ConfigMaps`, `Jobs`, `Roles`, `RoleBindings`,
+    `ClusterRoles`, and `ClusterRoleBindings`. You may want to allow Platform
+    Engineers to create `Roles`/`Rolebindings`/`ClusterRole`/`ClusterRoleBindings` if
+    they are responsible for managing user access.
+
+This role does not allow:
+	-	Creating, updating, patching, or deleting `CRDs`, `Pods`, `ConfigMaps`, `Jobs`, or any RBAC objects.
+
+## Example RBAC for Users of the Platform
+
+### Option A. Full access to all resources within one group
+
+Example with broad access within a single API group. Developers can create and
+manage any resource type under `services.internal.acme.org`, which includes
+`Database` and `VM`, all within the `team-a` namespace.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: services-all
+  namespace: team-a
+rules:
+- apiGroups: ["services.internal.acme.org"]
+  resources: ["*"] # This would be equivalent to ["databases","vms"]
+  verbs: ["get","list","watch","create","update","patch","delete"]
+
+# Let them discover what Promises are available
+- apiGroups: ["platform.kratix.io"]
+  resources: ["promises"]
+  verbs: ["get","list","watch"]
+```
+
+**This role allows:**
+
+- Manage `VMs` and `Databases`.
+- Discover available Promises. This is useful so developers can see what
+  services are offered on the Platform. If your exposing the Platform via a
+  different mechanism, for example via a Portal, you may not need this
+  permission. This permission means the user could see that the `app` Promise
+  exists, but they cannot manage `App` resources.
+- Automatically covering new resource kinds added later under the same group.
+  For example, if a new `Cache` kind is added under
+  `services.internal.acme.org`, developers with this role can manage it without
+  needing to update the Role.
+
+**This role does *not* allow:**
+- Access to CRDs in other API groups (e.g. any kinds belonging to `goldenpaths` or `networking`).
+- Create, update, or deletion of `Promises`.
+- Access to Kratix system resources like `Promise` or `Destination`.
+
+### Option B. Fine-grained control across groups
+
+Example with more fine-grained access control. They can manage `App` resources,
+view `Environment` resources, and manage all `networking.internal.acme.org`
+resources.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: apps-and-networking
+  namespace: team-a
+rules:
+- apiGroups: ["goldenpaths.internal.acme.org"]
+  resources: ["apps"]
+  verbs: ["*"]
+- apiGroups: ["goldenpaths.internal.acme.org"]
+  resources: ["environments"]
+  verbs: ["get","list","watch"]
+- apiGroups: ["networking.internal.acme.org"]
+  resources: ["*"]
+  verbs: ["*"]
+
+# Only let them see the Promises that they have access to
+- apiGroups: ["platform.kratix.io"]
+  resources: ["promises"]
+  resourceNames: ["app","environment","loadbalancer"]
+  verbs: ["get","list","watch"]
+```
+
+**This role allows:**
+- Managing `Apps`.
+- Viewing of `Environments`.
+- Viewing of `Promises` for `app`, `environment`, and `loadbalancer` only.
+- Managing `LoadBalancers` and any future networking resources added under `networking.internal.acme.org`.
+
+**This role does *not* allow:**
+- Updating or deleting `Environment` definitions.
+- Viewing of `Promises` outside of those they have access to, for example if the `Cache` Promise is added later, they cannot see it.
+- Accessing Kratix core or unrelated groups like `services.internal.acme.org`.
+
+
+---
+
+### Option C. Restricting access to a specific object
+
+Example with even more fine-grained access control. They can only update the `staging` instance of the `Environment` kind.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: env-staging-updater
+  namespace: team-a
+rules:
+- apiGroups: ["goldenpaths.internal.acme.org"]
+  resources: ["environments"]
+  resourceNames: ["staging"]
+  verbs: ["get","update","patch"]
+```
+
+**This role allows:**
+- Updating or patching the resource `staging` environment only.
+
+**This role does *not* allow:**
+- Creating or deleting any `Environments`.
+- Reading or modifying any other objects in the cluster.
+- Viewing `Promises` to discover available services.
+
+---
+
+The above is not an exhaustive list of possibilities. You can mix and match
+rules to create Roles that fit your organisational needs. Always follow the
+principle of least privilege when assigning permissions.
+
+:::info
+Remember to create corresponding RoleBindings or ClusterRoleBindings to assign these Roles or ClusterRoles to users, groups, or service accounts
+:::
+
+
+## When to use Roles vs. ClusterRoles
+
+- **Use Roles** for namespace-scoped access (most developer use cases).  
+  Each Role applies only within a namespace and isolates teams naturally.  
+- **Use ClusterRoles** for cluster-wide access (e.g. Platform Engineers).  
+  These are required when managing cluster-scoped resources such as CRDs or Kratix control-plane objects.  
+
+As a rule of thumb:
+- **Developers:** `Role` + `RoleBinding` per namespace.  
+- **Platform Engineers:** `ClusterRole` + `ClusterRoleBinding` across the cluster.
+
