@@ -134,6 +134,7 @@ rules:
 
 
 # read-only access to common runtime and RBAC objects across the cluster
+# for example accessing Pods created for Workflows and reading the logs
 - apiGroups: [""]  # core API group
   resources: ["pods", "pods/log","configmaps"]
   verbs: ["get","list","watch"]
@@ -147,13 +148,16 @@ rules:
 
 This role allows:
 	-	Installing and updating Promises and all other Kratix control-plane resources.
-	-	Managing any Promise-defined resource across the cluster.
-	-	Read-only viewing of CRDs, Pods, ConfigMaps, Jobs, Roles, RoleBindings, ClusterRoles, and ClusterRoleBindings.
+
+  -	Managing any Promise-defined resource across the cluster.
+
+  -	Read-only viewing of CRDs, Pods, ConfigMaps, Jobs, Roles, RoleBindings,
+    ClusterRoles, and ClusterRoleBindings. You may want to allow Platform
+    Engineers to create Roles/Rolebindings/ClusterRole/ClusterRoleBindings if
+    they are responsible for managing user access.
 
 This role does not allow:
 	-	Creating, updating, patching, or deleting CRDs, Pods, ConfigMaps, Jobs, or any RBAC objects.
-
----
 
 ## Example RBAC for Users of the Platform
 
@@ -161,7 +165,7 @@ This role does not allow:
 
 Example with broad access within a single API group. Developers can create and
 manage any resource type under `services.internal.acme.org`, which includes
-`Database` and `VM`.
+`Database` and `VM`, all within the `team-a` namespace.
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
