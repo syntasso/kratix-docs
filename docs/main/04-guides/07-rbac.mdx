@@ -1,6 +1,6 @@
 ---
-description: Role Based Access Control (RBAC) in Kratix
-title: Role Based Access Control (RBAC) in Kratix
+description: Role Based Access Control (RBAC)
+title: Role Based Access Control (RBAC)
 id: rbac
 ---
 
@@ -18,7 +18,7 @@ recommended to review the Kubernetes documentation before proceeding.
 Everything Kratix exposes is represented as a [Custom Resource Definition
 (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 in Kubernetes. Therefore to restrict access to Kratix functionality, you will
-create Roles and RoleBindings (or ClusterRoles and ClusterRoleBindings) that
+create `Role` and `RoleBindings` (or `ClusterRoles` and `ClusterRoleBindings`) that
 reference these CRDs. The CRDs of note that come out of the box with Kratix are:
 
 - [`Promise`](/main/reference/promises/intro) - The definition of a Service to
@@ -54,7 +54,7 @@ Before diving into examples, recall that every resource in Kubernetes is identif
 
 - **Group** groups related APIs together, e.g. `services.internal.acme.org`.  
 - **Version** represents the API version, e.g. `v1alpha1`.  
-- **Kind** is the resource type, e.g. `DatabaseRequest`.  
+- **Kind** is the resource type, e.g. `Database`.  
 
 When you define a Promise, you decide the group, version, and kind of the CRDs
 that Kratix installs.  RBAC rules reference these GVKs by *group* and *kind*.
@@ -103,13 +103,14 @@ roles to users or groups.
 These users need to:
 - Manage Kratix resources (e.g. `Promise`, `Work`, `Destination`).
 - Access the Custom Resources the Promise is exposing, to do actions like testing the services they install.
-- Read and manage the resources Kratix creates (e.g. Pods created for Workflows).
+- Read and manage the resources Kratix creates (e.g. `Pods` created for Workflows).
 
 :::warning
 
-Below *is just an example*. Your actual Platform Engineer role may differ based
-on your organisational needs and the Promises you have installed. Always follow
-the principle of least privilege when assigning permissions.
+Below *is just an example*. You will need to adjust the API groups and
+resources to match the actual Promises in your Platform. You may also want to
+adjust the verbs to be more restrictive based on your organisational needs.
+Always follow the principle of least privilege.
 
 :::
 
@@ -157,13 +158,13 @@ This role allows:
 
   -	Managing any Promise-defined resource across the cluster.
 
-  -	Read-only viewing of CRDs, Pods, ConfigMaps, Jobs, Roles, RoleBindings,
-    ClusterRoles, and ClusterRoleBindings. You may want to allow Platform
-    Engineers to create Roles/Rolebindings/ClusterRole/ClusterRoleBindings if
+  -	Read-only viewing of `CRDs`, `Pods`, `ConfigMaps`, `Jobs`, `Roles`, `RoleBindings`,
+    `ClusterRoles`, and `ClusterRoleBindings`. You may want to allow Platform
+    Engineers to create `Roles`/`Rolebindings`/`ClusterRole`/`ClusterRoleBindings` if
     they are responsible for managing user access.
 
 This role does not allow:
-	-	Creating, updating, patching, or deleting CRDs, Pods, ConfigMaps, Jobs, or any RBAC objects.
+	-	Creating, updating, patching, or deleting `CRDs`, `Pods`, `ConfigMaps`, `Jobs`, or any RBAC objects.
 
 ## Example RBAC for Users of the Platform
 
@@ -183,15 +184,29 @@ rules:
 - apiGroups: ["services.internal.acme.org"]
   resources: ["*"] # This would be equivalent to ["databases","vms"]
   verbs: ["get","list","watch","create","update","patch","delete"]
+
+# Let them discover what Promises are available
+- apiGroups: ["platform.kratix.io"]
+  resources: ["promises"]
+  verbs: ["get","list","watch"]
 ```
 
 **This role allows:**
 
 - Manage `VMs` and `Databases`.
-- Automatically covering new resource kinds added later under the same group. For example, if a new `Cache` kind is added under `services.internal.acme.org`, developers with this role can manage it without needing to update the Role.
+- Discover available Promises. This is useful so developers can see what
+  services are offered on the Platform. If your exposing the Platform via a
+  different mechanism, for example via a Portal, you may not need this
+  permission. This permission means the user could see that the `app` Promise
+  exists, but they cannot manage `App` resources.
+- Automatically covering new resource kinds added later under the same group.
+  For example, if a new `Cache` kind is added under
+  `services.internal.acme.org`, developers with this role can manage it without
+  needing to update the Role.
 
 **This role does *not* allow:**
 - Access to CRDs in other API groups (e.g. any kinds belonging to `goldenpaths` or `networking`).
+- Create, update, or deletion of `Promises`.
 - Access to Kratix system resources like `Promise` or `Destination`.
 
 ### Option B. Fine-grained control across groups
@@ -216,16 +231,25 @@ rules:
 - apiGroups: ["networking.internal.acme.org"]
   resources: ["*"]
   verbs: ["*"]
+
+# Only let them see the Promises that they have access to
+- apiGroups: ["platform.kratix.io"]
+  resources: ["promises"]
+  resourceNames: ["app","environment","loadbalancer"]
+  verbs: ["get","list","watch"]
 ```
 
 **This role allows:**
-- Managing Apps.
-- Viewing of environments.
-- Managing Load Balancers and any future networking resources added under `networking.internal.acme.org`.
+- Managing `Apps`.
+- Viewing of `Environments`.
+- Viewing of `Promises` for `app`, `environment`, and `loadbalancer` only.
+- Managing `LoadBalancers` and any future networking resources added under `networking.internal.acme.org`.
 
 **This role does *not* allow:**
-- Updating or deleting environment definitions.
+- Updating or deleting `Environment` definitions.
+- Viewing of `Promises` outside of those they have access to, for example if the `Cache` Promise is added later, they cannot see it.
 - Accessing Kratix core or unrelated groups like `services.internal.acme.org`.
+
 
 ---
 
@@ -250,14 +274,17 @@ rules:
 - Updating or patching the resource `staging` environment only.
 
 **This role does *not* allow:**
-- Creating or deleting any environments.
+- Creating or deleting any `Environments`.
 - Reading or modifying any other objects in the cluster.
+- Viewing `Promises` to discover available services.
 
 ---
 
-The above is not an exhaustive list of possibilities. You can mix and match rules to create Roles that fit your organisational needs. Always follow the principle of least privilege when assigning permissions.
+The above is not an exhaustive list of possibilities. You can mix and match
+rules to create Roles that fit your organisational needs. Always follow the
+principle of least privilege when assigning permissions.
 
-:::note
+:::info
 Remember to create corresponding RoleBindings or ClusterRoleBindings to assign these Roles or ClusterRoles to users, groups, or service accounts
 :::
 
