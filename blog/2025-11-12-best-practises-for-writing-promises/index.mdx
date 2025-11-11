@@ -1,0 +1,559 @@
+---
+slug: promise-best-practises
+title: "Best practices for Promise-writing"
+description: Best practises to bear in mind when writing your Promises
+authors: [sapphire]
+tags: [kratix, workflows, promises]
+---
+
+As platforms are so unique to organisations, and the services required by platform users are so vast, Kratix has always been very
+flexible when it comes to the design of Promises. Other than the expectation that Promise writers honour the Promise schema, the
+scope for how Promises can be designed is vast; containers can be written in any language, workflows can be as segmented as you
+would like and workflow actions can be imperative or declarative.
+
+However, there are a number design practices and approaches to promise development that can make development and maintenance
+easier for promise developers and make consuming services via Promises better for users.
+
+In this blog post, we’re going design a promise with some core fundamentals in mind, paving the way for better debug-ability,
+reliability and user clarity.
+
+<!-- truncate -->
+
+To get started, we’re going to bootstrap our Promise. We’ll be creating a Redis Promise to provision Redis instances as-a-service.
+We’ll start by creating a new directory for our Promise and  will use the [kratix cli](/main/kratix-cli/intro) to bootstrap it. Run:
+
+```bash
+mkdir redis-promise
+
+kratix init promise redis \
+  --group mygroup.org \
+  --kind Redis \
+  --version v1alpha1
+```
+
+This creates a basic `promise.yaml` and an example resource request - `example-resource.yaml` - for your Promise. So far, this
+Promise doesn’t do much, let’s leverage an existing Redis operator to create instances of our Redis. To do this, the Redis
+operator, CRDs and other dependencies must exist on all destinations before the Promise can provision Redis instances.
+
+To start, create a directory called `dependencies`:
+
+```bash
+mkdir dependencies
+```
+
+Then run the following to download the manifests for the redis dependencies and place them in the `dependencies` directory.
+
+```bash
+curl -L https://raw.githubusercontent.com/syntasso/kratix-marketplace/refs/heads/main/redis/internal/configure-pipeline/resources/dependencies/all-redis-operator-resources.yaml -o dependencies/operator-bundle.yaml
+
+curl https://raw.githubusercontent.com/syntasso/kratix-marketplace/refs/heads/main/redis/internal/configure-pipeline/resources/dependencies/databases.spotahome.com_redisfailovers.yaml > dependencies/databases.spotahome.com_redisfailovers.yaml
+```
+
+We can now use the kratix cli to ensure these dependencies are installed when the Promise’s Configure Pipeline runs with the
+`update dependencies` command:
+
+```bash
+kratix update dependencies dependencies --image ghcr.io/syntasso/redis-dependencies:v0.0.2
+```
+
+This command:
+
+- Places the dependencies in the `workflows/promise/configure/dependencies/configure-deps/resources` directory
+- Creates a Dockerfile that copies the contents of the resource directory into the `/kratix/outputs` directory so they will be
+  written to all appropriate destinations
+- Adds the `promise.configure` step to the `pipeline.yaml`
+
+Your directory should now look something like this:
+
+```bash
+├── README.md
+├── dependencies
+│   ├── databases.spotahome.com_redisfailovers.yaml
+│   └── operator-bundle.yaml
+├── example-resource.yaml
+├── promise.yaml
+└── workflows
+    └── promise
+        └── configure
+            └── dependencies
+                └── configure-deps
+                    ├── Dockerfile
+                    ├── resources
+                    │   ├── databases.spotahome.com_redisfailovers.yaml
+                    │   └── operator-bundle.yaml
+                    └── scripts
+                        └── pipeline.sh
+
+9 directories, 9 files
+```
+
+And your promise.yaml should include the below:
+
+```yaml
+  workflows:
+    config: {}
+#highlight-start
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: dependencies
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/redis-dependencies:v0.0.2
+            name: configure-deps
+#highlight-end
+    resource: {}
+```
+
+Now it is time to build the image that will run as part of the  `promise.configure` step. If you are running your cluster on kind,
+you can build and load the image to your cluster with:
+
+```bash
+docker build --tag ghcr.io/syntasso/redis-dependencies:v0.0.1 workflows/promise/configure/dependencies/configure-deps
+
+kind load docker-image ghcr.io/syntasso/redis-dependencies:v0.0.1 --name platform
+```
+
+We can now install this early iteration of the Promise!
+
+```bash
+kubectl apply --filename promise.yaml
+```
+
+You will soon see the Redis dependencies appearing on your worker cluster. Watch the the operator pod as it is created with:
+
+```bash
+kubectl get pods --context kind-worker --watch
+```
+
+You should eventually see output similar to the following:
+
+```bash
+NAME                             READY   STATUS    RESTARTS   AGE
+redisoperator-7f584c6969-zc8sx   1/1     Running   0          41s
+```
+
+You now have a Promise that installs the Redis operator and its its dependencies but it does not yet provision Redis as-a-service
+
+**Declarative Workflows**
+
+Whilst it would have been possible to install the operator and it’s dependencies with `kubectl apply` commands targeting the cluster,
+we have chosen a *declarative* approach; defining the desired state of the resources on the cluster and allowing the configured
+GitOps tools to converge on this desired state. Taking a declarative approach improves reliability as GitOps tools automatically
+correct drift, provide audibility as the configurations are declared up-front, and are more predictable. 
+
+This is also essential
+for ensuring that Kratix can easily delete the resources created when Promises are deleted as Kratix deletes the files created as part of any configure workflows during Promise deletion.
+
+At the moment, our Promise configure workflow is declarative and defines all prerequisites for installing the Redis Operator on
+the cluster, including the CRD for the RedisFailover CR. With these installed, we can continue to to take a declarative approach
+with our resource configure workflows - that is, what happens when a user makes a request of our redis promise.
+
+Within this workflow, we want to create a RedisFailover CR from the inputs provided by the user. There are a number of options
+that can be configured in the RedisFailover CR but there are some defaults that we, as the Promise writers, want to enforce. The
+only thing we want to users to be able to configure is the number of replicas and the name of their RedisFailover. 
+
+We’ll take the name of the RedisFailover from the name of the user’s requests and the number of replicas from the API exposed by
+the Promise. We’re going to wrap the number of replicas in a simple abstraction where `small` is one replica and `large` is three;
+we can implement the logic for this in our workflow which we’ll introduce shortly. 
+
+First, we’re going to update the Promise API to introduce the `size` property. We can do this with the `update api` command:
+
+```bash
+kratix update api --property size:string
+```
+
+You should see that the following has been added to the `promise.yaml`
+
+```yaml
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      creationTimestamp: null
+      name: rediss.mygroup.org
+    spec:
+      group: mygroup.org
+      names:
+        kind: Redis
+        plural: rediss
+        singular: redis
+      scope: Namespaced
+      versions:
+      - name: v1alpha1
+        schema:
+          openAPIV3Schema:
+            properties:
+              spec:
+                properties:
+                  size:
+                    type: string
+                type: object
+            type: object
+        served: true
+        storage: true
+```
+
+We can now add a workflow that uses to this property. Again, we can use the kratix cli - this time with the `add container`
+command:
+
+```bash
+kratix add container resource/configure/instance-configure --image ghcr.io/syntasso/redis-dependencies:v0.0.1 --language go
+```
+
+This will have updated the `promise.yaml` to add a `resource.configure` workflow and have bootstrapped a Docker image that can be
+built to run as part of this workflow. As we has specified that we want to use the [kratix-go sdk](https://pkg.go.dev/github.com/syntasso/kratix-go) for this Promise via the `--language`
+flag, we also have a `pipeline.go` file. Update the script to contain the following:
+
+```go
+package main
+
+import (
+	"fmt"
+
+	kratix "github.com/syntasso/kratix-go"
+)
+
+func main() {
+	sdk := kratix.New()
+	resource, _ := sdk.ReadResourceInput()
+	name := resource.GetName()
+	size, err := resource.GetValue("spec.size")
+	if err != nil {
+		log.Fatalf("failed fetch 'size' property from request: %v", err)
+	}
+	
+	var replicas int
+	if size == "small" {
+		replicas = 1
+	}
+	
+	if size == "large" {
+		replicas = 3
+	}
+	
+	failoverTemplate := `apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: %s
+  namespace: default
+spec:
+  redis:
+    imagePullPolicy: IfNotPresent
+    replicas: %d
+    customConfig:
+      - "maxclients 100"
+      - "hz 50"
+      - "timeout 60"
+      - "tcp-keepalive 60"
+      - "client-output-buffer-limit normal 0 0 0"
+      - "client-output-buffer-limit slave 1000000000 1000000000 0"
+      - "client-output-buffer-limit pubsub 33554432 8388608 60"
+    resources:
+      limits:
+        cpu: 400m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  sentinel:
+    imagePullPolicy: IfNotPresent
+    replicas: %d
+    customConfig:
+      - "down-after-milliseconds 2000"
+      - "failover-timeout 3000"
+    resources:
+      limits:
+        memory: 100Mi
+      requests:
+        cpu: 100m
+`
+		redisContent := []byte(fmt.Sprintf(failoverTemplate, name, replicas, replicas))
+	
+		sdk.WriteOutput("redis_failover.yaml", redisContent)
+}
+```
+
+We’re going to execute this script when creating and updating a resource request. It will:
+
+1. Retrieve the name and size of the Redis from the resource request
+2. Interpolate these in the template for the generated redis failover alongside the configured defaults
+3. Write the RedisFailover CR to the `/kratix/output` directory so it can be written to a destination.
+
+As this workflow is written declaratively, there will be no attempts to create the Redis after initial creation. It will only be
+updated if there is a change in the specification of the resource.
+
+**Idempotency**
+
+Idempotency refers to the ability to run an action multiple times with the guarantee that there will be no additional effect of
+running after it the initial action. In our case, if the resource configure workflow runs a second or third time, no additional
+Redis instance will be created on these occasions. This is part of what having a declarative workflow enables. As the workflow
+describes the *desired* Redis instance, if the workflow re-runs for any reason, the Redis will not be created again. It will
+however, be updated if there are any changes to the request.
+
+**Error Handling**
+
+When writing Promise workflows, correct error handling is essential and we must ensure that, should an error occur, the container
+exits with a non-zero exit code.
+
+Take a look at this part of our script:
+
+```bash
+	redisContent := []byte(fmt.Sprintf(failoverTemplate, name, size, size))
+	sdk.WriteOutput("redis_failover.yaml", redisContent)	
+```
+
+The go SDK’s `WriteOutput` function returns an error if for any reason, we are unable to write output to a file. However, at
+present, we are not checking if an error arises and do not exit if it does. In this form, the write could fail, the container
+would exit and we wouldn’t notice that something had gone wrong until the RedisFailover failed to appear on the destination.
+
+Let’s mitigate against exactly this, update the workflow with the following:
+
+```bash
+	redisContent := []byte(fmt.Sprintf(failoverTemplate, name, size, size))
+	
+	err = sdk.WriteOutput("redis_failover.yaml", redisContent)
+	if err != nil {
+		log.Fatalf("failed to write output: %v", err)
+	}
+```
+
+The script will now exit with an error if one is returned by the `WriteOutput` function. Now, if the write fails it is immediately obvious from the execution of the workflow pod as it will fail.
+
+**Informing users via the status**
+
+When users make a request, as Promise writers we can be as specific as we would like about the information we would like to
+surface to users about their request. For some resources, this can include details about how to access a given service with a url
+or database string for instance. We’re going to do something more simple, when the `redis_failover.yaml` has been successfully
+written to the outputs, we’re going to inform users that it is in the “Provisioning” stage so they know that their request is in
+progress.
+
+We can do this with the SDK. Add the following to the end of the workflow script:
+
+```bash
+	status := kratix.NewStatus()
+	status.Set("stage", "provisioning")
+	if err := sdk.WriteStatus(status); err != nil {
+		log.Fatalf("failed to write status: %v", err)
+	}
+```
+
+This part of the workflow:
+
+1. Creates a status 
+2. Sets the key and value `stage: provisioning` on the status
+3. Writes the status as a `status.yaml` file to the `metadata` directory
+
+When the `status.yaml` file is written to the metadata directory, Kratix will automatically persist that information to the status
+of the Resource. 
+
+This  status-writing happens at the end of the workflow, but what if there is a failure earlier in the workflow? How can we inform
+the user that something has gone wrong? In these error cases, we can update the status by patching the resource directly via the
+API.
+
+Let’s revisit the previous example of error handling:
+
+```bash
+	redisContent := []byte(fmt.Sprintf(failoverTemplate, name, size, size))
+	
+	err := sdk.WriteOutput("redis_failover.yaml", redisContent)
+	if err != nil {
+		log.Fatalf("failed to write output: %v", err)
+	}
+```
+
+If the `WriteOutput` function fails, we want to ensure that an error in provisioning is surfaced in the status of the requested resource. Update the script with the following:
+
+```bash
+	redisContent := []byte(fmt.Sprintf(failoverTemplate, name, size, size))
+
+	err := sdk.WriteOutput("redis_failover.yaml", redisContent)
+	if err != nil {
+#highlight-start
+		status := kratix.NewStatus()
+		status.Set("stage", "provisioning error")
+		if err := sdk.PublishStatus(resource, status); err != nil {
+			log.Fatalf("failed to publish status: %v", err)
+		}
+#highlight-end
+		log.Fatalf("failed to write output: %v", err)
+	}
+```
+
+If an error occurs when writing the output, before exiting the container we are now:
+
+1. Creating a status and setting the `stage` to `provisioning error`
+2. Calling `PublishStatus` to update the resource directly. The `PublishStatus` function performs a patch of the resource.
+
+This ensures that even in scenarios where errors occur, we still communicate the status of the resource to users.
+
+<details>
+<summary>
+
+_Click here_ for the full `pipeline.go` file.
+
+</summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	kratix "github.com/syntasso/kratix-go"
+)
+
+func main() {
+	sdk := kratix.New()
+	resource, _ := sdk.ReadResourceInput()
+	name := resource.GetName()
+	size, err := resource.GetValue("spec.size")
+	if err != nil {
+		log.Fatalf("failed fetch 'size' property from request: %v", err)
+	}
+
+	var replicas int
+	if size == "small" {
+		replicas = 1
+	}
+
+	if size == "large" {
+		replicas = 3
+	}
+
+	failoverTemplate := `apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: %s
+  namespace: default
+spec:
+  redis:
+    imagePullPolicy: IfNotPresent
+    replicas: %d
+    customConfig:
+      - "maxclients 100"
+      - "hz 50"
+      - "timeout 60"
+      - "tcp-keepalive 60"
+      - "client-output-buffer-limit normal 0 0 0"
+      - "client-output-buffer-limit slave 1000000000 1000000000 0"
+      - "client-output-buffer-limit pubsub 33554432 8388608 60"
+    resources:
+      limits:
+        cpu: 400m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  sentinel:
+    imagePullPolicy: IfNotPresent
+    replicas: %d
+    customConfig:
+      - "down-after-milliseconds 2000"
+      - "failover-timeout 3000"
+    resources:
+      limits:
+        memory: 100Mi
+      requests:
+        cpu: 100m
+`
+
+	redisContent := []byte(fmt.Sprintf(failoverTemplate, name, replicas, replicas))
+
+	err = sdk.WriteOutput("redis_failover.yaml", redisContent)
+	if err != nil {
+		status := kratix.NewStatus()
+		status.Set("stage", "provisioning error")
+		if err := sdk.PublishStatus(resource, status); err != nil {
+			log.Fatalf("failed to publish status: %v", err)
+		}
+		log.Fatalf("failed to write output: %v", err)
+	}
+
+	status := kratix.NewStatus()
+	status.Set("stage", "provisioning")
+	if err := sdk.WriteStatus(status); err != nil {
+		log.Fatalf("failed to write status: %v", err)
+	}
+}
+
+```
+
+</details>
+We are now ready to build this image and make our first resource request for a redis-as-a-service. 
+
+Let’s start by initialising the go modules for the script and building the image:
+
+```bash
+pushd workflows/resource/configure/instance-configure/ghcr-io-syntasso-redis-configure/scripts
+	go mod init syntasso/redis-configure
+	go mod tidy
+popd
+
+docker build --tag ghcr.io/syntasso/redis-configure:v0.0.1 workflows/resource/configure/instance-configure/ghcr-io-syntasso-redis-configure/
+
+kind load docker-image ghcr.io/syntasso/redis-configure:v0.0.1 --name platform
+```
+
+With the image built and loaded in your environment, you are now ready to make a resource request.
+
+Update the `example-resource.yaml` to specify a size:
+
+```bash
+apiVersion: mygroup.org/v1alpha1
+kind: Redis
+metadata:
+  name: example-redis
+#highlight-start
+spec:
+  size: small
+#highlight-end
+```
+
+Now you can use the `kubectl` cli to apply this request:
+
+```bash
+kubectl apply --file example-resource.yaml
+```
+
+Shortly, you should begin to see the Redis pods starting on your worker cluster. You can check with:
+
+```bash
+kubectl get pods --context kind-worker
+```
+
+You should see something similar to the following:
+
+```bash
+NAMESPACE            NAME                                           READY   STATUS    RESTARTS       AGE
+default              redisoperator-7f584c6969-7hh9z                 1/1     Running   0              10m
+default              rfr-example-redis-0                            1/1     Running   0              75s
+default              rfs-example-redis-79c8b8c977-fdv9x             1/1     Running   0              75s
+```
+
+Additionally, your resource request should detail that it is in a `provisioning` state. Run:
+
+```bash
+kubectle describe redis example-redis
+```
+
+Yous status should show the following:
+
+```bash
+  Last Successful Configure Workflow Time:  2025-11-11T14:40:07Z
+  Message:                                  Resource requested
+  Observed Generation:                      1
+#highlight-start
+  Stage:                                    provisioning
+#highlight-end
+  Workflows:                                1
+  Workflows Failed:                         0
+  Workflows Succeeded:                      1 
+```
+
+Congratulations! You have written a promise that employs some of the best practices for Promise implementation; declarative
+workflows, idempotency, correct error handling and effective use of the resource status. With these in mind, you’ll create
+Promises that are easier to debug and update, and provide a better experience for consumers.
