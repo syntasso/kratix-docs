@@ -385,5 +385,5 @@ see errors in the logs of the Workflow if it is trying to access the API without
 the correct permissions. To give the Workflow more access you need to create
 additional
 [RBAC permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). [Check the
-documentation](/main/reference/workflows#rbac) for how you can configure permissions for Workflows
+documentation](/main/reference/workflows#role-based-access-control-rbac) for how you can configure permissions for Workflows
 alongside some examples.
