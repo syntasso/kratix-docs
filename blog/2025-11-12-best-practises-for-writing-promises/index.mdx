@@ -31,7 +31,7 @@ kratix init promise redis \
   --version v1alpha1
 ```
 
-This creates a basic `promise.yaml` and an example resource request - `example-resource.yaml` - for your Promise. So far, this
+This creates a basic `promise.yaml` and an example resource request - `example-resource.yaml` - for our Promise. So far, this
 Promise doesn’t do much, let’s leverage an existing Redis operator to create instances of our Redis. To do this, the Redis
 operator, CRDs and other dependencies must exist on all destinations before the Promise can provision Redis instances.
 
@@ -87,7 +87,7 @@ Your directory should now look something like this:
 9 directories, 9 files
 ```
 
-And your promise.yaml should include the below:
+And the promise.yaml should include the below:
 
 ```yaml
   workflows:
@@ -122,7 +122,7 @@ We can now install this early iteration of the Promise!
 kubectl apply --filename promise.yaml
 ```
 
-You will soon see the Redis dependencies appearing on your worker cluster. Watch the the operator pod as it is created with:
+You will soon see the Redis dependencies appearing on the worker cluster. Watch the operator pod as it is created with:
 
 ```bash
 kubectl get pods --context kind-worker --watch
@@ -498,7 +498,7 @@ docker build --tag ghcr.io/syntasso/redis-configure:v0.0.1 workflows/resource/co
 kind load docker-image ghcr.io/syntasso/redis-configure:v0.0.1 --name platform
 ```
 
-With the image built and loaded in your environment, you are now ready to make a resource request.
+With the image built and loaded in our environment, we are now ready to make a resource request.
 
 Update the `example-resource.yaml` to specify a size:
 
@@ -513,13 +513,13 @@ spec:
 #highlight-end
 ```
 
-Now you can use the `kubectl` cli to apply this request:
+Now we can use the `kubectl` cli to apply this request:
 
 ```bash
 kubectl apply --file example-resource.yaml
 ```
 
-Shortly, you should begin to see the Redis pods starting on your worker cluster. You can check with:
+Shortly, we should begin to see the Redis pods starting on the worker cluster. Let's check with:
 
 ```bash
 kubectl get pods --context kind-worker
@@ -534,13 +534,13 @@ default              rfr-example-redis-0                            1/1     Runn
 default              rfs-example-redis-79c8b8c977-fdv9x             1/1     Running   0              75s
 ```
 
-Additionally, your resource request should detail that it is in a `provisioning` state. Run:
+Additionally, the resource request should detail that it is in a `provisioning` state. Run:
 
 ```bash
 kubectl describe redis example-redis
 ```
 
-Yous status should show the following:
+The status should show the following:
 
 ```bash
   Last Successful Configure Workflow Time:  2025-11-11T14:40:07Z
