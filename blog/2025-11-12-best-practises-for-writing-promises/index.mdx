@@ -490,7 +490,7 @@ Let’s start by initialising the go modules for the script and building the ima
 ```bash
 pushd workflows/resource/configure/instance-configure/ghcr-io-syntasso-redis-configure/scripts
 	go mod init syntasso/redis-configure
-	go mod tidy
+go mod tidy
 popd
 
 docker build --tag ghcr.io/syntasso/redis-configure:v0.0.1 workflows/resource/configure/instance-configure/ghcr-io-syntasso-redis-configure/
