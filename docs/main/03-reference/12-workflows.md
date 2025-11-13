@@ -299,7 +299,7 @@ does exist, Kratix will not modify or delete the service account.
 ### Secrets
 
 To access Secrets in the Pipeline, you can either [provide additional
-RBAC](#rbac) so that the pipeline can `kubectl get secret`  secret or pass in a
+RBAC](#role-based-access-control-rbac) so that the pipeline can `kubectl get secret` secret or pass in a
 reference to the Pipeline container's `env` using `valueFrom.secretKeyRef` in
 the standard Kubernetes way.
 
