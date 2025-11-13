@@ -144,8 +144,14 @@ we have chosen a *declarative* approach; defining the desired state of the resou
 GitOps tools to converge on this desired state. Taking a declarative approach improves reliability as GitOps tools automatically
 correct drift, provide audibility as the configurations are declared up-front, and are more predictable. 
 
-This is also essential
-for ensuring that Kratix can easily delete the resources created when Promises are deleted as Kratix deletes the files created as part of any configure workflows during Promise deletion.
+This is also essential for ensuring that Kratix can easily delete the resources created when Promises are deleted as Kratix deletes
+the files created as part of any configure workflows during Promise deletion.
+
+:::info
+This is in-keeping with the "Declare and Converge" pattern used to manage Kubernetes objects.
+
+You can read more about this in the [Kubernetes Documentation](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/)
+:::
 
 At the moment, our Promise configure workflow is declarative and defines all prerequisites for installing the Redis Operator on
 the cluster, including the CRD for the RedisFailover CR. With these installed, we can continue to to take a declarative approach
