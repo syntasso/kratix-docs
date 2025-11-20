@@ -377,3 +377,20 @@ ske-operator-controller-manager      1/1     1            1           1h
 
 You can now proceed with the configuration of Kratix (i.e. registering destinations or
 installing promises). For that, refer to the Open-Source Kratix documentation.
+
+## Post Installation
+
+After installing SKE, you must ensure that every namespace where resource
+requests will be made has access to the SKE license token. When SKE triggers a
+Workflow for a Promise, the Workflow pulls a SKE image to run as a container
+in the pod. The secret must therefore be present in the namespace so the image
+can be pulled successfully. For example, to ensure resource requests can be made
+successfully in the `default` namespace you would run the following:
+
+```bash
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=default \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
+```

@@ -67,6 +67,13 @@ kubectl create secret docker-registry syntasso-registry \
   --docker-server=registry.syntasso.io \
   --docker-username=syntasso-pkg \
   --docker-password=<YOUR TOKEN>
+
+# secret is required for all namespaces where resource requests are made
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=default \
+  --docker-server=registry.syntasso.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR TOKEN>
 ```
 
 Then apply the SKE installer manifest:
