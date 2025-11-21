@@ -1,6 +1,7 @@
 ---
 title: Troubleshooting
-description: Common issues when installing and running Kratix
+description: Common issues when installing and running Kratix and how to debug them
+keywords: [debugging, debug, troubleshoot, error, logs, works, logs, logging, log levels]
 ---
 
 ## Common issues
@@ -23,12 +24,13 @@ document goes from the Workflow to the Destination in a few steps:
    for them to appear (e.g. Kubernetes resources or terraform files)
 
 Let's first check:
+
 1. The workflow outputted the documents
    - Check the Workflow logs for any errors that might not be being handled
      correctly.
-     You can query the workflow pods by running
+     You can query the workflow pods by running:
 
-     ```
+     ```bash
      kubectl get pods --selector kratix.io/promise-name=<name of the promise>, \
       kratix.io/workflow-type=<promise or resource>, \
       kratix.io/workflow-action=<configure or delete>, \
@@ -36,19 +38,19 @@ Let's first check:
       kratix.io/resource-name=<name of resource>
      ```
 
-     Your can use as any combination of these labels depending on the workflow you
+     You can use as any combination of these labels depending on the workflow you
      are querying.
 
      You can find the name of a _specific_ Pipeline pod by running
 
-     ```
+     ```bash
      kubectl get pods --selector kratix.io/resource-name=<request-name>
      ```
 
      Then inspect the logs for your container, this will be the container name of
      the workflow Pipeline in your Promise specification
 
-     ```
+     ```bash
      kubectl logs <workflow-pod-name> -c <container-name>
      ```
 
@@ -56,13 +58,13 @@ Let's first check:
      contain the outputs of a Workflow) to see if the document is listed inside
      it.
 
-     ```
+     ```bash
      kubectl get work --selector kratix.io/resource-name=<request-name>
      ```
 
      Inspect the Work's `.spec` to see if your documents are listed
 
-     ```
+     ```bash
      kubectl get work <work-name> -o yaml
      ```
 
@@ -82,7 +84,7 @@ Let's first check:
      created from the `Work` resource, representing the scheduling of a `Work`)
      to see if the document is listed inside it.
 
-     ```
+     ```bash
      kubectl get workplacement --selector kratix.io/work=<work-name>
      ```
 
