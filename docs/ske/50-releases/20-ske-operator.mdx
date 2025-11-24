@@ -26,6 +26,18 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
+### [v0.18.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.18.2/) (2025-11-21)
+
+Released in Helm Chart version [version 0.50.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.50.0/)
+
+#### Bug fixes
+
+* Use the correct pipeline adapter image when Kratix version is set to 'latest'.
+
+#### Known issues
+
+* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE Operator. SKE Operator is not impacted by the vulnerability. The upstream dependency will be updated in the next release.
+
 ### [v0.18.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.18.1/) (2025-10-14)
 
 Released in Helm Chart version [version 0.48.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.48.0/)
