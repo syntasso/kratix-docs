@@ -1,17 +1,17 @@
 ---
 id: setup
-title: "Installing the tools"
-description: Find out what you need in installed before starting the workshop
+title: Installing the tools
+description: Find out what you need installed before starting any workshop
 ---
 
 ## Install cli tools
 
-In this workshop, you will deploy Kratix on a local Kubernetes cluster, and deploy
+In our workshops, you will run Kratix on a local Kubernetes cluster, and deploy
 Kratix workloads on another Kubernetes cluster. You will need the following
 tools:
 
 1. `kratix` CLI / **Kratix Command-line Tool**: <br />
-   Used to build the Promise in Part II. <br />
+   Used to build the Promise in the [Writing a Promise Workshop](../writing-a-promise/intro). <br />
    See [Kratix CLI documentation page](/main/kratix-cli/intro)
    for installation instructions.
 
@@ -47,14 +47,14 @@ tools:
 
 :::info
 
-You can run the workshop without KinD. Ideally, you will have access to two
+You can run the workshop without `kind`. Ideally in this case, you will have access to two
 Kubernetes clusters.
 
-One cluster will be the Platform cluster, where Kratix will be installed.
+One cluster will be the **Platform** cluster, where Kratix will be installed.
 Whenever you see `--context kind-platform`, replace it with the context of your
 platform cluster.
 
-The other worker will be the Worker cluster. Whenever you see `--context
+The other worker will be the **Worker** cluster. Whenever you see `--context
 kind-worker`, replace it with the context of your worker cluster.
 
 If you want to try it on a single cluster, you can omit the `--context` flag and
@@ -62,7 +62,7 @@ argument entirely.
 
 :::
 
-## Docker Resources {#docker-config}
+## Docker Resources
 
 In order to complete all tutorials in this series, you must allocate enough
 resources to Docker. Ensure you allocate at least:

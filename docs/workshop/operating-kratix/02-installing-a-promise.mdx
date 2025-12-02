@@ -1,8 +1,7 @@
 ---
-description: Create and configure a worker cluster, and install a Promise
-title: "Section B: Installing a Promise"
 id: installing-a-promise
-slug: ../installing-a-promise
+title: "Part 2: Installing a Promise"
+description: Create and configure a Worker cluster, and install a Promise
 ---
 
 ```mdx-code-block
@@ -14,18 +13,20 @@ import PartialPromise from '../../_partials/_promise-architecture.md';
 ```
 
 This is Part 2 of [a series](intro) illustrating how Kratix works. <br />
-👈🏾 Previous: [Install Kratix](installing-kratix) <br />
-👉🏾 Next: [Using a Compound Promise](multiple-promises)
+👈🏾 Previous: [Installing Kratix](installing-kratix) <br />
+👉🏾 Next: [Using Compound Promises](compound-promises)
 
 <hr />
 
 **In this tutorial, you will**
 
-- [learn what Promises are](#promise-definition)
-- [install your first Kratix Promise](#install-jenkins)
-- [request a Resource from a promised service](#request-jenkins)
+- [Learn what Promises are](#promise-definition)
+- [Install your first Kratix Promise](#install-jenkins)
+- [Request a Resource from a promised service](#request-jenkins)
 
-Following the [Installing Kratix](installing-kratix) tutorial, you should now have Kratix up and running in your platform cluster. You should also have a worker cluster reconciling on the documents in the MinIO Bucket.
+Following the [Installing Kratix](installing-kratix) tutorial, you should now
+have Kratix up and running in your platform cluster. You should also have a
+worker cluster reconciling on the documents in the MinIO Bucket.
 
 Validate your installation by running:
 
@@ -76,7 +77,7 @@ provide anything-as-a-Service and are composed of mainly three pieces:
    <summary>🤔 How's that different from Helm? Or Crossplane? Or... </summary>
 
 Kratix positions itself as a framework for building platforms. Instead of
-thinking _Kratix or X_, think **Kratix and X**. The team has written
+thinking _Kratix or X_, think **Kratix _and_ X**. Our team has written
 extensively on how Kratix can work together with other Kubernetes tools.
 Please check [How Kratix Complements](/main/learn-more/how-kratix-complements)
 for details.
@@ -87,14 +88,16 @@ for details.
 
 <PartialPromise />
 
-As you go through installing and using the Promise, this tutorial will unpack and highlight
-the parts of the Promise you are interacting with.
+As you go through installing and using the Promise, this tutorial will unpack
+and highlight the parts of the Promise you are interacting with.
 
 ## Provide Jenkins-as-a-Service {#install-jenkins}
 
-Kratix offers a variety of ready-to-use Promises in the [Kratix Marketplace](/marketplace). This tutorial will focus on making [Jenkins-as-a-Service](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins) available, on demand, for platform users.
+Kratix offers a variety of ready-to-use Promises in the [Kratix Marketplace](/marketplace).
+This tutorial will focus on making [Jenkins-as-a-Service](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)
+available, on demand, for platform users.
 
-Install the Jenkins Promise:
+Let's install the Jenkins Promise:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/jenkins/promise.yaml
@@ -102,14 +105,14 @@ kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/s
 
 And that's it! Promise installed!
 
-Once the Promise is installed, the platform cluster is extended with a new API:
-the Jenkins Promise API. This API teaches the platform cluster how to deal with
+Once the Promise is installed, the Platform cluster is extended with a new API:
+the Jenkins Promise API. This API teaches the Platform cluster how to deal with
 requests for Jenkins.
 
 <details>
 <summary>🤔 How's the Promise API determined?</summary>
 
-The Promise API is fully defined by the platform team. They have the choice to
+The Promise API is fully defined by the Platform Team. They have the choice to
 hide complexity, making it easy for users to request new services.
 Alternatively, they can offer users greater flexibility, allowing them to
 fine-tune lower-level details of the services or select the specific destination
@@ -127,7 +130,9 @@ The above command will give output similar to:
 jenkins.marketplace.kratix.io          2024-01-26T16:16:13Z
 ```
 
-Kratix will also write a declaration of state to the State Store, informing any destinations that they should install the Promise Dependencies. For the Jenkins Promise, the Dependencies include the Jenkins Operator.
+Kratix will also write a declaration of state to the State Store, informing any
+Destinations that they should install the Promise Dependencies. For the Jenkins
+Promise, the Dependencies include the Jenkins Operator.
 
 <figure className="diagram">
   <InstallSuccessDiagram className="large"/>
@@ -135,14 +140,14 @@ Kratix will also write a declaration of state to the State Store, informing any 
   <figcaption>Installation of the Jenkins Promise</figcaption>
 </figure>
 
-Verify that the Jenkins Operator starts in the worker cluster:
+Let's verify that the Jenkins Operator starts in the worker cluster:
 
 ```shell-session
 kubectl --context $WORKER get deployments --watch
 ```
 
-The above command will give an output similar to the following (it may take a couple of
-minutes):
+The above command will give an output similar to the following (it may take a
+couple of minutes):
 
 ```shell-session
 NAME               READY   UP-TO-DATE   AVAILABLE   AGE
@@ -153,15 +158,17 @@ jenkins-operator   0/1     1            0           0s
 jenkins-operator   1/1     1            1           11s
 ```
 
-Once the jenkins-operator deployment is ready, press <kbd>Ctrl</kbd>+<kbd>C</kbd>
+Once the `jenkins-operator` deployment is ready, press <kbd>Ctrl</kbd>+<kbd>C</kbd>
 to exit the watch mode.
 
-If at this stage you create another Kubernetes cluster and follow similar steps to register and configure this new cluster, the Jenkins Promise dependencies automatically be installed in the new cluster.
+If at this stage you create another Kubernetes cluster and follow similar steps
+to register and configure this new cluster, the Jenkins Promise dependencies
+will be automatically installed in the new cluster.
 
-Later in this tutorial you will learn how to make certain Promises available only in certain clusters based on Promise configuration.
+Later in this tutorial you will learn how to make certain Promises available
+only in certain clusters based on Promise configuration.
 
 Your environment now looks like this (with some detail omitted for clarity):
-
 
 ```mdx-code-block
 import Topology03 from "/img/docs/workshop/topology-03.png"
@@ -173,9 +180,11 @@ import Topology03 from "/img/docs/workshop/topology-03.png"
   <figcaption>Jenkins dependencies are reconciled on all workers</figcaption>
 </figure>
 
-With both the API available in the platform, and the dependencies installed in the worker, the Jenkins Promise installation is now complete.
+With both the API available in the platform, and the dependencies installed in
+the worker, the Jenkins Promise installation is now complete.
 
-It is now time to switch roles for a moment, and imagine you are a developer who wants to request a new Jenkins Resource.
+It is now time to switch roles for a moment, and imagine you are a developer
+(that is, a user of your platform) who wants to request a new Jenkins Resource.
 
 ## Request a Resource from a Promised service {#request-jenkins}
 
@@ -193,9 +202,10 @@ NAME      STATUS      KIND      API VERSION                      VERSION
 jenkins   Available   jenkins   marketplace.kratix.io/v1alpha1
 ```
 
-To request a Jenkins, all you need is to send a request for a new Jenkins Resource to the platform.
+To request a Jenkins instance, all you need is to send a request for a new
+Jenkins Resource to the platform.
 
-Create a Jenkins Resource:
+Let's create a Jenkins Resource:
 
 ```yaml
 cat <<EOF | kubectl --context $PLATFORM apply --filename -
@@ -231,20 +241,20 @@ systems such as GitOps Repositories, ticketing systems, or CI/CD tools.
 
 When writing a request for a Resource, the platform user will have all the
 configuration options exposed to them as part of the Promise API, as defined by
-the platform team. The Jenkins Promise exposes a single
-configuration option: `spec.env` (see the [Jenkins Promise
-documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
+the Platform Team. The Jenkins Promise exposes a single configuration option:
+`spec.env` (see the [Jenkins Promise documentation](https://github.com/syntasso/kratix-marketplace/tree/main/jenkins)).
 When set to `prod`, the resulting Resources will have backups enabled.
 
-Once the request is created, Kratix will kick-off the imperative Workflow for the
-Configure. The Jenkins Configure Workflow is a very basic Kratix Pipeline that transforms
-the user's request into a Jenkins manifest.
+Once the request is created, Kratix will kick-off the imperative Workflow for
+Promise configuration. The Jenkins Configure Workflow is a very basic Kratix
+Pipeline that transforms the user's request into a Jenkins manifest.
 
 However, Workflows can do much more. It is within the Workflow that you define
 the business processes of your organisation, encapsulating the steps required to
-deliver the promised service on-demand. Through Workflows, platform teams have the
-flexibility to customise the Promise according to their specific business and
-compliance requirements in either simple Kratix Pipelines or other popular pipeline technologies (e.g. Tekton).
+deliver the promised service on-demand. Through Workflows, Platform Teams have
+the flexibility to customise the Promise according to their specific business
+and compliance requirements in either simple Kratix Pipelines or other popular
+pipeline technologies (e.g. Tekton).
 
 <figure className="diagram">
   <PipelineDiagram className="large"/>
@@ -256,7 +266,9 @@ vulnerability scanning, you can include a Snyk image in your Promise. Similarly,
 if you wish to receive alerts for specific events, you can include a Slack
 image.
 
-Furthermore, the stages of a Workflow and within a Kratix Pipeline are designed to be reusable. This allows platform teams to encode specific rules once and apply them consistently across all services within the platform.
+Furthermore, the stages of a Workflow and within a Kratix Pipeline are designed
+to be reusable. This allows Platform Teams to encode specific rules once and
+apply them consistently across all services within the platform.
 
 Verify the Jenkins Workflow execution:
 
@@ -271,13 +283,16 @@ NAME                                                    READY   STATUS      REST
 kratix-jenkins-example-instance-configure-655a8-vpmg2   0/1     Completed   0          71s
 ```
 
-Once the Workflow completes, Kratix will write the documents it outputted (i.e. the declaration of state) to the directory within the bucket that the worker cluster is watching. You will soon see the requested Jenkins resources starting up on the worker cluster.
+Once the Workflow completes, Kratix will write the documents it outputted (that
+is, the declaration of state) to the directory within the bucket that the Worker
+cluster is watching. You will soon see the requested Jenkins resources starting
+up on the Worker cluster.
 
 <figure className="diagram">
   <ResourceRequestDiagram className="large"/>
 </figure>
 
-Verify Jenkins is booting up:
+Let's verify that Jenkins is booting up:
 
 ```bash
 kubectl --context $WORKER get pods --watch
@@ -300,8 +315,8 @@ jenkins-operator-7f58798d5c-sr825   1/1     Running   0          1h
 ```
 
 When the `Ready` column reports `1/1` for `jenkins-dev-example`, your Jenkins
-is fully deployed and ready to be accessed! Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to
-exit the watch mode.
+is fully deployed and ready to be accessed! Press <kbd>Ctrl</kbd>+<kbd>C</kbd>
+to exit the watch mode.
 
 Go to [http://localhost:30269](http://localhost:30269) and check it out!
 
@@ -330,9 +345,10 @@ kubectl --context $WORKER get secrets --selector app=jenkins-operator -o go-temp
 
 ## Clean up
 
-Since you will no longer need Jenkins for the remainder of this tutorial, you can go ahead and delete it.
+Since you will no longer need Jenkins for the remainder of this tutorial, you
+can go ahead and delete it.
 
-Delete the Jenkins Promise:
+This is how you can delete the Jenkins Promise:
 
 ```bash
 kubectl --context $PLATFORM delete promise jenkins
@@ -347,7 +363,7 @@ promise.platform.kratix.io "jenkins" deleted
 The delete command will also cascade-delete all traces of Jenkins from the
 platform, including the deployed Jenkins on the worker cluster.
 
-Verify that the Jenkins Resource gets deleted:
+Let's verify that the Jenkins Resource gets deleted:
 
 ```bash
 kubectl --context $WORKER get pods
@@ -370,4 +386,4 @@ To recap the steps you took:
 
 ✅&nbsp;&nbsp;Your Promise has been installed and deleted. <br />
 👉🏾&nbsp;&nbsp;Next, you will learn more about [Compound
-Promises](multiple-promises)
+Promises](compound-promises)

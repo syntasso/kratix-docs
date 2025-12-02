@@ -103,7 +103,7 @@ const config = {
           {
             type: "doc",
             docId: "workshop/intro",
-            label: "Workshop",
+            label: "Workshops",
             position: "left",
           },
           {

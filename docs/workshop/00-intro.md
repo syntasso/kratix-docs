@@ -13,61 +13,64 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 <img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
 
-This workshop introduces you to the [Kratix](https://www.kratix.io) framework.
+These workshops introduces you to the [Kratix](https://www.kratix.io) framework.
 Over a series of tutorials you will build a deeper understanding of what
-Kratix is, how Kratix works, and how you can use Kratix to deliver a first-class
+Kratix is, how it works, and how you can use Kratix to deliver a first-class
 platform within your organisation.
 
-Before beginning this workshop, consider your answers to the following questions:
+Before beginning these workshops, consider your answers to the following questions:
 
 - What is the highest value service your platform provides to your application development teams?
 - How easy is it for you to provide and maintain that service?
 - How easy is it for application developers to use that service?
 - How can you enhance flow for your application developers and reduce effort for you and your platform team?
 
-We hope that, by going through the workshop and learning Kratix's concepts, it
+We hope that, by going through the workshops and learning Kratix's concepts, it
 will become evident how you could incorporate Kratix into your platform to
 provide a better developer experience.
 
 ## The series
 
-This workshop is divided into two parts. On Part I, the focus is on operating
-Kratix. On Part II, you will dive into writing and extending Promises.
+This series of workshops guide you through understanding Kratix, getting it up
+and running, and writing and extending [Promises](../main/03-reference/11-promises/01-intro.md).
 
-### Part I
+You should choose which workshop suits your interests best. Each workshop is self-contained,
+but they all share the same [prerequisites](prerequisites/intro).
 
-1. [Install Kratix](installing-kratix) <br />
-   Learn more about Kratix and install Kratix locally using KinD.
+### Operating Kratix
 
-1. [Install a Kratix Promise](installing-a-promise) <br />
+1. [Install Kratix](operating-kratix/installing-kratix) <br />
+   Learn more about Kratix and install Kratix locally using `kind`.
+
+1. [Install a Kratix Promise](operating-kratix/installing-a-promise) <br />
    Learn more about Kratix Promises and install a sample Jenkins Promise.
 
-1. [Using multiple Kratix Promises](multiple-promises) <br />
+1. [Using multiple Kratix Promises](operating-kratix/compound-promises) <br />
    Learn about Compound Promises, and how the combination of Promises can provide
    more compelling developer experiences.
 
-### Part II
+### Writing a Promise
 
-1. [Writing your first Promise](part-ii/writing-your-first-promise) <br />
+1. [Writing your first Promise](writing-a-promise/writing-your-first-promise) <br />
    Learn the basics of how to write a Kratix Promise
 
-1. [Improving the Workflows](part-ii/promise-workflows) <br />
+1. [Improving the Workflows](writing-a-promise/promise-workflows) <br />
    Learn more about the different types of workflows that can be used within a Promise.
 
-1. [Accessing Secrets and storing state](part-ii/secrets-and-state) <br />
+1. [Accessing Secrets and storing state](writing-a-promise/secrets-and-state) <br />
    Learn how you can access Secrets and store state from within a Kratix pipeline
 
-1. [Surfacing information via Status](part-ii/status) <br />
+1. [Surfacing information via Status](writing-a-promise/status) <br />
    Learn how to surface information to users via the status of a Resource
 
-1. [Making a Compound Promise](part-ii/compound-promise) <br />
+1. [Making a Compound Promise](writing-a-promise/compound-promise) <br />
    Extend your Promise with another Promise, making it a compound promise
 
-### Conclusion
+### What's next?
 
-1. [Final Thoughts](whats-next) <br />
-   How can Kratix help you?
+1. [How can Kratix help you?](whats-next) <br />
+   
 
 ## 🥁 Time to get started
 
-Begin with [setting up your machine for the workshop](part-0/intro).
+Begin with [setting up your machine for the workshops](prerequisites/intro).

@@ -14,7 +14,7 @@ This iterative writing is useful because it allows you to use the structure of e
 
 We suggest these examples as good starting places:
 - [Promise Marketplace](https://docs.kratix.io/marketplace)
-- [Promise writing guide](../../../workshop/part-ii/writing-your-first-promise)
+- [Promise writing guide](../../../workshop/writing-a-promise/writing-your-first-promise)
 
 ## Creating a Promise
 You create a Promise by assembling a YAML file which defines all the dependencies and workflows that the Promise will include. It also defines the API that is used to request a resource. Once the Promise is written, it needs to be installed so that the dependencies it refers to will be available when a user requests them.

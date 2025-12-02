@@ -1,16 +1,22 @@
 ---
 id: create-clusters
-title: "Creating the clusters"
-description: In this section, you will create the Kubernetes clusters that will be used in the workshop. You will also configure the Worker to ensure it can run Kratix workloads.
+title: Creating the clusters
+description: Create and configure the Kubernetes clusters that will be used in the workshops
 ---
 
-One of the most powerful Kratix features is the ability platform teams have to fully control the scheduling of work across extensive and diverse infrastructure, i.e. to determine in which Kubernetes cluster (or other infrastructure) a certain workload should be deployed to. Kratix leverages the GitOps toolkit to deliver this capability.
+One of the most powerful Kratix features is the ability Platform Teams have 
+to fully control the scheduling of work across extensive and diverse 
+infrastructure, that is, to determine in which Kubernetes cluster (or other
+infrastructure) a certain workload should be deployed to. Kratix leverages
+the GitOps toolkit to deliver this capability.
 
-Kratix itself runs in Kubernetes. The first step in getting Kratix up and running is to create a Kubernetes cluster where you can install it. In this workshop, you will use `kind` to run Kubernetes clusters locally.
+Kratix itself runs in Kubernetes. The first step in getting Kratix up and
+running is to create a Kubernetes cluster where you can install it. In
+our workshops, you will use `kind` to run Kubernetes clusters locally.
 
 :::info
 
-You can run the workshop without KinD. Ideally, you will have access to two
+You can run the workshop without `kind`. Ideally, you will have access to two
 Kubernetes clusters.
 
 One cluster will be the Platform cluster, where Kratix will be installed.
@@ -26,7 +32,9 @@ argument entirely.
 :::
 
 
-Within the Kratix repository, you will find two KinD configuration files that will make it easier to interact with the clusters. Start by cloning the repository locally:
+Within the Kratix repository, you will find two `kind` configuration files that
+will make it easier to interact with the clusters. Start by cloning the repository
+locally:
 
 ```bash
 git clone https://github.com/syntasso/kratix
@@ -45,10 +53,17 @@ kind create cluster \
     --config config/samples/kind-platform-config.yaml
 ```
 
-The **Platform** cluster is the Kubernetes cluster where Kratix will be installed. It will also be the cluster where the Platform team will manage the Kratix configuration.
+The **Platform** cluster is the Kubernetes cluster where Kratix will be
+installed. It will also be the cluster where the Platform team will
+manage the Kratix configuration.
 
-Although it is possible to schedule workloads to the Platform cluster, it is not generally where most of the workloads will be deployed to.
-More often, platform teams will have a dedicated set of clusters (and other varied infrastructure) where the requested services will actually run. In this workshop, you will use a second cluster to simulate this scenario. Whenever you read **Worker** cluster in the workshop, it will refer to this second cluster.
+Although it is possible to schedule workloads to the Platform cluster,
+it is not generally where most of the workloads will be deployed to.
+More often, Platform Teams will have a dedicated set of clusters (and
+other varied infrastructure) where the requested services will actually
+run. In our workshops, you will use a second cluster to simulate this
+scenario. Whenever you read **Worker** cluster in our workshops, it
+will refer to this second cluster.
 
 Create the **Worker** cluster with the following command:
 
@@ -59,7 +74,8 @@ kind create cluster \
     --config config/samples/kind-worker-config.yaml
 ```
 
-To make it easier to interact with both clusters, set the `PLATFORM` and `WORKER` environment variables with each cluster context:
+To make it easier to interact with both clusters, set the `PLATFORM`
+and `WORKER` environment variables with each cluster context:
 
 ```bash
 export PLATFORM="kind-platform"
@@ -85,9 +101,11 @@ CoreDNS is running at https://127.0.0.1:65004/api/v1/namespaces/kube-system/serv
 
 ## Install the Platform Prerequisites
 
-### Cert-manager
+### cert-manager
 
-Kratix requires [cert-manager](https://cert-manager.io/) to be installed in the cluster. Cert-manager is a Kubernetes add-on that automates the management and issuance of TLS certificates from various issuing sources.
+Kratix requires [cert-manager](https://cert-manager.io/) to be installed in
+the cluster. cert-manager is a Kubernetes add-on that automates management
+and issuance of TLS certificates from various issuing sources.
 
 To install it, run the following command:
 
@@ -101,7 +119,7 @@ You can validate cert-manager is running with the following command:
 kubectl --context $PLATFORM get pods --namespace cert-manager
 ```
 
-which should give an output similar to:
+This should give an output similar to:
 
 ```shell-session
 NAME                                      READY   STATUS    RESTARTS   AGE
@@ -113,9 +131,14 @@ cert-manager-webhook-5655dcfb4b-54r49     1/1     Running   0          19s
 ### MinIO as the GitOps Repository
 
 As mentioned before, Kratix leverages GitOps for deploying and reconciling
-scheduled workloads. That means that Kratix needs a backing service to serve as the state store. Kratix supports two types of state stores: S3-compatible buckets and Git repositories. In this workshop, you will use a MinIO instance running in the platform cluster as the state store. In productions environment, you will probably use a Git repository or a S3-compatible bucket in a cloud provider.
+scheduled workloads. That means that Kratix needs a backing service to serve
+as the state store. Kratix supports two types of state stores: S3-compatible
+buckets and Git repositories. In our workshops, you will use a MinIO instance
+running in the Platform cluster as the state store. In production environments,
+you will probably use a Git repository or a S3-compatible bucket in a Cloud
+Provider.
 
-To install MinIO in the platform, run:
+To install MinIO in the Platform cluster, run:
 
 ```bash
 # from the root of the Kratix repository
@@ -141,7 +164,7 @@ NAME     READY   UP-TO-DATE   AVAILABLE   AGE
 minio    1/1     1            1           1h
 ```
 
-You can also verify the Create Bucket job:
+You can also verify the `Create Bucket` job:
 
 ```bash
 kubectl --context $PLATFORM get jobs
@@ -167,7 +190,7 @@ mc ls kind/
 The above command will give an output similar to:
 
 ```shell-session
-[2021-10-13 15:10:00 CEST]     0B kratix/
+[2025-12-02 15:10:00 CEST]     0B kratix/
 ```
 
 You platform cluster is now ready to receive Kratix!
@@ -175,8 +198,8 @@ You platform cluster is now ready to receive Kratix!
 ## Install the Worker prerequisites
 
 Kratix schedules workloads to
-[Destinations](../../main/reference/destinations/intro). For this workshop we
-will be using a Kubernetes cluster as our Destination by writing a state
+[Destinations](../../main/reference/destinations/intro). For this workshop, 
+we will use a Kubernetes cluster as our Destination by writing a state
 declaration (following the Kubernetes declare-and-converge pattern) to a
 designated State Store. When it comes to reconciling the declared state on the
 Destination cluster, Kratix remains agnostic about the specific tool to be used
@@ -197,25 +220,26 @@ The script above will:
 - Create a new Flux `Bucket` Source
 - Create two Flux `Kustomizations`
 
-The Flux `Kustomizations` are responsible for continuously reconciling with the state
-declared in the `Source`.
+The Flux `Kustomizations` are responsible for continuously reconciling with
+the state declared in the `Source`.
 
-If you are curious to know what this script does, or would prefer to configure the worker cluster yourself, take a look at the section below.
-
+If you are curious to know what this script does, or would prefer to
+configure the worker cluster yourself, take a look at the section below.
 
 <details>
 <summary>Configuring the cluster: the manual way</summary>
 
-If you prefer to configure the worker cluster manually, follow the steps below.
+If you prefer to configure the Worker cluster manually, follow the steps
+below.
 
-Install Flux on the worker cluster:
+Install Flux on the Worker cluster:
 
 ```bash
 kubectl --context $WORKER apply --filename https://github.com/fluxcd/flux2/releases/download/v2.4.0/install.yaml
 ```
 
-Next, Flux must be configured to read from the MinIO bucket. For that, you will create a new
-Flux [Bucket Source](https://fluxcd.io/flux/components/source/buckets/),
+Next, Flux must be configured to read from the MinIO bucket. For that, you
+will create a new Flux [Bucket Source](https://fluxcd.io/flux/components/source/buckets/),
 together with a Secret containing the bucket credentials.
 
 :::caution
@@ -243,7 +267,7 @@ If the command above outputs a different IP, make sure to update the Bucket
 configuration below accordingly.
 
 The port part of the endpoint should always be 31337. Verify the NodePort of the
-MinIO service in the platform cluster:
+MinIO service in the Platform cluster:
 
 ```bash
 kubectl --context $PLATFORM get services minio --namespace kratix-platform-system
@@ -296,10 +320,11 @@ secret/minio-credentials created
 bucket.source.toolkit.fluxcd.io/kratix created
 ```
 
-This tutorial will not dive into details of how to configure Flux Sources, but please read on their
-[documentation](https://fluxcd.io/flux/components/source/) if you are curious.
+This tutorial will not dive into details of how to configure Flux Sources, 
+but please read on their [documentation](https://fluxcd.io/flux/components/source/)
+if you are curious.
 
-Once the Bucket Source is created, validate that Flux can reach the bucket:
+Once the Bucket Source is created, validate that Flux can reach it:
 
 ```bash
 kubectl --context $WORKER get buckets.source.toolkit.fluxcd.io --namespace flux-system
@@ -369,14 +394,15 @@ Kind):
 - All other documents will be written to a specific `resources` path within the
   State Store.
 
-Later when you register the cluster as a Destination, Kratix will use the cluster's `namespace`
-and `name` to build the full path for that cluster within the State Store.
+Later, when you register the cluster as a Destination, Kratix will use the
+cluster's `namespace` and `name` to build the full path for that cluster
+within the State Store.
 
-The first Kustomization above is for dependencies (CRDs), while the second is for the other
-resources (note the `spec.path`). You can also note that the
-`kratix-worker-resources` depends on the `kratix-worker-dependencies`. That's to
-avoid failures when a resource documents uses a GVK being defined by a CRD
-document.
+The first Kustomization above is for dependencies (CRDs), while the second
+is for the other resources (note the `spec.path`). You can also note that the
+`kratix-worker-resources` depends on the `kratix-worker-dependencies`. That's
+intentionally done to avoid failures when a resource document uses a GVK
+being defined by a CRD document.
 
 For further details on the naming convention for the buckets and paths, check
 the [documentation](../../main/reference/statestore/intro). For more on
@@ -416,4 +442,4 @@ import Topology00 from "/img/docs/workshop/topology-00.png"
   <figcaption>Current installation</figcaption>
 </figure>
 
-You are now ready to move to [Part I and install Kratix](../part-i/intro)!
+You are now ready to do our [workshops](../intro#the-series)!

@@ -11,7 +11,7 @@ abstractions.
 
 For details on how to use a Compound Promise, check [this
 guide](/main/guides/compound-promises). If you are looking to write a compound
-promise, [check the Writing a Promise workshop.](/workshop/part-ii/compound-promise)
+promise, [check the Writing a Promise workshop.](/workshop/writing-a-promise/compound-promise)
 
 This page contains reference documentation for building better Compound Promises.
 
