@@ -40,7 +40,7 @@ but they all share the same [prerequisites](prerequisites/intro).
 ### Operating Kratix
 
 1. [Install Kratix](installing-kratix) <br />
-   Learn more about Kratix and install Kratix locally using KinD.
+   Learn more about Kratix and install Kratix locally using `kind`.
 
 1. [Install a Kratix Promise](installing-a-promise) <br />
    Learn more about Kratix Promises and install a sample Jenkins Promise.
