@@ -13,28 +13,31 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 <img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
 
-This workshop introduces you to the [Kratix](https://www.kratix.io) framework.
+These workshops introduces you to the [Kratix](https://www.kratix.io) framework.
 Over a series of tutorials you will build a deeper understanding of what
-Kratix is, how Kratix works, and how you can use Kratix to deliver a first-class
+Kratix is, how it works, and how you can use Kratix to deliver a first-class
 platform within your organisation.
 
-Before beginning this workshop, consider your answers to the following questions:
+Before beginning these workshops, consider your answers to the following questions:
 
 - What is the highest value service your platform provides to your application development teams?
 - How easy is it for you to provide and maintain that service?
 - How easy is it for application developers to use that service?
 - How can you enhance flow for your application developers and reduce effort for you and your platform team?
 
-We hope that, by going through the workshop and learning Kratix's concepts, it
+We hope that, by going through the workshops and learning Kratix's concepts, it
 will become evident how you could incorporate Kratix into your platform to
 provide a better developer experience.
 
 ## The series
 
-This workshop is divided into two parts. On Part I, the focus is on operating
-Kratix. On Part II, you will dive into writing and extending Promises.
+This series of workshops guide you through understanding Kratix, getting it up
+and running, and writing and extending [Promises](../main/03-reference/11-promises/01-intro.md).
 
-### Part I
+You should choose which workshop suits your interests best. Each workshop is self-contained,
+but they all share the same [prerequisites](prerequisites/intro).
+
+### Operating Kratix
 
 1. [Install Kratix](installing-kratix) <br />
    Learn more about Kratix and install Kratix locally using KinD.
@@ -46,7 +49,7 @@ Kratix. On Part II, you will dive into writing and extending Promises.
    Learn about Compound Promises, and how the combination of Promises can provide
    more compelling developer experiences.
 
-### Part II
+### Writing a Promise
 
 1. [Writing your first Promise](writing-a-promise/writing-your-first-promise) <br />
    Learn the basics of how to write a Kratix Promise
@@ -70,4 +73,4 @@ Kratix. On Part II, you will dive into writing and extending Promises.
 
 ## 🥁 Time to get started
 
-Begin with [setting up your machine for the workshop](prerequisites/intro).
+Begin with [setting up your machine for the workshops](prerequisites/intro).
