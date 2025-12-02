@@ -22,13 +22,13 @@ This is part of [a series](intro) illustrating how to write Kratix Promises.
 - [Write a Workflow to deliver the service](#workflow)
 - [Experience requesting a Resource](#using-the-app-promise)
 
-## <span id="prequisites">Prerequisites</span>
+## Prerequisites {#prequisites}
 
 To complete this workshop, you will need to have access to an installation of
 Kratix as well as some essential tools. Take a look at the [Prerequisites](../prerequisites/intro)
 to ensure your environment is correctly configured.
 
-## <span id="what-is-a-promise">What is a Promise?</span>
+## What is a Promise? {#what-is-a-promise}
 
 Kratix is a framework used by platform teams to build platforms tailored to
 their organisation.
@@ -84,7 +84,7 @@ import AppPromise from "/img/docs/workshop/part-ii-app-promise.png"
   <figcaption>The App-as-a-Service Promise</figcaption>
 </figure>
 
-### <span id="api-design">Design an API for your service</span>
+### Design an API for your service {#api-design}
 
 When building an API, you have a lot of design considerations to include. For
 example, you will want to:
@@ -233,7 +233,7 @@ import PromiseWithAPI from "!!raw-loader!./_partials/writing-a-promise/02-promis
 Great! Your Promise now has an API. You can move on to the next step: defining
 the dependencies.
 
-### <span id="dependencies">Define the dependencies</span>
+### Define the dependencies {#dependencies}
 
 The next step is to define the dependencies of your Promise. This is where you
 will define the Kubernetes resources that will be created when the Promise is
@@ -322,7 +322,7 @@ Amazing! You are now one step away from having a working Promise. The next step
 is to define the Resource Workflow, that is, what must happen when a user
 requests a new app deployment.
 
-### <span id="workflow">Define the Workflow</span>
+### Define the Workflow {#workflow}
 
 ```mdx-code-block
 import PromiseWorkflows from "/img/docs/workshop/part-ii-wayfinding-pipeline-only.svg"
@@ -491,7 +491,7 @@ import FullPromise from "!!raw-loader!./_partials/writing-a-promise/06-full-prom
 
 </details>
 
-### <span id="install-the-promise">Install the Promise</span>
+### Install the Promise {#install-the-promise}
 
 Go ahead and install the Promise in the platform:
 
@@ -529,7 +529,7 @@ import PromiseInstalled from "/img/docs/workshop/part-ii-promise-installed.png"
   <figcaption>Dependencies being scheduled to the Destination</figcaption>
 </figure>
 
-## <span id="using-the-app-promise">Using the App Promise</span>
+## Using the App Promise {#using-the-app-promise}
 
 As a developer, you can check the available Promises by running the following 
 ommand:

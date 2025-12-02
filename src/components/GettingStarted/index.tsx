@@ -19,25 +19,25 @@ export default function GettingStarted({ }: Props): JSX.Element {
 
       <div className={styles.terminal} id={win1ID}>
         <Window title="1. Install Kratix">
-          <span className={styles.terminalBody}>
+          <a className={styles.terminalBody}>
             $&gt; kubectl apply -f kratix.yaml
-          </span>
+          </a>
         </Window>
       </div>
 
       <div className={styles.terminal} id={win2ID}>
         <Window title="2. Install a Promise">
-          <span className={styles.terminalBody}>
+          <a className={styles.terminalBody}>
             $&gt; kubectl apply -f promise-postgres.yaml
-          </span>
+          </a>
         </Window>
       </div>
 
       <div className={styles.terminal} id={win3ID}>
         <Window title="3. Request a resource from your Promise">
-          <span className={styles.terminalBody}>
+          <a className={styles.terminalBody}>
             $&gt; kubectl apply -f request-postgres.yaml
-          </span>
+          </a>
         </Window>
       </div>
 

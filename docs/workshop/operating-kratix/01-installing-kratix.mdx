@@ -129,7 +129,7 @@ kratix-platform-controller-manager   1/1     1            1           1h
 You can now tell Kratix which repositories it will use to deploy and manage the
 workloads.
 
-### <span id="statestore-setup">Create the Kratix State Store</span>
+### Create the Kratix State Store {#statestore-setup}
 
 The State Store represents the various backing storage options to which Kratix
 can write. When registering a Worker cluster with Kratix, you will need to
@@ -242,7 +242,7 @@ Although Kratix now knows about the State Store, it's not currently aware of any
 place that the workloads can actually run: there's no _Destination_ registered
 with the Platform cluster.
 
-### <span id="destination-setup">Register the Worker cluster as a Destination</span>
+### Register the Worker cluster as a Destination {#destination-setup}
 
 In Kratix terms, a _Destination_ is any system _converging_ on the state
 declared by Kratix.
