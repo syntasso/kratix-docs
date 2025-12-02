@@ -66,10 +66,10 @@ but they all share the same [prerequisites](prerequisites/intro).
 1. [Making a Compound Promise](writing-a-promise/compound-promise) <br />
    Extend your Promise with another Promise, making it a compound promise
 
-### Conclusion
+### What's next?
 
-1. [Final Thoughts](whats-next) <br />
-   How can Kratix help you?
+1. [How can Kratix help you?](whats-next) <br />
+   
 
 ## 🥁 Time to get started
 
