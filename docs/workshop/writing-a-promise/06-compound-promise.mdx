@@ -156,10 +156,10 @@ We'll need to define an additional step in the pipeline that makes a request for
 
 For this step, we will use a Python script powered by the [Kratix Python SDK](https://github.com/syntasso/kratix-python). The SDK provides a set of helper functions to make it even easier to write Kratix Promises.
 
-Create a `database-configure` file in the `workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts` directory and make it executable. Next, copy the contents of [this file](https://raw.githubusercontent.com/syntasso/kratix-docs/refs/heads/main/docs/workshop/part-ii/_partials/compound-promise/02-database-configure) into it by running the following:
+Create a `database-configure` file in the `workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts` directory and make it executable. Next, copy the contents of [this file](https://raw.githubusercontent.com/syntasso/kratix-docs/refs/heads/main/docs/workshop/writing-a-promise/_partials/compound-promise/02-database-configure) into it by running the following:
 
 ```bash
-curl -o workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/database-configure --silent https://raw.githubusercontent.com/syntasso/kratix-docs/refs/heads/main/docs/workshop/part-ii/_partials/compound-promise/02-database-configure
+curl -o workflows/resource/configure/mypipeline/kratix-workshop-app-pipeline-image/scripts/database-configure --silent https://raw.githubusercontent.com/syntasso/kratix-docs/refs/heads/main/docs/workshop/writing-a-promise/_partials/compound-promise/02-database-configure
 ```
 
 Take a closer look at the script. Unlike the Ingress configured via the NGINX Controller, we will not always want to provision a PostgreSQL service with each app. The script will only provision a PostgreSQL if the resource request `spec` specifies a `dbDriver` key a value of `postgresql`:

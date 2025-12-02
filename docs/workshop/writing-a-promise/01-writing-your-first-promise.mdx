@@ -8,7 +8,7 @@ description: Learn how to write your first Kratix Promise
 import CodeBlock from '@theme/CodeBlock';
 ```
 
-This is Part 1 of [a series](intro) illustrating how to write Kratix Promises.
+This is part of [a series](intro) illustrating how to write Kratix Promises.
 
 👉🏾 Next: [Using Promise Workflows](./promise-workflows)
 
@@ -22,7 +22,7 @@ This is Part 1 of [a series](intro) illustrating how to write Kratix Promises.
 
 ## What is a Promise? {#what-is-a-promise}
 
-In [Part I](../part-i/intro), you learned that Kratix is a framework used by platform teams to build platforms tailored to their organisation.
+Kratix is a framework used by platform teams to build platforms tailored to their organisation and through Promises, teams can build their platforms incrementally.
 
 Kratix Promises are the encapsulation of platform offerings. They provide a structure to manage the complexities of providing _something-as-a-service_, including the definition of how a user can request a Resource, the steps to provision the requested Resource, and how to provide access to the Resource.
 
@@ -200,13 +200,13 @@ installed on your worker cluster Destination _prior_ to any user deploying their
 
 That's exactly what Kratix dependencies are for: to define the resources that need to be created when the Promise is installed.
 
-If you follow the NGINX Ingress Controller [installation instructions](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps), you will find that you need the resources defined in [this file](https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml) installed on the cluster.
+If you follow the NGINX Ingress Controller [installation instructions](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps), you will find that you need the resources defined in [this file](https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/writing-a-promise/_partials/nginx-patched.yaml) installed on the cluster.
 
 Create a subdirectory in your `app-promise` directory called `dependencies`. Then, create a file called `dependencies.yaml` and copy the contents of the file above into it.
 
 ```bash
 mkdir -p dependencies
-curl -o dependencies/dependencies.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/part-ii/_partials/nginx-patched.yaml
+curl -o dependencies/dependencies.yaml --silent https://raw.githubusercontent.com/syntasso/kratix-docs/main/docs/workshop/writing-a-promise/_partials/nginx-patched.yaml
 ```
 
 Once stored locally, you can declare the Promise Dependencies in your Promise Workflow.

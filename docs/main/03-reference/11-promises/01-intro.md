@@ -125,7 +125,7 @@ spec:
       version: required-promise-version
 ```
 :::info
-Learn more about the requiredPromises fields in the [Compound Promise Workshop](../../../workshop/part-ii/compound-promise#defining-promises-as-required-promises).
+Learn more about the requiredPromises fields in the [Compound Promise Workshop](../../../workshop/writing-a-promise/compound-promise#defining-promises-as-required-promises).
 :::
 
 

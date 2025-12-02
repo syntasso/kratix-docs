@@ -17,7 +17,7 @@ import PipelineDiagram from "/img/docs/workshop/compound-promise-pipeline-execut
 
 This is Part 3 of [a series](intro) illustrating how Kratix works. <br />
 👈🏾 Previous: [Install a Kratix Promise](installing-a-promise) <br />
-👉🏾 Next: [Part II](part-ii/intro)
+👉🏾 Next: [Part II](writing-a-promise/intro)
 
 <hr />
 
@@ -463,5 +463,5 @@ You have installed a Compound Promise and created an _EasyApp_ Resource!
 
 ✅&nbsp;&nbsp;This tutorial concludes the Introduction to Kratix. <br />
 👉🏾&nbsp;&nbsp;You can go ahead and start the next module to learn [how to write your own
-Promises](part-ii/intro) or jump to [What's next](whats-next) to learn about
+Promises](writing-a-promise/intro) or jump to [What's next](whats-next) to learn about
 what else you can achieve with Kratix.

@@ -1,10 +1,10 @@
 ---
 id: intro
-title: Part II
-description: Summary of what to expect from the Workshop, Part II
+title: Writing a Promise
+description: What to expect from the Writing a Promise Workshop
 ---
 
-Part II of this workshop focuses on the structure and design of a Kratix Promise. You will:
+The Writing a Promise workshop focuses on the structure and design of a Kratix Promise. You will:
 
 1. [Write your first Promise](./writing-your-first-promise)
 1. [Use Promise Configure workflows](./promise-workflows)
