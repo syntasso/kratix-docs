@@ -4,7 +4,8 @@ title: Operating Kratix
 description: Workshop summary and goals
 ---
 
-This workshop will focus on operating Kratix. You will show you how:
+The Operating Kratix workshop focuses on what is needed to run and operate
+Kratix on real Kubernetes clusters. Here you will:
 
 1. [Install Kratix on a local Kubernetes cluster](installing-kratix)
 1. [Learn about Kratix Promises and install a Jenkins Promise.](installing-a-promise)
