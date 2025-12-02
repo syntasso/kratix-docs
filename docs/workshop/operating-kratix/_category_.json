@@ -1,0 +1,10 @@
+{
+  "label": "Operating Kratix",
+  "position": 2,
+  "collapsed": false,
+  "collapsible": true,
+  "link": {
+    "type": "doc",
+    "id": "workshop/operating-kratix/intro"
+  }
+}

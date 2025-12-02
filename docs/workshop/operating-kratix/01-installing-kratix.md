@@ -42,7 +42,7 @@ Kratix is a framework used by platform teams to build custom platforms tailored 
 
 ## Hands on: Installing Kratix {#install-kratix}
 
-Before continuing, be sure to go back to the [prerequisites](./part-0/intro)
+Before continuing, be sure to go back to the [prerequisites](./prerequisites/intro)
 and follow the guide if you haven't done so already.
 
 You should also make sure you are currently in the `kratix` directory and have the following environment variables set:
@@ -129,7 +129,7 @@ can write. When registering a worker cluster with Kratix, you will need to
 specify the state store you intend to use. Kratix will then write to the
 specified state store when scheduling workloads for deployment on that cluster.
 
-Create a new State Store that points to the MinIO bucket created in the [prerequisites](./part-0/intro):
+Create a new State Store that points to the MinIO bucket created in the [prerequisites](./prerequisites/intro):
 
 ```yaml
 cat << EOF | kubectl --context $PLATFORM apply -f -
