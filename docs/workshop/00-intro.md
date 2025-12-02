@@ -39,13 +39,13 @@ but they all share the same [prerequisites](prerequisites/intro).
 
 ### Operating Kratix
 
-1. [Install Kratix](installing-kratix) <br />
+1. [Install Kratix](operating-kratix/installing-kratix) <br />
    Learn more about Kratix and install Kratix locally using `kind`.
 
-1. [Install a Kratix Promise](installing-a-promise) <br />
+1. [Install a Kratix Promise](operating-kratix/installing-a-promise) <br />
    Learn more about Kratix Promises and install a sample Jenkins Promise.
 
-1. [Using multiple Kratix Promises](multiple-promises) <br />
+1. [Using multiple Kratix Promises](operating-kratix/multiple-promises) <br />
    Learn about Compound Promises, and how the combination of Promises can provide
    more compelling developer experiences.
 
