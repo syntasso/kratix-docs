@@ -1,0 +1,34 @@
+---
+title: Tokens
+description: Reference for the tokens used to download releases and access the Syntasso registry
+sidebar_label: Tokens
+---
+
+Syntasso Kratix Enterprise (SKE) uses two credentials:
+
+- A GitHub token for accessing private release artifacts
+- A registry token for pulling container images from `registry.syntasso.io`
+
+## Enterprise Releases token
+
+Use this token when downloading release assets (for example, the SKE testing plugin) from the private `syntasso/enterprise-releases` GitHub repository.
+
+- **Suggested GitHub scopes:** `repo` and `read:packages` so the token can read private release assets and GitHub Container Registry images that may be referenced by release automation.
+- **Recommended environment variable:** `GH_TOKEN`.
+- **Usage example:** set `GH_TOKEN` before running `gh release download` commands in the SKE documentation.
+
+## Syntasso registry token
+
+Use this token to authenticate as `syntasso-pkg` when pulling images from the private Syntasso registry (`registry.syntasso.io`).
+
+- **Registry permissions:** token must be allowed to pull images from the registry; no other permissions are required.
+- **Recommended environment variable:** `SYNTASSO_TOKEN` (or another registry-specific variable consumed by your tooling).
+- **Usage example:**
+
+  ```bash
+  docker login registry.syntasso.io \
+    --username syntasso-pkg \
+    --password "$SYNTASSO_TOKEN"
+  ```
+
+Store both tokens securely (for example, in a secret manager or CI/CD secret store) and avoid committing them to source control.
