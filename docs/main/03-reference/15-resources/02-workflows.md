@@ -117,10 +117,11 @@ different actions, including, but not limited to:
 - Changes to the Resource definition
 - Changes to the Promise definition
 
-In addition to the above, Kratix will reconcile on a regular cadence (10 hours by 
-default, [configurable](/main/reference/kratix-config/config)) to attempt to
-mitigate against any drift that may have occurred. During this reconciliation,
-Kratix will ensure that all the Workflows for a given resource are re-run.
+In addition to the above, the Kratix Promise Controller will reconcile on a regular cadence -
+the Default Reconciliation Interval - which is 10 hours by default and
+configurable via the [kratix config](/main/reference/kratix-config/config). The regular
+reconciliation attempts to mitigate against any drift that may have occurred. During this
+reconciliation, the controller will ensure that all the Workflows for a given resource are re-run.
 
 ## Delete Workflows
 
