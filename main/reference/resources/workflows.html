@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.692da5fa.css">
-<script src="/assets/js/runtime~main.6480d2b4.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.cc88f3b8.js" defer="defer"></script>
 <script src="/assets/js/main.ce4da367.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -78,10 +78,11 @@ different actions, including, but not limited to:</p>
 <li class="">Changes to the Resource definition</li>
 <li class="">Changes to the Promise definition</li>
 </ul>
-<p>In addition to the above, Kratix will reconcile on a regular cadence (10 hours by
-default, <a class="" href="/main/reference/kratix-config/config">configurable</a>) to attempt to
-mitigate against any drift that may have occurred. During this reconciliation,
-Kratix will ensure that all the Workflows for a given resource are re-run.</p>
+<p>In addition to the above, the Kratix Promise Controller will reconcile on a regular cadence -
+the Default Reconciliation Interval - which is 10 hours by default and
+configurable via the <a class="" href="/main/reference/kratix-config/config">kratix config</a>. The regular
+reconciliation attempts to mitigate against any drift that may have occurred. During this
+reconciliation, the controller will ensure that all the Workflows for a given resource are re-run.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="delete-workflows">Delete Workflows<a href="#delete-workflows" class="hash-link" aria-label="Direct link to Delete Workflows" title="Direct link to Delete Workflows" translate="no">​</a></h2>
 <p>Resource Delete workflows are triggered when a Resource is deleted, and currently only
 support a <strong>single</strong> Pipeline.</p>
