@@ -50,3 +50,9 @@ redis-v0.2.0   true
 ```
 
 ## Deleting a Promise Revision
+
+Upon initiating the deletion of a Promise Revision, the Resource Requests created from that Promise Revision will be deleted alongside their Resource Bindings.
+
+:::info
+The Promise Revision with the `latest` label cannot be deleted, as a result, the Resource Requests will not be deleted
+:::
