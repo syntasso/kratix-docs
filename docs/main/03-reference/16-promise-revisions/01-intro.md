@@ -12,7 +12,7 @@ the spec of a Promise a specified version.
 When a Promise is installed, Kratix will create a Promise Revision for that Promise. This Promise Revision consists of a
 reference to the Promise it is a revision of, the version of the Promise and the spec of the Promise at that version.
 This encompasses the definitions of the Promise API, Dependencies and Workflows at that version. This initial Promise
-Revision with be labeled as the `latest` revision (via the kratix.io/latest-revision label) and all Resource Requests of this Promise will be bound to the Promise at that version (via a Resource Binding).
+Revision with be labeled as the `latest` revision (via the `kratix.io/latest-revision` label) and all Resource Requests of this Promise will be bound to the Promise at that version (via a Resource Binding).
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
