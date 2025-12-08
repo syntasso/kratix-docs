@@ -1,0 +1,52 @@
+---
+description: Documentation for the Kratix Promise Revision Custom Resource
+title: Promise Revisions
+sidebar_label: Promise Revisions
+---
+
+# Promise Revisions
+
+Promise Revisions provide a mechanism for tracking a Promise at a specific version. A Promise Revision reflects
+the spec of a Promise a specified version.
+
+When a Promise is installed, Kratix will create a Promise Revision for that Promise. This Promise Revision consists of a
+reference to the Promise it is a revision of, the version of the Promise and the spec of the Promise at that version.
+This encompasses the definitions of the Promise API, Dependencies and Workflows at that version. This initial Promise
+Revision with be labeled as the `latest` revision (via the kratix.io/latest-revision label) and all Resource Requests of this Promise will be bound to the Promise at that version (via a Resource Binding).
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: PromiseRevision
+metadata:
+  labels:
+    kratix.io/promise-name: promise-name
+  name: promise-revision-name
+  # Name of the Promise Revision; this takes the form <PROMISE_NAME>-<VERSION>
+spec:
+  promiseRef:
+    name: promise-name
+  promiseSpec:
+  # The full promise.spec of the Promise
+    api:
+    destinationSelectors:
+    workflows:
+  version: v0.1.0
+  # The version of the Promise as indicated by the kratix.io/promise-version label
+status: {}
+```
+
+## Updating a Promise
+
+The Promise Revision created when installing a Promise will be labelled as the `latest` Promise Revision. When a new version of the Promise is installed, a new Promise Revision will be created reflecting the updated specification at the updated version. This newly created Promise Revision will be become the new `latest` revision.
+
+For example, if the redis promise is initially installed at `v0.1.0` and then upgraded to `v0.2.0`, there will be two Promise Revisions, with `v0.2.0` labelled as the `latest`.
+
+```bash
+$ kubectl get promiserevisions
+
+NAME           LATEST
+redis-v0.1.0
+redis-v0.2.0   true
+```
+
+## Deleting a Promise Revision
