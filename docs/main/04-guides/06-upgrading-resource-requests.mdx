@@ -3,19 +3,204 @@ description: A guide to upgrading Resource Requests with Resource Bindings
 title: Upgrading Resource Requests
 ---
 
-Kratix Promises provide a means of providing Anything-as-a-Service. The Promise API equips users with the ability to tailor a given service to their needs, essential business rules can be embedded within Promise workflows and the continuous reconciliation of resources helps ensure resources are kept up-to-date.
+Kratix Promises provide a means of providing Anything-as-a-Service.
+The Promise API equips users with the ability to tailor a given service to their needs,
+essential business rules can be embedded within Promise workflows and the continuous reconciliation of resources helps ensure resources are kept up-to-date.
 
-For Platform Teams and Promise writers, the Promise also serves as a way to perform upgrades to a fleet a fleet of resources. Upgrades can take many forms, be they upgrades to the API determining how users provision their services, updated to the Dependencies used by a Promise or updates to Promise Workflows.
+For Platform Teams and Promise writers, the Promise also serves as a way to perform upgrades to a fleet a fleet of resources.
+Upgrades can take many forms, be they upgrades to the API determining how users provision their services, updated to the Dependencies used by a Promise or updates to Promise Workflows.
 
 ## Updating the API
 
-When introducing changes to Promise API, it is essential to ensure that the changes are backwards-compatible. For instance, when a Resource Configure workflow runs for the 
-updated Promise, it should not fail because of a newly introduced change to the API.
+When introducing changes to Promise API, it is essential to ensure that the changes are backwards-compatible.
+For instance, when a Resource Configure workflow runs for the updated Promise, it should not fail because of a newly introduced change to the API.
 
-Lets say we have an `app` promise, and want to introduce the ability to configure a database. When selecting a database. consumers will be able to configure a size of `small`, `medium` or `large`.
+Lets say we have an `app` promise, and want to introduce the ability to configure a database.
+When selecting a database. consumers will be able to configure a size of `small`, `medium` or `large`.
+This new configurability can be added to the API by introducing a new field, like:
 
-// Updating the Destinations
+```yaml
+spec: # Promise spec
+  api:
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            ...
+            properties:
+              dbSize: # new field
+                type: string
+```
 
-// Updates to Workflows
+This is a backwards compatible change as introducing a new field will not impact json marshalling and unmarshalling.
+If your updates to the API include changes such as changing the type of an existing field,
+making an existing field as required, or removing an field, they are not backwards compatible changes.
+Introducing a new API group and adding a conversion webhook will be required to support changes like these.
 
-// Updates to Resource Requests
+## Updates to Workflows
+
+Now, with the new field `spec.dbSize` added to our Promise API, we would like to start using it in our workflow to deploy database for our applications.
+However, we don't want to change any configurations for existing applications as they don't have `spec.dbSize` set in their resource request.
+This is where [Promise Revisions](/main/reference/promise-upgrade/promise-revisions) and [Resource Bindings](/main/reference/promise-upgrade/resource-bindings) come into play,
+as you can use Promise Revisions to track different versions of the Promise, and Resource Bindings to control the version of the Promise that the Resource Request is reconciled with.
+
+For example, given our app Promise:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  labels:
+    kratix.io/promise-version: v0.0.1
+  name: app
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: apps.workshop.kratix.io
+    spec:
+      group: workshop.kratix.io
+      names:
+        kind: App
+        plural: apps
+        singular: app
+      scope: Namespaced
+      versions:
+        - name: v1
+          schema:
+            openAPIV3Schema:
+              properties:
+                spec:
+                  properties:
+                    image:
+                      type: string
+                  type: object
+              type: object
+          served: true
+          storage: true
+    status:
+      acceptedNames:
+        kind: ""
+        plural: ""
+      conditions: null
+      storedVersions: null
+  workflows:
+    promise:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: dependencies
+          spec:
+            containers:
+              - image: kratix-workshop/app-promise-pipeline:v0.1.0
+                name: configure-deps
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: mypipeline
+          spec:
+            containers:
+              - command:
+                  - resource-configure
+                image: kratix-workshop/app-pipeline-image:v1.0.0
+                name: kratix-workshop-app-pipeline-image
+```
+
+We would like to introduce `.spec.dbSize` to the Promise API, and add a new container to the existing Resource Configure
+workflow pipeline to deploy a database for the application. We should update the Promise to a new version with the changes above. For example:
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  labels:
+    #highlight-start
+    kratix.io/promise-version: v0.0.2 # new Promise version
+    #highlight-end
+  name: app
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: apps.workshop.kratix.io
+    spec:
+      group: workshop.kratix.io
+      names:
+      ...
+      scope: Namespaced
+      versions:
+        - name: v1
+          schema:
+            openAPIV3Schema:
+              properties:
+                spec:
+                  properties:
+                    #highlight-start
+                    dbDriver: # new API field
+                      type: string
+                    #highlight-end
+                    image:
+                      type: string
+                  type: object
+              type: object
+          served: true
+          storage: true
+  workflows:
+  ...
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: mypipeline
+          spec:
+            containers:
+              - name: kratix-workshop-app-pipeline-image
+                command: [resource-configure]
+                image: kratix-workshop/app-pipeline-image:v1.0.0
+              #highlight-start
+              - name: database-configure # new container to deploy a database
+                image: kratix-workshop/app-pipeline-image:v1.0.0
+                command: [ database-configure ]
+              #highlight-end
+```
+
+After applying this new version of our app Promise, we should see two Promise Revisions created in our environment:
+```bash
+❯ kubectl get promiserevisions
+NAME         LATEST
+app-v0.0.1
+app-v0.0.2   true
+```
+
+You can see that the version `v0.0.2` is being marked as the latest Promise Revision. When you create new app Resource Requests,
+your applications will be reconciled using Promise Revision `v0.0.2`, which includes our changes to the Promise API and the new container in the Resource Configure workflow.
+
+For any existing Resource Requests, if you check their Resource Bindings, you can see that they continue to be bound to the previous Promise Revision:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: ResourceBinding
+metadata:
+  labels:
+    kratix.io/promise-name: app
+    kratix.io/resource-name: app-a
+  name: app-a-c42a2
+  namespace: default
+spec:
+  promiseRef:
+    name: app
+  resourceRef:
+    name: app-a
+    namespace: default
+  version: v0.0.1
+```
+
+This application will continue to be reconciled at Promise Revision `app-v0.0.1` until we update the Promise version in its Resource Binding.
+
