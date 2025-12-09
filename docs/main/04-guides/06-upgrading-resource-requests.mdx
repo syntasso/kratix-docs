@@ -9,8 +9,10 @@ For Platform Teams and Promise writers, the Promise also serves as a way to perf
 
 ## Updating the API
 
-When introducing changes to Promise API, it is essentials to ensure that the changes are backwards-compatible. For instance, when a Resource Configure workflow runs for the 
+When introducing changes to Promise API, it is essential to ensure that the changes are backwards-compatible. For instance, when a Resource Configure workflow runs for the 
 updated Promise, it should not fail because of a newly introduced change to the API.
+
+Lets say we have an `app` promise, and want to introduce the ability to configure a database. When selecting a database. consumers will be able to configure a size of `small`, `medium` or `large`.
 
 // Updating the Destinations
 
