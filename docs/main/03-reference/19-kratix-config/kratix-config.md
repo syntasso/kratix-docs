@@ -22,18 +22,23 @@ metadata:
   namespace: kratix-platform-system
 data:
   config: |
+
     # Number of old successful pipeline pods to keep. Default is 5
     numberOfJobsToKeep: 1
+
     # Selective cache for Secrets to limit memory usage. Please ensure Secrets used by Kratix are
     # created with label: app.kubernetes.io/part-of=kratix. Default is false.
     selectiveCache: false
-    # interval in which the Kratix runs the Promises/Resources workflows 
+
+    # interval in which the Kratix runs the Promises/Resources workflows
     reconciliationInterval: "10h"
     # Timeout configuration of controller's leader election.
+
     controllerLeaderElection:
       leaseDuration: 15s
       renewDeadline: 10s
       retryPeriod: 2s
+
     workflows:
       jobOptions:
         # Number of times Kubernetes retries a failing workflow Job before marking it failed.
@@ -44,7 +49,7 @@ data:
       defaultContainerSecurityContext:
         # Security context fields, e.g.:
         runAsNonRoot: false
-    
+
     logging:
       level: "info" # one of info, warning, debug, trace
       structured: false # if true, emit logs as json
@@ -56,6 +61,9 @@ data:
       insecure: true
       headers: # additional headers if required
         authorization: "Bearer <grafana-api-token>"
+
+    featureFlags:
+      promiseUpgrade: false # enable/disable promise revisions
 ```
 
 ## Kratix Pipeline Adapter Config

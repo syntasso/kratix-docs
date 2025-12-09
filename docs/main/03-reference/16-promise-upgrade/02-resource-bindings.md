@@ -13,9 +13,13 @@ Kratix will automatically create a Resource Binding for this Resource.
 This Binding consists of a reference to the Resource Request and the Promise Revision that the Resource is reconciled at.
 
 :::info
+
 Resource Bindings are managed by Kratix. As a Kratix users, you will not need to create or delete Resource
 Bindings manually.
+
 :::
+
+A Resource Binding looks like this:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -32,12 +36,14 @@ spec:
   resourceRef:
     name: example # name of the Resource
     namespace: default # namespace of the Resource
-  version: v0.1.0 # version of the Promise
+  version: v0.1.0 # version of the Promise this Resource is associated to
 ```
 
 :::info
+
 When updating a Resource Request, Kratix will reconcile the Resource using the Promise Revision recorded in the Resource Binding.
 If you want the Resource to be reconciled using a different Promise Revision, you need to update the Resource Binding.
+
 :::
 
 ## Upgrading a Resource Request
@@ -45,7 +51,13 @@ If you want the Resource to be reconciled using a different Promise Revision, yo
 To update the Promise Revision that a Resource Request is reconciled at, you can update its Resource Binding.
 To find the corresponding Resource Binding, you can run `kubectl` command with label filters.
 
-For example, to look for Resource Binding of a `redis` Resource Request with name `example` in namespace `default`, run :
+:::tip
+
+Resource Bindings have a 1:1 relationship to a resource request.
+
+:::
+
+For example, to look for the Resource Binding of a `redis` Resource Request with name `example` in namespace `default`, run:
 
 ```bash
 kubectl -n default get resourcebindings -l kratix.io/promise-name=redis -l kratix.io/resource-name=example
@@ -63,7 +75,7 @@ metadata:
   name: example-resource
 spec:
   ...
-  version: v0.1.0 # update to upgrade Resource Requests
+  version: v0.2.0 # update to upgrade Resource Requests
 ```
 
 Following this update, Kratix will automatically reconcile and run the Resource Configure workflow for the Resource Request.
