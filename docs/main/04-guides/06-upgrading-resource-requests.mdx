@@ -1,14 +1,15 @@
 ---
 description: A guide to upgrading Resource Requests with Resource Bindings
 title: Upgrading Resource Requests
+keywords: [promise upgrades, resource upgrades, resource bindings, promise bindings, versioning, updates]
 ---
 
 Kratix Promises provide a means of providing Anything-as-a-Service.
 The Promise API equips users with the ability to tailor a given service to their needs,
 essential business rules can be embedded within Promise workflows and the continuous reconciliation of resources helps ensure resources are kept up-to-date.
 
-For Platform Teams and Promise writers, the Promise also serves as a way to perform upgrades to a fleet a fleet of resources.
-Upgrades can take many forms, be they upgrades to the API determining how users provision their services, updated to the Dependencies used by a Promise or updates to Promise Workflows.
+For Platform Teams and Promise writers, the Promise also serves as a way to perform upgrades to a fleet of resources.
+Upgrades can take many forms, be they upgrades to the API determining how users provision their services, updates to the Dependencies used by a Promise or updates to Promise Workflows.
 
 ## Updating the API
 
@@ -36,14 +37,13 @@ spec: # Promise spec
 
 This is a backwards compatible change as introducing a new field will not impact json marshalling and unmarshalling.
 If your updates to the API include changes such as changing the type of an existing field,
-making an existing field as required, or removing an field, they are not backwards compatible changes.
+making an existing field required, or removing an field, they are not backwards compatible changes.
 Introducing a new API group and adding a conversion webhook will be required to support changes like these.
 
 ## Updates to Workflows
 
-Now, with the new field `spec.dbSize` added to our Promise API, we would like to start using it in our workflow to deploy database for our applications.
-However, we don't want to change any configurations for existing applications as they don't have `spec.dbSize` set in their resource request.
-This is where [Promise Revisions](/main/reference/promise-upgrade/promise-revisions) and [Resource Bindings](/main/reference/promise-upgrade/resource-bindings) come into play,
+Now, with the new field `spec.dbSize` added to our Promise API, we would like to start using it in our workflow to deploy a database for our applications.
+However, we don't want to change any configurations for existing applications as they don't have `spec.dbSize` set in their resource request. There are two mechanisms that can be employed to do this. One is via [Promise Revisions](/main/reference/promise-upgrade/promise-revisions) and [Resource Bindings](/main/reference/promise-upgrade/resource-bindings),
 as you can use Promise Revisions to track different versions of the Promise, and Resource Bindings to control the version of the Promise that the Resource Request is reconciled with.
 
 For example, given our app Promise:
@@ -113,7 +113,9 @@ spec:
 ```
 
 We would like to introduce `.spec.dbSize` to the Promise API, and add a new container to the existing Resource Configure
-workflow pipeline to deploy a database for the application. We should update the Promise to a new version with the changes above. For example:
+workflow pipeline to deploy a database for the application. We should update the Promise to introduce the new API fields and
+deploy this in a new version of the Promise. For example:
+
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
@@ -204,3 +206,24 @@ spec:
 
 This application will continue to be reconciled at Promise Revision `app-v0.0.1` until we update the Promise version in its Resource Binding.
 
+Another way that we can ensure that the addition of the workflow does not deploy any unexpected database for existing resources is via the
+`database-configure` container itself. The script run within the container can guard against the property being absent from the resource request. Take to following example:
+
+````
+import kratix_sdk as ks
+import yaml
+
+# Initialize the sdk
+sdk = ks.KratixSDK()
+resource = sdk.read_resource_input()
+
+# Read from resource input
+dbSize = resource.get_value("spec.dbSize", default="not-set")
+
+if dbSize == "not-set"
+    print("no dbSize configured, skipping database deployment")
+    exit(0)
+```
+
+If the Resource Configure Workflow runs for a Resource Request which does not have a `dbSize` in it's spec, the script will exit early without attempting to create a database.
+This means that if a user _did_ update their Resource Binding to a Promise Version where the `database-configure` container ran, it wouldn't fail or deploy any unexpected database.
