@@ -14,7 +14,7 @@ This Binding consists of a reference to the Resource Request and the Promise Rev
 
 :::info
 
-Resource Bindings are managed by Kratix. As a Kratix users, you will not need to create or delete Resource
+Resource Bindings are managed by Kratix. As a Kratix user, you will not need to create or delete Resource
 Bindings manually.
 
 :::

@@ -5,8 +5,8 @@ keywords: [promise upgrades, resource upgrades, resource bindings, promise bindi
 ---
 
 Kratix Promises provide a means of providing Anything-as-a-Service. The Promise
-API equips users with the ability to tailor a given service to their needs,
-essential business rules can be embedded within Promise workflows and the
+API equips users with the ability to tailor a given service to their needs.
+Essential business rules can be embedded within Promise workflows and the
 continuous reconciliation of resources helps ensure resources are kept
 up-to-date.
 
@@ -34,7 +34,7 @@ Kratix applies the following rules when upgrading a Promise:
 
 * Changes to the API are left to Kubernetes
 * Promises have Revisions
-* Destinations are always on the lates Promise Revision
+* Destinations are always on the latest installed Promise Revision
 * Resource requests are associated to a Promise Revision
 
 This guide will illustrate how you could control how and when resource requests are upgraded when a new version of a Promise is installed.
@@ -48,7 +48,7 @@ Promise Revisions and Resource Bindings are still a beta feature. To enable it, 
 ## Updating the API
 
 When introducing changes to Promise API, it is essential to ensure that the changes are backwards-compatible.
-For instance, when a Resource Configure workflow runs for the updated Promise, it should not fail because of a newly introduced change to the API.
+For instance, when a Resource Configure workflow runs for the updated Promise, it should not fail because of a newly-introduced change to the API.
 
 Let's say we have an `app` promise, and we want to introduce the ability to configure a database.
 When selecting a database, consumers should be able to configure a size of `small`, `medium` or `large`.
@@ -73,7 +73,8 @@ spec: # Promise spec
 
 This is a backwards-compatible change, as introducing a new field should not cause issues when the field is not present.
 If your updates to the API include changes such as changing the type of an existing field,
-making an existing field required, or removing a field, they could be breaking changes and your API is no longer backwards-compatible.
+making an existing field required, or removing a field, these could be breaking
+changes to your API contract and your API is no longer backwards-compatible.
 Introducing a new API group and adding a conversion webhook will be required to support breaking changes to the API.
 
 ## Updates to Workflows

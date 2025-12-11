@@ -6,18 +6,18 @@ sidebar_label: Promise Revisions
 
 # Promise Revisions
 
-Promise Revisions provide a mechanism for tracking a Promise at a specific version.
+Promise Revisions provide a mechanism for locking a Promise to a specific version.
 
 When a Promise is installed, Kratix will automatically create a Promise Revision for that Promise. This Promise Revision
-consists of a reference to the Promise, the version and the `spec` of the Promise at
-that version, includingh the Promise API, dependencies and workflows. This
+consists of a reference to the Promise, the desired version, and the `spec` of the Promise at
+that version, including the Promise API, dependencies and workflows. This
 initial Promise Revision will be labeled as the `latest` revision (via the `kratix.io/latest-revision` label).
 
-Resource request of the Promise will be bound to the `latest` Promise Revision via a Resource Binding.
+The Resource request for the Promise will be bound to the `latest` Promise Revision via a Resource Binding.
 
 :::info
 
-Promise Revisions are fully managed by Kratix. As a Kratix users, you will not need to create or update Promise
+Promise Revisions are fully managed by Kratix. As a Kratix user, you will not need to create or update Promise
 Revisions manually.
 
 :::
@@ -47,7 +47,7 @@ status: {}
 
 ## Updating a Promise
 
-The latest applied Promise will automatically generate a `latest` Promise Revision. When a new
+Kratix will automatically generate a `latest` Promise Revision for the latest applied Promise. When a new
 _version_ of the Promise is installed, a new Promise Revision will be created reflecting the updated specification at the
 updated version. This newly created Promise Revision will be become the new `latest` revision.
 
@@ -66,7 +66,20 @@ When a Promise is installed with no version tag, the Promise Revision will be cr
 
 :::
 
-If a Promise is updated, but the version already has a Promise Revision associated to it, the existing Promise Revision will be updated to reflect the updated Promise spec.
+If a Promise is updated, but the version already has a Promise Revision
+associated to it, the existing Promise Revision will be updated to reflect the
+updated Promise spec.
+
+:::warning
+
+Kratix _does not take_ [semantic versioning](https://semver.org/) into account
+when applying the `latest` label, as not all Promises might use. This means that
+if you have version `0.2.0` installed and you install version `0.1.0`, the
+`latest` Promise version will be `0.1.0` because it is the most recently
+installed Promise.
+
+:::
+
 
 ## Deleting a Promise Revision
 
