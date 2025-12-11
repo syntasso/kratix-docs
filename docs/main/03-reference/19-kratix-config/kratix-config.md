@@ -63,7 +63,7 @@ data:
         authorization: "Bearer <grafana-api-token>"
 
     featureFlags:
-      promiseUpgrade: false # enable/disable promise revisions
+      promiseUpgrade: false # enable/disable Promise Revisions
 ```
 
 ## Kratix Pipeline Adapter Config
