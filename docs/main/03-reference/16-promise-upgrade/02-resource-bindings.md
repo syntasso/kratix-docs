@@ -53,7 +53,7 @@ To find the corresponding Resource Binding, you can run `kubectl` command with l
 
 :::tip
 
-Resource Bindings have a 1:1 relationship to a Resource Request.
+Resource Bindings have a 1:1 relationship to a resource request.
 
 :::
 
