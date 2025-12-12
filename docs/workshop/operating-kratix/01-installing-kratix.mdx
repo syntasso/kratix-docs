@@ -17,30 +17,20 @@ This is Part 1 of [a series](intro) illustrating how Kratix works. <br />
 - [Learn more about Kratix as a framework](#what-is-kratix)
 - [Install and configure Kratix on a Kubernetes cluster](#install-kratix)
 
-<img align="right" src={useBaseUrl('/img/logo_300_with-padding.png')} />
-
 ## What is Kratix?
 
-Kratix is a framework used by platform teams to build custom platforms tailored
-to their organisation.
+Kratix is a framework that enables co-creation of capabilities by providing a
+clear contract between application and platform teams through the definition and
+creation of "Promises". Kratix focuses on empowering platform engineers to build
+better platforms. The following video provides a high-level overview of Kratix:
 
-### Using Kratix to build your platform allows you to
 
-- use GitOps workflows and familiar Kubernetes-native constructs.
-- co-create capabilities by providing a clear contract between application and
-  platform teams through the definition and creation of “Promises”. This
-  tutorial will talk more about Kratix Promises in [the next step](installing-a-promise).
-- create a flexible platform by providing your own paved paths as Promises.
-- evolve your platform easily as your business needs change.
-- start small on a laptop and expand to multi-team, multi-cluster, multi-region,
-  and multi-cloud with a consistent API everywhere.
+<div style={{ "text-align": "center" }}>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mCeCMaeHg7I?si=Yfu_oBhrT4_Nu3YB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+<br />
 
-### Providing a Kratix-built platform allows your users to
-
-- discover available services that are already fit-for-purpose.
-- consume services on demand using standard Kubernetes APIs.
-- move focus away from infrastructure toward adding product value into your
-  platform.
+For a more in-depth explanation of Kratix, check the [introduction to Kratix doc.](/)
 
 <hr />
 
@@ -49,7 +39,7 @@ to their organisation.
 Before continuing, be sure to go back to the [prerequisites](../prerequisites/intro)
 and follow the guide if you haven't done so already.
 
-You should also make sure you are currently in the `kratix` directory and have 
+You should also make sure you are currently in the `kratix` directory and have
 the following environment variables set:
 
 ```bash
@@ -194,7 +184,7 @@ minio   NodePort   10.96.96.166   <none>        80:31337/TCP   17h
 to exist prior to Kratix trying to use it. As a part of setting up MinIO you
 ran a Job to create the base `kratix` bucket.
 
-Finally, `secretRef` points to a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/), 
+Finally, `secretRef` points to a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/),
 in the same namespace as the State Store, containing the credentials to access
 the store. For `BucketStateStore`, Kratix expects to find an `accessKeyID` and
 a `secretAccessKey` when resolving the secret. As part of the MinIO deployment,
@@ -259,7 +249,7 @@ Worker cluster, and the state would eventually be applied to a Worker.
 
 :::
 
-It's important to note that Kratix makes no assumptions about the Destinations 
+It's important to note that Kratix makes no assumptions about the Destinations
 hemselves. Although Destinations are often Kubernetes clusters, they may be any
 system that can interpret whatever state is being declared as desired.
 

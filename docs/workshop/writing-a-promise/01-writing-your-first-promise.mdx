@@ -28,10 +28,22 @@ To complete this workshop, you will need to have access to an installation of
 Kratix as well as some essential tools. Take a look at the [Prerequisites](../prerequisites/intro)
 to ensure your environment is correctly configured.
 
-## What is a Promise? {#what-is-a-promise}
+## What is Kratix?
 
-Kratix is a framework used by platform teams to build platforms tailored to
-their organisation.
+Kratix is a framework that enables co-creation of capabilities by providing a
+clear contract between application and platform teams through the definition and
+creation of "Promises". Kratix focuses on empowering platform engineers to build
+better platforms. The following video provides a high-level overview of Kratix:
+
+<div style={{ "text-align": "center" }}>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mCeCMaeHg7I?si=Yfu_oBhrT4_Nu3YB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+<br />
+
+For a more in-depth explanation of Kratix, check the [introduction to Kratix doc.](/)
+
+## What is a Promise? {#what-is-a-promise}
 
 Kratix Promises are the encapsulation of platform offerings. They provide a
 structure to manage the complexities of providing _something-as-a-service_,
@@ -197,7 +209,7 @@ mkdir -p ~/app-promise && cd ~/app-promise
 kratix init promise app --group workshop.kratix.io --version v1 --kind App
 ```
 
-The command above should generate a `promise.yaml` file in the current directory. 
+The command above should generate a `promise.yaml` file in the current directory.
 You can check it out by running:
 
 ```bash
@@ -309,7 +321,7 @@ cat promise.yaml | yq '.spec.workflows'
 ```
 
 Now, you'll need build the app-promise-pipeline image used in the
-`configure-deps` workflow and make it available in the container registry. 
+`configure-deps` workflow and make it available in the container registry.
 Since you are using kind clusters, you can build and load the image into the
 cluster directly by running the following commands:
 
@@ -433,7 +445,7 @@ import ExecutePipeline from "!!raw-loader!./_partials/writing-a-promise/04-resou
 </CodeBlock>
 
 As you can see, the script above uses the `kubectl` command to create a Deployment, a Service, and an Ingress. The
-script uses the `yq` cli to extract the user's input from the `/kratix/input/object.yaml` file. The `object.yaml` 
+script uses the `yq` cli to extract the user's input from the `/kratix/input/object.yaml` file. The `object.yaml`
 file contains the input the user provided when requesting the new resource.
 
 You may also notice that the script uses the `/kratix/output` directory to store the resources that must be created.
@@ -531,7 +543,7 @@ import PromiseInstalled from "/img/docs/workshop/part-ii-promise-installed.png"
 
 ## Using the App Promise {#using-the-app-promise}
 
-As a developer, you can check the available Promises by running the following 
+As a developer, you can check the available Promises by running the following
 ommand:
 
 ```bash
