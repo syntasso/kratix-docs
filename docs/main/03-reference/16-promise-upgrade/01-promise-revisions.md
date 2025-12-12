@@ -73,8 +73,8 @@ updated Promise spec.
 :::warning
 
 Kratix _does not take_ [semantic versioning](https://semver.org/) into account
-when applying the `latest` label, as not all Promises might use. This means that
-if you have version `0.2.0` installed and you install version `0.1.0`, the
+when applying the `latest` label, as not all Promises might use it. This means
+that if you have version `0.2.0` installed and you install version `0.1.0`, the
 `latest` Promise version will be `0.1.0` because it is the most recently
 installed Promise.
 
