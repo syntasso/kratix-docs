@@ -24,6 +24,14 @@ A Promise version is an arbitrary number that represents a specific version of a
 Promise. Kratix will, through Promise Releases, ensure the Promise at the
 specified version is installed in the Platform.
 
+:::info
+
+Note that if you have enabled the Promise Upgrades feature flag, 
+every time a Promise version changes, Kratix creates a new Promise Revision for the Promise. 
+For more information, refer to the [reference doc](/main/reference/promise-upgrade/promise-revisions) and guide on [Promise upgrades](/main/guides/upgrading-resource-requests).
+
+:::
+
 ## Promise Release
 
 A Promise Release represents a Promise with a specific version that will be installed in
