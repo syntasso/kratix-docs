@@ -13,8 +13,12 @@ const config = {
   tagline: "An open-source framework for building platforms",
   url: "https://docs.kratix.io",
   baseUrl: "/",
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: "throw",
+    }
+  },
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "throw",
   favicon: "img/favicon.ico",
 
   // GitHub pages deployment config.
