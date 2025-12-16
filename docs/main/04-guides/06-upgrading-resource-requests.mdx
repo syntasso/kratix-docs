@@ -10,19 +10,6 @@ Essential business rules can be embedded within Promise workflows and the
 continuous reconciliation of resources helps ensure resources are kept
 up-to-date.
 
-{/*
-Goal of this guide:
-- How to make the API backwards-compatible
-*/}
-
-{/*
-
-This guide will go through how you could control the Promise and Resource upgrades via the Promise Revisions and Resource Bindings.
-There are some changes that makes upgrades hard, this guide will clarify how to not make that.
-
-*/}
-
-
 During an upgrade, any part of the Promise can change:
 
 * The API
@@ -203,30 +190,17 @@ app-v0.0.1
 app-v0.0.2   true
 ```
 
-You can see that the version `v0.0.2` is being marked as the latest Promise Revision. New app resource requests will be automatically bound to the `v0.0.2` version, which includes our changes to the Promise API and the new container in the Resource Configure workflow. For any existing resource requests, if you check their Resource Bindings, you can see that they continue to be bound to the previous Promise Revision:
+You can see that the version `v0.0.2` is being marked as the latest Promise Revision. New app resource requests will be
+automatically bound to the `v0.0.2` version, which includes our changes to the Promise API and the new container in the
+Resource Configure workflow.
 
-```yaml
-apiVersion: platform.kratix.io/v1alpha1
-kind: ResourceBinding
-metadata:
-  labels:
-    kratix.io/promise-name: app
-    kratix.io/resource-name: app-a
-  name: app-a-c42a2
-  namespace: default
-spec:
-  promiseRef:
-    name: app
-  resourceRef:
-    name: app-a
-    namespace: default
-  version: v0.0.1
-```
+By default, Kratix associates new resource requests to the `latest` Promise Revision. When a new revision is created
+those resources will be automatically upgraded. Any Resource Binding that is pinned to a specific version will not be
+upgraded automatically. To trigger an upgrade on those resources you can edit the Resource Binding directly.
 
-This application will continue to be reconciled at Promise Revision `app-v0.0.1` until we update the Promise version in its Resource Binding.
-
-Another way that we can ensure that the addition of the workflow does not deploy any unexpected database for existing resources is via the
-`database-configure` container itself. The script run within the container can guard against the property being absent from the resource request. Take to following example:
+Another way that we can ensure that the addition of the workflow does not deploy any unexpected database for existing
+resources is via the `database-configure` container itself. The script run within the container can guard against the
+property being absent from the resource request. Take to following example:
 
 ```python
 import kratix_sdk as ks
@@ -246,11 +220,15 @@ if dbSize == "not-set"
 # ...
 ```
 
-If the Resource Configure Workflow runs for a resource request which does not have a `dbSize` in it's spec, the script above will exit early. This means that if a user _did_ update their Resource Binding to a Promise Version where the `database-configure` container ran, it wouldn't fail or deploy any unexpected database.
+If the Resource Configure Workflow runs for a resource request which does not have a `dbSize` in it's spec, the script
+above will exit early. This means that if a user _did_ update their Resource Binding to a Promise Version where the
+`database-configure` container ran, it wouldn't fail or deploy any unexpected database.
 
 ## Upgrading Resource Requests
 
-To upgrade a resource request that is bound to a previous Promise Revision, you can edit the existing Resource Binding `spec.version` and point it to the desired Promise Revision version. In our example, we had a resource request bound to `v0.0.1`. To upgrade it, edit it as follows:
+To upgrade a resource request that is bound to a previous Promise Revision, you can edit the existing Resource Binding
+`spec.version` and point it to the desired Promise Revision version. In our example, we had a resource request bound to
+`v0.0.1`. To upgrade it, edit it as follows:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -271,10 +249,14 @@ spec:
   version: v0.0.2 # changed from v0.0.1 to v0.0.2
 ```
 
-Once that change is applied, Kratix will run the Resource Configure Workflow for the target resource using the `v0.0.2` Promise Revision.
+Once that change is applied, Kratix will run the Resource Configure Workflow for the target resource using the `v0.0.2`
+Promise Revision.
 
 ## Conclusion
 
-Promise Revisions and Resource Bindings enable resources to be associated with different versions of a Promise, which allows the platform engineering team to control exactly when and how the fleet will be upgraded. This, together with health checks, allow more controlled upgrades in production environments. 
+Promise Revisions and Resource Bindings enable resources to be associated with different versions of a Promise, which
+allows the platform engineering team to control exactly when and how the fleet will be upgraded. This, together with
+health checks, allow more controlled upgrades in production environments.
 
-We hope this guide has given you a better understanding of how to control upgrades. If you have any questions or feedback please don't hesitate to reach out to us on [Slack](https://kratixworkspace.slack.com/) or [GitHub](https://github.com/syntasso/kratix).
+We hope this guide has given you a better understanding of how to control upgrades. If you have any questions or
+feedback please don't hesitate to reach out to us on [Slack](https://kratixworkspace.slack.com/) or [GitHub](https://github.com/syntasso/kratix).
