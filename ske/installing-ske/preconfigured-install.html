@@ -16,7 +16,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.692da5fa.css">
-<script src="/assets/js/runtime~main.e0dea7ae.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.8bbb928c.js" defer="defer"></script>
 <script src="/assets/js/main.43d61de2.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -94,8 +94,9 @@ take a look at the Promise we just published:</p>
 <p>In a separate terminal, open a port-forward so you can access the Backstage UI:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">kubectl port-forward svc/backstage </span><span class="token number" style="color:#36acaa">7007</span><span class="token plain">:7007 </span><span class="token parameter variable" style="color:#36acaa">-n</span><span class="token plain"> kratix-platform-system</span><br></span></code></pre></div></div>
 <p>Then navigate to <a href="http://localhost:7007" target="_blank" rel="noopener noreferrer" class="">http://localhost:7007</a> in your browser.
-After a few moments you should see the Backstage UI with the Postgres Promise Component listed in
-the catalog (you may need to refresh the page):</p>
+After a few moments you should see the Backstage UI. Click on &quot;Login as Guest&quot;
+and you should see a page with the Postgres Promise Component listed in the
+catalog (you may need to refresh the page):</p>
 <figure class="diagram"><img class="medium" src="/img/ske/01-quick-start-catalog.png" alt="The App Promise"></figure>
 <p>If you select <code>Create</code> in the top right, you will then be able to see that
 the PostgreSQL template is available to be chosen.</p>
@@ -159,7 +160,7 @@ created by SKE and is used to generate the Backstage resource that is displayed
 in the Backstage UI.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="update-an-instance-via-backstage">Update an Instance (via Backstage)<a href="#update-an-instance-via-backstage" class="hash-link" aria-label="Direct link to Update an Instance (via Backstage)" title="Direct link to Update an Instance (via Backstage)" translate="no">​</a></h3>
 <p>SKE isn&#x27;t a fire and forget solution; it handles the full lifecycle, including
-all day 2 operations.  For example, if your requirements change, it&#x27;s easy to
+all Day 2 operations.  For example, if your requirements change, it&#x27;s easy to
 adapt. As a consumer,  you simply update the request and re-submit. Promises are
 designed  to safely handle updates without requiring custom scripts or manual
 intervention. Open the resource in Backstage, navigate to the <code>Manage</code> tab, edit
