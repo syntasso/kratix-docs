@@ -1,0 +1,129 @@
+---
+slug: revision-and-bindings-announcement
+title: "Control your Fleet Upgrades with Kratix Promise Revisions and Resource Bindings"
+description: Product announcement on the new Kratix Promise Revision and Resource Binding feature
+authors: [cat]
+tags: [kratix, product announcement, fleet management, new feature]
+---
+
+Rolling out [changes across a platform fleet](https://www.syntasso.io/post/fleet-management-what-platform-engineering-can-learn-from-over-the-air-car-updates)
+ is one of the hardest parts of being a platform engineer. Move too fast, and you risk availability. Move too slowly, and the platform becomes a bottleneck.
+
+
+Imagine you are responsible for maintaining a suite of production services. Some support apps that are more business critical 
+than others - maybe they are customer facing, or back time-sensitive business functions. You receive a notification of a vulnerability that you need
+  to patch. How do you ensure that upgrades to those business critical services are successful and won’t cause downtime or outages? 
+
+<!-- truncate -->
+Today, we’re introducing Kratix [Promise Revisions](/main/reference/promises/promise-upgrade/promise-revisions) 
+and [Resource Bindings](/main/reference/promises/promise-upgrade/resource-bindings), a new way to control how 
+upgrades roll out across your Kratix fleet. You decide which resources are upgraded, when they are upgraded, and how to roll back if 
+something does not behave as expected.
+
+This removes the risk from (often ad hoc) platform upgrades and puts control firmly back in the hands of platform teams.
+
+## Why should I care about fleet upgrades?
+
+At Syntasso, we have been talking about [fleet management](https://www.syntasso.io/blog-all-posts/tags/fleet-management) 
+for a while. We believe platforms only succeed long-term if they can incrementally support double, triple, or 10x the 
+number of resources without increasing platform team headcount. 
+
+Our customers agree.
+
+“We like the concept of a fleet,” said one large banking customer. Music to our ears!
+
+But they also told us: “But I'm not sure whether it's a good idea to just slide silently upgrade 50 databases at once.”
+
+That concern is very real. A platform is the beating heart of an engineering organisation. If upgrades are applied too broadly 
+or at the wrong time, the impact can ripple across teams and environments. 
+In Kratix terms, fleet-wide upgrades can dramatically improve consistency and velocity. But without proper controls, 
+they also increase risk around availability, safety, and trust in the platform.
+
+With the latest Kratix and [Syntasso Kratix Enterprise (SKE)](/ske) release, fleet upgrades become significantly safer.
+
+Using Promise Revisions and Resource Bindings, platform engineers can control exactly which resources receive an update and 
+when, enabling gradual rollouts, canaries, and fast rollbacks.
+
+
+### The benefits of Promise Revisions and Resource Bindings
+
+With Promise Revisions and Resource Bindings, platform teams can define upgrade strategies that match how their organisation actually operates:
+- Upgrade a single canary resource first, then roll out to the rest once it is healthy
+- Update development environments to the latest version while holding production back until you are ready
+- Quickly roll back to a previous version if an upgrade does not behave as expected
+
+## How Kratix enables safe resource upgrades
+
+### Versioned Promises and Promise Revisions
+
+Every time a versioned Promise is installed, Kratix creates a [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions). 
+A Promise Revision is a snapshot of the Promise at that point in time.
+
+You can retain as many revisions as you like, giving you:
+- A clear audit trail of which Promise versions have existed on your platform
+- Visibility into what changed between versions
+- A stable reference point for upgrades and rollbacks
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: PromiseRevision
+metadata:
+  labels:
+    kratix.io/promise-name: promise-name
+  name: promise-revision-name
+  # Name of the Promise Revision; this takes the form <PROMISE_NAME>-<VERSION>
+spec:
+  promiseRef:
+    name: promise-name
+  promiseSpec:
+  # The full promise.spec of the Promise
+    api:
+    destinationSelectors:
+    workflows:
+  version: v0.1.0
+  # The version of the Promise as indicated by the kratix.io/promise-version label
+status: {}
+```
+### Resource Bindings for precise control
+When a resource is created, Kratix now creates a [Resource Binding](/main/reference/promises/promise-upgrade/resource-bindings) 
+that maps that resource to the latest Promise Revision. 
+
+Platform engineers can update this binding at any time to point to a different revision. This allows you to:
+- Control which resources receive upgrades and when
+- Roll resources back to a known-good version
+- See exactly which resources are running on which Promise Revision with a single command
+
+This makes the state of your fleet of resources explicit and observable, rather than implicit and risky.
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: ResourceBinding
+metadata:
+  labels:
+    kratix.io/promise-name: redis # name of the Promise
+    kratix.io/resource-name: example # name of the Resource
+  name: example-redis-e7f90
+  namespace: default # Resource Bindings are created in the same namespace as the Resource itself
+spec:
+  promiseRef:
+    name: redis # name of the Promise
+  resourceRef:
+    name: example # name of the Resource
+    namespace: default # namespace of the Resource
+  version: latest # version of the Promise this Resource is associated to
+```
+
+### Safe, staged fleet upgrades
+By combining Promise Revisions and Resource Bindings, platform engineers can group resources and control how upgrades move through the fleet. 
+Upgrades no longer have to be all-or-nothing. You can roll changes out gradually, validate behaviour, and expand confidence before 
+widening the blast radius.
+
+For advanced Kratix users, this is just the beginning. By layering in [health checks](/main/guides/resource-health), you can build automated canary and progressive 
+rollout strategies. We will be sharing a deeper dive into this pattern in an upcoming blog post.
+
+## Ready to try out Promise Revisions?
+Promise Revisions and Resource Bindings are available now in the latest Kratix release.
+- Join us in the [community Slack](https://kratixworkspace.slack.com/) if you have feedback or want help getting started
+- Check out the [documentation](/main/reference/promises/promise-upgrades) to learn how to use these features today
+- We are also working on a step-by-step guide to help you adopt fleet upgrades safely
+
