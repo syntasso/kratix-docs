@@ -212,8 +212,9 @@ kubectl port-forward svc/backstage 7007:7007 -n kratix-platform-system
 ```
 
 Then navigate to [http://localhost:7007](http://localhost:7007) in your browser.
-After a few moments you should see the Backstage UI with the Postgres Promise Component listed in
-the catalog (you may need to refresh the page):
+After a few moments you should see the Backstage UI. Click on "Login as Guest"
+and you should see a page with the Postgres Promise Component listed in the
+catalog (you may need to refresh the page):
 
 <figure className="diagram">
   <img className="medium" src={useBaseUrl('/img/ske/01-quick-start-catalog.png')} alt="The App Promise" />
@@ -361,7 +362,7 @@ in the Backstage UI.
 ### Update an Instance (via Backstage)
 
 SKE isn't a fire and forget solution; it handles the full lifecycle, including
-all day 2 operations.  For example, if your requirements change, it's easy to
+all Day 2 operations.  For example, if your requirements change, it's easy to
 adapt. As a consumer,  you simply update the request and re-submit. Promises are
 designed  to safely handle updates without requiring custom scripts or manual
 intervention. Open the resource in Backstage, navigate to the `Manage` tab, edit
