@@ -50,7 +50,7 @@ spec:
           name: dependencies
         spec:
           containers:
-          - image: kratix-workshop/app-promise-pipeline:v0.1.0
+          - image: syntasso/workshop-app-pipeline-image:v1.0.0
             name: configure-deps
     resource:
       configure:
@@ -61,5 +61,5 @@ spec:
           spec:
             containers:
               - name: kratix-workshop-app-pipeline-image
-                image: kratix-workshop/app-pipeline-image:v1.0.0
+                image: syntasso/workshop-app-pipeline-image:v1.0.0
                 command: [ resource-configure ]
