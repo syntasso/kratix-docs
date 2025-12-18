@@ -10,54 +10,18 @@ import CodeBlock from '@theme/CodeBlock';
 
 This is part of [a series](intro) illustrating how to write Kratix Promises.
 
+👈🏾 Previous: [Intro: Kratix and Promises](kratix-and-promises) <br />
 👉🏾 Next: [Using Promise Workflows](./promise-workflows)
 
 ---
 
 **In this tutorial, you will**
 
-- [Learn more about Promises](#what-is-a-promise)
 - [Design an API for your service](#api-design)
 - [Define the dependencies of your promise](#dependencies)
 - [Write a Workflow to deliver the service](#workflow)
 - [Experience requesting a Resource](#using-the-app-promise)
 
-## Prerequisites {#prequisites}
-
-To complete this workshop, you will need to have access to an installation of
-Kratix as well as some essential tools. Take a look at the [Prerequisites](../prerequisites/intro)
-to ensure your environment is correctly configured.
-
-## What is Kratix?
-
-Kratix is a framework that enables co-creation of capabilities by providing a
-clear contract between application and platform teams through the definition and
-creation of "Promises". Kratix focuses on empowering platform engineers to build
-better platforms. The following video provides a high-level overview of Kratix:
-
-<div style={{ "text-align": "center" }}>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mCeCMaeHg7I?si=Yfu_oBhrT4_Nu3YB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-
-<br />
-
-For a more in-depth explanation of Kratix, check the [introduction to Kratix doc.](/)
-
-## What is a Promise? {#what-is-a-promise}
-
-Kratix Promises are the encapsulation of platform offerings. They provide a
-structure to manage the complexities of providing _something-as-a-service_,
-including the definition of how a user can request a Resource, the steps to
-provision the requested Resource, and how to provide access to the Resource.
-
-Promises allow platform teams to:
-
-- Define an API, including versioning and validation
-- Execute imperative commands per the user request
-- Use GitOps to continuously reconcile delivered services
-- Install and configure (or verify) dependencies for delivering a service
-- Manage where services are deployed across the infrastructure (on and
-  off-Kubernetes, on Cloud providers, etc)
 
 ### Promise Architecture
 
