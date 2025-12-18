@@ -1,0 +1,4 @@
+apiVersion: workshop.kratix.io/v1
+kind: App
+metadata:
+  name: example-app
