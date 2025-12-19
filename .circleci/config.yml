@@ -33,7 +33,7 @@ jobs:
       - run:
           name: deploy
           command: |
-            export CUSTOM_COMMIT_MESSAGE="[ci skip] Deploy website - based on $(git rev-parse HEAD) "
+            export CUSTOM_COMMIT_MESSAGE="[ci skip] Deploy website - based on $(git rev-parse HEAD)"
             yarn deploy
           no_output_timeout: 2m
 
