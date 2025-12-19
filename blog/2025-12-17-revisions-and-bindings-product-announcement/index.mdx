@@ -20,35 +20,35 @@ and [Resource Bindings](/main/reference/promises/promise-upgrade/resource-bindin
 upgrades roll out across your Kratix fleet. You decide which resources are upgraded, when they are upgraded, and how to roll back if 
 something does not behave as expected.
 
-This removes the risk from (often ad hoc) platform upgrades and puts control firmly back in the hands of platform teams.
+This removes the risk from (often ad-hoc) platform upgrades and puts control firmly back in the hands of platform teams.
 
 ## Why should I care about fleet upgrades?
 
 At Syntasso, we have been talking about [fleet management](https://www.syntasso.io/blog-all-posts/tags/fleet-management) 
 for a while. We believe platforms only succeed long-term if they can incrementally support double, triple, or 10x the 
-number of resources without increasing platform team headcount. 
+number of resources without increasing platform-team headcount. 
 
 Our customers agree.
 
 “We like the concept of a fleet,” said one large banking customer. Music to our ears!
 
-But they also told us: “But I'm not sure whether it's a good idea to just slide silently upgrade 50 databases at once.”
+But they also told us: “But I'm not sure whether it's a good idea to just silently upgrade 50 databases at once.”
 
-That concern is very real. A platform is the beating heart of an engineering organisation. If upgrades are applied too broadly 
+That concern is very real. A platform is the beating heart of an engineering organisation. If upgrades are applied too broadly, 
 or at the wrong time, the impact can ripple across teams and environments. 
-In Kratix terms, fleet-wide upgrades can dramatically improve consistency and velocity. But without proper controls, 
+In Kratix terms fleet-wide upgrades can dramatically improve consistency and velocity. But without proper controls 
 they also increase risk around availability, safety, and trust in the platform.
 
-With the latest Kratix and [Syntasso Kratix Enterprise (SKE)](/ske) release, fleet upgrades become significantly safer.
+With the latest Kratix and [Syntasso Kratix Enterprise (SKE)](/ske) release fleet upgrades become significantly safer.
 
-Using Promise Revisions and Resource Bindings, platform engineers can control exactly which resources receive an update and 
+Using Promise Revisions and Resource Bindings platform engineers can control exactly which resources receive an update and 
 when, enabling gradual rollouts, canaries, and fast rollbacks.
 
 
 ### The benefits of Promise Revisions and Resource Bindings
 
 With Promise Revisions and Resource Bindings, platform teams can define upgrade strategies that match how their organisation actually operates:
-- Upgrade a single canary resource first, then roll out to the rest once it is healthy
+- Upgrade a single canary resource first then roll out to the remaining resources if the canary remains healthy
 - Update development environments to the latest version while holding production back until you are ready
 - Quickly roll back to a previous version if an upgrade does not behave as expected
 
@@ -56,7 +56,7 @@ With Promise Revisions and Resource Bindings, platform teams can define upgrade 
 
 ### Versioned Promises and Promise Revisions
 
-Every time a versioned Promise is installed, Kratix creates a [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions). 
+Every time a versioned Promise is installed Kratix creates a [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions). 
 A Promise Revision is a snapshot of the Promise at that point in time.
 
 You can retain as many revisions as you like, giving you:
@@ -126,4 +126,3 @@ Promise Revisions and Resource Bindings are available now in the latest Kratix r
 - Join us in the [community Slack](https://kratixworkspace.slack.com/) if you have feedback or want help getting started
 - Check out the [documentation](/main/reference/promises/promise-upgrades) to learn how to use these features today
 - We are also working on a step-by-step guide to help you adopt fleet upgrades safely
-
