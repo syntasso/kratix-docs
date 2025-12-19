@@ -51,8 +51,6 @@ data:
       promiseUpgrade: false # enable/disable promise revisions
 ```
 
-## Kratix Config Options
-
 ### numberOfJobsToKeep (default: 5)
 
 The total number of completed Kratix workflow jobs to keep in the cluster. The oldest jobs will be deleted as new jobs are created.
