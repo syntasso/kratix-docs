@@ -9,7 +9,7 @@ sidebar_label: Resource Bindings
 Resource Bindings bind a Resource Request to a [Promise Revision](./promise-revisions).
 
 When a Resource Request is made, Kratix reconciles this Resource using the latest Promise Revision.
-Kratix will automatically create a Resource Binding for this Resource.
+Kratix will automatically create a Resource Binding for this Resource using `latest` as the Promise version.
 This Binding consists of a reference to the Resource Request and the Promise Revision that the Resource is reconciled at.
 
 :::info
