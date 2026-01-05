@@ -5,12 +5,12 @@ Command to update destination selectors
 Command to update destination selectors
 
 ## Usage
-```
+```bash
 kratix update destination-selector KEY=VALUE [flags]
 ```
 
 ## Examples
-```
+```bash
 # adds and updates a destination selector
 kratix update destination-selector env=dev
 
@@ -19,7 +19,7 @@ kratix update destination-selector zone-
 ```
 
 ## Flags
-```
+```bash
 -d, --dir string   Directory to read Promise from (default ".")
 ```
 

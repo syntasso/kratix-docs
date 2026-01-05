@@ -5,13 +5,13 @@ Command to add to Kratix resources
 Command to add to Kratix resources
 
 ## Usage
-```
+```bash
 kratix add [command]
 ```
 
 
 ## Flags
-```
+```bash
 -h, --help   help for add
 ```
 

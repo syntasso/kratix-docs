@@ -3,23 +3,21 @@ Command to update promise API
 
 ## Description
 Command to update the Promise API.
-
 It can be used to update the API GVK, or to add/remove properties to the API.
 The --group, --kind, --version, and --plural flags are used to update the API
 GVK. The --property flag is used to add or remove properties from the API. The
 format is PROPERTY-NAME:TYPE. Valid types are string, number, integer, object,
 and boolean.
-
 For object types, the property name can be nested using the '.' character.
 To remove a property, append a '-' to the property name.
 
 ## Usage
-```
+```bash
 kratix update api --property PROPERTY-NAME:TYPE [flags]
 ```
 
 ## Examples
-```
+```bash
 # add a new property of type string to the API kratix update api
 --property region:string
 
@@ -37,7 +35,7 @@ kratix update api --version v1beta3 --plural mydbs
 ```
 
 ## Flags
-```
+```bash
 -d, --dir string             Directory to read Promise from (default ".")
 -g, --group string           The API group for the Promise
 -h, --help                   help for api

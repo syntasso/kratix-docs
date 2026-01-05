@@ -5,12 +5,12 @@ Command to build a container image generated with 'add container'
 Command to build a container image generated with 'add container'
 
 ## Usage
-```
+```bash
 kratix build container LIFECYCLE/ACTION/PIPELINE-NAME [flags]
 ```
 
 ## Examples
-```
+```bash
 # Build a container
 kratix build container resource/configure/mypipeline --name mycontainer
 
@@ -31,7 +31,7 @@ kratix build container resource/configure/mypipeline --engine podman
 ```
 
 ## Flags
-```
+```bash
 -a, --all                 Build all of the containers for the Promise across all Workflows
 --build-args string   Extra build arguments to pass to the container build command
 --buildx              Build the container using Buildx

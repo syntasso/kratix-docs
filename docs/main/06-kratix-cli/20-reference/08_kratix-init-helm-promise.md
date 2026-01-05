@@ -5,12 +5,12 @@ Initialize a new Promise from a Helm chart
 Initialize a new Promise from a Helm Chart
 
 ## Usage
-```
+```bash
 kratix init helm-promise PROMISE-NAME --chart-url HELM-CHART-URL --group PROMISE-API-GROUP --kind PROMISE-API-KIND [--chart-version] [flags]
 ```
 
 ## Examples
-```
+```bash
 # initialize a new promise from an OCI Helm Chart
 kratix init helm-promise jenkins --chart-url oci://ghcr.io/jenkinsci/helm-charts/jenkins [--chart-version] --group syntasso.io --kind cicd
 
@@ -22,7 +22,7 @@ kratix init helm-promise postgresql --chart-url https://github.com/stefanprodan/
 ```
 
 ## Flags
-```
+```bash
 --chart-name string      The Helm chart name. Required when using Helm repository
 --chart-url string       The URL (supports OCI and tarball) of the Helm chart
 --chart-version string   The Helm chart version. Default to latest
@@ -30,7 +30,7 @@ kratix init helm-promise postgresql --chart-url https://github.com/stefanprodan/
 ```
 
 ## Global
-```
+```bash
 -d, --dir string       The output directory to write the Promise structure to; defaults to '.' (default ".")
 -g, --group string     The API group for the Promise
 -k, --kind string      The kind to be provided by the Promise

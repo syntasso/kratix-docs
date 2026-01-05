@@ -5,20 +5,20 @@ Generate a Promise from a given Kubernetes Operator.
 Generate a Promise from a given Kubernetes Operator.
 
 ## Usage
-```
+```bash
 kratix init operator-promise PROMISE-NAME --group PROMISE-API-GROUP --version PROMISE-API-VERSION --kind PROMISE-API-KIND --operator-manifests OPERATOR-MANIFESTS-DIR --api-schema-from CRD-NAME [flags]
 ```
 
 
 ## Flags
-```
+```bash
 -a, --api-schema-from string      The name of the CRD which the Promise API schema should be generated from.
 -h, --help                        help for operator-promise
 -m, --operator-manifests string   The path to the directory containing the operator manifests.
 ```
 
 ## Global
-```
+```bash
 -d, --dir string       The output directory to write the Promise structure to; defaults to '.' (default ".")
 -g, --group string     The API group for the Promise
 -k, --kind string      The kind to be provided by the Promise

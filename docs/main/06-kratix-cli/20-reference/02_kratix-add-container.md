@@ -5,12 +5,12 @@ Adds a container to the named workflow
 Adds a container to the named workflow
 
 ## Usage
-```
+```bash
 kratix add container LIFECYCLE/ACTION/PIPELINE-NAME --image CONTAINER-IMAGE [flags]
 ```
 
 ## Examples
-```
+```bash
 # LIFECYCLE is one of: promise, resource
 # ACTION is one of: configure, delete
 
@@ -22,7 +22,7 @@ kratix add container promise/configure/pipeline0 --image syntasso/postgres-resou
 ```
 
 ## Flags
-```
+```bash
 -d, --dir string        Directory to read promise.yaml from. Default to current working directory. (default ".")
 -h, --help              help for container
 -i, --image string      The image used by this container.

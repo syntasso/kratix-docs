@@ -5,13 +5,13 @@ Command to build kratix resources
 Command to build kratix resources
 
 ## Usage
-```
+```bash
 kratix build [command]
 ```
 
 
 ## Flags
-```
+```bash
 -h, --help   help for build
 ```
 

@@ -5,12 +5,12 @@ Initialize a new Promise
 Initialize a new Promise within the current directory, with all the necessary files to get started
 
 ## Usage
-```
+```bash
 kratix init promise PROMISE-NAME --group PROMISE-API-GROUP --kind PROMISE-API-KIND [flags]
 ```
 
 ## Examples
-```
+```bash
 # initialize a new promise with the api group and provided kind
 kratix init promise postgresql --group syntasso.io --kind database
 
@@ -19,12 +19,12 @@ kratix init promise postgresql --group syntasso.io --kind database --version v1
 ```
 
 ## Flags
-```
+```bash
 -h, --help   help for promise
 ```
 
 ## Global
-```
+```bash
 -d, --dir string       The output directory to write the Promise structure to; defaults to '.' (default ".")
 -g, --group string     The API group for the Promise
 -k, --kind string      The kind to be provided by the Promise

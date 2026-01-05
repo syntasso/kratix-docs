@@ -5,13 +5,13 @@ Command to update kratix resources
 Command to update kratix resources
 
 ## Usage
-```
+```bash
 kratix update [command]
 ```
 
 
 ## Flags
-```
+```bash
 -h, --help   help for update
 ```
 
