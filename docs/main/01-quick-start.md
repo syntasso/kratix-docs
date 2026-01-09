@@ -68,7 +68,7 @@ quick-start that uses a single job to install Kratix with sensible defaults.
 
   1. Installs [**cert-manager**](https://cert-manager.io/) to manage TLS certificates for
       Kratix webhooks
-  1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/learn-more/kratix-resources)
+  1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/platform-concepts/kratix-resources)
       in the `kratix-system` namespace
   1. Deploys [**MinIO**](https://min.io/), a local S3-compatible bucket for storing
       declarative workloads

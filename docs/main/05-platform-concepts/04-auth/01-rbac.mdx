@@ -12,6 +12,8 @@ how Kubernetes RBAC works, please refer to the official Kubernetes documentation
 [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). This guide
 assumes familiarity with Kubernetes RBAC concepts. If you are new to RBAC, it is
 recommended to review the Kubernetes documentation before proceeding.
+For how authentication fits into Kratix, see
+[Authentication](/main/platform-concepts/auth/authentication-oidc).
 
 ## RBAC in Kratix
 
@@ -23,9 +25,9 @@ reference these CRDs. The CRDs of note that come out of the box with Kratix are:
 
 - [`Promise`](/main/reference/promises/intro) - The definition of a Service to
   be offered on the Platform (cluster-scoped).
-- [`Work`](/main/learn-more/kratix-resources#output-objects) - The definition
+- [`Work`](/main/platform-concepts/kratix-resources#output-objects) - The definition
   of the declarative workloads that need to be scheduled (namespace-scoped).
-- [`WorkPlacement`](/main/learn-more/kratix-resources#output-objects) - The
+- [`WorkPlacement`](/main/platform-concepts/kratix-resources#output-objects) - The
   definition of a scheduled workload (namespace-scoped).
 - [`GitStateStore`/`BucketStateStore`](/main/reference/statestore/intro) -
   Definitions of State Stores that Kratix can use to write declarative
@@ -299,4 +301,3 @@ Remember to create corresponding RoleBindings or ClusterRoleBindings to assign t
 As a rule of thumb:
 - **Developers:** `Role` + `RoleBinding` per namespace.  
 - **Platform Engineers:** `ClusterRole` + `ClusterRoleBinding` across the cluster.
-
