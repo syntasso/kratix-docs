@@ -1,8 +1,0 @@
-{
-  "label": "Learn More",
-  "position": 5,
-  "link": {
-    "type": "generated-index",
-    "description": "Learn more about Kratix concepts and internals, and how Kratix fits the ecosystem."
-  }
-}
