@@ -38,47 +38,24 @@ for setup instructions.
 
 ## Installing the Backstage Controller
 
-The Controller is released separately from SKE. Its releases can be found [here](../../releases/backstage-controller).
+### Via the SKE Operator Helm Chart
 
-The Controller can be installed using the [helm chart](https://github.com/syntasso/helm-charts/tree/main/backstage-controller).
+The Backstage Controller is installed by the [SKE Operator](../../installing-ske/advanced-install) and can be configured to be deployed when installing the SKE Operator Helm Chart.
 
-You will need to start by adding the Syntasso Helm repository:
-```bash
-helm repo add syntasso https://syntasso.github.io/helm-charts
-helm repo update
-```
-### Configure values
-
-Helm can accept values via the values file. Any configuration should be placed in a values.yaml file that is then passed in to the helm install command.
-For all available configurations, please refer to the default values file in [Backstage Controller chart](https://github.com/syntasso/helm-charts/blob/main/backstage-controller/values.yaml).
-
-Below are instructions on how you could use the values file to configure SKE license and image registry.
-
-#### The SKE license
-
-Both the Backstage Controller image and the SKE Backstage Generator image used by the Controller are hosted in a private registry, to access
-these images, you will need to authenticate using the token you have been provided with.
-
-The Backstage Controller chart will, be default, use a secret named `syntasso-registry` in the `kratix-platform-system` namespace. This secret is created and managed by the SKE operator helm chart.
-If you wish to create a different image pull secret, you can run the following command:
-
-```bash
-kubectl create secret docker-registry YOUR-SECRET-NAME \
-  --namespace=kratix-platform-system \
-  --docker-server=registry.syntasso.io \
-  --docker-username=syntasso-pkg \
-  --docker-password=<YOUR TOKEN>
-```
-
-The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
-To use this secret in Backstage Controller chart, you can customize `imageRegistry.imagePullSecret` in your values file.
+To deploy the Backstage Controller via the SKE Operator Helm Chart, configure the `backstageIntegration` values. Most crucially, you will need to set `backstageIntegration.enabled` to `true`.
 
 ```yaml
-# Configuration for the image registry
-# Update these values if you are using a private image registry
-imageRegistry:
-  imagePullSecret: YOUR-SECRET-NAME
-# ...
+backstageIntegration:
+  enabled: true
+  version: "latest"
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
 ```
 
 #### Image registry for Air-gapped Environments
@@ -89,31 +66,59 @@ due to air-gapped requirements or other security measures.
 To do this, you will need to set up image mirroring and configure the Backstage Controller distribution to pull images
 from your own registry.
 
-You must ensure that the following images are mirrored to your own image registry and tagged according to the version.
+You must ensure that the Backstage Controller image is mirrored in your own image registry and tagged according to the version.
 
-- `registry.syntasso.io/syntasso/backstage-controller`
-- `registry.syntasso.io/syntasso/ske-backstage-generator`
-
-You can then customize `imageRegistry.host` in your values file:
-
-```yaml
-# Configuration for the image registry
-# Update these values if you are using a private image registry
-imageRegistry:
-  host: "my-org.registry.io"
-...
+```
+registry.syntasso.io/syntasso/backstage-controller
 ```
 
-### Deploy the Backstage Controller
+As is the case for the SKE Operator and SKE Platform images, the Backstage Controller will use registry configured via the `imageRegistry.host` when pulling images. If have changed the name of the Backstage Controller image in your internal registry, ensure that the `imageRegistry.backstageControllerImage.name` is updated to reflect this.
 
-Next, install Backstage Controller by running:
+As you may have already done for SKE Operator image, you can then  the `imageRegistry.host` in your values file:
+
+#### Deploy the Backstage Controller
+
+Having updated the Helm values, install the Backstage Controller by running:
 
 ```bash
-helm install backstage-controller syntasso/backstage-controller \
+helm install ske-operator syntasso/ske-operator \
   --namespace kratix-platform-system \
   --wait \
-  --values values.yaml # This is optional. Only use if you are configuring custom values.
+  --values values.yaml
 ```
+
+### Via the SKE Integrations CRD
+
+The SKE Operator includes a custom resource definition (CRD) for managing SKE Integrations such as Backstage. Only one instance of a Backstage SKE Integration can be created by the SKE Operator in a given cluster.
+
+If both the SKE Operator and SKE are deployed on your cluster, you can deploy the Backstage Controller by creating a SKE Integration. Create a file named backstage-integration.yaml with the following contents:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: backstage-integration
+spec:
+  type: backstage
+  version: v0.99.0 # The desired version of the Controller
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+Apply the file with kubectl:
+
+```yaml
+kubectl apply --filename backstage-integration.yaml
+```
+
+The operator will then install the Backstage Controller and the desired configurations.
+
 
 ## How does it work?
 
