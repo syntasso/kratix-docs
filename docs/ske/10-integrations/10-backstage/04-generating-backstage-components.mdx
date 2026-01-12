@@ -46,9 +46,11 @@ You will need `0.52.0` of the SKE Operator Helm Chart
 
 :::
 
-The Backstage Controller is installed by the [SKE Operator](../../installing-ske/advanced-install) and can be configured to be deployed when installing the SKE Operator Helm Chart.
+The Backstage Controller is installed by the [SKE Operator](../../installing-ske/advanced-install) and can be deployed via the SKE Operator Helm Chart.
 
 To deploy the Backstage Controller via the SKE Operator Helm Chart, configure the `backstageIntegration` values. Most crucially, you will need to set `backstageIntegration.enabled` to `true`.
+
+You can use the `deploymentConfig.resource` to configure the resource allocations for the Backstage Controller deployment.
 
 ```yaml
 backstageIntegration:
@@ -79,8 +81,6 @@ registry.syntasso.io/syntasso/backstage-controller
 ```
 
 As is the case for the SKE Operator and SKE Platform images, the Backstage Controller will use registry configured via the `imageRegistry.host` when pulling images. If have changed the name of the Backstage Controller image in your internal registry, ensure that the `imageRegistry.backstageControllerImage.name` is updated to reflect this.
-
-As you may have already done for SKE Operator image, you can then  the `imageRegistry.host` in your values file:
 
 #### Deploy the Backstage Controller
 
