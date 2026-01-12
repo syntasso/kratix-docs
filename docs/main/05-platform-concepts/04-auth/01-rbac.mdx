@@ -45,6 +45,11 @@ with them. End users typically need two capabilities:
 workloads for example, a Promise that provides a database will introduce a
 `Database` CRD
 
+Those request resources are namespaced, so access is typically granted with
+namespace-scoped `Role` and `RoleBinding` pairs per team or environment. See
+[Namespaces](/main/platform-concepts/namespaces) for how this shapes isolation
+and access boundaries.
+
 Create Roles that grant only these permissions and bind them to the relevant
 users or service accounts. Prefer least privilege. Avoid granting access to
 Kratix control-plane CRDs outside the Platform team. Below are some examples

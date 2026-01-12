@@ -1,0 +1,18 @@
+---
+title: Namespaces
+description: Use Kubernetes namespaces to isolate Kratix resource requests.
+---
+
+Kratix relies on Kubernetes namespaces for isolation. Every Promise-defined
+request kind (for example `Database` or `App`) is namespaced, so each request
+belongs to a namespace. This makes namespaces a natural boundary for teams,
+individuals, environments, or organisations. You can combine namespaces with
+Kubernetes features like ResourceQuotas to enforce limits and isolation.
+
+Promises themselves are cluster-scoped and are not namespaced. That means a
+Promise is visible across the cluster once installed. Use Kubernetes RBAC to
+control who can list Promises and who can create request resources in each
+namespace. See the Kratix [RBAC](/main/platform-concepts/auth/rbac) guide for
+examples and guidance.
+
+For the Kubernetes details, see the [Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) docs.
