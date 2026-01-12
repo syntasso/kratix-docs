@@ -135,8 +135,7 @@ It's also possible to install Promises via a Promise Release. Check the [Promise
 When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customise their resources using the available API options.
 When the API request is submitted to Kratix, the Promise uses the API options to create the resources as described in the Promise.  
 For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.
-Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only.
-You can learn more about CRDs [here](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/).
+Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only. See [Custom Resource Definitions (CRDs)](/main/platform-concepts/custom-resource-definitions) for how this maps to the Promise API.
 
 ### Dependencies
 Dependencies are everything that the Promise relies on to function. A Kratix Promise can even be built on other Kratix Promises. A dependency is the pre-requisite software to create the resource and make it operational. A dependency might be a low-level resource such as a database, a pre-defined environment, a connection, a queue, or a bundle of related items that work together.

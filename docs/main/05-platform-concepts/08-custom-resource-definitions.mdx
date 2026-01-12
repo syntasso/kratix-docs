@@ -1,0 +1,45 @@
+---
+title: Custom Resource Definitions (CRDs)
+description: How Kratix uses Kubernetes CRDs to define Promise APIs.
+---
+
+Kratix builds on Kubernetes Custom Resource Definitions (CRDs) to define the
+APIs that platform users interact with. A CRD extends the Kubernetes API with a
+new group, version, and kind (GVK), plus a schema that validates user requests.
+CRDs are highly customizable: you can set defaults, define enums, and enforce
+validation rules to shape how users request resources. For the full range of
+capabilities, see the Kubernetes [Custom Resource Definitions](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/) docs.
+
+## CRDs and the Promise API
+
+In a Promise, the `.spec.api` block is a CRD manifest. When you install the
+Promise, Kratix applies that CRD to the cluster. The CRD defines the request
+kind users create (for example `Database` or `App`) and the fields they can set
+when requesting a resource.
+
+When you update the Promise API section, you are changing the CRD that Kratix
+manages. That changes the request surface available to users and the schema
+validation Kubernetes enforces.
+
+## CRD versions and Promise versions
+
+CRDs can define multiple API versions under a single kind, allowing you to
+evolve the schema over time while supporting older versions. The versioning
+inside a CRD does not have to match your Promise version. Some teams keep them
+aligned, others change CRD versions only when the API shape changes, and use the
+Promise version for broader platform changes. For how Kratix versions Promises,
+see [Promise Releases](/main/reference/promises/releases).
+
+For example:
+- You add a new required field, change validation rules, or remove a field in
+  the Promise API. You might bump the CRD from `v1alpha1` to `v1alpha2` and also
+  bump the Promise version (often a major or minor semver change) to make the API
+  change obvious to users.
+- You add an optional field or default that is backwards compatible. You might
+  keep the CRD version the same and bump only the Promise version (often a minor
+  or patch semver change) to communicate the new capability.
+- You update workflow logic, dependencies, or scheduling rules without changing
+  the API schema. You might bump the Promise version but keep the CRD version
+  unchanged because the request shape is the same.
+
+To see how the Promise API is defined, see the [Promise introduction](/main/reference/promises/intro).

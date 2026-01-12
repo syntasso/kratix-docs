@@ -21,7 +21,8 @@ Everything Kratix exposes is represented as a [Custom Resource Definition
 (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 in Kubernetes. Therefore to restrict access to Kratix functionality, you will
 create `Role` and `RoleBindings` (or `ClusterRoles` and `ClusterRoleBindings`) that
-reference these CRDs. The CRDs of note that come out of the box with Kratix are:
+reference these CRDs. See [Custom Resource Definitions (CRDs)](/main/platform-concepts/custom-resource-definitions)
+for how Promises define their APIs. The CRDs of note that come out of the box with Kratix are:
 
 - [`Promise`](/main/reference/promises/intro) - The definition of a Service to
   be offered on the Platform (cluster-scoped).
