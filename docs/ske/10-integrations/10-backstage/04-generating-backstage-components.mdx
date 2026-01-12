@@ -40,6 +40,12 @@ for setup instructions.
 
 ### Via the SKE Operator Helm Chart
 
+:::warning
+
+You will need `0.52.0` of the SKE Operator Helm Chart
+
+:::
+
 The Backstage Controller is installed by the [SKE Operator](../../installing-ske/advanced-install) and can be configured to be deployed when installing the SKE Operator Helm Chart.
 
 To deploy the Backstage Controller via the SKE Operator Helm Chart, configure the `backstageIntegration` values. Most crucially, you will need to set `backstageIntegration.enabled` to `true`.
@@ -89,7 +95,13 @@ helm install ske-operator syntasso/ske-operator \
 
 ### Via the SKE Integrations CRD
 
-The SKE Operator includes a custom resource definition (CRD) for managing SKE Integrations such as Backstage. Only one instance of a Backstage SKE Integration can be created by the SKE Operator in a given cluster.
+:::warning
+
+You will need `v0.19.0` of the SKE Operator or later
+
+:::
+
+The SKE Operator includes a Custom Resource Definition (CRD) for managing SKE Integrations such as Backstage. Only one instance of a Backstage SKE Integration can be created by the SKE Operator in a given cluster.
 
 If both the SKE Operator and SKE are deployed on your cluster, you can deploy the Backstage Controller by creating a SKE Integration. Create a file named backstage-integration.yaml with the following contents:
 
@@ -118,7 +130,6 @@ kubectl apply --filename backstage-integration.yaml
 ```
 
 The operator will then install the Backstage Controller and the desired configurations.
-
 
 ## How does it work?
 
