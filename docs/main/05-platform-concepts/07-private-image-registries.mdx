@@ -1,0 +1,39 @@
+---
+title: Private Image Registries
+description: Use private registries with Kratix deployments and workflow images.
+---
+
+Kratix workflows pull images like any other Kubernetes workload. If your
+cluster needs private registry access, use `imagePullSecrets`. See the
+Kubernetes docs on [pulling images from a private registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
+
+## Workflow images
+
+Promise workflows run in the `kratix-platform-system` namespace and resource
+workflows run in the resource request namespace. For private images, create an
+image pull secret in the relevant namespace and reference it in the Pipeline
+spec via `imagePullSecrets`. That ensures the workflow Job can pull all of the
+container images it needs.
+
+Example Pipeline snippet:
+
+```yaml
+platform: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: example
+spec:
+  workflows:
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: build
+        spec:
+          containers:
+          - name: runner
+            image: registry.example.com/team/tooling:1.2.3
+          imagePullSecrets:
+          - name: registry-creds
+```
