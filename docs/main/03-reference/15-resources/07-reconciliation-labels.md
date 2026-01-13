@@ -2,7 +2,7 @@
 title: Resource Reconciliation Labels
 description: Labels that change how Kratix reconciles Resource requests.
 sidebar_label: Reconciliation labels
-slug: /reference/resources/reconciliation-labels
+slug: /main/reference/resources/reconciliation-labels
 ---
 
 Kratix exposes labels that change the reconciliation behavior for Resource requests. If you are looking for labels that apply to Promises, see [Promise Reconciliation Labels](/main/reference/promises/reconciliation-labels).
