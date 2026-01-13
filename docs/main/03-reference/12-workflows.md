@@ -131,6 +131,38 @@ is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
   marking it failed. Kratix does not set a default value for this field; if omitted,
   Kubernetes uses its own Job default.
 
+#### Common Job signals
+
+These are typical symptoms when workflows are running as Jobs:
+- Pod `STATUS` shows `CrashLoopBackOff`: a container in the Pipeline is exiting
+  with a non-zero status and Kubernetes is retrying it up to `backoffLimit`.
+  Example:
+  ```
+  kubectl -n kratix-platform-system get pods
+  NAME                                    READY   STATUS             RESTARTS   AGE
+  workflow-abc123-9wq5k                   0/1     CrashLoopBackOff   3          4m
+  ```
+- Job completes with `0/1` and the workflow is marked failed: retries were
+  exhausted and the Job hit `backoffLimit`. Example:
+  ```
+  kubectl -n kratix-platform-system get jobs
+  NAME                  COMPLETIONS   DURATION   AGE
+  workflow-abc123       0/1           2m12s      6m
+  ```
+  ```
+  kubectl -n kratix-platform-system describe job workflow-abc123
+  ...
+  BackoffLimitExceeded
+  ```
+- Pod `STATUS` shows `ErrImagePull` or `ImagePullBackOff`: Kubernetes cannot
+  pull the image, often due to missing `imagePullSecrets` or registry access
+  issues. Example:
+  ```
+  kubectl -n kratix-platform-system get pods
+  NAME                                    READY   STATUS             RESTARTS   AGE
+  workflow-abc123-9wq5k                   0/1     ErrImagePull       0          2m
+  ```
+
 ### Role-based Access Control (RBAC)
 
 Each pipeline runs with its own service account and a default set of restrictive
