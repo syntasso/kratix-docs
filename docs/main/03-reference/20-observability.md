@@ -3,6 +3,7 @@ title: Observability
 sidebar_label: Observability
 description: How to observe Kratix through logs, metrics, traces, and status.
 id: observability
+keywords: observability, tracing, open telemetry, logging, logs, probes
 ---
 
 # Observability
@@ -114,7 +115,7 @@ while debugging.
 ## Health checks
 
 Health checks are represented by the `HealthRecord` CRD, which Kratix uses to
-update Resource Request status with health information.
+update the Resource Request status with health information.
 
 - [Health Record reference](/main/reference/healthrecord)
 - [Surfacing health information](/main/guides/resource-health)
