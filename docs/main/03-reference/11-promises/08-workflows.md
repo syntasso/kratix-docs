@@ -96,7 +96,7 @@ If this occurs, the workflow **halts**: no further containers are executed withi
 Pipeline, and no further Pipelines are executed in the workflow.
 
 To re-run a workflow following a Pipeline failure, you can perform a
-[manual reconciliation](/main/platform-concepts/controlling-with-labels) of the Resource, which will trigger the
+[manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation) of the Promise, which will trigger the
 workflow again from the beginning.
 
 ### Idempotency
@@ -174,7 +174,7 @@ further intervention.
 Kratix will create a new Pipeline Job when:
 
 - The Promise is updated
-- A [Manual Reconciliation](/main/platform-concepts/controlling-with-labels#manual-reconciliation)
+- A [Manual Reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation)
 is triggered
 
 This means that if the failing Pipeline Job can be fixed by applying an update to the Promise,
