@@ -55,7 +55,8 @@ data:
       structured: false # if true, emit logs as json
 
     telemetry:
-      enabled: false
+      traces: true # false to disable traces
+      metrics: true # false to disable metrics
       endpoint: grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4317 # exporter endpoint
       protocol: grpc # or http
       insecure: true
