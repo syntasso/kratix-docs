@@ -1,0 +1,197 @@
+---
+title: Creating a Promise from a Terraform Module
+description: Step-by-step guide to using the kratix cli and tf-state finder to create a Promise from a Terraform Module
+sidebar_label: Promise Development
+keywords: terraform, promise
+---
+
+Terraform Modules are a common starting place for the creation of Promises. We know that a lot of organisations have Terraform within their
+organisations already and the declarative nature of Terraform lends itself well to the definition of declarative Promise workflows. In
+short: Kratix and Terraform are good friends and our Terraform integrations make then even more compatible.
+
+In this guide, we'll be creating a Promise from a terraform module using both the Kratix CLI and the TF State Finder Pipeline stage. We'll
+be:
+- defining an API that reflects the configurable Terraform values
+- creating declarative workflows to generate the infrastructure to deploy
+- surfacing the Terraform outputs in the status of resource requests
+
+## Pre-requisites
+
+You will need:
+1. An installation of SKE. Go to [Configuring SKE](/ske/installing-ske/intro) and follow the appropriate guide if you haven't done so already.
+1. [kratix CLI](/main/kratix-cli/intro) and the [SKE Testing Framework Plugin](/ske/promise-testing-framework/intro).
+1. A Terraform workspace configured configured [watch a Git repository](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create)
+1. A Terraform Destination. You can follow the [Configuring the Destination](/ske/integrations/tfe#configuring-the-destination) documentation to set up your Destination.
+
+## Initializing the Promise from the Terraform Module
+
+The Terraform Module we'll be using within this workshop is the [AWS S3 Bucket Module](https://github.com/terraform-aws-modules/terraform-aws-s3-bucket) which provisions s3 buckets. To get started, let's bootstrap the Promise with the `init tf-module-promise` command:
+
+```bash
+kratix init tf-module-promise s3 \
+    --module-source "git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0" \
+    --group example.syntasso.io \
+    --kind S3 \
+    --version v1alpha1 \
+    --dir s3-promise
+```
+
+### The API
+
+Teasing this apart, the `init tf-module-promise` command generates a promise from the Terraform module referred to in the `--module-source`. It transforms the variables that can be configured in the module into properties of the Promise API.
+
+Take a look at the generated `promise.yaml` in the newly created `s3-promise` directory. The `group`, `version` and `kind` mirror those that were specified when initializing the Promise:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: s3
+  labels:
+    kratix.io/promise-version: v0.0.1
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: s3s.example.syntasso.io
+    spec:
+      group: example.syntasso.io
+      names:
+        kind: S3
+        plural: s3s
+        singular: s3
+```
+
+The S3 Module the Promise was generated from included a [number of variables](https://github.com/terraform-aws-modules/terraform-aws-s3-bucket/blob/master/variables.tf), which have now been converted to properties in the API. Take the `create_bucket` variable for instance:
+
+```
+variable "create" {
+  description = "Whether to create an instance"
+  type        = bool
+  default     = true
+}
+```
+
+This is now reflected by a property of the same name with same `type`, `description` and `default`:
+
+```yaml
+    create_bucket:
+        default: true
+        description: Controls if S3 bucket should be created
+        type: boolean
+```
+
+### Destination Selectors
+
+As the Promise will will generating Terraform configurations, the generated files must be scheduled to a destination that can handle these files. In this case, the Terraform destination created as part of the [pre-requisites](#pre-requisites).
+
+In keeping with this, you'll see that the promise has `destinationSelectors` that ensure work flows are written to a destination with the label `environment: terraform`:
+
+```yaml
+  destinationSelectors:
+    - matchLabels:
+        environment: terraform
+```
+
+### Workflows
+
+You'll find that a `resource.configure` workflow has also been added to the `promise.yaml`:
+
+```yaml
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: instance-configure
+          spec:
+            containers:
+            - env:
+              - name: MODULE_SOURCE
+                value: git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0
+              image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.4.0
+              name: terraform-generate
+```
+
+The `ghcr.io/syntasso/kratix-cli/terraform-generate:v0.4.0` image takes the inputs provided via the API and uses these to generate a Terraform configuration that honours these inputs.
+
+///// Add promise workflow to configure provider
+///// Note AWS creds are needed
+
+
+## Validating the something something
+
+Our promise is not yet complete, but we can validate the implementation so far. Install the promise by running:
+
+```yaml
+kubectl apply -f promise.yaml
+```
+
+As our promise has no `promise.configure` workflows, we won't see that any workflows have been triggered meaning that our promise will be `Available` almost immediately:
+
+```
+$ kubectl get promise s3
+
+NAME   STATUS      KIND   API VERSION                    VERSION
+s3     Available   S3     example.syntasso.io/v1alpha1   v0.0.1
+```
+
+With the promise installed, we can make a request of it. Update the `example-resource.yaml` to give the bucket a custom name and regions. This name is configured via the `bucket` property in the promise API and the region via the `region` property:
+
+```yaml
+apiVersion: example.syntasso.io/v1alpha1
+kind: S3
+metadata:
+  name: example-s3
+spec:
+  bucket: app-assets
+  region: us-east-1
+```
+
+Make the request with:
+
+```
+kubectl apply -f example-resource.yaml
+```
+
+In the git repository you set up for your destination, you should eventually see output very similar to the following:
+
+```yaml
+{
+  "module": {
+    "s3_default_example-s3": {
+...
+      "create_bucket": true,
+      "create_metadata_configuration": false,
+      "force_destroy": false,
+      "ignore_public_acls": true,
+      "inventory_self_source_destination": false,
+      "is_directory_bucket": false,
+      "object_lock_enabled": false,
+      "object_ownership": "BucketOwnerEnforced",
+      "owner": {},
+      "putin_khuylo": true,
+      "restrict_public_buckets": true,
+      "skip_destroy_public_access_block": true,
+      "source": "git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0",
+      "tags": {},
+      "type": "Directory",
+      "versioning": {}
+    }
+  }
+}
+```
+
+Writing this file to the repository watched by Terraform triggers an apply in the Terraform workspace and eventually, the s3 bucket is created.
+
+Take a look at the output of the Terraform run, the bucket was successfully created. But, what was it called? How can we find it? As we didn't explicitly give the bucket a name, one has been generated randomly which is helpful to reduce duplications but isn't great for users who have requested a promise. The only path to finding out is by looking in the AWS console.
+
+We can make like easier for both users and ourselves by surfacing this in the status of the resource.
+
+## Surfacing Terraform outputs
+
+## 🎉 Congratulations
+
+✅&nbsp;&nbsp; That's it! You've successfully created and tested your Database Promise.<br />
