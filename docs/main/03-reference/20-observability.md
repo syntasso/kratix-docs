@@ -3,7 +3,7 @@ title: Observability
 sidebar_label: Observability
 description: How to observe Kratix through logs, metrics, traces, and status.
 id: observability
-keywords: observability, tracing, open telemetry, logging, logs, probes
+keywords: [observability, tracing, open telemetry, logging, logs, probes]
 ---
 
 # Observability
