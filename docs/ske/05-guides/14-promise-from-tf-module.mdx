@@ -187,7 +187,7 @@ Your directory structure will now look like this:
                         └── pipeline.sh
 ```
 
-To ensure it can be used within the promise, build the `kratix-workshop/s3-promise-pipeline` image and push it. If you are using kind, you can load it to your cluster.
+To ensure it can be used within the promise, build the `kratix-workshop/s3-promise-pipeline` image and make it available to the cluster. If you are using kind, you can load it to your cluster, else you will need to push it to a valid image store you have push access to which may affect the name.
 
 ```yaml
 docker build -t kratix-workshop/s3-promise-pipeline:v0.1.0 workflows/promise/configure/dependencies/configure-deps
