@@ -20,13 +20,8 @@ You will need:
 1. An installation of SKE. Go to [Configuring SKE](/ske/installing-ske/intro) and follow the appropriate guide if you haven't done so
    already.
 1. The [kratix CLI](/main/kratix-cli/intro)
-<<<<<<< HEAD
-1. A Terraform workspace configured to [watch a Git
-   repository](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create)
-=======
 1. A Terraform workspace configured configured [watch a Git
    repository](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create). As we'll also be creating an AWS resource, this Workspace should have AWS credentials configured.
->>>>>>> dc508b89e (chore: note that aws credentials should be configured)
 1. A Terraform Destination that is backed by a GitStateStore that references the above repository. You can follow the [Configuring the Destination](/ske/integrations/tfe#configuring-the-destination)
    documentation to set up your Destination.
 
@@ -265,10 +260,16 @@ In the git repository you set up for your Destination, you should eventually see
 }
 ```
 
-Note that the `region` is "us-east-1", which comes from our Resource Request whereas all of the over values are populated by the defaults in the Promise API.
+Note that the `region` is "us-east-1", which comes from our Resource Request whereas all of the other values are populated by the defaults in the Promise API.
 
 Writing this file to the repository watched by Terraform triggers an apply in the Terraform workspace and eventually, the s3 bucket is
-created. Take a look at the output of the Terraform run, the bucket was successfully created. But, what was it called? How can we find it?
+created.
+
+:::note
+In this workshop we're using Terraform Cloud, however, this flow is possible when using other Terraform Automation and Collaboration Software within a GipOps flow.
+:::
+
+Take a look at the output of the Terraform run, the bucket was successfully created. But, what was it called? How can we find it?
 
 ```mdx-code-block
 import TerraformPlan from "./terraform-plan.png"
