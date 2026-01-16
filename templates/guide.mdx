@@ -1,0 +1,85 @@
+---
+title: A descriptive but short title, used as the Heading in the guide and within the <HEAD> of the page
+description: One line summary. Used in the guide summary in the index page and the <HEAD> of the page
+sidebar_label: Promise Development
+keywords: [terraform, promise] // They are not visible on the page or used by teh in-site search but _do_ aid SEO
+---
+
+Introductory paragraph providing the user with an overview of what the guide will cover. What is the end result of following the guide? They
+may achieve:
+- This goal
+- This goal too
+- and one more
+
+## Pre-requisites
+
+You will need:
+1. Any tools on their machine that the user will not be able to proceed without
+1. Any required infrastructure
+1. Any additional objects such as secrets in their cluster
+
+## The first heading
+
+Use headings to provide an indication of the small goals the users will achieve as they work through. The can also help with wayfinding if
+anyone is interrupted as they progress - as people often are.
+
+Another benefit of the headings is that they are high-priority search results when using the search bar so a well-placed heading could help
+unlock a reader goal.
+
+## The next heading
+
+And some content.
+
+## One more heading and things to give guides some pizzazz
+
+### Pictures and diagrams
+
+An image or diagram can both break up any walls of text and help users process the content on the page with greater speed and ease.
+
+Interesting reading about the role of images in processing:
+- [Pictorial illustrations still improve students' learning from
+  text](https://www.researchgate.net/profile/Russell-Carney/publication/263116114_Pictorial_Illustrations_Still_Improve_Students'_Learning_from_Text/links/02e7e51754d7237561000000/Pictorial-Illustrations-Still-Improve-Students-Learning-from-Text.pdf)
+- [Picture This: Studying the Effectiveness of Illustrated Instructions](https://ir.library.oregonstate.edu/concern/articles/8910k362j)
+
+But when using images, they must be sure to be relevant to the context they're in, comprehensible to the intended audience and accessible.
+
+The example below uses alt text which can make the content more accessible to those using a screen reader. This can be useful but an even
+greater benefit can be describing the upcoming image in body of the text, e.g. As seen in the below screenshot of the Terraform Cloud UI,
+two outputs were produced; the s3_bucket_bucket_regional_domain_name and the s3_bucket_id.
+
+```mdx-code-block
+import TerraformOutputs from "./terraform-outputs.png"
+```
+
+<figure className="diagram">
+  <img className="large" src={TerraformOutputs} alt="A screen shot of the Terraform UI with the s3_bucket_bucket_regional_domain_name and s3_bucket_id values detailed as outputs" />
+
+  <figcaption>Terraform Outputs</figcaption>
+</figure>
+
+### Code samples
+
+Code samples are typically executable or explanatory. When they are only the latter, ensure that this is very clear to the user.
+
+Interesting reading:
+- Integrating Code Samples - Docs for Developers 
+- [Writing great examples](https://jvns.ca/blog/2021/07/08/writing-great-examples/)
+- [Creating Sample Code](https://developers.google.com/tech-writing/two/sample-code)
+
+### Admonishments
+
+As the docs are built with Docusaurus, there are a handful of [Admonishments](https://docusaurus.io/docs/markdown-features/admonitions) that
+can be used to call out important information. 
+
+These can be helpful to note useful tips, flags to guard against errors and opportunities to find out more.
+
+## 🎉 Congratulations
+
+✅&nbsp;&nbsp; If they made it this far the user has achieved something, summarise that in a one liner e.g. Bravo! You have successfully
+created a Promise from a Terraform module! It can create infrastructure based on inputs from requests, produce outputs and surface these to
+users in the status of the request.<br />
+
+## Next steps
+
+If there is a natural follow-up action or area of investigation that would be beneficial to the user, highlight it:
+- Next, learn how to expand your promise with bells and whistles
