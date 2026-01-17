@@ -12,6 +12,8 @@ how Kubernetes RBAC works, please refer to the official Kubernetes documentation
 [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). This guide
 assumes familiarity with Kubernetes RBAC concepts. If you are new to RBAC, it is
 recommended to review the Kubernetes documentation before proceeding.
+For how authentication fits into Kratix, see
+[Authentication](/main/platform-concepts/auth/authentication-oidc).
 
 ## RBAC in Kratix
 
@@ -19,13 +21,14 @@ Everything Kratix exposes is represented as a [Custom Resource Definition
 (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 in Kubernetes. Therefore to restrict access to Kratix functionality, you will
 create `Role` and `RoleBindings` (or `ClusterRoles` and `ClusterRoleBindings`) that
-reference these CRDs. The CRDs of note that come out of the box with Kratix are:
+reference these CRDs. See [API](/main/platform-concepts/api)
+for how Promises define their APIs. The CRDs of note that come out of the box with Kratix are:
 
 - [`Promise`](/main/reference/promises/intro) - The definition of a Service to
   be offered on the Platform (cluster-scoped).
-- [`Work`](/main/learn-more/kratix-resources#output-objects) - The definition
+- [`Work`](/main/platform-concepts/kratix-resources#output-objects) - The definition
   of the declarative workloads that need to be scheduled (namespace-scoped).
-- [`WorkPlacement`](/main/learn-more/kratix-resources#output-objects) - The
+- [`WorkPlacement`](/main/platform-concepts/kratix-resources#output-objects) - The
   definition of a scheduled workload (namespace-scoped).
 - [`GitStateStore`/`BucketStateStore`](/main/reference/statestore/intro) -
   Definitions of State Stores that Kratix can use to write declarative
@@ -42,6 +45,11 @@ with them. End users typically need two capabilities:
 1. Create and manage the Promise-specific request kinds that represent their
 workloads for example, a Promise that provides a database will introduce a
 `Database` CRD
+
+Those request resources are namespaced, so access is typically granted with
+namespace-scoped `Role` and `RoleBinding` pairs per team or environment. See
+[Multi-tenancy](/main/platform-concepts/multi-tenancy) for how this shapes
+isolation and access boundaries.
 
 Create Roles that grant only these permissions and bind them to the relevant
 users or service accounts. Prefer least privilege. Avoid granting access to
@@ -299,4 +307,3 @@ Remember to create corresponding RoleBindings or ClusterRoleBindings to assign t
 As a rule of thumb:
 - **Developers:** `Role` + `RoleBinding` per namespace.  
 - **Platform Engineers:** `ClusterRole` + `ClusterRoleBinding` across the cluster.
-
