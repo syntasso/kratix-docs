@@ -106,8 +106,8 @@ guidance on what signals and spans you would expect from Kratix.
 Kratix surfaces workflow progress and outcomes via status conditions on Resources
 and related CRDs. Pipelines can also write status data back to Resources. See:
 
-- [Resource Status and Events](/main/learn-more/status-conditions-events/resource-status-events)
-- [Promise Status and Events](/main/learn-more/status-conditions-events/promise-status-events)
+- [Resource Status and Events](/main/reference/resources/resource-status-events)
+- [Promise Status and Events](/main/reference/promises/promise-status-events)
 
 Use `kubectl describe` and `kubectl get -o yaml` to inspect conditions and events
 while debugging.
