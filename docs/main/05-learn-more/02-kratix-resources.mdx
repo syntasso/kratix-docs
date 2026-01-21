@@ -11,7 +11,7 @@ In this page, we explore what those objects are.
 There are two categories of Objects that Kratix creates:
 
 1. The Objects it needs to execute the Workflows.
-1. The Objects that represent the Workflows output.
+1. The Objects that represent the Workflows' output.
 
 The diagram below shows all of the Objects Kratix creates. We dive deeper into what they are used for later.
 
@@ -80,7 +80,7 @@ Apart from the `status-writer`, all containers are actually set as `initContaine
 
 :::
 
-Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting `numberOfJobsToKeep` in the [Kratix Config](/main/reference/kratix-config/config) document.
+Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting `numberOfJobsToKeep` in the [Kratix Config](/main/reference/kratix-config/config).
 You can also configure how many times a failing workflow Job is retried by setting `backoffLimit` in the same ConfigMap. Kratix does not provide a default value for this field.
 
 ## Output Objects
