@@ -67,7 +67,37 @@ const config = {
     ],
   ],
 
-  plugins: ["docusaurus-plugin-sass", require.resolve("docusaurus-plugin-image-zoom")],
+  plugins: [
+    "docusaurus-plugin-sass",
+    require.resolve("docusaurus-plugin-image-zoom"),
+    [
+      "@docusaurus/plugin-client-redirects",
+      {
+        redirects: [
+          {
+            from: "/main/learn-more/status-conditions-events/promise-status-events",
+            to: "/main/reference/promises/promise-status-events",
+          },
+          {
+            from: "/main/learn-more/status-conditions-events/resource-status-events",
+            to: "/main/reference/resources/resource-status-events",
+          },
+          {
+            from: "/main/learn-more/status-conditions-events/work-status-events",
+            to: "/main/platform-concepts/kratix-resources/work-status-events",
+          },
+          {
+            from: "/main/learn-more/kratix-resources",
+            to: "/main/platform-concepts/kratix-resources",
+          },
+          {
+            from: "/main/guides/rbac",
+            to: "/main/platform-concepts/auth/rbac",
+          },
+        ],
+      },
+    ],
+  ],
 
   scripts: [
       {
