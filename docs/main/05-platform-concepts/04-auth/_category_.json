@@ -1,8 +1,8 @@
 {
-  "label": "Authentication and Authorization",
+  "label": "Access controls",
   "position": 8,
   "link": {
     "type": "generated-index",
-    "description": "How Kratix relies on Kubernetes authentication and authorization."
+    "description": "How access to Kratix is authenticated and authorized."
   }
 }
