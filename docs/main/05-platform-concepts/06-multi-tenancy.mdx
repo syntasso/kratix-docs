@@ -1,13 +1,24 @@
 ---
 title: Multi-tenancy
-description: Use Kubernetes namespaces to isolate Kratix resource requests.
+description: Multi-tenancy for Kratix using standard Kubernetes isolation models.
 ---
 
-Kratix relies on Kubernetes namespaces for isolation. Every Promise-defined
-request kind (for example `Database` or `App`) is namespaced, so each request
-belongs to a namespace. This makes namespaces a natural boundary for teams,
-individuals, environments, or organisations. You can combine namespaces with
-Kubernetes features like ResourceQuotas to enforce limits and isolation.
+Kratix does not introduce a custom multi-tenancy layer. Instead, it fits into
+the same Kubernetes isolation patterns you already use. Depending on your
+security and operational requirements, you can isolate tenants with separate
+clusters, node pools, or namespaces.
+
+Separate clusters are often used to reduce blast radius or to meet DR/HA or
+regulatory requirements. Node pools help ensure workloads and workflows run on
+the right type of compute (for example, dedicated, compliant, or GPU nodes).
+Namespaces provide a lightweight boundary for teams. For example, an
+organisation might allocate `backend` and `frontend` namespaces so each team can
+manage their own Promise requests independently from the same Platform.
+
+Most Kratix resource requests (for example `Database` or `App`) are namespaced,
+so namespaces are a natural boundary for teams, environments, or organisations.
+You can combine namespaces with Kubernetes features like ResourceQuotas and
+NetworkPolicies to enforce limits and isolation.
 
 Promises themselves are cluster-scoped and are not namespaced. That means a
 Promise is visible across the cluster once installed. Use Kubernetes RBAC to
