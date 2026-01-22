@@ -21,6 +21,23 @@ When you update the Promise API section, you are changing the CRD that Kratix
 manages. That changes the request surface available to users and the schema
 validation Kubernetes enforces.
 
+## Making requests to CRDs
+
+Kubernetes is an API server, so all Promise requests are API calls. You can
+choose the medium that suits your workflow:
+
+- `kubectl` for direct creation and updates (for example,
+  `kubectl apply -f database.yaml`).
+- The Kubernetes API server over HTTP/JSON using client libraries or direct
+  REST calls. `kubectl` is just a client to that same API server.
+- GitOps workflows where you commit YAML to a repo watched by Flux, Argo CD, or
+  another GitOps controller. The controller applies the CRD instances to the
+  cluster on your behalf.
+
+All of these approaches also power developer portals such as Backstage, which
+ultimately create the same CRDs. For a production-ready portal integration, see
+[Kratix and Backstage](/ske/integrations/backstage/intro).
+
 ## CRD versions and Promise versions
 
 CRDs can define multiple API versions under a single kind, allowing you to
