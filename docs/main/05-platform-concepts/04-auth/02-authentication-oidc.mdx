@@ -1,0 +1,33 @@
+---
+title: Authentication
+description: How Kratix authentication and authorization are handled.
+---
+
+Kratix does not implement its own authentication or authorization system. All
+Kratix operations go through the Kubernetes API, so the cluster's authentication
+and authorization policies apply automatically.
+
+## Authentication
+
+Kratix uses the same authentication mechanisms configured for your Kubernetes
+API server, such as client certificates, bearer tokens, or OIDC. If you enable
+OIDC on the API server, Kratix inherits those identities and group memberships
+without additional configuration. Other common options include webhook
+authentication and authentication proxies in front of the API server.
+
+Refer to the Kubernetes documentation for details on configuring
+[authentication](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
+and [OIDC](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens).
+
+## Authorization
+
+Once authenticated, access to Kratix resources is controlled by Kubernetes
+RBAC. This includes Promises, Promise-installed CRDs, and Kratix control-plane
+objects. For examples and guidance on defining roles, see
+[Role Based Access Control (RBAC)](/main/platform-concepts/auth/rbac).
+
+## Why this matters
+
+Kratix models platform operations as Kubernetes resources and workflows. Because
+every action is a Kubernetes API call, you can use the same cluster-wide authentication
+and authorization approach for Kratix that you already use for other workloads.

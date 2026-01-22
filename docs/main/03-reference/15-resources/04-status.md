@@ -221,7 +221,7 @@ kubectl describe <resource> <name>
 ```
 
 For a deeper discussion see the
-[Resource Status and Events](/main/learn-more/status-conditions-events/resource-status-events)
+[Resource Status and Events](/main/reference/resources/resource-status-events)
 documentation.
 
 ## Health Checks

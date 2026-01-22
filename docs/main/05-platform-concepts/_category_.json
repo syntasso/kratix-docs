@@ -1,0 +1,8 @@
+{
+  "label": "Platform Concepts",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Core concepts that explain how Kratix works and behaves."
+  }
+}

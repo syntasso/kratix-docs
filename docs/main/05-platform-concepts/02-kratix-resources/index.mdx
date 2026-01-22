@@ -2,9 +2,11 @@
 title: Kratix Internal Objects
 description: Learn more about the objects Kratix creates when a Promise or Resource is requested.
 id: kratix-resources
+sidebar_label: Overview
+slug: /main/platform-concepts/kratix-resources
 ---
 
-Whenever a new Promise is installed, or a new Resource is requested, Kratix creates a series of Kubernetes Objects to complete the installation or to fulfill the Promise.
+Whenever a new Promise is installed, or a new Resource is requested, Kratix creates a series of Kubernetes Objects to complete the installation or to fulfill the Promise. Request resources are namespaced; see [Multi-tenancy](/main/platform-concepts/multi-tenancy) for how that affects isolation and access.
 
 In this page, we explore what those objects are.
 
@@ -83,7 +85,7 @@ Apart from the `status-writer`, all containers are actually set as `initContaine
 Kratix creates a new Job every time a new workflow needs to be executed. You can control the number of Jobs that Kratix keeps by setting `numberOfJobsToKeep` in the [Kratix Config](/main/reference/kratix-config/config).
 You can also configure how many times a failing workflow Job is retried by setting `backoffLimit` in the same ConfigMap. Kratix does not provide a default value for this field.
 
-## Output Objects
+## Output Objects {#output-objects}
 
 ### Works
 
