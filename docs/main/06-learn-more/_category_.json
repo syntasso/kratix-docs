@@ -1,8 +1,8 @@
 {
-  "label": "Learn More",
+  "label": "How Kratix Complements",
   "position": 7,
   "link": {
-    "type": "generated-index",
-    "description": "How Kratix complements the ecosystem."
+    "type": "doc",
+    "id": "main/learn-more/intro"
   }
 }

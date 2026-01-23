@@ -2,6 +2,7 @@
 description: Learn more about how Kratix complements other tools in the platform space
 title: How Kratix Complements
 id: intro
+slug: /main/learn-more/how-kratix-complements
 ---
 
 <img
@@ -16,6 +17,6 @@ Rather than directly comparing Kratix to technologies in our space, we prefer to
 
 Read on to understand how Kratix works with:
 
-- [Terraform](./how-kratix-complements/terraform)
-- [Crossplane](./how-kratix-complements/crossplane)
-- [Backstage](./how-kratix-complements/backstage)
+- [Terraform](/main/learn-more/how-kratix-complements/terraform)
+- [Crossplane](/main/learn-more/how-kratix-complements/crossplane)
+- [Backstage](/main/learn-more/how-kratix-complements/backstage)
