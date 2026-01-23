@@ -2,7 +2,7 @@
 description: Learn more about how Kratix works with Crossplane
 title: Kratix and Crossplane
 id: crossplane
-slug: /main/learn-more/how-kratix-complements/crossplane
+slug: /main/how-kratix-complements/crossplane
 ---
 
 _**[Crossplane](https://www.crossplane.io/)** is an open-source multi-cloud control plane that allows you to extend Kubernetes to connect to and from external sources like databases, the cloud and the edge._

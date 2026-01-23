@@ -2,7 +2,7 @@
 description: Kratix and Terraform can work well together. Find out how one complements the other.
 title: Kratix and Terraform
 id: terraform
-slug: /main/learn-more/how-kratix-complements/terraform
+slug: /main/how-kratix-complements/terraform
 ---
 
 _**[Terraform](https://www.terraform.io/)** is a tool for writing infrastructure as code. It is used to define both cloud and on-prem resources in human-readable configuration files that you can version, reuse, and share._

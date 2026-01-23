@@ -2,7 +2,7 @@
 description: Learn more about how Kratix works with Backstage
 title: Kratix and Backstage
 id: backstage
-slug: /main/learn-more/how-kratix-complements/backstage
+slug: /main/how-kratix-complements/backstage
 ---
 
 
