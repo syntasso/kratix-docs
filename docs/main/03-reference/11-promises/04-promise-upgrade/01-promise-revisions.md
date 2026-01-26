@@ -6,6 +6,12 @@ sidebar_label: Promise Revisions
 
 # Promise Revisions
 
+```mdx-code-block
+import FeatureFlagBox from "./_feature_flag_box.md"
+```
+
+<FeatureFlagBox />
+
 Promise Revisions provide a mechanism for locking a Promise to a specific version.
 
 When a Promise is installed, Kratix will automatically create a Promise Revision for that Promise. This Promise Revision

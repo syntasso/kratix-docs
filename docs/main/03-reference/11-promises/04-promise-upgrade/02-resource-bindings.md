@@ -6,6 +6,12 @@ sidebar_label: Resource Bindings
 
 # Resource Bindings
 
+```mdx-code-block
+import FeatureFlagBox from "./_feature_flag_box.md"
+```
+
+<FeatureFlagBox />
+
 Resource Bindings bind a Resource Request to a [Promise Revision](./promise-revisions).
 
 When a Resource Request is made, Kratix reconciles this Resource using the latest Promise Revision.
