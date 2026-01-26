@@ -76,7 +76,7 @@ rollout strategies. We will be sharing a deeper dive into this pattern in an upc
 <p>Promise Revisions and Resource Bindings are available now in the latest Kratix release.</p>
 <ul>
 <li class="">Join us in the <a href="https://kratixworkspace.slack.com/" target="_blank" rel="noopener noreferrer" class="">community Slack</a> if you have feedback or want help getting started</li>
-<li class="">Check out the <a class="" href="https://docs.kratix.io/category/upgrades">documentation</a> to learn how to use these features today</li>
+<li class="">Check out the <a class="" href="https://docs.kratix.io/main/reference/promises/promise-upgrade/intro">documentation</a> to learn how to use these features today</li>
 <li class="">We are also working on a step-by-step guide to help you adopt fleet upgrades safely</li>
 </ul>]]></content>
         <author>
