@@ -119,29 +119,3 @@ Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
 :::
-
-## Status
-
-The status of the BucketStateStore can be `Ready` or `NotReady` based on Kratix's availability to write to the State Store.
-
-A [condition](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-conditions) of type `Ready` is also provided to enable waiting for the State Store to be ready.
-
-An example is provided below showing a BucketStateStore coming online, including events detailing any status changes.
-
-```
-$ kubectl describe bucketstatestores.platform.kratix.io default
-Name:         default
-...
-Status:
-  Conditions:
-    Last Transition Time:  2025-03-05T12:52:49Z
-    Message:               State store is ready
-    Reason:                StateStoreReady
-    Status:                True
-    Type:                  Ready
-  Status:                  Ready
-Events:
-  Type    Reason  Age   From                        Message
-  ----    ------  ----  ----                        -------
-  Normal  Ready   11m   BucketStateStoreController  BucketStateStore "default" is ready
-```

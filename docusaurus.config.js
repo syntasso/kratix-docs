@@ -94,6 +94,30 @@ const config = {
             from: "/main/guides/rbac",
             to: "/main/platform-concepts/auth/rbac",
           },
+          {
+            from: "/main/learn-more",
+            to: "/main/how-kratix-complements",
+          },
+          {
+            from: "/main/learn-more/how-kratix-complements",
+            to: "/main/how-kratix-complements",
+          },
+          {
+            from: "/main/learn-more/how-kratix-complements/intro",
+            to: "/main/how-kratix-complements",
+          },
+          {
+            from: "/main/learn-more/how-kratix-complements/terraform",
+            to: "/main/how-kratix-complements/terraform",
+          },
+          {
+            from: "/main/learn-more/how-kratix-complements/crossplane",
+            to: "/main/how-kratix-complements/crossplane",
+          },
+          {
+            from: "/main/learn-more/how-kratix-complements/backstage",
+            to: "/main/how-kratix-complements/backstage",
+          },
         ],
       },
     ],

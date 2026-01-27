@@ -143,31 +143,3 @@ Require a different method of authentication? Get in touch with us at
 [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
 or [open a GitHub Issue](https://github.com/syntasso/kratix/issues/new).
 :::
-
-## Status
-
-The status of the GitStateStore can be `Ready` or `NotReady` based on Kratix's availability to write to the State Store.
-
-A condition of type `Ready` is also provided to enable waiting for the State Store to be ready.
-
-An example is provided below showing a GitStateStore coming online, including events detailing any status changes.
-
-```
-$ kubectl describe gitstatestores.platform.kratix.io default
-Name:         default
-...
-Status:
-  Conditions:
-    Last Transition Time:  2025-03-05T12:53:12Z
-    Message:               State store is ready
-    Reason:                StateStoreReady
-    Status:                True
-    Type:                  Ready
-  Status:                  Ready
-Events:
-  Type     Reason    Age    From                     Message
-  ----     ------    ----   ----                     -------
-  Warning  NotReady  2m44s  GitStateStoreController  GitStateStore "default" is not ready: Error writing test file: Get "https://172.18.0.2:31333/gitea_admin/kratix/info/refs?service=git-upload-pack": dial tcp 172.18.0.2:31333: connect: connection refused
-  Warning  NotReady  2m32s  GitStateStoreController  GitStateStore "default" is not ready: Error writing test file: repository not found: Repository not found
-  Normal   Ready     2m21s  GitStateStoreController  GitStateStore "default" is ready
-```

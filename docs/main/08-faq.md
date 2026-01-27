@@ -52,7 +52,7 @@ workloads](./reference/destinations/multidestination-management).
 
 ### How does Kratix compare to other tools?
 
-[See here](/main/learn-more/how-kratix-complements)
+[See here](/main/how-kratix-complements)
 
 ### I use AWS, Google Cloud or Microsoft Azure. Why should I use Kratix?
 

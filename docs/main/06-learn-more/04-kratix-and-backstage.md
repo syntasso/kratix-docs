@@ -2,6 +2,7 @@
 description: Learn more about how Kratix works with Backstage
 title: Kratix and Backstage
 id: backstage
+slug: /main/how-kratix-complements/backstage
 ---
 
 
@@ -46,7 +47,7 @@ This divide between GUI and API makes Backstage and Kratix the perfect package.
 - **Auto-populated GUI:**
 
   Backstage GUIs must be declared, which is toil for the platform. Kratix can
-  reduce this toil by integrating [Promises](../../reference/promises/intro) with
+  reduce this toil by integrating [Promises](/main/reference/promises/intro) with
   Backstage by default. In addition, these GUIs can diverge from platform
   offerings if they are managed separately from the backend implementations.
   Promises that define the API and the Backstage GUI at the same time provide
@@ -106,8 +107,8 @@ Backstage supports reading objects from S3-compatible blob stores. Kratix
 also supports writing to them.
 
 To set up this integration, you'll need to create a
-[BucketStateStore](../../reference/statestore/bucketstatestore) and a
-[Destination](../../reference/destinations/intro) which points to the
+[BucketStateStore](/main/reference/statestore/bucketstatestore) and a
+[Destination](/main/reference/destinations/intro) which points to the
 directory that Backstage is configured to watch.
 
 For example, first create a `BucketStateStore` for Backstage to use:
@@ -173,11 +174,11 @@ and components, which Kratix has written to the state store.
 
 ### Create Backstage Resources with Kratix
 
-Kratix [workflows](../../reference/workflows) allow Promise authors to define pipelines that
-run at various points in the lifecycle of a [Resource](../../reference/resources/workflows) or
-[Promise](../../reference/promises/workflows). These workflows can output documents of
+Kratix [workflows](/main/reference/workflows) allow Promise authors to define pipelines that
+run at various points in the lifecycle of a [Resource](/main/reference/resources/workflows) or
+[Promise](/main/reference/promises/workflows). These workflows can output documents of
 _any type_, and a single workflow can schedule to
-[multiple destinations](../../reference/destinations/multidestination-management#dynamic).
+[multiple destinations](/main/reference/destinations/multidestination-management#dynamic).
 
 This powerful combination enables Promise authors to output many distinct types of
 resource to its own destination, all in a single workflow. In this case, we're writing
@@ -230,7 +231,7 @@ populate the UI as shown below:
 
 ![Promise in Backstage](/img/docs/backstage-promise.png)
 
-A user can then make a [Resource request](../../reference/resources/intro) to Kratix by
+A user can then make a [Resource request](/main/reference/resources/intro) to Kratix by
 clicking "Create" in the top right, selecting the Kafka form and filling out the details:
 
 ![Backstage Template](/img/docs/backstage-template.png)

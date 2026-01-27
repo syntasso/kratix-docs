@@ -1,0 +1,74 @@
+---
+title: StateStore Status and Events
+description: Understand the status conditions and events for GitStateStore and BucketStateStore.
+sidebar_label: Status and Events
+id: statestore-status-events
+slug: /main/reference/statestore/status-events
+keywords: [statestore status, statestore events, gitstatestore status, bucketstatestore status]
+---
+
+This page applies to both `GitStateStore` and `BucketStateStore`. The status conditions and events are the same for
+both types; examples below show each resource kind.
+
+## Status
+
+The StateStore `status.status` field can be `Ready` or `NotReady`, depending on whether Kratix can write to the
+backing storage.
+
+A `Ready` condition is also provided so you can wait for State Stores to become usable.
+
+When a State Store is not ready, the condition message includes the underlying failure (for example, errors
+initialising the writer or validating permissions).
+
+## Events
+
+State Stores emit these events:
+
+- `Ready` (`Normal`) – the State Store is ready to use.
+- `NotReady` (`Warning`) – Kratix cannot write to the State Store; the message includes the failure.
+- `InvalidCredentials` (`Warning`, GitStateStore only) – authentication succeeded only after trimming trailing
+  whitespace in the Secret; update the Secret to remove it.
+
+## Examples
+
+GitStateStore:
+
+```
+$ kubectl describe gitstatestores.platform.kratix.io default
+Name:         default
+...
+Status:
+  Conditions:
+    Last Transition Time:  2025-03-05T12:53:12Z
+    Message:               State store is ready
+    Reason:                StateStoreReady
+    Status:                True
+    Type:                  Ready
+  Status:                  Ready
+Events:
+  Type     Reason    Age    From                     Message
+  ----     ------    ----   ----                     -------
+  Warning  NotReady  2m44s  GitStateStoreController  GitStateStore "default" is not ready: Error writing test file: Get "https://172.18.0.2:31333/gitea_admin/kratix/info/refs?service=git-upload-pack": dial tcp 172.18.0.2:31333: connect: connection refused
+  Warning  NotReady  2m32s  GitStateStoreController  GitStateStore "default" is not ready: Error writing test file: repository not found: Repository not found
+  Normal   Ready     2m21s  GitStateStoreController  GitStateStore "default" is ready
+```
+
+BucketStateStore:
+
+```
+$ kubectl describe bucketstatestores.platform.kratix.io default
+Name:         default
+...
+Status:
+  Conditions:
+    Last Transition Time:  2025-03-05T12:52:49Z
+    Message:               State store is ready
+    Reason:                StateStoreReady
+    Status:                True
+    Type:                  Ready
+  Status:                  Ready
+Events:
+  Type    Reason  Age   From                        Message
+  ----    ------  ----  ----                        -------
+  Normal  Ready   11m   BucketStateStoreController  BucketStateStore "default" is ready
+```

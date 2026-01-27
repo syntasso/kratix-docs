@@ -2,6 +2,7 @@
 description: Learn more about how Kratix works with Crossplane
 title: Kratix and Crossplane
 id: crossplane
+slug: /main/how-kratix-complements/crossplane
 ---
 
 _**[Crossplane](https://www.crossplane.io/)** is an open-source multi-cloud control plane that allows you to extend Kubernetes to connect to and from external sources like databases, the cloud and the edge._
@@ -14,11 +15,11 @@ style={{"float": "right", "width":"400px", "margin":"20px 0 40px 40px"}}
 
 _We have written a tremendous [blog](https://www.syntasso.io/post/kratix-and-crossplane) about how Kratix and Crossplane complement each other._
 
-[Kratix Promises](../../reference/promises/intro) and [Crossplane Compositions](https://docs.crossplane.io/master/concepts/compositions/) are similar in that they both provide declarative APIs and a facade into more complicated underlying platform orchestration.
+[Kratix Promises](/main/reference/promises/intro) and [Crossplane Compositions](https://docs.crossplane.io/master/concepts/compositions/) are similar in that they both provide declarative APIs and a facade into more complicated underlying platform orchestration.
 
 Kratix does not aim to compete with Crossplane on cloud orchestration and it can help a platform builder already using Crossplane.
 
-- Creating a [Promise](../../reference/promises/intro) for
+- Creating a [Promise](/main/reference/promises/intro) for
   Crossplane simplifies the Crossplane installation experience.
 - Kratix provides multi-cluster
   support for
@@ -32,7 +33,7 @@ Kratix does not aim to compete with Crossplane on cloud orchestration and it can
   via Promises. See the
   [blog](https://www.syntasso.io/post/building-your-platform-your-way-with-crossplane-and-kratix)
   for more detail on this pattern.
-- [Kratix Promises](../../reference/promises/intro) can offer the
+- [Kratix Promises](/main/reference/promises/intro) can offer the
   benefits of Workflows. Tasks such as billing checks, security scans, audits,
   resource decoration etc can all happen in the Promise before a delegation to
   Crossplane is made.

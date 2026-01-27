@@ -1,0 +1,52 @@
+---
+title: Destination Status and Events
+description: Understand the status conditions and events of a Destination.
+sidebar_label: Status and Events
+id: destination-status-events
+slug: /main/reference/destinations/status-events
+keywords: [destination status, destination events, destination conditions]
+---
+
+Kratix follows the Kubernetes convention of using status conditions and events to report Destination health.
+Destinations are considered ready when Kratix can write test documents to the backing State Store.
+
+## Conditions
+
+Destinations expose a `Ready` condition that reflects the latest health check:
+
+- `TestDocumentsWritten` – test documents were written to the State Store successfully.
+- `ReconciledSuccessfully` – init workloads are disabled, so no test documents are written.
+- `StateStoreWriteFailed` – Kratix could not write the test documents.
+
+The test documents include `dependencies/kratix-canary-namespace.yaml` and `resources/kratix-canary-configmap.yaml`.
+When the `Ready` condition is `True` and a worker cluster is reconciling the Destination, you will see a
+`kratix-worker-system` namespace and a `kratix-info` configmap on the target cluster.
+
+Example:
+
+```
+$ kubectl describe destinations.platform.kratix.io worker-1
+Name:         worker-1
+...
+Status:
+  Conditions:
+    Last Transition Time:  2025-03-04T15:26:21Z
+    Message:               Test documents written to State Store
+    Reason:                TestDocumentsWritten
+    Status:                True
+    Type:                  Ready
+```
+
+## Events
+
+Destinations emit the following events:
+
+- `DestinationReady` (`Normal`) – the Destination is ready. If init workloads are disabled, the message notes that
+  no init workloads were written.
+- `DestinationNotReady` (`Warning`) – writing test documents failed; the message includes the error.
+
+Inspect events with:
+
+```
+kubectl describe destinations.platform.kratix.io <name>
+```

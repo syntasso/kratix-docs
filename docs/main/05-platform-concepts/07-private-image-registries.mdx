@@ -37,3 +37,34 @@ spec:
           imagePullSecrets:
           - name: registry-creds
 ```
+
+## Namespace scope and syncing
+
+Image pull secrets are namespace-scoped, so each namespace that runs workflows
+needs access to the right `Secret`. In practice, this often means copying or
+syncing the same credentials into multiple namespaces. A common approach is to
+use a secrets operator that can source credentials from a central store (like a
+cloud secret manager or Vault) and fan them out into the namespaces that need
+them. This keeps the source of truth centralized while still meeting the
+namespace scoping rules.
+
+## Cluster-wide options
+
+Some clusters configure registry access at the node level so workloads do not
+need per-namespace secrets. For example, you can use kubelet image credential
+providers to supply credentials based on the image registry, or configure
+registry mirrors so nodes pull from a trusted internal endpoint. This can
+simplify per-namespace management, but it also broadens who can use those
+credentials: any workload scheduled on the node can pull from the registry. Use
+this approach only when that risk is acceptable for your environment. See the
+Kubernetes docs on
+[image credential providers](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-credential-provider/)
+for an overview.
+
+## Air-gapped environments
+
+If you are running in an air-gapped environment or need to mirror registries,
+the SKE [air-gapped installation](/ske/installing-ske/air-gapped) guide walks
+you through the setup. SKE handles much of the heavy lifting around registry
+mirrors and offline artifacts, so you can focus on your platform workflows
+instead of the plumbing.
