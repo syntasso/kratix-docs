@@ -1,5 +1,5 @@
 ---
-title: Using destination selectors to with multiple Terraform workspaces
+title: Using destination selectors with multiple Terraform workspaces
 description: |
     How to publish resources to different Terraform workspaces using destination
     selectors
@@ -31,12 +31,12 @@ To complete this guide you will need:
 1. An AWS account for Terraform Cloud to use for infrastructure provisioning
 1. A Terraform workspace configured to [watch a Git
    repository](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create). 
-    As we'll also be creating an AWS resource, this Workspace should have AWS credentials configured.
+    As we'll also be creating an AWS resource, this workspace should have AWS credentials configured.
 1. Two Terraform Destinations that are backed GitStateStores that references the 
    above repository. You can follow the [Configuring the Destination](/ske/integrations/tfe#configuring-the-destination)
    documentation to set up your Destination.
-1. A working [Kratix installation](./installing-kratix-others) and related
-   binaries
+1. An installation of SKE. Go to [Configuring SKE](/ske/installing-ske/intro) and follow the appropriate guide if you haven't done so
+   already.
 1. The [kratix-cli](/main/kratix-cli/intro)
 1. A [Promise that writes to Terraform](/ske/guides/promise-from-tf-module)
 
@@ -46,14 +46,14 @@ We will start by cloning and running an existing Promise that uses Terraform:
 
 ```shell
 git clone git@github.com:syntasso/kratix-examples.git
-cd promise-aws-terraform-buckets
+cd kratix-examples
 ```
 
 :::tip
 
 We are using a pre-built Promise to focus on dynamic scheduling, but if you are
 curious about how this Promise works, you can [build it
-yourself](./guides/promise-from-tf-module)!
+yourself](/ske/guides/promise-from-tf-module)!
 
 :::
 
