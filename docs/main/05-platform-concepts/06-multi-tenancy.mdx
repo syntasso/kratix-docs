@@ -15,10 +15,12 @@ Namespaces provide a lightweight boundary for teams. For example, an
 organisation might allocate `backend` and `frontend` namespaces so each team can
 manage their own Promise requests independently from the same Platform.
 
-Most Kratix resource requests (for example `Database` or `App`) are namespaced,
-so namespaces are a natural boundary for teams, environments, or organisations.
-You can combine namespaces with Kubernetes features like ResourceQuotas and
-NetworkPolicies to enforce limits and isolation.
+Kratix Promises can create namespaced CRDs and therefore resource requests 
+(for example a Kratix Promise for `Database` or `App`) will be namespaced. 
+This makes namespaces a natural boundary for teams, environments, or 
+organisations. You can then combine namespaces with Kubernetes features 
+like ResourceQuotas and NetworkPolicies to enforce limits and isolation per
+team or other organisational division.
 
 Promises themselves are cluster-scoped and are not namespaced. That means a
 Promise is visible across the cluster once installed. Use Kubernetes RBAC to
