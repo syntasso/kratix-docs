@@ -239,7 +239,7 @@ yourself](/ske/guides/promise-from-tf-module)!
 
 :::
 
-For that, we will use the S3 Bucket example Promise available [here](TODO: add link). You can install the Promise with the following command:
+For that, we will use the S3 Bucket example Promise available [here](https://github.com/syntasso/kratix-examples/tree/main/s3-bucket-promise). You can install the Promise with the following command:
 
 ```shell-session
 kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-examples/main/s3-bucket-promise/promise.yaml
@@ -266,7 +266,36 @@ $ kubectl explain s3s.example.syntasso.io/v1alpha1 spec.team
 But how is this property used? Let's inspect the Request Configure workflow:
 
 ```python
-TODO: add request configure workflow code here
+#!/usr/bin/env python3
+import kratix_sdk as ks
+import sys
+from typing import List
+
+def resource_configure() -> int:
+    sdk = ks.KratixSDK()
+    resource = sdk.read_resource_input()
+
+    team = resource.get_value("spec.team")
+    if not team or not isinstance(team, str):
+        print("Error: spec.team is required and must be a non-empty string", file=sys.stderr)
+        return 1
+
+    selectors: List[ks.DestinationSelector] = [
+        ks.DestinationSelector(match_labels={
+            "workspace": team
+        })
+    ]
+
+    sdk.write_destination_selectors(selectors)
+    print(f"Destination configured for team: {team}")
+    return 0
+
+def main():
+    exit_code = resource_configure()
+    sys.exit(exit_code)
+
+if __name__ == '__main__':
+    main()
 ```
 
 Note how the Promise is using the `spec.team` property to determine which
@@ -276,14 +305,14 @@ Promise above is using the Python SDK to produce a file that looks like this:
 
 ```yaml title="destination-selectors.yaml"
 - matchLabels:
-    team: ${team}-workspace
+    workspace: ${team}
 ```
 
 So when the team is `mobile`, the `destination-selectors.yaml` file will look like this:
 
 ```yaml title="destination-selectors.yaml"
 - matchLabels:
-    team: mobile-workspace
+    workspace: mobile
 ```
 
 When SKE is processing the request, it will look for destinations matching the
