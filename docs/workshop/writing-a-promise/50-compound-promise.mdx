@@ -290,7 +290,7 @@ the Dockerfile to include the Python dependencies.
 
 - RUN apk update && apk add --no-cache yq kubectl curl
 + RUN apk update && apk add --no-cache yq kubectl curl git
-+ RUN python3 -m pip install git+https://github.com/syntasso/kratix-python.git PyYAML
++ RUN python3 -m pip install kratix-sdk PyYAML
 ```
 
 Now that the script has been defined, you can test it. Since the
