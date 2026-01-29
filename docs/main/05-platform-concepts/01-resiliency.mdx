@@ -18,12 +18,29 @@ By the end of this page, you should understand:
 - How to plan and test disaster recovery for Kratix state
 - How external outputs (StateStores like Git/S3) behave during outages
 
+## Resiliency model overview
+
+Kratix is a Kubernetes-native control plane: intent is declared as Kubernetes
+resources (CRDs and core resources) and persisted in etcd via kube-apiserver.
+
+Kratix converges on that intent using asynchronous reconciliation (event-driven
+plus periodic), so behaviour is eventually consistent rather than synchronous.
+
+Availability has two distinct dimensions:
+
+- **Declaring intent** depends on kube-apiserver and etcd availability.
+- **Executing intent** depends on Kratix controllers and external dependencies
+  (StateStores and APIs).
+
+If controllers or dependencies are temporarily unavailable, intent remains
+persisted and reconciliation resumes when they recover.
+
 ## How Kratix stores and acts on intent
 
 Kratix follows the Kubernetes controller pattern. You declare intent by
 creating or updating Kubernetes resources. Kubernetes persists those resources
 into its backing store, normally etcd. Kratix observes changes and reconciles
-asynchronously towards the desired state that the document define.
+asynchronously towards the desired state that the document defines.
 
 ### Where Kratix state lives
 
@@ -54,10 +71,27 @@ Promises. Workflow execution and its declarative outputs (e.g. Terraform files)
 are represented as Kubernetes resources [called `Work`s and the scheduling of
 them as
 `WorkPlacement`s](/main/platform-concepts/kratix-resources#output-objects).
-Like other cluster state, `Work`/`WorkPlacements`s are persisted to etcd.
+Like other cluster state, `Work`/`WorkPlacement`s are persisted to etcd.
 
-This matters for HA/DR because `Work` is replayable from the control plane: after a
-restart, Kratix can observe existing `Work` resources and continue convergence.
+This matters for HA/DR because `Work/WorkPlacement` is replayable from the control plane: after a
+restart, Kratix can observe existing `Work/WorkPlacement` resources and continue convergence.
+
+Destinations represent systems that Kratix can write documents to, which are
+then reconciled by an external tool (for example Flux, Argo CD, or Terraform
+Enterprise). They are conceptually similar to nodes in Kubernetes: Destinations
+have labels, and `Work` uses selectors to match eligible Destinations. Kratix
+then creates a `WorkPlacement` to record the chosen Destination for that
+`Work`, similar to how a scheduler selects a node for a workload and records
+the decision by creating a Pod.
+
+It is important to restore `WorkPlacement`s during disaster recovery. A `WorkPlacement`
+records the intent of which destination the `Work` was scheduled to. If a `Work`
+matches multiple eligible destinations, Kratix may select one destination from
+those matched by the selector. If the `WorkPlacement` is missing after restore, the
+`Work` may be scheduled to a different destination.
+
+A workaround is to ensure that every `Work` is defined with strict
+criteria so that it always resolves to a single destination.
 
 ### Persisted intent and restart behaviour
 
@@ -104,8 +138,8 @@ Workflows defined within Promises produce end state via one or both of the follo
 
 Workflows are intended to be idempotent so that retries and restarts are safe.
 
-- Declarative output is recorded in-cluster as `Work` resources (persisted to etcd),
-  which makes it observable and replayable during recovery.
+- Declarative output is recorded in-cluster as `Work/WorkPlacement` resources
+  (persisted to etcd), which makes it observable and replayable during recovery.
 - Imperative effects persist in the external systems they target, and recovery may
   depend on the idempotency and drift handling of those systems and workflows.
 
@@ -113,6 +147,16 @@ Workflows are intended to be idempotent so that retries and restarts are safe.
 
 This section describes how to run Kratix with high availability in a single
 Kubernetes cluster.
+
+:::note What “high availability” means for Kratix
+
+Kratix is not a synchronous service with strict per-request availability
+expectations. It is a reconciliation system optimized for correctness over
+time. In practice, evaluating HA for Kratix means:
+
+- Can we keep declaring intent during incidents (kube-apiserver available)?
+- Does the platform reliably converge once Kratix and dependencies recover?
+:::
 
 ### Deployment model
 
@@ -337,4 +381,3 @@ If a Git repository or S3 bucket is lost or replaced:
 ## Related docs
 - [Kratix config](/main/reference/kratix-config/config)
 <!-- TODO: Add links to StateStores, Promises, and workflow authoring guidance. -->
-
