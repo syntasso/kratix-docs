@@ -71,9 +71,8 @@ State Store depending on the Destination, and Terraform Enterprise will apply
 the changes to the workspace.
 
 
-The example Promise we will explore in this guide provides S3 buckets as a
-service. Let's go through what happens when a member of the Mobile team requests
-a new S3 bucket.
+The example Promise in this guide provides S3 buckets as a service. Let's go
+through what happens when a member of the Mobile team requests a new S3 bucket:
 
 1. The request for a new bucket is sent to the Platform. It includes the team
 membership information.
@@ -120,6 +119,8 @@ metadata:
     workspace: mobile
 spec:
   path: mobile-workspace
+  filepath:
+    mode: none
   stateStoreRef:
     name: gitops-state-store
     kind: GitStateStore
@@ -199,7 +200,12 @@ the Destination.
   <figcaption>Selecting the Repository</figcaption>
 </figure>
 
-Make sure that, when configuring the settings, you click in "Advanced Options" and select the subdirectory matching the Destination `spec.path`. For example, for the Mobile team workspace, we defined the `spec.path` as `mobile-workspace`, so we will select the `mobile-workspace` subdirectory.
+Make sure that, when configuring the settings, you click in "Advanced Options"
+and select the subdirectory matching the Destination `spec.path`. For example,
+for the Mobile team workspace, we defined the `spec.path` as `mobile-workspace`,
+so we will select the `mobile-workspace` subdirectory. Also make sure to check
+the Auto Apply boxes to have Terraform Enterprise apply the changes to the
+workspace automatically.
 
 <figure className="diagram">
   <img className="large" src={WorkspacePage03} alt="Selecting the Subdirectory" />
@@ -239,10 +245,10 @@ yourself](/ske/guides/promise-from-tf-module)!
 
 :::
 
-For that, we will use the S3 Bucket example Promise available [here](https://github.com/syntasso/kratix-examples/tree/main/s3-bucket-promise). You can install the Promise with the following command:
+For that, we will use the S3 Bucket example Promise available [here](https://github.com/syntasso/kratix-examples/tree/main/promise-terraform-aws-buckets). You can install the Promise with the following command:
 
 ```shell-session
-kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-examples/main/s3-bucket-promise/promise.yaml
+kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-examples/refs/heads/main/promise-terraform-aws-buckets/promise.yaml
 ```
 
 
@@ -260,7 +266,18 @@ Inspect the Promise API:
 
 ```shell-session
 $ kubectl explain s3.spec.team --api-version=example.syntasso.io/v1alpha1
-...
+GROUP:      example.syntasso.io
+KIND:       S3
+VERSION:    v1alpha1
+
+FIELD: team <string>
+ENUM:
+    mobile
+    backend
+    frontend
+
+DESCRIPTION:
+    Team name identifier.
 ```
 
 But how is this property used? Let's inspect the Request Configure workflow:
@@ -318,6 +335,14 @@ So when the team is `mobile`, the `destination-selectors.yaml` file will look li
 When SKE is processing the request, it will look for destinations matching the
 `matchLabels` defined in the file, ensuring that the resources are scheduled to
 the correct Terraform workspace.
+
+Which brings us back to the diagram at the beginning of this guide, where you can see how SKE will schedule the request to the correct Terraform workspace:
+
+<figure className="diagram">
+  <img className="large" src={Topology} alt="High-level diagram of the Platform" />
+
+  <figcaption>How SKE will process the request</figcaption>
+</figure>
 
 :::tip
 
