@@ -1,0 +1,383 @@
+---
+title: Resiliency
+description: How Kratix supports resilient platform operations.
+sidebar_label: Resiliency
+sidebar_position: 1
+---
+
+This page describes Kratix resiliency: how Kratix stores and acts on intent,
+what that implies for high availability, and how to recover Kratix after an
+incident.
+
+By the end of this page, you should understand:
+- How intent is represented in Kubernetes resources and persisted via
+  kube-apiserver and etcd
+- How Kratix reconciliation works at a high level, including eventual
+  consistency
+- What “high availability” means for Kratix and which dependencies matter most
+- How to plan and test disaster recovery for Kratix state
+- How external outputs (StateStores like Git/S3) behave during outages
+
+## Resiliency model overview
+
+Kratix is a Kubernetes-native control plane: intent is declared as Kubernetes
+resources (CRDs and core resources) and persisted in etcd via kube-apiserver.
+
+Kratix converges on that intent using asynchronous reconciliation (event-driven
+plus periodic), so behaviour is eventually consistent rather than synchronous.
+
+Availability has two distinct dimensions:
+
+- **Declaring intent** depends on kube-apiserver and etcd availability.
+- **Executing intent** depends on Kratix controllers and external dependencies
+  (StateStores and APIs).
+
+If controllers or dependencies are temporarily unavailable, intent remains
+persisted and reconciliation resumes when they recover.
+
+## How Kratix stores and acts on intent
+
+Kratix follows the Kubernetes controller pattern. You declare intent by
+creating or updating Kubernetes resources. Kubernetes persists those resources
+into its backing store, normally etcd. Kratix observes changes and reconciles
+asynchronously towards the desired state that the document defines.
+
+### Where Kratix state lives
+
+Kratix represents all intent and progress as Kubernetes resources. It uses a mix of
+core resources (for example Jobs, Deployments) and custom resources (for example
+Promises, Resource Requests) to represent desired state and observed state.
+
+All Kubernetes resources follow the same convention (excluding metadata):
+
+- `spec` describes desired state (what you want Kratix to achieve).
+- `status` describes observed state (what has happened so far).
+
+These resources are persisted by kube-apiserver into **etcd**, the backing data
+store for Kubernetes cluster state. etcd uses the Raft consensus algorithm to
+replicate state and elect a leader. This matters because:
+
+- Writes to cluster state require a quorum of etcd members.
+- Availability of the Kubernetes API for writes is tied to etcd availability.
+
+You do not need to understand Raft in detail to operate Kratix, but you do need
+to treat the Kubernetes control plane and etcd durability as the primary
+availability boundary for Kratix.
+
+#### Workflow-related state
+
+A major part of Kratix reconciliation is orchestrating Workflows defined within
+Promises. Workflow execution and its declarative outputs (e.g. Terraform files)
+are represented as Kubernetes resources [called `Work`s and the scheduling of
+them as
+`WorkPlacement`s](/main/platform-concepts/kratix-resources#output-objects).
+Like other cluster state, `Work`/`WorkPlacement`s are persisted to etcd.
+
+This matters for HA/DR because `Work/WorkPlacement` is replayable from the control plane: after a
+restart, Kratix can observe existing `Work/WorkPlacement` resources and continue convergence.
+
+Destinations represent systems that Kratix can write documents to, which are
+then reconciled by an external tool (for example Flux, Argo CD, or Terraform
+Enterprise). They are conceptually similar to nodes in Kubernetes: Destinations
+have labels, and `Work` uses selectors to match eligible Destinations. Kratix
+then creates a `WorkPlacement` to record the chosen Destination for that
+`Work`, similar to how a scheduler selects a node for a workload and records
+the decision by creating a Pod.
+
+It is important to restore `WorkPlacement`s during disaster recovery. A `WorkPlacement`
+records the intent of which destination the `Work` was scheduled to. If a `Work`
+matches multiple eligible destinations, Kratix may select one destination from
+those matched by the selector. If the `WorkPlacement` is missing after restore, the
+`Work` may be scheduled to a different destination.
+
+A workaround is to ensure that every `Work` is defined with strict
+criteria so that it always resolves to a single destination.
+
+### Persisted intent and restart behaviour
+
+Because intent is stored in etcd (via kube-apiserver), it survives Kratix restarts:
+
+- Restarting the Kratix pod does not remove or reset desired state.
+- When Kratix starts, it lists existing Kratix resources and
+  resumes reconciliation by reacting to current cluster state and subsequent changes.
+- Reconciliation continues from what is stored in cluster state, not from
+  in-memory queues.
+
+This is the core of Kratix resiliency: the control plane stores intent, and Kratix
+can always resume convergence after a restart.
+
+### Reconciliation and eventual consistency
+
+Kratix is an eventually consistent system:
+
+- Changes are acted on asynchronously.
+- Convergence time depends on workflow execution time and external dependencies
+  (for example StateStores).
+
+Reconciliation happens in two ways:
+
+- **Event-driven reconciliation**
+  - Creating, updating, or deleting a Kratix resource triggers reconciliation.
+  - Changes to related resources can also trigger reconciliation.
+  - A [manual trigger of reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation)
+
+- **Periodic reconciliation**
+  - Periodic reconciliation is enabled by default.
+  - The interval is configurable at
+    [Kratix config](/main/reference/kratix-config/config).
+  - Periodic reconciliation helps recover from transient failures and makes the
+    system more robust to missed events.
+
+#### How workflows drive convergence
+
+Workflows defined within Promises produce end state via one or both of the following:
+
+- **Imperative:** making API calls to external services (for example cloud providers).
+- **Declarative:** generating documents (for example Terraform files) that Kratix
+  then schedules to different StateStores (for example Git or S3).
+
+Workflows are intended to be idempotent so that retries and restarts are safe.
+
+- Declarative output is recorded in-cluster as `Work/WorkPlacement` resources
+  (persisted to etcd), which makes it observable and replayable during recovery.
+- Imperative effects persist in the external systems they target, and recovery may
+  depend on the idempotency and drift handling of those systems and workflows.
+
+## High availability design
+
+This section describes how to run Kratix with high availability in a single
+Kubernetes cluster.
+
+:::note What “high availability” means for Kratix
+
+Kratix is not a synchronous service with strict per-request availability
+expectations. It is a reconciliation system optimized for correctness over
+time. In practice, evaluating HA for Kratix means:
+
+- Can we keep declaring intent during incidents (kube-apiserver available)?
+- Does the platform reliably converge once Kratix and dependencies recover?
+:::
+
+### Deployment model
+
+Kratix runs as a Kubernetes Deployment.
+
+- You can configure multiple replicas, but only one replica is active at a time.
+- Kratix uses Kubernetes leader election (kubebuilder pattern), so a single
+  leader performs reconciliation.
+- If the active replica fails, Kubernetes can restart it or another replica can
+  acquire the leader lease and continue processing.
+
+This gives fast failover without multiple reconcilers acting on the same state.
+
+### Recommended HA posture
+
+- **Run multiple replicas**
+  - Multiple replicas reduce time to recovery when the active pod is
+    rescheduled.
+  - Leader election ensures a single active reconciler.
+
+- **Spread replicas across failure domains**
+  - Use node and zone spreading so a single node or zone outage does not take
+    out all replicas.
+  - Align placement with your cluster availability requirements.
+
+- **Treat the Kratix pod as disposable**
+  - Design for restarts and rescheduling.
+  - Focus availability investment on the Kubernetes control plane, because it
+    stores the intent Kratix needs to function.
+
+- **Prioritise Kubernetes control plane availability**
+  - kube-apiserver and etcd availability determine whether intent can be
+    declared and persisted.
+  - Managed Kubernetes offerings often provide well-tested control plane HA
+    patterns. Validate what your platform provides and what failure modes it
+    covers.
+
+### Anti-pattern: multi-active Kratix control planes
+
+Avoid running two independent Kratix control planes that both attempt to
+reconcile the same desired state.
+
+Multi-active reconcilers can cause split-brain behaviour:
+
+- conflicting decisions against the same resources and destinations
+- oscillation between states as each reconciler attempts to converge
+
+If you believe active-active is required for your setup, please reach out to
+us.
+
+## Failure modes and behaviour
+
+This section describes what continues to work, what pauses, and what to expect
+when the system recovers.
+
+### Kubernetes API unavailable
+
+Impact:
+- You cannot create, update, or delete Kratix resources through the Kubernetes
+  API.
+- Kratix cannot read cluster state, so it cannot reconcile.
+
+What to expect:
+- No new intent can be declared until kube-apiserver is available again.
+- Once it recovers, reconciliation continues from persisted cluster state.
+
+### Kratix unavailable (Kubernetes API available)
+
+Impact:
+- You can continue to create, update, and delete Kratix resources.
+- Changes are persisted to etcd.
+- Kratix will not execute intent until it recovers.
+
+What pauses while Kratix is unavailable:
+- workflows do not run
+- scheduling and actuation does not occur
+- writing outputs to StateStores does not occur
+- status updates and progress reporting become stale
+
+What to expect on recovery:
+- Kratix re-lists resources, resumes watching, and continues reconciliation from
+  persisted intent.
+
+### StateStore unavailable (Git, S3)
+
+Impact:
+- Kratix cannot write workflow outputs to the StateStore while the dependency is
+  unavailable.
+
+What to expect:
+- Workflows still complete successfully and produce outputs that are stored in etcd.
+- Writes to the StateStore are delayed until the StateStore recovers.
+- Once available, Kratix resumes syncing and converges external state.
+
+### External API unavailable (called by workflows)
+
+Impact:
+- Workflows that call the external API may fail, time out, or be delayed.
+
+What to expect:
+- Failures are surfaced through workflow status.
+- Convergence resumes once the dependency recovers, subject to workflow retry
+  behaviour and periodic reconciliation.
+- Workflows must be idempotent so retries are safe.
+
+## Disaster recovery
+
+Disaster recovery for Kratix is primarily disaster recovery for the Kubernetes
+cluster state that contains Kratix resources.
+
+### Define targets with RTO and RPO
+
+Express resiliency requirements using recovery objectives rather than a generic
+number of “nines”.
+
+- **RTO (recovery time objective)**
+  - How long you can tolerate Kratix being unable to execute intent.
+  - In practice: how quickly you need workflows and delivery to resume after an
+    incident.
+
+- **RPO (recovery point objective)**
+  - How much Kratix state you can tolerate losing, measured as time.
+  - For Kratix this is driven by your backup cadence for Kubernetes resources,
+    and by whether you also manage intent via GitOps.
+
+RTO influences your restore approach and readiness. RPO influences backup
+frequency and scope.
+
+### Backup strategy
+
+Use a Kubernetes backup tool that captures cluster resources, including CRDs and
+custom resources. Velero is a common choice.
+
+If you use GitOps to manage Kratix resources, your Git repository is a useful
+input source for restoring intent. It does not replace Kubernetes backups
+because it does not capture everything required to operate Kratix (for example
+in-cluster credentials and RBAC configuration).
+
+### What to back up
+
+Ensure your backups include:
+
+- **Kratix API resources**
+  - Kratix CRDs
+  - all Kratix custom resources
+
+- **Configuration and credentials**
+  - Secrets used by Kratix and workflows (for example StateStore credentials and
+    external API credentials)
+  - ConfigMaps required to configure Kratix
+
+- **Access control**
+  - ServiceAccounts
+  - Roles and RoleBindings
+  - ClusterRoles and ClusterRoleBindings
+
+- **Workload manifests**
+  - Resources that define and run Kratix (for example Deployments)
+
+Resources that are optional for functional recovery:
+- Events (useful for troubleshooting and incident review)
+
+:::warning
+Restoring Kubernetes resources can overwrite existing state. Test restores in a
+non-production environment and ensure you understand what will be replaced
+before restoring into a live cluster.
+:::
+
+### Restore approach
+
+Your restore approach depends on the incident type:
+
+- **Restore into an existing cluster**
+  - Use this when the cluster still exists but has lost state or has been
+    partially corrupted.
+
+- **Recreate the cluster and restore**
+  - Use this when the cluster is lost (for example a full cluster outage).
+  - Restore backups into the new cluster, then let Kratix resume reconciliation.
+
+After restore, verify that Kratix can:
+- list and watch its resources
+- acquire leader election and begin reconciliation
+- continue convergence without manual state repair
+
+### Workflow idempotency
+
+Workflows must be idempotent. During recovery, workflows may be re-run after a
+restore, after controller restarts, or after external dependencies recover.
+
+When authoring Promises, treat idempotency as a requirement:
+
+- re-running a workflow converges to the same result
+- external API calls handle retries safely
+- outputs written to StateStores are safe to apply more than once
+
+## StateStore recovery and resync
+
+A StateStore is an external destination where Kratix writes workflow outputs,
+such as a Git repository or an S3 bucket.
+
+### Periodic rewrites
+
+Kratix periodically rewrites outputs to StateStores to ensure external state
+remains up to date.
+
+- The sync interval is configurable.
+- The default interval is 3 hours.
+- You can trigger a rewrite manually by labelling the relevant resource.
+
+<!-- TODO: Link to the documentation for manual StateStore resync. -->
+
+### Recovering from StateStore loss
+
+If a Git repository or S3 bucket is lost or replaced:
+
+- Recreate the repository or bucket and update the StateStore configuration if
+  required.
+- Trigger a resync (or wait for the periodic rewrite) so Kratix repopulates the
+  destination from the desired state stored in Kubernetes.
+
+## Related docs
+- [Kratix config](/main/reference/kratix-config/config)
+<!-- TODO: Add links to StateStores, Promises, and workflow authoring guidance. -->
