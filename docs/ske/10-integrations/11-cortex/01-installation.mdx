@@ -1,0 +1,68 @@
+---
+title: Install Cortex Integration
+description: Documentation for how to set up Cortex workspace and install Cortex SKE integration
+sidebar_label: Install Cortex Integration
+slug: install-cortex-integration
+---
+
+To integrate SKE with Cortex, you need to set up your Cortex workspace and install the SKE Cortex
+integration in your platform.
+
+This document will cover:
+
+- Create a Cortex token for Kratix
+- Configure Cortex Workspace
+- Set up GitOps in Kratix platform to discover resource requests coming from Cortex
+- Install SKE Cortex integration
+
+## Create a Cortex token for SKE
+
+SKE Cortex integration communicates with Cortex through Cortex API.
+Following [Cortex's official documentation](https://docs.cortex.io/configure/settings/api-keys/personal-tokens),
+you can create a personal access token to access your Cortex workspace, and you need to provide this token to
+SKE Cortex integration at installation.
+
+SKE Cortex integration will use the access token to authenticate. The integration will:
+
+* create, update, and delete Workflows
+* create, update, and delete custom Entity Types
+* create, update, and delete Entities
+
+Please ensure the token is generated with the right permissions.
+
+## Set up Cortex Workspace
+
+Resource requests created from Cortex will be sent to SKE through GitOps. For any of the resource requests Workflows to
+run successfully in Cortex, you will need to set up version control integration in your Cortex workspace.
+
+Follow the [office Cortex documentation](https://docs.cortex.io/ingesting-data-into-cortex/integrations) on integrations.
+SKE Cortex integration only supports Github and GitLab integrations at the moment. If you require a different version
+control provider, please contact Syntasso.
+
+## Install SKE Cortex integration
+
+TODO: all configuration should be done through helm chart,
+please review this page and update it as a whole once we have the chart ready to release.
+
+This integration is released separately from SKE.
+Its releases can be found in blah and it can be installed using its or ske-operator helm chart.
+
+Before installing this integration, ensure you have a valid SKE installation in your platform to proceed further.
+
+Provide the Cortex access token that you generated from the previous step to helm chart `values.yaml` file.
+
+Set `cortex-config` config map in `values.yaml` file :
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cortex-config # needs to be this name; should be set by helm chart
+  namespace: kratix-platform-system
+data:
+  branch: main # any branch that exists; default to main
+  integrationAlias: cortex # needs to matching an existing integration alias name in workspace
+  path: test-sub-dir # any dir, if not set, it will default to `kratix-resource-requests`
+  provider: github # github or gitlab; else it errors
+  repositoryName: syntasso/cortex-testing # needs to be an existing repo
+```
