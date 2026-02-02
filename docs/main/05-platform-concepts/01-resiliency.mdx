@@ -30,8 +30,8 @@ Availability has two distinct dimensions:
 - **Executing intent** depends on Kratix controllers and external dependencies
   (StateStores and APIs).
 
-If controllers or dependencies are temporarily unavailable, intent remains
-persisted and reconciliation resumes when they recover.
+If Kratix or external dependencies are temporarily unavailable, intent remains
+persisted in etcd and reconciliation resumes when they recover.
 
 ## How Kratix stores and acts on intent
 
@@ -88,8 +88,12 @@ matches multiple eligible destinations, Kratix will select a destination at rand
 those matched by the selector. If the `WorkPlacement` is missing after restore, the
 `Work` may be scheduled to a different destination.
 
+:::note
+
 A workaround is to ensure that every `Work` is defined with strict
 criteria so that it always resolves to a single destination.
+
+:::
 
 ### Persisted intent and restart behaviour
 
@@ -160,9 +164,10 @@ time. In practice, evaluating HA for Kratix means:
 
 Kratix runs as a Kubernetes Deployment.
 
-- You can configure multiple replicas, but only one replica is active at a time.
-- Kratix uses Kubernetes leader election (kubebuilder pattern), so a single
-  leader performs reconciliation.
+- You can configure multiple replicas, but only one replica is active at a
+  time.
+- Kratix uses Kubernetes leader election (implemented via `Lease` objects), so
+  a single leader performs reconciliation.
 - If the active replica fails, Kubernetes can restart it or another replica can
   acquire the leader lease and continue processing.
 
@@ -231,6 +236,7 @@ Impact:
 - You can continue to create, update, and delete Kratix resources.
 - Changes are persisted to etcd.
 - Kratix will not execute intent until it recovers.
+- External running services are unaffected.
 
 What pauses while Kratix is unavailable:
 - workflows do not run
