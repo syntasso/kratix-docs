@@ -10,13 +10,11 @@ what that implies for high availability, and how to recover Kratix after an
 incident.
 
 By the end of this page, you should understand:
-- How intent is represented in Kubernetes resources and persisted via
-  kube-apiserver and etcd
-- How Kratix reconciliation works at a high level, including eventual
-  consistency
-- What “high availability” means for Kratix and which dependencies matter most
+- What “high availability” means for Kratix
+  - How intent is represented and persisted in Kubernetes resources
+  - How reconciliation works at a high level, including eventual consistency
 - How to plan and test disaster recovery for Kratix state
-- How external outputs (StateStores like Git/S3) behave during outages
+  - How your system will behave during different component outages
 
 ## Resiliency model overview
 
@@ -53,7 +51,7 @@ All Kubernetes resources follow the same convention (excluding metadata):
 - `spec` describes desired state (what you want Kratix to achieve).
 - `status` describes observed state (what has happened so far).
 
-These resources are persisted by kube-apiserver into **etcd**, the backing data
+These resources are persisted by kube-apiserver into etcd, the backing data
 store for Kubernetes cluster state. etcd uses the Raft consensus algorithm to
 replicate state and elect a leader. This matters because:
 
@@ -86,7 +84,7 @@ the decision by creating a Pod.
 
 It is important to restore `WorkPlacement`s during disaster recovery. A `WorkPlacement`
 records the intent of which destination the `Work` was scheduled to. If a `Work`
-matches multiple eligible destinations, Kratix may select one destination from
+matches multiple eligible destinations, Kratix will select a destination at random from
 those matched by the selector. If the `WorkPlacement` is missing after restore, the
 `Work` may be scheduled to a different destination.
 
@@ -204,8 +202,12 @@ Multi-active reconcilers can cause split-brain behaviour:
 - conflicting decisions against the same resources and destinations
 - oscillation between states as each reconciler attempts to converge
 
+:::Info
+
 If you believe active-active is required for your setup, please reach out to
-us.
+Syntasso for a more in depth design discussion.
+
+:::
 
 ## Failure modes and behaviour
 
