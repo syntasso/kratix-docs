@@ -46,7 +46,7 @@ Kratix represents all intent and progress as Kubernetes resources. It uses a mix
 core resources (for example Jobs, Deployments) and custom resources (for example
 Promises, Resource Requests) to represent desired state and observed state.
 
-All Kubernetes resources follow the same convention (excluding metadata):
+All Kubernetes resources follow the same convention:
 
 - `spec` describes desired state (what you want Kratix to achieve).
 - `status` describes observed state (what has happened so far).
@@ -229,6 +229,12 @@ Impact:
 What to expect:
 - No new intent can be declared until kube-apiserver is available again.
 - Once it recovers, reconciliation continues from persisted cluster state.
+
+If you place GitOps in front of Kratix Resource Requests, you can still declare
+intent by committing changes even while Kubernetes is unavailable. When the
+cluster recovers, those changes are applied and Kratix converges on the new
+state. This is supported by the [portal integration](/ske/integrations/backstage/intro)
+and is good practice if you are driving Kratix solely via an API.
 
 ### Kratix unavailable (Kubernetes API available)
 
