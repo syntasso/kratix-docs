@@ -116,12 +116,14 @@ message: "my-app.local.gd:31338"
 Excellent. With that file in place, Kratix will automatically persist that
 information to the status of the Resource.
 
-The status that persist to your resource will also be viewable the next time
+So far we've tested this status update locally with our testing scripts. When running this pipeline in a real k8s cluster,
+the status that persist to your resource will also be viewable the next time
 the pipeline runs by inspecting the `/kratix/input/object.yaml`. For example
 after the very first pipeline has run, all future pipelines would have an input
 object like the following:
 
-```yaml title="test/input/object.yaml"
+```yaml title="kratix/input/object.yaml"
+# example object.yaml file from a pipeline
 apiVersion: workshop.kratix.io/v1
 kind: App
 metadata:
