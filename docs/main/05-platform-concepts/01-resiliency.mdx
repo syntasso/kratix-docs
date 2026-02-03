@@ -10,7 +10,7 @@ what that implies for high availability, and how to recover Kratix after an
 incident.
 
 By the end of this page, you should understand:
-- What “high availability” means for Kratix
+- What "high availability" means for Kratix
   - How intent is represented and persisted in Kubernetes resources
   - How reconciliation works at a high level, including eventual consistency
 - How to plan and test disaster recovery for Kratix state
@@ -88,10 +88,15 @@ matches multiple eligible destinations, Kratix will select a destination at rand
 those matched by the selector. If the `WorkPlacement` is missing after restore, the
 `Work` may be scheduled to a different destination.
 
-:::note
+:::warning WorkPlacement is part of the source of truth for scheduling
 
-A workaround is to ensure that every `Work` is defined with strict
-criteria so that it always resolves to a single destination.
+If you restore Kratix without `WorkPlacement`s, the scheduler can make a new
+selection and place work on a different Destination. That can lead to
+non-deterministic placement and unexpected drift. Ensure your backups include
+`WorkPlacement`s and validate they are present after restore.
+
+If you cannot restore `WorkPlacement`s, tighten scheduling rules so each
+`Work` resolves to exactly one Destination.
 
 :::
 
@@ -150,7 +155,7 @@ Workflows are intended to be idempotent so that retries and restarts are safe.
 This section describes how to run Kratix with high availability in a single
 Kubernetes cluster.
 
-:::note What “high availability” means for Kratix
+:::note What "high availability" means for Kratix
 
 Kratix is not a synchronous service with strict per-request availability
 expectations. It is a reconciliation system optimized for correctness over
@@ -284,7 +289,7 @@ cluster state that contains Kratix resources.
 ### Define targets with RTO and RPO
 
 Express resiliency requirements using recovery objectives rather than a generic
-number of “nines”.
+number of "nines".
 
 - **RTO (recovery time objective)**
   - How long you can tolerate Kratix being unable to execute intent.
@@ -309,29 +314,42 @@ input source for restoring intent. It does not replace Kubernetes backups
 because it does not capture everything required to operate Kratix (for example
 in-cluster credentials and RBAC configuration).
 
+### Control plane data (etcd)
+
+etcd is the primary durability boundary for Kratix, because it stores all
+Kubernetes resources and their status. Treat etcd backups as a first-class DR
+concern.
+
+- **Managed clusters:** cloud and on-prem managed offerings often include
+  automated etcd snapshots and restore procedures. Validate what your provider
+  covers (RPO, retention, and restore path) and test restores.
+- **Self-managed clusters:** schedule regular etcd snapshots to off-cluster
+  storage and rehearse restore procedures as part of DR drills.
+
+Velero (and similar tools) back up Kubernetes resources via the API. That is
+essential, and combined with etcd snapshots it can provide broad coverage for
+control plane recovery. Choose the DR approach that fits your risk tolerance,
+then test and verify it.
+
 ### What to back up
 
 Ensure your backups include:
 
-- **Kratix API resources**
-  - Kratix CRDs
-  - all Kratix custom resources
+- **Kratix resources**
+  - [All Kratix CRDs](/main/platform-concepts/kratix-resources)
+  - All Resource Requests for the Promises
 
 - **Configuration and credentials**
-  - Secrets used by Kratix and workflows (for example StateStore credentials and
+  - Secrets used by Kratix and Workflows (for example StateStore credentials and
     external API credentials)
   - ConfigMaps required to configure Kratix
 
-- **Access control**
+- **Workflows**
+  - Jobs
   - ServiceAccounts
   - Roles and RoleBindings
   - ClusterRoles and ClusterRoleBindings
-
-- **Workload manifests**
-  - Resources that define and run Kratix (for example Deployments)
-
-Resources that are optional for functional recovery:
-- Events (useful for troubleshooting and incident review)
+  - ConfigMaps
 
 :::warning
 Restoring Kubernetes resources can overwrite existing state. Test restores in a
@@ -367,6 +385,21 @@ When authoring Promises, treat idempotency as a requirement:
 - external API calls handle retries safely
 - outputs written to StateStores are safe to apply more than once
 
+For more detail, see [Workflow idempotency](/main/reference/resources/workflows#idempotency).
+
+#### How to validate workflow idempotency
+
+Use a non-production environment to exercise the same workflow multiple times
+against the same inputs:
+
+- re-run the workflow after a successful run and confirm no unintended changes
+- simulate a retry after a partial failure and ensure it converges cleanly
+- verify that external system calls are idempotent (for example create-or-update)
+- compare outputs written to the StateStore and ensure they are stable
+
+For workflows that talk to external systems, consider adding idempotency keys or
+deduplication logic on the external side where available.
+
 ## StateStore recovery and resync
 
 A StateStore is an external destination where Kratix writes workflow outputs,
@@ -392,6 +425,23 @@ If a Git repository or S3 bucket is lost or replaced:
 - Trigger a resync (or wait for the periodic rewrite) so Kratix repopulates the
   destination from the desired state stored in Kubernetes.
 
+## Recovery checklist
+
+Use this as a post-restore validation checklist. Adjust to match your platform.
+
+- Kubernetes API writable and etcd healthy
+- Kratix CRDs and namespaces restored
+- Secrets and ConfigMaps restored (including StateStore credentials)
+- RBAC restored (Roles, ClusterRoles, and bindings)
+- Kratix Deployment running and leader election healthy
+- Controllers reconciling and status progressing
+- `Work` and `WorkPlacement` resources present and consistent
+- StateStore resync completed and confirmed
+- GitOps toolkit healthy (for example Flux `Kustomization`s or Argo CD Applications)
+
 ## Related docs
 - [Kratix config](/main/reference/kratix-config/config)
+- [Destinations](/main/reference/destinations/intro)
+- [StateStores](/main/reference/statestore/intro)
+- [Workflow idempotency](/main/reference/resources/workflows#idempotency)
 <!-- TODO: Add links to StateStores, Promises, and workflow authoring guidance. -->
