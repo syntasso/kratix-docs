@@ -38,12 +38,12 @@ persisted in etcd and reconciliation resumes when they recover.
 Kratix follows the Kubernetes controller pattern. You declare intent by
 creating or updating Kubernetes resources. Kubernetes persists those resources
 into its backing store, normally etcd. Kratix observes changes and reconciles
-asynchronously towards the desired state that the document defines.
+asynchronously towards the desired state that the resource defines.
 
 ### Where Kratix state lives
 
 Kratix represents all intent and progress as Kubernetes resources. It uses a mix of
-core resources (for example Jobs, Deployments) and custom resources (for example
+core resources (for example Jobs) and custom resources (for example
 Promises, Resource Requests) to represent desired state and observed state.
 
 All Kubernetes resources follow the same convention:
@@ -277,6 +277,8 @@ Impact:
 
 What to expect:
 - Failures are surfaced through workflow status.
+- A failed workflow does not affect documents that have already been scheduled
+  to a StateStore.
 - Convergence resumes once the dependency recovers, subject to workflow retry
   behaviour and periodic reconciliation.
 - Workflows must be idempotent so retries are safe.
@@ -335,21 +337,35 @@ then test and verify it.
 
 Ensure your backups include:
 
-- **Kratix resources**
-  - [All Kratix CRDs](/main/platform-concepts/kratix-resources)
-  - All Resource Requests for the Promises
+- **Kratix CRDs and resource request CRDs**
+  - all Kratix CRDs
+  - CRDs created by Promises (the CRDs that back resource requests, for example
+    `redis.marketplace.kratix.io`)
+  - core Kratix CRDs:
+    - bucketstatestores.platform.kratix.io
+    - destinations.platform.kratix.io
+    - gitstatestores.platform.kratix.io
+    - healthrecords.platform.kratix.io
+    - promisereleases.platform.kratix.io
+    - promiserevisions.platform.kratix.io
+    - promises.platform.kratix.io
+    - resourcebindings.platform.kratix.io
+    - workplacements.platform.kratix.io
+    - works.platform.kratix.io
 
-- **Configuration and credentials**
-  - Secrets used by Kratix and Workflows (for example StateStore credentials and
-    external API credentials)
-  - ConfigMaps required to configure Kratix
-
-- **Workflows**
+- **Workflow-related resources**
   - Jobs
   - ServiceAccounts
-  - Roles and RoleBindings
-  - ClusterRoles and ClusterRoleBindings
-  - ConfigMaps
+  - Roles, RoleBindings, ClusterRoles, and ClusterRoleBindings
+  - ConfigMaps required by workflows
+
+- **Secrets used by Kratix and workflows**
+  - StateStore credentials
+  - external API credentials
+
+- **Other resources workflows depend on**
+  - any platform cluster resources that workflows reference or query (for
+    example via `kubectl get` or API calls)
 
 :::warning
 Restoring Kubernetes resources can overwrite existing state. Test restores in a
@@ -411,7 +427,7 @@ Kratix periodically rewrites outputs to StateStores to ensure external state
 remains up to date.
 
 - The sync interval is configurable.
-- The default interval is 3 hours.
+- The default interval is 10 hours.
 - You can trigger a rewrite manually by labelling the relevant resource.
 
 <!-- TODO: Link to the documentation for manual StateStore resync. -->
