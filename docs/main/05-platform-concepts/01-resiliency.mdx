@@ -18,7 +18,7 @@ By the end of this page, you should understand:
 
 ## Resiliency model overview
 
-Kratix is a Kubernetes-native control plane: intent is declared as Kubernetes
+Kratix is a Kubernetes-native platform control plane: intent is declared as Kubernetes
 resources (CRDs and core resources) and persisted in etcd via kube-apiserver.
 
 Kratix converges on that intent using asynchronous reconciliation (event-driven
@@ -53,9 +53,10 @@ All Kubernetes resources follow the same convention:
 
 These resources are persisted by kube-apiserver into etcd, the backing data
 store for Kubernetes cluster state. etcd uses the Raft consensus algorithm to
-replicate state and elect a leader. This matters because:
+maintain a consistent replicated log and elect a leader. This matters because:
 
-- Writes to cluster state require a quorum of etcd members.
+- etcd replicates committed data across members, so quorum is required for
+  durable writes.
 - Availability of the Kubernetes API for writes is tied to etcd availability.
 
 You do not need to understand Raft in detail to operate Kratix, but you do need
@@ -88,15 +89,14 @@ matches multiple eligible destinations, Kratix will select a destination at rand
 those matched by the selector. If the `WorkPlacement` is missing after restore, the
 `Work` may be scheduled to a different destination.
 
-:::warning WorkPlacement is part of the source of truth for scheduling
+:::warning Back up and restore `WorkPlacement`s
 
-If you restore Kratix without `WorkPlacement`s, the scheduler can make a new
-selection and place work on a different Destination. That can lead to
-non-deterministic placement and unexpected drift. Ensure your backups include
-`WorkPlacement`s and validate they are present after restore.
+Ensure your backups include `WorkPlacement`s and validate they are present
+after restore before re-enabling automation.
 
-If you cannot restore `WorkPlacement`s, tighten scheduling rules so each
-`Work` resolves to exactly one Destination.
+If `WorkPlacement`s are missing, the scheduler can make a new selection and
+place `Work` on a different Destination. That can cause non-deterministic
+placement and unexpected drift.
 
 :::
 
@@ -202,20 +202,28 @@ This gives fast failover without multiple reconcilers acting on the same state.
     patterns. Validate what your platform provides and what failure modes it
     covers.
 
-### Anti-pattern: multi-active Kratix control planes
+### Multi-active Kratix control planes
 
-Avoid running two independent Kratix control planes that both attempt to
-reconcile the same desired state.
+Our recommendation is to avoid running two independent Kratix control planes
+that both attempt to reconcile the same desired state.
 
-Multi-active reconcilers can cause split-brain behaviour:
+Some teams may still choose this design to meet specific constraints. If so,
+be explicit about the operational trade-off and test failure behaviour
+thoroughly.
+
+Running multi-active reconcilers against the same desired state can introduce
+split-brain behaviour and operational instability:
 
 - conflicting decisions against the same resources and destinations
 - oscillation between states as each reconciler attempts to converge
+- inconsistent reconciliation ordering across controllers and destinations
+- more complex incident response because ownership of a change is harder to
+  attribute during failures
 
 :::info
 
 If you believe active-active is required for your setup, please reach out to
-Syntasso for a more in depth design discussion.
+Syntasso for a more in-depth design discussion.
 
 :::
 
@@ -282,16 +290,48 @@ What to expect:
 - Convergence resumes once the dependency recovers, subject to workflow retry
   behaviour and periodic reconciliation.
 - Workflows must be idempotent so retries are safe.
+- Consider using circuit breakers with sensible timeouts
+  and backoff to avoid repeated failing calls during outages.
+
+### Workflow idempotency
+
+Workflows must be idempotent. During normal reconciliation and recovery,
+workflows may be re-run after a restore, after controller restarts, or after
+external dependencies recover.
+
+When authoring Promises, treat idempotency as a requirement:
+
+- re-running a workflow converges to the same result
+- external API calls handle retries safely
+- outputs written to StateStores are safe to apply more than once
+
+For more detail, see [Workflow idempotency](/main/reference/resources/workflows#idempotency).
+
+#### How to validate workflow idempotency
+
+Use a non-production environment to exercise the same workflow multiple times
+against the same inputs:
+
+- re-run the workflow after a successful run and confirm no unintended changes
+- simulate a retry after a partial failure and ensure it converges cleanly
+- verify that external system calls are idempotent (for example create-or-update)
+- compare outputs written to the StateStore and ensure they are stable
+
+For workflows that talk to external systems, consider adding idempotency keys or
+deduplication logic on the external side where available.
 
 ## Disaster recovery
 
 Disaster recovery for Kratix is primarily disaster recovery for the Kubernetes
 cluster state that contains Kratix resources.
 
+This page provides DR guidance, not a complete runbook for every environment.
+Apply and adapt it to your platform topology, security controls, and
+operational model.
+
 ### Define targets with RTO and RPO
 
-Express resiliency requirements using recovery objectives rather than a generic
-number of "nines".
+Define resiliency requirements with explicit RTO and RPO targets.
 
 - **RTO (recovery time objective)**
   - How long you can tolerate Kratix being unable to execute intent.
@@ -304,12 +344,17 @@ number of "nines".
     and by whether you also manage intent via GitOps.
 
 RTO influences your restore approach and readiness. RPO influences backup
-frequency and scope.
+frequency and scope. Revisit both as your platform architecture and usage
+change.
 
 ### Backup strategy
 
 Use a Kubernetes backup tool that captures cluster resources, including CRDs and
 custom resources. Velero is a common choice.
+
+Tool examples in this page are guidance, not a prescriptive runbook. Your exact
+backup and restore design depends on your cluster setup, security controls,
+GitOps model, and operational constraints.
 
 If you use GitOps to manage Kratix resources, your Git repository is a useful
 input source for restoring intent. It does not replace Kubernetes backups
@@ -331,7 +376,7 @@ concern.
 Velero (and similar tools) back up Kubernetes resources via the API. That is
 essential, and combined with etcd snapshots it can provide broad coverage for
 control plane recovery. Choose the DR approach that fits your risk tolerance,
-then test and verify it.
+then test and verify it regularly with full restore rehearsals.
 
 ### What to back up
 
@@ -367,10 +412,14 @@ Ensure your backups include:
   - any platform cluster resources that workflows reference or query (for
     example via `kubectl get` or API calls)
 
+The exact backup scope varies by environment. Keep an explicit inventory of
+what Kratix and your workflows depend on, and update it as dependencies change.
+
 :::warning
 Restoring Kubernetes resources can overwrite existing state. Test restores in a
 non-production environment and ensure you understand what will be replaced
-before restoring into a live cluster.
+before restoring into a live cluster. Perform restores using an environment-specific,
+tested runbook.
 :::
 
 ### Restore approach
@@ -385,36 +434,30 @@ Your restore approach depends on the incident type:
   - Use this when the cluster is lost (for example a full cluster outage).
   - Restore backups into the new cluster, then let Kratix resume reconciliation.
 
+Restore sequencing matters. If reconciliation tools resume before cluster state
+is fully restored, they may prune or overwrite resources.
+
+Use a tested restore order for your platform:
+
+- temporarily pause GitOps reconciliation and other automation that can apply or
+  prune resources
+- restore control plane state and required resources (including CRDs, secrets,
+  RBAC, and Kratix resources)
+- run dry-run or preflight checks where your tooling supports them
+- verify restored state and controller health before re-enabling reconciliation
+- resume automation in stages and monitor for unexpected prune or drift events
+
+The precise sequence and safeguards vary by environment. Validate your order in
+regular DR exercises and update it when tooling or architecture changes.
+
 After restore, verify that Kratix can:
 - list and watch its resources
 - acquire leader election and begin reconciliation
 - continue convergence without manual state repair
 
-### Workflow idempotency
-
-Workflows must be idempotent. During recovery, workflows may be re-run after a
-restore, after controller restarts, or after external dependencies recover.
-
-When authoring Promises, treat idempotency as a requirement:
-
-- re-running a workflow converges to the same result
-- external API calls handle retries safely
-- outputs written to StateStores are safe to apply more than once
-
-For more detail, see [Workflow idempotency](/main/reference/resources/workflows#idempotency).
-
-#### How to validate workflow idempotency
-
-Use a non-production environment to exercise the same workflow multiple times
-against the same inputs:
-
-- re-run the workflow after a successful run and confirm no unintended changes
-- simulate a retry after a partial failure and ensure it converges cleanly
-- verify that external system calls are idempotent (for example create-or-update)
-- compare outputs written to the StateStore and ensure they are stable
-
-For workflows that talk to external systems, consider adding idempotency keys or
-deduplication logic on the external side where available.
+Treat backup restore as an operational capability, not a one-off task. Rehearse
+end-to-end recovery regularly and update the runbook as your environment
+changes.
 
 ## StateStore recovery and resync
 
@@ -440,10 +483,13 @@ If a Git repository or S3 bucket is lost or replaced:
   required.
 - Trigger a resync (or wait for the periodic rewrite) so Kratix repopulates the
   destination from the desired state stored in Kubernetes.
+- Validate the recovered destination against your expected state before
+  re-enabling dependent automation.
 
 ## Recovery checklist
 
-Use this as a post-restore validation checklist. Adjust to match your platform.
+Use this as a post-restore validation checklist. Adjust to match your platform
+and keep it in sync with environment changes.
 
 - Kubernetes API writable and etcd healthy
 - Kratix CRDs and namespaces restored
