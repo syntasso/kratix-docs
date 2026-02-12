@@ -33,6 +33,9 @@ Availability has two distinct dimensions:
 If Kratix or external dependencies are temporarily unavailable, intent remains
 persisted in etcd and reconciliation resumes when they recover.
 
+For user experience, fast acknowledgement of submitted intent is usually more
+important than the exact reconciliation completion time.
+
 ## How Kratix stores and acts on intent
 
 Kratix follows the Kubernetes controller pattern. You declare intent by
@@ -163,6 +166,11 @@ time. In practice, evaluating HA for Kratix means:
 
 - Can we keep declaring intent during incidents (kube-apiserver available)?
 - Does the platform reliably converge once Kratix and dependencies recover?
+
+While both are important, in many environments, a request being accepted
+immediately with clear acknowledgement is a better user outcome than blocking
+submission.
+
 :::
 
 ### Deployment model
@@ -290,8 +298,10 @@ What to expect:
 - Convergence resumes once the dependency recovers, subject to workflow retry
   behaviour and periodic reconciliation.
 - Workflows must be idempotent so retries are safe.
-- Consider using circuit breakers with sensible timeouts
-  and backoff to avoid repeated failing calls during outages.
+- Consider implementing the
+  ["Circuit Breaker" pattern](https://martinfowler.com/bliki/CircuitBreaker.html)
+  with sensible timeouts and backoff to avoid repeated failing calls during
+  outages.
 
 ### Workflow idempotency
 
@@ -343,9 +353,18 @@ Define resiliency requirements with explicit RTO and RPO targets.
   - For Kratix this is driven by your backup cadence for Kubernetes resources,
     and by whether you also manage intent via GitOps.
 
+For Kratix, prioritise RTO/RPO for kube-apiserver and etcd so users can submit
+requests and receive acknowledgement quickly. Reconciliation remains eventually
+consistent; moderate increases in reconciliation time are often acceptable if
+submission and acknowledgement remain available.
+
 RTO influences your restore approach and readiness. RPO influences backup
 frequency and scope. Revisit both as your platform architecture and usage
 change.
+
+Do not use a single RTO/RPO target for every part of the system. Set stricter
+targets for accepting and persisting intent, and separate targets for
+reconciliation speed.
 
 ### Backup strategy
 
@@ -437,7 +456,19 @@ Your restore approach depends on the incident type:
 Restore sequencing matters. If reconciliation tools resume before cluster state
 is fully restored, they may prune or overwrite resources.
 
-Use a tested restore order for your platform:
+:::danger GitOps prune risk during restore and migration
+
+External GitOps reconcilers handle source outages differently. When a
+reconciler comes back online and its source repository is empty, incomplete, or
+stale, some tools can interpret the missing manifests as intentional removals
+and automatically prune the corresponding live resources
+
+This can happen during DR recovery, when platform and GitOps components fail at
+the same time, or during repository migrations (for example moving from GitHub
+to GitLab) where the new repository is briefly empty.
+:::
+
+Use a tested restore order for your platform. An example order might be:
 
 - temporarily pause GitOps reconciliation and other automation that can apply or
   prune resources
@@ -473,8 +504,6 @@ remains up to date.
 - The default interval is 10 hours.
 - You can trigger a rewrite manually by labelling the relevant resource.
 
-<!-- TODO: Link to the documentation for manual StateStore resync. -->
-
 ### Recovering from StateStore loss
 
 If a Git repository or S3 bucket is lost or replaced:
@@ -483,8 +512,12 @@ If a Git repository or S3 bucket is lost or replaced:
   required.
 - Trigger a resync (or wait for the periodic rewrite) so Kratix repopulates the
   destination from the desired state stored in Kubernetes.
-- Validate the recovered destination against your expected state before
-  re-enabling dependent automation.
+- Pause GitOps reconcilers until the destination is repopulated and validated
+  against expected state.
+- Avoid enabling prune behaviour until repository contents are complete and
+  stable for your environment.
+- Resume reconciliation in stages and monitor for drift, because a large gap
+  between cluster state and repository state can take time to converge safely.
 
 ## Recovery checklist
 
@@ -499,6 +532,8 @@ and keep it in sync with environment changes.
 - Controllers reconciling and status progressing
 - `Work` and `WorkPlacement` resources present and consistent
 - StateStore resync completed and confirmed
+- GitOps source repositories populated with expected manifests before
+  reconciliation and prune are re-enabled
 - GitOps toolkit healthy (for example Flux `Kustomization`s or Argo CD Applications)
 
 ## Related docs
@@ -506,4 +541,3 @@ and keep it in sync with environment changes.
 - [Destinations](/main/reference/destinations/intro)
 - [StateStores](/main/reference/statestore/intro)
 - [Workflow idempotency](/main/reference/resources/workflows#idempotency)
-<!-- TODO: Add links to StateStores, Promises, and workflow authoring guidance. -->
