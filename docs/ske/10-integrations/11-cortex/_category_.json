@@ -1,0 +1,8 @@
+{
+  "label": "Cortex",
+  "position": 3,
+  "link": {
+    "type": "doc",
+    "id": "ske/integrations/cortex/intro"
+  }
+}
