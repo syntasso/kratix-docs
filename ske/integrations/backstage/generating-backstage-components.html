@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.31a4a936.css">
-<script src="/assets/js/runtime~main.00adf636.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.54b268c7.js" defer="defer"></script>
 <script src="/assets/js/main.debd6bd9.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -57,7 +57,7 @@ due to air-gapped requirements or other security measures.</p>
 <p>To do this, you will need to set up image mirroring and configure the Backstage Controller distribution to pull images
 from your own registry.</p>
 <p>You must ensure that the Backstage Controller image is mirrored in your own image registry and tagged according to the version.</p>
-<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">registry.syntasso.io/syntasso/backstage-controller</span><br></span></code></pre></div></div>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">ghcr.io/syntasso/backstage-controller</span><br></span></code></pre></div></div>
 <p>As is the case for the SKE Operator and SKE Platform images, the Backstage Controller will use registry configured via the <code>imageRegistry.host</code> when pulling images. If have changed the name of the Backstage Controller image in your internal registry, ensure that the <code>imageRegistry.backstageControllerImage.name</code> is updated to reflect this.</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="deploy-the-backstage-controller">Deploy the Backstage Controller<a href="#deploy-the-backstage-controller" class="hash-link" aria-label="Direct link to Deploy the Backstage Controller" title="Direct link to Deploy the Backstage Controller" translate="no">​</a></h4>
 <p>Having updated the Helm values, install the Backstage Controller by running:</p>

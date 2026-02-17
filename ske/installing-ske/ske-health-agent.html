@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.31a4a936.css">
-<script src="/assets/js/runtime~main.00adf636.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.54b268c7.js" defer="defer"></script>
 <script src="/assets/js/main.debd6bd9.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -68,8 +68,8 @@ or other security measures.</p>
 from your own registry.</p>
 <p>You must ensure that images listed below are mirrored to your own image registry and tagged according to the version:</p>
 <ul>
-<li class=""><code>registry.syntasso.io/syntasso/k8s-health-agent</code></li>
-<li class=""><code>registry.syntasso.io/syntasso/health-check-adapter</code></li>
+<li class=""><code>ghcr.io/syntasso/k8s-health-agent</code></li>
+<li class=""><code>ghcr.io/syntasso/health-check-adapter</code></li>
 </ul>
 <p>You can then customise <code>imageRegistry.host</code> in your values file:</p>
 <div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic"># Configuration for the image registry</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic"># Update these values if you are using a private image registry</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">imageRegistry</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">host</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;my-org.registry.io&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">imagePullSecret</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;secret-name&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic"># ...</span><br></span></code></pre></div></div>
