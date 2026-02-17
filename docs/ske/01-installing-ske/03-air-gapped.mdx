@@ -33,7 +33,7 @@ The user associated with your SKE licence is `syntasso-pkg`. To pull the images
 from the Syntasso Registry, first login with:
 
 ```bash
-docker login --username syntasso-pkg ghcr.io
+docker login --username syntasso-pkg registry.syntasso.io
 ```
 
 You will be prompted for a password. The password is your Licence Key.
@@ -52,8 +52,8 @@ The SKE Operator and SKE images are stored in the GitHub Container Registry (GHC
 You must ensure that the following images are mirrored to your own image registry and
 tagged according to the version.
 
-- `ghcr.io/syntasso/ske-operator`
-- `ghcr.io/syntasso/ske-platform`
+- `registry.syntasso.io/syntasso/ske-operator`
+- `registry.syntasso.io/syntasso/ske-platform`
 
 You can find the available versions of the images in the [Syntasso Enterprise
 Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
@@ -68,19 +68,19 @@ How to: Push the images to your internal registry
 Log in to the Syntasso registry
 
 ```bash
-docker login ghcr.io -u syntasso-pkg -p {SYNTASSO_TOKEN}
+docker login registry.syntasso.io -u syntasso-pkg -p {SYNTASSO_TOKEN}
 ```
 
 Pull the images at the desired tag
 
 ```bash
-docker pull ghcr.io/syntasso/ske-platform:latest
+docker pull registry.syntasso.io/syntasso/ske-platform:latest
 ```
 
 Tag the image to be pushed to your internal registry
 
 ```bash
-docker tag ghcr.io/syntasso/ske-platform:latest ${INTERNAL_REGISTRY}/syntasso/ske-platform:latest
+docker tag registry.syntasso.io/syntasso/ske-platform:latest ${INTERNAL_REGISTRY}/syntasso/ske-platform:latest
 ```
 
 Push the image to the internal registry

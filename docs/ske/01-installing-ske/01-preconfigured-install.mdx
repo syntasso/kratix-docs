@@ -64,14 +64,14 @@ kubectl create namespace kratix-platform-system
 
 kubectl create secret docker-registry syntasso-registry \
   --namespace=kratix-platform-system \
-  --docker-server=ghcr.io \
+  --docker-server=registry.syntasso.io \
   --docker-username=syntasso-pkg \
   --docker-password=<YOUR TOKEN>
 
 # secret is required for all namespaces where resource requests are made
 kubectl create secret docker-registry syntasso-registry \
   --namespace=default \
-  --docker-server=ghcr.io \
+  --docker-server=registry.syntasso.io \
   --docker-username=syntasso-pkg \
   --docker-password=<YOUR TOKEN>
 ```
