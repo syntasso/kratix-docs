@@ -77,7 +77,7 @@ from your own registry.
 You must ensure that the Backstage Controller image is mirrored in your own image registry and tagged according to the version.
 
 ```
-registry.syntasso.io/syntasso/backstage-controller
+ghcr.io/syntasso/backstage-controller
 ```
 
 As is the case for the SKE Operator and SKE Platform images, the Backstage Controller will use registry configured via the `imageRegistry.host` when pulling images. If have changed the name of the Backstage Controller image in your internal registry, ensure that the `imageRegistry.backstageControllerImage.name` is updated to reflect this.
