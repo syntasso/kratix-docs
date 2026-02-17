@@ -16,6 +16,13 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstag
 
 ## Release Notes
 
+:::important
+Please note that as of v0.5.0, the Backstage Controller image will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
+the image and the backstage-controller pod will fail to start.
+:::
+
 ### [v0.4.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/v0.4.2/) (2026-02-10)
 
 Released via the SKE Operator Helm Chart [v0.53.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.53.0/)
