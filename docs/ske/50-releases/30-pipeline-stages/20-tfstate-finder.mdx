@@ -20,6 +20,12 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.7.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.4/) (2026-02-18)
+
+#### Bug Fixes
+
+* The TF state finder now correctly retrieves the commit SHA when it is not overridden in the Promise. This reduces the time Kratix takes to mark a resource as ready in these situations and speeds up resource deletions. (b4cc03c)
+
 ### [v0.7.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.3/) (2025-11-19)
 
 #### Bug fixes
