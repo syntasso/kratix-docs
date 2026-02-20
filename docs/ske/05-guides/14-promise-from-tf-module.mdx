@@ -346,7 +346,7 @@ To utilise it, we can add a second Pipeline after the `instance-configure` Pipel
             - list
           resourceNamespace: "*"
       containers:
-        - image: registry.syntasso.io/syntasso/ske-tfstate-finder:v0.7.3
+        - image: ghcr.io/syntasso/ske-tfstate-finder:v0.7.3
           name: fetch-output
           env:
           - name: TIMEOUT
@@ -779,7 +779,7 @@ spec:
                 - list
               resourceNamespace: "*"
           containers:
-            - image: registry.syntasso.io/syntasso/ske-tfstate-finder:v0.7.3
+            - image: ghcr.io/syntasso/ske-tfstate-finder:v0.7.3
               name: fetch-output
               env:
               - name: TIMEOUT

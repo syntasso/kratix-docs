@@ -13,10 +13,17 @@ given resource and write it to the status of the object.
 The Pipeline Stage is available as a Container image at:
 
 ```
-registry.syntasso.io/syntasso/ske-tfstate-finder:VERSION
+ghcr.io/syntasso/ske-tfstate-finder:VERSION
 ```
 
 Check the release notes below for information on each available version.
+
+:::important
+Please note that as of v0.8.0, the tf-state-finder image will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, any Promises using the tf-state-finder
+will fail to pull the image within their Workflows
+:::
 
 ## Release Notes
 

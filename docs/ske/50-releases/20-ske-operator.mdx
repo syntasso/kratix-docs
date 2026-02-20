@@ -26,6 +26,13 @@ SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
+:::important
+Please note that as of v0.20.0 of the SKE Operator (Helm Chart v0.57.0), the SKE images will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
+the images and the ske-operator pod will fail to start.
+:::
+
 ### [v0.19.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.19.3/) (2026-02-17)
 
 Released in Helm Chart version [version 0.56.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.56.0/)
