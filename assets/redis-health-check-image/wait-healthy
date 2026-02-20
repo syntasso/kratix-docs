@@ -4,8 +4,8 @@ namespace="$(yq '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 resourceName="$(yq '.metadata.name' /kratix/input/object.yaml)"
 
 while true; do
-  state="$(kubectl get redis ${resourceName} --namespace ${namespace} -o jsonpath='{.status.healthRecord.state}')"
-  if [[ ${state} == "healthy" ]]; then 
+  state="$(kubectl get redis ${resourceName} --namespace ${namespace} -o jsonpath='{status.healthStatus.healthRecords[0].state}')"
+  if [[ "${state}" == "healthy" ]]; then
     break
   fi
   echo "Waiting for resource to be healthy, current state: ${state:-"unknown"}"
