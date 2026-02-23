@@ -344,6 +344,10 @@ The Secret must be accessible within the Pipeline's namespace.
 Refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/secret/)
 for more details on Secrets in Kubernetes.
 
+For broader context on secret handling patterns, see
+[Secret management](/main/platform-concepts/secrets) and the
+[Secrets management demo (video)](https://youtu.be/M_ATRRt7AoY).
+
 Example:
 
 ```yaml
