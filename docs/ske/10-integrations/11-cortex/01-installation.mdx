@@ -6,14 +6,19 @@ slug: configuring-cortex
 keywords: [cortex, installation, ske, controller]
 ---
 
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
 To integrate SKE with Cortex, you need to set up your Cortex workspace and install the SKE Cortex integration on your Platform cluster.
 
 This document will cover:
 
 - [Creating a Cortex token for Kratix](#create-a-cortex-token-for-ske)
 - [Configuring the Cortex Workspace](#set-up-the-cortex-workspace)
-- Setting up GitOps in Kratix platform to discover resource requests coming from Cortex
-- Installing SKE Cortex integration
+- [Installing Cortex Controller](#install-the-ske-cortex-controller)
+- [Setting up GitOps on the Platform Cluster to discover Cortex-Generates requests](#configure-git-ops-for-cortex-generated-resource-requests)
 
 ## Create a Cortex token for SKE
 
@@ -155,9 +160,61 @@ kubectl apply --filename cortex-integration.yaml
 
 The operator will then install the Cortex Controller and the desired configurations.
 
-## Configure GitOps for Cortex Requests
+## Configure GitOps for Cortex-Generated Resource Requests
 
 When the Cortex Workflows run, they will create resource requests for a given promise and write these to a Git Repository. To ensure these requests are created on the Platform Cluster where SKE is installed, GitOps tooling must be configured on the cluster to watch and converge upon the files written to this repository.
 
 Please refer to the appropriate documentation to use [ArgoCD](/main/guides/installing-argocd), [FluxCD](/main/guides/installing-fluxcd), or your preferred [GitOps
 Agent](/main/guides/custom-gitops-agent).
+
+<details>
+  <summary>You can see two examples of how to configure the GitOps repository using ArgoCD and FluxCD below.</summary>
+
+  <Tabs className="boxedTabs" groupId="GitOps">
+  <TabItem value="ArgoCD" label="ArgoCD Application">
+
+  ```bash
+  apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: kratix-cortex-resources
+    namespace: argocd
+  spec:
+    project: default
+    source:
+      repoURL: https://github.com/${ORGANIZATION}/${CORTEX_REPOSITORY}
+      targetRevision: HEAD
+      path: .
+      directory:
+        recurse: true
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: default
+    syncPolicy:
+      automated:
+        selfHeal: true
+        prune: true
+  ```
+
+  </TabItem>
+
+  <TabItem value="FluxCD" label="Flux Kustomization">
+
+  ```bash
+  apiVersion: source.toolkit.fluxcd.io/v1
+  kind: GitRepository
+  metadata:
+    name: kratix-cortex-resources
+    namespace: flux-system
+  spec:
+    interval: 5s
+    url: https://github.com/${ORGANIZATION}/${CORTEX_REPOSITORY}
+    ref:
+      branch: main
+    secretRef:
+      name: cortex-git-credentials
+  ```
+
+  </TabItem>
+  </Tabs>
+</details>
