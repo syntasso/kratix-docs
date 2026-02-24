@@ -1,28 +1,27 @@
 ---
-title: Install Cortex Integration
-description: Documentation for how to set up Cortex workspace and install Cortex SKE integration
-sidebar_label: Install Cortex Integration
-slug: install-cortex-integration
+title: Configuring Cortex
+description: Documentation for how to set up the Cortex workspace and install Cortex SKE integration
+sidebar_label: Configuring Cortex
+slug: configuring-cortex
+keywords: [cortex, installation, ske, controller]
 ---
 
-To integrate SKE with Cortex, you need to set up your Cortex workspace and install the SKE Cortex
-integration in your platform.
+To integrate SKE with Cortex, you need to set up your Cortex workspace and install the SKE Cortex integration on your Platform cluster.
 
 This document will cover:
 
-- Create a Cortex token for Kratix
-- Configure Cortex Workspace
-- Set up GitOps in Kratix platform to discover resource requests coming from Cortex
-- Install SKE Cortex integration
+- [Creating a Cortex token for Kratix](#create-a-cortex-token-for-ske)
+- [Configuring the Cortex Workspace](#set-up-the-cortex-workspace)
+- Setting up GitOps in Kratix platform to discover resource requests coming from Cortex
+- Installing SKE Cortex integration
 
 ## Create a Cortex token for SKE
 
-SKE Cortex integration communicates with Cortex through Cortex API.
-Following [Cortex's official documentation](https://docs.cortex.io/configure/settings/api-keys/personal-tokens),
-you can create a personal access token to access your Cortex workspace, and you need to provide this token to
-SKE Cortex integration at installation.
+The SKE Cortex integration communicates with Cortex through teh Cortex API. Following [Cortex's official
+documentation](https://docs.cortex.io/configure/settings/api-keys/personal-tokens), you can create a personal access token to access your Cortex workspace. You will need to provide
+this token when installing the SKE Cortex integration.
 
-SKE Cortex integration will use the access token to authenticate. The integration will:
+The SKE Cortex integration will use the access token to authenticate. It will:
 
 * create, update, and delete Workflows
 * create, update, and delete custom Entity Types
@@ -30,39 +29,135 @@ SKE Cortex integration will use the access token to authenticate. The integratio
 
 Please ensure the token is generated with the right permissions.
 
-## Set up Cortex Workspace
+## Set up the Cortex Workspace
 
-Resource requests created from Cortex will be sent to SKE through GitOps. For any of the resource requests Workflows to
-run successfully in Cortex, you will need to set up version control integration in your Cortex workspace.
+Resource requests created from Cortex will be sent to SKE through GitOps, meaning that the requests will be written a Git repository that the cluster will watch and converge upon.
+For any of the resource requests Workflows to run successfully in Cortex, you will need to set up version control integration in your Cortex workspace.
 
-Follow the [office Cortex documentation](https://docs.cortex.io/ingesting-data-into-cortex/integrations) on integrations.
-SKE Cortex integration only supports Github and GitLab integrations at the moment. If you require a different version
-control provider, please contact Syntasso.
+Follow the [official Cortex documentation](https://docs.cortex.io/ingesting-data-into-cortex/integrations) on integrations to set up the integration with you Git provider. SKE
+Cortex integration only supports Github and GitLab integrations at the moment. If you require a different version control provider, please contact
+[Syntasso](mailto:feedback@syntasso.io?subject=SKECortex%20Feedback).
 
-## Install SKE Cortex integration
+## Install the SKE Cortex Controller
 
-TODO: all configuration should be done through helm chart,
-please review this page and update it as a whole once we have the chart ready to release.
+### Via the SKE Operator Helm Chart
 
-This integration is released separately from SKE.
-Its releases can be found in blah and it can be installed using its or ske-operator helm chart.
+:::important
 
-Before installing this integration, ensure you have a valid SKE installation in your platform to proceed further.
+You will need `v0.57.0` of the SKE Operator Helm Chart
 
-Provide the Cortex access token that you generated from the previous step to helm chart `values.yaml` file.
+:::
 
-Set `cortex-config` config map in `values.yaml` file :
+The Cortex Controller is installed by the [SKE Operator](../../installing-ske/advanced-install) and can be deployed via the SKE Operator Helm Chart.
+
+To deploy the Cortex Controller via the SKE Operator Helm Chart, configure the `cortexIntegration` values. Most crucially, you will need to set `cortexIntegration.enabled` to
+`true`.
+
+```yaml
+cortexIntegration:
+  enabled: true
+  version: "latest"
+  cortexToken: "cortex-personal-token"
+  gitConfig:
+    branch: main # any branch that exists; defaults to main
+    integrationAlias: cortex # needs to matching an existing integration alias name in the workspace
+    path: test-sub-dir # any dir, if not set, it will default to `kratix-resource-requests`
+    provider: github # must be github or gitlab
+    repositoryName: syntasso/cortex-testing # needs to be an existing repo
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+#### Image registry for Air-gapped Environments
+
+You may want to manage the Cortex Controller images within your own environment either due to air-gapped requirements or other security measures.
+
+To do this, you will need to set up image mirroring and configure the Cortex Controller distribution to pull images from your own registry.
+
+You must ensure that the Cortex Controller image is mirrored in your own image registry and tagged according to the version.
+
+```
+ghcr.io/syntasso/cortex-controller
+```
+
+As is the case for the SKE Operator and SKE Platform images, the Cortex Controller will use registry configured via the `imageRegistry.host` in the Helm Chart when pulling images.
+If you have changed the name of the Cortex Controller image in your internal registry, ensure that the `imageRegistry.cortexControllerImage.name` is updated to reflect this.
+
+#### Deploy the Cortex Controller
+
+Having updated the Helm values, install the Cortex Controller by running:
+
+```bash
+helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
+  --wait \
+  --values values.yaml
+```
+
+### Via the SKE Integrations CRD
+
+:::warning
+
+You will need `v0.20.0` of the SKE Operator or later
+
+:::
+
+The SKE Operator includes a Custom Resource Definition (CRD) for managing SKE Integrations such as Cortex. Only one instance of a Cortex SKE Integration can be created by the SKE
+Operator in a given cluster.
+
+Before creating the SKE Integration, you will need to create the secret that will be used to connect to Cortex. This will include the personal access token created in the first
+step:
 
 ```yaml
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
-  name: cortex-config # needs to be this name; should be set by helm chart
+  name: cortex-connection
   namespace: kratix-platform-system
+type: Opaque
 data:
-  branch: main # any branch that exists; default to main
-  integrationAlias: cortex # needs to matching an existing integration alias name in workspace
-  path: test-sub-dir # any dir, if not set, it will default to `kratix-resource-requests`
-  provider: github # github or gitlab; else it errors
-  repositoryName: syntasso/cortex-testing # needs to be an existing repo
+  token: "cortex-personal-token"
+  url: "https://api.getcortexapp.com"
 ```
+
+If both the SKE Operator and SKE are deployed on your cluster, you can deploy the Cortex Controller by creating a SKE Integration. Create a file named `cortex-integration.yaml`
+with the following contents:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: cortex-integration
+spec:
+  type: cortex
+  version: v0.99.0 # The desired version of the Controller
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+Apply the file with kubectl:
+
+```yaml
+kubectl apply --filename cortex-integration.yaml
+```
+
+The operator will then install the Cortex Controller and the desired configurations.
+
+## Configure GitOps for Cortex Requests
+
+When the Cortex Workflows run, they will create resource requests for a given promise and write these to a Git Repository. To ensure these requests are created on the Platform Cluster where SKE is installed, GitOps tooling must be configured on the cluster to watch and converge upon the files written to this repository.
+
+Please refer to the appropriate documentation to use [ArgoCD](/main/guides/installing-argocd), [FluxCD](/main/guides/installing-fluxcd), or your preferred [GitOps
+Agent](/main/guides/custom-gitops-agent).

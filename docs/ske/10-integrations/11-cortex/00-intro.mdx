@@ -2,6 +2,23 @@
 title: Introduction
 description: Introduction to SKE Cortex integration
 sidebar_label: Introduction
+keywords: [cortex, internal developer portal, idp]
 ---
 
-Placeholder.
+Cortex is an Internal Developer Portal (IDP) that centralises self-service access across organisations. This pairs well with Syntasso Kratix Enterprise (SKE) which is a framework
+for building a Platform for which Cortex can serve as an entrypoint. SKE can orchestrate the deployment of services through the medium of Promises and surface the progress of these
+services being provisioned within the Cortex UI.
+
+With the SKE Cortex integration, you can automate the process of creating populating the Cortex catalog with Entities as well and generate Workflows that can be used to provision
+services backed by Kratix Promises. Developers using Cortex can then send requests to Kratix via the Cortex Workflow to create and manage Resources.
+
+// Add a diagram here
+
+## Architecture
+
+1. Install the Cortex Controller
+1. The configure the Git Repository that will be used by Cortex
+1. Configure GitOps tooling on your Platform cluster to reconcile on files written to the Git State Store by the Cortex Workflows
+1. Label your Promises with the Cortex label
+
+* In [Configuring Cortex](./configuring-cortex), you will learn how to install the Cortex Controller and configure your Platform Cluster to create Cortex-Generated resources
