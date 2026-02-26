@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkkratix_docs=globalThis.webpackChunkkratix_docs||[]).push([[8035],{90416(s,a,k){k.r(a)}}]);
