@@ -1,0 +1,53 @@
+---
+title: Using the SKE Cortex Integration
+description: Documentation for how to use the Cortex SKE integration
+sidebar_label: Using the SKE Cortex Integration
+slug: using-cortex-integration
+keywords: [cortex, installation, ske, controller]
+---
+
+With your Cortex Workspace configured and the Cortex Controller installed on your Platform Cluster, you will now be able to leverage the SKE Cortex integration. If you have not
+setup the workspace and installed the controller, follow the [Configuring Cortex guide](./configuring-cortex).
+
+## How does it work?
+
+The SKE Cortex Controller uses the the Cortex API to generate [Entity Types](https://docs.cortex.io/ingesting-data-into-cortex/entities?q=workflows#entity-types) and
+[Workflows](https://docs.cortex.io/streamline/workflows) in Cortex, these can be used to manage the lifecycle of Resource Requests in the SKE Platform. For a given Promise, the SKE
+Cortex Controller will generate:
+
+* **Promise Entity Type**: Represents the Promise in Cortex
+* **Create Workflow**: Creates Resource Requests of the Promise exposing the options in the Promise API
+* **Update Workflow**: Updates a given Resource Request of the Promise
+* **Delete Workflow**: Deletes a given Resource Request of the Promise
+
+When a user uses the Create Workflow to make a Request of a Promise, the Workflow generates a yaml document for that request and writes it to the Cortex Git Repository. When the
+Platform Cluster converges on this and creates the Resource Request, the Cortex Controller creates an Entity in Cortex to correspond with the Request. This details the `spec` and
+`status` of the Resource Request in SKE.
+
+When a given Resource Request or Promise is deleted (either via the Workflow or the Kubernetes API), the corresponding objects in Cortex will also be deleted.
+
+### Translating Promises to Entity Types
+
+The Cortex Controller takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex. At present, the [supported types](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) for Cortex fields are
+`array`, `boolean`, `integer`, `null`, `number`, `object` and `string`. At present, Cortex does not support an array of primitives.
+
+## Labelling Promises for Cortex Integration
+
+To take advantage of the Cortex Integration for a given Promise and automatically generate Cortex objects, label your Promise with `kratix.io/cortex: "true"`.
+
+```bash
+kubectl label promises PROMISE_NAME kratix.io/cortex=true
+```
+
+Or add the label to the Promise spec:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/cortex: "true"
+```
+
+The Cortex Controller will then create the Cortex objects which you will be able to see in the Cortex UI.
