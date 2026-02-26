@@ -6,19 +6,24 @@ keywords: [cortex, internal developer portal, idp]
 ---
 
 Cortex is an Internal Developer Portal (IDP) that centralises self-service access across organisations. This pairs well with Syntasso Kratix Enterprise (SKE) which is a framework
-for building a Platform for which Cortex can serve as an entrypoint. SKE can orchestrate the deployment of services through the medium of Promises and surface the progress of these
+for building Platforms that provision Anything-As-A-Service. Coupled together, Cortex can serve as an entrypoint for the SKE Platform. SKE can orchestrate the deployment of services through the medium of Promises and surface the progress of these
 services being provisioned within the Cortex UI.
 
-With the SKE Cortex integration, you can automate the process of creating populating the Cortex catalog with Entities as well and generate Workflows that can be used to provision
-services backed by Kratix Promises. Developers using Cortex can then send requests to Kratix via the Cortex Workflow to create and manage Resources.
+With the SKE Cortex integration, you can automate the process of populating the Cortex catalog with Entities as well as generate Workflows that can be used to provision
+services backed by Kratix Promises. Developers using Cortex can then leverage Cortex to send requests to SKE via the Cortex Workflow to manage the lifecycle of their services.
 
 // Add a diagram here
 
 ## Architecture
 
+To integrate SKE with the Cortex, you need to do the following:
+
+1. Configure your Cortex Workspace
 1. Install the Cortex Controller
-1. The configure the Git Repository that will be used by Cortex
-1. Configure GitOps tooling on your Platform cluster to reconcile on files written to the Git State Store by the Cortex Workflows
+1. Set up GitOps tooling on your Platform cluster to reconcile on files written to the Git State Store by the Cortex Workflows
 1. Label your Promises with the Cortex label
 
-* In [Configuring Cortex](./configuring-cortex), you will learn how to install the Cortex Controller and configure your Platform Cluster to create Cortex-Generated resources
+The following sections will explore each of these steps in detail.
+
+* In [Configuring Cortex](./configuring-cortex), you will learn how to Configure the Cortex Workspace, install the Cortex Controller and configure your Platform Cluster to create Cortex-Generated resources
+* In [Generating Cortex Components](./generating-cortex-components), you will learn how to automatically generate Cortex Workflows, Entity Types and Entities

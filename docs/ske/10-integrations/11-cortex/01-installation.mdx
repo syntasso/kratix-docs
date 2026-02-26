@@ -15,15 +15,23 @@ To integrate SKE with Cortex, you need to set up your Cortex workspace and insta
 
 This document will cover:
 
-- [Creating a Cortex token for Kratix](#create-a-cortex-token-for-ske)
 - [Configuring the Cortex Workspace](#set-up-the-cortex-workspace)
+- [Creating a Cortex token for Kratix](#create-a-cortex-token-for-ske)
 - [Installing Cortex Controller](#install-the-ske-cortex-controller)
-- [Setting up GitOps on the Platform Cluster to discover Cortex-Generates requests](#configure-git-ops-for-cortex-generated-resource-requests)
+
+## Set up the Cortex Workspace
+
+The Cortex Workflows will create and update Resource Request for their respective Promises. These requests which will be sent to SKE via GitOps, meaning that the requests will be written a Git repository that the Platform Cluster will watch and converge upon.
+To enable this GitOps flow from your Workflows, you will need to set up a version control integration in your Cortex workspace.
+
+Follow the [official Cortex documentation](https://docs.cortex.io/ingesting-data-into-cortex/integrations) on integrations to set up the integration with your Git provider. The SKE
+Cortex integration currently only supports Github and GitLab integration, if you require a different version control provider, please contact Syntasso at
+[feedback@syntasso.io](mailto:feedback@syntasso.io?subject=SKECortex%20Feedback).
 
 ## Create a Cortex token for SKE
 
-The SKE Cortex integration communicates with Cortex through teh Cortex API. Following [Cortex's official
-documentation](https://docs.cortex.io/configure/settings/api-keys/personal-tokens), you can create a personal access token to access your Cortex workspace. You will need to provide
+The SKE Cortex integration communicates with Cortex through the Cortex API so you'll need to generate a token for authenticating with your Cortex Workspace. Follow [Cortex's official
+documentation](https://docs.cortex.io/configure/settings/api-keys/personal-tokens) to create a personal access token to access your Cortex workspace. You will need to provide
 this token when installing the SKE Cortex integration.
 
 The SKE Cortex integration will use the access token to authenticate. It will:
@@ -34,14 +42,6 @@ The SKE Cortex integration will use the access token to authenticate. It will:
 
 Please ensure the token is generated with the right permissions.
 
-## Set up the Cortex Workspace
-
-Resource requests created from Cortex will be sent to SKE through GitOps, meaning that the requests will be written a Git repository that the cluster will watch and converge upon.
-For any of the resource requests Workflows to run successfully in Cortex, you will need to set up version control integration in your Cortex workspace.
-
-Follow the [official Cortex documentation](https://docs.cortex.io/ingesting-data-into-cortex/integrations) on integrations to set up the integration with you Git provider. SKE
-Cortex integration only supports Github and GitLab integrations at the moment. If you require a different version control provider, please contact
-[Syntasso](mailto:feedback@syntasso.io?subject=SKECortex%20Feedback).
 
 ## Install the SKE Cortex Controller
 
