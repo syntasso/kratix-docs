@@ -54,3 +54,43 @@ metadata:
 ```
 
 The Cortex Controller will then create the Cortex objects which you will be able to see in the Cortex UI.
+
+## Managing Resource Requests in Cortex
+
+```mdx-code-block
+import CortexCreateWorkflow from "/img/docs/ske/cortex-create-workflow.png"
+import CortexEntities from "/img/docs/ske/cortex-entities.png"
+import CortexRequestWorkflows from "/img/docs/ske/cortex-request-workflows.png"
+```
+
+When a Promise has been successfully installed with the Cortex integration, Platform users can use Cortex workflows to manage the lifecycle of their services. From either the Entity Type
+view or the Workflows view, users can trigger the Create Workflow for the desired Entity Type that represents the Promise. When initiating the Workflow, they will be presented with the input
+form with fields that honour the Promise API.
+
+<figure className="diagram">
+  <img className="large" src={CortexCreateWorkflow} alt="The input form for a Cortex create workflow for a Redis Promise" />
+
+  <figcaption>Cortex Create Workflow</figcaption>
+</figure>
+
+Upon submitting their request form, the Resource Request will be written to the configured Git Repository and created on the Platform Cluster. The creation of the request on the cluster will trigger
+a Kratix Workflow that creates an Entity representing the Resource Request in Cortex.
+
+<figure className="diagram">
+  <img className="large" src={CortexEntities} alt="The entity view in Cortex with one entity visible" />
+
+  <figcaption>Cortex Entity View</figcaption>
+</figure>
+
+The Resource Request can then be managed via the Entity in Cortex, which will expose both the Update and Delete workflows for the Entity.
+
+<figure className="diagram">
+  <img className="large" src={CortexRequestWorkflows} alt="The Cortex UI detailing the Update and Delete workflows for an Entity" />
+
+  <figcaption>Cortex Update and Delete Workflows</figcaption>
+</figure>
+
+Running the Update Workflow for the Resource Request will update the request in the Git Repository and eventually, the Kratix workflows for the request will re-run and the Entity in
+Cortex will be updated accordingly.
+
+Triggering the Delete Workflow will remove the request from the Git Repository, trigger a deletion on the Platform Cluster and remove the Entity from Cortex.
