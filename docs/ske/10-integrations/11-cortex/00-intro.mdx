@@ -12,7 +12,9 @@ services being provisioned within the Cortex UI.
 With the SKE Cortex integration, you can automate the process of populating the Cortex catalog with Entities as well as generate Workflows that can be used to provision
 services backed by Kratix Promises. Developers using Cortex can then leverage Cortex to send requests to SKE via the Cortex Workflow to manage the lifecycle of their services.
 
-// Add a diagram here
+```mdx-code-block
+import CortexDiagram from "/img/docs/ske/cortex-resource-request-diagram.jpg"
+```
 
 ## Architecture
 
@@ -22,6 +24,14 @@ To integrate SKE with the Cortex, you need to do the following:
 1. Install the Cortex Controller
 1. Set up GitOps tooling on your Platform cluster to reconcile on files written to the Git State Store by the Cortex Workflows
 1. Label your Promises with the Cortex label
+
+The diagram below shows the architecture of the integration and flow of actions when a user makes a Resource Request via the Cortex UI.
+
+<figure className="diagram">
+  <img className="large" src={CortexDiagram} alt="Cortex and Kratix Architecture" />
+
+  <figcaption>Cortex and Kratix Architecture</figcaption>
+</figure>
 
 The following sections will explore each of these steps in detail.
 
