@@ -62,13 +62,21 @@ To deploy the Cortex Controller via the SKE Operator Helm Chart, configure the `
 cortexIntegration:
   enabled: true
   version: "latest"
-  cortexToken: "cortex-personal-token"
-  gitConfig:
+  config:
     branch: main # any branch that exists; defaults to main
-    integrationAlias: cortex # needs to matching an existing integration alias name in the workspace
-    path: test-sub-dir # any dir, if not set, it will default to `kratix-resource-requests`
-    provider: github # must be github or gitlab
+    integrationAlias: cortex # needs to match the integrationAlias for your GitOps integration
+    path: test-sub-dir # any dir within the repo, if not set, it will default to `kratix-resource-requests`
+    provider: github # must be github
     repositoryName: syntasso/cortex-testing # needs to be an existing repo
+    # auth options (choose exactly one):
+    # 1) set both token and url and this chart creates Secret `cortex-credentials`
+    # 2) set secretRef.name to an existing Secret in kratix-platform-system
+    # token/url and secretRef are mutually exclusive.
+    token: ""
+    url: ""
+    # optional existing Secret reference (used only when token/url are not set)
+    # secretRef:
+    #   name: "cortex-credentials"
   deploymentConfig:
     resources:
       limits:
@@ -142,6 +150,12 @@ metadata:
 spec:
   type: cortex
   version: v0.99.0 # The desired version of the Controller
+  cortex:
+    branch: main # any branch that exists; defaults to main
+    integrationAlias: my-alias # needs to match the integrationAlias for your GitOps integration
+    path: test-sub-dir # any dir to be created in the workflow, if not set, it will default to `kratix-resource-requests`
+    provider: github # must be github
+    repositoryName: syntasso/cortex-testing # needs to be an existing repo
   deploymentConfig:
     resources:
       limits:
