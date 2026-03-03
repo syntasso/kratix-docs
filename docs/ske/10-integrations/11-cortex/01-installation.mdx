@@ -49,7 +49,7 @@ Please ensure the token is generated with the right permissions.
 
 :::important
 
-You will need `v0.57.0` of the SKE Operator Helm Chart
+You will need `v0.58.0` of the SKE Operator Helm Chart
 
 :::
 
@@ -99,7 +99,7 @@ You must ensure that the Cortex Controller image is mirrored in your own image r
 ghcr.io/syntasso/cortex-controller
 ```
 
-As is the case for the SKE Operator and SKE Platform images, the Cortex Controller will use registry configured via the `imageRegistry.host` in the Helm Chart when pulling images.
+As is the case for the SKE Operator and SKE Platform images, the Cortex Controller will use the registry configured via the `imageRegistry.host` in the Helm Chart when pulling images.
 If you have changed the name of the Cortex Controller image in your internal registry, ensure that the `imageRegistry.cortexControllerImage.name` is updated to reflect this.
 
 #### Deploy the Cortex Controller

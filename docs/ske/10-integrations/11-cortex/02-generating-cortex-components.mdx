@@ -21,7 +21,7 @@ Cortex Controller will generate:
 * **Delete Workflow**: Deletes a given Resource Request of the Promise
 
 When a user uses the Create Workflow to make a Request of a Promise, the Workflow generates a yaml document for that request and writes it to the Cortex Git Repository. When the
-Platform Cluster converges on this and creates the Resource Request, the Cortex Controller creates an Entity in Cortex to correspond with the Request. This details the `spec` and
+Platform Cluster converges on this and creates the Resource Request, the Cortex Controller creates an Entity in Cortex to correspond with the request. This details the `spec` and
 `status` of the Resource Request in SKE.
 
 When a given Resource Request or Promise is deleted (either via the Workflow or the Kubernetes API), the corresponding objects in Cortex will also be deleted.
