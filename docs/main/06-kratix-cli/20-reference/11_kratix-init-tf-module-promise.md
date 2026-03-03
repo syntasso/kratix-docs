@@ -16,10 +16,8 @@ kratix init tf-module-promise [flags]
 ```bash
 # Initialize a Promise from a Terraform Module in git
 kratix init tf-module-promise vpc \
-
 --module-source "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v5.19.0" \
 --group syntasso.io \
-
 --kind VPC \
 --version v1alpha1
 
@@ -27,26 +25,32 @@ kratix init tf-module-promise vpc \
 kratix init tf-module-promise gateway \
 
 --module-source "git::https://github.com/GoogleCloudPlatform/cloud-foundation-fabric.git//modules/api-gateway?ref=v44.1.0" \
+--module-providers "versions.tf,providers.tf" \
 --group syntasso.io \
-
 --kind Gateway \
 --version v1alpha1
+# Initialize a Promise from a Terraform Module in Terraform registry with a dedicated repository
 
-# Initialize a Promise from a Terraform Module in Terraform registry
+kratix init tf-module-promise s3-bucket \
+--module-source "terraform-aws-modules/s3-bucket/aws" \
+--module-registry-version 3.7.0 \
+--group syntasso.io \
+--kind S3Bucket \
+--version v1alpha1
+
+# Initialize a Promise from a Terraform Module in Terraform registry in a monorepo
 kratix init tf-module-promise iam \
-
---module-source terraform-aws-modules/iam/aws \
+--module-source terraform-aws-modules/iam/aws//modules/iam-account \
 --module-registry-version 6.2.3 \
-
 --group syntasso.io \
 --kind IAM \
-
 --version v1alpha1
 ```
 
 ## Flags
 ```bash
 -h, --help                             help for tf-module-promise
+--module-providers strings             (Optional) the names of any files containing Terraform provider block; defaults to versions.tf and providers.tf
 -r, --module-registry-version string   (Optional) version of the Terraform module from a registry; only use when pulling modules from Terraform registry
 -s, --module-source source             Source of the terraform module.
 This can be a Git URL, Terraform registry path, or a local directory path.
