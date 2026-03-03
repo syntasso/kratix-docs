@@ -65,7 +65,7 @@ cortexIntegration:
   config:
     branch: main # any branch that exists; defaults to main
     integrationAlias: cortex # needs to match the integrationAlias for your GitOps integration
-    path: test-sub-dir # any dir within the repo, if not set, it will default to `kratix-resource-requests`
+    path: test-sub-dir # the directory within the Cortex repo, if not set, it will default to `kratix-resource-requests`
     provider: github # must be github
     repositoryName: syntasso/cortex-testing # needs to be an existing repo
     # auth options (choose exactly one):
@@ -153,7 +153,7 @@ spec:
   cortex:
     branch: main # any branch that exists; defaults to main
     integrationAlias: my-alias # needs to match the integrationAlias for your GitOps integration
-    path: test-sub-dir # any dir to be created in the workflow, if not set, it will default to `kratix-resource-requests`
+    path: test-sub-dir # the directory to be created in the Cortex repository, if not set, it will default to `kratix-resource-requests`
     provider: github # must be github
     repositoryName: syntasso/cortex-testing # needs to be an existing repo
   deploymentConfig:
