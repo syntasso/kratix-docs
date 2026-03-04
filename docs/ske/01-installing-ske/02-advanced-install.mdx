@@ -280,7 +280,7 @@ If you are not running SKE in an air-gapped environment, all you need to do is c
 ```bash
 kubectl create secret docker-registry syntasso-registry \
   --namespace=kratix-platform-system \
-  --docker-server=registry.syntasso.io \
+  --docker-server=ghcr.io \
   --docker-username=syntasso-pkg \
   --docker-password=<YOUR TOKEN>
 ```
@@ -390,7 +390,7 @@ successfully in the `default` namespace you would run the following:
 ```bash
 kubectl create secret docker-registry syntasso-registry \
   --namespace=default \
-  --docker-server=registry.syntasso.io \
+  --docker-server=ghcr.io \
   --docker-username=syntasso-pkg \
   --docker-password=<YOUR TOKEN>
 ```

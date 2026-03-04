@@ -44,7 +44,7 @@ The SKE GUI chart will, by default, use a secret named `syntasso-registry` in th
 ```bash
 kubectl create secret docker-registry YOUR-SECRET-NAME \
   --namespace=kratix-platform-system \
-  --docker-server=registry.syntasso.io \
+  --docker-server=ghcr.io \
   --docker-username=syntasso-pkg \
   --docker-password=<YOUR TOKEN>
 ```
@@ -67,7 +67,7 @@ You may want to manage the GUI image within your own environment either due to a
 To do this, you will need to set up image mirroring and configure the SKE GUI chart to pull image
 from your own registry.
 
-You must ensure that image `registry.syntasso.io/syntasso/ske-gui` is mirrored to your own image registry and tagged according to the version.
+You must ensure that image `ghcr.io/syntasso/ske-gui` is mirrored to your own image registry and tagged according to the version.
 
 You can then customise `imageRegistry.host` in your values file:
 

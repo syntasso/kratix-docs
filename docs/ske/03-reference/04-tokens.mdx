@@ -6,17 +6,17 @@ sidebar_label: Tokens
 
 Syntasso Kratix Enterprise (SKE) uses two credentials:
 
-- A registry token for pulling container images from `registry.syntasso.io`
+- A registry token for pulling container images from `ghcr.io/syntasso`
 - A GitHub token for accessing private release artifacts
 
 ## Syntasso registry token
 
-Use this token to authenticate as `syntasso-pkg` when pulling images from the private Syntasso registry (`registry.syntasso.io`).
+Use this token to authenticate as `syntasso-pkg` when pulling images from the private Syntasso registry (`ghcr.io/syntasso`).
 
 **Usage example:**
 
 ```bash
-docker login registry.syntasso.io \
+docker login ghcr.io \
   --username syntasso-pkg \
   --password "$SYNTASSO_TOKEN"
 ```
