@@ -34,6 +34,7 @@ data:
     workflows:
       jobOptions:
         defaultBackoffLimit: 6
+        podTTLSecondsAfterFinished: 3600
       defaultImagePullPolicy: IfNotPresent # can be `IfNotPresent`, `Always`, or `Never`
       defaultContainerSecurityContext:
         runAsNonRoot: false
@@ -83,6 +84,12 @@ Options for the Jobs that are created by Kratix Workflows.
 ##### defaultBackoffLimit
 
 The number of times to retry a failing workflow Job before marking it failed. This configures the [backoffLimit](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy) in Workflow Jobs. This will default to the Kubernetes Job default of 6.
+
+##### podTTLSecondsAfterFinished
+
+podTTLSecondsAfterFinished limits the lifetime of workflow Jobs Pods that has finished execution (either Complete or Failed).
+If this field is set, podTTLSecondsAfterFinished after the Job finishes, Kratix will automatically clean up its Pods.
+Value of podTTLSecondsAfterFinished has to be greater than 0, or else it's ignored.
 
 #### defaultImagePullPolicy
 
