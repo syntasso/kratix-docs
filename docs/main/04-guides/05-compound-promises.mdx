@@ -7,7 +7,8 @@ title: Compound Promises
 import PartialPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.md';
 ```
 
-Compound Promises are Promises that, in its Dependencies, contain other Promises. That ability allows Platform teams deliver entire stacks on demand, instead of simple databases or services.
+Compound Promises are Promises that depend on other Promises to deliver their promised service.
+The abiltiy to chain Promises together allows platform teams to deliver entire stacks on demand, while keeping each sub-Promise small and focused on its own service.
 
 **In this tutorial, you will**
 
@@ -16,9 +17,9 @@ Compound Promises are Promises that, in its Dependencies, contain other Promises
 
 <PartialPreRequisites />
 
-## Register the Platform as a Worker
+## Register the Platform as a Destination
 
-To install a Compound Promises, the first step is to register the platform cluster itself as an available Destination. That's because the Dependencies for the Compound Promises are Promises themselves, therefore they need to be scheduled to the platform cluster.
+Compound Promises work by scheduling their workflow outputs to the Platform cluster itself. For that to work, you will need to register the Platform cluster as a Destination, and run a GitOps Agent in the PLatform cluster listening to the State Store associated with the platform destination.
 
 Create a new [Destination document](../reference/destinations/intro) `platform-cluster.yaml` with the following contents:
 
@@ -43,9 +44,9 @@ Register the Destination:
 kubectl --context $PLATFORM apply --filename platform-cluster.yaml
 ```
 
-## Install and configure GitOps
+### Install and configure GitOps
 
-For the platform cluster to sync as a worker, you will need to install the GitOps toolkit in it. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
+Now that your Destination is registered, make sure to install the GitOps Agent into your Platform cluster. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
 
 ```bash
 cd /path/to/kratix
@@ -54,210 +55,154 @@ cd /path/to/kratix
 
 ## Install a Compound Promise
 
-You can now install a "Paved Path" Promise:
+In the [Kratix Marketplace](https://docs.kratix.io/marketplace) there's an example Compound Promise that provides App-as-a-Service. Go ahead and install that promise:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/refs/heads/main/app-as-a-service/promise.yaml
 ```
 
-This Promise is composed of a Knative and Postgres. Installing the Promise on the Platform will have the following side-effects:
-
-- Three Promises will be scheduled to the platform Destination: Paved Path, Knative and Postgres.
-- The Knative and Postgres's Dependencies will be scheduled to the worker Destination
-
-To verify the installation was successful, run:
+This Promise is composed of a NGINX and Postgres Promise. When you applied the promise, you should've seen a warning in the output saying the required promises are not available. In fact, the App promise itself should be marked as Unavailable:
 
 ```shell-session
 $ kubectl --context $PLATFORM get promises
-NAME                      STATUS      KIND              API VERSION                      VERSION
-knative                   Available   knative           marketplace.kratix.io/v1alpha1
-paved-path-demo-promise   Available   paved-path-demo   example.promise.syntasso.io/v1
-postgresql                Available   postgresql        marketplace.kratix.io/v1alpha1
+NAME   STATUS        KIND   API VERSION                VERSION
+app    Unavailable   app    marketplace.kratix.io/v1   v1.0.0-beta.1
+```
+
+You can make the promise available by installing the required promises:
+
+```bash
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/nginx-ingress/promise.yaml
+```
+
+Once these two Promises become available, you should see the App promise becoming available as well:
+
+```shell-session
+$ kubectl --context $PLATFORM get promises
+NAME            STATUS      KIND         API VERSION                      VERSION
+app             Available   app          marketplace.kratix.io/v1         v1.0.0-beta.1
+nginx-ingress   Available                                                 v1.0.0-beta.2
+postgresql      Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3
 
 $ kubectl --context $WORKER get pods
-NAME                                 READY   STATUS    RESTARTS   AGE
-postgres-operator-6c6dbd4459-kv5lw   1/1     Running   0          1h
+NAME                                              READY   STATUS    RESTARTS   AGE
+nginx-nginx-ingress-controller-6fd8bbcf49-fdnnz   1/1     Running   0          87s
+postgres-operator-578ff5d886-qcwz8                1/1     Running   0          87s
 
-$ kubectl --context $WORKER get crds | grep knative
-certificates.networking.internal.knative.dev          2022-11-25T12:24:20Z
-clusterdomainclaims.networking.internal.knative.dev   2022-11-25T12:24:20Z
-...
+$ kubectl --context $WORKER get crds | grep nginx
+dnsendpoints.externaldns.nginx.org           2026-03-04T11:39:57Z
+globalconfigurations.k8s.nginx.org           2026-03-04T11:39:57Z
+policies.k8s.nginx.org                       2026-03-04T11:39:57Z
+transportservers.k8s.nginx.org               2026-03-04T11:39:57Z
+virtualserverroutes.k8s.nginx.org            2026-03-04T11:39:57Z
+virtualservers.k8s.nginx.org                 2026-03-04T11:39:57Z
 ```
 
 ## Send a request for a Resource
 
-Platform users can now send requests for a new "Paved Path" Resource. That will create a new Knative Serving and a new Postgres database in the worker cluster:
+When a new resource request is created, the Compound Promise's Workflow is triggered. The Workflow will output a resource request for the Postgres Proimse, and produce the Ingress rules using the NGINX Ingress Controller. Create a resource request for the App-as-a-Service Promise:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix/main/samples/paved-path-demo/paved-path-demo-resource-request.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/app-as-a-service/resource-request.yaml
 ```
 
-You can see the Workflow for the Paved Path Promise running, which will in turn trigger the Knative and Postgres Workflows:
+You should see the Workflow for the App-as-a-Service Promise running, which will in turn trigger the Postgres Promise:
 
 ```shell-session
 $ kubectl --context $PLATFORM get pods
-NAMESPACE                NAME                                                     READY   STATUS      RESTARTS   AGE
-default                  configure-pipeline-knative-66cf1-g4kx7                   0/1     Completed   0          28s
-default                  configure-pipeline-paved-path-demo-promise-d8e6e-58grl   0/1     Completed   0          36s
-default                  configure-pipeline-postgresql-4e937-bnnpb                0/1     Completed   0          28s
+NAME                                                        READY   STATUS      RESTARTS   AGE
+kratix-app-todoer-resource-configure-b8535-hbq2b            0/1     Completed   0          1m
+kratix-postgresql-todoerdb-instance-configure-83965-d5gc8   0/1     Completed   0          1m
 ```
 
 Eventually, the resources will be ready to be used:
 
 ```shell-session
 $ kubectl --context $WORKER get pods -A
-NAMESPACE            NAME                          READY   STATUS      RESTARTS   AGE
-default              acid-minimal-cluster-0        1/1     Running     0          1h
-default              acid-minimal-cluster-1        1/1     Running     0          1h
-...
-knative-serving      activator-7d967fb5f4-4k4m5    1/1     Running     0          1h
-knative-serving      autoscaler-684b55df5f-7gw86   1/1     Running     0          1h
-knative-serving      controller-65866d54fc-zfh8d   1/1     Running     0          1h
-knative-serving      default-domain-dl972          0/1     Completed   0          1h
-...
+NAMESPACE            NAME                                              READY   STATUS    RESTARTS   AGE
+default              nginx-nginx-ingress-controller-6fd8bbcf49-fdnnz   1/1     Running   0          1m
+default              postgres-operator-578ff5d886-qcwz8                1/1     Running   0          1m
+default              todoer-58d6d695cb-2jsxg                           1/1     Running   0          1m
+default              todoerteam-todoerdb-postgresql-0                  1/1     Running   0          1m
 ```
 
-🎉 **Congratulations**: you have installed a Compound Promise and requested a Paved Path Resource!
+🎉 **Congratulations**: you have installed a Compound Promise and requested a App-as-a-Service Resource!
 
 ## A closer look in the Promise
 
-Start by noticing the `dependencies` for the Paved Path Promise:
+Start by noticing the `requiredPromises` in the Promise spec:
 
 ```yaml
+apiVersion: 
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: paved-path-demo-promise
+  name: app
 spec:
-  destinationSelectors:
-    - matchLabels:
-        environment: platform
-  dependencies:
-    #highlight-start
-    - apiVersion: platform.kratix.io/v1alpha1
-      kind: Promise
-      #highlight-end
-      metadata:
-        name: knative
-      spec:
-        destinationSelectors:
-          - matchLabels:
-              environment: dev
-        dependencies:
-        ... # remainder of the knative Promise
-    #highlight-start
-    - apiVersion: platform.kratix.io/v1alpha1
-      kind: Promise
-      #highlight-end
-      metadata:
-        name: postgres
-      spec:
-        destinationSelectors:
-          - matchLabels:
-              environment: dev
-        dependencies:
-        ... # remainder of the postgres Promise
-  ... # remainder of the paved path Promise...
+  # ...
+  #highlight-start
+  requiredPromises:
+    - name: postgresql
+      version: v1.0.0-beta.3
+    - name: nginx-ingress
+      version: v1.0.0-beta.2
+  #highlight-end
+  # ...
 ```
 
-Since Paved Path Promise Dependencies are Promises, and considering that Kratix and its
-CRDs (Custom Resource Definitions) are only installed in the platform cluster, you need to ensure the Dependencies are
-applied exclusively to the platform cluster.
+This is what tells Kratix that this Promise depends on the other Promises, on the particular version specified. When the required Promises are not available at install time, you will see the warning on the output. When the required Promises are available, the Promise will be marked as Available.
 
-That is controlled by the `destinationSelectors` key:
+Next, let's take a look at the `destinationSelectors` key:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: Promise
 metadata:
-  name: paved-path-demo-promise
+  name: app
 spec:
   #highlight-start
   destinationSelectors:
     - matchLabels:
         environment: platform
   #highlight-end
-  dependencies:
-    -  # knative Promise
-    -  # postgres Promise
-  ... # remainder of the paved path Promise
 ```
 
-The Paved Path Promise `destinationSelectors` is set to target clusters with `matchLabel`
-equal to `environment: platform`. In other words, that is telling Kratix to
-install the sub-Promises into Destinations with an `environment: platform` label.
+The App-as-a-Service Promise `destinationSelectors` is set to target clusters with `matchLabel`
+equal to `environment: platform`. In other words, that is telling Kratix to send any output of the workflows of the App Promise into Destinations with an `environment: platform` label.
 
 You may have noticed that, when registering the Platform Destination, the Destination definition
 included exactly that label. You can verify the applied labels with:
 
 ```shell-session
 $ kubectl --context $PLATFORM get destinations.platform.kratix.io --show-labels
-NAME                 AGE    LABELS
-#highlight-start
-platform-cluster     1hr    environment=platform
-#highlight-end
-worker-1             1hr    environment=dev
+NAME               STATESTOREKIND     STATESTORENAME   READY   LABELS
+platform-cluster   BucketStateStore   default          True    environment=platform
+worker-1           BucketStateStore   default          True    environment=dev
 ```
 
-However, the sub-Promises' Dependencies (i.e. the Knative and Postgres Dependencies) should not be installed
-in the platform cluster, but in the worker cluster. When you executed the quick start
-script, it registered the worker cluster as a Destination with a label `environment: dev` (as
-per output above). The `destinationSelectors` field in the sub-Promises are set to target
-those clusters:
+The sub-Promises themselves also have their own `destinationSelectors` key. For example, the Postgres Promise has the following selectors:
 
-```yaml showLineNumbers
-apiVersion: platform.kratix.io/v1alpha1
-kind: Promise
-metadata:
-  name: paved-path-demo-promise
-spec:
-  destinationSelectors:
-    - matchLabels:
-        environment: platform
-  dependencies:
-    - apiVersion: platform.kratix.io/v1alpha1
-      kind: Promise
-      metadata:
-        name: knative
-      spec:
-        #highlight-start
-        destinationSelectors:
-          - matchLabels:
-              environment: dev
-        #highlight-end
-        dependencies:
-        ... # remainder of the knative Promise
-    - apiVersion: platform.kratix.io/v1alpha1
-      kind: Promise
-      metadata:
-        name: postgres
-      spec:
-        #highlight-start
-        destinationSelectors:
-          - matchLabels:
-              environment: dev
-        #highlight-end
-        dependencies:
-        ... # remainder of the postgres Promise ...
-  ... # remainder of the paved path Promise...
+```shell-session
+$ kubectl --context $PLATFORM describe promise postgresql | grep "Destination Selectors" -A 2
+  Destination Selectors:
+    Match Labels:
+      Environment:  dev
 ```
 
-This configuration ensures the Knative CRDs and the Postgres Operator are installed
-exclusively in the worker. This is how, when installing the Paved Path Promise,
-Kratix knew it should install the sub-Promises in the platform cluster and the
-sub-Promises' Dependencies in the worker.
+This configuration ensures the Postgres Operator is installed exclusively in the Worker destination. This stops requests for Postgres resources being scheduled to the Platform destination accidentally.
 
 ## A closer look in the Workflow
 
-When a request for a Resource is created, the Paved Path Workflow is triggered. Usually, the
+When a request for a Resource is created, the App Promise Workflow is triggered. Usually, the
 output of the Workflow is a set of Kubernetes Resources that need to be created. For
 Compound Promises, that's usually a set of requests for other promised Resources to be applied in the Platform itself.
 
-The Paved Path Promise is a very basic example, but you can see that's exactly what the
-Workflow Pipeline is doing in its
-[Dockerfile](https://github.com/syntasso/kratix/blob/main/samples/paved-path-demo/configure-pipeline/Dockerfile#L6-L11).
+The App Promise Workflow is a very basic example, but you can see that's exactly what the
+Workflow Pipeline is doing by checking the pipeline code [here](https://github.com/syntasso/kratix-marketplace/blob/main/app-as-a-service/internal/configure-pipeline/scripts/main.go). The stage is creating a request for Postgres, and generating a set of resources to deploy the application, including the Ingress rules using the NGINX Ingress Controller.
 
 ## 🎉 Congratulations
 
 ✅ &nbsp; You have just installed and used your first Compound Promise. <br />
-👉 &nbsp; Let's see [where to go from here](./whats-next).
+
+If you want to learn more about Compound Promises, you can check the [Compound Promise Workshop](/workshop/writing-a-promise/compound-promise), or check out this [blog post](/blog/compound-promises) for a more detailed explanation.
