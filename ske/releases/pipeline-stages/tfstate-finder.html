@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.123df288.css">
-<script src="/assets/js/runtime~main.9f90970d.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.a8c8e6b4.js" defer="defer"></script>
 <script src="/assets/js/main.be89c2b4.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -32,8 +32,10 @@
 Terraform state of a given resource. It is used to find the Terraform state of a
 given resource and write it to the status of the object.</p>
 <p>The Pipeline Stage is available as a Container image at:</p>
-<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">registry.syntasso.io/syntasso/ske-tfstate-finder:VERSION</span><br></span></code></pre></div></div>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">ghcr.io/syntasso/ske-tfstate-finder:VERSION</span><br></span></code></pre></div></div>
 <p>Check the release notes below for information on each available version.</p>
+<div class="theme-admonition theme-admonition-important admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>important</div><div class="admonitionContent_BuS1"><p>Please note that as of v0.8.0, the tf-state-finder image will be accessible at ghcr.io not registry.syntasso.io.</p><p>Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, any Promises using the tf-state-finder
+will fail to pull the image within their Workflows</p></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="release-notes">Release Notes<a href="#release-notes" class="hash-link" aria-label="Direct link to Release Notes" title="Direct link to Release Notes" translate="no">​</a></h2>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v074-2026-02-18"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.4/" target="_blank" rel="noopener noreferrer" class="">v0.7.4</a> (2026-02-18)<a href="#v074-2026-02-18" class="hash-link" aria-label="Direct link to v074-2026-02-18" title="Direct link to v074-2026-02-18" translate="no">​</a></h3>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="bug-fixes">Bug Fixes<a href="#bug-fixes" class="hash-link" aria-label="Direct link to Bug Fixes" title="Direct link to Bug Fixes" translate="no">​</a></h4>
