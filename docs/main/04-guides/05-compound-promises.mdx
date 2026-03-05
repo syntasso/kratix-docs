@@ -19,9 +19,9 @@ The abiltiy to chain Promises together allows platform teams to deliver entire s
 
 ## Register the Platform as a Destination
 
-Compound Promises work by scheduling their workflow outputs to the Platform cluster itself. For that to work, you will need to register the Platform cluster as a Destination, and run a GitOps Agent in the PLatform cluster listening to the State Store associated with the platform destination.
+Compound Promises work by scheduling their workflow outputs to the Platform cluster itself. For that to work, you will need to register the Platform cluster as a Destination, and run a GitOps Agent in the Platform cluster listening to the State Store associated with the platform destination.
 
-Create a new [Destination document](../reference/destinations/intro) `platform-cluster.yaml` with the following contents:
+Create a new [Destination document](../reference/destinations/intro) - `platform-cluster.yaml` - with the following contents:
 
 ```yaml title="platform-cluster.yaml"
 apiVersion: platform.kratix.io/v1alpha1
@@ -55,7 +55,7 @@ cd /path/to/kratix
 
 ## Install a Compound Promise
 
-In the [Kratix Marketplace](https://docs.kratix.io/marketplace) there's an example Compound Promise that provides App-as-a-Service. Go ahead and install that promise:
+In the [Kratix Marketplace](https://docs.kratix.io/marketplace) there's an example Compound Promise that provides Apps-as-a-Service. Go ahead and install that promise:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/refs/heads/main/app-as-a-service/promise.yaml
@@ -101,7 +101,7 @@ virtualservers.k8s.nginx.org                 2026-03-04T11:39:57Z
 
 ## Send a request for a Resource
 
-When a new resource request is created, the Compound Promise's Workflow is triggered. The Workflow will output a resource request for the Postgres Proimse, and produce the Ingress rules using the NGINX Ingress Controller. Create a resource request for the App-as-a-Service Promise:
+When a new resource request is created, the Compound Promise's Workflow is triggered. The Workflow will output a resource request for the Postgres Promise, and produce the Ingress rules using the NGINX Ingress Controller. Create a resource request for the App-as-a-Service Promise:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/app-as-a-service/resource-request.yaml
@@ -168,7 +168,7 @@ spec:
   #highlight-end
 ```
 
-The App-as-a-Service Promise `destinationSelectors` is set to target clusters with `matchLabel`
+The App-as-a-Service Promise `destinationSelectors` are set to target clusters with `matchLabel`
 equal to `environment: platform`. In other words, that is telling Kratix to send any output of the workflows of the App Promise into Destinations with an `environment: platform` label.
 
 You may have noticed that, when registering the Platform Destination, the Destination definition
