@@ -66,7 +66,7 @@ cortexIntegration:
     branch: main # any branch that exists; defaults to main
     integrationAlias: cortex # needs to match the integrationAlias for your GitOps integration
     path: test-sub-dir # the directory within the Cortex repo, if not set, it will default to `kratix-resource-requests`
-    provider: github # must be github
+    provider: github # must be github or gitlab
     repositoryName: syntasso/cortex-testing # needs to be an existing repo
     # auth options (choose exactly one):
     # 1) set both token and url and this chart creates Secret `cortex-credentials`
