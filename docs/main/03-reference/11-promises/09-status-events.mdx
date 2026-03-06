@@ -60,22 +60,22 @@ kubectl describe promise <name>
 
 ## Common Promise Status Fields
 
-- `apiVersion` – Shows the API version that this Promise is serving requests at.
-- `kind` – Shows the Kind that this Promise is serving.
-- `lastAvailableTime` – When this Promise becomes available.
-- `status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
+- `kratix.apiVersion` – Shows the API version that this Promise is serving requests at.
+- `kratix.kind` – Shows the Kind that this Promise is serving.
+- `kratix.lastAvailableTime` – When this Promise becomes available.
+- `kratix.status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
 - `workflows` - The number of Resource configure workflow pipelines
 - `workflowsSucceeded` - The number of Resource configure workflow pipelines that have completed successfully
 - `workflowsFailed`- The number of Resource configure workflow pipelines that have failed
 
 ```yaml
 status:
-  apiVersion: test.kratix.io/v1alpha1
-  kind: Redis
-  lastAvailableTime: "2025-06-23T15:34:32Z"
-  status: Available
-  conditions:
-  ...
+  kratix:
+    apiVersion: marketplace.kratix.io/v1alpha1
+    kind: redis
+    lastAvailableTime: "2026-03-06T16:02:26Z"
+    status: Available
+    version: v0.1.0
 ```
 
 ## Events
