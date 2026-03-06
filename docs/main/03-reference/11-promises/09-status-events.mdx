@@ -64,6 +64,7 @@ kubectl describe promise <name>
 - `kind` – Shows the Kind that this Promise is serving.
 - `lastAvailableTime` – When this Promise becomes available.
 - `status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
+- `message` - Message set by Promise configure workflow.
 - `workflows` - The number of Resource configure workflow pipelines
 - `workflowsSucceeded` - The number of Resource configure workflow pipelines that have completed successfully
 - `workflowsFailed`- The number of Resource configure workflow pipelines that have failed
@@ -74,6 +75,7 @@ status:
   kind: Redis
   lastAvailableTime: "2025-06-23T15:34:32Z"
   status: Available
+  message: Configuration updated
   conditions:
   ...
 ```

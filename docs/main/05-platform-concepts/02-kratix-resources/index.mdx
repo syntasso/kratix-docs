@@ -74,7 +74,7 @@ Once a Job is created, Kubernetes creates an associated [Pod](https://kubernetes
 
 * The `reader`: this container is responsible for injecting the Resource object into the `/kratix/input` directory.
 * The `work-creator`: this container is responsible for creating the Work associated with the Workflow. See more about the Work in the next section.
-* The `status-writer`: this container uses the `/kratix/metadata/status.yaml` file to update the Resource status.
+* The `status-writer`: this container uses the `/kratix/metadata/status.yaml` file to update status. For Promise workflows, only `status.message` is updated from this file.
 
 :::info
 
