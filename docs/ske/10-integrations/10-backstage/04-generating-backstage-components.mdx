@@ -66,7 +66,9 @@ backstageIntegration:
         cpu: "100m"
 ```
 
-#### Image registry for Air-gapped Environments
+#### Deploying Within Air-gapped Environments
+
+##### Mirroring the Backstage Controller Images
 
 You may want to manage the Backstage Controller images within your own environment either
 due to air-gapped requirements or other security measures.
@@ -81,6 +83,23 @@ ghcr.io/syntasso/backstage-controller
 ```
 
 As is the case for the SKE Operator and SKE Platform images, the Backstage Controller will use registry configured via the `imageRegistry.host` in the Helm Chart when pulling images. If you have changed the name of the Backstage Controller image in your internal registry, ensure that the `imageRegistry.backstageControllerImage.name` is updated to reflect this.
+
+##### Mirroring the Cortex Release Manifests
+
+Like the SKE distribution, you will need to ensure that the Backstage Controller deployment manifests are available the [SKE Release Storage](/ske/installing-ske/air-gapped#ske-release-storage); the S3-compatible bucket or Git repository that is accessible from the Platform Cluster.
+
+You need to ensure that the manifests are downloaded to the SKE Release Storage and that the directory structure matches the [Syntasso Enterprise Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/). For instance:
+
+```
+ske
+  v0.43.0
+    ske-distribution.yaml
+    release-metadata.json
+
+ske-cortex-controller
+  v0.2.2
+    ske-cortex-controller-distribution.yaml
+```
 
 #### Deploy the Backstage Controller
 

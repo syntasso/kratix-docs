@@ -87,7 +87,9 @@ cortexIntegration:
         cpu: "100m"
 ```
 
-#### Image registry for Air-gapped Environments
+#### Deploying Within Air-gapped Environments
+
+##### Mirroring the Cortex Controller Images
 
 You may want to manage the Cortex Controller images within your own environment either due to air-gapped requirements or other security measures.
 
@@ -99,8 +101,25 @@ You must ensure that the Cortex Controller image is mirrored in your own image r
 ghcr.io/syntasso/cortex-controller
 ```
 
-As is the case for the SKE Operator and SKE Platform images, the Cortex Controller will use the registry configured via the `imageRegistry.host` in the Helm Chart when pulling images.
+As is the case for the SKE Operator and SKE Platform images, the Cortex Controller will use the registry configured via the `imageRegistry.host` in the SKE Operator Helm Chart when pulling images.
 If you have changed the name of the Cortex Controller image in your internal registry, ensure that the `imageRegistry.cortexControllerImage.name` is updated to reflect this.
+
+##### Mirroring the Cortex Release Manifests
+
+Like the SKE distribution, you will need to ensure that the Cortex Controller deployment manifests are available the [SKE Release Storage](/ske/installing-ske/air-gapped#ske-release-storage); the S3-compatible bucket or Git repository that is accessible from the Platform Cluster.
+
+You need to ensure that the manifests are downloaded to the SKE Release Storage and that the directory structure matches the [Syntasso Enterprise Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/). For instance:
+
+```
+ske
+  v0.43.0
+    ske-distribution.yaml
+    release-metadata.json
+
+backstage-controller
+  v0.5.5
+    backstage-controller-distribution.yaml
+```
 
 #### Deploy the Cortex Controller
 

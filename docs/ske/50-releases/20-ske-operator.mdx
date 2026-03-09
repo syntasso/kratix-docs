@@ -6,8 +6,7 @@ sidebar_label: SKE-Operator
 
 ## Overview
 
-The SKE-Operator is the operator for managing the installation and upgrading of
-SKE. For installation documentation see [here](/ske/installing-ske/intro).
+The SKE-Operator is the operator for managing the installation and upgrading of SKE. For installation documentation see [here](/ske/installing-ske/intro).
 
 The release manifest is available at:
 
@@ -21,17 +20,33 @@ The helm chart is available at:
 http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/
 ```
 
-To see which version of the helm chart corresponds to which version of the
-SKE-Operator, please refer to the release notes below.
+To see which version of the helm chart corresponds to which version of the SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
 
-:::important
+:::important `releaseStorage.path` deprecated
+Please note that the `releaseStorage.path` is deprecated, please remove this from your Helm values and instead use `releaseStorage.releasesPath` to define the
+top-level directory containing the SKE release artefacts.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull the images and the ske-operator pod will fail
+to start.
+:::
+
+:::important Updated SKE Registry
 Please note that as of v0.20.0 of the SKE Operator (Helm Chart v0.58.0), the SKE images will be accessible at ghcr.io not registry.syntasso.io.
 
-Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
-the images and the ske-operator pod will fail to start.
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull the images and the ske-operator pod will fail
+to start.
 :::
+
+### [v0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.21.0/) (2026-03-09)
+
+Released in Helm Chart version [version 0.60.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.59.0/)
+
+#### Feature
+
+* Introduce the `releasesPath` to configure the top-level directory in the SKE Release Storage containing the release artefacts. The `releaseStorage.path` key will soon be
+  deprecated.
 
 ### [v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.20.0/) (2026-03-03)
 
@@ -71,7 +86,8 @@ Released in Helm Chart version [version 0.52.0](http://syntasso-enterprise-relea
 
 #### Features
 
-* This release adds the functionality to [deploy the Backstage Controller](/ske/integrations/backstage/generating-backstage-components#installing-the-backstage-controller) via the SKE Operator.
+* This release adds the functionality to [deploy the Backstage Controller](/ske/integrations/backstage/generating-backstage-components#installing-the-backstage-controller) via the
+  SKE Operator.
 
 ### [v0.18.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.18.3/) (2025-12-16)
 
@@ -91,7 +107,8 @@ Released in Helm Chart version [version 0.50.0](http://syntasso-enterprise-relea
 
 #### Known issues
 
-* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE Operator. SKE Operator is not impacted by the vulnerability. The upstream dependency will be updated in the next release.
+* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE Operator. SKE
+  Operator is not impacted by the vulnerability. The upstream dependency will be updated in the next release.
 
 ### [v0.18.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.18.1/) (2025-10-14)
 
@@ -103,7 +120,8 @@ Released in Helm Chart version [version 0.48.0](http://syntasso-enterprise-relea
 
 #### Known issues
 
-* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE Operator. SKE Operator is not impacted by the vulnerability. We are waiting for an upstream dependency release to update in the next version.
+* There is a known [security vulnerability](https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891) associated with an indirect dependency of SKE Operator. SKE
+  Operator is not impacted by the vulnerability. We are waiting for an upstream dependency release to update in the next version.
 
 ### [v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.17.0/) (2025-10-07)
 
@@ -125,8 +143,8 @@ Released in Helm Chart version [version 0.46.0](http://syntasso-enterprise-relea
 
 #### Features
 
-* This release consolidates the images that are required when deploying SKE with the SKE Operator Helm Chart. The operator image can be used to run the
-Helm Chart's post-install jobs, eliminating the dependency on the `kratix-pipeline-utility` image.
+* This release consolidates the images that are required when deploying SKE with the SKE Operator Helm Chart. The operator image can be used to run the Helm Chart's post-install
+jobs, eliminating the dependency on the `kratix-pipeline-utility` image.
 
 ### [v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.15.0/) (2025-08-06)
 
@@ -142,10 +160,8 @@ Released in Helm Chart version [version 0.43.0](http://syntasso-enterprise-relea
 
 #### Features
 
-* The SKE Operator will now iterate over the available versions when upgrading
-  SKE. For example, if your installation is on version `v0.29.0`, and you set
-  the version to `v0.31.0`, the SKE Operator will first upgrade to `v0.30.0` and
-  then to `v0.31.0`. This ensures a smooth upgrade process.
+* The SKE Operator will now iterate over the available versions when upgrading SKE. For example, if your installation is on version `v0.29.0`, and you set the version to `v0.31.0`,
+  the SKE Operator will first upgrade to `v0.30.0` and then to `v0.31.0`. This ensures a smooth upgrade process.
 * Resource requests and limits of CPU and memory can now be configured for the SKE deployment.
 
 ### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.13.0/) (2025-07-11)
@@ -154,22 +170,22 @@ Released in Helm Chart version [version 0.42.0](http://syntasso-enterprise-relea
 
 #### Features
 
-* In rare occasions where a release version is not available, the SKE Operator
-can now handle upgrades to the next appropriate version. The version is
-determined by the `release-metadata.json` file within the release artefact.
+* In rare occasions where a release version is not available, the SKE Operator can now handle upgrades to the next appropriate version. The version is determined by the
+`release-metadata.json` file within the release artefact.
 
 ### Helm Chart [v0.42.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.42.0/)(2025-07-11)
 
 #### Features
 
-* Resource limits, nodeSelector, tolerations and affinities can now be configured for the SKE Operator deployment. Check [the values.yaml](https://github.com/syntasso/helm-charts/blob/75fba8637ac152290997ec1691aac267e5067983/ske-operator/values.yaml#L74-L85) for more information.
+* Resource limits, nodeSelector, tolerations and affinities can now be configured for the SKE Operator deployment. Check [the
+  values.yaml](https://github.com/syntasso/helm-charts/blob/75fba8637ac152290997ec1691aac267e5067983/ske-operator/values.yaml#L74-L85) for more information.
 
 ### Helm Chart [v0.39.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.39.0/) (2025-05-25)
 
 ##### Features
 
-* Deleting the SKE Operator by uninstalling the Helm Chart will no longer result in the deletion of your SKE instances, CRDs or the registry secret. To
-allow for the deletion of these resources when uninstalling the SKE Operator via the chart, the value `global.skeDeployment.deleteOnUninstall` has been introduced.
+* Deleting the SKE Operator by uninstalling the Helm Chart will no longer result in the deletion of your SKE instances, CRDs or the registry secret. To allow for the deletion of
+these resources when uninstalling the SKE Operator via the chart, the value `global.skeDeployment.deleteOnUninstall` has been introduced.
 
 ### [v0.12.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.12.1/) (2025-05-11)
 
@@ -228,10 +244,9 @@ Deploys SKE Operator version [v0.6.0](http://syntasso-enterprise-releases.s3-web
 
 #### Features
 
-* This chart provides support for provisioning additional SKE and Kubernetes resources alongside the SKE Operator and SKE Deployment. With the
-`skeDeployment.additionalResources`, property, users can specify any additional resources that rely on the existence of a SKE Deployment
-(e.g. Destinations, BucketStateStore) whilst the higher level `additionalResources` property can be used to specify any other Kubernetes resources
-required (e.g. Secrets).
+* This chart provides support for provisioning additional SKE and Kubernetes resources alongside the SKE Operator and SKE Deployment. With the `skeDeployment.additionalResources`,
+property, users can specify any additional resources that rely on the existence of a SKE Deployment (e.g. Destinations, BucketStateStore) whilst the higher level
+`additionalResources` property can be used to specify any other Kubernetes resources required (e.g. Secrets).
 
 ### [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.6.0/) (2024-11-21)
 
@@ -245,19 +260,15 @@ Released in Helm Chart [version 0.25.0](http://syntasso-enterprise-releases.s3-w
 
 Released in Helm Chart [version 0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.22.0/)
 
-:::warning
-This version of the Helm chart introduces a **breaking change** in how it manages
-the Kratix CRD. To ensure a smooth upgrade, you must run the following manual
-commands before upgrading:
+:::warning This version of the Helm chart introduces a **breaking change** in how it manages the Kratix CRD. To ensure a smooth upgrade, you must run the following manual commands
+before upgrading:
 
 ```bash
 kubectl --context=$PLATFORM label crd kratixes.platform.syntasso.io app.kubernetes.io/managed-by=Helm
 kubectl --context=$PLATFORM annotate crd kratixes.platform.syntasso.io meta.helm.sh/release-name=ske-operator meta.helm.sh/release-namespace=kratix-platform-system
 ```
 
-These steps are required to align the CRD management with the new Helm chart
-structure. Failing to perform this migration will result in upgrade failures.
-:::
+These steps are required to align the CRD management with the new Helm chart structure. Failing to perform this migration will result in upgrade failures. :::
 
 * Support installing SKE Operator and SKE without cert-manager
 
