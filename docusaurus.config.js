@@ -137,6 +137,19 @@ const config = {
          * Path to data on filesystem relative to site dir.
          */
         path: './ske-releases-feed',
+        showReadingTime: false,
+        feedOptions: {
+          type: 'all',
+          copyright: `Copyright © ${new Date().getFullYear()} Syntasso Ltd`,
+          createFeedItems: async (params) => {
+            const {blogPosts, defaultCreateFeedItems, ...rest} = params;
+            return defaultCreateFeedItems({
+              // keep only the 10 most recent blog posts in the feed
+              blogPosts: blogPosts.filter((item, index) => index < 40),
+              ...rest,
+            });
+          },
+        },
       },
     ],
   ],
