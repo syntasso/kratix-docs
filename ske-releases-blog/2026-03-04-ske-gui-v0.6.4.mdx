@@ -1,0 +1,17 @@
+---
+slug: ske-gui-v0.6.4
+title: "SKE GUI v0.6.4"
+description: New release of SKE GUI v0.6.4
+tags: [ske-gui]
+---
+
+Released in Helm Chart version [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui-helm-chart/0.14.0/)
+
+Includes a fix that stops the Resource list view from crashing when many Promises and Resources are created and deleted at the same time.
+
+:::important
+Please note that as of v0.6.3, the SKE GUI image will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
+the image and the ske-gui pod will fail to start.
+:::
