@@ -121,6 +121,24 @@ const config = {
         ],
       },
     ],
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        /**
+         * Required for any multi-instance plugin
+         */
+        id: 'ske-releases',
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: '/ske/ske-releases-feed',
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: './docs/ske/50-releases/releases-feed',
+      },
+    ],
   ],
 
   scripts: [
