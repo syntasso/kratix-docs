@@ -132,12 +132,13 @@ const config = {
          * URL route for the blog section of your site.
          * *DO NOT* include a trailing slash.
          */
-        routeBasePath: '/ske/ske-releases-feed',
+        routeBasePath: '/ske/ske-releases-blog',
         /**
          * Path to data on filesystem relative to site dir.
          */
-        path: './ske-releases-feed',
+        path: './ske-releases-blog',
         showReadingTime: false,
+        onUntruncatedBlogPosts: 'ignore',
         feedOptions: {
           type: 'all',
           copyright: `Copyright © ${new Date().getFullYear()} Syntasso Ltd`,
