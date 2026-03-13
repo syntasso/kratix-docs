@@ -136,7 +136,7 @@ const config = {
         /**
          * Path to data on filesystem relative to site dir.
          */
-        path: './docs/ske/50-releases/releases-feed',
+        path: './ske-releases-feed',
       },
     ],
   ],
