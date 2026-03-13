@@ -74,6 +74,13 @@ spec:
   jobOptions:
     # Number of times Kubernetes retries a failing workflow Job before marking it failed.
     backoffLimit: 4
+  nodeSelector: # Optional; node labels for scheduling the pipeline Job Pod
+    disk: ssd
+  tolerations: # Optional; tolerations for scheduling on tainted nodes
+    - key: "dedicated"
+      operator: "Equal"
+      value: "workflows"
+      effect: "NoSchedule"
   volumes:
     - name: myvolume # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:

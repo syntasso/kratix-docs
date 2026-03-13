@@ -19,7 +19,7 @@ spec:
   bucketName: kratix
   # The endpoint of the bucket provider: required
   endpoint: s3.eu-west-2.amazonaws.com
-  # Skip TLS veritfication: optional, defaults to false
+  # Skip TLS verification: optional, defaults to false
   insecure: false
   # The Top-level path in the Bucket repository to write to: optional
   path: destinations/

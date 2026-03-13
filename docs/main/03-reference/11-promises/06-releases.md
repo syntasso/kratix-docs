@@ -48,7 +48,7 @@ metadata:
 spec:
   version: # The version of the Promise found at the sourceRef
   sourceRef:
-    type: # Source type: http, git, etc.
+    type: http # Only http is supported
     # Source specific fields
 ```
 
@@ -62,11 +62,11 @@ the first reconciliation loop.
 
 ## Source Reference types
 
-Currently, the following `sourceRef.types` are supported:
+Currently, only the `http` `sourceRef.type` is supported.
 
 ### HTTP
 
-The HTTP `sourceRef.type` is used to fetch a Promise from a HTTP endpoint. The
+The HTTP `sourceRef.type` is used to fetch a Promise from an HTTP endpoint. The
 `sourceRef.url` must be set to a valid URL containing a single Promise definition.
 
 The below example shows a Promise Release using the HTTP `sourceRef.type`:
