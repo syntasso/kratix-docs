@@ -24,7 +24,7 @@ data:
   # The condition of the Health Check
   # Can be unknown, ready, unhealthy, healthy or degraded
   state: ready
-  # The timestamp of the last time the Heath Check was executed
+  # The timestamp of the last time the Health Check was executed
   lastRun: 1531958400
   # Optional: any additional details
   details:
