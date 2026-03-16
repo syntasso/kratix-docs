@@ -78,6 +78,35 @@ status:
     version: v0.1.0
 ```
 
+## Pipeline Execution Status Fields
+
+Kratix executes Configure Workflow pipelines in order and records the state of each pipeline under `status.kratix.workflows.pipelines`.
+
+For example, if a Promise has three configure pipelines and the third pipeline is currently running, the status could look like:
+
+```yaml
+status:
+  kratix:
+    workflows:
+      lastSuccessfulConfigureWorkflowTime: "2026-03-16T11:52:06Z"
+      pipelines:
+        - name: pipeline0
+          phase: Succeeded
+          lastTransitionTime: "2026-03-16T11:53:04Z"
+        - name: pipeline1
+          phase: Succeeded
+          lastTransitionTime: "2026-03-16T11:53:05Z"
+        - name: pipeline2
+          phase: Running
+          lastTransitionTime: "2026-03-16T11:53:57Z"
+```
+
+Each pipeline can be in one of these phases: `Pending`, `Running`, `Succeeded`, or `Failed`.
+
+`lastTransitionTime` is updated whenever the pipeline phase changes. If a pipeline enters the `Failed` phase, Kratix stops executing the remaining pipelines in that workflow. When a new configure reconciliation starts, Kratix resets all pipeline phases to `Pending` before running the workflow again.
+
+For more detail about a failed pipeline, inspect the events on the Promise and the logs of the failed pipeline Job.
+
 ## Events
 
 Events record important moments in the Promise lifecycle such as when requirements are installed,

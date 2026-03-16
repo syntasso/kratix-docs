@@ -46,9 +46,38 @@ status:
 ## Common Resource Status Fields
 
 - `kratix.workflows.lastSuccessfulConfigureWorkflowTime` – The time of the last successful Configure workflow run
-- `workflows` - The number of Promise configure workflow pipelines
-- `workflowsSucceeded` - The number of Promise configure workflow pipelines that have completed successfully
-- `workflowsFailed`- The number of Promise configure workflow pipelines that have failed
+- `workflows` - The number of Resource configure workflow pipelines
+- `workflowsSucceeded` - The number of Resource configure workflow pipelines that have completed successfully
+- `workflowsFailed`- The number of Resource configure workflow pipelines that have failed
+
+## Pipeline Execution Status Fields
+
+Kratix executes Resource Configure Workflow pipelines in order and records the state of each pipeline under `status.kratix.workflows.pipelines`.
+
+For example, if a Resource Configure Workflow has three pipelines and the second pipeline is currently running, the status could look like:
+
+```yaml
+status:
+  kratix:
+    workflows:
+      lastSuccessfulConfigureWorkflowTime: "2026-03-16T11:52:06Z"
+      pipelines:
+        - name: resource-pipeline0
+          phase: Succeeded
+          lastTransitionTime: "2026-03-16T11:53:04Z"
+        - name: resource-pipeline1
+          phase: Running
+          lastTransitionTime: "2026-03-16T11:53:05Z"
+        - name: resource-pipeline2
+          phase: Pending
+          lastTransitionTime: "2026-03-16T11:52:57Z"
+```
+
+Each pipeline can be in one of these phases: `Pending`, `Running`, `Succeeded`, or `Failed`.
+
+`lastTransitionTime` is updated whenever the pipeline phase changes. If a pipeline enters the `Failed` phase, Kratix stops executing the remaining pipelines in that workflow. When a new configure reconciliation starts, Kratix resets all pipeline phases to `Pending` before running the workflow again.
+
+For more detail about a failed pipeline, inspect the events on the resource and the logs of the failed pipeline Job.
 
 ## Events
 
