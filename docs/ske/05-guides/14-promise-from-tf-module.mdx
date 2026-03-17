@@ -37,6 +37,7 @@ kratix init tf-module-promise s3 \
     --group example.syntasso.io \
     --kind S3 \
     --version v1alpha1 \
+    --generate-outputs \
     --dir s3-promise
 ```
 
@@ -74,8 +75,8 @@ variables](https://github.com/terraform-aws-modules/terraform-aws-s3-bucket/blob
 properties in the API. Take the `create_bucket` variable for instance:
 
 ```
-variable "create" {
-  description = "Whether to create an instance"
+variable "create_bucket" {
+  description = "Controls if S3 bucket should be created"
   type        = bool
   default     = true
 }
@@ -131,11 +132,13 @@ You'll find that a `resource.configure` workflow has also been added to the `pro
             - env:
               - name: MODULE_SOURCE
                 value: git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0
-              image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.4.0
-              name: terraform-generate
+              - name: MODULE_OUTPUT_NAMES
+                value: s3_bucket_id,s3_bucket_arn,s3_bucket_bucket_domain_name,s3_bucket_bucket_regional_domain_name,s3_bucket_hosted_zone_id,s3_bucket_lifecycle_configuration_rules,s3_bucket_policy,s3_bucket_region,s3_bucket_website_endpoint,s3_bucket_website_domain,s3_directory_bucket_name,s3_directory_bucket_arn,aws_s3_bucket_versioning_status,s3_bucket_tags
+            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.5.0
+            name: terraform-generate
 ```
 
-The `ghcr.io/syntasso/kratix-cli/terraform-generate:v0.4.0` image takes the inputs provided via the API and uses these to generate a
+The `ghcr.io/syntasso/kratix-cli/terraform-generate:v0.5.0` image takes the inputs provided via the API and uses these to generate a
 Terraform configuration that honours these inputs.
 
 ## The Promise Workflow
@@ -167,13 +170,24 @@ You'll also see that a new workflow directory has been created at `workflows/pro
 This image will ensure that the contents of the `resources` directory are copied to the `/kratix/output` directory so it can be scheduled to a
 Destination.
 
+The S3 Module requires the region to be configured in the Provider block. We can add this to the `versions.tf` file:
+
+```bash
+cat <<EOF >> workflows/promise/configure/dependencies/add-tf-dependencies/resources/versions.tf
+
+provider "aws" {
+  region = "us-east-1"
+}
+EOF
+```
+
 To ensure this new image can be used within the Promise, build the `my-registry.io/my-org/kratix/terraform-dependencies:v0.0.1` image and make it available
 to the cluster. If you are using kind, you can load it to your cluster, otherwise you will need to push it to a valid image store you have push access to which
 may affect the name.
 
 ```yaml
-docker build -t my-registry.io/my-org/kratix/terraform-dependencies:v0.0.1:v0.1.0 workflows/promise/configure/dependencies/add-tf-dependencies
-kind load docker-image my-registry.io/my-org/kratix/terraform-dependencies:v0.0.1:v0.1.0 -n platform
+docker build -t my-registry.io/my-org/kratix/terraform-dependencies:v0.0.1 workflows/promise/configure/dependencies/add-tf-dependencies
+kind load docker-image my-registry.io/my-org/kratix/terraform-dependencies:v0.0.1 -n platform
 ```
 
 ## Validating the generated resources
@@ -197,11 +211,10 @@ import TerraformProvider from "./terraform-provider.png"
 
 Ensure the Promise is Available with:
 
-```
+```shell-session
 $ kubectl get promise s3
-
-NAME   STATUS      KIND   API VERSION                    VERSION
-s3     Available   S3     example.syntasso.io/v1alpha1   v0.0.1
+NAME   STATUS      KIND   API VERSION                    VERSION   MESSAGE
+s3     Available   S3     example.syntasso.io/v1alpha1   v0.0.1    Promise configured
 ```
 
 With the Promise installed, we can make a request of it. Update the `example-resource.yaml` to give the bucket a region:
@@ -236,6 +249,18 @@ In the git repository you set up for your Destination, you should eventually see
       "type": "Directory",
       "versioning": {}
     }
+  },
+  "output": {
+    "s3_default_example-s3_aws_s3_bucket_versioning_status": {
+      "value": "${module.s3_default_example-s3.aws_s3_bucket_versioning_status}"
+    },
+    "s3_default_example-s3_s3_bucket_arn": {
+      "value": "${module.s3_default_example-s3.s3_bucket_arn}"
+    },
+    "s3_default_example-s3_s3_bucket_bucket_domain_name": {
+      "value": "${module.s3_default_example-s3.s3_bucket_bucket_domain_name}"
+    }
+    ...
   }
 }
 ```
@@ -268,49 +293,15 @@ We can make life easier for both users and ourselves by surfacing this in the st
 
 ## Surfacing Terraform outputs
 
-Lets take a look at the possible outputs in the [S3 Bucket Module](https://github.com/terraform-aws-modules/terraform-aws-s3-bucket), some useful information that we could surface is the `s3_bucket_id` which will give
-us the bucket name as well as the `s3_bucket_bucket_regional_domain_name`.
+You may have noticed we included the `--generate-outputs` flag when initializing the Promise, and that the generated Resource Configure container has an environment variable `MODULE_OUTPUT_NAMES` that lists the outputs we want to surface as a result of this run. The list is automatically generated based on the `outputs.tf` file in the module.
 
-Add the following container step to the `instance-configure` pipeline.
+:::tip
 
-```
-  - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
-    name: generate-output
-    command: [ "sh" ]
-    args:
-      - -c
-      - |
-        INPUT_OBJECT_PATH="/kratix/input/object.yaml"
-        INPUT_DIR="/kratix/output"
-        OUTPUT_DIR="/kratix/output"
+Don't want to include all the outputs? You can manually edit the environment variable to only include the outputs you want to surface.
 
-        KIND="$(yq eval '.kind' "$INPUT_OBJECT_PATH" | tr '[:upper:]' '[:lower:]')"
-        NAMESPACE="$(yq eval '.metadata.namespace' "$INPUT_OBJECT_PATH")"
-        NAME="$(yq eval '.metadata.name' "$INPUT_OBJECT_PATH")"
+:::
 
-        INPUT_FILE_NAME="${KIND}_${NAMESPACE}_${NAME}.tf.json"
-        INPUT_PATH="${INPUT_DIR}/${INPUT_FILE_NAME}"
-        OUTPUT_PATH="${OUTPUT_DIR}/${INPUT_FILE_NAME}"
-
-        MODULE_NAME=$(jq -r '.module | keys[0] // empty' "$INPUT_PATH")
-
-        jq --arg module "$MODULE_NAME" '
-          .output = (.output // {})
-          | .output.s3_bucket_bucket_regional_domain_name = {"value": "${module." + $module + ".s3_bucket_bucket_regional_domain_name}"}
-          | .output.s3_bucket_id = {"value": "${module." + $module + ".s3_bucket_id}"}
-        ' "$INPUT_PATH" > "${INPUT_PATH}.tmp"
-
-        mv "${INPUT_PATH}.tmp" "$OUTPUT_PATH"
-
-        printf "Updated outputs in %s\n" "$OUTPUT_PATH"
-```
-
-This script fetches the generated Terraform file and adds an `output` block which will ensure that the `s3_bucket_id` and
-`s3_bucket_bucket_regional_domain_name` are outputted when the resources are created.
-
-When the Terraform apply runs, our desired outputs will be visible via the the Terraform Cloud UI but how do we ensure this information
-is visible to the user who has made the request? It's very likely that they don't have direct access to Terraform Cloud so how can this
-information be communicated back to them?
+By defining the `MODULE_OUTPUT_NAMES`, we informed the `terraform-generate` stage to include the outputs in the generated Terraform configuration. We now need a mechanism to surface these outputs in the Platform, so the users can see them in the Resource Request status.
 
 This is where the [tfstate-finder](/ske/integrations/tfe#adding-the-ske-tf-state-finder-pipeline-stage) comes in. The tfstate-finder is a Pipeline Stage that fetches the outputs from the Terraform run and makes these visible in the Resource Request.
 
@@ -719,37 +710,10 @@ spec:
           - env:
             - name: MODULE_SOURCE
               value: git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0
-            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.4.0
+            - name: MODULE_OUTPUT_NAMES
+              value: s3_bucket_id,s3_bucket_arn,s3_bucket_bucket_domain_name,s3_bucket_bucket_regional_domain_name,s3_bucket_hosted_zone_id,s3_bucket_lifecycle_configuration_rules,s3_bucket_policy,s3_bucket_region,s3_bucket_website_endpoint,s3_bucket_website_domain,s3_directory_bucket_name,s3_directory_bucket_arn,aws_s3_bucket_versioning_status,s3_bucket_tags
+            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.5.0
             name: terraform-generate
-          - image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
-            name: generate-output
-            command: [ "sh" ]
-            args:
-              - -c
-              - |
-                INPUT_OBJECT_PATH="/kratix/input/object.yaml"
-                INPUT_DIR="/kratix/output"
-                OUTPUT_DIR="/kratix/output"
-
-                KIND="$(yq eval '.kind' "$INPUT_OBJECT_PATH" | tr '[:upper:]' '[:lower:]')"
-                NAMESPACE="$(yq eval '.metadata.namespace' "$INPUT_OBJECT_PATH")"
-                NAME="$(yq eval '.metadata.name' "$INPUT_OBJECT_PATH")"
-
-                INPUT_FILE_NAME="${KIND}_${NAMESPACE}_${NAME}.tf.json"
-                INPUT_PATH="${INPUT_DIR}/${INPUT_FILE_NAME}"
-                OUTPUT_PATH="${OUTPUT_DIR}/${INPUT_FILE_NAME}"
-
-                MODULE_NAME=$(jq -r '.module | keys[0] // empty' "$INPUT_PATH")
-
-                jq --arg module "$MODULE_NAME" '
-                  .output = (.output // {})
-                  | .output.s3_bucket_bucket_regional_domain_name = {"value": "${module." + $module + ".s3_bucket_bucket_regional_domain_name}"}
-                  | .output.s3_bucket_id = {"value": "${module." + $module + ".s3_bucket_id}"}
-                ' "$INPUT_PATH" > "${INPUT_PATH}.tmp"
-
-                mv "${INPUT_PATH}.tmp" "$OUTPUT_PATH"
-
-                printf "Updated outputs in %s\n" "$OUTPUT_PATH"   
       - apiVersion: platform.kratix.io/v1alpha1
         kind: Pipeline
         metadata:
@@ -800,14 +764,14 @@ Apply the promise once again with:
 kubectl apply -f promise.yaml
 ```
 
-This will re-trigger both the Promise workflows and the Resource workflows. When the workflows have completed, you should see that another Terraform apply has been triggered and this time, it details our desired outputs. Take a look at the Terraform Cloud run, this shows that there were two outputs, the `s3_bucket_bucket_regional_domain_name` and the `s3_bucket_id`:
+This will re-trigger both the Promise workflows and the Resource workflows. When the workflows have completed, you should see that another Terraform apply has been triggered and this time, it details our desired outputs. Take a look at the Terraform Cloud run, you should see the outputs there:
 
 ```mdx-code-block
 import TerraformOutputs from "./terraform-outputs.png"
 ```
 
 <figure className="diagram">
-  <img className="large" src={TerraformOutputs} alt="A screen shot of the Terraform UI with the s3_bucket_bucket_regional_domain_name and s3_bucket_id values detailed as outputs" />
+  <img className="large" src={TerraformOutputs} alt="A screen shot of the Terraform UI with the outputs" />
 
   <figcaption>Terraform Outputs</figcaption>
 </figure>
@@ -826,9 +790,17 @@ You should see that the `status` of the request now mirrors the outputs we saw i
   Observed Generation:                      1
 #highlight-start
   Outputs:
-    Tfstate:
-      s3_bucket_bucket_regional_domain_name:  terraform-20260114120617401500000001.s3.us-east-1.amazonaws.com
-      s3_bucket_id:                           terraform-20260114120617401500000001
+    Tfe:
+      s3_default_example-s3_s3_bucket_arn:                            arn:aws:s3:::terraform-20260317162041202100000001
+      s3_default_example-s3_s3_bucket_bucket_domain_name:             terraform-20260317162041202100000001.s3.amazonaws.com
+      s3_default_example-s3_s3_bucket_bucket_regional_domain_name:    terraform-20260317162041202100000001.s3.us-east-1.amazonaws.com
+      s3_default_example-s3_s3_bucket_hosted_zone_id:                 Z3AQBSTGFYJSTF
+      s3_default_example-s3_s3_bucket_id:                             terraform-20260317162041202100000001
+      s3_default_example-s3_s3_bucket_lifecycle_configuration_rules:
+      s3_default_example-s3_s3_bucket_policy:
+      s3_default_example-s3_s3_bucket_region:                         us-east-1
+      s3_default_example-s3_s3_bucket_website_domain:
+      s3_default_example-s3_s3_bucket_website_endpoint:
 #highlight-end
   Workflows:                                  2
   Workflows Failed:                           0
