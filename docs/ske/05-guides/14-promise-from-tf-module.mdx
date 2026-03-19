@@ -134,11 +134,11 @@ You'll find that a `resource.configure` workflow has also been added to the `pro
                 value: git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0
               - name: MODULE_OUTPUT_NAMES
                 value: s3_bucket_id,s3_bucket_arn,s3_bucket_bucket_domain_name,s3_bucket_bucket_regional_domain_name,s3_bucket_hosted_zone_id,s3_bucket_lifecycle_configuration_rules,s3_bucket_policy,s3_bucket_region,s3_bucket_website_endpoint,s3_bucket_website_domain,s3_directory_bucket_name,s3_directory_bucket_arn,aws_s3_bucket_versioning_status,s3_bucket_tags
-            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.5.0
+            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.6.0
             name: terraform-generate
 ```
 
-The `ghcr.io/syntasso/kratix-cli/terraform-generate:v0.5.0` image takes the inputs provided via the API and uses these to generate a
+The `ghcr.io/syntasso/kratix-cli/terraform-generate:v0.6.0` image takes the inputs provided via the API and uses these to generate a
 Terraform configuration that honours these inputs.
 
 ## The Promise Workflow
@@ -712,7 +712,7 @@ spec:
               value: git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.10.0
             - name: MODULE_OUTPUT_NAMES
               value: s3_bucket_id,s3_bucket_arn,s3_bucket_bucket_domain_name,s3_bucket_bucket_regional_domain_name,s3_bucket_hosted_zone_id,s3_bucket_lifecycle_configuration_rules,s3_bucket_policy,s3_bucket_region,s3_bucket_website_endpoint,s3_bucket_website_domain,s3_directory_bucket_name,s3_directory_bucket_arn,aws_s3_bucket_versioning_status,s3_bucket_tags
-            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.5.0
+            image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.6.0
             name: terraform-generate
       - apiVersion: platform.kratix.io/v1alpha1
         kind: Pipeline
