@@ -25,8 +25,9 @@ kratix init [command]
 ## See Also
 
 * [kratix](/main/kratix-cli/reference/kratix): The kratix CLI
-* [kratix init crossplane-promise](/main/kratix-cli/reference/kratix-init-crossplane-promise): Initialize a new Promise from a Crossplane XRD
-* [kratix init helm-promise](/main/kratix-cli/reference/kratix-init-helm-promise): Initialize a new Promise from a Helm chart
-* [kratix init operator-promise](/main/kratix-cli/reference/kratix-init-operator-promise): Generate a Promise from a given Kubernetes Operator.
+* [kratix init crossplane-promise](/main/kratix-cli/reference/kratix-init-crossplane-promise): Preview: Initialize a new Promise from a Crossplane XRD
+* [kratix init helm-promise](/main/kratix-cli/reference/kratix-init-helm-promise): Preview: Initialize a new Promise from a Helm chart
+* [kratix init operator-promise](/main/kratix-cli/reference/kratix-init-operator-promise): Preview: Generate a Promise from a given Kubernetes Operator.
 * [kratix init promise](/main/kratix-cli/reference/kratix-init-promise): Initialize a new Promise
+* [kratix init pulumi-component-promise](/main/kratix-cli/reference/kratix-init-pulumi-component-promise): Preview: Initialize a new Promise from a Pulumi package schema
 * [kratix init tf-module-promise](/main/kratix-cli/reference/kratix-init-tf-module-promise): Initialize a Promise from a Terraform module

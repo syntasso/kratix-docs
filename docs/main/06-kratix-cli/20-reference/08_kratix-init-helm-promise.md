@@ -1,8 +1,8 @@
 # kratix init helm-promise
-Initialize a new Promise from a Helm chart
+Preview: Initialize a new Promise from a Helm chart
 
 ## Description
-Initialize a new Promise from a Helm Chart
+Preview: Initialize a new Promise from a Helm Chart. This command is in preview, not supported under SLAs, and may change or break without notice.
 
 ## Usage
 ```bash
