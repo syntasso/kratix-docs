@@ -20,7 +20,7 @@ Adding this label to a Resource request forces Kratix to rerun the Resource work
 
 The label is removed automatically once Kratix schedules the manual run so it can be applied again later.
 
-## Workflow Suspension
+## Unsuspend a Workflow
 
 ```
 kratix.io/workflow-suspend: "true"
@@ -38,15 +38,10 @@ message: "optional reason"
 
 While the label is present:
 
-- Kratix does not schedule later Resource configure Pipelines
+- Kratix does not schedule later Pipelines from the workflow
 - the current pipeline is marked as `Suspended` in `status.kratix.workflows.pipelines`
 
 If the label is removed, Kratix resumes from the suspended Pipeline.
-
-If the Resource is manually reconciled, updated, reconciled because the
-reconciliation interval is reached, the parent Promise is updated, or the
-Resource is unpaused while suspended, Kratix removes the suspend label and
-restarts the configure workflow from the beginning.
 
 ## Pausing Reconciliation
 

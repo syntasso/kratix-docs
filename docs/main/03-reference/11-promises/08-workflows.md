@@ -101,7 +101,7 @@ workflow again from the beginning.
 
 ### Suspending a workflow
 
-A Promise Configure Pipeline can output an optional file to suspend its running:
+A Promise Configure Pipeline can output an optional file to suspend its execution:
 
 ```text
 /kratix/metadata/workflow-control.yaml
@@ -121,15 +121,14 @@ When a Pipeline writes `suspend: true`, Kratix:
 - stores the optional message on that pipeline entry
 - stops executing later Pipelines in the workflow
 
-If the suspend label is removed, Kratix reruns the suspended Pipeline.
+If the suspend label is removed, Kratix starts from the suspended Pipeline.
 
-If a fresh reconciliation is triggered while the Promise is suspended, Kratix
-restarts the configure workflow from the beginning instead. This applies when:
+If a new reconciliation is triggered while the Promise is suspended, Kratix
+starts the configure workflow from the beginning instead. This applies when:
 
 - the Promise is manually reconciled
 - the reconciliation interval is reached
-- the Promise is updated
-- the Promise is unpaused
+- the Promise spec is updated
 
 ### Idempotency
 
