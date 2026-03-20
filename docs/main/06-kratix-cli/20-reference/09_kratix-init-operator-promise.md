@@ -1,8 +1,8 @@
 # kratix init operator-promise
-Generate a Promise from a given Kubernetes Operator.
+Preview: Generate a Promise from a given Kubernetes Operator.
 
 ## Description
-Generate a Promise from a given Kubernetes Operator.
+Preview: Generate a Promise from a given Kubernetes Operator. This command is in preview, not supported under SLAs, and may change or break without notice.
 
 ## Usage
 ```bash
