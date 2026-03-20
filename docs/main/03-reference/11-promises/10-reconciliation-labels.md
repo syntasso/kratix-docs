@@ -20,6 +20,33 @@ Adding this label to a Promise forces Kratix to rerun the Promise workflows outs
 
 The label is removed automatically once Kratix schedules the manual run so it can be applied again later.
 
+## Workflow Suspension
+
+```
+kratix.io/workflow-suspend: "true"
+```
+
+This label marks a Promise configure workflow as suspended.
+
+Kratix sets this label when a Promise Configure Pipeline outputs
+`/kratix/metadata/workflow-control.yaml` with:
+
+```yaml
+suspend: true
+message: "optional reason"
+```
+
+While the label is present:
+
+- Kratix does not schedule later Promise configure Pipelines
+- the current pipeline is marked as `Suspended` in `status.kratix.workflows.pipelines`
+
+If the label is removed, Kratix resumes from the suspended Pipeline.
+
+If the Promise is manually reconciled, updated, reconciled because the
+reconciliation interval is reached, or unpaused while suspended, Kratix removes
+the suspend label and restarts the configure workflow from the beginning.
+
 ## Pausing Reconciliation
 
 ```

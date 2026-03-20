@@ -163,6 +163,46 @@ These are typical symptoms when workflows are running as Jobs:
   workflow-abc123-9wq5k                   0/1     ErrImagePull       0          2m
   ```
 
+### Workflow Control
+
+A Pipeline can output an optional file to suspend its running:
+
+```text
+/kratix/metadata/workflow-control.yaml
+```
+
+The supported schema is:
+
+```yaml
+suspend: true | false
+message: "optional reason"
+```
+
+When a Pipeline writes `suspend: true`, Kratix will:
+
+- add `kratix.io/workflow-suspend: "true"` to the Promise or Resource request
+- mark the current entry in `status.kratix.workflows.pipelines` as `Suspended`
+- store the optional `message` on that pipeline status entry
+- stop executing any later Pipelines in the workflow
+
+This applies to both Promise and Resource Configure workflows.
+
+#### Resuming or restarting a suspended workflow
+
+Once a workflow is suspended, Kratix supports two different behaviors:
+
+- If `kratix.io/workflow-suspend` is removed, Kratix resumes from the Pipeline
+  marked `Suspended`.
+- If Kratix triggers a fresh reconciliation, the workflow restarts from the
+  beginning.
+
+Fresh reconciliation from the beginning happens when:
+
+- `kratix.io/manual-reconciliation: "true"` is added
+- the reconciliation interval is reached
+- the Promise or Resource request is updated
+- a previously paused object is unpaused
+
 ### Role-based Access Control (RBAC)
 
 Each pipeline runs with its own service account and a default set of restrictive
