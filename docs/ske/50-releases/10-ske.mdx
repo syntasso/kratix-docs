@@ -19,14 +19,24 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.44.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.44.0/) (2026-??-??)
+
+#### Fix
+
+* Promise revisions can now be created successfully even when the Promise version
+  contains special characters.
+  * Kratix will no longer use the Promise Version directly in the Promise Revision name.
+    It will instead use a unique hash derived from the Promise version.
+  * For backwards compatibility, revisions following the previous name format will continue to work.
+
+### [v0.43.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.43.0/) (2026-03-04)
+
 :::important
 Please note that as of v0.43.0, the SKE images will be accessible at ghcr.io not registry.syntasso.io.
 
 Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
 the images and the kratix-controller-manager pod will fail to start.
 :::
-
-### [v0.43.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.43.0/) (2026-03-04)
 
 #### Features
 
