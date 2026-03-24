@@ -23,7 +23,7 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 ## Unsuspension a Workflow
 
 ```
-kratix.io/workflow-suspend: "true"
+kratix.io/workflow-suspended: "true"
 ```
 
 This label marks a Promise configure workflow as suspended.
