@@ -116,7 +116,7 @@ message: "optional reason"
 
 When a Pipeline writes `suspend: true`, Kratix:
 
-- adds `kratix.io/workflow-suspend: "true"` to the Promise
+- adds `kratix.io/workflow-suspended: "true"` to the Promise
 - marks the current pipeline as `Suspended` in `status.kratix.workflows.pipelines`
 - stores the optional message on that pipeline entry
 - stops executing later Pipelines in the workflow
