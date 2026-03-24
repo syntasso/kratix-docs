@@ -23,7 +23,7 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 ## Unsuspend a Workflow
 
 ```
-kratix.io/workflow-suspend: "true"
+kratix.io/workflow-suspended: "true"
 ```
 
 This label marks a Resource configure workflow as suspended.
