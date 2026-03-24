@@ -191,7 +191,7 @@ This applies to both Promise and Resource Configure workflows.
 
 Once a workflow is suspended, Kratix supports two different behaviors:
 
-- If `kratix.io/workflow-suspend` is removed, Kratix resumes from the Pipeline
+- If `kratix.io/workflow-suspended` is removed, Kratix resumes from the Pipeline
   marked `Suspended`.
 - If Kratix triggers a fresh reconciliation, the workflow restarts from the
   beginning.
