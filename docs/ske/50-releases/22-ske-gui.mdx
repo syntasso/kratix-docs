@@ -15,7 +15,28 @@ The release manifest is available at:
 http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui/
 ```
 
+:::important
+Please note that as of v0.6.3, the SKE GUI image will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
+the image and the ske-gui pod will fail to start.
+:::
+
 ## Release Notes
+
+### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui/v0.7.0/) (2026-03-24)
+
+Released in Helm Chart version [v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui-helm-chart/0.15.0/)
+
+#### Features
+
+* The full Promise and Resource Request status is now present in the their respective views
+* Show retried pipelines in the GUI
+* Extend the configurable options in the Helm Chart, see [values.yaml](https://github.com/syntasso/helm-charts/blob/main/ske-gui/values.yaml) for more information
+
+#### Maintenance
+
+* Bump dependencies
 
 ### [v0.6.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui/v0.6.4/) (2026-03-04)
 
@@ -23,12 +44,6 @@ Released in Helm Chart version [v0.14.0](http://syntasso-enterprise-releases.s3-
 
 Includes a fix that stops the Resource list view from crashing when many Promises and Resources are created and deleted at the same time.
 
-:::important
-Please note that as of v0.6.3, the SKE GUI image will be accessible at ghcr.io not registry.syntasso.io.
-
-Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
-the image and the ske-gui pod will fail to start.
-:::
 
 ### [v0.6.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui/v0.6.3/) (2026-03-04)
 
