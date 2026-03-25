@@ -2,12 +2,10 @@
 
 set -eu
 
-# Extract values from input
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
-app_image="$(yq eval '.spec.image' /kratix/input/object.
+app_image="$(yq eval '.spec.image' /kratix/input/object.yaml)"
 
-# Create Runtime request
 cat > /kratix/output/runtime-request.yaml <<EOF
 apiVersion: marketplace.kratix.io/v1alpha1
 kind: Runtime
@@ -28,17 +26,18 @@ spec:
       value: "8000"
 EOF
 
+database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
+database_name="${app_name}-db"
 
 if [ "${database_driver}" = "postgresql" ]; then
-# The PostgreSQL Request
-database_request_name="${app_name}-db"
-database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
+  database_secret_name="${app_name}.${app_name}-${database_name}-postgresql.credentials.postgresql.acid.zalan.do"
+  database_host="${app_name}-${database_name}-postgresql.default.svc.cluster.local"
 
-cat > /kratix/output/postgresql-request.yaml <<EOF
-apiVersion: marketplace.kratix.io/v1alpha1
+  cat > /kratix/output/postgresql-request.yaml <<EOF
+apiVersion: marketplace.kratix.io/v1alpha2
 kind: postgresql
 metadata:
-  name: ${database_request_name}
+  name: ${database_name}
   namespace: ${app_namespace}
   labels:
     kratix.io/component-of-promise-name: app-stack
@@ -47,15 +46,10 @@ metadata:
 spec:
   env: dev
   teamId: ${app_name}
-  dbName: ${database_request_name}
+  dbName: ${database_name}
 EOF
 
-# This is the secret name the PostgreSQL promise will generate
-database_secret_name="${app_name}.${app_name}-${database_request_name}-postgresql.credentials.postgresql.acid.zalan.do"
-database_host="${app_name}-${database_request_name}-postgresql.default.svc.cluster.local"
-
-## Injecting the database secrets into the application env
-cat >> /kratix/output/runtime-request.yaml <<EOF
+  cat >> /kratix/output/runtime-request.yaml <<EOF
     - name: PGHOST
       value: ${database_host}
     - name: DBNAME
@@ -73,13 +67,13 @@ cat >> /kratix/output/runtime-request.yaml <<EOF
 EOF
 fi
 
-# Bucket Request
-if [ -n "${bucket_name}" ]; then
-bucket_name="$(yq eval '.spec.bucket.name // ""' /kratix/input/object.yaml)"
-bucket_public="$(yq eval '.spec.bucket.public // false' /kratix/input/object.yaml)"
 
-bucket_arn="arn:aws:s3:::${bucket_name}"
-cat > /kratix/output/bucket-request.yaml <<EOF
+bucket_name="$(yq eval '.spec.bucket.name // ""' /kratix/input/object.yaml)"
+if [ -n "${bucket_name}" ]; then
+  bucket_public="$(yq eval '.spec.bucket.public // false' /kratix/input/object.yaml)"
+  bucket_arn="arn:aws:s3:::${bucket_name}"
+
+  cat > /kratix/output/bucket-request.yaml <<EOF
 apiVersion: example.kratix.io/v1alpha1
 kind: bucket
 metadata:
@@ -94,8 +88,10 @@ spec:
   public: ${bucket_public}
 EOF
 
-cat >> /kratix/output/runtime-request.yaml <<EOF
+  cat >> /kratix/output/runtime-request.yaml <<EOF
     - name: BUCKET_NAME
       value: ${bucket_name}
+    - name: BUCKET_ARN
+      value: ${bucket_arn}
 EOF
 fi

@@ -2,8 +2,9 @@ FROM alpine:3.20
 
 RUN apk add --no-cache yq
 
-COPY scripts/* /usr/local/bin/
+ADD scripts/pipeline.sh /usr/bin/pipeline.sh
 
-RUN chmod +x /usr/local/bin/*
+RUN chmod +x /usr/bin/pipeline.sh
 
+CMD [ "sh", "-c", "pipeline.sh" ]
 ENTRYPOINT []

@@ -198,16 +198,18 @@ spec:
 Back in the pipeline script, let's update it to include this request when needed. We should also make sure to include the connection details as environment variables to our Runtime request, so the application can connect. Add the following code snippet just after the `runtime_request` assignment:
 
 ```sh
-if [ "${database_driver}" = "postgresql" ]; then
-# The PostgreSQL Request
-database_request_name="${app_name}-db"
 database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
+database_name="${app_name}-db"
 
-cat > /kratix/output/postgresql-request.yaml <<EOF
+if [ "${database_driver}" = "postgresql" ]; then
+  database_secret_name="${app_name}.${app_name}-${database_name}-postgresql.credentials.postgresql.acid.zalan.do"
+  database_host="${app_name}-${database_name}-postgresql.default.svc.cluster.local"
+
+  cat > /kratix/output/postgresql-request.yaml <<EOF
 apiVersion: marketplace.kratix.io/v1alpha1
 kind: postgresql
 metadata:
-  name: ${database_request_name}
+  name: ${database_name}
   namespace: ${app_namespace}
   labels:
     kratix.io/component-of-promise-name: app-stack
@@ -216,15 +218,10 @@ metadata:
 spec:
   env: dev
   teamId: ${app_name}
-  dbName: ${database_request_name}
+  dbName: ${database_name}
 EOF
 
-# This is the secret name the PostgreSQL promise will generate
-database_secret_name="${app_name}.${app_name}-${database_request_name}-postgresql.credentials.postgresql.acid.zalan.do"
-database_host="${app_name}-${database_request_name}-postgresql.default.svc.cluster.local"
-
-## Injecting the database secrets into the application env
-cat >> /kratix/output/runtime-request.yaml <<EOF
+  cat >> /kratix/output/runtime-request.yaml <<EOF
     - name: PGHOST
       value: ${database_host}
     - name: DBNAME
@@ -260,12 +257,12 @@ spec:
 Similar to the PostgreSQL request, when the user requests an S3 Bucket, we should add the Bucket request to the output directory and inject the connection details into the Runtime request. Right after the PostgreSQL block you just added, include the following:
 
 ```sh
-if [ -n "${bucket_name}" ]; then
 bucket_name="$(yq eval '.spec.bucket.name // ""' /kratix/input/object.yaml)"
-bucket_public="$(yq eval '.spec.bucket.public // false' /kratix/input/object.yaml)"
+if [ -n "${bucket_name}" ]; then
+  bucket_public="$(yq eval '.spec.bucket.public // false' /kratix/input/object.yaml)"
+  bucket_arn="arn:aws:s3:::${bucket_name}"
 
-bucket_arn="arn:aws:s3:::${bucket_name}"
-cat > /kratix/output/bucket-request.yaml <<EOF
+  cat > /kratix/output/bucket-request.yaml <<EOF
 apiVersion: example.kratix.io/v1alpha1
 kind: bucket
 metadata:
@@ -280,9 +277,11 @@ spec:
   public: ${bucket_public}
 EOF
 
-cat >> /kratix/output/runtime-request.yaml <<EOF
+  cat >> /kratix/output/runtime-request.yaml <<EOF
     - name: BUCKET_NAME
       value: ${bucket_name}
+    - name: BUCKET_ARN
+      value: ${bucket_arn}
 EOF
 fi
 ```
@@ -291,14 +290,18 @@ And that's it. Workflow done!
 
 <details>
 <summary>Click here for the complete `pipeline.sh` script</summary>
-TBA
-</details
+
+    ```sh
+    TBA
+    ```
+</details>
 
 There are only two things left to do in our Compound Promise:
 
 * Ensure the outputs of the pipeline are scheduled to the Platform cluster
 * Set the sub-Promises as requirements for the Compound Promise
 The next sections will explore how to do this.
+
 
 ### Scheduling to the Platform cluster
 
@@ -329,7 +332,6 @@ platform-cluster   True    environment=platform
 worker-1           True    environment=dev
 ```
 
-
 ### Defining the Promise Requirements
 
 The final piece missing in our Compound Promise is the declaration of the sub-Promises it depends on. For that, you set the `spec.requiredPromises` field in the Compound Promise document with a list of sub-Promise names and versions.
@@ -350,7 +352,7 @@ spec:
     - name: s3
       version: v0.1.0
     - name: postgresql
-      version: v1.0.0-beta.2
+      version: v1.0.0-beta.3
     - name: runtime
       version: v1.0.0
   #highlight-end
@@ -418,7 +420,7 @@ kind: AppStack
 metadata:
   name: app-stack
 spec:
-  image: syntasso/my-app:v1.0.0 # you can use this one, or build your own
+  image: python-app:v0.1.0 # you can use this one, or build your own
   database:
     driver: postgresql
   bucket:
@@ -436,17 +438,23 @@ Sending this request will immediately trigger the AppStack Promise Resource work
 The container image you use for `spec.image` should serve HTTP on port `8000`, handle the bucket and PostgreSQL environment variables only when they are present, and return a message such as `Hello world, my bucket name is myapp-bucket. My bucket ARN is arn:aws:s3:::myapp-bucket`.
 
 That, in turn, should trigger the sub-promises workflows:
-```sh
+```shell-session
 $ kubectl --context $PLATFORM get pods
+NAME                                                            READY   STATUS      RESTARTS   AGE
+kratix-app-stack-app-stack-instance-configure-beec4-l2nf8       0/1     Completed   0          31s
+kratix-postgresql-app-stack-db-instance-configure-785e4-hktjk   0/1     Completed   0          19s
+kratix-runtime-app-stack-instance-e6313-szgrt                   0/1     Completed   0          19s
+TBA (bucket)
 ```
 
 In a couple of minutes, in your Worker cluster, you should see the application pod running:
-```sh
+```shell-session
 $ kubectl --context $WORKER get pods
+TBA
 ```
 
 You can build the example Python application in `app-stack-example/python-app` and push it to your registry, then use that image in the `AppStack` request.
 ```sh
-docker build -t python-bucket-app:v0.1.0 python-app/
-kind load docker-image python-bucket-app:v0.1.0 -n platform
+docker build -t python-app:v0.1.0 python-app/
+kind load docker-image python-app:v0.1.0 -n worker
 ```
