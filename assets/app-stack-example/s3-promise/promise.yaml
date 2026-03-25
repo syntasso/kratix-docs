@@ -14,7 +14,7 @@ spec:
     spec:
       group: example.kratix.io
       names:
-        kind: bucket
+        kind: Bucket
         plural: buckets
         singular: bucket
       scope: Namespaced

@@ -364,20 +364,25 @@ If we try to install the Compound Promise now, you should get a warning:
 
 ```shell-session
 $ kubectl --context $PLATFORM apply --filename promise.yaml
-TBA
+Warning: Required Promise "s3" at version "v0.1.0" not installed
+Warning: Required Promise "postgresql" at version "v1.0.0-beta.2" not installed
+Warning: Required Promise "runtime" at version "v1.0.0" not installed
+Warning: Promise will not be available until the above issue(s) is resolved
+promise.platform.kratix.io/app-stack created
 ```
 
 The Compound Promise itself will remain unavailable until the requirements are satisfied.
 ```shell-session
 $ kubectl --context $PLATFORM get promises
-TBA
+NAME        STATUS        KIND       API VERSION                  VERSION   MESSAGE
+app-stack   Unavailable   AppStack   example.kratix.io/v1alpha1   v0.1.0
 ```
 
 To satisfy the `requiredPromises` declaration, you will to, install the required promises in your Platform cluster:
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
-TBA: S3 Bucket promise
+kubectl --context $PLATFORM apply --filename s3-promise/promise.yaml # needs to change
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/runtime/promise-release.yaml
 ```
 
@@ -385,7 +390,11 @@ After a few seconds, you should see all the Promises available in your Platform:
 
 ```shell-session
 $ kubectl --context $PLATFORM get promises
-TBA
+NAME         STATUS      KIND         API VERSION                      VERSION         MESSAGE
+app-stack    Available   AppStack     example.kratix.io/v1alpha1       v0.1.0
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3   Promise configured
+runtime      Available   Runtime      marketplace.kratix.io/v1alpha1   v1.0.0          Promise configured
+s3           Available   Bucket       example.kratix.io/v1alpha1       v0.1.0          Promise configured
 ```
 
 :::tip
