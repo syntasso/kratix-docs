@@ -1,0 +1,443 @@
+---
+description: Learn how to combine multiple promises into a single Compound Promise, and add waits
+title: Compound Promises with waits
+---
+
+```mdx-code-block
+import PartialPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.md';
+```
+
+Compound Promises are Promises that depend on other Promises to deliver their promised service.
+The abiltiy to chain Promises together allows platform teams to deliver entire stacks on demand, while keeping each sub-Promise small and focused on its own service.
+
+**In this tutorial, you will**
+
+1. Encapsulate multiple Promises into a Compound Promise with waits
+1. Request a complete development environment Resource through a Compound Promise
+
+<PartialPreRequisites />
+
+## Register the Platform as a Destination
+
+Compound Promises work by scheduling their workflow outputs to the Platform cluster itself. For that to work, you will need to register the Platform cluster as a Destination, and run a GitOps Agent in the Platform cluster listening to the State Store associated with the platform destination.
+
+Create a new [Destination document](../reference/destinations/intro) - `platform-cluster.yaml` - with the following contents:
+
+```yaml title="platform-cluster.yaml"
+apiVersion: platform.kratix.io/v1alpha1
+kind: Destination
+metadata:
+  name: platform-cluster
+  labels:
+    environment: platform
+spec:
+  path: platform-cluster
+  strictMatchLabels: true
+  stateStoreRef:
+    name: default
+    kind: BucketStateStore
+```
+
+Register the Destination:
+
+```bash
+kubectl --context $PLATFORM apply --filename platform-cluster.yaml
+```
+
+### Install and configure GitOps
+
+Now that your Destination is registered, make sure to install the GitOps Agent into your Platform cluster. The quickest way to do that is to run the `./scripts/install-gitops` script from the Kratix root directory:
+
+```bash
+cd /path/to/kratix
+./scripts/install-gitops --context $PLATFORM --path platform-cluster
+```
+
+## Building the Compound Promise
+
+:::tip[Skip the build!]
+
+You can follow this guide and build the Promise along with us, or you can use it as a reference when building your own Compound Promises.
+
+The Promise mentioned in this post is available [here](LINK TO BE ADDED).
+
+You can skip straight to [installing the Promise](#install) if you want to see it in action.
+
+:::
+
+### Implementing the API
+
+Let's create the AppStack Promise. We can use the [Kratix CLI](/main/kratix-cli/intro) to speed up development. Create a new directory in your system and initialise a new Promise:
+
+```sh
+mkdir app-stack-example && cd app-stack-example
+
+kratix init promise app-stack \
+    --group example.kratix.io \
+    --kind AppStack \
+    --version v1alpha1
+```
+
+The command above should produce a `promise.yaml` in the `app-stack-example` directory. We can now add the API properties we defined above:
+
+```sh
+kratix update api \
+  --property image:string \
+  --property database.driver:string \ # todo add the enum list
+  --property bucket.name:string \
+  --property bucket.public:boolean
+```
+
+```sh
+kratix update destination-selector \
+  --dir . \
+  --label environment=platform
+```
+
+The next step is to implement the workflow that will transform the user's request into the sub-promises request.
+```sh
+kratix add container resource/configure/instance-configure \
+  --image ghcr.io/syntasso/kratix-docs/app-stack-example-pipeline:v0.1.0 \
+  --name deploy-resources \
+  --dir .
+```
+
+At this point, your local `app-stack-example` directory should look like this:
+
+```
+.
+├── README.md
+├── example-resource.yaml
+├── promise.yaml
+└── workflows
+    └── resource
+        └── configure
+            └── instance
+                └── deploy-resources
+                    ├── Dockerfile
+                    ├── resources
+                    └── scripts
+                        └── pipeline.sh
+
+8 directories, 5 files
+```
+
+A quick recap of what the pipeline script should do:
+
+1. Deploy the application specified with the provided image, via the Runtime Promise.
+1. Create a PostgreSQL instance if `database.driver` is set to `postgresql`, via the PostgreSQL Promise.
+1. Create an S3 Bucket if `bucket.name` is set via the Bucket Promise.
+1. Update the application environment variables with the credentials for the optional services.
+
+Adding the Runtime Request
+Let's add the first requirement. To deploy the application via the Runtime Promise, the pipeline must output a Resource Request for that Promise. The API for the Runtime Promise looks like this:
+
+```sh
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: Runtime
+metadata:
+  name: example-runtime
+  namespace: default
+spec:
+  lifecycle: dev
+  image: syntasso/website
+```
+
+As you can see, the only configuration option we are currently providing in the API of our RubyApp promise is the image, and the lifecycle. All the other fields should either be populated by the AppStack workflow, or left empty. We must also ensure the `metadata.name` we generate for this request is unique, otherwise it may clash with other resources already deployed.
+
+Now open the pipeline.sh script in workflows/resource/configure/instance/deploy-resources/scripts and update it to:
+
+```sh
+#!/usr/bin/env sh
+
+set -eu
+
+# Extract values from input
+app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
+app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+app_image="$(yq eval '.spec.image' /kratix/input/object.yaml)"
+
+# Create Runtime request
+cat > /kratix/output/runtime-request.yaml <<EOF
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: Runtime
+metadata:
+  name: ${app_name}
+  namespace: ${app_namespace}
+  labels:
+    kratix.io/component-of-promise-name: app-stack
+    kratix.io/component-of-resource-name: ${app_name}
+    kratix.io/component-of-resource-namespace: ${app_namespace}
+spec:
+  lifecycle: dev
+  image: ${app_image}
+  servicePort: 8000
+  replicas: 1
+  applicationEnv:
+    - name: PORT
+      value: "8000"
+EOF
+```
+
+#### Adding the PostgreSQL Request
+
+Next step is to optionally include a request to the PostgreSQL Promise if the user requests a database. The API for the PostgreSQL Promise looks like this:
+
+```yaml
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
+metadata:
+  name: example
+  namespace: default
+spec:
+  env: dev
+  teamId: acid
+  dbName: bestdb
+```
+
+Back in the pipeline script, let's update it to include this request when needed. We should also make sure to include the connection details as environment variables to our Runtime request, so the application can connect. Add the following code snippet just after the `runtime_request` assignment:
+
+```sh
+if [ "${database_driver}" = "postgresql" ]; then
+# The PostgreSQL Request
+database_request_name="${app_name}-db"
+database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
+
+cat > /kratix/output/postgresql-request.yaml <<EOF
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
+metadata:
+  name: ${database_request_name}
+  namespace: ${app_namespace}
+  labels:
+    kratix.io/component-of-promise-name: app-stack
+    kratix.io/component-of-resource-name: ${app_name}
+    kratix.io/component-of-resource-namespace: ${app_namespace}
+spec:
+  env: dev
+  teamId: ${app_name}
+  dbName: ${database_request_name}
+EOF
+
+# This is the secret name the PostgreSQL promise will generate
+database_secret_name="${app_name}.${app_name}-${database_request_name}-postgresql.credentials.postgresql.acid.zalan.do"
+database_host="${app_name}-${database_request_name}-postgresql.default.svc.cluster.local"
+
+## Injecting the database secrets into the application env
+cat >> /kratix/output/runtime-request.yaml <<EOF
+    - name: PGHOST
+      value: ${database_host}
+    - name: DBNAME
+      value: ${database_name}
+    - name: PGUSER
+      valueFrom:
+        secretKeyRef:
+          name: ${database_secret_name}
+          key: username
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: ${database_secret_name}
+          key: password
+EOF
+fi
+```
+
+### Adding the Bucket Request
+
+Finally, we do the same with the Bucket Promise. It's API looks like this:
+
+```sh
+apiVersion: example.syntasso.io/v1alpha1
+kind: S3
+metadata:
+  name: database-service-bucket
+spec:
+  bucketName: app-stack-buck
+  public: false
+```
+
+Similar to the PostgreSQL request, when the user requests an S3 Bucket, we should add the Bucket request to the output directory and inject the connection details into the Runtime request. Right after the PostgreSQL block you just added, include the following:
+
+```sh
+if [ -n "${bucket_name}" ]; then
+bucket_name="$(yq eval '.spec.bucket.name // ""' /kratix/input/object.yaml)"
+bucket_public="$(yq eval '.spec.bucket.public // false' /kratix/input/object.yaml)"
+
+bucket_arn="arn:aws:s3:::${bucket_name}"
+cat > /kratix/output/bucket-request.yaml <<EOF
+apiVersion: example.kratix.io/v1alpha1
+kind: bucket
+metadata:
+  name: ${bucket_name}
+  namespace: ${app_namespace}
+  labels:
+    kratix.io/component-of-promise-name: app-stack
+    kratix.io/component-of-resource-name: ${app_name}
+    kratix.io/component-of-resource-namespace: ${app_namespace}
+spec:
+  bucketName: ${bucket_name}
+  public: ${bucket_public}
+EOF
+
+cat >> /kratix/output/runtime-request.yaml <<EOF
+    - name: BUCKET_NAME
+      value: ${bucket_name}
+EOF
+fi
+```
+
+And that's it. Workflow done!
+
+<details>
+<summary>Click here for the complete `pipeline.sh` script</summary>
+TBA
+</details
+
+There are only two things left to do in our Compound Promise:
+
+* Ensure the outputs of the pipeline are scheduled to the Platform cluster
+* Set the sub-Promises as requirements for the Compound Promise
+The next sections will explore how to do this.
+
+### Scheduling to the Platform cluster
+
+To ensure that the documents generated by the AppStack Promise are scheduled to the Platform cluster, we need to:
+
+1. Create a Destination representing the platform with some specific labels, like `environment=platform`
+2. Configure the GitOps agent in the Platform cluster
+3. Add Destination Selectors in the Compound Promise.
+
+We won't go into detail about (1) and (2) in this blog post. You can find more information about how to [Registering the Platform as a Destination](/workshop/operating-kratix/compound-promises#register-the-platform-as-a-destination) in the Kratix workshop.
+
+:::tip
+
+To quickly get an environment compatible with the promises in this blog post, clone Kratix and run:
+
+```bash
+make quick-start
+make prepare-platform-as-destination
+```
+:::
+
+At this stage, you should see the following when listing the Destinations in your Platform cluster:
+
+```shell-session
+$ kubectl --context $PLATFORM get destinations --show-labels
+NAME               READY   LABELS
+platform-cluster   True    environment=platform
+worker-1           True    environment=dev
+```
+
+
+### Defining the Promise Requirements
+
+The final piece missing in our Compound Promise is the declaration of the sub-Promises it depends on. For that, you set the `spec.requiredPromises` field in the Compound Promise document with a list of sub-Promise names and versions.
+
+Let's update our AppStack Promise to include the required sub-Promises:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  labels:
+    kratix.io/promise-version: v0.1.0
+  name: app-stack
+spec:
+  #highlight-start
+  requiredPromises:
+    - name: s3
+      version: v0.1.0
+    - name: postgresql
+      version: v1.0.0-beta.2
+    - name: runtime
+      version: v1.0.0
+  #highlight-end
+  destinationSelectors: #..
+  api: #...
+```
+
+## Installing the Promise {#install}
+
+If we try to install the Compound Promise now, you should get a warning:
+
+```shell-session
+$ kubectl --context $PLATFORM apply --filename promise.yaml
+TBA
+```
+
+The Compound Promise itself will remain unavailable until the requirements are satisfied.
+```shell-session
+$ kubectl --context $PLATFORM get promises
+TBA
+```
+
+To satisfy the `requiredPromises` declaration, you will to, install the required promises in your Platform cluster:
+
+```bash
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
+TBA: S3 Bucket promise
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/runtime/promise-release.yaml
+```
+
+After a few seconds, you should see all the Promises available in your Platform:
+
+```shell-session
+$ kubectl --context $PLATFORM get promises
+TBA
+```
+
+:::tip
+
+You may have noticed that we are applying a different type of resource: a Promise Release. This guide will not go into detail on the Promise Releases, but you can find more information on them [here](/main/reference/promises/releases).
+
+:::
+
+You are now ready to send requests to your Compound Promise!
+
+## Testing it all together
+
+Now that you have everything set in the Platform, you can go ahead and deploy the your applications!
+
+For that, create a request for your AppStack Promise:
+
+```yaml
+cat <<EOF | kubectl --context $PLATFORM apply -f -
+apiVersion: example.kratix.io/v1alpha1
+kind: AppStack
+metadata:
+  name: app-stack
+spec:
+  image: syntasso/my-app:v1.0.0 # you can use this one, or build your own
+  database:
+    driver: postgresql
+  bucket:
+    name: myapp-bucket
+    public: false
+EOF
+```
+
+Sending this request will immediately trigger the AppStack Promise Resource workflow. That workflow will create:
+
+- a `bucket` request for the S3 Promise only when `spec.bucket` is defined
+- a `postgresql` request for the PostgreSQL Promise only when `spec.database.driver` is `postgresql`
+- a `Runtime` request for the Python application
+
+The container image you use for `spec.image` should serve HTTP on port `8000`, handle the bucket and PostgreSQL environment variables only when they are present, and return a message such as `Hello world, my bucket name is myapp-bucket. My bucket ARN is arn:aws:s3:::myapp-bucket`.
+
+That, in turn, should trigger the sub-promises workflows:
+```sh
+$ kubectl --context $PLATFORM get pods
+```
+
+In a couple of minutes, in your Worker cluster, you should see the application pod running:
+```sh
+$ kubectl --context $WORKER get pods
+```
+
+You can build the example Python application in `app-stack-example/python-app` and push it to your registry, then use that image in the `AppStack` request.
+```sh
+docker build -t python-bucket-app:v0.1.0 python-app/
+kind load docker-image python-bucket-app:v0.1.0 -n platform
+```

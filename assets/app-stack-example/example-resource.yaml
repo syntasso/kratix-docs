@@ -1,0 +1,11 @@
+apiVersion: example.kratix.io/v1alpha1
+kind: AppStack
+metadata:
+  name: my-app-stack
+spec:
+  image: syntasso/example-python-app:v1.0.0
+  database:
+    driver: postgresql
+  # bucket:
+  #   name: my-app-stack
+  #   public: false
