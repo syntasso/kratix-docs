@@ -114,6 +114,7 @@ A Resource Configure Pipeline can output an optional file to suspend its executi
 The file supports:
 
 ```yaml
+retryAfter: 10m
 suspend: true | false
 message: "optional reason"
 ```
@@ -126,6 +127,21 @@ When a Pipeline writes `suspend: true`, Kratix:
 - stops executing later Pipelines in the workflow
 
 If the suspend label is removed, Kratix starts from the suspended Pipeline.
+
+When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as
+suspended. It will also:
+
+- re-executes the suspended Pipeline at or after `retryAfter`
+- increments the retry `attempts` for that pipeline
+
+If the re-executed Pipeline writes a new `retryAfter`, Kratix schedules another
+retry from that Pipeline.
+
+If the re-executed Pipeline does not write `retryAfter`, the retry loop stops
+and Kratix continues with the next Pipeline in the workflow.
+
+If both `retryAfter` and `suspend` are present, `retryAfter` takes precedence.
+This is true whether `suspend` is `true` or `false`.
 
 If a new reconciliation is triggered while the Resource is suspended, Kratix
 starts the configure workflow from the beginning instead. This applies when:

@@ -110,6 +110,7 @@ A Promise Configure Pipeline can output an optional file to suspend its executio
 The file supports:
 
 ```yaml
+retryAfter: 10m
 suspend: true | false
 message: "optional reason"
 ```
@@ -123,8 +124,22 @@ When a Pipeline writes `suspend: true`, Kratix:
 
 If the suspend label is removed, Kratix starts from the suspended Pipeline.
 
+When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as suspended.
+It will also:
+- re-executes the suspended Pipeline after the duration set by `retryAfter`
+- increments the retry `attempts` for that pipeline in `status.kratix.workflows.pipelines`
+
+If the re-executed Pipeline writes a new `retryAfter`, Kratix schedules another
+retry from that Pipeline.
+
+If the re-executed Pipeline does not write `retryAfter`, the retry loop stops
+and Kratix continues with the next Pipeline in the workflow.
+
+When both `retryAfter` and `suspend` are present, `retryAfter` takes precedence.
+This is true whether `suspend` is `true` or `false`.
+
 If a new reconciliation is triggered while the Promise is suspended, Kratix
-starts the configure workflow from the beginning instead. This applies when:
+starts the configure workflow from the beginning. This applies when:
 
 - the Promise is manually reconciled
 - the reconciliation interval is reached
