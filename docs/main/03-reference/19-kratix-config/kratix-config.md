@@ -34,15 +34,34 @@ data:
     workflows:
       jobOptions:
         defaultBackoffLimit: 6
+        podTTLSecondsAfterFinished: 3600 # seconds to keep completed Job Pods before cleanup; omit to use Kubernetes default
       defaultImagePullPolicy: IfNotPresent # can be `IfNotPresent`, `Always`, or `Never`
+      defaultContainerResources: # optional; default CPU/memory requests and limits for pipeline containers
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
       defaultContainerSecurityContext:
         runAsNonRoot: false
+      defaultContainerResources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+          ephemeral-storage: "256Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+          ephemeral-storage: "256Mi"
     logging:
       level: "info" # one of info, warning, debug, trace
       structured: false # if true, emit logs as json
     telemetry:
-      traces: true # false to disable traces
-      metrics: true # false to disable metrics
+      traces:
+        enabled: true # false to disable traces
+      metrics:
+        enabled: true # false to disable metrics
       endpoint: grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4317 # exporter endpoint
       protocol: grpc # or http
       insecure: true
@@ -58,7 +77,7 @@ The total number of completed Kratix workflow jobs to keep in the cluster. The o
 
 ### selectiveCache (default: false)
 
-Enable label selector caching of Secrets on the cluster to optimise memory usage. Secrets used by Kratix must be labelled with app.`kubernetes.io/part-of=kratix`.
+Enable label selector caching of Secrets on the cluster to optimise memory usage. Secrets used by Kratix must be labelled with `app.kubernetes.io/part-of=kratix`.
 
 ### reconciliationInterval (default: 10h)
 
@@ -84,6 +103,14 @@ Options for the Jobs that are created by Kratix Workflows.
 
 The number of times to retry a failing workflow Job before marking it failed. This configures the [backoffLimit](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy) in Workflow Jobs. This will default to the Kubernetes Job default of 6.
 
+##### podTTLSecondsAfterFinished
+
+The number of seconds to retain completed workflow Job Pods before they are cleaned up. When set, Kratix runs a controller that deletes Pods belonging to completed Jobs after this TTL. Omit to use the Kubernetes default (Pods are retained until the Job is deleted). Must be greater than zero when set.
+
+#### defaultContainerResources
+
+Default CPU and memory requests and limits for pipeline containers. Pipeline-level `resources` override these defaults. When omitted, Kratix uses built-in defaults (100m/128Mi requests, 200m/256Mi limits).
+
 #### defaultImagePullPolicy
 
 When to pull the images specified in Workflows. This configures the [imagePullPolicy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) in Workflow Jobs. Can be `IfNotPresent`, `Always`, or `Never`
@@ -91,6 +118,10 @@ When to pull the images specified in Workflows. This configures the [imagePullPo
 #### defaultContainerSecurityContext
 
 The [Security Context](/main/reference/workflows#security-context) to apply to all Workflow Pods.
+
+#### defaultContainerResources
+
+Defines the resource requirements that Workflow Jobs should default to. This controls the `spec.resources` for the generated pods.
 
 ### logging
 
@@ -106,7 +137,14 @@ Set to true to emit logs as json.
 
 ### telemetry
 
-Telemetry configuration for Kratix.
+Telemetry configuration for Kratix. Configures OpenTelemetry export for traces and metrics.
+
+- **endpoint**: OTLP exporter endpoint (e.g. `grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4317`).
+- **protocol**: OTLP protocol; `grpc` (default) or `http`.
+- **insecure**: Set to `true` to skip TLS verification when connecting to the endpoint.
+- **headers**: Optional map of headers (e.g. `authorization: "Bearer <token>"`) for authenticated endpoints.
+- **traces.enabled**: Set to `false` to disable trace export. Defaults to `true` when telemetry is configured.
+- **metrics.enabled**: Set to `false` to disable metrics export. Defaults to `true` when telemetry is configured.
 
 ### featureFlags
 

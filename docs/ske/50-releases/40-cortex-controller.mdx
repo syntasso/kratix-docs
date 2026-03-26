@@ -16,10 +16,23 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cort
 
 ## Release Notes
 
+### [v0.2.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.2.4/) (2026-03-24)
+
+### Fixes
+
+- Fixed an issue where the array key in the generated manifest would be missing when the array had a certain number of items.
+- In specific occasions, the generated workflow for Update would not pre-populate the previous values for the field. This is now fixed.
+- Fixed a bug that would generate invalid workflows when `spec.name` or `spec.namespace`
+  were defined in the Promise API.
+
+### [v0.2.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.2.3/) (2026-03-23)
+
+Contains dependency updates.
+
 ### [v0.2.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.2.2/) (2026-02-26)
 
 Released via the SKE Operator Helm Chart [version 0.58.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.58.0/)
 
 #### Features
 
-* Initial release
+- Initial release

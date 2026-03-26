@@ -78,6 +78,13 @@ spec:
     name: default
     # The kind of the State Store to use: required, valid options: GitStateStore, BucketStateStore
     kind: BucketStateStore
+
+
+  # Controls whether Kratix writes initial placeholder files to the StateStore for this Destination
+  initWorkloads:
+    # If false, Kratix will not create the files
+    # Defaults to true
+    enabled: true
 ```
 
 When a new Destination is created in the platform cluster, Kratix will write to

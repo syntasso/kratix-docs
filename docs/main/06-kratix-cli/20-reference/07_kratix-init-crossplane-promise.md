@@ -1,8 +1,8 @@
 # kratix init crossplane-promise
-Initialize a new Promise from a Crossplane XRD
+Preview: Initialize a new Promise from a Crossplane XRD
 
 ## Description
-Initialize a new Promise from a Crossplane XRD
+Preview: Initialize a new Promise from a Crossplane XRD. This command is in preview, not supported under SLAs, and may change or break without notice.
 
 ## Usage
 ```bash

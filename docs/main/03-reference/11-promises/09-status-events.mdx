@@ -60,25 +60,55 @@ kubectl describe promise <name>
 
 ## Common Promise Status Fields
 
-- `apiVersion` – Shows the API version that this Promise is serving requests at.
-- `kind` – Shows the Kind that this Promise is serving.
-- `lastAvailableTime` – When this Promise becomes available.
-- `status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
-- `message` - Message set by Promise configure workflow.
+- `kratix.apiVersion` – Shows the API version that this Promise is serving requests at.
+- `kratix.kind` – Shows the Kind that this Promise is serving.
+- `kratix.lastAvailableTime` – When this Promise becomes available.
+- `kratix.status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
+- `kratix.message` - Message set by Promise configure workflow.
 - `workflows` - The number of Resource configure workflow pipelines
 - `workflowsSucceeded` - The number of Resource configure workflow pipelines that have completed successfully
 - `workflowsFailed`- The number of Resource configure workflow pipelines that have failed
+- `message` - Message set by Promise configure workflow.
 
 ```yaml
 status:
-  apiVersion: test.kratix.io/v1alpha1
-  kind: Redis
-  lastAvailableTime: "2025-06-23T15:34:32Z"
-  status: Available
-  message: Configuration updated
-  conditions:
-  ...
+  kratix:
+    apiVersion: marketplace.kratix.io/v1alpha1
+    kind: redis
+    lastAvailableTime: "2026-03-06T16:02:26Z"
+    status: Available
+    version: v0.1.0
+    message: Configuration updated
 ```
+
+## Pipeline Execution Status Fields
+
+Kratix executes Configure Workflow pipelines in order and records the state of each pipeline under `status.kratix.workflows.pipelines`.
+
+For example, if a Promise has three configure pipelines and the third pipeline is currently running, the status could look like:
+
+```yaml
+status:
+  kratix:
+    workflows:
+      lastSuccessfulConfigureWorkflowTime: "2026-03-16T11:52:06Z"
+      pipelines:
+        - name: pipeline0
+          phase: Succeeded
+          lastTransitionTime: "2026-03-16T11:53:04Z"
+        - name: pipeline1
+          phase: Succeeded
+          lastTransitionTime: "2026-03-16T11:53:05Z"
+        - name: pipeline2
+          phase: Running
+          lastTransitionTime: "2026-03-16T11:53:57Z"
+```
+
+Each pipeline can be in one of these phases: `Pending`, `Running`, `Succeeded`, or `Failed`.
+
+`lastTransitionTime` is updated whenever the pipeline phase changes. If a pipeline enters the `Failed` phase, Kratix stops executing the remaining pipelines in that workflow. When a new configure reconciliation starts, Kratix resets all pipeline phases to `Pending` before running the workflow again.
+
+For more detail about a failed pipeline, inspect the events on the Promise and the logs of the failed pipeline Job.
 
 ## Events
 

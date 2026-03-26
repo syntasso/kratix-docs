@@ -144,6 +144,9 @@ const config = {
           hideable: true,
         },
       },
+      colorMode: {
+        respectPrefersColorScheme: true,
+      },
       navbar: {
         logo: {
           alt: "Kratix Logo",

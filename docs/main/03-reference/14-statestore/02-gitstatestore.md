@@ -1,5 +1,5 @@
 ---
-description: Documentation for the Kratix `GitStateStore`` Custom Resource
+description: Documentation for the Kratix GitStateStore Custom Resource
 title: GitStateStore
 sidebar_label: GitStateStore
 id: gitstatestore
