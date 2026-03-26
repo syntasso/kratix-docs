@@ -185,9 +185,9 @@ After applying this new version of our app Promise, we should see two Promise Re
 
 ```shell-session
 $ kubectl get promiserevisions
-NAME         LATEST
-app-v0.0.1
-app-v0.0.2   true
+NAME        PROMISE   VERSION   LATEST
+app-abcde   app       v0.0.1
+app-fghij   app       v0.0.2    true
 ```
 
 You can see that the version `v0.0.2` is being marked as the latest Promise Revision. New app resource requests will be

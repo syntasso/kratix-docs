@@ -37,6 +37,15 @@ data:
       defaultImagePullPolicy: IfNotPresent # can be `IfNotPresent`, `Always`, or `Never`
       defaultContainerSecurityContext:
         runAsNonRoot: false
+      defaultContainerResources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+          ephemeral-storage: "256Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+          ephemeral-storage: "256Mi"
     logging:
       level: "info" # one of info, warning, debug, trace
       structured: false # if true, emit logs as json
@@ -91,6 +100,10 @@ When to pull the images specified in Workflows. This configures the [imagePullPo
 #### defaultContainerSecurityContext
 
 The [Security Context](/main/reference/workflows#security-context) to apply to all Workflow Pods.
+
+#### defaultContainerResources
+
+Defines the resource requirements that Workflow Jobs should default to. This controls the `spec.resources` for the generated pods.
 
 ### logging
 

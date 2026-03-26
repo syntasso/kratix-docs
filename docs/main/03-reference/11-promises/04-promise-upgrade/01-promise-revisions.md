@@ -36,8 +36,8 @@ kind: PromiseRevision
 metadata:
   labels:
     kratix.io/promise-name: promise-name
-  name: promise-revision-name
-  # Name of the Promise Revision; this takes the form <PROMISE_NAME>-<VERSION>
+  name: promise-name-abcde
+  # Name of the Promise Revision; Kratix derives this deterministically from the Promise name and version.
 spec:
   promiseRef:
     name: promise-name
@@ -61,10 +61,13 @@ For example, if the Redis Promise is initially installed at `v0.1.0` (via the `k
 
 ```shell-session
 $ kubectl get promiserevisions
-NAME           LATEST
-redis-v0.1.0
-redis-v0.2.0   true
+NAME          PROMISE   VERSION   LATEST
+redis-abcde   redis     v0.1.0
+redis-fghij   redis     v0.2.0    true
 ```
+
+Use the `PROMISE` and `VERSION` columns to identify a revision. The object name is stable for a given Promise name and
+version, but it is not intended to be parsed by clients.
 
 :::tip
 
