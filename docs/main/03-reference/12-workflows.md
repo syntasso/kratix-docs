@@ -174,45 +174,34 @@ A Pipeline can output an optional file to suspend its running:
 The supported schema is:
 
 ```yaml
-retryAfter: 10m
 suspend: true | false
 message: "optional reason"
 ```
 
-When a Pipeline writes `suspend: true`, Kratix:
+When a Pipeline writes `suspend: true`, Kratix will:
 
-- adds `kratix.io/workflow-suspended: "true"` to the Promise or Resource request
-- marks the current pipeline as `Suspended` in `status.kratix.workflows.pipelines`
-- stores the optional message on that pipeline entry
-- stops executing later Pipelines in the workflow
+- add `kratix.io/workflow-suspended: "true"` to the Promise or Resource request
+- mark the current entry in `status.kratix.workflows.pipelines` as `Suspended`
+- store the optional `message` on that pipeline status entry
+- stop executing any later Pipelines in the workflow
 
-If `kratix.io/workflow-suspended` is removed, Kratix starts from the suspended
-Pipeline.
+This applies to both Promise and Resource Configure workflows.
 
-When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as
-suspended. It will also:
+#### Resuming or restarting a suspended workflow
 
-- re-execute the suspended pipeline after `retryAfter`
-- increment the retry `attempts` for that pipeline
+Once a workflow is suspended, Kratix supports two different behaviors:
 
-If the re-executed Pipeline writes a new `retryAfter`, Kratix will schedule another
-retry from that Pipeline.
+- If `kratix.io/workflow-suspended` is removed, Kratix resumes from the Pipeline
+  marked `Suspended`.
+- If Kratix triggers a fresh reconciliation, the workflow restarts from the
+  beginning.
 
-If the re-executed Pipeline does not write `retryAfter`, the retry loop stops
-and Kratix continues with the next Pipeline in the workflow.
-
-When both `retryAfter` and `suspend` are present, `retryAfter` takes precedence.
-This is true whether `suspend` is `true` or `false`.
-
-Kratix can triggers a new reconciliation from the start of the pipeline
-while the workflow is suspended. This applies when:
+Fresh reconciliation from the beginning happens when:
 
 - `kratix.io/manual-reconciliation: "true"` is added
 - the reconciliation interval is reached
 - the Promise or Resource request is updated
-- a previously paused Promise or Resource is unpaused
-
-This applies to both Promise and Resource Configure workflows.
+- a previously paused object is unpaused
 
 ### Role-based Access Control (RBAC)
 
