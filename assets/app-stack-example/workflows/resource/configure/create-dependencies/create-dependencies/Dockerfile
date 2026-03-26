@@ -1,6 +1,6 @@
 FROM alpine:3.20
 
-RUN apk add --no-cache yq
+RUN apk update && apk add --no-cache yq
 
 ADD scripts/pipeline.sh /usr/bin/pipeline.sh
 

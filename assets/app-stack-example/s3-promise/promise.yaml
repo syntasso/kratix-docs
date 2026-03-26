@@ -65,7 +65,7 @@ spec:
             - name: MODULE_REGISTRY_VERSION
               value: 3.7.0
             - name: MODULE_OUTPUT_NAMES
-              value: s3_bucket_arn,s3_bucket_id,s3_bucket_arn,s3_bucket_bucket_domain_name
+              value: s3_bucket_arn,s3_bucket_id,s3_bucket_bucket_domain_name
             image: ghcr.io/syntasso/kratix-cli/terraform-generate:v0.6.0
             name: terraform-generate
       - apiVersion: platform.kratix.io/v1alpha1

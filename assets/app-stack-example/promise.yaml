@@ -61,8 +61,47 @@ spec:
         - apiVersion: platform.kratix.io/v1alpha1
           kind: Pipeline
           metadata:
-            name: instance-configure
+            name: create-dependencies
           spec:
             containers:
-              - image: ghcr.io/syntasso/kratix-docs/app-stack-example-pipeline:v0.1.0
-                name: deploy-resources
+              - image: ghcr.io/syntasso/kratix-docs/app-stack-create-dependencies:v0.1.0
+                name: create-dependencies
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: wait-for-dependencies
+          spec:
+            rbac:
+              permissions:
+                - apiGroups:
+                    - example.kratix.io
+                  resources:
+                    - buckets
+                  verbs:
+                    - get
+                    - list
+                - apiGroups:
+                    - marketplace.kratix.io
+                  resources:
+                    - postgresqls
+                  verbs:
+                    - get
+                    - list
+                - apiGroups:
+                    - ""
+                  resources:
+                    - secrets
+                  verbs:
+                    - get
+                  resourceNamespace: "*"
+            containers:
+              - image: ghcr.io/syntasso/kratix-docs/app-stack-wait-for-dependencies:v0.1.0
+                name: wait-for-dependencies
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: create-runtime
+          spec:
+            containers:
+              - image: ghcr.io/syntasso/kratix-docs/app-stack-create-runtime:v0.1.0
+                name: create-runtime
