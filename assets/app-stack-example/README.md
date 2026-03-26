@@ -29,9 +29,15 @@ This example now uses three `resource.configure` Pipelines:
 You can scaffold them with:
 
 ```bash
-kratix add container resource/configure/create-dependencies --image ghcr.io/syntasso/kratix-docs/app-stack-create-dependencies:v0.1.0
-kratix add container resource/configure/wait-for-dependencies --image ghcr.io/syntasso/kratix-docs/app-stack-wait-for-dependencies:v0.1.0
-kratix add container resource/configure/create-runtime --image ghcr.io/syntasso/kratix-docs/app-stack-create-runtime:v0.1.0
+kratix add container resource/configure/create-dependencies \
+ --image ghcr.io/syntasso/kratix-docs/app-stack-create-dependencies:v0.1.0 \
+ --name create-dependencies
+kratix add container resource/configure/wait-for-dependencies \
+ --image ghcr.io/syntasso/kratix-docs/app-stack-wait-for-dependencies:v0.1.0 \
+ --name wait-for-dependencies
+kratix add container resource/configure/create-runtime \ 
+ --image ghcr.io/syntasso/kratix-docs/app-stack-create-runtime:v0.1.0 \
+ --name create-runtime
 ```
 
 Together these Pipelines can output up to three sub-requests:

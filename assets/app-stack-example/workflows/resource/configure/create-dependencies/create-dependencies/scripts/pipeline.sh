@@ -40,7 +40,7 @@ if [ "${database_driver}" = "postgresql" ]; then
   database_requested=true
 
   cat > /kratix/output/postgresql-request.yaml <<EOF
-apiVersion: marketplace.kratix.io/v1alpha1
+apiVersion: marketplace.kratix.io/v1alpha2
 kind: postgresql
 metadata:
   name: ${database_name}
