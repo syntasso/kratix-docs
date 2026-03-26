@@ -64,9 +64,11 @@ kubectl describe promise <name>
 - `kratix.kind` – Shows the Kind that this Promise is serving.
 - `kratix.lastAvailableTime` – When this Promise becomes available.
 - `kratix.status` – Whether the Promise is ready to accept Resource requests; can be set to 'Available' or 'Unavailable'.
+- `kratix.message` - Message set by Promise configure workflow.
 - `workflows` - The number of Resource configure workflow pipelines
 - `workflowsSucceeded` - The number of Resource configure workflow pipelines that have completed successfully
 - `workflowsFailed`- The number of Resource configure workflow pipelines that have failed
+- `message` - Message set by Promise configure workflow.
 
 ```yaml
 status:
@@ -76,6 +78,7 @@ status:
     lastAvailableTime: "2026-03-06T16:02:26Z"
     status: Available
     version: v0.1.0
+    message: Configuration updated
 ```
 
 ## Pipeline Execution Status Fields
