@@ -20,7 +20,7 @@ Adding this label to a Promise forces Kratix to rerun the Promise workflows outs
 
 The label is removed automatically once Kratix schedules the manual run so it can be applied again later.
 
-## Unsuspension a Workflow
+## Unsuspending a Workflow
 
 ```
 kratix.io/workflow-suspended: "true"
