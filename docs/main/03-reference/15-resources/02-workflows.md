@@ -103,6 +103,37 @@ To re-run a workflow following a Pipeline failure, you can perform a
 [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation) of the Resource, which will trigger the
 workflow again from the beginning.
 
+### Suspending a workflow
+
+A Resource Configure Pipeline can output an optional file to suspend its execution:
+
+```text
+/kratix/metadata/workflow-control.yaml
+```
+
+The file supports:
+
+```yaml
+suspend: true | false
+message: "optional reason"
+```
+
+When a Pipeline writes `suspend: true`, Kratix:
+
+- adds `kratix.io/workflow-suspended: "true"` to the Resource request
+- marks the current pipeline as `Suspended` in `status.kratix.workflows.pipelines`
+- stores the optional message on that pipeline entry
+- stops executing later Pipelines in the workflow
+
+If the suspend label is removed, Kratix starts from the suspended Pipeline.
+
+If a new reconciliation is triggered while the Resource is suspended, Kratix
+starts the configure workflow from the beginning instead. This applies when:
+
+- the Resource is manually reconciled
+- the reconciliation interval is reached
+- the Resource is updated
+
 ### Idempotency
 
 All commands which run in Configure workflows must be idempotent, as there is a guarantee
