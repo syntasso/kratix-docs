@@ -137,6 +137,11 @@ Once you've done that, you'll also need to register the package in `packages/bac
 backend.add(import('@backstage/plugin-catalog-backend-module-aws/alpha'));
 ```
 
+### Configuring OIDC for Backstage
+
+If you plan to Configure OIDC for your Backstage installation, take a look at the [Kratix, Backstage, and OIDC blog post](/blog/backstage-and-keycloak) to see the steps you'll
+need to take to ensure that it integrates with SKE. This uses Keycloak as an example but Backstage supports a number of different [OIDC providers](https://backstage.io/docs/auth/).
+
 ## Configuring Kratix
 
 At this moment you have Backstage configured to read its catalog from an external state store. Next, you must configure Kratix so it can write Backstage entity data to the same state store.

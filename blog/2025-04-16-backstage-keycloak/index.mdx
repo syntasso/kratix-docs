@@ -499,7 +499,7 @@ const kcAuthProviderModule = createBackendModule({
       async init({ providers }) {
         providers.registerProvider({
           // This ID must match the actual provider config, e.g. addressing
-          // auth.providers.azure means that this must be "azur e".
+          // auth.providers.azure means that this must be "azure".
           providerId: 'keycloak',
           // Use createProxyAuthProviderFactory instead if it's one of the proxy
           // based providers rather than an OAuth based one

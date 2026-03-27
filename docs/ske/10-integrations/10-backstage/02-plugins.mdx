@@ -204,7 +204,9 @@ ske:
 
 :::warning
 
-For oidc authentication, you must ensure that, in the Backstage Token, there's a `tok` field with the `accessToken` to be used to access the Kubernetes cluster.
+When using OIDC authentication, you must ensure that the `issueToken` has a `tok` field. The value of this should be the `accessToken` to be used to access the Kubernetes cluster.
+
+Take a look at the [Kratix, Backstage, and OIDC blog post](/blog/backstage-and-keycloak) for more information.
 
 :::
 
@@ -214,7 +216,7 @@ If no `ske.kubernetes` section is present, the backend plugin will assume Backst
 
 :::info
 
-The Git integration is not as feature-complete as the Kuberntes integration. By
+The Git integration is not as feature-complete as the Kubernetes integration. By
 configuring Backstage with the Kubernetes integration, you will get the
 following benefits:
 
