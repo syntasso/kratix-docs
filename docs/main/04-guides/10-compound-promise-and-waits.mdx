@@ -152,12 +152,6 @@ CMD [ "create-dependencies" ]
 ENTRYPOINT []
 ```
 
-We also need to build and load this image into our local environment:
-```sh
-docker build -t kratix-guide/app-stack-create-dependencies:v0.1.0 workflows/resource/configure/create-dependencies/create-dependencies/
-kind load docker-image kratix-guide/app-stack-create-dependencies:v0.1.0 --name platform
-```
-
 ##### Adding the PostgreSQL Request
 
 Next step is to optionally include a request to the PostgreSQL Promise if the user requests a database. The API for the PostgreSQL Promise looks like this:
@@ -228,6 +222,12 @@ dependencies:
 EOF
 ```
 
+We also need to build and load this image into our local environment:
+```sh
+docker build -t kratix-guide/app-stack-create-dependencies:v0.1.0 workflows/resource/configure/create-dependencies/create-dependencies/
+kind load docker-image kratix-guide/app-stack-create-dependencies:v0.1.0 --name platform
+```
+
 And that's it. This workflow is now done!
 
 #### The next pipeline is `wait-for-dependencies`
@@ -270,12 +270,6 @@ RUN chmod +x /usr/local/bin/*
 CMD [ "wait-for-dependencies" ]
 
 ENTRYPOINT []
-```
-
-We also need to build and load this image into our local environment:
-```sh
-docker build -t kratix-guide/app-stack-wait-for-dependencies:v0.1.0 workflows/resource/configure/wait-for-dependencies/wait-for-dependencies
-kind load docker-image kratix-guide/app-stack-wait-for-dependencies:v0.1.0 --name platform
 ```
 
 Now let's implement the functionality. In the `wait-for-dependencies` add the following:
@@ -381,6 +375,12 @@ EOF
 fi
 ```
 
+We also need to build and load this image into our local environment:
+```sh
+docker build -t kratix-guide/app-stack-wait-for-dependencies:v0.1.0 workflows/resource/configure/wait-for-dependencies/wait-for-dependencies
+kind load docker-image kratix-guide/app-stack-wait-for-dependencies:v0.1.0 --name platform
+```
+
 #### Lastly the `create-runtime` workflow pipeline:
 In the `create-runtime` pipeline we will read the resolved values from status, and ONLY after our dependencies are available we will create the
 `Runtime` request from the Runtime Promise. This pipeline also injects to the application's environment the `PGHOST`, `DBNAME`, `PGUSER`, and `PGPASSWORD` only when PostgreSQL was requested
@@ -412,12 +412,6 @@ RUN chmod +x /usr/local/bin/*
 CMD [ "create-runtime" ]
 
 ENTRYPOINT []
-```
-
-We also need to build and load this image into our local environment:
-```sh
-docker build -t kratix-guide/app-stack-create-runtime:v0.1.0 workflows/resource/configure/create-runtime/create-runtime/
-kind load docker-image kratix-guide/app-stack-create-runtime:v0.1.0 --name platform
 ```
 
 ##### Adding the Runtime Request
@@ -499,13 +493,16 @@ EOF
 fi
 ```
 
+We also need to build and load this image into our local environment:
+```sh
+docker build -t kratix-guide/app-stack-create-runtime:v0.1.0 workflows/resource/configure/create-runtime/create-runtime/
+kind load docker-image kratix-guide/app-stack-create-runtime:v0.1.0 --name platform
+```
 
 And that's it. Workflow done!
 
 Now there is only one thing left to do in our Compound Promise:
 * Set the sub-Promises as requirements for the Compound Promise
-
-
 
 ### Defining the Promise Requirements
 
