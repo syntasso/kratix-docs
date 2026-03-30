@@ -4,10 +4,13 @@ set -eu
 
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+pg_safe_name="$(printf '%s' "$app_name" | tr '-' '_')"
 
 database_requested=false
 database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
-database_name="${app_name}-db"
+
+k8s_resource_name="${app_name}-db"     # e.g., app-stack-db (For Kubernetes)
+pg_database_name="${pg_safe_name}_db"  # e.g., app_stack_db (For Postgres)
 
 if [ "${database_driver}" = "postgresql" ]; then
   database_requested=true
@@ -16,7 +19,7 @@ if [ "${database_driver}" = "postgresql" ]; then
 apiVersion: marketplace.kratix.io/v1alpha2
 kind: postgresql
 metadata:
-  name: ${database_name}
+  name: ${k8s_resource_name}
   namespace: ${app_namespace}
   labels:
     kratix.io/component-of-promise-name: app-stack
@@ -25,7 +28,7 @@ metadata:
 spec:
   env: dev
   teamId: ${app_name}
-  dbName: ${database_name}
+  dbName: ${pg_database_name}
 EOF
 fi
 
@@ -34,5 +37,5 @@ message: Dependency requests created
 dependencies:
   database:
     requested: ${database_requested}
-    requestName: "${database_name}"
+    requestName: "${k8s_resource_name}"
 EOF

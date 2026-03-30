@@ -114,7 +114,7 @@ At this point, your local `app-stack-example` directory should look like this:
 └── workflows
     └── resource
         └── configure
-            └── instance
+            └── create-dependencies
                 └── create-dependencies
                     ├── Dockerfile
                     ├── resources
@@ -185,10 +185,13 @@ set -eu
 
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
+pg_safe_name="$(printf '%s' "$app_name" | tr '-' '_')"
 
 database_requested=false
 database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
-database_name="${app_name}-db"
+
+k8s_resource_name="${app_name}-db"     # e.g., app-stack-db (For Kubernetes)
+pg_database_name="${pg_safe_name}_db"  # e.g., app_stack_db (For Postgres)
 
 if [ "${database_driver}" = "postgresql" ]; then
   database_requested=true
@@ -197,7 +200,7 @@ if [ "${database_driver}" = "postgresql" ]; then
 apiVersion: marketplace.kratix.io/v1alpha2
 kind: postgresql
 metadata:
-  name: ${database_name}
+  name: ${k8s_resource_name}
   namespace: ${app_namespace}
   labels:
     kratix.io/component-of-promise-name: app-stack
@@ -206,7 +209,7 @@ metadata:
 spec:
   env: dev
   teamId: ${app_name}
-  dbName: ${database_name}
+  dbName: ${pg_database_name}
 EOF
 fi
 ```
@@ -215,7 +218,7 @@ Additionally in this pipeline script we need to write `/kratix/metadata/status.y
   - whether PostgreSQL was requested
   - the generated PostgreSQL request name
 
-After the bucket request section in the script add the following:
+Add the following:
 
 ```sh
 cat > /kratix/metadata/status.yaml <<EOF
@@ -223,7 +226,7 @@ message: Dependency requests created
 dependencies:
   database:
     requested: ${database_requested}
-    requestName: "${database_name}"
+    requestName: "${k8s_resource_name}"
 EOF
 ```
 
@@ -522,8 +525,9 @@ metadata:
   name: app-stack
 spec:
   #highlight-start
+  requiredPromises:
     - name: postgresql
-      version: v1.0.0-beta.3
+      version: v1.0.0-beta.5
     - name: runtime
       version: v1.0.0
   #highlight-end
@@ -537,7 +541,7 @@ If we try to install the Compound Promise now, you should get a warning:
 
 ```shell-session
 $ kubectl --context $PLATFORM apply --filename promise.yaml
-Warning: Required Promise "postgresql" at version "v1.0.0-beta.3" not installed
+Warning: Required Promise "postgresql" at version "v1.0.0-beta.5" not installed
 Warning: Required Promise "runtime" at version "v1.0.0" not installed
 Warning: Promise will not be available until the above issue(s) is resolved
 promise.platform.kratix.io/app-stack created
@@ -553,7 +557,7 @@ app-stack   Unavailable   AppStack   example.kratix.io/v1alpha1   v0.1.0
 To satisfy the `requiredPromises` declaration, you will to, install the required promises in your Platform cluster:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/tags/v1.0.0-beta.5/promise-release.yaml
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/runtime/promise-release.yaml
 ```
 
@@ -613,9 +617,17 @@ kratix-runtime-app-stack-instance-e6313-szgrt                   0/1     Complete
 In a couple of minutes, in your Worker cluster, you should see the application pod running:
 ```shell-session
 $ kubectl --context $WORKER get pods
-NAME                                              READY   STATUS              RESTARTS   AGE
-app-stack-58b99c69cc-982m4                        0/1     ContainerCreating   0          4s
-app-stack-app-stack-db-postgresql-0               1/1     Running             0          37s
-nginx-nginx-ingress-controller-758c9cb6fc-jcfd7   1/1     Running             0          17m
-postgres-operator-578ff5d886-9ztf6                1/1     Running             0          17m
+NAME                                              READY   STATUS    RESTARTS   AGE
+app-stack-app-stack-db-postgresql-0               1/1     Running   0          56s
+app-stack-db46cffb9-lbxnc                         1/1     Running   0          5s
+nginx-nginx-ingress-controller-758c9cb6fc-jcfd7   1/1     Running   0          87m
+postgres-operator-578ff5d886-9ztf6                1/1     Running   0          87m
 ```
+
+You can access the application via port-forwarding:
+
+```sh
+$ kubectl --context $WORKER  port-forward svc/app-stack 8080:8080
+```
+
+Navigate to http://localhost:8080/ on your browser.

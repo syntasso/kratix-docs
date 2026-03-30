@@ -40,21 +40,6 @@ kratix add container resource/configure/create-runtime \
 ```
 
 Together these Pipelines can output up to three sub-requests:
-
-- a `Bucket` request for the S3 Promise when `spec.bucket` is defined
 - a `postgresql` request for the PostgreSQL Promise when `spec.database.driver` is `postgresql`
-- a `Runtime` request for the Python application image after requested dependencies are ready
+- a `Runtime` request for a TODO application image after requested dependencies are ready
 
-The Python application is expected to read:
-
-- `BUCKET_NAME` when a bucket is requested
-- `BUCKET_ARN` when a bucket is requested
-- `PGHOST`, `DBNAME`, `PGUSER`, and `PGPASSWORD` when PostgreSQL is requested
-
-from its environment and respond in the browser with a message such as `Hello world, my bucket name is <bucket-name>. My bucket ARN is <bucket-arn>.`
-
-* `create-runtime` reads the resolved values written by `wait-for-dependencies`, so the Runtime request is created only after requested dependencies are ready.
-
-The example application source is in [python-app/app.py](/Users/stella/dev/kratix-docs/assets/app-stack-example/python-app/app.py) and [python-app/Dockerfile](/Users/stella/dev/kratix-docs/assets/app-stack-example/python-app/Dockerfile).
-
-In this asset, `BUCKET_ARN` should come from the surfaced S3 status written by the S3 Promise rather than being derived from the bucket name.
