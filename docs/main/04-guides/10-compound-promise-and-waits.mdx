@@ -8,7 +8,7 @@ import PartialPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.m
 ```
 
 Compound Promises are Promises that depend on other Promises to deliver their promised service.
-The abiltiy to chain Promises together allows platform teams to deliver entire stacks on demand, while keeping each sub-Promise small and focused on its own service.
+The ability to chain Promises together allows platform teams to deliver entire stacks on demand, while keeping each sub-Promise small and focused on its own service.
 
 **In this tutorial, you will**
 
@@ -96,7 +96,7 @@ Our promise will consist of three pipelines:
 
 #### The `create-dependencies` pipeline:
 
-which is responsible in creating the spefified sub-promise requests:
+which is responsible in creating the specified sub-promise requests:
 
 ```sh
 kratix add container resource/configure/create-dependencies \
@@ -384,7 +384,7 @@ fi
 ```
 
 #### Lastly the `create-runtime` workflow pipeline:
-In the `create-runtime` pipeline we will read the the resolved values from status, and ONLY after our dependencies are available we will create the
+In the `create-runtime` pipeline we will read the resolved values from status, and ONLY after our dependencies are available we will create the
 `Runtime` request from the Runtime Promise. This pipeline also injects to the application's environment the `PGHOST`, `DBNAME`, `PGUSER`, and `PGPASSWORD` only when PostgreSQL was requested
 
 ```sh
@@ -581,7 +581,7 @@ You are now ready to send requests to your Compound Promise!
 
 ## Testing it all together
 
-Now that you have everything set in the Platform, you can go ahead and deploy the your applications!
+Now that you have everything set in the Platform, you can go ahead and deploy your applications!
 
 For that, create a request for your AppStack Promise:
 
