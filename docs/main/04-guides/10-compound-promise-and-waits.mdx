@@ -258,7 +258,7 @@ mv workflows/resource/configure/wait-for-dependencies/wait-for-dependencies/scri
 
 Make sure to update the Dockerfile to reflect the new script name. Replace the Dockerfile contents with the snippet below:
 
-```Dockerfile title="app-stack-wait-for-dependencies:v0.1.0"
+```Dockerfile title="workflows/resource/configure/wait-for-dependencies/wait-for-dependencies/Dockerfile"
 FROM alpine:3.20
 
 RUN apk update && apk add --no-cache kubectl yq
