@@ -83,14 +83,11 @@ The command above should produce a `promise.yaml` in the `app-stack-example` dir
 ```sh
 kratix update api \
   --property image:string \
-  --property database.driver:string \ # todo add the enum list
-  --property bucket.name:string \
-  --property bucket.public:boolean
+  --property database.driver:string
 ```
 
 ```sh
 kratix update destination-selector \
-  --dir . \
   --label environment=platform
 ```
 
@@ -131,11 +128,8 @@ At this point, your local `app-stack-example` directory should look like this:
 This pipeline's script should do:
 
 1. Create a PostgreSQL instance if `database.driver` is set to `postgresql`, via the PostgreSQL Promise.
-1. Create an S3 Bucket if `bucket.name` is set via the Bucket Promise.
 1. Write `/kratix/metadata/status.yaml` with:
-     - whether bucket was requested
      - whether PostgreSQL was requested
-     - the generated bucket request name
      - the generated PostgreSQL request name
 
 ##### Adding the PostgreSQL Request
@@ -154,7 +148,7 @@ spec:
   dbName: bestdb
 ```
 
-Back in the pipeline script, let's update it to include this request when needed.  Add the following code snippet:
+Back in the `create-dependencies` pipeline script, let's update it to include this request when needed.  Add the following code snippet:
 
 ```sh
 #!/usr/bin/env sh
@@ -164,11 +158,7 @@ set -eu
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 
-mkdir -p /kratix/output /kratix/metadata
-
-
 database_requested=false
-
 database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
 database_name="${app_name}-db"
 
@@ -193,52 +183,9 @@ EOF
 fi
 ```
 
-##### Adding the Bucket Request
-
-Let's include a request to the Bucket Promise if the user requests an s3 bucket. It's API looks like this:
-
-```sh
-apiVersion: example.syntasso.io/v1alpha1
-kind: S3
-metadata:
-  name: database-service-bucket
-spec:
-  bucketName: app-stack-buck
-  public: false
-```
-
-Similar to the PostgreSQL request, when the user requests an S3 Bucket, we should add the Bucket request to the output directory. Right after the PostgreSQL block you just added, include the following:
-
-```sh
-bucket_requested=false
-bucket_name="$(yq eval '.spec.bucket.name // ""' /kratix/input/object.yaml)"
-bucket_public="$(yq eval '.spec.bucket.public // false' /kratix/input/object.yaml)"
-
-if [ -n "${bucket_name}" ]; then
-  bucket_requested=true
-
-  cat > /kratix/output/bucket-request.yaml <<EOF
-apiVersion: example.kratix.io/v1alpha1
-kind: Bucket
-metadata:
-  name: ${bucket_name}
-  namespace: ${app_namespace}
-  labels:
-    kratix.io/component-of-promise-name: app-stack
-    kratix.io/component-of-resource-name: ${app_name}
-    kratix.io/component-of-resource-namespace: ${app_namespace}
-spec:
-  bucketName: ${bucket_name}
-  public: ${bucket_public}
-EOF
-fi
-```
-
-And lastly we need to write `/kratix/metadata/status.yaml` with:
-     - whether bucket was requested
-     - whether PostgreSQL was requested
-     - the generated bucket request name
-     - the generated PostgreSQL request name
+Additionally in this pipeline script we need to write `/kratix/metadata/status.yaml` with:
+  - whether PostgreSQL was requested
+  - the generated PostgreSQL request name
 
 After the bucket request section in the script add the following:
 
@@ -246,9 +193,6 @@ After the bucket request section in the script add the following:
 cat > /kratix/metadata/status.yaml <<EOF
 message: Dependency requests created
 dependencies:
-  bucket:
-    requested: ${bucket_requested}
-    requestName: "${bucket_name}"
   database:
     requested: ${database_requested}
     requestName: "${database_name}"
@@ -257,20 +201,17 @@ EOF
 
 And that's it. This workflow is now done!
 
-#### `wait-for-dependencies`
+#### The next pipeline is `wait-for-dependencies`
 
 This pipeline is responsible for reading the status written by `create-dependencies`, and do the following operations
-   - If a bucket was requested:
-     - verify the bucket resource is ready
-     - read the surfaced `s3_bucket_arn` from bucket status
    - If PostgreSQL was requested:
      - verify the PostgreSQL resource is ready
-   - If any requested dependency is not ready:
+   - If the requested dependency is not ready:
      - write `/kratix/metadata/workflow-control.yaml`
      - include `retryAfter`
      - optionally include `maxAttempts` and `message`
-   - If all requested dependencies are ready:
-     - write `/kratix/metadata/status.yaml` with the resolved values needed by the Runtime request
+   - If the requested dependency is ready:
+     - write `/kratix/metadata/status.yaml` with the resolved values needed by the Runtime request.
 
 Let's implement this, in the `workflows/resource/configure/wait-for-dependencies/wait-for-dependencies/scripts/pipeline.sh` add the following:
 
@@ -282,17 +223,11 @@ set -eu
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 
-bucket_requested="$(yq eval '.status.dependencies.bucket.requested // false' /kratix/input/object.yaml)"
-bucket_request_name="$(yq eval '.status.dependencies.bucket.requestName // ""' /kratix/input/object.yaml)"
-
 database_requested="$(yq eval '.status.dependencies.database.requested // false' /kratix/input/object.yaml)"
 database_name="$(yq eval '.status.dependencies.database.requestName // ""' /kratix/input/object.yaml)"
 
 
 tmp_dir="$(mktemp -d)"
-
-bucket_ready=false
-bucket_arn=""
 
 database_ready=false
 database_host=""
@@ -309,14 +244,82 @@ append_wait_message() {
     wait_messages="${wait_messages}; ${message}"
   fi
 }
+
+if [ "${database_requested}" = "true" ]; then
+  if [ -z "${database_name}" ]; then
+    append_wait_message "database requested but no requestName recorded in status"
+  elif kubectl get postgresql "${database_name}" -n "${app_namespace}" -o yaml > "${tmp_dir}/postgresql.yaml" 2>/dev/null; then
+    database_ready_condition="$(
+      yq eval '.status.conditions[]? | select(.type == "WorksSucceeded") | .status' "${tmp_dir}/postgresql.yaml" \
+      | tail -n 1
+    )"
+
+    database_db_name="$(
+      yq eval '.status.dbName // .spec.dbName // ""' "${tmp_dir}/postgresql.yaml"
+    )"
+    if [ -z "${database_db_name}" ]; then
+      database_db_name="${database_name}"
+    fi
+
+    database_host="$(
+      yq eval '.status.host // .status.connectionDetails.host // ""' "${tmp_dir}/postgresql.yaml"
+    )"
+    if [ -z "${database_host}" ]; then
+      database_host="${app_name}-${database_name}-postgresql.default.svc.cluster.local"
+    fi
+
+    credentials_info="$(
+      yq eval '.status.connectionDetails.credentials // ""' "${tmp_dir}/postgresql.yaml"
+    )"
+
+    database_secret_name="$(printf '%s' "${credentials_info}" | sed -n 's/.*Secret: "\(.*\)".*/\1/p')"
+    database_secret_name="${database_secret_name#*/}"
+
+    if [ -z "${database_secret_name}" ]; then
+      database_secret_name="${app_name}.${app_name}-${database_name}-postgresql.credentials.postgresql.acid.zalan.do"
+    fi
+
+    if [ "${database_ready_condition}" = "True" ] && [ -n "${database_host}" ] && [ -n "${database_secret_name}" ]; then
+      database_ready=true
+    else
+      append_wait_message "postgresql ${database_name} is not ready or connection details have not been surfaced yet"
+    fi
+  else
+    append_wait_message "postgresql ${database_name} does not exist yet"
+  fi
+fi
+
+if [ -n "${wait_messages}" ]; then
+  status_message="Waiting for dependencies"
+else
+  status_message="Dependencies ready"
+fi
+
+cat > /kratix/metadata/status.yaml <<EOF
+message: ${status_message}
+dependencies:
+  database:
+    requested: ${database_requested}
+    requestName: "${database_name}"
+    ready: ${database_ready}
+    host: "${database_host}"
+    dbName: "${database_db_name}"
+    secretName: "${database_secret_name}"
+EOF
+
+if [ -n "${wait_messages}" ]; then
+  cat > /kratix/metadata/workflow-control.yaml <<EOF
+retryAfter: 30s
+maxAttempts: 5
+suspend: false
+message: "${wait_messages}"
+EOF
+fi
 ```
 
-TBA; the rest of the scripts
-
-
-#### `create-runtime`:
+#### Lastly the `create-runtime` workflow pipeline:
 In the `create-runtime` pipeline we will read the the resolved values from status, and ONLY after our dependencies are available we will create the
-`Runtime` request from the Runtime Promise. This pipeline also injects to the application's environment the `BUCKET_NAME` and `BUCKET_ARN` only when a bucket was requested. And in a similar manner, it only injects `PGHOST`, `DBNAME`, `PGUSER`, and `PGPASSWORD` only when PostgreSQL was requested
+`Runtime` request from the Runtime Promise. This pipeline also injects to the application's environment the `PGHOST`, `DBNAME`, `PGUSER`, and `PGPASSWORD` only when PostgreSQL was requested
 
 ##### Adding the Runtime Request
 Let's add the first requirement. To deploy the application via the Runtime Promise, the pipeline must output a Resource Request for that Promise. The API for the Runtime Promise looks like this:
@@ -332,28 +335,30 @@ spec:
   image: syntasso/website
 ```
 
-As you can see, the only configuration option we are currently providing in the API of our RubyApp promise is the image, and the lifecycle. All the other fields should either be populated by the AppStack workflow, or left empty. We must also ensure the `metadata.name` we generate for this request is unique, otherwise it may clash with other resources already deployed.
+As you can see, the only configuration option we are currently providing in the API of our AppStack promise is the image, and the lifecycle. All the other fields should either be populated by the AppStack workflow, or left empty. We must also ensure the `metadata.name` we generate for this request is unique, otherwise it may clash with other resources already deployed.
 
-Now open the pipeline.sh script in workflows/resource/configure/instance/deploy-resources/scripts and update it to:
+Now open the pipeline.sh script in `workflows/resource/configure/create-runtime/create-runtime/scripts/pipeline.sh` and update it to:
 
 ```sh
 #!/usr/bin/env sh
 
 set -eu
 
-# Extract values from input
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 app_image="$(yq eval '.spec.image' /kratix/input/object.yaml)"
-
-bucket_requested="$(yq eval '.status.dependencies.bucket.requested // false' /kratix/input/object.yaml)"
-bucket_name="$(yq eval '.status.dependencies.bucket.requestName // ""' /kratix/input/object.yaml)"
-bucket_arn="$(yq eval '.status.dependencies.bucket.arn // ""' /kratix/input/object.yaml)"
 
 database_requested="$(yq eval '.status.dependencies.database.requested // false' /kratix/input/object.yaml)"
 database_host="$(yq eval '.status.dependencies.database.host // ""' /kratix/input/object.yaml)"
 database_db_name="$(yq eval '.status.dependencies.database.dbName // ""' /kratix/input/object.yaml)"
 database_secret_name="$(yq eval '.status.dependencies.database.secretName // ""' /kratix/input/object.yaml)"
+
+if [ "${database_requested}" = "true" ]; then
+  if [ -z "${database_host}" ] || [ -z "${database_db_name}" ] || [ -z "${database_secret_name}" ]; then
+    echo "database requested but runtime inputs are incomplete" >&2
+    exit 1
+  fi
+fi
 
 cat > /kratix/output/runtime-request.yaml <<EOF
 apiVersion: marketplace.kratix.io/v1alpha1
@@ -374,15 +379,6 @@ spec:
     - name: PORT
       value: "8000"
 EOF
-
-if [ "${bucket_requested}" = "true" ]; then
-  cat >> /kratix/output/runtime-request.yaml <<EOF
-    - name: BUCKET_NAME
-      value: ${bucket_name}
-    - name: BUCKET_ARN
-      value: ${bucket_arn}
-EOF
-fi
 
 if [ "${database_requested}" = "true" ]; then
   cat >> /kratix/output/runtime-request.yaml <<EOF
@@ -407,50 +403,10 @@ fi
 
 And that's it. Workflow done!
 
-<details>
-<summary>Click here for the complete `pipeline.sh` script</summary>
-
-    ```sh
-    TBA
-    ```
-</details>
-
-There are only two things left to do in our Compound Promise:
-
-* Ensure the outputs of the pipeline are scheduled to the Platform cluster
+Now there is only one thing left to do in our Compound Promise:
 * Set the sub-Promises as requirements for the Compound Promise
 
-The next sections will explore how to do this.
 
-
-### Scheduling to the Platform cluster
-
-To ensure that the documents generated by the AppStack Promise are scheduled to the Platform cluster, we need to:
-
-1. Create a Destination representing the platform with some specific labels, like `environment=platform`
-2. Configure the GitOps agent in the Platform cluster
-3. Add Destination Selectors in the Compound Promise.
-
-We won't go into detail about (1) and (2) in this blog post. You can find more information about how to [Registering the Platform as a Destination](/workshop/operating-kratix/compound-promises#register-the-platform-as-a-destination) in the Kratix workshop.
-
-:::tip
-
-To quickly get an environment compatible with the promises in this blog post, clone Kratix and run:
-
-```bash
-make quick-start
-make prepare-platform-as-destination
-```
-:::
-
-At this stage, you should see the following when listing the Destinations in your Platform cluster:
-
-```shell-session
-$ kubectl --context $PLATFORM get destinations --show-labels
-NAME               READY   LABELS
-platform-cluster   True    environment=platform
-worker-1           True    environment=dev
-```
 
 ### Defining the Promise Requirements
 
@@ -468,9 +424,6 @@ metadata:
   name: app-stack
 spec:
   #highlight-start
-  requiredPromises:
-    - name: s3
-      version: v0.1.0
     - name: postgresql
       version: v1.0.0-beta.3
     - name: runtime
@@ -486,8 +439,7 @@ If we try to install the Compound Promise now, you should get a warning:
 
 ```shell-session
 $ kubectl --context $PLATFORM apply --filename promise.yaml
-Warning: Required Promise "s3" at version "v0.1.0" not installed
-Warning: Required Promise "postgresql" at version "v1.0.0-beta.2" not installed
+Warning: Required Promise "postgresql" at version "v1.0.0-beta.3" not installed
 Warning: Required Promise "runtime" at version "v1.0.0" not installed
 Warning: Promise will not be available until the above issue(s) is resolved
 promise.platform.kratix.io/app-stack created
@@ -504,7 +456,6 @@ To satisfy the `requiredPromises` declaration, you will to, install the required
 
 ```bash
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
-kubectl --context $PLATFORM apply --filename s3-promise/promise.yaml # needs to change
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/runtime/promise-release.yaml
 ```
 
@@ -516,7 +467,6 @@ NAME         STATUS      KIND         API VERSION                      VERSION  
 app-stack    Available   AppStack     example.kratix.io/v1alpha1       v0.1.0
 postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3   Promise configured
 runtime      Available   Runtime      marketplace.kratix.io/v1alpha1   v1.0.0          Promise configured
-s3           Available   Bucket       example.kratix.io/v1alpha1       v0.1.0          Promise configured
 ```
 
 :::tip
@@ -540,22 +490,18 @@ kind: AppStack
 metadata:
   name: app-stack
 spec:
-  image: python-app:v0.1.0 # you can use this one, or build your own
+  image: syntasso/sample-todo:v0.1.0 # you can use this one, or build your own
   database:
     driver: postgresql
-  bucket:
-    name: myapp-bucket
-    public: false
 EOF
 ```
 
 Sending this request will immediately trigger the AppStack Promise Resource workflow. That workflow will create:
 
-- a `bucket` request for the S3 Promise only when `spec.bucket` is defined
 - a `postgresql` request for the PostgreSQL Promise only when `spec.database.driver` is `postgresql`
-- a `Runtime` request for the Python application
+- a `Runtime` request for the application
 
-The container image you use for `spec.image` should serve HTTP on port `8000`, handle the bucket and PostgreSQL environment variables only when they are present, and return a message such as `Hello world, my bucket name is myapp-bucket. My bucket ARN is arn:aws:s3:::myapp-bucket`.
+The container image you use for `spec.image` should serve HTTP on port `8000`, and handle the PostgreSQL environment variables only when they are present. 
 
 That, in turn, should trigger the sub-promises workflows:
 ```shell-session
@@ -564,17 +510,9 @@ NAME                                                            READY   STATUS  
 kratix-app-stack-app-stack-instance-configure-beec4-l2nf8       0/1     Completed   0          31s
 kratix-postgresql-app-stack-db-instance-configure-785e4-hktjk   0/1     Completed   0          19s
 kratix-runtime-app-stack-instance-e6313-szgrt                   0/1     Completed   0          19s
-TBA (bucket)
 ```
 
 In a couple of minutes, in your Worker cluster, you should see the application pod running:
 ```shell-session
 $ kubectl --context $WORKER get pods
-TBA
-```
-
-You can build the example Python application in `app-stack-example/python-app` and push it to your registry, then use that image in the `AppStack` request.
-```sh
-docker build -t python-app:v0.1.0 python-app/
-kind load docker-image python-app:v0.1.0 -n worker
 ```

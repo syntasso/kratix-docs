@@ -5,17 +5,11 @@ set -eu
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 
-bucket_requested="$(yq eval '.status.dependencies.bucket.requested // false' /kratix/input/object.yaml)"
-bucket_request_name="$(yq eval '.status.dependencies.bucket.requestName // ""' /kratix/input/object.yaml)"
-
 database_requested="$(yq eval '.status.dependencies.database.requested // false' /kratix/input/object.yaml)"
 database_name="$(yq eval '.status.dependencies.database.requestName // ""' /kratix/input/object.yaml)"
 
 
 tmp_dir="$(mktemp -d)"
-
-bucket_ready=false
-bucket_arn=""
 
 database_ready=false
 database_host=""
@@ -32,30 +26,6 @@ append_wait_message() {
     wait_messages="${wait_messages}; ${message}"
   fi
 }
-
-if [ "${bucket_requested}" = "true" ]; then
-  if [ -z "${bucket_request_name}" ]; then
-    append_wait_message "bucket requested but no requestName recorded in status"
-  elif kubectl get bucket "${bucket_request_name}" -n "${app_namespace}" -o yaml > "${tmp_dir}/bucket.yaml" 2>/dev/null; then
-    bucket_ready_condition="$(
-      yq eval '.status.conditions[]? | select(.type == "WorksSucceeded" or .type == "ConfigureWorkflowCompleted") | .status' "${tmp_dir}/bucket.yaml" \
-      | grep '^True$' \
-      | tail -n 1 || true
-    )"
-    bucket_arn_key="s3_${app_namespace}_${bucket_request_name}_s3_bucket_arn"
-    bucket_arn="$(
-      yq eval ".status.outputs.tfe[\"${bucket_arn_key}\"] // .status.outputs.Tfe[\"${bucket_arn_key}\"] // \"\"" "${tmp_dir}/bucket.yaml"
-    )"
-
-    if [ "${bucket_ready_condition}" = "True" ] && [ -n "${bucket_arn}" ]; then
-      bucket_ready=true
-    else
-      append_wait_message "bucket ${bucket_request_name} is not ready or ARN has not been surfaced yet"
-    fi
-  else
-    append_wait_message "bucket ${bucket_request_name} does not exist yet"
-  fi
-fi
 
 if [ "${database_requested}" = "true" ]; then
   if [ -z "${database_name}" ]; then
@@ -110,11 +80,6 @@ fi
 cat > /kratix/metadata/status.yaml <<EOF
 message: ${status_message}
 dependencies:
-  bucket:
-    requested: ${bucket_requested}
-    requestName: "${bucket_request_name}"
-    ready: ${bucket_ready}
-    arn: "${bucket_arn}"
   database:
     requested: ${database_requested}
     requestName: "${database_name}"

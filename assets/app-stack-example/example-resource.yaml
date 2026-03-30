@@ -3,7 +3,8 @@ kind: AppStack
 metadata:
   name: my-app-stack
 spec:
-  image: syntasso/example-python-app:v1.0.0
+  # image: syntasso/example-python-app:v1.0.0
+  image: syntasso/sample-todo:v0.1.0
   database:
     driver: postgresql
   # bucket:

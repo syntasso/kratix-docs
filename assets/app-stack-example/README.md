@@ -12,9 +12,8 @@ To update the Promise API, you can use the `kratix update api` command:
 
 ```
 kratix update api \
+  --property image:string \
   --property database.driver:string \
-  --property bucket.name:string \
-  --property bucket.public:boolean \
   --kind AppStack
 ```
 

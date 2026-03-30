@@ -6,21 +6,10 @@ app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 app_image="$(yq eval '.spec.image' /kratix/input/object.yaml)"
 
-bucket_requested="$(yq eval '.status.dependencies.bucket.requested // false' /kratix/input/object.yaml)"
-bucket_name="$(yq eval '.status.dependencies.bucket.requestName // ""' /kratix/input/object.yaml)"
-bucket_arn="$(yq eval '.status.dependencies.bucket.arn // ""' /kratix/input/object.yaml)"
-
 database_requested="$(yq eval '.status.dependencies.database.requested // false' /kratix/input/object.yaml)"
 database_host="$(yq eval '.status.dependencies.database.host // ""' /kratix/input/object.yaml)"
 database_db_name="$(yq eval '.status.dependencies.database.dbName // ""' /kratix/input/object.yaml)"
 database_secret_name="$(yq eval '.status.dependencies.database.secretName // ""' /kratix/input/object.yaml)"
-
-if [ "${bucket_requested}" = "true" ]; then
-  if [ -z "${bucket_name}" ] || [ -z "${bucket_arn}" ]; then
-    echo "bucket requested but runtime inputs are incomplete" >&2
-    exit 1
-  fi
-fi
 
 if [ "${database_requested}" = "true" ]; then
   if [ -z "${database_host}" ] || [ -z "${database_db_name}" ] || [ -z "${database_secret_name}" ]; then
@@ -48,15 +37,6 @@ spec:
     - name: PORT
       value: "8000"
 EOF
-
-if [ "${bucket_requested}" = "true" ]; then
-  cat >> /kratix/output/runtime-request.yaml <<EOF
-    - name: BUCKET_NAME
-      value: ${bucket_name}
-    - name: BUCKET_ARN
-      value: ${bucket_arn}
-EOF
-fi
 
 if [ "${database_requested}" = "true" ]; then
   cat >> /kratix/output/runtime-request.yaml <<EOF

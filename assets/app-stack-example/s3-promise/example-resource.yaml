@@ -1,8 +1,0 @@
-apiVersion: example.kratix.io/v1alpha1
-kind: bucket
-metadata:
-    name: example
-    namespace: default
-spec:
-  bucketName: myApp
-  public: false
