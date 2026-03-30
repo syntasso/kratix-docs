@@ -8,7 +8,6 @@ app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object
 database_requested="$(yq eval '.status.dependencies.database.requested // false' /kratix/input/object.yaml)"
 database_name="$(yq eval '.status.dependencies.database.requestName // ""' /kratix/input/object.yaml)"
 
-
 tmp_dir="$(mktemp -d)"
 
 database_ready=false

@@ -31,11 +31,11 @@ metadata:
 spec:
   lifecycle: dev
   image: ${app_image}
-  servicePort: 8000
+  servicePort: 8080
   replicas: 1
   applicationEnv:
     - name: PORT
-      value: "8000"
+      value: "8080"
 EOF
 
 if [ "${database_requested}" = "true" ]; then

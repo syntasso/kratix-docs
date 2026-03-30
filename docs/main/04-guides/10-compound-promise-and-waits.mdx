@@ -87,21 +87,20 @@ kratix update api \
 ```
 
 ```sh
-kratix update destination-selector \
-  --label environment=platform
+kratix update destination-selector environment=platform
 ```
 
 The next step is to implement the workflows that will transform the user's request into the sub-promises request.
 
 Our promise will consist of three pipelines:
 
-#### `create-dependencies`
+#### The `create-dependencies` pipeline:
 
 which is responsible in creating the spefified sub-promise requests:
 
 ```sh
 kratix add container resource/configure/create-dependencies \
---image ghcr.io/syntasso/kratix-docs/app-stack-create-dependencies:v0.1.0 \
+--image kratix-guide/app-stack-create-dependencies:v0.1.0 \
 --name create-dependencies
 ```
 
@@ -131,6 +130,35 @@ This pipeline's script should do:
 1. Write `/kratix/metadata/status.yaml` with:
      - whether PostgreSQL was requested
      - the generated PostgreSQL request name
+
+Let's rename the pipeline.sh to create-dependencies to better reflect its purpose.
+
+```sh
+mv workflows/resource/configure/create-dependencies/create-dependencies/scripts/{pipeline.sh,create-dependencies}
+```
+
+Make sure to update the Dockerfile to reflect the new script name. Replace the Dockerfile contents with the snippet below:
+
+```Dockerfile title="workflows/resource/configure/create-dependencies/create-dependencies/Dockerfile"
+FROM alpine:3.20
+
+RUN apk update && apk add --no-cache yq
+
+COPY scripts/* /usr/local/bin/
+ADD resources resources
+
+RUN chmod +x /usr/local/bin/*
+
+CMD [ "create-dependencies" ]
+
+ENTRYPOINT []
+```
+
+We also need to build and load this image into our local environment:
+```sh
+docker build -t kratix-guide/app-stack-create-dependencies:v0.1.0 workflows/resource/configure/create-dependencies/create-dependencies/
+kind load docker-image kratix-guide/app-stack-create-dependencies:v0.1.0 --name platform
+```
 
 ##### Adding the PostgreSQL Request
 
@@ -213,7 +241,43 @@ This pipeline is responsible for reading the status written by `create-dependenc
    - If the requested dependency is ready:
      - write `/kratix/metadata/status.yaml` with the resolved values needed by the Runtime request.
 
-Let's implement this, in the `workflows/resource/configure/wait-for-dependencies/wait-for-dependencies/scripts/pipeline.sh` add the following:
+Let's create the pipeline:
+
+```sh
+kratix add container resource/configure/wait-for-dependencies \
+--image kratix-guide/app-stack-wait-for-dependencies:v0.1.0 \
+--name wait-for-dependencies
+```
+
+Same as before, let's rename the `pipeline.sh` to `wait-for-dependencies` to better reflect its purpose.
+
+```sh
+mv workflows/resource/configure/wait-for-dependencies/wait-for-dependencies/scripts/{pipeline.sh,wait-for-dependencies}
+```
+
+Make sure to update the Dockerfile to reflect the new script name. Replace the Dockerfile contents with the snippet below:
+
+```Dockerfile title="app-stack-wait-for-dependencies:v0.1.0"
+FROM alpine:3.20
+
+RUN apk update && apk add --no-cache kubectl yq
+
+COPY scripts/* /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/*
+
+CMD [ "wait-for-dependencies" ]
+
+ENTRYPOINT []
+```
+
+We also need to build and load this image into our local environment:
+```sh
+docker build -t kratix-guide/app-stack-wait-for-dependencies:v0.1.0 workflows/resource/configure/wait-for-dependencies/wait-for-dependencies
+kind load docker-image kratix-guide/app-stack-wait-for-dependencies:v0.1.0 --name platform
+```
+
+Now let's implement the functionality. In the `wait-for-dependencies` add the following:
 
 ```sh
 #!/usr/bin/env sh
@@ -225,7 +289,6 @@ app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object
 
 database_requested="$(yq eval '.status.dependencies.database.requested // false' /kratix/input/object.yaml)"
 database_name="$(yq eval '.status.dependencies.database.requestName // ""' /kratix/input/object.yaml)"
-
 
 tmp_dir="$(mktemp -d)"
 
@@ -321,6 +384,41 @@ fi
 In the `create-runtime` pipeline we will read the the resolved values from status, and ONLY after our dependencies are available we will create the
 `Runtime` request from the Runtime Promise. This pipeline also injects to the application's environment the `PGHOST`, `DBNAME`, `PGUSER`, and `PGPASSWORD` only when PostgreSQL was requested
 
+```sh
+kratix add container resource/configure/create-runtime \
+--image kratix-guide/app-stack-create-runtime:v0.1.0 \
+--name create-runtime
+```
+
+Same as before, let's rename the `pipeline.sh` to `create-runtime` to better reflect its purpose.
+
+```sh
+mv workflows/resource/configure/create-runtime/create-runtime/scripts/{pipeline.sh,create-runtime}
+```
+
+Make sure to update the Dockerfile to reflect the new script name. Replace the Dockerfile contents with the snippet below:
+
+```Dockerfile title="workflows/resource/configure/create-runtime/create-runtime/Dockerfile"
+FROM alpine:3.20
+
+RUN apk update && apk add --no-cache yq
+
+COPY scripts/* /usr/local/bin/
+ADD resources resources
+
+RUN chmod +x /usr/local/bin/*
+
+CMD [ "create-runtime" ]
+
+ENTRYPOINT []
+```
+
+We also need to build and load this image into our local environment:
+```sh
+docker build -t kratix-guide/app-stack-create-runtime:v0.1.0 workflows/resource/configure/create-runtime/create-runtime/
+kind load docker-image kratix-guide/app-stack-create-runtime:v0.1.0 --name platform
+```
+
 ##### Adding the Runtime Request
 Let's add the first requirement. To deploy the application via the Runtime Promise, the pipeline must output a Resource Request for that Promise. The API for the Runtime Promise looks like this:
 
@@ -337,7 +435,7 @@ spec:
 
 As you can see, the only configuration option we are currently providing in the API of our AppStack promise is the image, and the lifecycle. All the other fields should either be populated by the AppStack workflow, or left empty. We must also ensure the `metadata.name` we generate for this request is unique, otherwise it may clash with other resources already deployed.
 
-Now open the pipeline.sh script in `workflows/resource/configure/create-runtime/create-runtime/scripts/pipeline.sh` and update it to:
+Now open the `create-runtime` script in `workflows/resource/configure/create-runtime/create-runtime/scripts` and update it to:
 
 ```sh
 #!/usr/bin/env sh
@@ -373,11 +471,11 @@ metadata:
 spec:
   lifecycle: dev
   image: ${app_image}
-  servicePort: 8000
+  servicePort: 8080
   replicas: 1
   applicationEnv:
     - name: PORT
-      value: "8000"
+      value: "8080"
 EOF
 
 if [ "${database_requested}" = "true" ]; then
@@ -465,7 +563,7 @@ After a few seconds, you should see all the Promises available in your Platform:
 $ kubectl --context $PLATFORM get promises
 NAME         STATUS      KIND         API VERSION                      VERSION         MESSAGE
 app-stack    Available   AppStack     example.kratix.io/v1alpha1       v0.1.0
-postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3   Promise configured
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.5   Promise configured
 runtime      Available   Runtime      marketplace.kratix.io/v1alpha1   v1.0.0          Promise configured
 ```
 
@@ -501,7 +599,7 @@ Sending this request will immediately trigger the AppStack Promise Resource work
 - a `postgresql` request for the PostgreSQL Promise only when `spec.database.driver` is `postgresql`
 - a `Runtime` request for the application
 
-The container image you use for `spec.image` should serve HTTP on port `8000`, and handle the PostgreSQL environment variables only when they are present. 
+The container image you use for `spec.image` should serve HTTP on port `8080`, and handle the PostgreSQL environment variables only when they are present. 
 
 That, in turn, should trigger the sub-promises workflows:
 ```shell-session
@@ -515,4 +613,9 @@ kratix-runtime-app-stack-instance-e6313-szgrt                   0/1     Complete
 In a couple of minutes, in your Worker cluster, you should see the application pod running:
 ```shell-session
 $ kubectl --context $WORKER get pods
+NAME                                              READY   STATUS              RESTARTS   AGE
+app-stack-58b99c69cc-982m4                        0/1     ContainerCreating   0          4s
+app-stack-app-stack-db-postgresql-0               1/1     Running             0          37s
+nginx-nginx-ingress-controller-758c9cb6fc-jcfd7   1/1     Running             0          17m
+postgres-operator-578ff5d886-9ztf6                1/1     Running             0          17m
 ```

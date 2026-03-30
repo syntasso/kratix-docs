@@ -5,8 +5,6 @@ set -eu
 app_name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
 app_namespace="$(yq eval '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 
-# mkdir -p /kratix/output /kratix/metadata
-
 database_requested=false
 database_driver="$(yq eval '.spec.database.driver // ""' /kratix/input/object.yaml)"
 database_name="${app_name}-db"

@@ -50,10 +50,8 @@ spec:
   - matchLabels:
       environment: platform
   requiredPromises:
-  - name: s3
-    version: v0.1.0
   - name: postgresql
-    version: v1.0.0-beta.3
+    version: v1.0.0-beta.5
   - name: runtime
     version: v1.0.0
   workflows:
@@ -68,7 +66,7 @@ spec:
           name: create-dependencies
         spec:
           containers:
-          - image: example/app-stack-create-dependencies:v0.1.0
+          - image: kratix-guide/app-stack-create-dependencies:v0.1.0
             name: create-dependencies
           jobOptions: {}
           rbac: {}
@@ -79,7 +77,7 @@ spec:
           name: wait-for-dependencies
         spec:
           containers:
-          - image: example/app-stack-wait-for-dependencies:v0.1.0
+          - image: kratix-guide/app-stack-wait-for-dependencies:v0.1.0
             name: wait-for-dependencies
           jobOptions: {}
           rbac:
@@ -112,7 +110,7 @@ spec:
           name: create-runtime
         spec:
           containers:
-          - image: example/app-stack-create-runtime:v0.1.0
+          - image: kratix-guide/app-stack-create-runtime:v0.1.0
             name: create-runtime
           jobOptions: {}
           rbac: {}

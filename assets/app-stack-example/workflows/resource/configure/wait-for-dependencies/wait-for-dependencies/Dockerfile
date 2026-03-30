@@ -2,9 +2,10 @@ FROM alpine:3.20
 
 RUN apk update && apk add --no-cache kubectl yq
 
-ADD scripts/pipeline.sh /usr/bin/pipeline.sh
+COPY scripts/* /usr/local/bin/
 
-RUN chmod +x /usr/bin/pipeline.sh
+RUN chmod +x /usr/local/bin/*
 
-CMD [ "sh", "-c", "pipeline.sh" ]
+CMD [ "wait-for-dependencies" ]
+
 ENTRYPOINT []
