@@ -501,8 +501,9 @@ kind load docker-image kratix-guide/app-stack-create-runtime:v0.1.0 --name platf
 
 And that's it. Workflow done!
 
-Now there is only one thing left to do in our Compound Promise:
+Now there is only two things left to do in our Compound Promise:
 * Set the sub-Promises as requirements for the Compound Promise
+* Add the appropriate RBAC permissions
 
 ### Defining the Promise Requirements
 
@@ -528,6 +529,41 @@ spec:
   #highlight-end
   destinationSelectors: #..
   api: #...
+```
+
+### Add the appropriate RBAC permissions
+
+The `wait-for-dependencies` pipeline will need permissions to be able to query if the required dependencies are ready. Add the following to your Promise:
+
+```yaml
+spec:
+  containers:
+  - image: kratix-guide/app-stack-wait-for-dependencies:v0.1.0
+    name: wait-for-dependencies
+  jobOptions: {}
+  #highlight-start
+  rbac:
+    permissions:
+    - apiGroups:
+      - marketplace.kratix.io
+      resources:
+      - postgresqls
+      verbs:
+      - get
+      - list
+    - apiGroups:
+      - ""
+      resourceNamespace: '*'
+      resources:
+      - secrets
+      verbs:
+      - get
+#highlight-end
+- apiVersion: platform.kratix.io/v1alpha1
+kind: Pipeline
+metadata:
+  creationTimestamp: null
+  name: create-runtime
 ```
 
 ## Installing the Promise {#install}
@@ -619,13 +655,6 @@ spec:
           jobOptions: {}
           rbac:
             permissions:
-            - apiGroups:
-              - example.kratix.io
-              resources:
-              - buckets
-              verbs:
-              - get
-              - list
             - apiGroups:
               - marketplace.kratix.io
               resources:
