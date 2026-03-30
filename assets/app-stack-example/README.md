@@ -39,7 +39,7 @@ kratix add container resource/configure/create-runtime \
  --name create-runtime
 ```
 
-Together these Pipelines can output up to three sub-requests:
+Together these Pipelines can output up to two sub-requests:
 - a `postgresql` request for the PostgreSQL Promise when `spec.database.driver` is `postgresql`
 - a `Runtime` request for a TODO application image after requested dependencies are ready
 

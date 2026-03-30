@@ -1,6 +1,6 @@
 ---
 description: Learn how to combine multiple promises into a single Compound Promise, and add waits
-title: Compound Promises with waits
+title: Compound Promises with Waits
 ---
 
 ```mdx-code-block
@@ -59,9 +59,7 @@ cd /path/to/kratix
 
 You can follow this guide and build the Promise along with us, or you can use it as a reference when building your own Compound Promises.
 
-The Promise mentioned in this post is available [here](LINK TO BE ADDED).
-
-You can skip straight to [installing the Promise](#install) if you want to see it in action.
+The full Promise mentioned in this guide is available [here](https://github.com/syntasso/kratix-marketplace/tree/main/app-stack).
 
 :::
 
@@ -537,6 +535,132 @@ spec:
 
 ## Installing the Promise {#install}
 
+<details>
+<summary>See the full promise.yaml</summary>
+  ```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  creationTimestamp: null
+  labels:
+    kratix.io/promise-version: v0.1.0
+  name: app-stack
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      creationTimestamp: null
+      name: appstacks.example.kratix.io
+    spec:
+      group: example.kratix.io
+      names:
+        kind: AppStack
+        plural: appstacks
+        singular: appstack
+      scope: Namespaced
+      versions:
+      - name: v1alpha1
+        schema:
+          openAPIV3Schema:
+            properties:
+              spec:
+                properties:
+                  bucket:
+                    properties:
+                      name:
+                        type: string
+                      public:
+                        type: boolean
+                    type: object
+                  database:
+                    properties:
+                      driver:
+                        enum:
+                        - postgresql
+                        type: string
+                    type: object
+                  image:
+                    type: string
+                type: object
+            type: object
+        served: true
+        storage: true
+  destinationSelectors:
+  - matchLabels:
+      environment: platform
+  requiredPromises:
+  - name: postgresql
+    version: v1.0.0-beta.5
+  - name: runtime
+    version: v1.0.0
+  workflows:
+    config: {}
+    promise: {}
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          creationTimestamp: null
+          name: create-dependencies
+        spec:
+          containers:
+          - image: kratix-guide/app-stack-create-dependencies:v0.1.0
+            name: create-dependencies
+          jobOptions: {}
+          rbac: {}
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          creationTimestamp: null
+          name: wait-for-dependencies
+        spec:
+          containers:
+          - image: kratix-guide/app-stack-wait-for-dependencies:v0.1.0
+            name: wait-for-dependencies
+          jobOptions: {}
+          rbac:
+            permissions:
+            - apiGroups:
+              - example.kratix.io
+              resources:
+              - buckets
+              verbs:
+              - get
+              - list
+            - apiGroups:
+              - marketplace.kratix.io
+              resources:
+              - postgresqls
+              verbs:
+              - get
+              - list
+            - apiGroups:
+              - ""
+              resourceNamespace: '*'
+              resources:
+              - secrets
+              verbs:
+              - get
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          creationTimestamp: null
+          name: create-runtime
+        spec:
+          containers:
+          - image: kratix-guide/app-stack-create-runtime:v0.1.0
+            name: create-runtime
+          jobOptions: {}
+          rbac: {}
+status:
+  workflows: 0
+  workflowsFailed: 0
+  workflowsSucceeded: 0
+```
+</details>
+
 If we try to install the Compound Promise now, you should get a warning:
 
 ```shell-session
@@ -557,7 +681,8 @@ app-stack   Unavailable   AppStack   example.kratix.io/v1alpha1   v0.1.0
 To satisfy the `requiredPromises` declaration, you will to, install the required promises in your Platform cluster:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/tags/v1.0.0-beta.5/promise-release.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
+
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/runtime/promise-release.yaml
 ```
 
@@ -624,10 +749,14 @@ nginx-nginx-ingress-controller-758c9cb6fc-jcfd7   1/1     Running   0          8
 postgres-operator-578ff5d886-9ztf6                1/1     Running   0          87m
 ```
 
-You can access the application via port-forwarding:
+You can access the application via two methods:
+
+1. Via the url http://app-stack.default.local.gd:31338
+
+1. Or port-forward the service on the worker cluster:
 
 ```sh
 $ kubectl --context $WORKER  port-forward svc/app-stack 8080:8080
 ```
 
-Navigate to http://localhost:8080/ on your browser.
+And navigate to http://localhost:8080/ on your browser.
