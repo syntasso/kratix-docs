@@ -92,9 +92,10 @@ You can see all available configuration in the
         branch: main
         repo: https://github.com/org/repo
         secret:
-          name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
-          values:
-            username: "my-username" # instead of providing a secretName you can provide the username and password directly
+          name: git-creds # must be in the same namespace as the operator; must contain keys: username, password
+          values: # optional: provide username/password here and the chart creates the Secret for you;
+                  # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
+            username: "my-username"
             password: "my-password"
     ```
 
@@ -102,10 +103,35 @@ You can see all available configuration in the
 
 #### The SKE license
 
-To run SKE, you need a license. You can get one by [requesting a free trial](https://www.syntasso.io/pricing). In your values file, you can set the `skeLicense` field to the license token provided to you by Syntasso.
+To run SKE, you need a license. You can get one by [requesting a free trial](https://www.syntasso.io/pricing). SKE images are hosted in a private registry, and your cluster needs image pull credentials to access them. By default, the license token is used as the credential for the Syntasso registry, but you can also pre-create your own pull secret if you prefer not to inline credentials or if you are pulling from a self-hosted registry.
+
+**Option 1: Provide the license token directly**
+
+Set `skeLicense` in your values file and the chart will create the image pull secret automatically:
 
 ```yaml
 skeLicense: LICENSE # provided to you by Syntasso
+```
+
+**Option 2: Pre-create the image pull secret**
+
+To avoid inlining credentials in your values file, omit `skeLicense` and instead pre-create a `kubernetes.io/dockerconfigjson` Secret manually. The credentials will depend on the registry you are pulling from. This could still be your SKE license token (for the Syntasso registry), or your own credentials if you are using a self-hosted registry.
+
+For example, when pulling from the Syntasso registry:
+
+```bash
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=kratix-platform-system \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR_LICENSE_TOKEN>
+```
+
+Then reference the secret in your values file. The chart will skip creating the pull secret and use the pre-existing one instead:
+
+```yaml
+imageRegistry:
+  imagePullSecret: "syntasso-registry"
 ```
 
 #### SKE version
@@ -122,12 +148,15 @@ skeDeployment:
 #### Custom Certs {#custom-certs}
 
 By default, the SKE Operator and the SKE instance it deploys use cert-manager to
-manage TLS certificates for their webhooks. This default setup requires no
+manage TLS certificates for their webhooks and metrics server. This default setup requires no
 additional configuration. However, if you prefer not to use cert-manager, you
 can disable it and manually provide your own TLS certificates.
 
-To disable cert-manager and supply your custom certificates, update your
-configuration as follows:
+Note that for the SKE Deployment (the instance the operator deploys), both webhook and metrics server certificates are required. The SKE Operator itself only requires webhook certificates.
+
+To disable cert-manager and supply your custom certificates, you have two options:
+
+**Option 1: Provide certificate data inline**
 
 ```yaml
 global:
@@ -159,7 +188,36 @@ skeDeployment:
     webhookTLSCert: |
       -----BEGIN CERTIFICATE-----
       ...
+    metricsServerCACert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+    metricsServerTLSKey: |
+      -----BEGIN PRIVATE KEY-----
+      ...
+    metricsServerTLSCert: |
+      -----BEGIN CERTIFICATE-----
+      ...
 ```
+
+**Option 2: Reference pre-existing Secrets**
+
+To avoid inlining certificate data in your values file, pre-create Kubernetes Secrets containing the TLS data and reference them by name. The referenced Secrets must contain the keys: `ca.crt`, `tls.crt`, and `tls.key`.
+
+For the SKE Deployment, both `webhookTLSSecretRef` and `metricsServerTLSSecretRef` are required:
+
+```yaml
+skeDeployment:
+  enabled: true
+  tlsConfig:
+    certManager:
+      disabled: true
+    webhookTLSSecretRef:
+      name: "my-webhook-tls-secret"
+    metricsServerTLSSecretRef:
+      name: "my-metrics-server-tls-secret"
+```
+
+The chart will skip creating the TLS Secrets and use the referenced Secrets instead.
 
 Both the SKE Operator and SKE Deployment require valid TLS certificates for
 their webhook servers to securely communicate with the Kubernetes API. Below are
@@ -176,6 +234,12 @@ following DNS names:
 
 - `kratix-platform-webhook-service.kratix-platform-system.svc`
 - `kratix-platform-webhook-service.kratix-platform-system.svc.cluster.local`
+
+The TLS certificate for the SKE Deployment's metrics server must cover the
+following DNS names:
+
+- `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc`
+- `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc.cluster.local`
 
 #### Air-gapped mirrors {#air-gapped-mirrors}
 
@@ -206,8 +270,9 @@ imageRegistry:
       name: "syntasso-enterprise-releases"
       region: "eu-west-2"
         secret:
-          name: "my-secret" # the secret must be created in the same namespace as the operator. It must contain the following keys: accessKeyID, secretAccessKey. If provided below it is automatically created
-          values: # optional: if you've not pre-created the secret, you can instead provide the values below and the helm chart will create it for you
+          name: "my-secret" # must be in the same namespace as the operator; must contain keys: accessKeyID, secretAccessKey
+          values: # optional: provide accessKeyID/secretAccessKey here and the chart creates the Secret for you;
+                  # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
             accessKeyID: "my-access"
             secretAccessKey: "my-secret"
   ```
@@ -220,9 +285,10 @@ imageRegistry:
       branch: main
       repo: https://github.com/org/repo
       secret:
-        name: git-creds # the secret must be created in the same namespace as the operator. It must contain the following keys: username, password. If provided below it is automatically created
-        values: # optional: if you've not pre-created the secret, you can instead provide the values below and the helm chart will create it for you
-          username: "my-username" # instead of providing a secretName you can provide the username and password directly
+        name: git-creds # must be in the same namespace as the operator; must contain keys: username, password
+        values: # optional: provide username/password here and the chart creates the Secret for you;
+                # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
+          username: "my-username"
           password: "my-password"
   ```
   </TabItem>
