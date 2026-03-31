@@ -103,7 +103,7 @@ To re-run a workflow following a Pipeline failure, you can perform a
 [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation) of the Resource, which will trigger the
 workflow again from the beginning.
 
-### Suspending a workflow
+### Suspending or Retrying a workflow
 
 A Resource Configure Pipeline can output an optional file to suspend its execution:
 
@@ -111,16 +111,15 @@ A Resource Configure Pipeline can output an optional file to suspend its executi
 /kratix/metadata/workflow-control.yaml
 ```
 
-The file supports:
+The file supports the following schema:
 
 ```yaml
-retryAfter: 10m
+retryAfter: <duration> # e.g. 10m, 1h, 1d
 suspend: true | false
 message: "optional reason"
 ```
 
-When a Pipeline writes `suspend: true`, Kratix:
-
+When `suspend` is set to `true`, Kratix:
 - adds `kratix.io/workflow-suspended: "true"` to the Resource request
 - marks the current pipeline as `Suspended` in `status.kratix.workflows.pipelines`
 - stores the optional message on that pipeline entry
@@ -128,27 +127,31 @@ When a Pipeline writes `suspend: true`, Kratix:
 
 If the suspend label is removed, Kratix starts from the suspended Pipeline.
 
-When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as
-suspended. It will also:
-
-- re-executes the suspended Pipeline at or after `retryAfter`
-- increments the retry `attempts` for that pipeline
+When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as suspended. It will also:
+- re-executes the suspended Pipeline after the duration set by `retryAfter`
+- increments the retry `attempts` for that pipeline in `status.kratix.workflows.pipelines`
 
 If the re-executed Pipeline writes a new `retryAfter`, Kratix schedules another
-retry from that Pipeline.
+retry from that Pipeline. If the re-executed Pipeline does not write
+`retryAfter`, the retry loop stops and Kratix continues with the next Pipeline
+in the workflow.
 
-If the re-executed Pipeline does not write `retryAfter`, the retry loop stops
-and Kratix continues with the next Pipeline in the workflow.
+If both `retryAfter` and `suspend` are present, the value of `suspend` is
+ignored and the pipeline will be re-executed after the duration set by
+`retryAfter`.
 
-If both `retryAfter` and `suspend` are present, `retryAfter` takes precedence.
-This is true whether `suspend` is `true` or `false`.
+If a new reconciliation is triggered (for example due to a manual reconciliation
+or a resource update) while the Resource is suspended, Kratix starts the configure
+workflow from the beginning.
 
-If a new reconciliation is triggered while the Resource is suspended, Kratix
-starts the configure workflow from the beginning instead. This applies when:
+:::note
 
-- the Resource is manually reconciled
-- the reconciliation interval is reached
-- the Resource is updated
+The `message` field is used to populate the `status.kratix.workflows.pipelines.message` field. This field is displayed when the `kubectl describe` is evoked, but not when the `kubectl get` is used. 
+
+To display the message when using `kubectl get`, make sure to output the status
+file to the `/kratix/metadata/status.yaml` file.
+
+:::
 
 ### Idempotency
 

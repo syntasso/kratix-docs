@@ -172,7 +172,7 @@ These are typical symptoms when workflows are running as Jobs:
 
 ### Workflow Control
 
-A Pipeline can output an optional file to suspend its running:
+A Pipeline can output an optional file to control its own execution:
 
 ```text
 /kratix/metadata/workflow-control.yaml
@@ -192,6 +192,16 @@ When a Pipeline writes `suspend: true`, Kratix:
 - marks the current pipeline as `Suspended` in `status.kratix.workflows.pipelines`
 - stores the optional message on that pipeline entry
 - stops executing later Pipelines in the workflow
+
+:::info
+
+Suspending a Pipeline will not stop the execution of later stages in the same Pipeline. If you want to guarantee that no other stage is executed, you can either:
+
+1. Have the suspend as the last stage in the Pipeline.
+1. Have the suspend stage as the only stage in the Pipeline.
+1. Ensure that every stage checks for the workflow-control file.
+
+:::
 
 If `kratix.io/workflow-suspended` is removed, Kratix starts from the suspended
 Pipeline.

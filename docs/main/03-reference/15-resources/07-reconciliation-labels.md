@@ -9,7 +9,7 @@ Kratix exposes labels that change the reconciliation behavior for Resource reque
 
 ## Manual Reconciliation
 
-```
+```yaml
 kratix.io/manual-reconciliation: "true"
 ```
 
@@ -22,19 +22,13 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 
 ## Unsuspend a Workflow
 
-```
+Promises can signal Kratix that the current resource workflow should be suspended via the workflow-control file (check docs for [Workflow Control](/main/reference/promises/workflows#suspending-a-workflow)). When the workflow is suspended, Kratix will add the following label to the Resource:
+
+```yaml
 kratix.io/workflow-suspended: "true"
 ```
 
 This label marks a Resource configure workflow as suspended.
-
-Kratix sets this label when a Resource Configure Pipeline outputs
-`/kratix/metadata/workflow-control.yaml` with:
-
-```yaml
-suspend: true
-message: "optional reason"
-```
 
 While the label is present:
 
@@ -45,7 +39,7 @@ If the label is removed, Kratix resumes from the suspended Pipeline.
 
 ## Pausing Reconciliation
 
-```
+```yaml
 kratix.io/paused: "true"
 ```
 
@@ -62,6 +56,7 @@ Pausing affects both configuration and deletion:
   delete workflow will only be triggered when the label is removed.
 
 When an object is paused, its status condition will reflect the 'paused' state until the label is removed:
+
 ```yaml
 status:
   apiVersion: marketplace.kratix.io/v1alpha1
