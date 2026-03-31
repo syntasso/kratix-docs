@@ -48,19 +48,36 @@ You can see all available configuration in the
 
 ### The SKE license
 
-SKE Health Agent images are hosted in a private registry. To access these images, you will need to authenticate using
-the token you have been provided with by Syntasso.
+SKE Health Agent images are hosted in a private registry. To pull them, your cluster needs image pull credentials: either your SKE license token (when pulling from the Syntasso registry directly) or your own credentials if you are using a self-hosted registry.
 
-In your values file, you can set the `skeLicense` field to the license token provided to you by Syntasso.
+**Option 1: Provide the license token directly**
+
+If pulling from the Syntasso registry, set `skeLicense` in your values file and the chart will create the image pull secret automatically:
 
 ```yaml
 skeLicense: LICENSE # provided to you by Syntasso
 ```
 
-This will generate a Kubernetes Secret in the `k8s-health-agent-system`
-namespace that will be used to authenticate to the image registry. You can use
-your own image pull secret by setting the `imageRegistry.imagePullSecret` field
-instead.
+**Option 2: Pre-create the image pull secret**
+
+To avoid inlining credentials in your values file, omit `skeLicense` and instead pre-create a `kubernetes.io/dockerconfigjson` Secret manually. The credentials will depend on the registry you are pulling from. This could still be your SKE license token (for the Syntasso registry), or your own credentials if you are using a self-hosted registry.
+
+For example, when pulling from the Syntasso registry:
+
+```bash
+kubectl create secret docker-registry syntasso-registry \
+  --namespace=k8s-health-agent-system \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=<YOUR_LICENSE_TOKEN>
+```
+
+Then reference the secret in your values file. The chart will skip creating the pull secret and use the pre-existing one instead:
+
+```yaml
+imageRegistry:
+  imagePullSecret: "syntasso-registry"
+```
 
 :::warning
 
