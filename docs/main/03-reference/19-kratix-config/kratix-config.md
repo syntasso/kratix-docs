@@ -129,7 +129,18 @@ Logging configuration for the Kratix Controller Manager pod logs.
 
 #### level (default: "info")
 
-The log level. Can be "info", "warning", "debug" or "trace"
+The log level. Can be "info", "warning", "debug" or "trace".
+
+The different log levels and their meanings are described in the table below:
+
+| Level / Severity | Target Audience           | Usage Guidelines                                                                                                                     | Examples                                                                                                     |
+|------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| ERROR            | All               | <ul><li>Something is permanently broken and may require human intervention</li></ul>                                                                   | <ul><li>Invalid YAMLs</li><li>Can't talk to Git server</li><li>Invalid Bucket endpoints</li></ul>                                        |
+| WARNING          | All               | <ul><li>Something is temporarily broken but may fix itself within the Reconciliation loop</li></ul>                                                    | <ul><li>Promise is unavailable</li><li>State Store secret not found</li><li>No available destinations</li></ul>                          |
+| INFO             | Platform Operator | <ul><li>Heartbeat of the platform</li><li>Reconciliation-level logs</li><li>Business relevant actions completed</li><li>A resource status has changed</li></ul> | <ul><li>Reconciliation started and ended</li><li>Scheduling work to a destination</li><li>Next reconciliation time</li></ul>            |
+| DEBUG            | Platform Operator / Platform Engineer | <ul><li>Function-level logs</li><li>Transitional errors</li><li>Code actions completed</li></ul>                                                             | <ul><li>Applying the Promise API</li><li>Running a Pipeline for a Resource</li><li>Creating a WorkPlacement</li></ul>                    |
+| TRACE            | Kratix Developer  | <ul><li>Pre and Post actions</li><li>Used to identify a particular line/area of code</li></ul>                                                            | <ul><li>Creating auxiliary resources</li><li>Verifying if there's a pipeline in progress</li><li>Calculating Promise Spec hash</li></ul> |
+
 
 #### structured (default: false)
 
