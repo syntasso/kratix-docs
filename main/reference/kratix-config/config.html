@@ -17,8 +17,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.123df288.css">
-<script src="/assets/js/runtime~main.2626f7ff.js" defer="defer"></script>
-<script src="/assets/js/main.5ab804ab.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d846179c.js" defer="defer"></script>
+<script src="/assets/js/main.65606a9f.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -68,7 +68,9 @@ the <code>kratix-platform-controller-manager</code> pod starts within the same n
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging">logging<a href="#logging" class="hash-link" aria-label="Direct link to logging" title="Direct link to logging" translate="no">​</a></h3>
 <p>Logging configuration for the Kratix Controller Manager pod logs.</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="level-default-info">level (default: &quot;info&quot;)<a href="#level-default-info" class="hash-link" aria-label="Direct link to level (default: &quot;info&quot;)" title="Direct link to level (default: &quot;info&quot;)" translate="no">​</a></h4>
-<p>The log level. Can be &quot;info&quot;, &quot;warning&quot;, &quot;debug&quot; or &quot;trace&quot;</p>
+<p>The log level. Can be &quot;info&quot;, &quot;warning&quot;, &quot;debug&quot; or &quot;trace&quot;.</p>
+<p>The different log levels and their meanings are described in the table below:</p>
+<table><thead><tr><th>Level / Severity</th><th>Target Audience</th><th>Usage Guidelines</th><th>Examples</th></tr></thead><tbody><tr><td>ERROR</td><td>All</td><td><ul><li>Something is permanently broken and may require human intervention</li></ul></td><td><ul><li>Invalid YAMLs</li><li>Can&#x27;t talk to Git server</li><li>Invalid Bucket endpoints</li></ul></td></tr><tr><td>WARNING</td><td>All</td><td><ul><li>Something is temporarily broken but may fix itself within the Reconciliation loop</li></ul></td><td><ul><li>Promise is unavailable</li><li>State Store secret not found</li><li>No available destinations</li></ul></td></tr><tr><td>INFO</td><td>Platform Operator</td><td><ul><li>Heartbeat of the platform</li><li>Reconciliation-level logs</li><li>Business relevant actions completed</li><li>A resource status has changed</li></ul></td><td><ul><li>Reconciliation started and ended</li><li>Scheduling work to a destination</li><li>Next reconciliation time</li></ul></td></tr><tr><td>DEBUG</td><td>Platform Operator / Platform Engineer</td><td><ul><li>Function-level logs</li><li>Transitional errors</li><li>Code actions completed</li></ul></td><td><ul><li>Applying the Promise API</li><li>Running a Pipeline for a Resource</li><li>Creating a WorkPlacement</li></ul></td></tr><tr><td>TRACE</td><td>Kratix Developer</td><td><ul><li>Pre and Post actions</li><li>Used to identify a particular line/area of code</li></ul></td><td><ul><li>Creating auxiliary resources</li><li>Verifying if there&#x27;s a pipeline in progress</li><li>Calculating Promise Spec hash</li></ul></td></tr></tbody></table>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="structured-default-false">structured (default: false)<a href="#structured-default-false" class="hash-link" aria-label="Direct link to structured (default: false)" title="Direct link to structured (default: false)" translate="no">​</a></h4>
 <p>Set to true to emit logs as json.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="telemetry">telemetry<a href="#telemetry" class="hash-link" aria-label="Direct link to telemetry" title="Direct link to telemetry" translate="no">​</a></h3>
