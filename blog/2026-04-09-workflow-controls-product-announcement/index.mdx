@@ -1,0 +1,167 @@
+---
+slug: workflow-controls-product-announcement
+title: "Kratix Workflow Controls: Easily Add Manual Approvals and External Events to Your Platform"
+description: "Kratix Workflow Controls allow you to easily add manual approvals and external events to your platform"
+authors: [cat]
+tags: [kratix, product announcement]
+---
+
+import ReactPlayer from 'react-player/lazy';
+
+Modern platforms do not operate in isolation. They depend on manual approvals, external systems,
+the availability of other resources, and compound building blocks. Until now, modelling these 
+asynchronous processes in Kratix has been inelegant, and the underlying Kubernetes pods orchestrating 
+the tasks could remain alive for a long time.
+
+<!-- truncate -->
+
+With the new Workflow Control feature, you can now safely and efficiently suspend a workflow until 
+a condition is met, without leaving long-running pods hanging around. Your platform stays responsive, 
+your workflows stay clean, and your enterprise processes fit naturally into Kratix.
+
+Unlike [CI pipelines or infrastructure tools](https://www.syntasso.io/post/beyond-the-platform-facade-escaping
+-the-portals-and-pipelines-trap) that rely on polling or long-running jobs, Kratix natively understands 
+when to pause, retry, and resume workflows as part of the platform.
+
+## Real platforms are asynchronous: most infra tools pretend they’re not
+
+Most Platform Engineers aspire to build platforms within a declarative world that requires 
+no manual intervention, where dependencies don't prevent them from waiting for their desired 
+states to converge… However, at Syntasso, we know that it isn't always possible, so we build 
+for the enterprises that consistently face scenarios such as:
+- A database request must be manually approved in Jira before provisioning begins
+- One resource must wait until another resource is available
+- Creation of environments requires things to happen sequentially
+
+Until now, the only way to model these behaviours in Kratix has been to wrap checks in loops 
+and sleeps within pipeline containers.
+
+This created two serious problems:
+1. Long-running pods consume resources unnecessarily
+  - If approvals take days, those pods sit idle but still consume memory and, in some environments, 
+  hog scarce IP addresses.
+2. The pattern feels hacky and fragile
+  - Promise writers are forced to build retry logic, polling, and lifecycle management themselves, 
+  rather than relying on Kratix to orchestrate workflow execution cleanly.
+
+This left platform teams with an unnecessary cognitive overhead, not just in writing Promises but in 
+how the whole platform behaves.
+
+## Workflow Control: native, efficient control of your pipelines’ behaviour
+
+The new Kratix Workflow Control functionality introduces a clean execution control mechanism that 
+allows pipelines to:
+- Signal that a condition has not yet been met
+- Retry a specified number of times and after a defined interval
+- Suspend execution without being treated as a failure
+- Resumed when the condition is satisfied
+
+Instead of keeping a pod alive on a sleep cycle, the pipeline exits and instructs Kratix when to 
+retry. The pipeline still contains all the business-specific logic needed to determine whether 
+the condition is met, while Kratix handles retrying the pipeline.
+
+```yaml
+Name:         prod
+Namespace:    default
+Labels:       kratix.io/promise-name=app
+              kratix.io/workflow-suspended=true
+Annotations:  <none>
+API Version:  marketplace.kratix.io/v1alpha1
+Kind:         app
+Metadata:
+  Creation Timestamp:  2026-04-09T13:15:55Z
+  Finalizers:
+    kratix.io/work-cleanup
+    kratix.io/workflows-cleanup
+    kratix.io/delete-workflows
+  Generation:        1
+  Resource Version:  409896
+  UID:               4aada8e0-0a83-4604-adec-25f50f5e21ff
+Spec:
+  App Config:
+    Image:                      syntasso/website
+    Lifecycle:                  prod
+    Requires Bucket Backend:    false
+    Requires Database Backend:  false
+    Service Port:               80
+Status:
+  Approval Issue:  https://github.com/syntasso/demo-approvals/issues/131
+  Conditions:
+    Last Transition Time:  2026-04-09T13:15:56Z
+    Message:               Pipelines are still in progress
+    Reason:                PipelinesInProgress
+    Status:                False
+    Type:                  ConfigureWorkflowCompleted
+    Last Transition Time:  2026-04-09T13:16:02Z
+    Message:               Suspended
+    Reason:                WorkflowSuspended
+    Status:                Unknown
+    Type:                  Reconciled
+  Kratix:
+    Workflows:
+      Pipelines:
+        Attempts:              1
+        Last Transition Time:  2026-04-09T13:15:55Z
+        Message:               Waiting for approval on issue https://github.com/syntasso/demo-approvals/issues/131
+        Name:                  app-configure
+        Next Retry At:         2026-04-09T13:16:32Z
+        Phase:                 Suspended
+      Suspended Generation:    1
+  Message:                     Waiting for approval on issue https://github.com/syntasso/demo-approvals/issues/131
+  Workflows:                   1
+  Workflows Failed:            0
+  Workflows Succeeded:         0
+Events:
+  Type     Reason             Age              From                       Message
+  ----     ------             ----             ----                       -------
+  Normal   PipelineStarted    11s              ResourceRequestController  Configure Pipeline started: app-configure
+  Warning  WorkflowSuspended  2s (x6 over 5s)  ResourceRequestController  'kratix.io/workflow-suspended' label set to 'true' for resource request; skipping reconciliation
+```
+
+_Example of a resource in the suspended state._
+
+### Using Workflow Controls to manage manual approvals
+
+<div style={{"text-align":"center", "margin":"10px 0"}}>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/S3Bdc5NJnBk?si=uxWxCKmCD51YLYEV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+In the video above, our Principal Engineer Derik, shows how you can use this feature to manage manual approvals via Github issues.
+
+### Key Workflow Control Features
+- **Efficient retry and suspend mechanism**
+  - Pipelines can create a workflow control file that instructs Kratix to retry after a specified 
+  interval, with optional max attempts, and the ability to suspend the checks if needed.
+  - Save money by reducing the number of idle pods waiting for approvals 
+- **Condition-aware progression**
+  - If a wait condition is not met, Kratix re-executes the pipeline after the configured delay. 
+  When the pipeline is marked “completed”, the next pipeline stage starts automatically.
+  - This means no more manual checks on status, or if the pod is still running as you expect. 
+  Just check the status of your resource.
+- **Clear separation between failure and “retry later”**
+  - Non-zero exits are still treated as failures. But unmet conditions are explicitly handled as 
+  retry states, rather than errors
+  - This makes workflow statuses clearer and easier to reason about.
+- **Enhanced status visibility**
+  - Retry attempts, suspension state, and next retry timestamps are persisted in the resource status, 
+  making the wait behaviour transparent for users.
+  - This reduces the need to poke another team to see what is going on under the platform-hood
+
+### What this means for platform teams
+With Workflow Controls, you can:
+- Integrate real-world change management workflows inside Kratix
+- Reduce platform resource pressure from idle pods
+- Avoid fragile sleep-and-poll scripts
+
+Your platform no longer has to choose between correctness and efficiency.
+
+## Ready to try it out?
+Promise Pipeline Waits and Events are available now in the latest Kratix & SKE releases. 
+- Check the documentation to learn how to add wait behaviour to your Promises, 
+or our guide on how to write Compound Promises. 
+- Join us in the [community Slack](https://kratixworkspace.slack.com/) to share feedback or ask questions
+- If you are an enterprise team modelling complex approval workflows, talk to us about how 
+[Syntasso Kratix Enterprise](https://www.syntasso.io/) can extend this capability further with 
+enterprise integrations to support tools like Jira, Service Now and Slack
+
+Real platforms are asynchronous. Now your Promise pipelines are too, without the operational cost.
