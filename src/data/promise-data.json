@@ -221,6 +221,16 @@
 		]
 	},
 	{
+		"name": "PostgreSQL (SKE)",
+		"description": "A SQL-compliant relational database management system, managed with Syntasso Kratix Enterprise (SKE).",
+		"url": "https://github.com/syntasso/promise-postgresql-ske",
+		"logoUrl": "/img/marketplace/postgresql.svg",
+		"ske": true,
+		"categories": [
+			"Data"
+		]
+	},
+	{
 		"name": "RabbitMQ",
 		"description": "A message broker that implements the Advanced Message Queuing Protocol (AMQP)",
 		"url": "https://github.com/syntasso/promise-rabbitmq",
