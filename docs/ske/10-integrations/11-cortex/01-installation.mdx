@@ -206,7 +206,7 @@ Agent](/main/guides/custom-gitops-agent).
   <Tabs className="boxedTabs" groupId="GitOps">
   <TabItem value="ArgoCD" label="ArgoCD Application">
 
-  ```bash
+  ```yaml
   apiVersion: argoproj.io/v1alpha1
   kind: Application
   metadata:
@@ -233,7 +233,21 @@ Agent](/main/guides/custom-gitops-agent).
 
   <TabItem value="FluxCD" label="Flux Kustomization">
 
-  ```bash
+  ```yaml
+  ---
+  apiVersion: kustomize.toolkit.fluxcd.io/v1
+  kind: Kustomization
+  metadata:
+    name: cortex-testing
+    namespace: flux-system
+  spec:
+    prune: true
+    interval: 10s
+    path: .
+    sourceRef:
+      kind: GitRepository
+      name: kratix-cortex-resources
+  ---
   apiVersion: source.toolkit.fluxcd.io/v1
   kind: GitRepository
   metadata:
@@ -246,6 +260,16 @@ Agent](/main/guides/custom-gitops-agent).
       branch: main
     secretRef:
       name: cortex-git-credentials
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: cortex-git-credentials
+    namespace: flux-system
+  data:
+    identity: $SSH_PRIVATE_KEY_BASE64
+    identity.pub: $SSH_PUBLIC_KEY_BASE64
+    known_hosts: $KNOWN_HOSTS_BASE64
   ```
 
   </TabItem>
