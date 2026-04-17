@@ -9,7 +9,7 @@ Kratix exposes labels that change the reconciliation behavior for Promise object
 
 ## Manual Reconciliation
 
-```
+```yaml
 kratix.io/manual-reconciliation: "true"
 ```
 
@@ -22,19 +22,12 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 
 ## Unsuspending a Workflow
 
-```
+Promises can signal Kratix that the current workflow should be suspended via the workflow-control file (check docs for [Workflow Control](/main/reference/promises/workflows#suspending-a-workflow)). When the workflow is suspended, Kratix will add the following label to the Promise:
+
+```yaml
 kratix.io/workflow-suspended: "true"
 ```
 
-This label marks a Promise configure workflow as suspended.
-
-Kratix sets this label when a Promise Configure Pipeline outputs
-`/kratix/metadata/workflow-control.yaml` with:
-
-```yaml
-suspend: true
-message: "optional reason"
-```
 
 While the label is present:
 
@@ -45,7 +38,7 @@ If the label is removed, Kratix resumes from the suspended Pipeline.
 
 ## Pausing Reconciliation
 
-```
+```yaml
 kratix.io/paused: "true"
 ```
 

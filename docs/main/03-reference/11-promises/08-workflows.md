@@ -99,22 +99,23 @@ To re-run a workflow following a Pipeline failure, you can perform a
 [manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation) of the Promise, which will trigger the
 workflow again from the beginning.
 
-### Suspending a workflow
+### Suspending or Retrying a workflow
 
-A Promise Configure Pipeline can output an optional file to suspend its execution:
+A Promise Configure Pipeline can output an optional file to control the workflow execution:
 
 ```text
 /kratix/metadata/workflow-control.yaml
 ```
 
-The file supports:
+The file supports the following schema:
 
 ```yaml
+retryAfter: <duration> # e.g. 10m, 1h, 1d
 suspend: true | false
 message: "optional reason"
 ```
 
-When a Pipeline writes `suspend: true`, Kratix:
+When `suspend` is set to `true`, Kratix:
 
 - adds `kratix.io/workflow-suspended: "true"` to the Promise
 - marks the current pipeline as `Suspended` in `status.kratix.workflows.pipelines`
@@ -123,12 +124,31 @@ When a Pipeline writes `suspend: true`, Kratix:
 
 If the suspend label is removed, Kratix starts from the suspended Pipeline.
 
-If a new reconciliation is triggered while the Promise is suspended, Kratix
-starts the configure workflow from the beginning instead. This applies when:
+When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as suspended. It will also:
+- re-executes the suspended Pipeline after the duration set by `retryAfter`
+- increments the retry `attempts` for that pipeline in `status.kratix.workflows.pipelines`
 
-- the Promise is manually reconciled
-- the reconciliation interval is reached
-- the Promise spec is updated
+If the re-executed Pipeline writes a new `retryAfter`, Kratix schedules another
+retry from that Pipeline. If the re-executed Pipeline does not write
+`retryAfter`, the retry loop stops and Kratix continues with the next Pipeline
+in the workflow.
+
+If both `retryAfter` and `suspend` are present, the value of `suspend` is
+ignored and the pipeline will be re-executed after the duration set by
+`retryAfter`.
+
+If a new reconciliation is triggered (for example due to a manual reconciliation
+or a promise update) while the Promise is suspended, Kratix starts the configure
+workflow from the beginning.
+
+:::note
+
+The `message` field is used to populate the `status.kratix.workflows.pipelines.message` field. This field is displayed when the `kubectl describe` is evoked, but not when the `kubectl get` is used. 
+
+To display the message when using `kubectl get`, make sure to output the status
+file to the `/kratix/metadata/status.yaml` file.
+
+:::
 
 ### Idempotency
 
