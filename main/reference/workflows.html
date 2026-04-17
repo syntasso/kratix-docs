@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.4d5fac85.css">
-<script src="/assets/js/runtime~main.c566ea41.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.90983757.js" defer="defer"></script>
 <script src="/assets/js/main.65606a9f.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -83,33 +83,45 @@ issues. Example:<!-- -->
 </li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workflow-control">Workflow Control<a href="#workflow-control" class="hash-link" aria-label="Direct link to Workflow Control" title="Direct link to Workflow Control" translate="no">​</a></h3>
-<p>A Pipeline can output an optional file to suspend its running:</p>
+<p>A Pipeline can output an optional file to control its own execution:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">/kratix/metadata/workflow-control.yaml</span><br></span></code></pre></div></div>
 <p>The supported schema is:</p>
-<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">suspend</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> true </span><span class="token punctuation" style="color:#393A34">|</span><span class="token plain"> false</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">message</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;optional reason&quot;</span><br></span></code></pre></div></div>
-<p>When a Pipeline writes <code>suspend: true</code>, Kratix will:</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">retryAfter</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> 10m</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">suspend</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> true </span><span class="token punctuation" style="color:#393A34">|</span><span class="token plain"> false</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">message</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;optional reason&quot;</span><br></span></code></pre></div></div>
+<p>When a Pipeline writes <code>suspend: true</code>, Kratix:</p>
 <ul>
-<li class="">add <code>kratix.io/workflow-suspended: &quot;true&quot;</code> to the Promise or Resource request</li>
-<li class="">mark the current entry in <code>status.kratix.workflows.pipelines</code> as <code>Suspended</code></li>
-<li class="">store the optional <code>message</code> on that pipeline status entry</li>
-<li class="">stop executing any later Pipelines in the workflow</li>
+<li class="">adds <code>kratix.io/workflow-suspended: &quot;true&quot;</code> to the Promise or Resource request</li>
+<li class="">marks the current pipeline as <code>Suspended</code> in <code>status.kratix.workflows.pipelines</code></li>
+<li class="">stores the optional message on that pipeline entry</li>
+<li class="">stops executing later Pipelines in the workflow</li>
 </ul>
-<p>This applies to both Promise and Resource Configure workflows.</p>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="resuming-or-restarting-a-suspended-workflow">Resuming or restarting a suspended workflow<a href="#resuming-or-restarting-a-suspended-workflow" class="hash-link" aria-label="Direct link to Resuming or restarting a suspended workflow" title="Direct link to Resuming or restarting a suspended workflow" translate="no">​</a></h4>
-<p>Once a workflow is suspended, Kratix supports two different behaviors:</p>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>Suspending a Pipeline will not stop the execution of later stages in the same Pipeline. If you want to guarantee that no other stage is executed, you can either:</p><ol>
+<li class="">Have the suspend as the last stage in the Pipeline.</li>
+<li class="">Have the suspend stage as the only stage in the Pipeline.</li>
+<li class="">Ensure that every stage checks for the workflow-control file.</li>
+</ol></div></div>
+<p>If <code>kratix.io/workflow-suspended</code> is removed, Kratix starts from the suspended
+Pipeline.</p>
+<p>When a Pipeline writes <code>retryAfter</code>, Kratix will treat the current pipeline as
+suspended. It will also:</p>
 <ul>
-<li class="">If <code>kratix.io/workflow-suspended</code> is removed, Kratix resumes from the Pipeline
-marked <code>Suspended</code>.</li>
-<li class="">If Kratix triggers a fresh reconciliation, the workflow restarts from the
-beginning.</li>
+<li class="">re-execute the suspended pipeline after <code>retryAfter</code></li>
+<li class="">increment the retry <code>attempts</code> for that pipeline</li>
 </ul>
-<p>Fresh reconciliation from the beginning happens when:</p>
+<p>If the re-executed Pipeline writes a new <code>retryAfter</code>, Kratix will schedule another
+retry from that Pipeline.</p>
+<p>If the re-executed Pipeline does not write <code>retryAfter</code>, the retry loop stops
+and Kratix continues with the next Pipeline in the workflow.</p>
+<p>When both <code>retryAfter</code> and <code>suspend</code> are present, <code>retryAfter</code> takes precedence.
+This is true whether <code>suspend</code> is <code>true</code> or <code>false</code>.</p>
+<p>Kratix can triggers a new reconciliation from the start of the pipeline
+while the workflow is suspended. This applies when:</p>
 <ul>
 <li class=""><code>kratix.io/manual-reconciliation: &quot;true&quot;</code> is added</li>
 <li class="">the reconciliation interval is reached</li>
 <li class="">the Promise or Resource request is updated</li>
-<li class="">a previously paused object is unpaused</li>
+<li class="">a previously paused Promise or Resource is unpaused</li>
 </ul>
+<p>This applies to both Promise and Resource Configure workflows.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="role-based-access-control-rbac">Role-based Access Control (RBAC)<a href="#role-based-access-control-rbac" class="hash-link" aria-label="Direct link to Role-based Access Control (RBAC)" title="Direct link to Role-based Access Control (RBAC)" translate="no">​</a></h3>
 <p>Each pipeline runs with its own service account and a default set of restrictive
 RBAC permissions. By default the service account is automatically created by
