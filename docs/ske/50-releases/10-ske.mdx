@@ -19,6 +19,22 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.45.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.45.0/) (2026-04-17)
+
+#### Features
+
+* Introducing the ability to retry Promise and Resource Workflows via an optional Workflow Control file, with detailed retry states now visible in the `status.kratix` of Promises and Requests. Check the [reference](/main/reference/workflows#workflow-control) docs for more details.
+
+#### Fixes
+
+* Use label selectors for the Kratix Promise webhook.
+* Ensure pipeline jobs are cleaned up when the workflow is Suspended and not Completed.
+* Ensure we run the configure workflows when a resource request is unpaused.
+
+#### Maintenance
+
+* Base image updates (Chainguard) and package maintenance.
+
 ### [v0.44.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.44.0/) (2026-03-26)
 
 #### Features
