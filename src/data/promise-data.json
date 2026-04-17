@@ -83,15 +83,6 @@
 		]
 	},
 	{
-		"name": "Dex",
-		"description": "A demo Promise with cluster authentication and authorization using OIDC as a service",
-		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/dex-group-authentication",
-		"logoUrl": "/img/marketplace/dex.svg",
-		"categories": [
-			"Security"
-		]
-	},
-	{
 		"name": "ElasticSearch",
 		"description": "A distributed, open search and analytics engine for all types of data",
 		"url": "https://github.com/syntasso/promise-elasticcloud",
