@@ -23,14 +23,13 @@ Check the release notes below for information on each available version.
 
 #### Features
 
-* Promise and Resource Workflows can be retried after a given duration via an optional Workflow Control file.
-* Detail the retry state of pipeline executions in the `status.kratix` of Promises and Requests.
+* Introducing the ability to retry Promise and Resource Workflows via an optional Workflow Control file, with detailed retry states now visible in the `status.kratix` of Promises and Requests. Check the [reference](/main/reference/workflows#workflow-control) docs for more details.
 
 #### Fixes
 
 * Use label selectors for the Kratix Promise webhook.
-* Ensure cleanup happens when the workflow is Suspended and not Completed.
-* Ensure we run the configure workflows when a resource request is Unpaused.
+* Ensure pipeline jobs are cleaned up when the workflow is Suspended and not Completed.
+* Ensure we run the configure workflows when a resource request is unpaused.
 
 #### Maintenance
 
