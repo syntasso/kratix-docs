@@ -162,7 +162,7 @@ From the root of the backstage repository, run:
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
 ```
 
-The plugin can communicate with Kubernetes in two ways:
+The plugin can fetch information about Backstage Entities in two ways:
 
 * Via the Kubernetes API (recommended)
 * Via a Git repository
@@ -247,7 +247,7 @@ ske:
 
 The backend plugin uses basic auth to authenticate against the Git provider. If you wish to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the `username` field, and set the `token` field to the password or token. Otherwise, the username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username` or `type` must be provided.
 
-The `token` field may not be provided when Backstage is configured with GitHub App credentials, as the GitHub App will be used to authenticate against the Git provider.
+The `token` is used by the Backstage plugin to retrieve information about Promises and Resource Requests from the configured Github Repository. If you have configured a Github App for the Github integration, you can leave this field empty and the plugin will use the Github app's short-lived tokens to authenticate.
 
 The `repoUrl` is the repository to which Backstage will push the resource requests; you must configure your platform to reconcile on new documents.
 
