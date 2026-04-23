@@ -1,5 +1,5 @@
 ---
-description: Documentation for the Kratix State Store Custom Resources
+description: Documentation for the Custom Resources for Upgrading Resource Requests
 title: Promise Upgrades
 sidebar_label: Intro
 id: intro

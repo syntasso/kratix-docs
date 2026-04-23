@@ -42,7 +42,7 @@ spec:
   resourceRef:
     name: example # name of the Resource
     namespace: default # namespace of the Resource
-  version: v0.1.0 # version of the Promise this Resource is associated to
+  version: v0.1.0 # version of the Promise this Resource is associated to, can be 'latest'
 ```
 
 :::info
@@ -55,7 +55,7 @@ If you want the Resource to be reconciled using a different Promise Revision, yo
 ## Upgrading a Resource Request
 
 To update the Promise Revision that a Resource Request is reconciled at, you can update its Resource Binding.
-To find the corresponding Resource Binding, you can run `kubectl` command with label filters.
+To find the corresponding Resource Binding, you can run the `kubectl` command with label filters.
 
 :::tip
 
@@ -72,7 +72,7 @@ NAME                  RESOURCE   PROMISE   VERSION
 example-redis-e7f90   example    redis     v0.1.0
 ```
 
-Then, update `.spec.version` of the Binding:
+Then, update the `.spec.version` of the Binding:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
