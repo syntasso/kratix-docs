@@ -71,12 +71,12 @@ version, but it is not intended to be parsed by clients.
 
 :::tip
 
-When a Promise is installed with no version tag, the Promise Revision will be crated with a `version` configured as `not set`.
+When a Promise is installed with no version tag, the Promise Revision will be created with a `version` configured as `not set`.
 
 :::
 
 If a Promise is updated, but the version already has a Promise Revision
-associated to it, the existing Promise Revision will be updated to reflect the
+associated with it, the existing Promise Revision will be updated to reflect the
 updated Promise spec.
 
 :::warning
@@ -88,7 +88,6 @@ that if you have version `0.2.0` installed and you install version `0.1.0`, the
 installed Promise.
 
 :::
-
 
 ## Deleting a Promise Revision
 
