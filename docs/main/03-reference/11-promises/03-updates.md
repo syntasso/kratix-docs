@@ -101,18 +101,18 @@ Kratix will schedule the `bar` namespace to all Destinations with the label
 `environment: prod` and leave all the `environment: dev` Destinations with the old
 `foo` namespace.
 
-The misscheduled `WorkPlacement` resources can be identified by the `misscheduled` label:
+The misplaced `WorkPlacement` resources can be identified by the `kratix.io/misplaced` label:
 
 ```bash
 > kubectl --context kind-platform -n kratix-platform-system get workplacements.platform.kratix.io --show-labels
 NAME                       AGE   LABELS
-namespace.dev-cluster-1    40s   kratix.io/misscheduled=true,kratix.io/work=namespace
+namespace.dev-cluster-1    40s   kratix.io/misplaced=true,kratix.io/work=namespace
 namespace.prod-cluster-1   26s   kratix.io/work=namespace
 ```
 
 Cleaning them up:
 
 ```bash
-> kubectl --context kind-platform -n kratix-platform-system delete workplacements.platform.kratix.io --selector kratix.io/misscheduled=true
+> kubectl --context kind-platform -n kratix-platform-system delete workplacements.platform.kratix.io --selector kratix.io/misplaced=true
 workplacements.platform.kratix.io "namespace.dev-cluster-1" deleted
 ```
