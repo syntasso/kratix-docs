@@ -24,6 +24,25 @@ To see which version of the helm chart corresponds to which version of the SKE-O
 
 ## Release Notes
 
+### [v0.23.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.23.0/) (2026-04-28)
+
+Released in Helm Chart version [version 0.66.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.66.0/)
+
+#### Features
+
+* When a `imagePullSecret` is not specified in the configuration document, the
+SKE operator will no longer inject a default `syntasso-registry` image pull
+secret into the Deplolyments or into the Kratix ConfigMap.
+  * This enables the cases where the image pull permissions are handled at the
+  Kubernetes node level, or the image is mirrored to a internal registry that
+  does not require authentication.
+  * For details on how to use this feature, please refer to the [SKE Operator
+  Installation docs](/ske/installing-ske/advanced-install#the-ske-license)
+
+#### Security Fixes
+
+* Dependencies security updates
+
 :::important `releaseStorage.path` deprecated
 Please note that the `releaseStorage.path` is deprecated, please remove this from your Helm values and instead use `releaseStorage.releasesPath` to define the
 top-level directory containing the SKE release artefacts.
