@@ -6,10 +6,12 @@
 
 [data-theme="light"] {
   --bg-card-coming-soon: #ececec;
+  --enterprise-banner-color: #940DAE;
 }
 
 [data-theme="dark"] {
   --bg-card-coming-soon: rgb(45, 45, 45);
+  --enterprise-banner-color: #403891;
 }
 
 .root {
@@ -103,6 +105,12 @@
 .example {
   .bannerTitle {
     background-color: var(--example-banner-color);
+  }
+}
+
+.enterprise {
+  .bannerTitle {
+    background-color: var(--enterprise-banner-color);
   }
 }
 

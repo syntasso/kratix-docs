@@ -83,15 +83,6 @@
 		]
 	},
 	{
-		"name": "Dex",
-		"description": "A demo Promise with cluster authentication and authorization using OIDC as a service",
-		"url": "https://github.com/syntasso/kratix-marketplace/tree/main/dex-group-authentication",
-		"logoUrl": "/img/marketplace/dex.svg",
-		"categories": [
-			"Security"
-		]
-	},
-	{
 		"name": "ElasticSearch",
 		"description": "A distributed, open search and analytics engine for all types of data",
 		"url": "https://github.com/syntasso/promise-elasticcloud",
@@ -216,6 +207,16 @@
 		"description": "A SQL-compliant relational database management system",
 		"url": "https://github.com/syntasso/promise-postgresql",
 		"logoUrl": "/img/marketplace/postgresql.svg",
+		"categories": [
+			"Data"
+		]
+	},
+	{
+		"name": "PostgreSQL (SKE)",
+		"description": "A SQL-compliant relational database management system, managed with Syntasso Kratix Enterprise (SKE).",
+		"url": "https://github.com/syntasso/promise-postgresql-ske",
+		"logoUrl": "/img/marketplace/postgresql.svg",
+		"ske": true,
 		"categories": [
 			"Data"
 		]

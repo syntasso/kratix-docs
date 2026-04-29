@@ -142,20 +142,20 @@ spec:
   #highlight-start
   requiredPromises:
     - name: postgresql
-      version: v1.0.0-beta.3
+      version: v1.0.0-beta.5
   #highlight-end
   # rest of the file
 ```
 
 This states that the App-as-a-Promise needs the PostgreSQL Promise to be
-installed at version `v1.0.0-beta.3`. You can read more about Promise versioning
+installed at version `v1.0.0-beta.5`. You can read more about Promise versioning
 [in the reference documentation](/main/reference/promises/releases#promise-release).
 
 Before we can apply our newly updated promise, run the following to install the
 PostgreSQL Promise:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise-release.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/ee05fdd0c37c13fed7241ad90bd028de29000943/promise.yaml
 ```
 
 :::info
@@ -182,7 +182,7 @@ You should see both promises. After a few seconds, both promises are marked as
 ```shell-session
 NAME         STATUS      KIND         API VERSION                      VERSION
 app          Available   App          workshop.kratix.io/v1
-postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3
+postgresql   Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.5
 ```
 
 Excellent. You have now configured the App-as-a-Service Promise to be a Compound

@@ -72,7 +72,7 @@ app    Unavailable   app    marketplace.kratix.io/v1   v1.0.0-beta.1
 You can make the promise available by installing the required promises:
 
 ```bash
-kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/main/promise.yaml
+kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/promise-postgresql/ee05fdd0c37c13fed7241ad90bd028de29000943/promise.yaml
 kubectl --context $PLATFORM apply --filename https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/nginx-ingress/promise.yaml
 ```
 
@@ -83,7 +83,7 @@ $ kubectl --context $PLATFORM get promises
 NAME            STATUS      KIND         API VERSION                      VERSION
 app             Available   app          marketplace.kratix.io/v1         v1.0.0-beta.1
 nginx-ingress   Available                                                 v1.0.0-beta.2
-postgresql      Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.3
+postgresql      Available   postgresql   marketplace.kratix.io/v1alpha2   v1.0.0-beta.5
 
 $ kubectl --context $WORKER get pods
 NAME                                              READY   STATUS    RESTARTS   AGE
@@ -144,7 +144,7 @@ spec:
   #highlight-start
   requiredPromises:
     - name: postgresql
-      version: v1.0.0-beta.3
+      version: v1.0.0-beta.5
     - name: nginx-ingress
       version: v1.0.0-beta.2
   #highlight-end
@@ -206,3 +206,4 @@ Workflow Pipeline is doing by checking the pipeline code [here](https://github.c
 ✅ &nbsp; You have just installed and used your first Compound Promise. <br />
 
 If you want to learn more about Compound Promises, you can check the [Compound Promise Workshop](/workshop/writing-a-promise/compound-promise), or check out this [blog post](/blog/compound-promises) for a more detailed explanation.
+

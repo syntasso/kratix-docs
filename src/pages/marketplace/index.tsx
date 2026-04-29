@@ -39,8 +39,18 @@ function MarketplaceCard({
   description,
   categories,
   available = true,
+  ske = false,
   example = false,
 }) {
+  let badge = null;
+  if (!available) {
+    badge = <Banner title="Coming Soon" style={styles.preview} />;
+  } else if (ske) {
+    badge = <Banner title="Enterprise" style={styles.enterprise} />;
+  } else if (example) {
+    badge = <Banner title="Example" style={styles.example} />;
+  }
+
   return (
     <Card
       className={clsx(styles.card, available ? null : styles.cardComingSoon)}
@@ -74,10 +84,7 @@ function MarketplaceCard({
               </ListItem>
             ))}
           </ul>
-          {!available ? (
-            <Banner title="Coming Soon" style={styles.preview} />
-          ) : null}
-          {example ? <Banner title="Example" style={styles.example} /> : null}
+          {badge}
         </CardContent>
       </CardActionArea>
     </Card>
