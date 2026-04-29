@@ -81,6 +81,7 @@ You can see all available configuration in the
       version: latest
     imageRegistry:
       host: "ghcr.io"
+      managePullSecret: false
       imagePullSecret: "my-secret"
       skeOperatorImage:
         name: "syntasso/ske-operator"
@@ -107,7 +108,7 @@ To run SKE, you need a license. You can get one by [requesting a free trial](htt
 
 **Option 1: Provide the license token directly**
 
-Set `skeLicense` in your values file and the chart will create the image pull secret automatically:
+Set `skeLicense` in your values file and the chart will create and inject the image pull secret automatically:
 
 ```yaml
 skeLicense: LICENSE # provided to you by Syntasso
@@ -132,6 +133,17 @@ Then reference the secret in your values file. The chart will skip creating the 
 ```yaml
 imageRegistry:
   imagePullSecret: "syntasso-registry"
+```
+
+**Option 3: no image pull secret required**
+
+On setups where the image registry can be directly accessed by the Kubernetes
+Nodes without an image pull secret, you can stop the helm chart from injecting
+the image pull secret by setting `managePullSecret` to false:
+
+```yaml
+imageRegistry:
+  managePullSecret: false
 ```
 
 #### SKE version
