@@ -63,10 +63,10 @@ That's exactly what Kratix dependencies are for: to define the resources that ne
 Let's download dependencies for our Postgres Promise and save them in `dependencies/`
 
 ```bash
-curl -o dependencies/operator.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/operator.yaml
-curl -o dependencies/operatorconfiguration.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/operatorconfiguration.crd.yaml
-curl -o dependencies/postgresql.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresql.crd.yaml
-curl -o dependencies/postgresteam.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/internal/configure-pipeline/dependencies/postgresteam.crd.yaml
+curl -o dependencies/operator.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/workflows/configure-pipeline/resources/dependencies/operator.yaml
+curl -o dependencies/operatorconfiguration.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/workflows/configure-pipeline/resources/dependencies/operatorconfiguration.crd.yaml
+curl -o dependencies/postgresql.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/workflows/configure-pipeline/resources/dependencies/postgresql.crd.yaml
+curl -o dependencies/postgresteam.crd.yaml --silent https://raw.githubusercontent.com/syntasso/promise-postgresql/refs/heads/main/workflows/configure-pipeline/resources/dependencies/postgresteam.crd.yaml
 ```
 
 Now, we can add a Promise configure workflow using the Kratix CLI:
@@ -174,12 +174,14 @@ if __name__ == '__main__':
 Let's take a closer look at the script itself to see what it's doing.
 
 The script imports [Kratix Python SDK](/main/kratix-sdks/python) and YAML library:
+
 ```python
 import kratix_sdk as ks
 import yaml
 ```
 
 It then reads the incoming resource request and initializes the Kratix SDK:
+
 ```python
     sdk = ks.KratixSDK()
     resource = sdk.read_resource_input()
@@ -215,6 +217,7 @@ mkdir expected-output
 ```
 
 Inside directory `expected-output`, create a file called `database.yaml` with the following content:
+
 ```yaml
 apiVersion: acid.zalan.do/v1
 kind: postgresql
@@ -233,15 +236,16 @@ spec:
     - createdb
   volume:
     size: 10Gi
-
 ```
 
 Next, you need to define the input for the test. Create an `input` directory:
+
 ```bash
 mkdir input
 ```
 
 Inside the directory `input/`, create a file called `object.yaml` with the following content:
+
 ```yaml
 apiVersion: demo.kratix.io/v1beta1
 kind: Database
@@ -263,6 +267,7 @@ Our test has failed, and let's fix it 😀
 
 Earlier in the Promise API, we defined the property `size`, but we failed to use the input in the script `pipeline.py`.
 It's using a hardcoded value:
+
 ```python
             "volume": {
                 "size": "1Gi", # we will fix in testing
@@ -270,6 +275,7 @@ It's using a hardcoded value:
 ```
 
 You can fix it by using `size` from the resource request manifest:
+
 ```python
             "volume": {
                 "size": resource.get_value("spec.size")
@@ -319,13 +325,22 @@ kubectl apply -f promise.yaml
 After the Promise becomes available, you can create a Postgres database, using the resource request we generated for
 our test input, or a different set of configurations:
 
-`kubectl apply -f input/object.yaml`
+```shell
+kubectl apply -f input/object.yaml
+```
 
-You can target the Destination to see the StatefulSet created for your Postgres database:
+You can target the Destination to see the StatefulSet created for your Postgres
+database with the command:
+
 ```bash
-kubectl get statefulset
-NAME    READY   AGE
-grape   0/2     6s
+kubectl --context=<destination-cluster-config> get statefulset -A
+```
+
+Which will show something like:
+
+```shellsession
+NAMESPACE   NAME    READY   AGE
+default     grape   2/2     96s
 ```
 
 ## 🎉 Congratulations
