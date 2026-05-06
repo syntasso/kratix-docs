@@ -26,13 +26,16 @@ Platform Cluster converges on this and creates the Resource Request, the Cortex 
 
 When a given Resource Request or Promise is deleted (either via the Workflow or the Kubernetes API), the corresponding objects in Cortex will also be deleted.
 
-### Translating Promises to Entity Types
+### Translating Promises to Cortex Workflow inputs
 
-The Cortex Controller takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex.
+The Cortex Controller takes the API of the Promise and uses it to generate both the fields on the Entity Type and the inputs on the Create and Update Workflows in Cortex.
+Cortex Workflow inputs support `string`, `number`, `boolean`, and `object` types, as well as arrays of objects. Promise schema constructs that fall outside this set cannot be
+expressed as Workflow inputs — when the controller encounters one, the Promise itself will still reconcile, but the Create, Update, and Delete Workflows in Cortex will not be
+generated.
 
-The [supported types](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) for Cortex fields are `array`,
-`boolean`, `integer`, `null`, `number`, `object` and `string`. At present, Cortex does not support arrays of objects with fields with more than one level of nesting.
-Additionally, when defined outside of an array, objects cannot exceed more than five levels of nesting.
+#### Quoting numeric values in string inputs
+
+When a Cortex Workflow input is typed as `string` and a user enters a value that consists only of digits, make sure to wrap purely numeric values in quotes (for example, `"0001234"`) when filling the Cortex form so the value is interpreted as a string.
 
 ## Labelling Promises for Cortex Integration
 
