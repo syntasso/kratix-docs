@@ -28,11 +28,39 @@ When a given Resource Request or Promise is deleted (either via the Workflow or 
 
 ### Translating Promises to Entity Types
 
-The Cortex Controller takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex.
+The Cortex Controller takes the API of the Promise and uses it to generate both the fields on the Entity Type and the inputs on the Create and Update Workflows in Cortex. Cortex
+Entity Types and Cortex Workflow inputs have slightly different supported type sets, so some Promise schema constructs are accepted by the Entity Type generation but rejected
+when generating Workflow inputs.
 
-The [supported types](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) for Cortex fields are `array`,
-`boolean`, `integer`, `null`, `number`, `object` and `string`. At present, Cortex does not support arrays of objects with fields with more than one level of nesting.
+#### Entity Type fields
+
+The [supported types](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) for Cortex Entity Type fields
+are `array`, `boolean`, `integer`, `null`, `number`, `object` and `string`. At present, Cortex does not support arrays of objects with fields with more than one level of nesting.
 Additionally, when defined outside of an array, objects cannot exceed more than five levels of nesting.
+
+#### Workflow inputs
+
+[Cortex Workflow inputs](https://docs.cortex.io/streamline/workflows/create#step-2-configure-your-workflow-settings) support a narrower set of types than Entity Type fields:
+only `string`, `number`, `boolean`, and `object`, with arrays available on top of `object`. Promise schema constructs that fall outside this set cannot be expressed as
+Workflow inputs — when the controller encounters one, the Promise itself will still reconcile, but the Create, Update, and Delete Workflows in Cortex will not be generated.
+
+If a field's natural shape doesn't fit within the supported types, model it using one of those types instead. For example, a list of simple values can be modelled as an array
+of objects with a single property:
+
+```yaml
+initialNsAdmins:
+  type: array
+  items:
+    type: object
+    properties:
+      username:
+        type: string
+```
+
+#### Quoting numeric values in string inputs
+
+When a Cortex Workflow input is typed as `string` and a user enters a value that consists only of digits, Cortex serialises it as an integer in the generated request, which then
+fails Promise schema validation. Wrap purely numeric values in quotes (for example, `"0001234"`) when filling the Cortex form so the value round-trips as a string.
 
 ## Labelling Promises for Cortex Integration
 
