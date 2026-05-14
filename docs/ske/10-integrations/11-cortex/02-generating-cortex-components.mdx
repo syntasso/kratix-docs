@@ -58,6 +58,29 @@ metadata:
 
 The Cortex Controller will then create the Cortex objects which you will be able to see in the Cortex UI.
 
+## Skipping Workflow Generation
+
+By default, the Cortex Controller generates Create, Update, and Delete workflows for every managed Promise.
+If you want to skip generation of specific workflows, annotate the Promise with `kratix.io/cortex-skip-workflows`
+set to a comma-separated list of operations to skip. Valid values are `create`, `update`, and `delete`.
+
+For example, to skip the Delete workflow:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/cortex: "true"
+  annotations:
+    # comma-separated list of workflows to skip
+    kratix.io/cortex-skip-workflows: "update,delete"
+```
+
+When workflows are skipped, the controller deletes any previously created Cortex workflows for those operations.
+If the annotation contains an invalid value, the controller falls back to generating all workflows.
+
 ## Managing Resource Requests in Cortex
 
 ```mdx-code-block
