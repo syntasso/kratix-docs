@@ -12,30 +12,54 @@ setup the workspace and installed the controller, follow the [Configuring Cortex
 ## How does it work?
 
 The SKE Cortex Controller uses the the Cortex API to generate [Entity Types](https://docs.cortex.io/ingesting-data-into-cortex/entities?q=workflows#entity-types) and
-[Workflows](https://docs.cortex.io/streamline/workflows) in Cortex, these can be used to manage the lifecycle of Resource Requests in the SKE Platform. For a given Promise, the SKE
-Cortex Controller will generate:
+[Workflows](https://docs.cortex.io/streamline/workflows) in Cortex, these can be used to manage the lifecycle of Resource Requests in the SKE Platform.
 
-* **Promise Entity Type**: Represents the Promise in Cortex
-* **Create Workflow**: Creates Resource Requests of the Promise exposing the options in the Promise API
-* **Update Workflow**: Updates a given Resource Request of the Promise
-* **Delete Workflow**: Deletes a given Resource Request of the Promise
+### Global Entities
 
-When a user uses the Create Workflow to make a Request of a Promise, the Workflow generates a yaml document for that request and writes it to the Cortex Git Repository. When the
-Platform Cluster converges on this and creates the Resource Request, the Cortex Controller creates an Entity in Cortex to correspond with the request. This details the `spec` and
-`status` of the Resource Request in SKE.
+Two global Cortex resources are created once when the SKE Cortex Controller starts:
+
+- **`kratix-promise` Entity Type**: the shared entity type used by all Promise entities.
+- **`instance-of-promise` Relationship Type**: the relationship type that links each Resource Request entity back to its parent Promise entity.
+
+:::warning
+
+These global resources are only created or updated when the controller starts.  If either is manually deleted from Cortex, the controller will **not** recreate them automatically. A controller restart is required to restore them.
+
+To restart the controller:
+
+```bash
+kubectl rollout restart deployment/ske-cortex-controller -n kratix-platform-system
+```
+
+:::
+
+### Per-Promise Entities
+
+For each labelled Promise, the SKE Cortex Controller will create and keep in sync the following objects in Cortex:
+
+**Promise Entity Type**: represents the resource being Promised in Cortex, derived from the Promise API.
+
+**Promise Entity**: one entity of type `kratix-promise` is created to represent the Promise itself. This entity is created and kept in sync during normal Promise reconciliation, so if it is deleted from Cortex it will be recreated the next time the Promise is reconciled.
+
+**Resource Request Entities**: one entity is created per Resource Request, typed after the Promise (e.g. `redis`). Each resource entity is linked to its parent Promise entity via the `instance-of-promise` relationship type, enabling navigation from a resource back to the Promise it was created from in the Cortex UI. Resource Request entities also record the email address of the user who triggered the Workflow as the entity owner, so platform teams can see who last created or updated a given resource.
+
+**Create, Update and Delete Workflows**: three workflows are generated to manage the lifecycle of Resource Requests. When a user uses the Create Workflow to make a Request, the Workflow generates a YAML document for that request and writes it to the Cortex Git Repository. When the Platform Cluster converges on this and creates the Resource Request, the Cortex Controller creates the corresponding Resource Request Entity in Cortex.
+
+All per-Promise entities are tagged with the `kratix-resources` group, which allows all Kratix-managed objects (Promises and resource requests alike) to be surfaced together under a single catalogue item in Cortex.
 
 When a given Resource Request or Promise is deleted (either via the Workflow or the Kubernetes API), the corresponding objects in Cortex will also be deleted.
 
-### Translating Promises to Cortex Workflow inputs
+### Generating the Workflows
 
-The Cortex Controller takes the API of the Promise and uses it to generate both the fields on the Entity Type and the inputs on the Create and Update Workflows in Cortex.
-Cortex Workflow inputs support `string`, `number`, `boolean`, and `object` types, as well as arrays of objects. Promise schema constructs that fall outside this set cannot be
-expressed as Workflow inputs — when the controller encounters one, the Promise itself will still reconcile, but the Create, Update, and Delete Workflows in Cortex will not be
-generated.
+The Cortex Controller takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex.
 
-#### Quoting numeric values in string inputs
+Cortex [supports the following API types:](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) `boolean`, `number`, `object`, `string`, as well as `arrays` of `objects` (with a single level of nesting). Outside of an array, objects cannot exceed more than five levels of nesting. Promise schema constructs that include properties outside this set cannot be expressed as Workflow inputs, and when the controller encounters one, the Create, Update, and Delete Workflows in Cortex will not be generated.
+
+:::info Quoting numeric values in string inputs
 
 When a Cortex Workflow input is typed as `string` and a user enters a value that consists only of digits, make sure to wrap purely numeric values in quotes (for example, `"0001234"`) when filling the Cortex form so the value is interpreted as a string.
+
+:::
 
 ## Labelling Promises for Cortex Integration
 
@@ -101,8 +125,7 @@ form with fields that honour the Promise API.
   <figcaption>Cortex Create Workflow</figcaption>
 </figure>
 
-Upon submitting their request form, the Resource Request will be written to the configured Git Repository and created on the Platform Cluster. The creation of the request on the cluster will trigger
-a Kratix Workflow that creates an Entity representing the Resource Request in Cortex.
+Upon submitting their request form, the Resource Request will be written to the configured Git Repository and created on the Platform Cluster. The creation of the request on the cluster will trigger a Kratix Workflow that creates an Entity representing the Resource Request in Cortex.
 
 <figure className="diagram">
   <img className="large" src={CortexEntities} alt="The entity view in Cortex with one entity visible" />
