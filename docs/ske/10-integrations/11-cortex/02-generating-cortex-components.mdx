@@ -73,9 +73,11 @@ metadata:
   name: my-promise
   labels:
     kratix.io/cortex: "true"
+  #highlight-start
   annotations:
     # comma-separated list of workflows to skip
     kratix.io/cortex-skip-workflows: "update,delete"
+  #highlight-end
 ```
 
 When workflows are skipped, the controller deletes any previously created Cortex workflows for those operations.
