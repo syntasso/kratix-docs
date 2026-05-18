@@ -21,10 +21,19 @@ Check the release notes below for information on each available version.
 
 ### [v0.47.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.47.0/) (2026-XX-XX)
 
+#### Features
+
+* UpgradeRun now captures a snapshot of resource groups at creation time, recording which resources belong to each rollout group in a ConfigMap referenced from `status.resourceListRefs`.
+* Image pull secrets are no longer injected when not explicitly defined. Customers using private or air-gapped registries no longer need to create a dummy `syntasso-registry` secret in target namespaces.
+
 #### Fixes
 
 * Fix an issue where Resource Bindings would be left behind after deleting a Promise.
 * Fix an issue where multiple Promise Revisions could be created for the same Promise version, causing failures on reconciliation.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
 
 ### [v0.46.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.46.0/) (2026-04-28)
 
