@@ -29,8 +29,15 @@ export NODE_OPTIONS=--no-node-snapshot
 
 :::info
 
-Plugins for SKE are compatible with Backstage apps created with Backstage version v1.24 or above.
+Plugins for SKE are compatible with Backstage apps created with Backstage version v1.24 or above (tested up to v1.50.4).
 If you are running Backstage v1.23 or lower, you can check out their [migration guide](https://backstage.io/docs/backend-system/building-backends/migrating).
+
+:::
+
+:::info
+
+Starting from Backstage v1.50, **Node.js 22** or higher is required due to native module
+dependencies. Make sure your build environment and Docker images use Node 22+.
 
 :::
 
@@ -153,6 +160,24 @@ const componentPage = (
 This states that for any Backstage `Component` definitions, the frontend plugin will display the custom `KratixPromiseEntityPage`
 for Components of `type` `promise` or `kratix-promise` and the `KratixResourceEntityPage` for for Components of `type`
 `resource` or `kratix-resource.
+
+### New Frontend System {#new-frontend-system}
+
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no changes to `EntityPage.tsx` are needed.
+
+The plugin registers the following extensions via its `alpha` entry point:
+
+- **Promise Overview** — displays the Overview tab for Promise entities
+- **Resource Overview** — displays the Overview tab for Resource entities
+- **Resource Manage** — displays the Manage tab for Resource entities
+
+To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
+
+:::tip
+
+If your Backstage app still uses the legacy frontend system (Backstage v1.48 or earlier), follow the [Update the EntityPage](#update-the-entitypage) instructions above. Both the legacy and new frontend system exports are included in the plugin, so no code changes are needed when migrating between systems.
+
+:::
 
 ## Installing the backend plugin
 
