@@ -95,13 +95,73 @@ the Docker build. Refer to the [Local Development](#local-development) section f
 
 :::
 
-## Installing the frontend plugin
+## Installing the plugins in a Backstage App
 
-From the root of the backstage repository, run:
+From the root of the backstage repository, run the following to install the frontend plugin:
 
 ```bash
 yarn add @syntasso/plugin-ske-frontend --cwd packages/app
 ```
+
+Repeat this for the backend plugin:
+
+```bash
+yarn add @syntasso/plugin-ske-backend --cwd packages/backend
+```
+
+## Installing the plugins in Spotify for Backstage
+
+If you are using Spotify Portal for Backstage, you will need to publish the plugins to your internal Portal Cloud instance.
+
+Contact Spotify to request a token for publishing plugins to your cloud instance. Once you have a token, download the frontend plugin by running:
+
+```
+npm pack @syntasso/plugin-ske-frontend
+```
+
+This will download the plugin as a `.tgz` file on your machine. Create a new directory and unpack this file with:
+
+```
+mkdir syntasso-plugin-ske-frontend
+tar -xzf syntasso-plugin-ske-frontend-VERSION.tgz -C syntasso-plugin-ske-frontend
+```
+
+Edit the `syntasso-plugin-ske-frontend/package/package.json` to add your registry to the `publishConfig`:
+
+```json
+{
+  "name": "@syntasso/plugin-ske-frontend",
+  "version": "0.17.5",
+  "publishConfig": {
+    # highlight-start
+    "registry": "https://<company>.spotifyportal.com/api/plugin-installer/registry/npm"
+    # highlight-end
+  },
+  ...
+}
+```
+
+Create a `.yarnrc.yml` referencing the `npmAuthToken` key:
+
+```yaml
+npmAuthToken: ${PORTAL_PUBLISHING_TOKEN}
+```
+
+Set the token you received from Spotify in your environment:
+
+```bash
+export PORTAL_PUBLISHING_TOKEN=<token>
+```
+
+From the `syntasso-plugin-ske-frontend/package` directory, publish the plugin:
+
+```
+yarn npm publish
+```
+
+Repeat these steps for the backend plugin - @syntasso/plugin-ske-backend.
+
+## Configuring the frontend plugin
 
 ### Update the EntityPage
 
@@ -163,7 +223,8 @@ for Components of `type` `promise` or `kratix-promise` and the `KratixResourceEn
 
 ### New Frontend System {#new-frontend-system}
 
-If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no changes to `EntityPage.tsx` are needed.
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no
+changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for backstage.
 
 The plugin registers the following extensions via its `alpha` entry point:
 
@@ -179,13 +240,7 @@ If your Backstage app still uses the legacy frontend system (Backstage v1.48 or 
 
 :::
 
-## Installing the backend plugin
-
-From the root of the backstage repository, run:
-
-```bash
-yarn add @syntasso/plugin-ske-backend --cwd packages/backend
-```
+## Configuring the backend plugin
 
 The plugin can fetch information about Backstage Entities in two ways:
 
