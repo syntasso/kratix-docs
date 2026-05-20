@@ -107,6 +107,49 @@ metadata:
 When workflows are skipped, the controller deletes any previously created Cortex workflows for those operations.
 If the annotation contains an invalid value, the controller falls back to generating all workflows.
 
+## Customising Name and Namespace Fields
+
+By default, the generated Create and Update workflows include two mandatory fields **Name** and **Namespace**.
+These fields may not be meaningful to all platform users. You can customise the display name and description of these
+fields by settings annotations on the Promise.
+
+Supported annotations:
+
+| Annotation | Default | Description |
+|---|---|---|
+| `kratix.io/cortex-name-field-name` | `Name` | Display name for the name input field |
+| `kratix.io/cortex-name-field-description` | `Resource name` | Help text shown below the name input field |
+| `kratix.io/cortex-namespace-field-name` | `Namespace` | Display name for the namespace input field |
+| `kratix.io/cortex-namespace-field-description` | `Resource request namespace` | Help text shown below the namespace input field |
+
+For example, to customize the displayed name for the name field as "Service ID" and the namespace field as "Team":
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/cortex: "true"
+  #highlight-start
+  annotations:
+    kratix.io/cortex-name-field-name: "Service ID"
+    kratix.io/cortex-name-field-description: "A unique identifier for your service"
+    kratix.io/cortex-namespace-field-name: "Team"
+    kratix.io/cortex-namespace-field-description: "The team that owns this service"
+  #highlight-end
+```
+
+Each annotation is optional. If an annotation is missing or empty, the default value is used. This means you
+can customise only the fields you need.
+
+:::note
+
+These annotations only affect how the fields are displayed in the Cortex workflow UI. The generated Kubernetes
+manifest always uses `metadata.name` and `metadata.namespace`, so the manifest is valid and can be applied for Kubernetes.
+
+:::
+
 ## Managing Resource Requests in Cortex
 
 ```mdx-code-block
