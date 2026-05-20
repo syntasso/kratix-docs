@@ -138,7 +138,15 @@ For example, if the Promise describes a database, a Jenkins installation, and an
 Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only. See [API](/main/platform-concepts/api) for how this maps to the Promise API.
 
 ### Dependencies
-Dependencies are everything that the Promise relies on to function. A Kratix Promise can even be built on other Kratix Promises. A dependency is the pre-requisite software to create the resource and make it operational. A dependency might be a low-level resource such as a database, a pre-defined environment, a connection, a queue, or a bundle of related items that work together.
+
+When a Promise is installed, it often needs supporting infrastructure to already be installed on Destinations before any Resource requests can be fulfilled.
+For example, a PostgreSQL Promise might need a Postgres Operator deployed to Destinations before accepting requests to create Postgres databases.
+
+This is when you can leverage Promise dependencies. Any resources listed under `spec.dependencies` are automatically scheduled to all matching Destinations when the Promise is installed.
+It's a simple and declarative way to express these prerequisites.
+
+Note that when your Promise prerequisites are lengthy, it can make the Promise definition large and Kubernetes object size limits can become a constraint.
+In this case, we recommend using [Promise Configure workflow](workflows) to install these prerequisites instead.
 
 ### Workflows
 Workflows are the actions that must run in order to fulfil a Promise. They are a chain of containers that execute in sequence to fulfill the promise specifications, including responses to API specifications, notifications, business rules, and custom specifications.
