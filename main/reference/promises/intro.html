@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.3fcc2199.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.ba22cb6e.js" defer="defer"></script>
 <script src="/assets/js/main.07d022fb.js" defer="defer"></script>
 </head>
 <body>
@@ -54,7 +54,12 @@ When the API request is submitted to Kratix, the Promise uses the API options to
 <!-- -->For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.
 Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only. See <a class="" href="/main/platform-concepts/api">API</a> for how this maps to the Promise API.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dependencies">Dependencies<a href="#dependencies" class="hash-link" aria-label="Direct link to Dependencies" title="Direct link to Dependencies" translate="no">​</a></h3>
-<p>Dependencies are everything that the Promise relies on to function. A Kratix Promise can even be built on other Kratix Promises. A dependency is the pre-requisite software to create the resource and make it operational. A dependency might be a low-level resource such as a database, a pre-defined environment, a connection, a queue, or a bundle of related items that work together.</p>
+<p>When a Promise is installed, it often needs supporting infrastructure to already be installed on Destinations before any Resource requests can be fulfilled.
+For example, a PostgreSQL Promise might need a Postgres Operator deployed to Destinations before accepting requests to create Postgres databases.</p>
+<p>This is when you can leverage Promise dependencies. Any resources listed under <code>spec.dependencies</code> are automatically scheduled to all matching Destinations when the Promise is installed.
+It&#x27;s a simple and declarative way to express these prerequisites.</p>
+<p>Note that when your Promise prerequisites are lengthy, it can make the Promise definition large and Kubernetes object size limits can become a constraint.
+In this case, we recommend using <a class="" href="/main/reference/promises/workflows">Promise Configure workflow</a> to install these prerequisites instead.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workflows">Workflows<a href="#workflows" class="hash-link" aria-label="Direct link to Workflows" title="Direct link to Workflows" translate="no">​</a></h3>
 <p>Workflows are the actions that must run in order to fulfil a Promise. They are a chain of containers that execute in sequence to fulfill the promise specifications, including responses to API specifications, notifications, business rules, and custom specifications.</p>
 <p>The Promise workflows are run as part of the Promise lifecycle, and the Resource workflows are run as part of the Resource lifecycle. Under both Promise and Resource workflows, Kratix supports two workflow types:</p>
