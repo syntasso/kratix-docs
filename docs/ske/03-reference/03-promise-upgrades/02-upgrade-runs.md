@@ -95,7 +95,7 @@ The Upgrade Run status tracks the progress of the upgrade across all rollout gro
 
 ```yaml
 status:
-  # Overall execution state: (empty), InProgress, Completed, or Failed.
+  # Overall execution state: (empty), Pending, InProgress, Completed, Failed, or Cancelled.
   state: InProgress
   # Total number of resources across all rollout groups.
   totalResources: 10
@@ -133,12 +133,16 @@ The `state` field reflects the overall execution state of the run:
 
 | State | Meaning |
 |-------|---------|
-| _(empty)_ | Waiting for the referenced UpgradePlan or the target PromiseRevision to be available |
+| _(empty)_ | Waiting for the referenced Upgrade Plan or the target PromiseRevision to be available |
+| `Pending` | Run is active but rollout has not started. Counts as active on the parent plan (`phase: Running`). The controller typically leaves this empty until the snapshot is created, then sets `InProgress`. |
 | `InProgress` | Snapshot created, rollout underway |
 | `Completed` | All rollout groups finished successfully |
 | `Failed` | A resource reported an upgrade failure, or the target PromiseRevision was deleted mid-run |
+| `Cancelled` | The run was deleted while still in progress |
 
-Once a run reaches `Completed` or `Failed` it is terminal — it will not be reconciled further.
+Once a run reaches `Completed`, `Failed`, or `Cancelled` it is terminal — it will not be reconciled further. The controller sets `finishedAt` at that point.
+
+When a run becomes terminal, the controller records a summary on the parent [Upgrade Plan](./upgrade-plans) in `status.lastRun`.
 
 ### Resource Snapshot
 
@@ -187,7 +191,7 @@ The Upgrade Run reports its state via standard Kubernetes conditions:
 | Condition | Description |
 |-----------|-------------|
 | `PlanResolved` | `True` when the referenced Upgrade Plan exists; `False` with reason `PlanNotFound` when absent |
-| `RunSucceeded` | `True` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource fails, or `PromiseRevisionNotFound` when the target revision is deleted mid-run |
+| `RunSucceeded` | `True` with reason `RunCompleted` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource fails, `PromiseRevisionNotFound` when the target revision is deleted mid-run, or `RunCancelled` when the run is deleted in progress |
 
 ## Manually Creating an Upgrade Run
 
@@ -208,4 +212,6 @@ EOF
 
 ## Deleting an Upgrade Run
 
-When an Upgrade Run is deleted, the associated resource snapshot ConfigMap is cleaned up automatically.
+When an Upgrade Run that is still in progress is deleted, the controller marks it `Cancelled`, records the outcome on the parent Upgrade Plan's `status.lastRun`, and then removes the associated resource snapshot ConfigMap.
+
+When a terminal run is deleted, the snapshot ConfigMap is cleaned up automatically. The plan's `lastRun` summary is not removed.

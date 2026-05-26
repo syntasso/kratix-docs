@@ -212,6 +212,59 @@ At least one resource upgrade window is required per rollout group.
 | `window` | Cron expression defining when this rule applies | Yes |
 | `timeZone` | Time zone for the window schedule | Yes |
 
+## Status
+
+The Upgrade Plan status reflects whether a run is currently active and summarises the most recent finished run. Rollout progress details live on the [Upgrade Run](./upgrade-runs), not on the plan.
+
+```yaml
+status:
+  observedGeneration: 3
+  phase: Available
+  activeRunRef: ""
+  lastRun:
+    name: redis-v1-to-v2-run-001
+    finishedAt: "2026-05-22T15:47:11Z"
+    result: Failed
+    reason: ResourceUpgradeFailed
+    message: '1 resource(s) failed to upgrade in rollout group "dev"'
+  conditions: []
+```
+
+### Phase
+
+The `phase` field describes whether an upgrade is running now. It does **not** record whether the last run succeeded or failed; see [`lastRun`](#last-run) for that.
+
+| Phase | Meaning |
+|-------|---------|
+| `Available` | No run is `Pending` or `InProgress`. The plan is idle. |
+| `Running` | A run is `Pending` or `InProgress`. See `activeRunRef` for the run name. |
+
+When a run finishes (`Completed`, `Failed`, or `Cancelled`), the plan returns to `Available`. The outcome is recorded in `lastRun`.
+
+### Active run reference
+
+`activeRunRef` is the name of the `Pending` or `InProgress` [Upgrade Run](./upgrade-runs) for this plan, if any. It is cleared when no run is active.
+
+### Last run
+
+`lastRun` is a sticky summary of the most recent terminal run. It is written when a run reaches `Completed`, `Failed`, or `Cancelled`, and is not cleared when the plan becomes idle.
+
+| Field | Description |
+|-------|-------------|
+| `name` | Name of the Upgrade Run |
+| `finishedAt` | When the run reached a terminal state |
+| `result` | `Completed`, `Failed`, or `Cancelled` |
+| `reason` | Copied from the run's `RunSucceeded` condition when present |
+| `message` | Copied from the run's `RunSucceeded` condition when present |
+
+Inspecting an Upgrade Plan:
+
+| Question | Where to look |
+|----------|---------------|
+| Is an upgrade running now? | `phase == Running` and `activeRunRef` |
+| Has this plan been executed? | `lastRun` is set |
+| How did the last run end? | `lastRun.result` |
+
 ## Deleting an Upgrade Plan
 
 When an Upgrade Plan is deleted, any Upgrade Runs that reference it will be cleaned up.
