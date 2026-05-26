@@ -12,7 +12,7 @@ An Upgrade Plan specifies which Promise and versions and when upgrades should ex
 Upgrade Plans are cluster-scoped resources. An Upgrade Plan looks like this:
 
 ```yaml
-apiVersion: ske.platform.syntasso.io/v1alpha1
+apiVersion: platform.syntasso.io/v1alpha1
 kind: UpgradePlan
 metadata:
   name: redis-v1-to-v2
