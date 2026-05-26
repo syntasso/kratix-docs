@@ -15,6 +15,7 @@ As the platform team, you might want to control when you upgrade Resource Reques
 
 - [Promise Revisions](./promise-revisions)
 - [Resource Bindings](./resource-bindings)
+- [Automated Upgrades](./automated-upgrades)
 
 
 
