@@ -1,24 +1,26 @@
 version: 2
 updates:
+  # Version updates disabled — security-only to reduce noise.
+  # open-pull-requests-limit: 0 suppresses routine version bumps; Dependabot security alerts
+  # bypass this limit and still open individual PRs for CVEs.
+  # Re-enable by removing open-pull-requests-limit once ready to tackle version catch-up.
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
       day: monday
+    open-pull-requests-limit: 0
     groups:
       npm-dependencies:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
+    open-pull-requests-limit: 0
     groups:
       github-actions:
-        patterns:
-          - "*"
+        patterns: ["*"]
