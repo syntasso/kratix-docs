@@ -58,7 +58,7 @@ run.
 When an UpgradeRun starts, it:
 
 1. **Takes a snapshot** of all Resource Bindings for the Promise that are on an eligible `from` version. The snapshot records each resource's version at the moment the run begins — this baseline is used throughout the run to detect drift.
-2. **Waits for the target PromiseRevision to exist** before the snapshot is finalised. If the target [Promise Revision](./promise-revisions) is not yet available, the run requeues until it appears.
+2. **Waits for the target PromiseRevision to exist** before the snapshot is finalised. If the target [Promise Revision](/main/reference/promises/promise-upgrade/promise_revision) is not yet available, the run requeues until it appears.
 3. **Processes rollout groups in plan order.** For each group, it patches the `spec.version` on each matching Resource Binding to the target version and waits for Kratix to apply the upgrade. Only once every resource in the current group is accounted for does the run move to the next group.
 
 ## Resource Outcomes
@@ -83,7 +83,7 @@ The snapshot records each resource's version at run start. If, by the time the r
 
 ## PromiseRevision Gate
 
-The run checks that the target [Promise Revision](../../reference/promises/promise-upgrade/promise-revisions) exists at two points, with different behaviour each time:
+The run checks that the target [Promise Revision](/main/reference/promises/promise-upgrade/promise_revision) exists at two points, with different behaviour each time:
 
 **Before the snapshot is taken:** if the target PromiseRevision does not yet exist, the run requeues and waits. No failure is recorded — this handles the case where the revision is still being created when the run starts.
 
