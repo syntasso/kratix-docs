@@ -15,7 +15,7 @@ policy triggers, but they can also be created manually.
 An Upgrade Run looks like this:
 
 ```yaml
-apiVersion: ske.platform.syntasso.io/v1alpha1
+apiVersion: platform.syntasso.io/v1alpha1
 kind: UpgradeRun
 metadata:
   name: redis-v1-to-v2-run-001
@@ -53,27 +53,65 @@ spec:
 Setting `suspend` back to `false` resumes execution. This allows you to temporarily halt an upgrade without deleting the
 run.
 
+## How an UpgradeRun executes
+
+When an UpgradeRun starts, it:
+
+1. **Takes a snapshot** of all Resource Bindings for the Promise that are on an eligible `from` version. The snapshot records each resource's version at the moment the run begins — this baseline is used throughout the run to detect drift.
+2. **Waits for the target PromiseRevision to exist** before the snapshot is finalised. If the target [Promise Revision](./promise-revisions) is not yet available, the run requeues until it appears.
+3. **Processes rollout groups in plan order.** For each group, it patches the `spec.version` on each matching Resource Binding to the target version and waits for Kratix to apply the upgrade. Only once every resource in the current group is accounted for does the run move to the next group.
+
+## Resource Outcomes
+
+When a run processes a rollout group, each snapshotted resource is evaluated against its current live state. Because the run re-checks bindings on every reconcile cycle, resources can change between when the snapshot was taken and when their group is reached.
+
+| Outcome | When it applies |
+|---------|-----------------|
+| **Succeeded** | The binding's `lastAppliedVersion` equals the target version — the upgrade was applied. This includes resources that were already at the target version by the time their group was reached. |
+| **Skipped** | The binding no longer exists (resource was deleted), or the resource was upgraded to a different version externally. |
+| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`). The entire run stops immediately. |
+| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. The run requeues and waits. |
+
+Skipped resources count towards group completion and do not block the run from advancing to the next group. A single failed resource stops the run entirely — subsequent groups are not processed.
+
+### Drift Detection
+
+The snapshot records each resource's version at run start. If, by the time the run processes a resource, its version has been changed externally, the resource is **Skipped** rather than overwritten:
+
+- A resource upgraded to a version *other than the target* (e.g. `v3.0.0` when the target is `v2.0.0`) is skipped.
+- A resource already at the target version is counted as **Succeeded** immediately — no patch is issued.
+
+## PromiseRevision Gate
+
+The run checks that the target [Promise Revision](../../reference/promises/promise-upgrade/promise-revisions) exists at two points, with different behaviour each time:
+
+**Before the snapshot is taken:** if the target PromiseRevision does not yet exist, the run requeues and waits. No failure is recorded — this handles the case where the revision is still being created when the run starts.
+
+**Once the snapshot exists and the rollout is underway:** if the PromiseRevision is deleted, the run transitions immediately to `Failed` with reason `PromiseRevisionNotFound`. Resources that have not yet been patched remain on their current version.
+
 ## Status
 
 The Upgrade Run status tracks the progress of the upgrade across all rollout groups.
 
 ```yaml
 status:
-  totalResources: 10
+  # Overall execution state: (empty), InProgress, Completed, or Failed.
+  state: InProgress
   # Total number of resources across all rollout groups.
+  totalResources: 10
+  # References to ConfigMaps containing the snapshot of resources to be upgraded.
   resourceListRefs:
     - name: redis-v1-to-v2-run-001-resource-snapshot
-    # References to ConfigMaps containing the snapshot of resources to be upgraded.
   rolloutGroups:
     - name: dev
-      total: 5
       # Total resources in this group.
-      succeeded: 3
+      total: 5
       # Resources successfully upgraded.
-      failed: 1
+      succeeded: 3
       # Resources that failed to upgrade.
-      skipped: 1
+      failed: 1
       # Resources that were skipped.
+      skipped: 1
     - name: staging
       total: 5
       succeeded: 0
@@ -83,7 +121,24 @@ status:
     - type: PlanResolved
       status: "True"
       reason: PlanFound
+    - type: RunSucceeded
+      status: "False"
+      reason: ResourceUpgradeFailed
+      message: "1 resource(s) failed to upgrade in rollout group \"dev\""
 ```
+
+### State
+
+The `state` field reflects the overall execution state of the run:
+
+| State | Meaning |
+|-------|---------|
+| _(empty)_ | Waiting for the referenced UpgradePlan or the target PromiseRevision to be available |
+| `InProgress` | Snapshot created, rollout underway |
+| `Completed` | All rollout groups finished successfully |
+| `Failed` | A resource reported an upgrade failure, or the target PromiseRevision was deleted mid-run |
+
+Once a run reaches `Completed` or `Failed` it is terminal — it will not be reconciled further.
 
 ### Resource Snapshot
 
@@ -95,7 +150,7 @@ The ConfigMap data may look like this:
 
 ```json
 {
-  "resourceGroups": [
+  "groups": [
     {
       "name": "dev",
       "resources": [
@@ -115,7 +170,7 @@ The ConfigMap data may look like this:
 
 ### Rollout Group Status
 
-Each entry in `rolloutGroups` summarises the upgrade progress of a single rollout group:
+Each entry in `groups` summarises the upgrade progress of a single rollout group:
 
 | Field | Description |
 |-------|-------------|
@@ -132,15 +187,16 @@ The Upgrade Run reports its state via standard Kubernetes conditions:
 | Condition | Description |
 |-----------|-------------|
 | `PlanResolved` | `True` when the referenced Upgrade Plan exists; `False` with reason `PlanNotFound` when absent |
+| `RunSucceeded` | `True` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource fails, or `PromiseRevisionNotFound` when the target revision is deleted mid-run |
 
-## Creating an Upgrade Run
+## Manually Creating an Upgrade Run
 
 Upgrade Runs are typically created automatically by the system when an Upgrade Plan's execution policy triggers (via
 `repeatSchedule` or `executeAt`). You can also create one manually to trigger an immediate upgrade:
 
 ```bash
 kubectl apply -f - <<EOF
-apiVersion: ske.platform.syntasso.io/v1alpha1
+apiVersion: platform.syntasso.io/v1alpha1
 kind: UpgradeRun
 metadata:
   name: redis-v1-to-v2-manual-run
