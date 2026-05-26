@@ -8970,10 +8970,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-cookie@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "js-cookie@npm:2.2.1"
-  checksum: 10c0/ee67fc0f8495d0800b851910b5eb5bf49d3033adff6493d55b5c097ca6da46f7fe666b10e2ecb13cfcaf5b88d71c205ce00a7e646de791689bfd053bbb36a376
+"js-cookie@npm:^3.0.5":
+  version: 3.0.7
+  resolution: "js-cookie@npm:3.0.7"
+  checksum: 10c0/c921c43014e98bb94a1765663a1a10d693048d61444e374c1ecf459eba92320381f9c406e724df9aa44e819c4b606e6a7240f2abe2d5c54ad1e73a3002b191c2
   languageName: node
   linkType: hard
 
@@ -9255,7 +9255,7 @@ __metadata:
     prism-react-renderer: "npm:^2.1.0"
     raw-loader: "npm:^4.0.2"
     react: "npm:^18.2.0"
-    react-cookie-consent: "npm:^9.0.0"
+    react-cookie-consent: "npm:^10.0.1"
     react-curved-arrow: "npm:^0.1.0"
     react-dom: "npm:^18.2.0"
     react-ga: "npm:^3.3.1"
@@ -12337,14 +12337,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-cookie-consent@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "react-cookie-consent@npm:9.0.0"
+"react-cookie-consent@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "react-cookie-consent@npm:10.0.1"
   dependencies:
-    js-cookie: "npm:^2.2.1"
+    js-cookie: "npm:^3.0.5"
   peerDependencies:
-    react: ">=16"
-  checksum: 10c0/8cf336c2b43c2ad6524e28076613bfe11bcf22b9f1837c47e180af0aa1710c823f5b1c878e2708fd69e8546e5eab816ba3095e44541909a4fbe2a14bf9edb4ae
+    react: ">=18"
+    react-dom: ">=18"
+  checksum: 10c0/76977fea75885a815d002a279845e892dc42c3b9c0482859f0ab2077ac1ada68a07192557731b2b4393796f753770a30319905d184896fcc623d5fa69d2a0f8c
   languageName: node
   linkType: hard
 
