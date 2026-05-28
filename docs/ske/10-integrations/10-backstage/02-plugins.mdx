@@ -115,36 +115,16 @@ If you are using Spotify Portal for Backstage, you will need to publish the plug
 
 Contact Spotify to request a token for publishing plugins to your cloud instance. Once you have a token, download the frontend plugin by running:
 
-```
+```bash
 npm pack @syntasso/plugin-ske-frontend
 ```
 
-This will download the plugin as a `.tgz` file on your machine. Create a new directory and unpack this file with:
+This downloads the latest version of the plugin as a `.tgz` file in the current directory.
 
-```
-mkdir syntasso-plugin-ske-frontend
-tar -xzf syntasso-plugin-ske-frontend-VERSION.tgz -C syntasso-plugin-ske-frontend
-```
+Repeat for the backend plugin:
 
-Edit the `syntasso-plugin-ske-frontend/package/package.json` to add your registry to the `publishConfig`:
-
-```json
-{
-  "name": "@syntasso/plugin-ske-frontend",
-  "version": "0.17.5",
-  "publishConfig": {
-    # highlight-start
-    "registry": "https://<company>.spotifyportal.com/api/plugin-installer/registry/npm"
-    # highlight-end
-  },
-  ...
-}
-```
-
-Create a `.yarnrc.yml` referencing the `npmAuthToken` key:
-
-```yaml
-npmAuthToken: ${PORTAL_PUBLISHING_TOKEN}
+```bash
+npm pack @syntasso/plugin-ske-backend
 ```
 
 Set the token you received from Spotify in your environment:
@@ -153,13 +133,20 @@ Set the token you received from Spotify in your environment:
 export PORTAL_PUBLISHING_TOKEN=<token>
 ```
 
-From the `syntasso-plugin-ske-frontend/package` directory, publish the plugin:
+Configure npm to authenticate against your Portal registry:
 
-```
-yarn npm publish
+```bash
+npm config set //<company>.spotifyportal.com/api/plugin-installer/registry/npm/:_authToken $PORTAL_PUBLISHING_TOKEN
 ```
 
-Repeat these steps for the backend plugin - @syntasso/plugin-ske-backend.
+Publish each plugin to your Portal instance, replacing `<version>` with the version printed by `npm pack`:
+
+```bash
+npm publish syntasso-plugin-ske-frontend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
+npm publish syntasso-plugin-ske-backend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
+```
+
+Passing `--registry` directly ensures the tarball is published to your Portal instance regardless of any registry configuration inside the plugin's own `package.json`.
 
 ## Configuring the frontend plugin
 
