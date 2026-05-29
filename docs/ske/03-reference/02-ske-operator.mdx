@@ -37,21 +37,70 @@ The Kratix CRD is the resource definition corresponding to a Kratix installation
 resource is managed by the SKE Operator.
 
 ```yaml
-apiVersion: platform.syntasso.io/v1alpha1
-kind: Kratix
-metadata:
-  name: my-kratix
-spec:
-  version: vX.Y.Z # The desired version of SKE, can be set to latest
-  deploymentConfig:
-    resources: # set to customize resource requests&limits for kratix deployment
-      # limits and requests must be valid Kubernetes resource quantities
-      limits:
-        memory: 500Mi
-        cpu: 300Mi
-      requests:
-        memory: 500Mi
-        cpu: 300Mi
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: Kratix
+  metadata:
+    name: my-kratix
+  spec:
+    version: vX.Y.Z # The desired version of SKE; set to "latest" to always use the latest
+    tlsConfig:
+      certManager:
+        disabled: false # Set to true to disable cert-manager integration
+        issuerRef: # Optional: reference a custom cert-manager issuer
+          kind: ClusterIssuer # or Issuer
+          name: my-issuer
+      certSecretName: my-tls-secret # Required if cert-manager is disabled
+      metricsServerCertSecretName: my-metrics-secret # Required if cert-manager is disabled
+    deploymentConfig:
+      resources: # Customize resource requests & limits for the Kratix deployment
+        limits:
+          memory: 500Mi
+          cpu: 300m
+        requests:
+          memory: 500Mi
+          cpu: 300m
+      nodeSelector: # Constrain scheduling to nodes matching these labels
+        kubernetes.io/os: linux
+      affinity: # Standard Kubernetes affinity rules
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - my-app
+              topologyKey: kubernetes.io/hostname
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - my-app
+                topologyKey: kubernetes.io/hostname
+      tolerations: # Allow scheduling on tainted nodes
+        - key: example-key
+          operator: Exists
+          effect: NoSchedule
+      volumes: # Additional volumes to mount into the deployment
+        - name: my-volume
+          configMap:
+            name: my-configmap
+      volumeMounts: # Additional volume mounts for the manager container
+        - name: my-volume
+          mountPath: /etc/config
 ```
 
 The Kratix resource is the owner of all resources installed as part of the [SKE
