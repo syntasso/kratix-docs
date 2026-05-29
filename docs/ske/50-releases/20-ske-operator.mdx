@@ -23,18 +23,30 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-oper
 To see which version of the helm chart corresponds to which version of the SKE-Operator, please refer to the release notes below.
 
 ## Release Notes
+
+### [v0.25.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.25.0/) (2026-05-29)
+
+Released in Helm Chart version [version 0.71.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.71.0/)
+
+#### Features
+
+* Added support for configuraing SKE deployment storage. You can now configure `volumes` and `volumeMounts` on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting `deploymentConfig.affinity` and `deploymentConfig.tolerations`.
+
+#### Maintenance
+
+* Base image updates (Chainguard).
+
 ### [v0.24.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.24.0/) (2026-05-06)
 
 Released in Helm Chart version [version 0.70.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.70.0/)
 
 #### Features
 
-* Added support for Kubernetes scheduling constraints. You can now configure `nodeSelector`, `affinity`, and `tolerations` on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting `deploymentConfig.nodeSelector`, `deploymentConfig.affinity` and `deploymentConfig.tolerations`.
+* Added support for Kubernetes scheduling constraints. You can now configure `nodeSelector`, `affinity`, and `tolerations` on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting `deploymentConfig.nodeSelector`, `deploymentConfig.volumes` and `deploymentConfig.volumeMounts`.
 
 #### Maintenance
 
 * Base image updates (Chainguard).
-
 
 ### [v0.23.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.23.0/) (2026-04-28)
 
