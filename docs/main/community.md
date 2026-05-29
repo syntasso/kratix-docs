@@ -13,4 +13,11 @@ links below for how to get in contact.
 - [Join our slack community](https://join.slack.com/t/kratixworkspace/shared_invite/zt-2aqdyq16t-geFUqrQgaTFbcBaP1FlY4g)
 - [Open a GitHub Issue](https://github.com/syntasso/kratix/issues/new)
 - Contact Syntasso directly at [feedback@syntasso.io](mailto:feedback@syntasso.io?subject=Kratix%20Feedback)
-- [Google Form](https://forms.gle/WVXwVRJsqVFkHfJ79)
+
+:::info
+
+**Thinking of contributing to Kratix?**
+
+Check out our [contributor guide](https://github.com/syntasso/kratix/blob/main/CONTRIBUTING.md). After raising a PR you will be asked to agree to the Syntasso contributor agreement. You will need to agree to this before we can merge your change.
+
+:::
