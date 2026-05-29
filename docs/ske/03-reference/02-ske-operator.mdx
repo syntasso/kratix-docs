@@ -46,10 +46,10 @@ resource is managed by the SKE Operator.
     tlsConfig:
       certManager:
         disabled: false # Set to true to disable cert-manager integration
-        issuerRef:      # Optional: reference a custom cert-manager issuer
+        issuerRef: # Optional: reference a custom cert-manager issuer
           kind: ClusterIssuer # or Issuer
           name: my-issuer
-      certSecretName: my-tls-secret             # Required if cert-manager is disabled
+      certSecretName: my-tls-secret # Required if cert-manager is disabled
       metricsServerCertSecretName: my-metrics-secret # Required if cert-manager is disabled
     deploymentConfig:
       resources: # Customize resource requests & limits for the Kratix deployment
@@ -59,21 +59,21 @@ resource is managed by the SKE Operator.
         requests:
           memory: 500Mi
           cpu: 300m
-      nodeSelector:       # Constrain scheduling to nodes matching these labels
+      nodeSelector: # Constrain scheduling to nodes matching these labels
         kubernetes.io/os: linux
-      affinity:           # Standard Kubernetes affinity rules
+      affinity: # Standard Kubernetes affinity rules
         nodeAffinity: {}
         podAffinity: {}
         podAntiAffinity: {}
-      tolerations:        # Allow scheduling on tainted nodes
+      tolerations: # Allow scheduling on tainted nodes
         - key: example-key
           operator: Exists
           effect: NoSchedule
-      volumes:            # Additional volumes to mount into the deployment
+      volumes: # Additional volumes to mount into the deployment
         - name: my-volume
           configMap:
             name: my-configmap
-      volumeMounts:       # Additional volume mounts for the first container
+      volumeMounts: # Additional volume mounts for the manager container
         - name: my-volume
           mountPath: /etc/config
 ```
