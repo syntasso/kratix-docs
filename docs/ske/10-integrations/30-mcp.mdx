@@ -1,0 +1,136 @@
+---
+title: MCP Server (Preview)
+description: Documentation for the Kratix MCP Server, available in SKE and SKA
+sidebar_label: MCP Server (Preview)
+---
+
+:::warning Preview
+This integration is in Preview mode and is not covered by the Syntasso SLA. If you are evaluating or using it, contact Syntasso to discuss applicability and expectations.
+:::
+
+## Overview
+
+The Kratix MCP Server exposes your Kratix platform capabilities (browsing Promises, checking Destinations, and submitting requests) to AI agents over the [Model Context Protocol](https://modelcontextprotocol.io).
+
+This server is included in both **SKE** (Syntasso Kratix Enterprise) and **SKA** (Syntasso Kratix Agentic).
+
+When you invest in Promises as your platform's standard API, you want your users' AI clients to discover and use those capabilities immediately. The Kratix MCP Server runs inside your cluster, connects to your platform's Promises, and makes them accessible in a secure, standard way to any MCP-compatible AI client.
+
+Platform teams deploy the server once. Users register it with their AI client of choice and start asking questions about the platform from inside their editor.
+
+## Prerequisites
+
+To get started, you will need a SKE or SKA token. You can request a token via the [Syntasso](https://www.syntasso.io/pricing) website by clicking the "Try SKE Today" button.
+
+In addition:
+
+- An MCP-compatible AI client installed on user machines (see [Connecting users](#connecting-users) for examples)
+- A Kubernetes cluster running Kratix
+- The published server image at `ghcr.io/syntasso/ske-mcp-server:latest`
+
+## Deploying the server
+
+The server must run on the **same cluster as Kratix**, where it can reach the Kratix API resources directly. It deploys into the `kratix-platform-system` namespace alongside the Kratix platform components.
+
+Apply the manifests from the release and create the auth secret:
+
+```bash
+kubectl apply -f deploy/kubernetes/
+kubectl create secret generic ske-mcp-server-auth \
+  --namespace kratix-platform-system \
+  --from-literal=token="$(openssl rand -hex 32)"
+```
+
+The server exposes a Streamable HTTP endpoint at `/mcp`, protected by a shared bearer token. Requests are attributed per user via the `X-User-Identity` header.
+
+## Connecting users
+
+The server uses [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) transport, which any MCP-compatible AI client can connect to. The platform team should distribute a ready-to-run command with `<SERVER_URL>` and `<TOKEN>` already substituted; users should not need to look these up themselves. Consult your client's documentation for full MCP registration instructions. Below are examples for three popular clients.
+
+**Claude Code**
+
+```bash
+claude mcp add --scope user --transport http ske-mcp-server <SERVER_URL>/mcp \
+  --header "Authorization: Bearer <TOKEN>" \
+  --header "X-User-Identity: $(whoami)"
+```
+
+See the [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for more options.
+
+**Cursor**
+
+Add the following to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "ske-mcp-server": {
+      "url": "<SERVER_URL>/mcp",
+      "headers": {
+        "Authorization": "Bearer <TOKEN>",
+        "X-User-Identity": "your-username"
+      }
+    }
+  }
+}
+```
+
+See the [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol) for more options.
+
+**GitHub Copilot in VS Code**
+
+Add the following to `.vscode/mcp.json` in your workspace, or to your user settings:
+
+```json
+{
+  "servers": {
+    "ske-mcp-server": {
+      "type": "http",
+      "url": "<SERVER_URL>/mcp",
+      "headers": {
+        "Authorization": "Bearer <TOKEN>",
+        "X-User-Identity": "your-username"
+      }
+    }
+  }
+}
+```
+
+See the [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more options.
+
+## Querying your platform
+
+Once connected, users can ask natural language questions about the platform directly in their AI client:
+
+- What can I request from my platform?
+- What destinations can I deploy my `<Promise type>` to?
+- I need a `<Promise type>`. What can I configure?
+- What's the status of my `<request name>` request?
+
+The server provides the AI agent with the tools to answer these questions and, when the user is ready, submit a validated request through the platform's Promise workflows.
+
+![MCP Kratix Server](/img/ske/mcp/ske-mcp-server.png)
+
+**Available tools**
+
+| Tool | What it does |
+|---|---|
+| `fetch_promises` | List available Promises |
+| `describe_promise_requestable` | Promise summary, schema, and submit hints in one view |
+| `fetch_ready_destinations` | Destinations that can accept requests |
+| `fetch_destination_contexts` | Which destinations match a Promise's placement selectors |
+| `fetch_full_promises` | Promises expanded with their matching resource instances |
+| `fetch_promise_requests` | Requests scoped to a single Promise |
+| `get_request_status` | Look up a single request by name and namespace |
+| `validate_promise_request` | OpenAPI-schema preflight check before submitting |
+| `submit_promise_request` | Create a namespaced request; stamps the requesting user and emits a Kubernetes Event |
+
+## Debugging the server
+
+To inspect the server interactively independent of any AI client, use the [MCP Inspector](https://github.com/modelcontextprotocol/inspector). Configure it with:
+
+| Field | Value |
+|---|---|
+| Transport | Streamable HTTP |
+| URL | `<SERVER_URL>/mcp` |
+| Header | `Authorization: Bearer <MCP_AUTH_TOKEN>` |

@@ -1,0 +1,56 @@
+---
+title: SKE MCP Server
+description: Release information about SKE MCP Server
+sidebar_label: SKE MCP Server
+---
+
+:::warning Preview
+This integration is in Preview mode and is not covered by the Syntasso SLA. If you are evaluating or using it, contact Syntasso to discuss applicability and expectations.
+:::
+
+## Overview
+
+The SKE MCP Server provides a bespoke MCP Server for the users of your SKE built platform. This will support your platform consumers to understand, request, and check on the status of the resources provisioned through Kratix Promises without needing to understand Kratix.
+Documentation on how to use this can be found [here](/ske/integrations/mcp).
+
+The release manifest is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/
+```
+
+
+Check the release notes below for information on each available version.
+
+## Release Notes
+
+## [0.2.2](https://github.com/syntasso/ske-mcp-server/compare/ske-mcp-server-v0.2.1...ske-mcp-server-v0.2.2) (2026-06-04)
+
+### Features
+
+* enable fast registration wth claude desktop ([641c849](https://github.com/syntasso/ske-mcp-server/commit/641c849ce1bde94a4f40c929c218edff79f55a0e))
+
+## [0.2.1](https://github.com/syntasso/ske-mcp-server/compare/ske-mcp-server-v0.2.0...ske-mcp-server-v0.2.1) (2026-06-02)
+
+### Features
+
+* add dev MCP Inspector deployment and port-forward
+* add env-configured server runtime and Kubernetes manifests
+* add schema field descriptions
+* add tool and resource descriptions
+* add user audit trail to submit requests
+* add walking skeleton health endpoints
+* advertise json resource contracts
+* improve descriptions to be user friendly and agent useful
+* local run of mcp connecting to claude
+* slim inventory request payloads
+* add mcp auth and narrow rbac
+
+### Chores
+
+* upgrade go to fix vulns
+
+### [ske-mcp-server v0.1.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/v0.1.0/) (2025-09-25)
+
+#### Features
+* Initial release with access to local MCP Server
