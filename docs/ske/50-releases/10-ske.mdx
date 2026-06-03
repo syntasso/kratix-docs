@@ -23,9 +23,7 @@ Check the release notes below for information on each available version.
 
 #### Features
 
-* Support selectively skipping Cortex workflow generation (create, update, delete) per Promise using the `kratix.io/cortex-skip-workflows` annotation.
 * Support upgrading resources via an UpgradeRun.
-* Support configuring additional `volumes` and `volumeMounts` on the Kratix deployment via `spec.deploymentConfig` in the SKE Operator.
 * Workflow status is now surfaced on Resource Bindings.
 * Introduce a platform-wide `resourceBindings.defaultVersion` setting in the Kratix Config to control whether new Resource Bindings pin to a specific version (`pinned`) or track latest (`floating`, default).
 * Resource Bindings can be reconciled on-demand using the `kratix.io/reconcile` label.
