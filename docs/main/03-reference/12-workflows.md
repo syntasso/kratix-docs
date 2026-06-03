@@ -615,3 +615,16 @@ spec:
     config:
       pipelineNamespace: team-a # optional; needs to be an existing namespace, or else the Promise will fail to install
 ```
+
+:::warning
+
+Changing `pipelineNamespace` on an existing Promise will not clean up workflow Jobs in the previous namespace. 
+Kratix's Job cleanup only targets the currently configured namespace, so any Jobs in the old namespace will need to be manually deleted.
+
+You can use label selectors to help you clean up Jobs from the previous namespace. For example:
+```bash
+kubectl delete jobs -n <old-namespace> \
+  -l app.kubernetes.io/managed-by=Kratix,kratix.io/promise-name=<promise-name>
+```
+
+:::
