@@ -19,6 +19,31 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.48.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.48.0/) (2026-06-03)
+
+#### Features
+
+* Workflow status is now surfaced on Resource Bindings.
+* Introduce a platform-wide `resourceBindings.defaultVersion` setting in the Kratix Config to control whether new Resource Bindings pin to a specific version (`pinned`) or track latest (`floating`, default).
+* Resource Bindings can be reconciled on-demand using the `kratix.io/reconcile` label.
+* Pipeline Jobs now carry an owner reference to their parent resource or Promise, making job-to-resource relationships discoverable.
+* Unpausing a Resource Request no longer triggers an unnecessary reconciliation.
+
+#### Fixes
+
+* Fixed: invalid Resource Binding version no longer prevents resource deletion.
+* `UpgradeFailed` status now propagates correctly to Resource Bindings.
+* Fixed inconsistent upgrade status for Resource Bindings during promise upgrades.
+* Improved error message when an SSH private key is missing from the configured Secret.
+
+#### Security Fixes
+
+* Updated `golang.org/x/crypto` and `golang.org/x/net` dependencies to address recent CVEs.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.47.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.47.0/) (2026-05-18)
 
 #### Features
