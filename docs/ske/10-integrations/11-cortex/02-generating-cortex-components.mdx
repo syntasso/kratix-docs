@@ -111,7 +111,7 @@ If the annotation contains an invalid value, the controller falls back to genera
 
 By default, the generated Create and Update workflows include two mandatory fields **Name** and **Namespace**.
 These fields may not be meaningful to all platform users. You can customise the display name and description of these
-fields by settings annotations on the Promise.
+fields by setting annotations on the Promise.
 
 Supported annotations:
 
@@ -121,8 +121,9 @@ Supported annotations:
 | `kratix.io/cortex-name-field-description` | `Resource name` | Help text shown below the name input field |
 | `kratix.io/cortex-namespace-field-name` | `Namespace` | Display name for the namespace input field |
 | `kratix.io/cortex-namespace-field-description` | `Resource request namespace` | Help text shown below the namespace input field |
+| `kratix.io/cortex-fixed-namespace` | unset | Fixed `metadata.namespace` value for generated Resource Requests |
 
-For example, to customize the displayed name for the name field as "Service ID" and the namespace field as "Team":
+For example, to customise the displayed name for the name field as "Service ID" and the namespace field as "Team":
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -145,10 +146,33 @@ can customise only the fields you need.
 
 :::note
 
-These annotations only affect how the fields are displayed in the Cortex workflow UI. The generated Kubernetes
-manifest always uses `metadata.name` and `metadata.namespace`, so the manifest is valid and can be applied for Kubernetes.
+The field name and description annotations only affect how fields are displayed in the Cortex workflow UI. The generated
+Kubernetes manifest always uses `metadata.name` and `metadata.namespace`, so the manifest is valid and can be applied
+for Kubernetes.
 
 :::
+
+### Using a Fixed Namespace
+
+If all Resource Requests for a Promise should be created in the same namespace, set
+`kratix.io/cortex-fixed-namespace` on the Promise. The generated Cortex workflows will not ask users for a namespace,
+and generated Resource Requests will use the annotation value as `metadata.namespace`.
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/cortex: "true"
+  #highlight-start
+  annotations:
+    kratix.io/cortex-fixed-namespace: "my-namespace"
+  #highlight-end
+```
+
+Use this when the Promise has a fixed namespace for all requests and the namespace is not a useful concept for
+the Cortex users creating those requests.
 
 ## Managing Resource Requests in Cortex
 
