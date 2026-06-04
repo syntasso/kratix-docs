@@ -58,7 +58,7 @@ run.
 When an UpgradeRun starts, it:
 
 1. **Takes a snapshot** of all Resource Bindings for the Promise that are on an eligible `from` version. The snapshot records each resource's version at the moment the run begins — this baseline is used throughout the run to detect drift.
-2. **Waits for the target PromiseRevision to exist** before the snapshot is finalised. If the target [Promise Revision](/main/reference/promises/promise-upgrade/promise_revision) is not yet available, the run requeues until it appears.
+2. **Waits for the target PromiseRevision to exist** before the snapshot is finalised. If the target [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) is not yet available, the run requeues until it appears.
 3. **Processes rollout groups in plan order.** For each group, it patches the `spec.version` on each matching Resource Binding to the target version and waits for Kratix to apply the upgrade. Only once every resource in the current group is accounted for does the run move to the next group.
 
 ## Resource Outcomes
@@ -67,23 +67,24 @@ When a run processes a rollout group, each snapshotted resource is evaluated aga
 
 | Outcome | When it applies |
 |---------|-----------------|
-| **Succeeded** | The binding's `lastAppliedVersion` equals the target version — the upgrade was applied. This includes resources that were already at the target version by the time their group was reached. |
+| **Succeeded** | The binding's `lastAppliedVersion` equals the target version — the upgrade was applied. This includes resources that were already applied at the target version by the time their group was reached. |
 | **Skipped** | The binding no longer exists (resource was deleted), or the resource was upgraded to a different version externally. |
-| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`). The entire run stops immediately. |
-| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. The run requeues and waits. |
+| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`) during the current run. The failure is part of the current run when the condition's `lastTransitionTime` is at or after the Upgrade Run's `creationTimestamp`. The entire run stops immediately. |
+| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. If the binding is already at the target `spec.version` and the only upgrade failure was recorded before this Upgrade Run was created, the run treats that failure as the result of an earlier run. It sets `kratix.io/manual-reconciliation: "true"` on the Resource Binding to request a retry, then requeues and waits. |
 
-Skipped resources count towards group completion and do not block the run from advancing to the next group. A single failed resource stops the run entirely — subsequent groups are not processed.
+Skipped resources count towards group completion and do not block the run from advancing to the next group. A single failed resource stops the run entirely — subsequent groups are not processed. Upgrade failures recorded before the Upgrade Run was created do not fail the current run.
 
 ### Drift Detection
 
 The snapshot records each resource's version at run start. If, by the time the run processes a resource, its version has been changed externally, the resource is **Skipped** rather than overwritten:
 
 - A resource upgraded to a version *other than the target* (e.g. `v3.0.0` when the target is `v2.0.0`) is skipped.
-- A resource already at the target version is counted as **Succeeded** immediately — no patch is issued.
+- A resource with `lastAppliedVersion` already at the target version is counted as **Succeeded** immediately — no patch is issued.
+- A resource with `spec.version` already at the target version, but with `lastAppliedVersion` still behind, remains **Pending**. If its only upgrade failure was recorded before the current run was created, the run adds the [manual reconciliation label](/main/reference/resources/reconciliation-labels#requesting-reconciliation-via-a-resource-binding) to the Resource Binding so Kratix retries the Resource Configure workflow.
 
 ## PromiseRevision Gate
 
-The run checks that the target [Promise Revision](/main/reference/promises/promise-upgrade/promise_revision) exists at two points, with different behaviour each time:
+The run checks that the target [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) exists at two points, with different behaviour each time:
 
 **Before the snapshot is taken:** if the target PromiseRevision does not yet exist, the run requeues and waits. No failure is recorded — this handles the case where the revision is still being created when the run starts.
 
