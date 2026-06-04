@@ -30,7 +30,7 @@ Released in Helm Chart version [version 0.72.0](http://syntasso-enterprise-relea
 
 #### Features
 
-* Added support for configuraing SKE deployment storage. You can now configure `volumes` and `volumeMounts` on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting `deploymentConfig.affinity` and `deploymentConfig.tolerations`.
+* Added support for configuring SKE deployment storage. You can now configure `volumes` and `volumeMounts` on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting `deploymentConfig.affinity` and `deploymentConfig.tolerations`.
 
 #### Maintenance
 
@@ -56,7 +56,7 @@ Released in Helm Chart version [version 0.66.0](http://syntasso-enterprise-relea
 
 * When a `imagePullSecret` is not specified in the configuration document, the
 SKE operator will no longer inject a default `syntasso-registry` image pull
-secret into the Deplolyments or into the Kratix ConfigMap.
+secret into the Deployments or into the Kratix ConfigMap.
   * This enables the cases where the image pull permissions are handled at the
   Kubernetes node level, or the image is mirrored to a internal registry that
   does not require authentication.
