@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.6824b119.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.896b85c3.js" defer="defer"></script>
 <script src="/assets/js/main.7a22342a.js" defer="defer"></script>
 </head>
 <body>
@@ -39,7 +39,7 @@
 <p>Released in Helm Chart version <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.72.0/" target="_blank" rel="noopener noreferrer" class="">version 0.72.0</a></p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features">Features<a href="#features" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
-<li class="">Added support for configuraing SKE deployment storage. You can now configure <code>volumes</code> and <code>volumeMounts</code> on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting <code>deploymentConfig.affinity</code> and <code>deploymentConfig.tolerations</code>.</li>
+<li class="">Added support for configuring SKE deployment storage. You can now configure <code>volumes</code> and <code>volumeMounts</code> on Kratix Deployments. These fields can be defined directly within the Kratix Custom Resource (CR) or configured during deployment via the SKE Operator Helm chart by setting <code>deploymentConfig.affinity</code> and <code>deploymentConfig.tolerations</code>.</li>
 </ul>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance">Maintenance<a href="#maintenance" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
 <ul>
@@ -61,7 +61,7 @@
 <ul>
 <li class="">When a <code>imagePullSecret</code> is not specified in the configuration document, the
 SKE operator will no longer inject a default <code>syntasso-registry</code> image pull
-secret into the Deplolyments or into the Kratix ConfigMap.<!-- -->
+secret into the Deployments or into the Kratix ConfigMap.<!-- -->
 <ul>
 <li class="">This enables the cases where the image pull permissions are handled at the
 Kubernetes node level, or the image is mirrored to a internal registry that
