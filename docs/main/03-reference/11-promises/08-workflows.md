@@ -99,7 +99,7 @@ To re-run a workflow following a Pipeline failure, you can perform a
 [manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation) of the Promise, which will trigger the
 workflow again from the beginning.
 
-### Suspending or Retrying a workflow
+### Suspending or Retrying a workflow {#suspending-a-workflow}
 
 A Promise Configure Pipeline can output an optional file to control the workflow execution:
 
