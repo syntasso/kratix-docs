@@ -42,7 +42,7 @@ Check the release notes below for information on each available version.
 #### Features
 
 * Workflow status is now surfaced on Resource Bindings.
-* Introduce a platform-wide `resourceBindings.defaultVersion` setting in the Kratix Config to control whether new Resource Bindings pin to a specific version (`pinned`) or track latest (`floating`, default).
+* Introduce a platform-wide `ResourceBindingVersionStrategy` setting in the [Kratix Config](/main/reference/kratix-config/config#resourcebindingversionstrategy) to control whether new Resource Bindings pin to a specific version (`pinned`) or track latest (`floating`, default).
 * Resource Bindings can be reconciled on-demand using the `kratix.io/reconcile` label.
 * Pipeline Jobs now carry an owner reference to their parent resource or Promise, making job-to-resource relationships discoverable.
 * Unpausing a Resource Request no longer triggers an unnecessary reconciliation.
