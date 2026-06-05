@@ -113,7 +113,7 @@ making the wait behaviour transparent for users.</li>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="ready-to-try-it-out">Ready to try it out?<a href="https://docs.kratix.io/blog/workflow-controls-product-announcement#ready-to-try-it-out" class="hash-link" aria-label="Direct link to Ready to try it out?" title="Direct link to Ready to try it out?" translate="no">​</a></h2>
 <p>Promise Pipeline Waits and Events are available now in the latest Kratix &amp; SKE releases.</p>
 <ul>
-<li class="">Check the documentation to learn how to <a class="" href="https://docs.kratix.io/main/reference/promises/workflows#workflow-control">add wait behaviour to your Promises</a>,
+<li class="">Check the documentation to learn how to <a class="" href="https://docs.kratix.io/main/reference/workflows#workflow-control">add wait behaviour to your Promises</a>,
 or our <a class="" href="https://docs.kratix.io/main/guides/compound-promise-and-waits">guide on how to write Compound Promises</a>.</li>
 <li class="">Join us in the <a href="https://kratixworkspace.slack.com/" target="_blank" rel="noopener noreferrer" class="">Community Slack</a> to share feedback or ask questions</li>
 <li class="">If you are an enterprise team modelling complex approval workflows, talk to us about how
