@@ -19,6 +19,24 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.49.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.49.0/) (2026-06-05)
+
+#### Fixes
+
+* Fixed an intermittent crash in the `status-writer` pipeline sidecar when a parallel pipeline writes to the same Promise status concurrently, causing the Promise to become stuck in `PipelinesInProgress`.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
+---
+
+:::important
+**Upgrading from v0.48.0:** If you observe a Promise stuck in `PipelinesInProgress` state and the `status-writer` container in the configure pipeline pod is crashing with `missing status.kratix.workflows.pipelines`, this is a known issue in v0.48.0. Upgrade to v0.49.0 to resolve it.
+:::
+
+---
+
 ### [v0.48.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.48.0/) (2026-06-03)
 
 #### Features
