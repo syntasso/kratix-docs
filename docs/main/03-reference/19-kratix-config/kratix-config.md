@@ -31,6 +31,7 @@ data:
       leaseDuration: 15s
       renewDeadline: 10s
       retryPeriod: 2s
+    resourceBindingVersionStrategy: "pinned" # can be `floating` or `pinned`
     workflows:
       jobOptions:
         defaultBackoffLimit: 6
@@ -90,6 +91,10 @@ Timeouts for the kratix controller's leader election. Defaults:
 - leaseDuration: 15s
 - renewDeadline: 10s
 - retryPeriod: 2s
+
+### resourceBindingVersionStrategy
+
+Defines whether the `spec.version` of resource bindings should be set to "latest" or the version of the `promiseRevision`. `floating` sets the version to "latest" whilst `pinned` sets the version to that of the `promiseRevision`.
 
 ### Workflows
 
