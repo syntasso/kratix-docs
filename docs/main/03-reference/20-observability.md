@@ -3,7 +3,7 @@ title: Observability
 sidebar_label: Observability
 description: How to observe Kratix through logs, metrics, traces, and status.
 id: observability
-keywords: [observability, tracing, open telemetry, logging, logs, probes]
+keywords: [observability, tracing, open telemetry, logging, logs, probes, profiling, pprof]
 ---
 
 # Observability
@@ -119,3 +119,37 @@ update the Resource Request status with health information.
 
 - [Health Record reference](/main/reference/healthrecord)
 - [Surfacing health information](/main/guides/resource-health)
+
+## Runtime profiling
+
+Kratix exposes Go runtime profiling data for the Kratix controller through
+[pprof](https://github.com/google/pprof/tree/main/doc). Use these profiles when
+you need to investigate runtime behaviour that metrics and logs do not explain,
+such as high memory usage.
+
+:::warning
+Do not expose the profiling port outside trusted administrative access. Profiles
+can contain implementation details and runtime data from the operator.
+:::
+
+The following example collects a heap profile from the Kratix controller.
+
+1. Port-forward the Kratix controller Deployment:
+
+   ```bash
+   kubectl -n kratix-platform-system port-forward deployment/kratix-platform-controller-manager 8082:8082
+   ```
+
+1. In another terminal, collect the heap profile:
+
+   ```bash
+   curl -s "http://127.0.0.1:8082/debug/pprof/heap" > ./heap.out
+   ```
+
+1. Visualise the profile with `pprof`:
+
+   ```bash
+   go tool pprof -http=:8080 ./heap.out
+   ```
+
+The `go tool pprof` command requires Go to be installed on your local machine.

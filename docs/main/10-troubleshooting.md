@@ -390,3 +390,11 @@ additional
 [RBAC permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). [Check the
 documentation](/main/reference/workflows#role-based-access-control-rbac) for how you can configure permissions for Workflows
 alongside some examples.
+
+### Kratix Controller has high memory usage
+
+If you observe high memory usage in the Kratix Controller Pod, collect a heap
+profile with `pprof`.
+
+See [runtime profiling](/main/reference/observability#runtime-profiling) for the
+port-forward and profile collection commands.
