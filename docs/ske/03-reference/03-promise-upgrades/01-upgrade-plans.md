@@ -18,42 +18,45 @@ metadata:
   name: redis-v1-to-v2
 spec:
   promiseRef:
-    name: redis
     # Name of the Promise whose resources will be upgraded.
+    name: redis
   upgradePath:
     from:
-      - "v1.0.0"
       # List of versions and version patterns that are eligible for upgrade.
       # Plain strings are exact matches; wrap in "/" for regex (e.g. "/v1\\..*/" matches all v1.x.x).
-    to: "v2.0.0"
+      - "v1.0.0"
     # The target version that resources will be upgraded to.
+    to: "v2.0.0"
+  # Required: Policy for when the upgrade should start
   upgradeExecutionPolicy:
-    repeatSchedule: "0 23 * * 6"
     # Cron expression for recurring execution (e.g. every Saturday at 23:00).
-    executeAt: "2026-05-01T23:00:00Z"
+    repeatSchedule: "0 23 * * 6"
     # One-time execution datetime in RFC 3339 format.
-    timeZone: "Europe/London"
+    executeAt: "2026-05-01T23:00:00Z"
     # Time zone applied to both repeatSchedule and executeAt.
     # It has to be a valid IANA Time Zone.
+    timeZone: "Europe/London"
   rolloutGroups:
-    - name: dev
       # Identifier for this rollout group.
+    - name: dev
       selectors:
         matchExpressions:
         - key: prod
           operator: NotIn
           values: ["true"]
         matchLabels:
-          env: dev
         # Label selectors to determine which ResourceBindings belong to this group.
         # Selectors match against ResourceBinding labels.
-      maxConcurrent: 5
+          env: dev
       # Maximum number of resources upgraded concurrently. Accepts an integer or a percentage (e.g. "25%").
+      maxConcurrent: 5
+      # Optional. Defines the time windows where upgrades can start. If not
+      # specified, upgrades can start at any time.
       resourceUpgradeWindows:
         - kind: allow
-          window: "0 1-7 * * *"
+          schedule: "0 22 * * *"
+          duration: "4h"
           timeZone: "Europe/London"
-          # Cron-based time window that allows upgrades during hours 1-7 UTC.
 ```
 
 ## Promise Reference
@@ -142,7 +145,8 @@ spec:
       maxConcurrent: 5
       resourceUpgradeWindows:
         - kind: allow
-          window: "0 1-7 * * *"
+          schedule: "0 22 * * *"
+          duration: "4h"
           timeZone: "Europe/London"
 ```
 
@@ -191,26 +195,39 @@ maxConcurrent: "25%"   # At most 25% of resources in the group at a time
 
 ### Resource Upgrade Windows
 
-Resource upgrade windows define cron-based time windows that gate when upgrades may proceed for resources in the group.
-Each window has a `kind` (either `allow` or `deny`) and a `window` cron expression.
+Resource upgrade windows control when new upgrades may start for resources in a group. Each window has a `kind`
+(`allow` or `deny`), a cron `schedule`, a `duration`, and a `timeZone`.
 
 ```yaml
 resourceUpgradeWindows:
   - kind: allow
-    window: "0 1-7 * * *"
-    timeZone: "Europe/London"
-  - kind: deny
-    window: "0 0 25 12 *"
+    schedule: "0 22 * * 6"
+    duration: "4h"
     timeZone: "Europe/London"
 ```
 
-At least one resource upgrade window is required per rollout group.
+| Field | Description |
+|-------|-------------|
+| `kind` | `allow` or `deny` — whether this window permits or blocks upgrades |
+| `schedule` | When the window opens (standard 5-field cron, e.g. `"0 23 * * 6"`) |
+| `duration` | How long the window stays open (e.g. `"2h"`, `"30m"`) |
+| `timeZone` | IANA timezone for the schedule (e.g. `"Europe/London"`, `"UTC"`) |
 
-| Field | Description | Required |
-|-------|-------------|----------|
-| `kind` | `allow` or `deny` — whether this window permits or blocks upgrades | Yes |
-| `window` | Cron expression defining when this rule applies | Yes |
-| `timeZone` | Time zone for the window schedule | Yes |
+If no windows are defined, upgrades are always permitted. The behaviour when windows are defined depends on which
+kinds are present:
+
+| Windows defined | Behaviour |
+|-----------------|-----------|
+| None | Always open |
+| Allow only | Open during allow windows; denied outside them |
+| Deny only | Open at all times except during deny windows |
+| Allow and deny | Open during allow windows; deny takes precedence if both are active |
+
+:::note
+
+Windows only gate when new upgrades start — resources already being upgraded are not interrupted when a window closes.
+
+:::
 
 ## Status
 
