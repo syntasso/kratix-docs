@@ -185,10 +185,20 @@ As this reconciliation is managed by the Promise Controller, restarts of the Kra
 Manager may disrupt the regularity of this cadence meaning that the reconciliation interval
 may be greater than the configured.
 
+### Pipeline Reconciliation
+
+If a new reconciliation is triggered while a Pipeline is actively running (for
+example due to a Promise update), Kratix waits for the current Job to reach a
+terminal state before restarting the configure workflow from the beginning.
+
 ## Delete Workflows
 
 Promise Delete workflows are triggered when a Promise is deleted, and currently only
 support a **single** Pipeline.
+
+If a Promise configure Pipeline is still running when the Promise is deleted, Kratix
+waits for the current Job to reach a terminal state before triggering the delete
+workflow.
 
 This Pipeline is responsible for cleaning up resources and configurations that were set up
 by the `promise.configure` workflow.
