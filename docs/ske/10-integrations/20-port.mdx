@@ -55,8 +55,8 @@ backend of your choosing for the self-service actions in Port.
 
 To install the SKE Port Controller, you will need:
 
-* A SKE token. To request one, visit [Syntasso](https://www.syntasso.io/pricing) and click "Try SKE
-Today".
+* A [Syntasso registry token](../reference/tokens#syntasso-registry-token).
+To request one, visit [Syntasso](https://www.syntasso.io/pricing) and click "Try SKE Today".
 * A Kubernetes cluster with Kratix running. The [Kratix Quick Start](../../main/quick-start)
 is an easy way to get started.
 
@@ -106,7 +106,8 @@ authentication credentials via a docker-registry secret and refer to this secret
 Pipeline definition in your Workflow.
 
 The release is set to use `imagePullSecret`, to access the enterprise image. To create
-the secret, replacing YOUR_TOKEN with the token you have been provided with:
+the secret, replacing YOUR_TOKEN with the [Syntasso registry token](../reference/tokens#syntasso-registry-token)
+you have been provided with:
 
 ```
 kubectl create secret docker-registry syntasso-registry \

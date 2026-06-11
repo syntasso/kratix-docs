@@ -6,12 +6,12 @@ sidebar_label: Tokens
 
 Syntasso Kratix Enterprise (SKE) uses two credentials:
 
-- A registry token for pulling container images from `ghcr.io/syntasso`
-- A GitHub token for accessing private release artifacts
+- A registry token for pulling container images from `ghcr.io/syntasso` (beings with `ghp_`)
+- A GitHub token for accessing private release artifacts (begins with `github_pat_`)
 
 ## Syntasso registry token
 
-Use this token to authenticate as `syntasso-pkg` when pulling images from the private Syntasso registry (`ghcr.io/syntasso`).
+Use the token that starts with `ghp_` to authenticate as `syntasso-pkg` when pulling images from the private Syntasso registry (`ghcr.io/syntasso`).
 
 **Usage example:**
 
@@ -23,7 +23,7 @@ docker login ghcr.io \
 
 ## Enterprise releases token
 
-Use this token when downloading release artifacts (for example, the SKE testing plugin) from the private `syntasso/enterprise-releases` GitHub repository.
+Use the token that starts with `github_pat_` when downloading release artifacts (for example, the SKE testing plugin) from the private `syntasso/enterprise-releases` GitHub repository.
 
 **Usage example:**
 

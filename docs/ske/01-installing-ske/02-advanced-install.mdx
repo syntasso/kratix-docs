@@ -49,7 +49,7 @@ helm repo update
 
 Helm can accept values via the values file. Refer to the examples
 below for common configuration options. Any configuration should be placed in a
-`values.yaml` file that is then passed in to the `helm install` command.
+`values.yaml` file and your token will refer to the that is then passed in to the `helm install` command.
 
 :::tip
 
@@ -67,6 +67,8 @@ You can see all available configuration in the
     skeDeployment:
       version: latest
     ```
+
+    NOTE: Token refers to the [Syntasso registry token](../reference/tokens#syntasso-registry-token)
 
 </details>
 
@@ -100,11 +102,13 @@ You can see all available configuration in the
             password: "my-password"
     ```
 
+    NOTE: Token refers to the [Syntasso registry token](../reference/tokens#syntasso-registry-token)
+
 </details>
 
 #### The SKE license
 
-To run SKE, you need a license. You can get one by [requesting a free trial](https://www.syntasso.io/pricing). SKE images are hosted in a private registry, and your cluster needs image pull credentials to access them. By default, the license token is used as the credential for the Syntasso registry, but you can also pre-create your own pull secret if you prefer not to inline credentials or if you are pulling from a self-hosted registry.
+To run SKE, you need a license. You can get one by [requesting a free trial](https://www.syntasso.io/pricing). SKE images are hosted in a private registry, and your cluster needs image pull credentials to access them. By default, the [Syntasso registry token](../reference/tokens#syntasso-registry-token) is used as the credential for the Syntasso registry, but you can also pre-create your own pull secret if you prefer not to inline credentials or if you are pulling from a self-hosted registry.
 
 **Option 1: Provide the license token directly**
 
@@ -116,7 +120,7 @@ skeLicense: LICENSE # provided to you by Syntasso
 
 **Option 2: Pre-create the image pull secret**
 
-To avoid inlining credentials in your values file, omit `skeLicense` and instead pre-create a `kubernetes.io/dockerconfigjson` Secret manually. The credentials will depend on the registry you are pulling from. This could still be your SKE license token (for the Syntasso registry), or your own credentials if you are using a self-hosted registry.
+To avoid inlining credentials in your values file, omit `skeLicense` and instead pre-create a `kubernetes.io/dockerconfigjson` Secret manually. The credentials will depend on the registry you are pulling from. This could still be your [Syntasso registry token](../reference/tokens#syntasso-registry-token), or your own credentials if you are using a self-hosted registry.
 
 For example, when pulling from the Syntasso registry:
 
