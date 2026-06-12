@@ -136,7 +136,7 @@ export PORTAL_PUBLISHING_TOKEN=<token>
 Configure npm to authenticate against your Portal registry:
 
 ```bash
-npm config set //<company>.spotifyportal.com/api/plugin-installer/registry/npm/:_authToken $PORTAL_PUBLISHING_TOKEN
+npm config set //<company>.spotifyportal.com/api/plugin-installer/registry/:_authToken=$PORTAL_PUBLISHING_TOKEN
 ```
 
 Publish each plugin to your Portal instance, replacing `<version>` with the version printed by `npm pack`:
