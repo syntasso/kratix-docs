@@ -221,7 +221,7 @@ and Kratix continues with the next Pipeline in the workflow.
 When both `retryAfter` and `suspend` are present, `retryAfter` takes precedence.
 This is true whether `suspend` is `true` or `false`.
 
-Kratix can triggers a new reconciliation from the start of the pipeline
+Kratix can trigger a new reconciliation from the start of the pipeline
 while the workflow is suspended. This applies when:
 
 - `kratix.io/manual-reconciliation: "true"` is added
@@ -449,6 +449,13 @@ spec:
                         name: slack-msg
                         key: url
 ```
+
+### Pipeline Reconciliation
+
+If a new reconciliation is triggered while a Pipeline is actively running (for
+example due to a Promise or Resource update, or a deletion), Kratix waits for the
+current Job to reach a terminal state before starting the new workflow from the
+beginning.
 
 ## Volumes {#volumes}
 
