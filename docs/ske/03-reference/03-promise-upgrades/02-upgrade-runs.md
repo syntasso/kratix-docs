@@ -41,18 +41,6 @@ spec:
 When the referenced Upgrade Plan exists, the Upgrade Run will resolve the plan and begin execution.
 If the plan does not exist, the Upgrade Run will set a `PlanResolved` condition with status `False` and reason `PlanNotFound`.
 
-## Suspending an Upgrade Run
-
-You can pause an in-progress Upgrade Run by setting `suspend` to `true`:
-
-```yaml
-spec:
-  suspend: true
-```
-
-Setting `suspend` back to `false` resumes execution. This allows you to temporarily halt an upgrade without deleting the
-run.
-
 ## How an UpgradeRun executes
 
 When an UpgradeRun starts, it:
@@ -193,6 +181,7 @@ The Upgrade Run reports its state via standard Kubernetes conditions:
 |-----------|-------------|
 | `PlanResolved` | `True` when the referenced Upgrade Plan exists; `False` with reason `PlanNotFound` when absent |
 | `RunSucceeded` | `True` with reason `RunCompleted` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource fails, `PromiseRevisionNotFound` when the target revision is deleted mid-run, or `RunCancelled` when the run is deleted in progress |
+| `Suspended` | Present with status `True` and reason `RunSuspended` while `spec.suspend` is `true`; removed entirely when the run is resumed |
 
 ## Manually Creating an Upgrade Run
 
@@ -210,6 +199,45 @@ spec:
     name: redis-v1-to-v2
 EOF
 ```
+
+## Suspending an Upgrade Run
+
+You can pause an in-progress UpgradeRun by setting `suspend` to `true`:
+
+```bash
+kubectl patch upgraderun redis-v1-to-v2-run-001 --type merge -p '{"spec":{"suspend":true}}'
+```
+
+Suspension is graceful. Suspend an UpgradeRun will not disrupt upgrades that are already started:
+
+- **Resource upgrades that have already started run to completion.** Their outcomes are still tracked, so the rollout
+  group's `succeeded`/`skipped` counts keep updating while the run is suspended.
+- **No new resource upgrades are started.** Resources whose upgrade has not yet begun — including rollout groups the run
+  has not reached — stay on their current version until the run is resumed.
+
+While suspended, the run reports a `Suspended` condition:
+
+```yaml
+conditions:
+  - type: Suspended
+    status: "True"
+    reason: RunSuspended
+    message: "UpgradeRun is suspended; no new resource upgrades will be started"
+```
+
+### Resuming an Upgrade Run
+
+Resume the run by setting `suspend` to `false`, or by removing the field from UpgradeRun spec:
+
+```bash
+kubectl patch upgraderun redis-v1-to-v2-run-001 --type merge -p '{"spec":{"suspend":false}}'
+```
+
+On resume, any remaining resource upgrades are started, continuing from wherever the rollout had progressed to.
+
+Note that suspension only pauses the run, and it does not override the plan's other scheduling controls.
+If the plan's rollout groups define [resource upgrade windows](./upgrade-plans#resource-upgrade-windows), resumed upgrades still only start inside an allowed
+window. Suspending a run that has already reached a terminal state (`Completed` or `Failed`) has no effect.
 
 ## Deleting an Upgrade Run
 
