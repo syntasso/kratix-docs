@@ -48,7 +48,7 @@ You can see all available configuration in the
 
 ### The SKE license
 
-SKE Health Agent images are hosted in a private registry. To pull them, your cluster needs image pull credentials: either your SKE license token (when pulling from the Syntasso registry directly) or your own credentials if you are using a self-hosted registry.
+SKE Health Agent images are hosted in a private registry. To pull them, your cluster needs image pull credentials: either your [Syntasso registry token](../reference/tokens#syntasso-registry-token) (when pulling from the Syntasso registry directly) or your own credentials if you are using a self-hosted registry.
 
 **Option 1: Provide the license token directly**
 
@@ -60,7 +60,7 @@ skeLicense: LICENSE # provided to you by Syntasso
 
 **Option 2: Pre-create the image pull secret**
 
-To avoid inlining credentials in your values file, omit `skeLicense` and instead pre-create a `kubernetes.io/dockerconfigjson` Secret manually. The credentials will depend on the registry you are pulling from. This could still be your SKE license token (for the Syntasso registry), or your own credentials if you are using a self-hosted registry.
+To avoid inlining credentials in your values file, omit `skeLicense` and instead pre-create a `kubernetes.io/dockerconfigjson` Secret manually. The credentials will depend on the registry you are pulling from. This could still be your [Syntasso registry token](../reference/tokens#syntasso-registry-token), or your own credentials if you are using a self-hosted registry.
 
 For example, when pulling from the Syntasso registry:
 
