@@ -168,7 +168,7 @@ Check the release notes below for information on each available version.
 
 #### 🚨 Breaking changes 🚨
 
-* The plugins will no longer rely on a Git repository to execute CRUD operations on the Kubernetes Cluster. Instead, they will now use the Kubernetes API to manage the resources. This enables users to get the most up-to-date information on their resources, as well as manage resources created via other means, like via `kubectl`. The migration is quite simple and only requires changes to the Backstage app config. Read the [Configuring the backend plugin](/ske/integrations/backstage/plugins#configuring-the-backend-plugin) documentation for more information.
+* The plugins will no longer rely on a Git repository to execute CRUD operations on the Kubernetes Cluster. Instead, they will now use the Kubernetes API to manage the resources. This enables users to get the most up-to-date information on their resources, as well as manage resources created via other means, like via `kubectl`. The migration is quite simple and only requires changes to the Backstage app config. Read the [Configuring the backend plugin](/ske/integrations/backstage/installation/plugins#configuring-the-backend-plugin) documentation for more information.
 * The Backstage Component Promise is now deprecated; its features are now available within the plugins and SKE v0.21.0+.
 
 #### Features
@@ -198,7 +198,7 @@ Check the release notes below for information on each available version.
 
 * Fixed a bug where the "Create" button wasn't being displayed on the Promise Entity page when a custom `type` was specified.
     - There's now a new `kratix.io/type` annotation that can be used to specify the type of the Component. Users of the SKE Backstage Generator ([v0.10.1](pipeline-stages/backstage-generator#v0.10.1)) will have this annotation automatically added to their Component YAML files.
-    - **This requires changes to your Catalog Entity page.** Please refer to the [Configuring the Plugins documentation](../integrations/backstage/plugins#update-the-entitypage) for instructions.
+    - **This requires changes to your Catalog Entity page.** Please refer to the [Configuring the Plugins documentation](../integrations/backstage/installation/plugins#update-the-entitypage) for instructions.
 
 ### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/v0.11.0/) (2024-09-19)
 
