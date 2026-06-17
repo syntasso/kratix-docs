@@ -68,8 +68,6 @@ data:
       insecure: true
       headers: # additional headers if required
         authorization: "Bearer <grafana-api-token>"
-    featureFlags:
-      promiseUpgrade: false # enable/disable promise revisions
 ```
 
 ### numberOfJobsToKeep (default: 5)
@@ -161,14 +159,6 @@ Telemetry configuration for Kratix. Configures OpenTelemetry export for traces a
 - **headers**: Optional map of headers (e.g. `authorization: "Bearer <token>"`) for authenticated endpoints.
 - **traces.enabled**: Set to `false` to disable trace export. Defaults to `true` when telemetry is configured.
 - **metrics.enabled**: Set to `false` to disable metrics export. Defaults to `true` when telemetry is configured.
-
-### featureFlags
-
-Enable Kratix features. These are disabled by default.
-
-#### promiseUpgrade (default: false)
-
-Enable the use of Promise Revision and Resource Bindings to manage Resource upgrades.
 
 ## Kratix Pipeline Adapter Config
 
