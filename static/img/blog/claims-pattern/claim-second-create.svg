@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#4a5568"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#a0aec0"/>
+    </marker>
+    <style>
+      .box { fill: #f7fafc; stroke: #2d3748; stroke-width: 2; rx: 8; }
+      .box-muted { fill: #edf2f7; stroke: #a0aec0; stroke-width: 2; rx: 8; }
+      .box-accent { fill: #ebf8ff; stroke: #2b6cb0; stroke-width: 2; rx: 8; }
+      .box-worker { fill: #f0fff4; stroke: #276749; stroke-width: 2; rx: 8; }
+      .box-same { fill: #edf2f7; stroke: #718096; stroke-width: 2; stroke-dasharray: 6 4; rx: 8; }
+      .label { font-size: 14px; fill: #1a202c; font-weight: 600; }
+      .label-muted { font-size: 14px; fill: #718096; font-weight: 600; }
+      .sublabel { font-size: 12px; fill: #4a5568; }
+      .sublabel-muted { font-size: 12px; fill: #a0aec0; }
+      .step { font-size: 11px; fill: #2b6cb0; font-weight: 700; }
+      .arrow { stroke: #2b6cb0; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .arrow-muted { stroke: #cbd5e0; stroke-width: 2; fill: none; marker-end: url(#arrow-muted); }
+      .note { font-size: 12px; fill: #2b6cb0; font-weight: 600; }
+    </style>
+  </defs>
+  <text x="360" y="28" text-anchor="middle" class="label" font-size="16">Second claim: count rises, namespace is not duplicated</text>
+
+  <!-- Already in place from the first claim -->
+  <rect x="30" y="55" width="120" height="50" class="box-muted"/>
+  <text x="90" y="78" text-anchor="middle" class="label-muted">app-one</text>
+  <text x="90" y="94" text-anchor="middle" class="sublabel-muted">existing</text>
+  <rect x="200" y="55" width="150" height="50" class="box-muted"/>
+  <text x="275" y="73" text-anchor="middle" class="label-muted">claim (app-one)</text>
+  <text x="275" y="91" text-anchor="middle" class="sublabel-muted">team-mobile</text>
+
+  <!-- New in this step -->
+  <rect x="30" y="130" width="120" height="50" class="box"/>
+  <text x="90" y="153" text-anchor="middle" class="label">app-two</text>
+  <text x="90" y="169" text-anchor="middle" class="sublabel">new request</text>
+  <rect x="200" y="130" width="150" height="50" class="box-accent"/>
+  <text x="275" y="148" text-anchor="middle" class="label">claim (app-two)</text>
+  <text x="275" y="166" text-anchor="middle" class="sublabel">team-mobile</text>
+
+  <!-- Unchanged shared resources -->
+  <rect x="420" y="92" width="170" height="56" class="box-same"/>
+  <text x="505" y="116" text-anchor="middle" class="label">Namespace request</text>
+  <text x="505" y="134" text-anchor="middle" class="sublabel">unchanged (one)</text>
+  <rect x="420" y="280" width="170" height="56" class="box-worker"/>
+  <text x="505" y="304" text-anchor="middle" class="label">Namespace</text>
+  <text x="505" y="322" text-anchor="middle" class="sublabel">still one on worker</text>
+
+  <!-- Muted arrows for existing state -->
+  <line x1="150" y1="80" x2="198" y2="80" class="arrow-muted"/>
+  <line x1="350" y1="80" x2="418" y2="110" class="arrow-muted"/>
+  <line x1="505" y1="148" x2="505" y2="278" class="arrow-muted"/>
+
+  <!-- Numbered steps for what happens now -->
+  <line x1="150" y1="155" x2="198" y2="155" class="arrow"/>
+  <text x="174" y="145" text-anchor="middle" class="step">1</text>
+  <line x1="350" y1="155" x2="418" y2="134" class="arrow"/>
+  <text x="384" y="138" text-anchor="middle" class="step">2</text>
+
+  <text x="40" y="210" class="sublabel">1. app-two emits a second NamespaceClaim for team-mobile.</text>
+  <text x="40" y="230" class="sublabel">2. Configure runs; the provider request already exists, so nothing new is created.</text>
+  <text x="40" y="250" class="sublabel">The live claim count rises to 2. The namespace on the worker is not duplicated.</text>
+  <text x="360" y="380" text-anchor="middle" class="note">Live claim count: 1 to 2</text>
+</svg>

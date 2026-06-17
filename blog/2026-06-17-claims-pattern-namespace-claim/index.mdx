@@ -1,0 +1,159 @@
+---
+slug: claims-pattern-namespace-claim
+title: "Sharing resources: a claims pattern for Compound Promises"
+description: "When many consumers need the same namespace (or database, or Kafka cluster), the usual Compound Promise trick stops working. Here is a pattern we call claims, and how to use it."
+authors: [derik]
+tags: [kratix, promises, patterns, namespace, compound promise, claims]
+---
+
+If you have been writing [Compound Promises](/main/guides/compound-promises), you have probably wondered: what happens when **multiple** resources need to share **one** unique resource provided by a sub-Promise?
+
+For example, imagine an Application Promise that deploys applications on Kubernetes. Each application may need a namespace on the destination cluster, so you make it a Compound Promise and use the [Namespace Promise](/marketplace) from the Marketplace. You know the drill: the Application Promise's configure pipeline writes the Namespace request to `/kratix/output/`, Kratix schedules it to the Platform cluster, and the Namespace Promise does its thing.
+
+You request your first application, `app-one`, in the `team-mobile` namespace. The pipelines run, you see the Namespace request come through, the namespace appears on the destination, shortly followed by the application. So far, so good. You now want to deploy a second application, `app-two`, also in `team-mobile`. You send the request, the pipeline runs, and... nothing happens.
+
+You check your GitOps agent logs and see that you now have two requests for the same Namespace. It does not like that. You update your Promise pipeline to only emit the Namespace request if it does not exist yet. Everything seems to work, until you delete `app-one`, the original requester of the Namespace. As the Namespace request is owned by `app-one`, it gets deleted. `app-two`, deployed in that namespace, gets wiped out in the process. Absolute chaos.
+
+Congratulations: you have discovered that **work ownership** and **shared resources** are not friends.
+
+In this post we walk through a Promise design that fixes this. We call it **claims**, and there is a working example in the [Marketplace](https://github.com/syntasso/kratix-marketplace/tree/main/namespace-claim).
+
+{/* truncate */}
+
+## The problem
+
+You have just hit both failure modes. Here is what is going on under the hood.
+
+When a workflow writes a document to `/kratix/output/`, that document becomes part of a **Work** object owned by *that specific resource request*. If you are not familiar with Works, we wrote about them in [How your Resources get from Promise to Destination](/blog/from-platform-to-destination). When the parent request goes away, its Work is garbage-collected, and the documents in it go with it.
+
+That explains the wipeout when you deleted `app-one`: the namespace request was work-owned, so it left with the first Application even though `app-two` was still running.
+
+The GitOps failure is the other side of the same coin. Multiple Applications each emitting their own copy of the same namespace request means multiple Works declaring the same resource ID in the State Store. Your reconciliation path falls over with duplicates, even when the Platform cluster looks fine.
+
+## What is a claim?
+
+The fix is to separate **saying you need something** from **actually creating it**.
+
+Your Application Promise should not create the namespace directly. Instead, it places a **reservation** with an intermediate Promise: "I need `team-mobile`." Not the namespace itself, just a record that this Application is counting on it.
+
+That intermediate Promise owns the shared resource lifecycle: it creates the namespace when the first reservation arrives, ignores subsequent ones, and tears it down only when no reservations remain. This mechanism is what call a **claim**. A `NamespaceClaim` is not the namespace; it is a lightweight, per-consumer signal that someone is still using it.
+
+<figure className="diagram">
+  <img className="large" src="/img/blog/claims-pattern/claims-overview.svg" alt="Application Promise, NamespaceClaim, Namespace provider request, and Namespace on the worker cluster" />
+  <figcaption>The Application places a reservation; the claim Promise owns create-once, delete-when-empty</figcaption>
+</figure>
+
+The same shape generalises beyond namespaces: a DB server and many DB instances, a Kafka cluster and many topics. The counting idea stays the same; only what gets created and destroyed changes.
+
+<!-- TODO(video): Embed walkthrough demo here with ReactPlayer.
+Suggested content:
+1) Create two NamespaceClaims for the same namespace
+2) Delete the first claim (namespace stays)
+3) Delete the last claim (namespace goes away)
+4) Briefly show the race / hardening note
+-->
+
+## How it works in practice
+
+Let's replay the `app-one` / `app-two` scenario from the intro using [NamespaceClaim Promise](https://github.com/syntasso/kratix-marketplace/tree/main/namespace-claim).
+
+The fundamental difference is that the Application Promise no longer writes to `/kratix/output` the `Namespace` request directly, but rather a `NamespaceClaim` request like the one below. It does not need any extra logic; it behaves like any other Compound Promise:
+
+```yaml
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: NamespaceClaim
+metadata:
+  name: my-app-namespace-claim
+  namespace: default
+spec:
+  namespaceName: team-mobile
+```
+
+### The first Application claims a namespace
+
+When `app-one` is requested, defining `team-mobile` as its target namespace, Kratix will run the Application promise resource configure workflow. The workflow will output the claim, which in turn will execute the `NamespaceClaim` resource configure workflow. No provider `Namespace` request exists for `team-mobile` yet, so one is created imperatively (outside `/kratix/output/`, so it escapes work ownership). The Namespace Promise schedules the real `Namespace` to the worker.
+
+<figure className="diagram">
+  <img className="large" src="/img/blog/claims-pattern/claim-first-create.svg" alt="First NamespaceClaim leading to creation of the provider Namespace request and the Namespace on the worker" />
+  <figcaption>The first claim creates the shared namespace</figcaption>
+</figure>
+
+### A second Application joins the same namespace
+
+You now deploy `app-two` into the same `team-mobile` namespace. The Application Promise does the same thing it did for `app-one`: it emits another `NamespaceClaim` to `/kratix/output/`, and Kratix runs the claim Promise's configure workflow again.
+
+This time, the provider `Namespace` request is already on the Platform cluster, so there is nothing new to create. You end up with two live claims pointing at the same namespace, and still exactly one namespace on the destination.
+
+<figure className="diagram">
+  <img className="large" src="/img/blog/claims-pattern/claim-second-create.svg" alt="Two NamespaceClaims converging on one provider Namespace request and one Namespace" />
+  <figcaption>A second claim raises the count; the namespace is not duplicated</figcaption>
+</figure>
+
+### Deleting an Application (and its claim)
+
+When you delete `app-one`, its `NamespaceClaim` goes with it, as Kratix will delete any Work belonging to the Application. That triggers the claim Promise's **delete** workflow, which counts how many live claims for `team-mobile` still exist. `app-two` is still around, so the count stays above zero: the provider request stays, the namespace on the worker stays, and `app-two` keeps its home.
+
+<figure className="diagram">
+  <img className="large" src="/img/blog/claims-pattern/claim-delete-non-last.svg" alt="Deleting the first Application and its claim while a second claim keeps the namespace" />
+  <figcaption>Deleting a non-last claim does not remove the shared namespace</figcaption>
+</figure>
+
+This is the scenario the naive Compound Promise pattern gets wrong. The first Application is no longer the boss of the namespace.
+
+When `app-two` goes as well, the story ends cleanly. Its claim disappears, the delete workflow runs the count again, and this time nobody is left reserved on `team-mobile`. The provider `Namespace` request is removed, the Namespace Promise's Work is garbage-collected, and the namespace is pruned from the worker.
+
+<figure className="diagram">
+  <img className="large" src="/img/blog/claims-pattern/claim-delete-last.svg" alt="Deleting the last Application and claim removes the provider request and the Namespace" />
+  <figcaption>Deleting the last claim tears the shared namespace down</figcaption>
+</figure>
+
+:::info
+
+A few implementation details worth knowing: you may decide _not to_ delete the resource when it has no claims.
+
+:::
+
+<details>
+<summary>How the pipeline implements the counting</summary>
+
+The configure and delete workflows both run the same container image from the Marketplace repo. If you want to adapt the pattern to another shared resource, copy that pipeline and swap what gets created and destroyed; the counting logic stays the same. The [source is here](https://github.com/syntasso/kratix-marketplace/blob/main/namespace-claim/internal/configure-pipeline/claim) if you want to read it line by line.
+
+</details>
+
+## Try it
+
+If you want to poke at it yourself, try out the promise available in the marketplace. Install the Promise, apply the examples below, and observe what the promise produces. Rhen delete them in order and watch what happens to the namespace on the worker:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/namespace/promise.yaml
+kubectl apply -f https://raw.githubusercontent.com/syntasso/kratix-marketplace/main/namespace-claim/promise.yaml
+
+kubectl apply -f - <<EOF
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: NamespaceClaim
+metadata:
+  name: team-a-claim
+  namespace: default
+spec:
+  namespaceName: shared-team-namespace
+EOF
+
+kubectl apply -f - <<EOF
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: NamespaceClaim
+metadata:
+  name: team-b-claim
+  namespace: default
+spec:
+  namespaceName: shared-team-namespace
+EOF
+
+kubectl delete namespaceclaim team-a-claim   # namespace stays
+kubectl delete namespaceclaim team-b-claim   # last claim gone; namespace removed
+```
+
+## Wrapping up
+
+Claims give you shared sub-promise resources without fighting work ownership. The parent emits a lightweight reservation; the claim Promise handles create-once, delete-when-empty. The `namespace-claim` Promise in the Marketplace is the reference implementation, but the pattern is what you reuse when the next shared resource shows up on your roadmap.
+
+We would love to hear how you use it, or what breaks when you try. Drop by [Slack](https://kratixworkspace.slack.com/) or [GitHub](https://github.com/syntasso/kratix-marketplace).
