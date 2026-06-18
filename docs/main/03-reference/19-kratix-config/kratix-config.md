@@ -31,7 +31,7 @@ data:
       leaseDuration: 15s
       renewDeadline: 10s
       retryPeriod: 2s
-    resourceBindingVersionStrategy: "pinned" # can be `floating` or `pinned`
+    resourceBindingVersionStrategy: "floating" # floating (default) or pinned
     workflows:
       jobOptions:
         defaultBackoffLimit: 6
@@ -92,7 +92,12 @@ Timeouts for the kratix controller's leader election. Defaults:
 
 ### resourceBindingVersionStrategy
 
-Defines whether the `spec.version` of resource bindings should be set to "latest" or the version of the `promiseRevision`. `floating` sets the version to "latest" whilst `pinned` sets the version to that of the `promiseRevision`.
+Controls the `spec.version` Kratix sets on a [Resource Binding](/main/reference/promises/promise-upgrade/resource-bindings) when it is first created. This determines whether a Resource Request automatically follows new [Promise Revisions](/main/reference/promises/promise-upgrade/promise-revisions) or stays pinned to the version it was created at.
+
+- `floating` (default): new Resource Bindings are set to `latest`. The binding always tracks whichever Promise Revision is currently marked as `latest`, so when the Promise is upgraded to a new version the Resource Request is automatically re-reconciled against it.
+- `pinned`: new Resource Bindings are set to the resolved latest version at the time of creation (for example `v1.2.0`). The binding stays locked to that Promise Revision, and later Promise upgrades do not automatically flow through to the Resource.
+
+This strategy only sets the _initial_ value of the binding. You can always change a binding's `spec.version` later to upgrade or pin a Resource — see the [Upgrading a Promise](/main/guides/upgrading-resource-requests) guide.
 
 ### Workflows
 
