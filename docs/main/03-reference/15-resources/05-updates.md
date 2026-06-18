@@ -19,6 +19,11 @@ Any update to the Resource will result in Kratix re-running the
 Any files which are output by this workflow will replace all existing files associated
 with this Resource in the [StateStore](../statestore/intro).
 
+This workflow runs against the Promise Revision the Resource is currently bound to. Updating
+the request `spec` does not change that version. To reconcile a Resource against a different
+Promise version, update its [Resource Binding](../promises/promise-upgrade/resource-bindings) —
+see the [Upgrading a Promise](/main/guides/upgrading-resource-requests) guide.
+
 ## Scheduling
 
 If an update to a Resource changes its scheduling, the change will be **ignored**.
