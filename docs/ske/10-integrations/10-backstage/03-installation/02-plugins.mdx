@@ -104,48 +104,23 @@ Repeat this for the backend plugin:
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
 ```
 
-## Installing the plugins in Spotify Portal for Backstage
-
-If you are using Spotify Portal for Backstage, you will need to publish the plugins to your internal Portal Cloud instance.
-
-Contact Spotify to request a token for publishing plugins to your cloud instance. Once you have a token, download the frontend plugin by running:
-
-```bash
-npm pack @syntasso/plugin-ske-frontend
-```
-
-This downloads the latest version of the plugin as a `.tgz` file in the current directory.
-
-Repeat for the backend plugin:
-
-```bash
-npm pack @syntasso/plugin-ske-backend
-```
-
-Set the token you received from Spotify in your environment:
-
-```bash
-export PORTAL_PUBLISHING_TOKEN=<token>
-```
-
-Configure npm to authenticate against your Portal registry:
-
-```bash
-npm config set //<company>.spotifyportal.com/api/plugin-installer/registry/:_authToken=$PORTAL_PUBLISHING_TOKEN
-```
-
-Publish each plugin to your Portal instance, replacing `<version>` with the version printed by `npm pack`:
-
-```bash
-npm publish syntasso-plugin-ske-frontend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
-npm publish syntasso-plugin-ske-backend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
-```
-
-Passing `--registry` directly ensures the tarball is published to your Portal instance regardless of any registry configuration inside the plugin's own `package.json`.
+If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](../air-gapped-installation/spotify-portal) to publish the plugin to your cloud instance before continuing with the configuration steps below.
 
 ## Configuring the frontend plugin
 
+`@syntasso/plugin-ske-frontend` brings dedicated entity pages for Kratix Promises and Resources into the Backstage catalog. Teams can browse Promises, view and create Requests, and track the status of their requests — without leaving Backstage.
+
 ### Update the EntityPage
+
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for Backstage.
+
+The plugin registers the following extensions via its `alpha` entry point:
+
+- **Promise Overview** — displays the Overview tab for Promise entities
+- **Resource Overview** — displays the Overview tab for Resource entities
+- **Resource Manage** — displays the Manage tab for Resource entities
+
+To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
 
 In the `packages/app/src/components/catalog/EntityPage.tsx` file, add the following to the list of imports:
 
@@ -157,21 +132,9 @@ import {
 } from "@syntasso/plugin-ske-frontend";
 ```
 
-Find the line where the `const componentPage` is being declared. Add the following case
-to the `EntitySwitch`:
+Find the line where the `const componentPage` is being declared. Add the `KratixPromiseEntityPage` and `KratixResourceEntityPage` cases to the `EntitySwitch`.
 
-```typescript
-<EntitySwitch.Case if={isKratixType('promise')}>
-  <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
-</EntitySwitch.Case>
-
-<EntitySwitch.Case if={isKratixType('resource')}>
-  <KratixResourceEntityPage>{entityWarningContent}</KratixResourceEntityPage>
-</EntitySwitch.Case>
-```
-
-When updated, the `componentPage` variable should look similar to this, with any other
-additional case statements:
+When updated, the `componentPage` variable should look similar to this, with any other additional case statements:
 
 ```typescript
 const componentPage = (
@@ -203,24 +166,33 @@ This states that for any Backstage `Component` definitions, the frontend plugin 
 for Components of `type` `promise` or `kratix-promise` and the `KratixResourceEntityPage` for for Components of `type`
 `resource` or `kratix-resource.
 
-### New Frontend System {#new-frontend-system}
+### Plugin components
 
-If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no
-changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for backstage.
+#### Promise Overview
 
-The plugin registers the following extensions via its `alpha` entry point:
+`KratixPromiseEntityPage` renders a dedicated catalog page for Promise entities:
 
-- **Promise Overview** — displays the Overview tab for Promise entities
-- **Resource Overview** — displays the Overview tab for Resource entities
-- **Resource Manage** — displays the Manage tab for Resource entities
+- API group and resource name
+- Promise description and current status
+- Create button linking to the scaffolder template for new Resources
+- Dependency graph showing related Resource instances
 
-To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
+#### Resource Overview
 
-:::tip
+`KratixResourceEntityPage` renders a dedicated catalog page for Resource entities:
 
-If your Backstage app still uses the legacy frontend system (Backstage v1.48 or earlier), follow the [Update the EntityPage](#update-the-entitypage) instructions above. Both the legacy and new frontend system exports are included in the plugin, so no code changes are needed when migrating between systems.
+- Resource name, namespace, kind, and parent Promise
+- Optional Promise summary (markdown-rendered)
+- Current resource status
+- Dependency graph showing the relationship to the parent Promise
 
-:::
+#### Resource Manage
+
+The **Manage** tab on `KratixResourceEntityPage` provides Resource lifecycle actions:
+
+- Pre-filled update form with the Resource's current spec
+- Read-only name and namespace fields
+- Delete button with confirmation dialog
 
 ## Configuring the backend plugin
 
@@ -354,23 +326,6 @@ yarn install
 ```
 
 Your backstage instance is now ready to use the SKE plugins.
-
-## Start your Backstage app
-
-You should now have two-way communication between Kratix and Backstage set up. You can now start your Backstage with the necessary environment variables set:
-
-```bash
-export NODE_OPTIONS=--no-node-snapshot
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
-yarn dev
-```
-
-:::info
-
-Make sure the port-forwarding to the MinIO instance is still running in a separate terminal.
-
-:::
 
 ## Using the actions
 
