@@ -50,3 +50,36 @@ npm publish syntasso-plugin-ske-backend-<version>.tgz --registry https://<compan
 Passing `--registry` directly ensures the tarball is published to your Portal instance regardless of any registry configuration inside the plugin's own `package.json`.
 
 ## SKE Backstage Controller
+
+In air-gapped environments, you must mirror the Backstage Controller images and deployment manifests into your own infrastructure before installing. Once mirrored, follow the standard [Installing the Backstage Controller](../installation/generating-backstage-components#installing-the-backstage-controller) steps.
+
+### Mirroring the Backstage Controller Images
+
+You may want to manage the Backstage Controller images within your own environment either due to air-gapped requirements or other security measures.
+
+To do this, you will need to set up image mirroring and configure the Backstage Controller distribution to pull images from your own registry.
+
+You must ensure that the Backstage Controller image is mirrored in your own image registry and tagged according to the version.
+
+```
+ghcr.io/syntasso/backstage-controller
+```
+
+As is the case for the SKE Operator and SKE Platform images, the Backstage Controller will use the registry configured via `imageRegistry.host` in the Helm Chart when pulling images. If you have changed the name of the Backstage Controller image in your internal registry, ensure that `imageRegistry.backstageControllerImage.name` is updated to reflect this.
+
+### Mirroring the Backstage Controller Release Manifests
+
+Like the SKE distribution, you will need to ensure that the Backstage Controller deployment manifests are available in the [SKE Release Storage](/ske/installing-ske/air-gapped#ske-release-storage) — the S3-compatible bucket or Git repository that is accessible from the Platform Cluster.
+
+You need to ensure that the manifests are downloaded to the SKE Release Storage and that the directory structure matches the [Syntasso Enterprise Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/). For instance:
+
+```
+ske
+  v0.43.0
+    ske-distribution.yaml
+    release-metadata.json
+
+ske-backstage-controller
+  v0.2.2
+    ske-backstage-controller-distribution.yaml
+```
