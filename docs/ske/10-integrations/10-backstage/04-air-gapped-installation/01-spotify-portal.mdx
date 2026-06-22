@@ -1,0 +1,52 @@
+---
+title: Air-Gapped Installation
+description: Installing the SKE Backstage integration in air-gapped or network-restricted environments.
+sidebar_label: Air-Gapped Installation
+---
+
+This section covers how to install the SKE Backstage integration in air-gapped or network-restricted environments.
+
+## Backstage Plugins
+
+In air-gapped or network-restricted environments, your Backstage may not be able to reach the public npm registry to install SKE plugins directly. You must first publish the plugins to an internal registry accessible from your Backstage instance, then follow the standard [installation and configuration steps](../installation/plugins).
+
+### Spotify Portal for Backstage
+
+If you are using Spotify Portal for Backstage, you will need to publish the plugins to your internal Portal Cloud instance.
+
+Contact Spotify to request a token for publishing plugins to your cloud instance. Once you have a token, download the frontend plugin by running:
+
+```bash
+npm pack @syntasso/plugin-ske-frontend
+```
+
+This downloads the latest version of the plugin as a `.tgz` file in the current directory.
+
+Repeat for the backend plugin:
+
+```bash
+npm pack @syntasso/plugin-ske-backend
+```
+
+Set the token you received from Spotify in your environment:
+
+```bash
+export PORTAL_PUBLISHING_TOKEN=<token>
+```
+
+Configure npm to authenticate against your Portal registry:
+
+```bash
+npm config set //<company>.spotifyportal.com/api/plugin-installer/registry/:_authToken=$PORTAL_PUBLISHING_TOKEN
+```
+
+Publish each plugin to your Portal instance, replacing `<version>` with the version printed by `npm pack`:
+
+```bash
+npm publish syntasso-plugin-ske-frontend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
+npm publish syntasso-plugin-ske-backend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
+```
+
+Passing `--registry` directly ensures the tarball is published to your Portal instance regardless of any registry configuration inside the plugin's own `package.json`.
+
+## SKE Backstage Controller
