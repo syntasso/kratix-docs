@@ -1,8 +1,11 @@
 ---
-title: Configuring the Plugins
+title: Installing and Configuring the Plugins
 description: Documentation for the enterprise plugins for Backstage bundled with SKE.
-sidebar_label: Configuring the Plugins
+sidebar_label: Installing and Configuring the Plugins
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 The Backstage plugins for SKE are a set of plugins that provide additional functionality to Backstage. The plugins are:
 
@@ -16,38 +19,26 @@ commands must be executed from the root of your Backstage app. Refer to the
 [Backstage official documentation](https://backstage.io/docs/getting-started)
 for instructions on how to create a Backstage app.
 
-:::info
+## Prerequisites
 
-For the plugins to work, make sure you have the following environment variable set when
-starting your Backstage app:
+- **Backstage v1.24 or above**: The SKE plugins are compatible with Backstage version v1.24 or above (tested up to v1.50.4). If you are running v1.23 or lower, refer to the Backstage [migration guide](https://backstage.io/docs/backend-system/building-backends/migrating).
 
-```bash
-export NODE_OPTIONS=--no-node-snapshot
-```
+- **Node.js 22+**: Starting from Backstage v1.50, Node.js 22 or higher is required due to native module dependencies. Ensure your build environment and Docker images use Node 22+.
 
-:::
+- **`NODE_OPTIONS` environment variable**: Set the following when starting your Backstage app:
 
-:::info
-
-Plugins for SKE are compatible with Backstage apps created with Backstage version v1.24 or above (tested up to v1.50.4).
-If you are running Backstage v1.23 or lower, you can check out their [migration guide](https://backstage.io/docs/backend-system/building-backends/migrating).
-
-:::
-
-:::info
-
-Starting from Backstage v1.50, **Node.js 22** or higher is required due to native module
-dependencies. Make sure your build environment and Docker images use Node 22+.
-
-:::
+  ```bash
+  export NODE_OPTIONS=--no-node-snapshot
+  ```
 
 ## Accessing the private npm registry
 
 The SKE plugins are distributed through a private npm registry. Please follow the steps below to enable access to it.
 
-### For local development {#local-development}
+<Tabs>
+  <TabItem value="local" label="For local development">
 
-To access the private npm registry in your local machine, you will need npm config in a
+To access the private npm registry on your local machine, you will need npm config in a
 local `~/.npmrc` file in your home directory. Create this file if it doesn't already
 exist, and add the following content:
 
@@ -68,7 +59,8 @@ yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthT
 
 :::
 
-### For Docker
+  </TabItem>
+  <TabItem value="docker" label="For Docker">
 
 For Docker builds, you must update the `packages/backend/Dockerfile` in your Backstage
 app so that it can access the private npm registry.
@@ -91,13 +83,16 @@ file to include the additional required flag.
 :::warning
 
 Make sure that the `~/.npmrc` file is in the home directory of the user that is running
-the Docker build. Refer to the [Local Development](#local-development) section for instructions.
+the Docker build. Create it by following the **For local development** tab above.
 
 :::
 
-## Installing the plugins in a Backstage App
+  </TabItem>
+</Tabs>
 
-From the root of the backstage repository, run the following to install the frontend plugin:
+## Installing the plugins
+
+For a self-hosted Backstage, from the root of the backstage repository, run the following to install the frontend plugin:
 
 ```bash
 yarn add @syntasso/plugin-ske-frontend --cwd packages/app
