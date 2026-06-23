@@ -17,8 +17,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.a210ac29.js" defer="defer"></script>
-<script src="/assets/js/main.2432afa9.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9b78df54.js" defer="defer"></script>
+<script src="/assets/js/main.cc503a16.js" defer="defer"></script>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -109,7 +109,7 @@ stage directly, please update your image reference to the Backstage Controller i
 <ul>
 <li class="">SKE backstage generator image used by the Backstage Controller can be customized to a registry of your choice.
 This can be used when deploying the controller in an air-gapped environment. For more details, refer to
-<a class="" href="/ske/integrations/backstage/generating-backstage-components#deploying-within-air-gapped-environments">the installation guide</a>.</li>
+<a class="" href="/ske/integrations/backstage/air-gapped-installation/intro#ske-backstage-controller">the installation guide</a>.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v021-2025-07-23"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/v0.2.1/" target="_blank" rel="noopener noreferrer" class="">v0.2.1</a> (2025-07-23)<a href="#v021-2025-07-23" class="hash-link" aria-label="Direct link to v021-2025-07-23" title="Direct link to v021-2025-07-23" translate="no">​</a></h3>
 <p><code>v0.2.1</code> requires SKE <code>0.32.0</code> and above.
@@ -118,7 +118,7 @@ If you&#x27;re running SKE with a lower version, please upgrade SKE first before
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-2">Features<a href="#features-2" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
 <li class="">Introduce <code>entityGenerationOptions</code> to the <code>BackstageEntityCustomization</code>
-resource. See <a class="" href="/ske/integrations/backstage/generating-backstage-components#customize-backstage-components">Backstage Entity Customization</a> for more details.</li>
+resource. See <a class="" href="/ske/integrations/backstage/installation/generating-backstage-components#customize-backstage-components">Backstage Entity Customization</a> for more details.</li>
 <li class="">Promises must now declare the BackstageEntityCustomization they want to use
 via the <code>kratix.io/backstage-customization</code> label.</li>
 <li class="">Resources created with the label <code>kratix.io/backstage</code> set to <code>&quot;false&quot;</code> won&#x27;t

@@ -17,8 +17,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.a210ac29.js" defer="defer"></script>
-<script src="/assets/js/main.2432afa9.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9b78df54.js" defer="defer"></script>
+<script src="/assets/js/main.cc503a16.js" defer="defer"></script>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -160,7 +160,7 @@ need to manually add the scaffolding in your Backend app.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ske-backend-v0140-ske-frontend-v0130-2025-03-31"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.14.0/" target="_blank" rel="noopener noreferrer" class="">ske-backend v0.14.0</a>; <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.13.0/" target="_blank" rel="noopener noreferrer" class="">ske-frontend v0.13.0</a> (2025-03-31)<a href="#ske-backend-v0140-ske-frontend-v0130-2025-03-31" class="hash-link" aria-label="Direct link to ske-backend-v0140-ske-frontend-v0130-2025-03-31" title="Direct link to ske-backend-v0140-ske-frontend-v0130-2025-03-31" translate="no">​</a></h3>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="-breaking-changes--2">🚨 Breaking changes 🚨<a href="#-breaking-changes--2" class="hash-link" aria-label="Direct link to 🚨 Breaking changes 🚨" title="Direct link to 🚨 Breaking changes 🚨" translate="no">​</a></h4>
 <ul>
-<li class="">The plugins will no longer rely on a Git repository to execute CRUD operations on the Kubernetes Cluster. Instead, they will now use the Kubernetes API to manage the resources. This enables users to get the most up-to-date information on their resources, as well as manage resources created via other means, like via <code>kubectl</code>. The migration is quite simple and only requires changes to the Backstage app config. Read the <a class="" href="/ske/integrations/backstage/plugins#configuring-the-backend-plugin">Configuring the backend plugin</a> documentation for more information.</li>
+<li class="">The plugins will no longer rely on a Git repository to execute CRUD operations on the Kubernetes Cluster. Instead, they will now use the Kubernetes API to manage the resources. This enables users to get the most up-to-date information on their resources, as well as manage resources created via other means, like via <code>kubectl</code>. The migration is quite simple and only requires changes to the Backstage app config. Read the <a class="" href="/ske/integrations/backstage/installation/plugins#configuring-the-backend-plugin">Configuring the backend plugin</a> documentation for more information.</li>
 <li class="">The Backstage Component Promise is now deprecated; its features are now available within the plugins and SKE v0.21.0+.</li>
 </ul>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-9">Features<a href="#features-9" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
@@ -188,7 +188,7 @@ need to manually add the scaffolding in your Backend app.</p>
 <li class="">Fixed a bug where the &quot;Create&quot; button wasn&#x27;t being displayed on the Promise Entity page when a custom <code>type</code> was specified.<!-- -->
 <ul>
 <li class="">There&#x27;s now a new <code>kratix.io/type</code> annotation that can be used to specify the type of the Component. Users of the SKE Backstage Generator (<a class="" href="/ske/releases/pipeline-stages/backstage-generator#v0.10.1">v0.10.1</a>) will have this annotation automatically added to their Component YAML files.</li>
-<li class=""><strong>This requires changes to your Catalog Entity page.</strong> Please refer to the <a class="" href="/ske/integrations/backstage/plugins#update-the-entitypage">Configuring the Plugins documentation</a> for instructions.</li>
+<li class=""><strong>This requires changes to your Catalog Entity page.</strong> Please refer to the <a class="" href="/ske/integrations/backstage/installation/plugins#update-the-entitypage">Configuring the Plugins documentation</a> for instructions.</li>
 </ul>
 </li>
 </ul>
