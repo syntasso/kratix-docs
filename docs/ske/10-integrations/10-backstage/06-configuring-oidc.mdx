@@ -1,0 +1,80 @@
+---
+title: Configuring OIDC Authentication
+description: How to configure OIDC authentication for the SKE Backstage integration
+sidebar_label: Configuring OIDC Authentication
+---
+
+When using the SKE backend plugin in [Kubernetes API mode](./installation/plugins#kubernetes-api-mode-recommended), you can configure Backstage to authenticate with the platform cluster using an OIDC provider of you choice. This allows you to enforce fine-grained access control on the cluster based on the identity of the logged-in Backstage user.
+
+## How it works
+
+The SKE backend plugin communicates with the platform cluster using the Backstage user's OIDC token. When a user logs in to Backstage via an OIDC provider, their access token is forwarded to the cluster, where Kubernetes RBAC determines what operations they are permitted to perform.
+
+For this to work, three things must be configured:
+
+1. **The Kubernetes API server** must be configured to accept tokens from the OIDC provider.
+2. **Backstage** must be configured with an OIDC auth provider that issues a token containing the user's access token in the `tok` claim.
+3. **The SKE backend plugin** must be configured to use the OIDC token provider when communicating with the cluster.
+
+## Configuring the Kubernetes API server
+
+Your platform cluster's API server must be configured to trust your OIDC provider. The required flags are:
+
+```
+--oidc-issuer-url=<your-provider-issuer-url>
+--oidc-client-id=<your-client-id>
+--oidc-username-claim=<claim to use as username, e.g. email>
+--oidc-groups-claim=<claim to use for groups, e.g. groups>
+```
+
+How you set these flags depends on how your cluster is managed. Refer to the [Kubernetes OIDC documentation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens) for details.
+
+## Configuring Backstage
+
+Backstage must be configured with an OIDC auth provider. The steps for this depend on your provider, but the approach follows the [OIDC provider from scratch](https://backstage.io/docs/auth/oidc) guide in the Backstage documentation.
+
+### The critical requirement: the `tok` claim
+
+Regardless of which OIDC provider you use, the SKE backend plugin requires that the `issueToken` call in your Backstage auth resolver includes a `tok` field set to the user's access token:
+
+```typescript
+return ctx.issueToken({
+  claims: {
+    sub: userRef,
+    ent: [userRef],
+    tok: info?.result.session.accessToken, // required by the SKE backend plugin
+  },
+});
+```
+
+Without this, the SKE backend plugin cannot forward the user's credentials to the platform cluster.
+
+## Configuring the SKE backend plugin
+
+Once Backstage is configured with an OIDC auth provider, update the `kubernetes` section of your `app-config.yaml` to use `oidc` as the `authProvider` and set `oidcTokenProvider` to the name of your provider:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - url: <platform cluster url>
+          name: kratix-platform
+          authProvider: oidc
+          oidcTokenProvider: <your-provider-name>  # e.g. keycloak, okta, auth0
+          skipTLSVerify: true
+```
+
+Then tell the SKE plugin which cluster is the platform cluster:
+
+```yaml
+ske:
+  kubernetes:
+    platformName: kratix-platform
+```
+
+## Worked example
+
+For a step-by-step walkthrough using Keycloak as the OIDC provider, see the [Kratix, Backstage, and OIDC blog post](/blog/backstage-and-keycloak). Note that the blog post uses a hosted Keycloak instance and a local KinD cluster — it is intended as a guide for understanding the integration, not a production deployment pattern.
