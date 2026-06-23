@@ -5,7 +5,7 @@ sidebar_label: SKE Backstage Generator
 ---
 
 :::note
-If you are using the [Backstage Controller](./installation/generating-backstage-components) you will
+If you are using the [Backstage Controller](../installation/generating-backstage-components) you will
 not need to use `ske-backstage-generator` directly.
 :::
 
@@ -25,12 +25,12 @@ Promise and Resource metadata.
 In order to utilise the Templates and Components, you should also install both the
 `ske-backend` and `ske-frontend` plugins into your Backstage instance.
 
-See [Configuring the Plugins](./installation/plugins) for instructions.
+See [Configuring the Plugins](../installation/plugins) for instructions.
 
 ### Backstage Destination {#destination}
 
 You must have a Destination created with the `environment: backstage` label. See the
-[Kratix Backstage docs](./installation/configuring-backstage#configure-a-destination-for-backstage)
+[Kratix Backstage docs](../installation/creating-entity-state-store#configure-a-destination-for-backstage)
 for setup instructions.
 
 ## How does it work?
@@ -60,7 +60,7 @@ Check the [YAML File Format](./yaml-file-format) for examples of these manifests
 ### Pulling the image locally
 
 The image is hosted in a private registry. To access the image, you will need to
-authenticate using the [Syntasso registry token](../../reference/tokens#syntasso-registry-token)
+authenticate using the [Syntasso registry token](../../../reference/tokens#syntasso-registry-token)
 you have been provided with. For Docker, you can run the following command, providing your
 token as the password when prompted:
 

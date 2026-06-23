@@ -27,7 +27,7 @@ documentation](https://backstage.io/docs/getting-started) for instructions on ho
   export NODE_OPTIONS=--no-node-snapshot
   ```
 
-## Accessing the private npm registry
+## Accessing the private npm registry {#local-development}
 
 The SKE plugins are distributed through a private npm registry. Please follow the steps below to enable access to it.
 
@@ -91,7 +91,7 @@ Repeat this for the backend plugin:
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
 ```
 
-If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](../air-gapped-installation/spotify-portal) to publish the plugin to your cloud
+If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](../air-gapped-installation/intro) to publish the plugin to your cloud
 instance before continuing with the configuration steps below.
 
 ## Configuring the frontend plugin
@@ -413,5 +413,5 @@ To access the documentation for the SKE actions, check the actions documentation
 
 ## Next
 
-The [next guide](../generator) will show how you can use the SKE Backstage Generator to automatically generate Backstage entities from your Promises. If you want to manually
-configure your Promises, check the [YAML File Format](../yaml-file-format) reference.
+The [next guide](../reference/generator) will show how you can use the SKE Backstage Generator to automatically generate Backstage entities from your Promises. If you want to manually
+configure your Promises, check the [YAML File Format](../reference/yaml-file-format) reference.

@@ -13,7 +13,7 @@ The Backstage Controller generates Backstage components and templates for Promis
 used to create a Resource Request. The generated Components are also used by the `ske-frontend` Backstage plugin to display
 Promise and Resource metadata. See [Configuring the Plugins](./plugins) for installation instructions.
 - **Backstage Destination**: You must have a Destination created with the `environment: backstage` label. See the
-[Entity State Store docs](./configuring-backstage#configure-a-destination-for-backstage) for more information
+[Entity State Store docs](./creating-entity-state-store#configure-a-destination-for-backstage) for more information
 for setup instructions.
 
 ## Installing the Backstage Controller
@@ -42,7 +42,7 @@ backstageIntegration:
 
 :::info
 
-If you are deploying the Backstage Controller in an air-gapped or network-restricted environment, you must mirror the controller images and release manifests before proceeding. See the [Air-Gapped Installation](../air-gapped-installation#ske-backstage-controller) guide for details.
+If you are deploying the Backstage Controller in an air-gapped or network-restricted environment, you must mirror the controller images and release manifests before proceeding. See the [Air-Gapped Installation](../air-gapped-installation/intro#ske-backstage-controller) guide for details.
 
 :::
 
@@ -108,7 +108,7 @@ In a Resource Configure workflow, a single Backstage manifest will be generated:
 
 - **Resource Component:** A Backstage Component representing the Resource.
 
-See the [YAML File Format](../yaml-file-format) for examples of these manifests
+See the [YAML File Format](../reference/yaml-file-format) for examples of these manifests
 
 ### Labelling Promises for automatic file generation
 
@@ -130,7 +130,7 @@ metadata:
     kratix.io/backstage: "true"
 ```
 
-## Customizing Backstage Components
+## Customizing Backstage Components {#customize-backstage-components}
 
 You can customize the automatically generated Backstage Components and Templates by creating a `BackstageEntityCustomization`:
 
