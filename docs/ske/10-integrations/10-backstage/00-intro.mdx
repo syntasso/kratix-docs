@@ -11,6 +11,8 @@ keywords: [backstage, internal developer portal, idp]
 import BackstageDiagram from "/img/docs/ske/backstage-diagram.png"
 ```
 
+import InstallationSteps from './_partials/installation-steps.mdx';
+
 Backstage is a framework for building developer portals, while Kratix is a framework for building Platforms. Both systems can integrate with each other to provide an end-to-end
 self-service experience for developers.
 
@@ -65,9 +67,8 @@ To integrate Kratix with Backstage, you will need to do the following:
 
 The following sections will go through each of these steps in detail:
 
-1. [Configure Backstage catalogue ingestion](./installation/configuring-backstage)
-1. [Install and configure the SKE Backstage plugins](./installation/plugins)
-1. Configure backend access through Kubernetes API mode or GitOps mode
-1. [Install the Backstage Controller](./installation/generating-backstage-components)
-1. Label Promises for Backstage entity generation
-1. Verify that Backstage can create and display Kratix Resources
+<InstallationSteps />
+
+## Getting started quickly
+
+If you want to try out the integration before committing to a full installation, the [Backstage Development Image](./backstage-development-image) provides a pre-configured Backstage instance for development and testing purposes.
