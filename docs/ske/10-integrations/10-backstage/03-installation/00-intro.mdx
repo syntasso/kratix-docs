@@ -1,0 +1,37 @@
+---
+title: Install the Backstage Integration
+description: Installation instructions for the SKE Backstage integration.
+sidebar_label: Overview
+---
+
+import InstallationSteps from '../_partials/installation-steps.mdx';
+
+The SKE Backstage integration connects Kratix to your Backstage instance so that platform teams can expose Promises as self-service templates and users can track the status of their Resource Requests — all from within Backstage.
+
+The integration works in two directions:
+
+- **Kratix → Backstage**: Kratix writes Backstage entity files (Components and Templates) to a shared State Store. Backstage reads from that store to populate its Software Catalog.
+- **Backstage → Kratix**: The SKE backend plugin accepts Resource Requests submitted through Backstage and sends them to Kratix for fulfilment.
+
+## Prerequisites
+
+- **Kratix/SKE**: A running Kratix platform. If you haven't installed SKE, follow the [installation guide](/ske/installing-ske/intro)
+- **SKE Operator v0.28.0+**: The Backstage Controller is installed via the SKE Operator
+- **Backstage v1.40+**: The SKE plugins are compatible with Backstage v1.40 and above (tested up to v1.50.4).
+- **Node.js 22+**: Required for Backstage v1.50+. Ensure your build environment and Docker images use Node 22+
+
+- **Syntasso registry token**: Required to install the private SKE npm packages and pull the Backstage Controller image. Contact Syntasso if you do not have one.
+
+## Decide before you begin
+
+Several values appear in multiple installation steps and must be consistent across them. Decide these upfront:
+
+- **State Store type**: Whether you'll use an S3-compatible bucket or a Git repository to store Backstage entity files. This affects both the Kratix State Store configuration and the Backstage catalog discovery setup.
+- **State Store location**: The S3 endpoint and bucket name, or the Git repository URL and branch. Kratix and Backstage must both point at the same location.
+- **Entity path**: The directory path within the State Store where Kratix writes entity files (the `path` field on the Kratix Destination). Backstage must be configured to read catalog entries from this same path.
+
+## Installation steps
+
+Complete the following steps:
+
+<InstallationSteps />

@@ -1,0 +1,417 @@
+---
+title: Installing and Configuring the Plugins
+description: Documentation for the enterprise plugins for Backstage bundled with SKE.
+sidebar_label: Installing and Configuring the Plugins
+---
+
+import Tabs from "@theme/Tabs"; import TabItem from "@theme/TabItem";
+
+The Backstage plugins for SKE are a set of plugins that provide additional functionality to Backstage. The plugins are:
+
+- `@syntasso/plugin-ske-backend`: The backend plugin for SKE.
+- `@syntasso/plugin-ske-frontend`: The frontend plugin for SKE.
+
+Follow the instructions below to install and configure both plugins.
+
+## Prerequisites
+
+- **Backstage app running v1.40 or above**: The SKE plugins are tested up to v1.50.4
+the Backstage [migration guide](https://backstage.io/docs/backend-system/building-backends/migrating). If you do not have a Backstage app, refer to the [Backstage official
+documentation](https://backstage.io/docs/getting-started) for instructions on how to create a Backstage app.
+
+- **Node.js 22+**: Starting from Backstage v1.50, Node.js 22 or higher is required due to native module dependencies. Ensure your build environment and Docker images use Node 22+.
+
+- **`NODE_OPTIONS` environment variable**: Set the following when starting your Backstage app:
+
+  ```bash
+  export NODE_OPTIONS=--no-node-snapshot
+  ```
+
+## Accessing the private npm registry {#local-development}
+
+The SKE plugins are distributed through a private npm registry. Please follow the steps below to enable access to it.
+
+<Tabs> <TabItem value="local" label="For local development">
+
+To access the private npm registry on your local machine, you will need npm config in a local `~/.npmrc` file in your home directory. Create this file if it doesn't already exist,
+and add the following content:
+
+```bash
+# replace <YOUR_TOKEN_HERE> with the provided Syntasso registry token
+@syntasso:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken="<YOUR_TOKEN_HERE>"
+always-auth=true
+```
+
+:::info
+
+For Yarn 3+, use the following command to set a local `.yarnrc.yml` file:
+
+```bash
+yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthToken": "<YOUR TOKEN HERE>", "npmRegistryServer": "https://npm.pkg.github.com"}}'
+```
+
+:::
+
+  </TabItem> <TabItem value="docker" label="For Docker">
+
+For Docker builds, you must update the `packages/backend/Dockerfile` in your Backstage app so that it can access the private npm registry.
+
+Update the `RUN` command that is running the `yarn install` to mount a secret, as described below:
+
+```Dockerfile
+RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
+    #highlight-next-line
+    --mount=type=secret,id=npmrc,target=/app/.npmrc,uid=1000,gid=1000 \
+    yarn install --frozen-lockfile --production --network-timeout 300000
+```
+
+When running `yarn build-image` you now need to pass in the additional args `--secret id=npmrc,src=$HOME/.npmrc` to provide the npm credentials to Docker. Alternatively, you can
+update the `build-image` script in the `package.json` file to include the additional required flag.
+
+:::warning
+
+Make sure that the `~/.npmrc` file is in the home directory of the user that is running the Docker build. Create it by following the **For local development** tab above.
+
+:::
+
+  </TabItem> </Tabs>
+
+## Installing the plugins
+
+For a self-hosted Backstage, from the root of the backstage repository, run the following to install the frontend plugin:
+
+```bash
+yarn add @syntasso/plugin-ske-frontend --cwd packages/app
+```
+
+Repeat this for the backend plugin:
+
+```bash
+yarn add @syntasso/plugin-ske-backend --cwd packages/backend
+```
+
+If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](../air-gapped-installation/intro) to publish the plugin to your cloud
+instance before continuing with the configuration steps below.
+
+## Configuring the frontend plugin
+
+`@syntasso/plugin-ske-frontend` brings dedicated entity pages for Kratix Promises and Resources into the Backstage catalog. Teams can browse Promises, view and create Requests, and
+track the status of their requests — without leaving Backstage.
+
+### Update the EntityPage
+
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no
+changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for Backstage.
+
+The plugin registers the following extensions via its `alpha` entry point:
+
+- **Promise Overview** — displays the Overview tab for Promise entities
+- **Resource Overview** — displays the Overview tab for Resource entities
+- **Resource Manage** — displays the Manage tab for Resource entities
+
+To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
+
+In the `packages/app/src/components/catalog/EntityPage.tsx` file, add the following to the list of imports:
+
+```typescript
+import {
+  KratixPromiseEntityPage,
+  KratixResourceEntityPage,
+  isKratixType,
+} from "@syntasso/plugin-ske-frontend";
+```
+
+Find the line where the `const componentPage` is being declared. Add the `KratixPromiseEntityPage` and `KratixResourceEntityPage` cases to the `EntitySwitch`.
+
+When updated, the `componentPage` variable should look similar to this, with any other additional case statements:
+
+```typescript
+const componentPage = (
+  <EntitySwitch>
+    //highlight-start
+    <EntitySwitch.Case if={isKratixType('promise')}>
+      <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case if={isKratixType('resource')}>
+      <KratixResourceEntityPage>{entityWarningContent}</KratixResourceEntityPage>
+    </EntitySwitch.Case>
+    //highlight-end
+
+    <EntitySwitch.Case if={isComponentType("service")}>
+      {serviceEntityPage}
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case if={isComponentType("website")}>
+      {websiteEntityPage}
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
+  </EntitySwitch>
+);
+```
+
+This states that for any Backstage `Component` definitions, the frontend plugin will display the custom `KratixPromiseEntityPage` for Components of `type` `promise` or
+`kratix-promise` and the `KratixResourceEntityPage` for for Components of `type` `resource` or `kratix-resource.
+
+### Plugin components
+
+#### Promise Overview
+
+`KratixPromiseEntityPage` renders a dedicated catalog page for Promise entities:
+
+- API group and resource name
+- Promise description and current status
+- Create button linking to the scaffolder template for new Resources
+- Dependency graph showing related Resource instances
+
+#### Resource Overview
+
+`KratixResourceEntityPage` renders a dedicated catalog page for Resource entities:
+
+- Resource name, namespace, kind, and parent Promise
+- Optional Promise summary (markdown-rendered)
+- Current resource status
+- Dependency graph showing the relationship to the parent Promise
+
+#### Resource Manage
+
+The **Manage** tab on `KratixResourceEntityPage` provides Resource lifecycle actions:
+
+- Pre-filled update form with the Resource's current spec
+- Read-only name and namespace fields
+- Delete button with confirmation dialog
+
+## Configuring the backend plugin
+
+The plugin can read from and write to your Kratix platform in two ways: directly via the Kubernetes API, or indirectly via a Git repository (GitOps mode). Follow the decision
+guidance below to decide on the approach most fitting for your platform.
+
+### Configure Backend Access
+
+Choose the mode that best fits your environment and operational requirements:
+
+|                                                            | Kubernetes API | GitOps |
+| ---------------------------------------------------------- | -------------- | ------ |
+| Real-time status updates                                   | ✓              | ✗      |
+| Full resource management (kubectl-compatible)              | ✓              | ✗      |
+| Requires direct network access to the platform cluster     | ✓              | ✗      |
+| Routes all changes through a Git repository                | ✗              | ✓      |
+
+**Choose Kubernetes API mode** if Backstage can reach the platform cluster over your network. This provides the most complete feature set, including real-time status updates and
+full resource management.
+
+**Choose GitOps mode** if Backstage cannot access the platform cluster directly, or if your organisation requires all platform changes to flow through a Git repository.
+
+<Tabs> <TabItem value="kubernetes" label="Kubernetes API (Recommended)">
+
+The backend plugin will communicate with the Kubernetes cluster directly. For that, you will need to configure the Backstage Kubernetes integration. Check the [Backstage
+docs](https://backstage.io/docs/features/kubernetes/configuration) for detailed information.
+
+Once you configure the Kubernetes integration, you should have a `kubernetes` section in your `app-config.yaml` file similar to the following:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - url: <my platform cluster url>
+          name: kratixPlatform
+          authProvider: serviceAccount
+          skipTLSVerify: true
+          serviceAccountToken: <service-account-token>
+        - url: <another kubernetes cluster url>
+          name: someOtherCluster
+          authProvider: serviceAccount
+          serviceAccountToken: <service-account-token>
+```
+
+#### Using OIDC Authentication
+
+If your Backstage instance authenticates users via an OIDC provider, you can configure the backend plugin to forward the user's OIDC token to the platform cluster. This allows Kubernetes RBAC to enforce access control based on the logged-in Backstage user's identity, rather than using a shared service account.
+
+To enable this, set `authProvider: oidc` and `oidcTokenProvider: <your-provider-name>` on the cluster in your `kubernetes` config:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - url: <my platform cluster url>
+          name: kratixPlatform
+          authProvider: oidc
+          oidcTokenProvider: <your-provider-name>  # e.g. keycloak, okta, auth0
+          skipTLSVerify: true
+```
+
+See the [Configuring OIDC Authentication](../configuring-oidc) guide for full setup instructions.
+
+You must now tell the backend plugin which of the configured clusters is the platform cluster. For that, add the following section to your `app-config.yaml`:
+
+```yaml
+ske:
+  kubernetes:
+    # make sure this matches the name of the cluster you want to use
+    platformName: kratixPlatform
+```
+
+If no `ske.kubernetes` section is present, the backend plugin will assume Backstage itself is running on the Platform cluster and will load the cluster configuration from the local
+machine/pod.
+
+  </TabItem> <TabItem value="gitops" label="GitOps">
+
+To configure Backstage to talk to Kubernetes via a Git repository, add the following section to your `app-config.yaml`:
+
+```yaml
+ske:
+  mode: gitops
+  scm:
+    token: "my-access-token" # optional; git access token
+    repoUrl: "https://github.com/my-org/my-repo" # repository url
+    type: "github" # optional; git provider, currently one of "github" or "gitlab" (used to determine username if `username` not set)
+    username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
+    path: "catalog" # optional; path within the repository (default: "")
+    branch: "main" # optional; branch to use (default: "main")
+    defaultAuthor: # optional; git author details
+      name: "my-name" # default: "SKE"
+      email: "my@email.com" # default: ske@backstage.io
+```
+
+The backend plugin uses basic auth to authenticate against the Git provider. If you wish to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the
+`username` field, and set the `token` field to the password or token. Otherwise, the username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username` or
+`type` must be provided.
+
+The `token` is used by the Backstage plugin to retrieve information about Promises and Resource Requests from the configured Github Repository. If you have configured a Github App
+for the Github integration, you can leave this field empty and the plugin will use the Github app's short-lived tokens to authenticate.
+
+The `repoUrl` is the repository to which Backstage will push the resource requests; you must configure your platform to reconcile on new documents.
+
+#### Connect the Platform to the Git Repository
+
+Your platform needs to watch the Git repository and reconcile any documents that Backstage pushes to it. The steps below cover two common GitOps tools — choose the one your platform uses.
+
+<Tabs>
+  <TabItem value="flux" label="Flux">
+
+Create a `GitRepository` source pointing at the same repository you configured in `ske.scm`:
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: backstage-resources
+  namespace: flux-system
+spec:
+  interval: 10s
+  url: https://github.com/my-org/my-repo # must match ske.scm.repoUrl
+  ref:
+    branch: main # must match ske.scm.branch
+```
+
+Then create a `Kustomization` to reconcile documents from that source:
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: backstage-resources
+  namespace: flux-system
+spec:
+  interval: 10s
+  sourceRef:
+    kind: GitRepository
+    name: backstage-resources
+  path: ./catalog  # must match ske.scm.path
+  prune: true
+```
+
+Apply both resources to your platform cluster:
+
+```bash
+kubectl apply -f gitrepository.yaml -f kustomization.yaml
+```
+
+:::tip
+
+For private repositories, you will need to create a Flux secret with your Git credentials and reference it in the `GitRepository` via `spec.secretRef`. See the [Flux documentation](https://fluxcd.io/docs/components/source/gitrepositories/#secret-reference) for details.
+
+:::
+
+  </TabItem>
+  <TabItem value="argo" label="Argo CD">
+
+Create an `Application` resource that points to the same repository and path you configured in `ske.scm`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backstage-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/my-org/my-repo # must match ske.scm.repoUrl
+    targetRevision: main # must match ske.scm.branch
+    path: catalog # must match ske.scm.path
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+Apply this to your platform cluster:
+
+```bash
+kubectl apply -f application.yaml
+```
+
+Argo CD will now watch the repository and apply any new documents Backstage pushes to it.
+
+:::tip
+
+For private repositories, configure Argo CD repository credentials first. See the [Argo CD repository docs](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/) for details.
+
+:::
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+</Tabs>
+
+### Add the backend plugin
+
+Open the `packages/backend/src/index.ts` file and register the backend plugin by adding the following:
+
+```typescript
+backend.add(import("@syntasso/plugin-ske-backend"));
+```
+
+Once both packages are added and configured, from the root of your Backstage app, run:
+
+```bash
+yarn install
+```
+
+Your backstage instance is now ready to use the SKE plugins.
+
+## Using the actions
+
+Once both your frontend and backend plugins are installed and configured, your backstage should now have the SKE actions available and it should be able to render Kratix resources
+in the catalog.
+
+To access the documentation for the SKE actions, check the actions documentation on your Backstage instance, which is available on the `/create/actions` endpoint.
+
+## Next
+
+The [next guide](../reference/generator) will show how you can use the SKE Backstage Generator to automatically generate Backstage entities from your Promises. If you want to manually
+configure your Promises, check the [YAML File Format](../reference/yaml-file-format) reference.
