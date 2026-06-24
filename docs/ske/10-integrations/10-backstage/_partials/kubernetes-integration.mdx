@@ -1,0 +1,41 @@
+The plugin uses the [Backstage Kubernetes integration](https://backstage.io/docs/features/kubernetes/configuration) to talk to the platform cluster. Once you configure it, you should have a `kubernetes` section in your `app-config.yaml` file similar to the following:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - url: <my platform cluster url>
+          name: kratixPlatform
+          authProvider: serviceAccount
+          skipTLSVerify: true
+          serviceAccountToken: <service-account-token>
+        - url: <another kubernetes cluster url>
+          name: someOtherCluster
+          authProvider: serviceAccount
+          serviceAccountToken: <service-account-token>
+```
+
+#### Using OIDC Authentication
+
+If your Backstage instance authenticates users via an OIDC provider, you can configure the backend plugin to forward the user's OIDC token to the platform cluster. This allows Kubernetes RBAC to enforce access control based on the logged-in Backstage user's identity, rather than using a shared service account.
+
+To enable this, set `authProvider: oidc` and `oidcTokenProvider: <your-provider-name>` on the cluster in your `kubernetes` config:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - url: <my platform cluster url>
+          name: kratixPlatform
+          authProvider: oidc
+          oidcTokenProvider: <your-provider-name>  # e.g. keycloak, okta, auth0
+          skipTLSVerify: true
+```
+
+See the [Configuring OIDC Authentication](/ske/integrations/backstage/configuring-oidc) guide for full setup instructions.

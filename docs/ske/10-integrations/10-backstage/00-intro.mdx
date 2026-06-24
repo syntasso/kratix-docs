@@ -40,8 +40,8 @@ The integration is made up of SKE components, Backstage plugins, and shared stor
 - **Backstage Controller**: runs in the platform cluster and enables automatic Backstage entity generation for labelled Promises. It adds the generation workflow that produces
   Backstage Components and Templates for Promises and Resource requests.
 - **SKE frontend plugin**: runs in Backstage and renders SKE-specific pages for Promise and Resource Components.
-- **SKE backend plugin**: runs in the Backstage backend and provides the actions used by generated Templates. It sends Resource requests to Kratix through Kubernetes API mode or
-  GitOps mode.
+- **SKE backend plugin**: runs in the Backstage backend and provides the actions used by generated Templates. It sends Resource requests to Kratix through Kubernetes API mode, GitOps
+  mode, or Hybrid mode.
 - **State store and Destination**: provide the hand-off between Kratix and Backstage. Kratix writes generated Backstage entities to the Destination, and Backstage reads those
   entities from the same bucket or repository.
 

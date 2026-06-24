@@ -7,9 +7,11 @@ sidebar_label: YAML File Format
 
 ### Promise Template
 
-The `ske:configure-resource` action works by pushing a generated Resource Request manifest
-to a Git repository, and can be used in a Template to make these requests from within
-Backstage. The Template allows all Promise API fields to be filled in within Backstage.
+The `ske:configure-resource` action creates or updates a Kratix Resource Request and can be
+used in a Template to make these requests from within Backstage. In `gitops` and `hybrid`
+modes it works by pushing the generated Resource Request manifest to a Git repository; in
+Kubernetes API mode it applies the manifest directly via the Kubernetes API. The Template
+allows all Promise API fields to be filled in within Backstage.
 
 An outline of a Template for generating Jenkins Resource Requests is as follows:
 
