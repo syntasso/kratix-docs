@@ -22,7 +22,7 @@ In this post we walk through a Promise design that fixes this. We call it **clai
 
 ## The problems
 
-When work ownership and shared resources collide, there are two main problems. Here is what is going on under the hood.
+Here is what is going on under the hood.
 
 When a workflow writes a document to `/kratix/output/`, that document becomes part of a **Work** object owned by *that specific resource request*. If you are not familiar with Works, we wrote about them in [How your Resources get from Promise to Destination](/blog/from-platform-to-destination). When the parent request goes away, its Work is garbage-collected, and the documents in it go with it.
 
@@ -49,13 +49,16 @@ import Overview from "./fig01.png"
 
 The same shape generalises beyond namespaces: a DB server and many DB instances, a Kafka cluster and many topics. The counting idea stays the same; only what gets created and destroyed changes.
 
-<!-- TODO(video): Embed walkthrough demo here with ReactPlayer.
-Suggested content:
-1) Create two NamespaceClaims for the same namespace
-2) Delete the first claim (namespace stays)
-3) Delete the last claim (namespace goes away)
-4) Briefly show the race / hardening note
--->
+You can watch a walkthrough of the claims pattern in action in the video below:
+
+<p style={{ textAlign: 'center' }}>
+<iframe width="560" height="315"
+  src="https://www.youtube.com/embed/BRleytCeB6U?si=iD9fn3e1qgLVDQcY"
+  title="YouTube video player" frameborder="0" allow="accelerometer; autoplay;
+  clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+</iframe>
+</p>
 
 ## How it works in practice
 
