@@ -53,7 +53,7 @@ When a given Resource Request or Promise is deleted (either via the Workflow or 
 
 The Cortex Controller takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex.
 
-Cortex [supports the following API types:](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) `boolean`, `number`, `object`, `string`, as well as `arrays` of `objects` (with a single level of nesting). Outside of an array, objects cannot exceed more than five levels of nesting. Promise schema constructs that include properties outside this set cannot be expressed as Workflow inputs, and when the controller encounters one, the Create, Update, and Delete Workflows in Cortex will not be generated.
+Cortex [supports the following API types:](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) `boolean`, `number`, `object`, `string`, as well as `arrays` of each of these types. Object arrays can only have a single level of nesting. Outside of an array, objects cannot exceed more than five levels of nesting. Promise schema constructs that include properties outside this set cannot be expressed as Workflow inputs, and when the controller encounters one, the Create, Update, and Delete Workflows in Cortex will not be generated.
 
 :::info Quoting numeric values in string inputs
 
