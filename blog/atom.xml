@@ -21,7 +21,7 @@
 <p>In this post we walk through a Promise design that fixes this. We call it <strong>claims</strong>, and there is a working example in the <a href="https://github.com/syntasso/kratix-marketplace/tree/main/namespace-claim" target="_blank" rel="noopener noreferrer" class="">Marketplace</a>.</p>
 <!-- -->
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-problems">The problems<a href="https://docs.kratix.io/blog/claims-pattern-namespace-claim#the-problems" class="hash-link" aria-label="Direct link to The problems" title="Direct link to The problems" translate="no">​</a></h2>
-<p>When work ownership and shared resources collide, there are two main problems. Here is what is going on under the hood.</p>
+<p>Here is what is going on under the hood.</p>
 <p>When a workflow writes a document to <code>/kratix/output/</code>, that document becomes part of a <strong>Work</strong> object owned by <em>that specific resource request</em>. If you are not familiar with Works, we wrote about them in <a class="" href="https://docs.kratix.io/blog/from-platform-to-destination">How your Resources get from Promise to Destination</a>. When the parent request goes away, its Work is garbage-collected, and the documents in it go with it.</p>
 <p>That explains the wipeout when you deleted <code>app-one</code>: the namespace request was work-owned, so it left with the first Application even though <code>app-two</code> was still running.</p>
 <p>The GitOps failure is the other side of the same coin. Multiple Applications each emitting their own copy of the same namespace request means multiple Works declaring the same resource ID in the State Store. Your reconciliation path falls over with duplicates, even when the Platform cluster looks fine.</p>
@@ -32,6 +32,9 @@
 <!-- -->
 <figure class="diagram"><img class="large" src="https://docs.kratix.io/assets/images/fig01-a7c66e987449b0d0a524f112d7a6ae56.png" alt="Application Promise, NamespaceClaim, Namespace provider request, and Namespace on the worker cluster"><figcaption>The Application places a reservation; the claim Promise owns create-once, delete-when-empty</figcaption></figure>
 <p>The same shape generalises beyond namespaces: a DB server and many DB instances, a Kafka cluster and many topics. The counting idea stays the same; only what gets created and destroyed changes.</p>
+<p>You can watch a walkthrough of the claims pattern in action in the video below:</p>
+<p style="text-align:center"><iframe width="560" height="315" src="https://www.youtube.com/embed/BRleytCeB6U?si=iD9fn3e1qgLVDQcY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay;
+clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe></p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="how-it-works-in-practice">How it works in practice<a href="https://docs.kratix.io/blog/claims-pattern-namespace-claim#how-it-works-in-practice" class="hash-link" aria-label="Direct link to How it works in practice" title="Direct link to How it works in practice" translate="no">​</a></h2>
 <p>Let's replay the <code>app-one</code> / <code>app-two</code> scenario from the intro using <a href="https://github.com/syntasso/kratix-marketplace/tree/main/namespace-claim" target="_blank" rel="noopener noreferrer" class="">NamespaceClaim Promise</a>.</p>
 <p>The fundamental difference is that the Application Promise no longer writes to <code>/kratix/output</code> the <code>Namespace</code> request directly, but rather a <code>NamespaceClaim</code> request like the one below. It does not need any extra logic; it behaves like any other Compound Promise:</p>
