@@ -173,10 +173,21 @@ configurable via the [kratix config](/main/reference/kratix-config/config). The 
 reconciliation attempts to mitigate against any drift that may have occurred. During this
 reconciliation, the controller will ensure that all the Workflows for a given resource are re-run.
 
+### Pipeline Reconciliation
+
+If a new reconciliation is triggered while a Pipeline is actively running (for
+example due to a Resource or Promise update), Kratix waits for the current Job to
+reach a terminal state before restarting the configure workflow from the beginning.
+
 ## Delete Workflows
 
 Resource Delete workflows are triggered when a Resource is deleted, and currently only
 support a **single** Pipeline.
+
+If a Resource configure Pipeline is still running when the Resource is deleted, Kratix
+waits for the current Job to reach a terminal state before triggering the delete
+workflow. The same applies when the parent Promise is deleted while a Resource configure
+Pipeline is running.
 
 This Pipeline is responsible for cleaning up resources and configurations that were set up
 by the `resource.configure` workflow.

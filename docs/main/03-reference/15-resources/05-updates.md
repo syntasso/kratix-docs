@@ -16,6 +16,10 @@ Resource Request are limited to updating the request parameters in the `spec`.
 Any update to the Resource will result in Kratix re-running the
 [Resource Configure](./workflows#configure-workflows) workflow.
 
+If a configure Pipeline is already running when the Resource is updated, Kratix waits for
+the current Job to reach a terminal state before restarting the workflow from the
+beginning.
+
 Any files which are output by this workflow will replace all existing files associated
 with this Resource in the [StateStore](../statestore/intro).
 
