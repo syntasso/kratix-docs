@@ -11,9 +11,9 @@ reconciled by an external tool.
 
 Some example use cases:
 
-- [Kubernetes cluster](https://kubernetes.io/): Kratix will scheduled documents (Kubernetes manifests) to
+- [Kubernetes cluster](https://kubernetes.io/): Kratix will schedule documents (Kubernetes manifests) to
   the Destination, and then a GitOps tool running on the Kubernetes cluster,
-  such as Flux or ArgoCD with pull down the documents and deploy them. See our
+  such as Flux or ArgoCD, will pull down the documents and deploy them. See our
   [GitOps Agent documentation](/category/installing-gitops-agent) for more information.
 - [Terraform](https://www.terraform.io/): There are many tools that can trigger a `terraform apply`
   when a new Terraform file is committed to a Git repository. For example,
@@ -22,9 +22,11 @@ Some example use cases:
   has built-in support for GitOps workflows.
 - [Ansible](https://www.ansible.com/), where an Ansible Tower can be configured to reconcile from a Git
   repository.
-- [Backstage](https://backstage.io/), where a Backstage instance can be configured have its [Catalog
+- [Backstage](https://backstage.io/), where a Backstage instance can be configured to have its [Catalog
   filled from a Git
   repository](https://backstage.io/docs/integrations/github/discovery).
+
+## Spec
 
 Below is the full Spec for the Destination CRD:
 
@@ -87,31 +89,34 @@ spec:
     enabled: true
 ```
 
-When a new Destination is created in the platform cluster, Kratix will write to
-two paths in the [State Store](../statestore/intro): one for `resources`, one
-for `dependencies`. The path within the `State Store` follows the pattern:
+## State Store layout
 
-For `dependencies`:
+When a new Destination is created in the platform cluster, Kratix writes to two
+top-level directories within the [State Store](../statestore/intro): one for
+`dependencies` and one for `resources`. Both live under the Destination path,
+which is itself nested under the State Store path:
 
-```
-statestore.spec.path/
-├── destination.spec.path/
-    ├── dependencies/
-        ├── promise.name/
-```
-
-For `resources`:
-
-```
-statestore.spec.path/
-├── destination.spec.path/
-    ├── resources/
-        ├── resource.mamespace/
-            ├── promise.name/
-                ├── resource.namespace/
+```text
+<statestore.spec.path>/<destination.spec.path>/
+├── dependencies/
+└── resources/
 ```
 
-For example, for the following configuration:
+- **`dependencies/`** holds files scheduled at the Promise level, such as the
+  CRDs and other prerequisites a Promise installs.
+- **`resources/`** holds files generated for individual Resource requests.
+
+:::info
+
+Pre-requisites, like CRDs, are written to the `dependencies` subdirectory. This
+setup is often required by GitOps tools to ensure that all dependencies are
+ready before the resources themselves are applied.
+
+:::
+
+### Example
+
+For the following State Store and Destination configuration:
 
 ```yaml
 ---
@@ -141,32 +146,95 @@ spec:
     kind: BucketStateStore
 ```
 
-The following directories would be created in the State Store (that is, the bucket `kratix.s3.amazonaws.com`):
-
-- `destinations/dev/default/dependencies/`
-- `destinations/dev/default/resources/`
-
-:::info
-
-Here's a breakdown of the path structure and their relationship to the example above:
+Kratix would create the following directories in the State Store (that is, the
+bucket `kratix.s3.amazonaws.com`):
 
 ```text
-destinations/      ← statestore.spec.path
-├── dev/           ← destination.spec.path
-    ├── default/   ← destination.spec.path
-        ├── resources/        ← fixed name
-        ├── dependencies/        ← fixed name
+destinations/            ← statestore.spec.path
+└── dev/                 ← destination.spec.path
+    ├── dependencies/    ← fixed name
+    └── resources/       ← fixed name
 ```
-:::
 
 Kratix will, by default, write to unique directories within those paths
-depending on the Promise or Resource being requested. To stop this behaviour,
-check the `filepath.mode` field in the Destination Spec.
+depending on the Promise or Resource being requested. To change this behaviour,
+set the `filepath.mode` field in the Destination Spec, described below.
 
-:::info
+## Filepath modes
 
-Pre-requisites, like CRDs, are written to the `dependencies` subdirectory. This setup is
-often required by GitOps tools to ensure that all dependencies are ready before the
-resources themselves are applied.
+The `filepath.mode` field controls the exact layout Kratix uses when writing
+files to the State Store. It is **immutable** once the Destination is created.
+There are three modes: `nestedByMetadata` (the default), `aggregatedYAML`, and
+`none`.
+
+In the path templates below, `<destination.spec.path>` is the path configured on
+the Destination, written relative to the `statestore.spec.path`.
+
+### nestedByMetadata (default)
+
+Files are written into a nested directory structure derived from the Promise and
+Resource metadata. This extends the `dependencies/` and `resources/` layout
+shown above with further directories that keep each Promise, Resource, and
+pipeline run isolated.
+
+- Dependencies:
+
+  ```text
+  <destination.spec.path>/dependencies/<promise-name>/<pipeline-name>/<id>/<files>
+  ```
+
+- Resources:
+
+  ```text
+  <destination.spec.path>/resources/<resource-namespace>/<promise-name>/<resource-name>/<pipeline-name>/<id>/<files>
+  ```
+
+`<id>` is a short, deterministic identifier for the pipeline run, which keeps the
+output of each pipeline isolated within its own directory.
+
+### aggregatedYAML
+
+All documents from all pipelines scheduled to the Destination are concatenated
+into a single multi-document YAML file written at the root of the Destination
+path:
+
+```text
+<destination.spec.path>/<filename>
+```
+
+`<filename>` defaults to `aggregated.yaml` and can be overridden with the
+`filepath.filename` field.
+
+### none
+
+Files are written flat, directly into the top-level Destination path, with no
+metadata-based nesting:
+
+```text
+<destination.spec.path>/<files>
+```
+
+Because the files carry no metadata in their path, Kratix cannot infer which
+files belong to which WorkPlacement when it needs to clean them up. To track
+this, Kratix writes a state file for each WorkPlacement into a `.kratix`
+directory at the root of the Destination path:
+
+```text
+<destination.spec.path>/.kratix/<workplacement-namespace>-<workplacement-name>.yaml
+```
+
+Each state file lists every file written for that WorkPlacement, for example:
+
+```yaml
+files:
+  - <destination.spec.path>/configmap.yaml
+  - <destination.spec.path>/deployment.yaml
+```
+
+:::warning
+
+The `.kratix` directory is managed by Kratix and is used internally to track and
+clean up the flat files written in `none` mode. Do not edit or remove its
+contents manually.
 
 :::
