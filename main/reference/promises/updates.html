@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.9e5a7a08.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.4f79606d.js" defer="defer"></script>
 <script src="/assets/js/main.cc503a16.js" defer="defer"></script>
 </head>
 <body>
@@ -43,6 +43,9 @@ spec).</li>
 <p>Any update to the Promise <code>spec</code> will result in Kratix re-running the Promise Configure
 workflow, as well as re-running the Resource Configure workflow for all existing Resource
 Requests.</p>
+<p>If a configure Pipeline is already running when the Promise is updated, Kratix waits for
+the current Job to reach a terminal state before restarting the workflow from the
+beginning.</p>
 <p>For example, if you bump an image version for a Pipeline container in a Resource Configure
 workflow, Kratix will ensure that all Resources are reconciled again, including re-running
 the Resource Configure workflow using the new image for every existing Resource.</p>
