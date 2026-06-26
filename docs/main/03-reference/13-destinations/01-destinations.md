@@ -180,13 +180,13 @@ pipeline run isolated.
 - Dependencies:
 
   ```text
-  <destination.spec.path>/dependencies/<promise-name>/<pipeline-name>/<id>/<files>
+  <statestore.spec.path>/<destination.spec.path>/dependencies/<promise-name>/<pipeline-name>/<id>/<files>
   ```
 
 - Resources:
 
   ```text
-  <destination.spec.path>/resources/<resource-namespace>/<promise-name>/<resource-name>/<pipeline-name>/<id>/<files>
+  <statestore.spec.path>/<destination.spec.path>/resources/<resource-namespace>/<promise-name>/<resource-name>/<pipeline-name>/<id>/<files>
   ```
 
 `<id>` is a short, deterministic identifier for the pipeline run, which keeps the
