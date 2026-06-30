@@ -27,12 +27,13 @@ spec:
       - "v1.0.0"
     # The target version that resources will be upgraded to.
     to: "v2.0.0"
-  # Required: Policy for when the upgrade should start
+  # Optional. When set, SKE creates Upgrade Runs automatically on this schedule.
+  # If omitted, you trigger the plan by creating an Upgrade Run manually.
   upgradeExecutionPolicy:
     # Cron expression for recurring execution (e.g. every Saturday at 23:00).
     repeatSchedule: "0 23 * * 6"
-    # One-time execution datetime in RFC 3339 format.
-    executeAt: "2026-05-01T23:00:00Z"
+    # One-time execution datetime, formatted YYYY-MM-DDTHH:mm (no seconds or zone).
+    executeAt: "2026-05-01T23:00"
     # Time zone applied to both repeatSchedule and executeAt.
     # It has to be a valid IANA Time Zone.
     timeZone: "Europe/London"
@@ -113,22 +114,32 @@ with `\\` to match a literal dot, otherwise they match any character.
 
 ## Upgrade Execution Policy
 
-The `upgradeExecutionPolicy` controls when the upgrade executes. At least one of `repeatSchedule` or `executeAt` must be
-set. Both may be set simultaneously — `executeAt` fires once while `repeatSchedule` recurs.
+The `upgradeExecutionPolicy` is optional and controls when SKE creates an Upgrade Run automatically. Set
+`repeatSchedule`, `executeAt`, or both: `executeAt` fires once, `repeatSchedule` recurs, and the earliest future trigger
+becomes [`status.nextRunAt`](#scheduling-status).
+
+If `upgradeExecutionPolicy` is omitted, SKE does not create any Upgrade Runs for this plan. You can still execute the
+plan by [creating an Upgrade Run manually](./upgrade-runs#manually-creating-an-upgrade-run).
 
 ```yaml
 spec:
   upgradeExecutionPolicy:
     repeatSchedule: "0 23 * * 6"
-    executeAt: "2026-05-01T23:00:00Z"
+    executeAt: "2026-05-01T23:00"
     timeZone: "Europe/London"
 ```
 
 | Field | Description | Required |
 |-------|-------------|----------|
-| `repeatSchedule` | Cron expression for recurring execution | At least one of `repeatSchedule` or `executeAt` |
-| `executeAt` | One-time execution datetime (RFC 3339) | At least one of `repeatSchedule` or `executeAt` |
-| `timeZone` | Time zone for schedule evaluation (e.g. `Europe/London`) | No |
+| `repeatSchedule` | Cron expression (standard 5-field) for recurring execution | No |
+| `executeAt` | One-time execution datetime, formatted `YYYY-MM-DDTHH:mm` (no seconds or zone suffix) | No |
+| `timeZone` | IANA time zone used to evaluate both fields (e.g. `Europe/London`); defaults to UTC | No |
+
+Automatically-created runs are named `<plan-name>-YYYYMMDD-HHMM` from the trigger time in UTC. So that a generated run
+name stays within the Kubernetes 253-character limit, the name of a scheduled plan is limited to 229 characters.
+
+If a schedule fires while a run for this plan is still `Pending` or `InProgress`, SKE suspends the active run and starts
+a new one in its place. See [superseded runs](./upgrade-runs#superseded-runs).
 
 ## Rollout Groups
 
@@ -150,7 +161,8 @@ spec:
           timeZone: "Europe/London"
 ```
 
-At least one rollout group is required.
+At least one rollout group is required. A resource whose labels match more than one group's selectors is included in
+each matching group. Rollout groups are not de-duplicated.
 
 ### Selectors
 
@@ -166,15 +178,15 @@ selectors:
     - key: env
       operator: In
       values: ["staging", "dev"]
-  matchNamespaces:
-    - default
 ```
 
 | Field | Description |
 |-------|-------------|
-| `matchLabels` | Key-value label pairs that ResourceBindings must have |
+| `matchLabels` | Key-value label pairs the Resource Binding must have |
 | `matchExpressions` | Label selector requirements with operators (`In`, `NotIn`, `Exists`, `DoesNotExist`) |
-| `matchNamespaces` | Restricts selection to resources in the listed namespaces | TODO: this is not implemented yet; placeholder for now
+
+Kratix copies the labels from a Resource request onto its Resource Binding, so you can label either the Resource request
+or the Resource Binding directly.
 
 :::tip
 
@@ -193,6 +205,10 @@ maxConcurrent: 5       # At most 5 resources at a time
 maxConcurrent: "25%"   # At most 25% of resources in the group at a time
 ```
 
+A percentage accepts `"1%"` to `"100%"`. It is calculated against the number of resources in the group and rounded down
+to a whole number, but is always at least one resource. If `maxConcurrent` is omitted, all resources in the group may
+start together.
+
 ### Resource Upgrade Windows
 
 Resource upgrade windows control when new upgrades may start for resources in a group. Each window has a `kind`
@@ -208,7 +224,7 @@ resourceUpgradeWindows:
 
 | Field | Description |
 |-------|-------------|
-| `kind` | `allow` or `deny` — whether this window permits or blocks upgrades |
+| `kind` | `allow` or `deny`: whether this window permits or blocks upgrades |
 | `schedule` | When the window opens (standard 5-field cron, e.g. `"0 23 * * 6"`) |
 | `duration` | How long the window stays open (e.g. `"2h"`, `"30m"`) |
 | `timeZone` | IANA timezone for the schedule (e.g. `"Europe/London"`, `"UTC"`) |
@@ -225,7 +241,7 @@ kinds are present:
 
 :::note
 
-Windows only gate when new upgrades start — resources already being upgraded are not interrupted when a window closes.
+Windows only gate when new upgrades start. Resources already being upgraded are not interrupted when a window closes.
 
 :::
 
@@ -238,6 +254,10 @@ status:
   observedGeneration: 3
   phase: Available
   activeRunRef: ""
+  # Timestamp of the next automatic run trigger.
+  nextRunAt: "2026-05-29T23:00:00Z"
+  # The scheduled trigger time that was last serviced.
+  lastScheduledAt: "2026-05-22T23:00:00Z"
   lastRun:
     name: redis-v1-to-v2-run-001
     finishedAt: "2026-05-22T15:47:11Z"
@@ -262,6 +282,15 @@ When a run finishes (`Completed`, `Failed`, or `Cancelled`), the plan returns to
 
 `activeRunRef` is the name of the `Pending` or `InProgress` [Upgrade Run](./upgrade-runs) for this plan, if any. It is cleared when no run is active.
 
+### Scheduling status
+
+These fields are populated when the plan has an [`upgradeExecutionPolicy`](#upgrade-execution-policy):
+
+| Field | Description |
+|-------|-------------|
+| `nextRunAt` | Timestamp of the next automatic run trigger. |
+| `lastScheduledAt` | The scheduled trigger time that was last serviced. |
+
 ### Last run
 
 `lastRun` is a sticky summary of the most recent terminal run. It is written when a run reaches `Completed`, `Failed`, or `Cancelled`, and is not cleared when the plan becomes idle.
@@ -279,6 +308,7 @@ Inspecting an Upgrade Plan:
 | Question | Where to look |
 |----------|---------------|
 | Is an upgrade running now? | `phase == Running` and `activeRunRef` |
+| When will it run next? | `nextRunAt` |
 | Has this plan been executed? | `lastRun` is set |
 | How did the last run end? | `lastRun.result` |
 
