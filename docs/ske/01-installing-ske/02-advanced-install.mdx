@@ -22,8 +22,8 @@ Resource](/ske/reference/ske-operator#kratix-crd).
 
 To install the SKE Operator and instantiate a new SKE instance, we provide several mechanisms:
 
-* [With the SKE Operator Helm Chart](#via-helm-chart), you can deploy the Operator and SKE with all the customisations you need, including air-gapped environments.
-* [With the SKE Operator manifest and the Kratix CRD](#via-manifests), you have direct access to the files being deployed, and can customise it manually.
+- [With the SKE Operator Helm Chart](#via-helm-chart), you can deploy the Operator and SKE with all the customisations you need, including air-gapped environments.
+- [With the SKE Operator manifest and the Kratix CRD](#via-manifests), you have direct access to the files being deployed, and can customise it manually.
 
 The sections below cover each one of these methods of installation.
 
@@ -58,7 +58,6 @@ You can see all available configuration in the
 
 :::
 
-
 <details>
   <summary>Suggested starter `values.yaml` file</summary>
 
@@ -75,34 +74,34 @@ You can see all available configuration in the
 <details>
   <summary>Example air-gapped `values.yaml` file</summary>
 
-  To use this example, please set all values to your specific environment
+To use this example, please set all values to your specific environment
 
-  ```yaml
-    skeLicense: your-token-here
-    skeDeployment:
-      version: latest
-    imageRegistry:
-      host: "ghcr.io"
-      managePullSecret: false
-      imagePullSecret: "my-secret"
-      skeOperatorImage:
-        name: "syntasso/ske-operator"
-      skePlatformImage:
-        name: "syntasso/ske-platform"
-    releaseStorage:
-      path: "ske"
-      git:
-        branch: main
-        repo: https://github.com/org/repo
-        secret:
-          name: git-creds # must be in the same namespace as the operator; must contain keys: username, password
-          values: # optional: provide username/password here and the chart creates the Secret for you;
-                  # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
-            username: "my-username"
-            password: "my-password"
-    ```
+```yaml
+  skeLicense: your-token-here
+  skeDeployment:
+    version: latest
+  imageRegistry:
+    host: "ghcr.io"
+    managePullSecret: false
+    imagePullSecret: "my-secret"
+    skeOperatorImage:
+      name: "syntasso/ske-operator"
+    skePlatformImage:
+      name: "syntasso/ske-platform"
+  releaseStorage:
+    path: "ske"
+    git:
+      branch: main
+      repo: https://github.com/org/repo
+      secret:
+        name: git-creds # must be in the same namespace as the operator; must contain keys: username, password
+        values: # optional: provide username/password here and the chart creates the Secret for you;
+                # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
+          username: "my-username"
+          password: "my-password"
+  ```
 
-    NOTE: Token refers to the [Syntasso registry token](../reference/tokens#syntasso-registry-token)
+  NOTE: Token refers to the [Syntasso registry token](../reference/tokens#syntasso-registry-token)
 
 </details>
 
@@ -297,38 +296,26 @@ imageRegistry:
 
 <Tabs className="boxedTabs" groupId="stateStore">
   <TabItem value="bucket" label="Mirroring from Bucket">
-  ```yaml
-  releaseStorage:
-    path: "ske" # the path within the bucket that contains the SKE Versions
-    bucket:
-      name: "syntasso-enterprise-releases"
-      region: "eu-west-2"
-        secret:
-          name: "my-secret" # must be in the same namespace as the operator; must contain keys: accessKeyID, secretAccessKey
-          values: # optional: provide accessKeyID/secretAccessKey here and the chart creates the Secret for you;
-                  # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
-            accessKeyID: "my-access"
-            secretAccessKey: "my-secret"
-  ```
+    ```yaml releaseStorage: path: "ske" # the path within the bucket that
+    contains the SKE Versions bucket: name: "syntasso-enterprise-releases"
+    region: "eu-west-2" secret: name: "my-secret" # must be in the same
+    namespace as the operator; must contain keys: accessKeyID, secretAccessKey
+    values: # optional: provide accessKeyID/secretAccessKey here and the chart
+    creates the Secret for you; # omit values and pre-create the Secret yourself
+    to avoid storing credentials in Helm values accessKeyID: "my-access"
+    secretAccessKey: "my-secret" ```
   </TabItem>
   <TabItem value="git" label="Mirroring from Git Repo">
-  ```yaml
-  releaseStorage:
-    path: "ske" # the path within the Git Repo that contains the SKE Versions
-    git:
-      branch: main
-      repo: https://github.com/org/repo
-      secret:
-        name: git-creds # must be in the same namespace as the operator; must contain keys: username, password
-        values: # optional: provide username/password here and the chart creates the Secret for you;
-                # omit values and pre-create the Secret yourself to avoid storing credentials in Helm values
-          username: "my-username"
-          password: "my-password"
-  ```
+    ```yaml releaseStorage: path: "ske" # the path within the Git Repo that
+    contains the SKE Versions git: branch: main repo:
+    https://github.com/org/repo secret: name: git-creds # must be in the same
+    namespace as the operator; must contain keys: username, password values: #
+    optional: provide username/password here and the chart creates the Secret
+    for you; # omit values and pre-create the Secret yourself to avoid storing
+    credentials in Helm values username: "my-username" password: "my-password"
+    ```
   </TabItem>
 </Tabs>
-
-
 
 ### Install the Operator
 
@@ -350,11 +337,25 @@ To verify that Syntasso Kratix Enterprise has been installed successfully, run t
 kubectl get deployments.apps --namespace kratix-platform-system
 ```
 
-You should see the following output:
+You should see the SKE Operator and the Kratix Platform Controller:
+
+| Deployment                           | Description                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| `ske-operator-controller-manager`    | The SKE Operator, which manages the lifecycle of your SKE installation |
+| `kratix-platform-controller-manager` | The Kratix Platform Controller — the core SKE control plane            |
 
 ```shell-session
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
+ske-operator-controller-manager      1/1     1            1           1h
+```
+
+For SKE versions that include the Platform Manager, you will also see a `ske-platform-manager` deployment, which manages SKE upgrade plans and runs:
+
+```shell-session
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+kratix-platform-controller-manager   1/1     1            1           1h
+ske-platform-manager                 1/1     1            1           1h
 ske-operator-controller-manager      1/1     1            1           1h
 ```
 
@@ -467,11 +468,25 @@ To verify that Syntasso Kratix Enterprise has been installed successfully, run t
 kubectl get deployments.apps --namespace kratix-platform-system
 ```
 
-You should see the following output:
+You should see the SKE Operator and the Kratix Platform Controller:
+
+| Deployment                           | Description                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| `ske-operator-controller-manager`    | The SKE Operator, which manages the lifecycle of your SKE installation |
+| `kratix-platform-controller-manager` | The Kratix Platform Controller — the core SKE control plane            |
 
 ```shell-session
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
+ske-operator-controller-manager      1/1     1            1           1h
+```
+
+For SKE versions that include the Platform Manager, you will also see a `ske-platform-manager` deployment, which manages SKE upgrade plans and runs:
+
+```shell-session
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+kratix-platform-controller-manager   1/1     1            1           1h
+ske-platform-manager                 1/1     1            1           1h
 ske-operator-controller-manager      1/1     1            1           1h
 ```
 
