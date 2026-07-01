@@ -263,7 +263,7 @@ status:
     finishedAt: "2026-05-22T15:47:11Z"
     result: Failed
     reason: ResourceUpgradeFailed
-    message: '1 resource(s) failed to upgrade in rollout group "dev"'
+    message: '1 resource(s) failed to upgrade in rollout group \"dev\"'
   conditions: []
 ```
 
