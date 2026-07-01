@@ -51,6 +51,7 @@ resource is managed by the SKE Operator.
           name: my-issuer
       certSecretName: my-tls-secret # Required if cert-manager is disabled
       metricsServerCertSecretName: my-metrics-secret # Required if cert-manager is disabled
+      platformManagerCertSecretName: my-platform-manager-secret # Required if cert-manager is disabled from SKE VERSION-X
     deploymentConfig:
       resources: # Customize resource requests & limits for the Kratix deployment
         limits:
