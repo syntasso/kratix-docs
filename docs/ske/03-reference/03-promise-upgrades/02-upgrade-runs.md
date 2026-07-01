@@ -21,10 +21,10 @@ metadata:
   name: redis-v1-to-v2-run-001
 spec:
   upgradePlanRef:
-    name: redis-v1-to-v2
     # Name of the UpgradePlan this run executes. Immutable after creation.
+    name: redis-v1-to-v2
+  # Set to true to pause execution. Defaults to false.
   suspend: false
-    # Set to true to pause execution. Defaults to false.
 ```
 
 ## Upgrade Plan Reference

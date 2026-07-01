@@ -12,7 +12,7 @@ import FeatureFlagBox from "./_feature_flag_box.md"
 <FeatureFlagBox />
 
 As the platform team, you might want to control when you upgrade Resource Requests after updating your Promises. This can be controlled via Promise Revisions, which reflect the
-spec of a Promise at a given version and and Resource Bindings which tie a Resource Request to a version of a Promise. Follow the links below for details.
+spec of a Promise at a given version and Resource Bindings which tie a Resource Request to a version of a Promise. Follow the links below for details.
 
 - [Promise Revisions](./promise-revisions)
 - [Resource Bindings](./resource-bindings)
