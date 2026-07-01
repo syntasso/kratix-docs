@@ -54,6 +54,30 @@ spec:
 Setting `suspend` back to `false` resumes execution. This allows you to temporarily halt an upgrade without deleting the
 run.
 
+## Previewing an upgrade before it runs
+
+You can review exactly which resources an Upgrade Run will touch before any of them are upgraded by creating the run
+suspended:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: UpgradeRun
+metadata:
+  name: redis-v1-to-v2-preview
+spec:
+  upgradePlanRef:
+    name: redis-v1-to-v2
+  # highlight-next-line
+  suspend: true
+```
+
+A run created with `suspend: true` still takes its [snapshot](#resource-snapshot) of eligible resources and writes the
+snapshot ConfigMap, but it does not patch any Resource Bindings. This gives you a stable, per-rollout-group list of what
+the run set out to change, without changing anything.
+
+Once you are happy with the snapshot, set `suspend` back to `false` to let the run proceed. If you decide not to go
+ahead, [delete the run](#deleting-an-upgrade-run); the snapshot ConfigMap is cleaned up with it.
+
 ## Superseded runs
 
 When an Upgrade Plan is on a schedule and the next trigger fires while a run is still `Pending` or `InProgress`, SKE does
@@ -164,7 +188,7 @@ When a run becomes terminal, the controller records a summary on the parent [Upg
 When an Upgrade Run begins, it records a snapshot of every resource it will upgrade, grouped by rollout group, in a
 ConfigMap in the `kratix-platform-system` namespace. The snapshot is written at the start of the run and does not change
 as the upgrade proceeds, so it is a stable record of what the run set out to change. See
-[Managing Promise Upgrades](/ske/guides/managing-promise-upgrades) for how to use it.
+[Managing Promise Upgrades](/ske/guides/promise-upgrades) for how to use it.
 
 The `resourceListRefs` field lists the ConfigMaps that hold the snapshot. In practice this is a single ConfigMap.
 
