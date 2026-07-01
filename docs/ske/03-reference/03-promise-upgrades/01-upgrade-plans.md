@@ -185,7 +185,7 @@ selectors:
 | `matchLabels` | Key-value label pairs the Resource Binding must have |
 | `matchExpressions` | Label selector requirements with operators (`In`, `NotIn`, `Exists`, `DoesNotExist`) |
 
-Kratix copies the labels from a Resource request onto its Resource Binding, so you can label either the Resource request
+Kratix copies the labels from a Resource Request onto its Resource Binding, so you can label either the Resource Request
 or the Resource Binding directly.
 
 :::tip
