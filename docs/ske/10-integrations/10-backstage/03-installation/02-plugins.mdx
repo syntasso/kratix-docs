@@ -5,6 +5,7 @@ sidebar_label: Installing and Configuring the Plugins
 ---
 
 import Tabs from "@theme/Tabs"; import TabItem from "@theme/TabItem";
+import KubernetesIntegration from '../_partials/kubernetes-integration.mdx';
 
 The Backstage plugins for SKE are a set of plugins that provide additional functionality to Backstage. The plugins are:
 
@@ -185,71 +186,31 @@ The **Manage** tab on `KratixResourceEntityPage` provides Resource lifecycle act
 
 ## Configuring the backend plugin
 
-The plugin can read from and write to your Kratix platform in two ways: directly via the Kubernetes API, or indirectly via a Git repository (GitOps mode). Follow the decision
-guidance below to decide on the approach most fitting for your platform.
+The plugin can read from and write to your Kratix platform in three ways: directly via the Kubernetes API, indirectly via a Git repository (GitOps mode), or a combination of the two
+that reads via the Kubernetes API and writes via a Git repository (Hybrid mode). Follow the decision guidance below to decide on the approach most fitting for your platform.
 
 ### Configure Backend Access
 
 Choose the mode that best fits your environment and operational requirements:
 
-|                                                            | Kubernetes API | GitOps |
-| ---------------------------------------------------------- | -------------- | ------ |
-| Real-time status updates                                   | ✓              | ✗      |
-| Full resource management (kubectl-compatible)              | ✓              | ✗      |
-| Requires direct network access to the platform cluster     | ✓              | ✗      |
-| Routes all changes through a Git repository                | ✗              | ✓      |
+|                                                            | Kubernetes API | GitOps | Hybrid |
+| ---------------------------------------------------------- | -------------- | ------ | ------ |
+| Real-time status updates                                   | ✓              | ✗      | ✓      |
+| Full resource management (kubectl-compatible)              | ✓              | ✗      | ✓      |
+| Requires direct network access to the platform cluster     | ✓              | ✗      | ✓      |
+| Routes all changes through a Git repository                | ✗              | ✓      | ✓      |
 
 **Choose Kubernetes API mode** if Backstage can reach the platform cluster over your network. This provides the most complete feature set, including real-time status updates and
 full resource management.
 
 **Choose GitOps mode** if Backstage cannot access the platform cluster directly, or if your organisation requires all platform changes to flow through a Git repository.
 
+**Choose Hybrid mode** if Backstage can reach the platform cluster over your network *and* your organisation requires all platform changes to flow through a Git repository. Reads use
+the Kubernetes API (real-time status and visibility of resources created outside Backstage), while create, update, and delete operations are written to Git.
+
 <Tabs> <TabItem value="kubernetes" label="Kubernetes API (Recommended)">
 
-The backend plugin will communicate with the Kubernetes cluster directly. For that, you will need to configure the Backstage Kubernetes integration. Check the [Backstage
-docs](https://backstage.io/docs/features/kubernetes/configuration) for detailed information.
-
-Once you configure the Kubernetes integration, you should have a `kubernetes` section in your `app-config.yaml` file similar to the following:
-
-```yaml
-kubernetes:
-  serviceLocatorMethod:
-    type: multiTenant
-  clusterLocatorMethods:
-    - type: config
-      clusters:
-        - url: <my platform cluster url>
-          name: kratixPlatform
-          authProvider: serviceAccount
-          skipTLSVerify: true
-          serviceAccountToken: <service-account-token>
-        - url: <another kubernetes cluster url>
-          name: someOtherCluster
-          authProvider: serviceAccount
-          serviceAccountToken: <service-account-token>
-```
-
-#### Using OIDC Authentication
-
-If your Backstage instance authenticates users via an OIDC provider, you can configure the backend plugin to forward the user's OIDC token to the platform cluster. This allows Kubernetes RBAC to enforce access control based on the logged-in Backstage user's identity, rather than using a shared service account.
-
-To enable this, set `authProvider: oidc` and `oidcTokenProvider: <your-provider-name>` on the cluster in your `kubernetes` config:
-
-```yaml
-kubernetes:
-  serviceLocatorMethod:
-    type: multiTenant
-  clusterLocatorMethods:
-    - type: config
-      clusters:
-        - url: <my platform cluster url>
-          name: kratixPlatform
-          authProvider: oidc
-          oidcTokenProvider: <your-provider-name>  # e.g. keycloak, okta, auth0
-          skipTLSVerify: true
-```
-
-See the [Configuring OIDC Authentication](../configuring-oidc) guide for full setup instructions.
+<KubernetesIntegration />
 
 You must now tell the backend plugin which of the configured clusters is the platform cluster. For that, add the following section to your `app-config.yaml`:
 
@@ -289,9 +250,51 @@ The backend plugin uses basic auth to authenticate against the Git provider. If 
 The `token` is used by the Backstage plugin to retrieve information about Promises and Resource Requests from the configured Github Repository. If you have configured a Github App
 for the Github integration, you can leave this field empty and the plugin will use the Github app's short-lived tokens to authenticate.
 
-The `repoUrl` is the repository to which Backstage will push the resource requests; you must configure your platform to reconcile on new documents.
+The `repoUrl` is the repository to which Backstage will push the resource requests; you must configure your platform to reconcile on new documents — see [Connect the Platform to the Git Repository](#connect-the-platform-to-the-git-repository) below.
 
-#### Connect the Platform to the Git Repository
+  </TabItem> <TabItem value="hybrid" label="Hybrid">
+
+In hybrid mode, the backend plugin reads resource state directly from the Kubernetes API — giving real-time status and visibility of resources created outside Backstage (for example,
+via `kubectl`) — while all create, update, and delete operations are written to a Git repository. It combines the Kubernetes API and GitOps modes and requires the configuration of
+both.
+
+Because reads use the Kubernetes API, first configure the Kubernetes integration:
+
+<KubernetesIntegration />
+
+Then enable hybrid mode and configure the Git repository that create, update, and delete operations are written to:
+
+```yaml
+ske:
+  mode: hybrid
+  kubernetes:
+    # must match the name of a cluster configured in the `kubernetes` section above
+    platformName: kratixPlatform
+  scm:
+    token: "my-access-token" # optional; git access token
+    repoUrl: "https://github.com/my-org/my-repo" # repository url
+    type: "github" # optional; git provider, currently one of "github" or "gitlab"
+    username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
+    path: "catalog" # optional; path within the repository (default: "")
+    branch: "main" # optional; branch to use (default: "main")
+    defaultAuthor: # optional; git author details
+      name: "my-name" # default: "SKE"
+      email: "my@email.com" # default: ske@backstage.io
+```
+
+The `ske.scm` fields behave exactly as in GitOps mode. Because writes go to Git, the platform must also reconcile the repository back into the cluster — see [Connect the Platform to
+the Git Repository](#connect-the-platform-to-the-git-repository) below.
+
+  </TabItem>
+</Tabs>
+
+### Connect the Platform to the Git Repository
+
+:::note
+
+This step is required for **GitOps** and **Hybrid** modes, which write resource requests to a Git repository. It is not needed for Kubernetes API mode.
+
+:::
 
 Your platform needs to watch the Git repository and reconcile any documents that Backstage pushes to it. The steps below cover two common GitOps tools — choose the one your platform uses.
 
@@ -381,9 +384,6 @@ Argo CD will now watch the repository and apply any new documents Backstage push
 For private repositories, configure Argo CD repository credentials first. See the [Argo CD repository docs](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/) for details.
 
 :::
-
-  </TabItem>
-</Tabs>
 
   </TabItem>
 </Tabs>
