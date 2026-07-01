@@ -120,7 +120,9 @@ spec:
   [Resource Binding](/main/reference/promises/promise-upgrade/resource-bindings), so the `env` labels select the fleet.
 
 Because the run stops on the first failure, a faulty `v2.0.0` on a `dev` resource halts the run before `staging` or
-`prod` are patched, leaving those groups on `v1.0.0` while you investigate.
+`prod` are patched, leaving those groups on `v1.0.0` while you investigate. To find which resource failed, inspect the
+run's events with `kubectl describe upgraderun <run-name>`; see
+[Identifying a failed resource](/ske/reference/promise-upgrades/upgrade-runs#identifying-a-failed-resource).
 
 :::note
 
