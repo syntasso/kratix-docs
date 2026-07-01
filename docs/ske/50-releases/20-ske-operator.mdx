@@ -24,6 +24,14 @@ To see which version of the helm chart corresponds to which version of the SKE-O
 
 ## Release Notes
 
+### [v0.30.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.30.0/) (2026-07-01)
+
+Released in Helm Chart version [version 0.76.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.76.0/)
+
+#### Features
+
+* Added support for TLS certificate management for the SKE Platform Manager webhooks when cert-manager is disabled. SKE versions that include the Platform Manager now require a `platformManagerCertSecretName` in the Kratix CR's `tlsConfig`. This can be configured via the Helm chart using `skeDeployment.tlsConfig.platformManagerTLSSecretRef` (to reference a pre-existing Secret) or by providing inline values via `skeDeployment.tlsConfig.platformManagerCACert`, `platformManagerTLSCert`, and `platformManagerTLSKey`. See the [custom certs documentation](/ske/installing-ske/advanced-install#custom-certs) for details.
+
 ### [v0.29.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.29.0/) (2026-06-12)
 
 #### Chores
