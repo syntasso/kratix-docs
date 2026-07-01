@@ -110,6 +110,18 @@ When a run processes a rollout group, each snapshotted resource is evaluated aga
 
 Skipped resources count towards group completion and do not block the run from advancing to the next group. A single failed resource stops the run entirely. Subsequent groups are not processed. Upgrade failures recorded before the Upgrade Run was created do not fail the current run.
 
+### Identifying a failed resource
+
+The [`RunSucceeded` condition](#conditions) and the [rollout group status](#rollout-group-status) tell you _how many_ resources failed and in _which_ group, but not which specific resource. When a resource fails to upgrade, the run records a Kubernetes Event against the Upgrade Run naming the offending resource. Inspect the run's events to find it:
+
+```shell-session
+$ kubectl describe upgraderun <run-name>
+
+# TODO: paste example `kubectl describe` output here, including the Events section
+```
+
+The `Events` section at the end of the output identifies the resource that caused the group to fail.
+
 ### Drift Detection
 
 The snapshot records each resource's version at run start. If, by the time the run processes a resource, its version has been changed externally, the resource is **Skipped** rather than overwritten:
