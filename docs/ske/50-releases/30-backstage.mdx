@@ -23,6 +23,23 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.20.0/); [ske-frontend v0.17.6](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.6/) (2026-07-01)
+
+#### Features
+
+* New `hybrid` backend mode. In hybrid mode the plugin reads resource state from
+the Kubernetes API, giving real-time status and visibility of resources created
+outside Backstage (for example, via `kubectl`), while create, update, and
+delete operations are written to a Git repository. It requires both the
+`ske.kubernetes` and `ske.scm` configuration, and the platform must reconcile
+the Git repository back into the cluster. See [Configuring the backend
+plugin](/ske/integrations/backstage/installation/plugins#configuring-the-backend-plugin)
+for details.
+
+#### Bug Fixes
+
+* Resource update workflows now render correctly when they use any built-in plugin.
+
 ### [ske-backend v0.19.5](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.5/); [ske-frontend v0.17.5](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.5/) (2026-05-19)
 
 #### Features
