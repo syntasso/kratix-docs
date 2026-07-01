@@ -186,14 +186,21 @@ When a run becomes terminal, the controller records a summary on the parent [Upg
 ### Resource Snapshot
 
 When an Upgrade Run begins, it records a snapshot of every resource it will upgrade, grouped by rollout group, in a
-ConfigMap in the `kratix-platform-system` namespace. The snapshot is written at the start of the run and does not change
-as the upgrade proceeds, so it is a stable record of what the run set out to change. See
-[Managing Promise Upgrades](/ske/guides/promise-upgrades) for how to use it.
+ConfigMap in the `kratix-platform-system` namespace. Because the snapshot is written at the start of the run and does not
+change as the upgrade proceeds, it gives you an auditable record of exactly which resources a run is upgrading. You can
+use it to review the scope of an upgrade before it proceeds (see
+[Previewing an upgrade before it runs](#previewing-an-upgrade-before-it-runs)) and to confirm afterwards what was in
+scope. The [Managing Promise Upgrades](/ske/guides/promise-upgrades) guide walks through this workflow.
 
-The `resourceListRefs` field lists the ConfigMaps that hold the snapshot. In practice this is a single ConfigMap.
+The `resourceListRefs` field on the run's status lists the ConfigMaps that hold the snapshot. In practice this is a
+single ConfigMap. Read it from the `kratix-platform-system` namespace:
+
+```bash
+kubectl -n kratix-platform-system get configmap <snapshot-name> -o yaml
+```
 
 Each entry records the resource's namespace and name, the version captured at snapshot time (`lastAppliedVersion`), and
-its `spec.version` (`specVersion`). These versions form the baseline used for [drift detection](#drift-detection).
+its `spec.version` (`specVersion`). These versions also form the baseline used for [drift detection](#drift-detection).
 
 ```json
 {

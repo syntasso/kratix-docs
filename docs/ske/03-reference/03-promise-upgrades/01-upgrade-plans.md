@@ -315,3 +315,10 @@ Inspecting an Upgrade Plan:
 ## Deleting an Upgrade Plan
 
 When an Upgrade Plan is deleted, any Upgrade Runs that reference it will be cleaned up.
+
+:::note
+
+Deleting the referenced Promise does not delete the Upgrade Plan. The plan is only removed when you delete it
+explicitly.
+
+:::
