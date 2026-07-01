@@ -17,8 +17,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.183f4942.js" defer="defer"></script>
-<script src="/assets/js/main.cc503a16.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d27a7207.js" defer="defer"></script>
+<script src="/assets/js/main.a8ccb368.js" defer="defer"></script>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -47,8 +47,8 @@ Developers can then send requests to Kratix through Backstage Templates to creat
 <li class=""><strong>Backstage Controller</strong>: runs in the platform cluster and enables automatic Backstage entity generation for labelled Promises. It adds the generation workflow that produces
 Backstage Components and Templates for Promises and Resource requests.</li>
 <li class=""><strong>SKE frontend plugin</strong>: runs in Backstage and renders SKE-specific pages for Promise and Resource Components.</li>
-<li class=""><strong>SKE backend plugin</strong>: runs in the Backstage backend and provides the actions used by generated Templates. It sends Resource requests to Kratix through Kubernetes API mode or
-GitOps mode.</li>
+<li class=""><strong>SKE backend plugin</strong>: runs in the Backstage backend and provides the actions used by generated Templates. It sends Resource requests to Kratix through Kubernetes API mode, GitOps
+mode, or Hybrid mode.</li>
 <li class=""><strong>State store and Destination</strong>: provide the hand-off between Kratix and Backstage. Kratix writes generated Backstage entities to the Destination, and Backstage reads those
 entities from the same bucket or repository.</li>
 </ul>
