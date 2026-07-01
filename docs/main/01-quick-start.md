@@ -415,6 +415,15 @@ take any other action one-by-one.
 Since Promises create and manage services in a consistent and repeatable way, platform
 contributors are provided full control and visibility without disrupting any consumers.
 
+:::tip Controlling upgrades
+
+In this example the update rolled out to every instance automatically. When you
+need finer control — pinning some requests to a specific Promise version, or
+upgrading a fleet deliberately rather than all at once — Kratix uses
+[Promise Revisions and Resource Bindings](/main/guides/upgrading-resource-requests).
+
+:::
+
 ## Business Processes, Built-in
 
 While this quick-start focuses on how to use marketplace Promises, this is really only

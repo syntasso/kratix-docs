@@ -68,4 +68,6 @@ spec:
 
 When applied to the platform cluster, Kratix will trigger the associated Workflows. For more details on the Workflows, see the [Workflow reference](./workflows).
 
+Each Resource is bound to a version of its Promise via a [Resource Binding](../promises/promise-upgrade/resource-bindings), which controls which Promise Revision the Resource is reconciled against and when it is upgraded as the Promise changes.
+
 For a in-depth exploration of requesting a Resource and Kratix Workflows, check the [Writing a Promise](../../guides/writing-a-promise) guide.

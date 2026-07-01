@@ -35,6 +35,18 @@ See [Promise Workflows](../promises/workflows#configure-workflows) and
 [Resource Workflows](../resources/workflows#configure-workflows) for
 more details.
 
+:::info Bumping the Promise version
+
+The behaviour above applies when you update the Promise `spec` in place. When you also
+change the Promise _version_ (via the `kratix.io/promise-version` label), Kratix creates a
+new [Promise Revision](../promises/promise-upgrade/promise-revisions) instead. New Resource
+Requests track the latest revision automatically, but existing Resources pinned to an
+earlier revision are **not** rolled forward until you upgrade them. See the
+[Upgrading a Promise](/main/guides/upgrading-resource-requests) guide for how to control
+when and how those Resources are upgraded.
+
+:::
+
 ## Scheduling
 
 The scheduling for a Promise may be changed by modifying either:
