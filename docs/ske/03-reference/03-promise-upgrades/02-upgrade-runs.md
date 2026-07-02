@@ -115,9 +115,75 @@ Skipped resources count towards group completion and do not block the run from a
 The [`RunSucceeded` condition](#conditions) and the [rollout group status](#rollout-group-status) tell you _how many_ resources failed and in _which_ group, but not which specific resource. When a resource fails to upgrade, the run records a Kubernetes Event against the Upgrade Run naming the offending resource. Inspect the run's events to find it:
 
 ```shell-session
-$ kubectl describe upgraderun <run-name>
-
-# TODO: paste example `kubectl describe` output here, including the Events section
+$ kubectl describe upgraderun redis-v1-to-v2-run-001
+Name:         redis-v1-to-v2-run-001
+Namespace:
+Labels:       <none>
+API Version:  platform.syntasso.io/v1alpha1
+Kind:         UpgradeRun
+Metadata:
+  Creation Timestamp:  2026-07-01T15:54:32Z
+  Finalizers:
+    platform.syntasso.io/upgraderun
+  Generation:  1
+  Owner References:
+    API Version:           platform.syntasso.io/v1alpha1
+    Block Owner Deletion:  true
+    Controller:            true
+    Kind:                  UpgradePlan
+    Name:                  redis-v1-to-v2
+    UID:                   98b582ba-e1e7-40bb-af7d-86ce0f31e18a
+  Resource Version:        10042
+  UID:                     c89f8ed6-7387-48c4-aad2-9db38b72444d
+Spec:
+  Upgrade Plan Ref:
+    Name:  redis-v1-to-v2
+Status:
+  Completed Resources:  2
+  Conditions:
+    Last Transition Time:  2026-07-01T15:54:32Z
+    Message:               UpgradePlan "redis-v1-to-v2" found
+    Reason:                PlanFound
+    Status:                True
+    Type:                  PlanResolved
+    Last Transition Time:  2026-07-01T15:54:33Z
+    Message:               PromiseRevision for promise "redis" version "v2.0.0" is ready
+    Reason:                PromiseRevisionReady
+    Status:                True
+    Type:                  TargetRevisionReady
+    Last Transition Time:  2026-07-01T16:00:46Z
+    Message:               1 resource(s) failed to upgrade in rollout group "dev"
+    Reason:                ResourceUpgradeFailed
+    Status:                False
+    Type:                  RunSucceeded
+  Finished At:             2026-07-01T16:00:46Z
+  Resource List Refs:
+    Name:  redis-v1-to-v2-run-001-resource-snapshot
+  Rollout Groups:
+    Failed:         1
+    Name:           dev
+    Skipped:        0
+    Succeeded:      2
+    Total:          3
+    Failed:         0
+    Name:           staging
+    Skipped:        0
+    Succeeded:      0
+    Total:          2
+  State:            Failed
+  Total Resources:  5
+#highlight-start
+Events:
+  Type     Reason                 Age                    From                  Message
+  ----     ------                 ----                   ----                  -------
+  Normal   GroupInProgress        9m21s (x2 over 9m21s)  UpgradeRunController  Group "dev": 0/3 resources upgraded to v2.0.0
+  Warning  ResourceUpgradeFailed  3m28s                  UpgradeRunController  Resource default/dev-r2 failed to upgrade to v2.0.0: upgrade gate denied
+  Normal   GroupInProgress        3m28s (x2 over 3m28s)  UpgradeRunController  Group "dev": 1/3 resources upgraded to v2.0.0
+  Warning  ResourceUpgradeFailed  3m28s                  UpgradeRunController  Resource default/dev-r2 failed to upgrade to v2.0.0: upgrade gate denied
+  Normal   GroupInProgress        3m23s (x2 over 3m23s)  UpgradeRunController  Group "dev": 1/3 resources upgraded to v2.0.0
+  Warning  ResourceUpgradeFailed  3m7s                   UpgradeRunController  Resource default/dev-r2 failed to upgrade to v2.0.0: upgrade gate denied
+  Warning  UpgradeRunFailed       3m7s                   UpgradeRunController  2/5 resources upgraded to v2.0.0
+#highlight-end
 ```
 
 The `Events` section at the end of the output identifies the resource that caused the group to fail.
