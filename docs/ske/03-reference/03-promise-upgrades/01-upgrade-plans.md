@@ -166,24 +166,56 @@ each matching group. Rollout groups are not de-duplicated.
 
 ### Selectors
 
-Selectors determine which resources belong to a rollout group. Selectors match against the labels on
-resources. Both `matchLabels` and `matchExpressions` can be used, following the same semantics as Kubernetes
+Selectors determine which resources belong to a rollout group by matching against the labels on their Resource Bindings.
+A selector can use `matchLabels`, `matchExpressions`, or both, following the same semantics as Kubernetes
 [label selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors).
-
-```yaml
-selectors:
-  matchLabels:
-    env: dev
-  matchExpressions:
-    - key: env
-      operator: In
-      values: ["staging", "dev"]
-```
 
 | Field | Description |
 |-------|-------------|
-| `matchLabels` | Key-value label pairs the Resource Binding must have |
-| `matchExpressions` | Label selector requirements with operators (`In`, `NotIn`, `Exists`, `DoesNotExist`) |
+| `matchLabels` | A map of key-value label pairs the Resource Binding must have exactly |
+| `matchExpressions` | A list of requirements, each with a `key`, an `operator` (`In`, `NotIn`, `Exists`, `DoesNotExist`), and, for `In`/`NotIn`, a list of `values` |
+
+**All conditions must match.** A resource is included in a group only if it satisfies _every_ condition in the selector.
+Each `matchLabels` pair and each `matchExpressions` requirement is combined with a logical **AND** — never OR. This
+applies at both levels:
+
+- When `matchLabels` and `matchExpressions` are both set, a resource must satisfy **all** of `matchLabels` **and all**
+  of `matchExpressions`.
+- When `matchExpressions` lists several requirements, a resource must satisfy **every** requirement in the list.
+
+For example, combining `matchLabels` and `matchExpressions` to select production resources that are not in the
+experimental tier:
+
+```yaml
+selectors:
+  # A resource must satisfy BOTH the label and the expression below.
+  matchLabels:
+    env: prod
+  matchExpressions:
+    - key: tier
+      operator: NotIn
+      values: ["experimental"]
+```
+
+A resource labelled `env: prod` **and** `tier: experimental` is excluded, because it fails the `matchExpressions`
+requirement even though it matches `matchLabels`.
+
+A list of `matchExpressions` works the same way — every requirement must hold:
+
+```yaml
+selectors:
+  matchExpressions:
+    # A resource must satisfy EVERY requirement in this list.
+    - key: env
+      operator: In
+      values: ["staging", "prod"]
+    - key: team
+      operator: Exists
+```
+
+This selects resources whose `env` is `staging` **or** `prod`, **and** which also have a `team` label. Note the
+distinction: the `In` operator is an OR _within_ a single requirement (the value can be `staging` or `prod`), while
+separate requirements in the list are combined with AND.
 
 Kratix copies the labels from a Resource Request onto its Resource Binding, so you can label either the Resource Request
 or the Resource Binding directly.
