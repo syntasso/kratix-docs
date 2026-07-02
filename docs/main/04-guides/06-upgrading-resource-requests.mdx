@@ -227,7 +227,7 @@ above will exit early. This means that if a user _did_ update their Resource Bin
 ## Upgrading Resource Requests
 
 To upgrade a resource request that is bound to a previous Promise Revision, you can edit the existing Resource Binding
-`spec.version` and point it to the desired Promise Revision version. In our example, we had a resource request bound to
+`spec.version` and point it to the desired Promise Revision version. In our example, we had a Resource Request bound to
 `v0.0.1`. To upgrade it, edit it as follows:
 
 ```yaml
@@ -251,6 +251,16 @@ spec:
 
 Once that change is applied, Kratix will run the Resource Configure Workflow for the target resource using the `v0.0.2`
 Promise Revision.
+
+:::tip Want enterprise-grade upgrade control?
+
+Editing bindings one at a time works for a handful of Resources, but it does not scale to a fleet. **Syntasso Kratix
+Enterprise** turns upgrades into a managed, repeatable process with [Upgrade Plans and Upgrade
+Runs](/ske/reference/promise-upgrades/intro): roll a new version out in ordered batches, canary it on a small group
+first, confine it to maintenance windows, hold it back during a change freeze, and run it on a schedule. The [Managing
+Promise Upgrades](/ske/guides/promise-upgrades) guide shows you how.
+
+:::
 
 ## Conclusion
 
