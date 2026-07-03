@@ -32,7 +32,7 @@ _Analysis date: July 2026. Scope: everything in this repo — `docs/main`, `docs
 
 **W1. Reference comes before Guides.** The main sidebar presents Reference (lookup material for existing users) ahead of Guides (the content newcomers need). Every one of the seven comparable projects studied — Crossplane, Backstage, Argo CD, Dapr, Terraform, Cluster API, Port — orders learning content first and reference last or near-last.
 
-**W2. Tutorials live in a different top-nav item than everything else.** "Workshops" is a separate sidebar from "Docs", so the learning path is invisible from the docs tree, and the quickstart has no natural "what's next" into it. Terraform is the only comparable that splits Docs from Tutorials at the header level, and it works only because both are heavily invested, cross-linked libraries. At Kratix's scale the split just hides the best onboarding content — and causes the duplication in W3.
+**W2. Tutorials live in a different top-nav item than everything else.** "Workshops" is a separate sidebar from "Docs", so the learning path is invisible from the docs tree, and the quickstart has no natural "what's next" into it. Terraform is the only comparable that splits Docs from Tutorials at the header level, and it works because both are heavily invested, cross-linked libraries. There is a legitimate business reason for the separate surface — the workshops are run live with customers as facilitated training — so the remedy is not merging but differentiation and cross-linking (see §5.0/5.2): today the two surfaces teach the same topics in the same tutorial register with no wiring between them, which is the actual problem.
 
 **W3. The same topics are written 2–4 times across the three trees.**
 - *Installing a Promise*: `main/04-guides/03`, `workshop/operating-kratix/02`, `workshop/writing-a-promise/01` (3×)
@@ -43,7 +43,7 @@ _Analysis date: July 2026. Scope: everything in this repo — `docs/main`, `docs
 - *Health checks*: near-identical guide prose in `main/04-guides/09` and `ske/05-guides/10`; related reference split across `main` (HealthRecord) and `ske` (HealthDefinition)
 - *Parts of a Platform*: duplicated wholesale between `main/03-reference/01` and `ske/03-reference/01`
 
-**W4. The SKE tree is a parallel universe, not a delta.** `docs/ske` re-creates the entire IA of `main` (its own Reference, its own Guides, its own intro) instead of documenting only what's enterprise-specific. This is the model GitLab explicitly tried and abandoned (they merged CE/EE docs and now consider a single tree with availability badges the source-of-truth rule), and the model whose drift tax Grafana visibly pays between its OSS and Cloud trees. The drift is already happening here — see the duplicated pages above.
+**W4. The SKE tree is a parallel universe, not a delta.** `docs/ske` re-creates the entire IA of `main` (its own Reference, its own Guides, its own intro) instead of documenting only what's enterprise-specific. Parallel-tree duplication is the model GitLab explicitly tried and abandoned for CE/EE, and the one whose drift tax Grafana visibly pays between its OSS and Cloud trees. The drift is already happening here — see the duplicated pages above. (Note: a *separate but thin* SKE tree is still the right call for Kratix given a possible foundation future — see §5.0. The problem is the duplication, not the separation.)
 
 **W5. Content types are muddled (the classic Diátaxis conflation).**
 - `main/04-guides` is self-described as "guides **and tutorials**" — install how-tos sit next to learning-oriented promise-writing walkthroughs.
@@ -89,7 +89,7 @@ Distilled principles that recur across all of them:
 1. Order the nav by the newcomer's journey; reference goes last.
 2. Diátaxis governs *page types*, not top-level nav — its author is explicit: "the structure it proposes is not intended to be a plan… do not create empty structures for tutorials/how-tos/reference/explanation." The winning shape (Dapr) is journey-first with persona-scoped how-to sections and Diátaxis discipline *within* each.
 3. Split by persona where personas genuinely diverge (operate vs build vs consume); share concepts and reference. Nielsen Norman Group's caution applies: audience-based navigation only works when each audience's content is genuinely distinct — which holds for Kratix (a platform engineer writing Promises and an app developer requesting a database have almost disjoint tasks and vocabularies) — and sections should carry task names ("Writing Promises"), not persona nouns ("For platform engineers").
-4. One site, one tree, one search for OSS + enterprise; mark availability with badges/metadata, not parallel trees.
+4. One site, one tree, one search for OSS + enterprise; mark availability with badges/metadata, not parallel trees. **Caveat**: this (the GitLab model) optimises for a product that will stay single-vendor forever. Where a foundation donation is plausible, the Dapr/Diagrid and Crossplane/Upbound precedent applies instead — a vendor-neutral OSS site plus a separable enterprise doc set — because CNCF-style vendor-neutrality rules would force the enterprise content off the OSS site anyway.
 5. Quickstart: one golden path, no branches, stated time, visible success, persona-routed next steps.
 6. Don't version until a real breaking-change boundary forces it; if editions have different cadences, version asymmetrically (Redpanda: versioned self-managed, evergreen cloud). Prefer per-feature "introduced in vX" history annotations (GitLab's pattern) over whole-tree snapshots.
 7. Accept some repetition where it serves distinct readers (Write the Docs' "ARID" principle — docs need some "moisture"): a short consumer-facing "request a resource" page may legitimately overlap a builder-facing one. What's not acceptable is unmanaged duplication of whole pages, which is what exists today.
@@ -98,18 +98,24 @@ Distilled principles that recur across all of them:
 
 ## 5. Proposed structure
 
-### 5.1 Target sidebar (single docs tree)
+### 5.0 Business constraints that shape the proposal
+
+Two constraints change what "best" means here, relative to a purely IA-driven answer:
+
+1. **The workshop is a facilitated training product** — it is run live with customers, which is why it has its own top-nav item. That makes it a different surface from self-serve docs (the closest analogues are AWS's workshops.aws, kept separate from AWS docs, and HashiCorp's Tutorials library). Merging it into the docs tree would destroy its value as a linear, self-contained curriculum an instructor can drive. So: **keep Workshops separate — but manage the overlap deliberately** instead of letting both trees independently teach the same topics (see 5.2).
+2. **A foundation donation is possible** (not imminent). CNCF-style vendor neutrality would force enterprise content off the OSS docs site entirely — Dapr/Diagrid and Crossplane/Upbound are the precedents. That rules out the GitLab "one merged tree with edition badges" model, because it deliberately entangles OSS and enterprise content page-by-page and would have to be untangled later at high cost. The right hedge is **design for separability**: a vendor-neutral-ready OSS tree, and an SKE tree that is a *thin delta* which can lift out to its own site (e.g. docs.syntasso.io) by moving one directory. Today's problem is not that SKE is separate — it's that it's a *full parallel copy* of the OSS IA rather than a delta.
+
+### 5.1 Target structure
+
+Top nav stays: **Docs | Workshops | Marketplace | Blog | Enterprise** — same five items, but with cleaned-up semantics: Docs is the self-serve OSS journey, Workshops is explicitly the facilitated curriculum, Enterprise is a thin SKE delta.
 
 ```
-Kratix Docs
+Docs (OSS tree — vendor-neutral-ready)
 ├── Welcome                      ← landing page: what Kratix is (2 paragraphs),
 │                                  who the docs serve (3 personas), primary CTA
 │                                  = Quick Start (~30 min), secondary = per-persona entry points
 ├── Quick Start                  ← one unbranched golden path; the OSS/SKE routing box
 │                                  becomes a short "Choose your installation" page it links to
-├── Tutorials                    ← the current Workshops, merged in as learning paths
-│   ├── Operating Kratix (3-part track)
-│   └── Writing a Promise (6-part track)
 ├── Concepts                     ← pure explanation
 │   ├── Promises · Workflows · Destinations & State Stores
 │   ├── Architecture (Parts of a Platform, deployment topology — un-hide it)
@@ -139,37 +145,57 @@ Kratix Docs
 │       (CRD pages should mirror the machinery: fields, defaults, validation,
 │        plus one minimal example manifest each — the industry-standard shape
 │        for Kubernetes CRD reference)
-├── Enterprise (SKE)             ← thin: only what has no OSS counterpart
-│   ├── Install SKE (preconfigured / advanced / air-gapped / migrate from OSS)
-│   ├── SKE operator & agents reference · GUI
-│   ├── Integrations: Backstage · Cortex · Terraform Enterprise · Port · MCP
-│   └── Releases & support policy
 ├── FAQ · Glossary (create it — the file is currently 0 bytes) · Community
+
+Workshops (facilitated training curriculum — separate surface, kept)
+├── Overview                     ← says explicitly what this is: instructor-led /
+│                                  guided learning tracks, also usable self-paced
+├── Prerequisites
+├── Operating Kratix (3-part track)
+└── Writing a Promise (6-part track)
+
+Enterprise / SKE (separate doc instance, kept — but reduced to a thin delta)
+├── Install SKE (preconfigured / advanced / air-gapped / migrate from OSS)
+├── SKE operator & agents reference · GUI · Tokens
+├── Promise Testing Framework
+├── Integrations: Backstage · Cortex · Terraform Enterprise · Port · MCP
+└── Releases & support policy
+    (everything conceptually shared — Parts of a Platform, health guides,
+     promise-writing — lives ONCE in the OSS tree; SKE pages link into it)
 ```
 
-Navbar simplifies to **Docs | Marketplace | Blog** (+ GitHub/Slack). "Workshops" merges into Tutorials; "Enterprise" becomes a section within Docs (one search index, one tree, no drift).
+Since Docs no longer has an in-tree Tutorials section, the learning path must be wired by cross-linking instead: the quickstart's "Next steps" and the Welcome page both route to the Workshop tracks as the guided-learning option, and each workshop chapter links to the canonical docs pages it exercises. Consider renaming the nav item from "Workshops" to "Learn" or "Learning paths" — "Workshops" reads as event-only to a self-serve visitor, and the content is genuinely useful self-paced.
 
 ### 5.2 How this maps from today
 
 | Today | Becomes |
 |---|---|
-| `main/02-intro.md` (marketing landing) | Slim "Welcome" chooser; move value-prop copy to kratix.io |
-| Workshops (separate nav) | `Tutorials` section; delete the 3 duplicated guide-topics from Guides |
+| `main/02-intro.md` (marketing landing) | Slim "Welcome" chooser; move value-prop copy to kratix.io (also a vendor-neutrality prerequisite) |
+| Workshops (separate nav) | Kept as a separate surface, repositioned as the guided-learning curriculum; overlap with Guides managed per the ownership rules below |
 | `main/04-guides` | Split: install/operate topics → *Operating your platform*; promise topics → *Writing Promises* |
 | `main/05-platform-concepts` + `main/06-learn-more` + concept pages hiding in Reference | `Concepts` |
 | `main/03-reference` minus concepts/how-tos | `Reference` (keep the excellent per-CRD lifecycle symmetry) |
 | `main/06-kratix-cli` + `main/07-kratix-sdks` | Usage guides → *Writing Promises*; command/API listings → *Reference* |
-| `docs/ske` reference & guides that duplicate OSS pages | Deleted; canonical page lives once in the shared tree with an **SKE badge** on enterprise-only capability |
-| `docs/ske` genuinely SKE-only content | `Enterprise (SKE)` section |
+| `docs/ske` reference & guides that duplicate OSS pages | Deleted; the canonical page lives once in the OSS tree and SKE pages link to it (never the reverse — OSS must not depend on SKE content, so the SKE tree can lift out cleanly) |
+| `docs/ske` genuinely SKE-only content | Stays in the separate SKE instance, now a thin delta |
+
+**Resolving the Workshops↔Guides duplication without merging.** The overlapping topics (installing Kratix, installing a Promise, writing a Promise, compound Promises) should be differentiated by Diátaxis type rather than deleted from either tree:
+
+- The **workshop chapter owns the teaching**: narrative, contrived setting, one managed path, explanations along the way — that's what a facilitated session needs anyway.
+- The **docs guide becomes a terse how-to**: task-oriented, real-world, branching where reality branches, no pedagogy. Today both are tutorial-shaped, which is why they read as duplicates.
+- **Shared command/YAML blocks single-source via `docs/_partials`** — the pattern already used for the cloud install guides and the workshop code fixtures; extend it to the overlapping topics so commands can't drift.
+- Each workshop chapter ends with links to the canonical how-to/reference pages; each how-to links to the workshop track under "learning this from scratch?".
+
+This is Write the Docs' ARID principle applied deliberately: the repetition that serves two genuinely different reading modes stays; the unmanaged copy-paste drift goes.
 
 ### 5.3 Format & mechanics recommendations
 
-1. **Availability badges instead of parallel trees** (GitLab/Grafana model): a frontmatter field, e.g. `availability: [oss, ske]`, rendered as a small badge under the page title, plus **one** shared "Requires Syntasso Kratix Enterprise" admonition partial used everywhere (neutral tone, one link). Keep edition and maturity as separate axes (`availability` vs `status: preview`).
+1. **Thin-delta enterprise tree, designed for separability** (Dapr/Diagrid model, chosen over the GitLab badge model because of the foundation possibility): keep the separate `ske` Docusaurus instance, but strip it to SKE-only content; shared material lives once in the OSS tree and SKE links into it, never the reverse. Create **one** shared "Requires Syntasso Kratix Enterprise" admonition partial (neutral tone, one link) as the only paywall notice, and confine SKE pointers in the OSS tree to a handful of known journey forks (the quick-start routing box is the template) so they can be stripped in a single pass if the OSS project moves to a foundation. Keep maturity marking (`status: preview`-style badges) as a separate axis — that one applies regardless of edition.
 2. **Fix ordering mechanics**: pick one source of truth for sidebar order (recommend explicit `position` in `_category_.json` + `sidebar_position` frontmatter; drop the numeric filename prefixes, which are currently lying). Today's three-way `position: 5` tie and duplicate `06-` prefixes make ordering accidental.
 3. **One landing convention**: every category gets an `index.md` that reads as an overview (per Diátaxis: section landings "should read like an overview"), replacing the mix of `generated-index`, `00-intro`, and `index.md`.
 4. **One filename convention**: kebab-case everywhere; regenerate CLI docs without the `00_kratix` underscore style.
 5. **Page templates per type**: extend `templates/` (the guide template is good) with concept, how-to, and reference skeletons matching `AGENTS.md`'s page-type rules — and de-Terraform the guide template's hardcoded frontmatter.
-6. **Quickstart shape**: state the time budget in the title area, remove in-page forks (link a "choose your installation" page instead), end with three persona-routed next steps (Tutorials / Operating / Writing Promises). Industry benchmarks: first observable success in under 30 minutes earns "good", 5–15 minutes is best-in-class; a quickstart should cover the primary feature only, with no error scenarios or alternatives (Good Docs Project quickstart guidance, Diátaxis tutorial rules).
+6. **Quickstart shape**: state the time budget in the title area, remove in-page forks (link a "choose your installation" page instead), end with three persona-routed next steps (the Workshop learning tracks / Operating your platform / Writing Promises). Industry benchmarks: first observable success in under 30 minutes earns "good", 5–15 minutes is best-in-class; a quickstart should cover the primary feature only, with no error scenarios or alternatives (Good Docs Project quickstart guidance, Diátaxis tutorial rules).
 7. **Drop the `/main/` URL prefix** when convenient (the redirect plugin is already in place). Don't adopt Docusaurus versioning until a breaking-change boundary demands it; if SKE's cadence requires versioned docs later, version the SKE section only (Redpanda's asymmetric precedent).
 8. **Blog hygiene**: tag posts as `announcement` vs `deep-dive`; promote evergreen technical posts (compound-promise claims pattern, debugging, Promise best practices) into docs pages and leave a pointer post.
 9. **Delete the dead weight now** (independent of any restructure): the 0-byte `09-glossary`, `_02-value-of-kratix.md`, the hidden `_01-deployment-topology` dir (or publish it under Concepts), the ~6 orphaned partials, and the stale FAQ roadmap bullet. Define or remove "SKA" and "Aspects".
@@ -178,13 +204,13 @@ Navbar simplifies to **Docs | Marketplace | Blog** (+ GitHub/Slack). "Workshops"
 
 - **Phase 0 — hygiene (no URL changes)**: delete dead files/orphaned partials, fix `_category_.json` position collisions and duplicate prefixes, standardize labels/landings, fix the stale FAQ, add the glossary or remove its stub.
 - **Phase 1 — reorder & re-type**: Guides above Reference; move concept pages out of Reference and merge `learn-more` + `platform-concepts` into Concepts; slim the landing page and de-market it. Redirects for every moved slug (the plugin and `onBrokenLinks: throw` make this safe).
-- **Phase 2 — merge Workshops into Tutorials**; delete the three duplicated guide topics in favour of the tutorial versions plus short task-oriented how-tos where genuinely distinct.
+- **Phase 2 — differentiate Workshops from Guides**: re-type the overlapping guide topics as terse how-tos (workshop keeps the teaching), single-source shared command blocks via partials, add the mutual cross-links, and reposition/rename the Workshops nav item as the guided-learning surface.
 - **Phase 3 — persona split**: break Guides into Operating / Writing Promises / Using the platform.
-- **Phase 4 — SKE consolidation**: introduce the availability badge + shared admonition, delete duplicated SKE pages, fold the remaining SKE-only tree into the main sidebar as the Enterprise section, retire the separate navbar item.
+- **Phase 4 — SKE thin-delta**: delete SKE pages that duplicate OSS content (redirecting to the canonical OSS pages), introduce the single shared "Requires SKE" admonition, audit that no OSS page depends on SKE content, and confine OSS→SKE pointers to the known journey forks.
 - **Phase 5 (optional)** — remove the `/main/` URL prefix.
 
 ---
 
 ## 6. Bottom line
 
-The raw material is better than the structure: strong tutorials, a symmetric reference tree, enforced link integrity, and codified editorial standards — arranged so that reference greets newcomers first, the best learning content hides in a separate nav item, three trees re-answer the same questions, and the enterprise fork is drifting exactly the way GitLab's and Grafana's history predicts. The fix is consolidation, not rewriting: one tree, journey-ordered, persona-scoped how-to sections, Diátaxis discipline within pages, and badges instead of a parallel enterprise universe.
+The raw material is better than the structure: strong tutorials, a symmetric reference tree, enforced link integrity, and codified editorial standards — arranged so that reference greets newcomers first, three trees re-answer the same questions, and the enterprise tree duplicates the OSS IA wholesale. Given the business constraints (the workshop is a facilitated training product; a foundation donation is possible), the fix is *differentiation and thinning* rather than merging: a journey-ordered, persona-scoped OSS tree with Diátaxis discipline within pages; Workshops kept as a distinct learning surface whose overlap with the docs is managed by content type and shared partials instead of parallel authorship; and an SKE tree reduced to a thin, separable delta that links into canonical OSS pages — ready to lift out to its own site if vendor neutrality ever requires it.
