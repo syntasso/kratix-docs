@@ -168,7 +168,7 @@ manage TLS certificates for their webhooks and metrics server. This default setu
 additional configuration. However, if you prefer not to use cert-manager, you
 can disable it and manually provide your own TLS certificates.
 
-Note that for the SKE Deployment (the instance the operator deploys), both webhook and metrics server certificates are required. The SKE Operator itself only requires webhook certificates.
+Note that for the SKE Deployment (the instance the operator deploys), both webhook and metrics server certificates are required. The SKE Operator itself only requires webhook certificates. If the SKE version you are deploying includes the SKE Platform Manager, certificates for its webhook are also required.
 
 To disable cert-manager and supply your custom certificates, you have two options:
 
@@ -213,13 +213,23 @@ skeDeployment:
     metricsServerTLSCert: |
       -----BEGIN CERTIFICATE-----
       ...
+    # Only required if the SKE version includes the SKE Platform Manager
+    platformManagerCACert: |
+      -----BEGIN CERTIFICATE-----
+      ...
+    platformManagerTLSKey: |
+      -----BEGIN PRIVATE KEY-----
+      ...
+    platformManagerTLSCert: |
+      -----BEGIN CERTIFICATE-----
+      ...
 ```
 
 **Option 2: Reference pre-existing Secrets**
 
 To avoid inlining certificate data in your values file, pre-create Kubernetes Secrets containing the TLS data and reference them by name. The referenced Secrets must contain the keys: `ca.crt`, `tls.crt`, and `tls.key`.
 
-For the SKE Deployment, both `webhookTLSSecretRef` and `metricsServerTLSSecretRef` are required:
+For the SKE Deployment, both `webhookTLSSecretRef` and `metricsServerTLSSecretRef` are required. If the SKE version includes the SKE Platform Manager, `platformManagerTLSSecretRef` is also required:
 
 ```yaml
 skeDeployment:
@@ -231,6 +241,8 @@ skeDeployment:
       name: "my-webhook-tls-secret"
     metricsServerTLSSecretRef:
       name: "my-metrics-server-tls-secret"
+    platformManagerTLSSecretRef:
+      name: "my-platform-manager-tls-secret"
 ```
 
 The chart will skip creating the TLS Secrets and use the referenced Secrets instead.
@@ -256,6 +268,12 @@ following DNS names:
 
 - `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc`
 - `kratix-platform-controller-manager-metrics-service.kratix-platform-system.svc.cluster.local`
+
+The TLS certificate for the SKE Platform Manager's webhook server must cover the
+following DNS names:
+
+- `ske-platform-webhook-service.kratix-platform-system.svc`
+- `ske-platform-webhook-service.kratix-platform-system.svc.cluster.local`
 
 #### Air-gapped mirrors {#air-gapped-mirrors}
 
