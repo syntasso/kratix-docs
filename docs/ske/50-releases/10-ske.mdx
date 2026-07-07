@@ -23,15 +23,11 @@ Check the release notes below for information on each available version.
 
 #### Features
 
-* Workflow inputs now support arrays of strings and primitive values, enabling richer parameterisation of platform workflows.
 * PromiseRevision and Resource Bindings are now always enabled — the feature flag has been removed.
 * Updating a resource or Promise no longer suspends active pipeline Jobs mid-execution.
 
 #### Fixes
 
-* Execution policy is now optional on Resource Requests.
-* Empty rollout groups are no longer surfaced in status conditions or ConfigMaps.
-* String values in generated resource requests are now correctly quoted.
 * Promises now reconcile correctly when their associated Work resources change.
 
 #### Maintenance
