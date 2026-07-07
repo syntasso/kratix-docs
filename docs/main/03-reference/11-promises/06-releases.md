@@ -26,8 +26,7 @@ specified version is installed in the Platform.
 
 :::info
 
-Note that if you have enabled the Promise Upgrades feature flag, 
-every time a Promise version changes, Kratix creates a new Promise Revision for the Promise. 
+Note that every time a Promise version changes, Kratix creates a new Promise Revision for the Promise. 
 For more information, refer to the [reference doc](/main/reference/promises/promise-upgrade/promise-revisions) and guide on [Promise upgrades](/main/guides/upgrading-resource-requests).
 
 :::
