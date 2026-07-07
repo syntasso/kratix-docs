@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.9828e30a.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.edd3b5eb.js" defer="defer"></script>
 <script src="/assets/js/main.a8ccb368.js" defer="defer"></script>
 </head>
 <body>
@@ -52,6 +52,13 @@ the Resource Configure workflow using the new image for every existing Resource.
 <p>See <a class="" href="/main/reference/promises/workflows#configure-workflows">Promise Workflows</a> and
 <a class="" href="/main/reference/resources/workflows#configure-workflows">Resource Workflows</a> for
 more details.</p>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>Bumping the Promise version</div><div class="admonitionContent_BuS1"><p>The behaviour above applies when you update the Promise <code>spec</code> in place. When you also
+change the Promise <em>version</em> (via the <code>kratix.io/promise-version</code> label), Kratix creates a
+new <a class="" href="/main/reference/promises/promise-upgrade/promise-revisions">Promise Revision</a> instead. New Resource
+Requests track the latest revision automatically, but existing Resources pinned to an
+earlier revision are <strong>not</strong> rolled forward until you upgrade them. See the
+<a class="" href="/main/guides/upgrading-resource-requests">Upgrading a Promise</a> guide for how to control
+when and how those Resources are upgraded.</p></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="scheduling">Scheduling<a href="#scheduling" class="hash-link" aria-label="Direct link to Scheduling" title="Direct link to Scheduling" translate="no">​</a></h2>
 <p>The scheduling for a Promise may be changed by modifying either:</p>
 <ul>

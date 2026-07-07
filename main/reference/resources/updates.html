@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.9828e30a.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.edd3b5eb.js" defer="defer"></script>
 <script src="/assets/js/main.a8ccb368.js" defer="defer"></script>
 </head>
 <body>
@@ -39,6 +39,10 @@ the current Job to reach a terminal state before restarting the workflow from th
 beginning.</p>
 <p>Any files which are output by this workflow will replace all existing files associated
 with this Resource in the <a class="" href="/main/reference/statestore/intro">StateStore</a>.</p>
+<p>This workflow runs against the Promise Revision the Resource is currently bound to. Updating
+the request <code>spec</code> does not change that version. To reconcile a Resource against a different
+Promise version, update its <a class="" href="/main/reference/promises/promise-upgrade/resource-bindings">Resource Binding</a> —
+see the <a class="" href="/main/guides/upgrading-resource-requests">Upgrading a Promise</a> guide.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="scheduling">Scheduling<a href="#scheduling" class="hash-link" aria-label="Direct link to Scheduling" title="Direct link to Scheduling" translate="no">​</a></h2>
 <p>If an update to a Resource changes its scheduling, the change will be <strong>ignored</strong>.</p>
 <p>The Destination selected at the first the Workflow run is always used. To move a Resource
