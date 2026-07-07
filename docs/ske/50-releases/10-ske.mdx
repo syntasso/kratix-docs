@@ -19,6 +19,25 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.51.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.51.0/) (2026-07-07)
+
+#### Features
+
+* Workflow inputs now support arrays of strings and primitive values, enabling richer parameterisation of platform workflows.
+* PromiseRevision and Resource Bindings are now always enabled — the feature flag has been removed. Check the [promise upgrades reference](/main/reference/promises/promise-upgrade/) docs for more details.
+* Updating a resource or Promise no longer suspends active pipeline Jobs mid-execution.
+
+#### Fixes
+
+* Execution policy is now optional on Resource Requests.
+* Empty rollout groups are no longer surfaced in status conditions or ConfigMaps.
+* String values in generated resource requests are now correctly quoted.
+* Promises now reconcile correctly when their associated Work resources change.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.50.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.50.0/) (2026-06-24)
 
 #### Maintenance
