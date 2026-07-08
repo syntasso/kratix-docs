@@ -181,7 +181,11 @@ The Claim Promise decides whether that shared resource already exists and owns i
 
 ```yaml
 # Shared database, like the NamespaceClaim
+apiVersion: marketplace.kratix.io/v1alpha1
 kind: DatabaseClaim
+metadata:
+  name: my-db-claim
+  namespace: team-mobile
 spec:
   databaseName: team-mobile-db
   requirements:
@@ -189,7 +193,11 @@ spec:
     tier: standard
 
 # Per-application part, owned by the consumer
+apiVersion: marketplace.kratix.io/v1alpha1
 kind: SchemaClaim
+metadata:
+  name: my-db-schema
+  namespace: team-mobile
 spec:
   databaseRef: team-mobile-db
   schemaName: orders
