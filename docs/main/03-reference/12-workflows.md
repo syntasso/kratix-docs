@@ -193,7 +193,7 @@ When a Pipeline writes `suspend: true`, Kratix:
 - stores the optional message on that pipeline entry
 - stops executing later Pipelines in the workflow
 
-:::info
+#### Configure Workflow specifics
 
 Suspending a Pipeline will not stop the execution of later stages in the same Pipeline. If you want to guarantee that no other stage is executed, you can either:
 
@@ -201,9 +201,22 @@ Suspending a Pipeline will not stop the execution of later stages in the same Pi
 1. Have the suspend stage as the only stage in the Pipeline.
 1. Ensure that every stage checks for the workflow-control file.
 
-:::
 
-If `kratix.io/workflow-suspended` is removed, Kratix starts from the suspended
+#### Delete Workflow specifics
+
+While a Delete Pipeline can also write `suspend: true`, because it has only
+a single Pipeline the "starting from the suspended Pipeline" means Kratix
+re-runs that same Pipeline.
+
+While a Delete Pipeline is suspended, the Works it would otherwise clean up
+are **not deleted** — the Promise or Resource request stays in a 
+`DeleteWorkflowSuspended` state until the label is removed and the Pipeline
+completes without suspending again.
+
+
+#### Resuming a suspended pipeline
+
+When `kratix.io/workflow-suspended` is removed, Kratix starts from the suspended
 Pipeline.
 
 When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as
@@ -500,16 +513,21 @@ Files written to `/kratix/output` in `delete` Pipelines will be ignored.
 
 ### Metadata
 
-All containers in a `configure` Pipeline have access a shared **metadata directory**
-mounted at `/kratix/metadata`.
+All containers in a Pipeline, whether `configure` or `delete`, have access to a shared
+**metadata directory** mounted at `/kratix/metadata`.
 
 Pipeline containers can control aspects of how Kratix behaves by creating special files in
 this directory:
 
-- `destination-selectors.yaml` can be added to any Promise to further refine where the
-  resources in `/kratix/output` will be [scheduled](./destinations/multidestination-management).
+- `destination-selectors.yaml` can be added to any `configure` Pipeline to further refine
+  where the resources in `/kratix/output` will be
+  [scheduled](./destinations/multidestination-management). Since `/kratix/output` is
+  ignored in `delete` Pipelines, this file has no effect there.
 - `status.yaml` allows the Pipeline to communicate information about the resource back to
   the requester. See the [status documentation for more information](./resources/status).
+- `workflow-control.yaml` lets the Pipeline suspend or retry itself; see
+  [Workflow Control](#workflow-control) above. This applies to both `configure` and
+  `delete` Pipelines.
 
 #### Passing data between containers
 

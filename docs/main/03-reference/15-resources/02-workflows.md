@@ -109,7 +109,7 @@ To re-run a workflow following a Pipeline failure, you can perform a
 [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation) of the Resource, which will trigger the
 workflow again from the beginning.
 
-### Suspending or Retrying a workflow
+### Suspending or Retrying a workflow {#suspending-a-workflow}
 
 A Resource Configure Pipeline can output an optional file to suspend its execution:
 
@@ -197,6 +197,24 @@ Pipeline is running.
 
 This Pipeline is responsible for cleaning up resources and configurations that were set up
 by the `resource.configure` workflow.
+
+### Suspending or Retrying a Delete workflow
+
+Like the Configure workflow, a Delete Pipeline can write
+[`/kratix/metadata/workflow-control.yaml`](../workflows#workflow-control)
+to suspend or retry itself before it finishes.
+
+While a Delete Pipeline is suspended, Kratix does not delete the Works created by the
+Resource request, and the `DeleteWorkflowCompleted` condition is set to `False` with
+reason `DeleteWorkflowSuspended`. This lets a Delete Pipeline gate teardown of the
+Resource's Works based on an external condition. Removing the `kratix.io/workflow-suspended`
+label re-runs the Delete Pipeline; if it completes without suspending again, the Works
+are deleted and the Resource deletion completes.
+
+A Delete Pipeline can also write its own `/kratix/metadata/status.yaml`, the same way a
+Configure Pipeline does. Writing a `message` key there surfaces that message via
+`kubectl get`, rather than only via `kubectl describe`. See the
+[status documentation](/main/reference/resources/status) for more detail.
 
 The example below shows how a `resource.delete` workflow can be defined.
 

@@ -47,7 +47,7 @@ Promises can signal Kratix that the current resource workflow should be suspende
 kratix.io/workflow-suspended: "true"
 ```
 
-This label marks a Resource configure workflow as suspended.
+This label marks a Resource Configure or Delete workflow as suspended.
 
 While the label is present:
 
@@ -55,6 +55,13 @@ While the label is present:
 - the current pipeline is marked as `Suspended` in `status.kratix.workflows.pipelines`
 
 If the label is removed, Kratix resumes from the suspended Pipeline.
+
+:::note
+The same labels work with Configure and Delete Pipelines. During Delete
+Pipelines, Works created by the Promise are **not deleted**, and the
+`DeleteWorkflowCompleted` condition is set to `False` with reason
+`DeleteWorkflowSuspended`. Removing the label re-runs the Delete Pipeline.
+:::
 
 ## Pausing Reconciliation
 
