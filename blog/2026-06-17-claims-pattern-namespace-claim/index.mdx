@@ -165,6 +165,46 @@ kubectl delete namespaceclaim team-a-claim   # namespace stays
 kubectl delete namespaceclaim team-b-claim   # last claim gone; namespace removed
 ```
 
+## Beyond namespaces
+
+Namespaces are the straightforward case: the shared resource is defined almost entirely by its name. Every consumer wants the same exact resource (i.e. a namespace called `team-mobile`) and the only question is whether anyone still needs it.
+
+Shared databases, Kafka clusters, and load balancers are harder. Consumers often want the same shared resource but not the same configuration. One application may need a schema and a read-write role; another may need different credentials on the same Postgres server. Worse, two applications might request the same database name with incompatible engine versions or storage tiers. Who should own the config?
+
+The Claim Promise is still the right place to answer that, but its job splits into layers:
+
+- **Shared identity**: what resource are we counting? (`team-mobile-db`, `orders-topic`)
+- **Provisioning config**: how is the shared resource created? (engine, version, size, HA)
+- **Consumer config**: what does this particular application need on top? (schema, user, grants)
+
+The Claim Promise decides whether that shared resource already exists and owns its lifecycle. It should not try to own every per-application variation unless those variations are part of the shared contract. When consumers need different things on top of the same shared resource, a two-tier model often works better: one claim for the shared server, and a separate per-consumer claim for the part each application needs:
+
+```yaml
+# Shared database, like the NamespaceClaim
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: DatabaseClaim
+metadata:
+  name: my-db-claim
+  namespace: team-mobile
+spec:
+  databaseName: team-mobile-db
+  requirements:
+    engine: postgres
+    tier: standard
+
+# Per-application part, owned by the consumer
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: SchemaClaim
+metadata:
+  name: my-db-schema
+  namespace: team-mobile
+spec:
+  databaseRef: team-mobile-db
+  schemaName: orders
+```
+
+The namespace example works because there is nothing to disagree on. Once configuration varies, your Claim Promise is the contract: it defines what is shared, what is per-consumer, and what to do when two requests clash. Design those rules into the schema and workflows early: reject incompatible claims, merge requirements, or let the first claimant set the baseline.
+
 ## Wrapping up
 
 Claims give you shared sub-promise resources without fighting work ownership. The parent emits a lightweight reservation; the claim Promise handles create-once, delete-when-empty. The `namespace-claim` Promise in the Marketplace is the reference implementation, but the pattern is what you reuse when the next shared resource shows up on your roadmap.
