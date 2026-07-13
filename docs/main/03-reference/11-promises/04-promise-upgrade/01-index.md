@@ -1,14 +1,11 @@
 ---
-description: Documentation for the Kratix State Store Custom Resources
+description: Documentation for the Custom Resources for Upgrading Resource Requests
 title: Promise Upgrades
 sidebar_label: Intro
 id: intro
 ---
 
-As the platform team, you might want to control when you upgrade Resource Requests after updating your Promises. This can be controlled via Promise Revisions and Resource Bindings. Follow the links below for details.
+As the platform team, you might want to control when you upgrade Resource Requests after updating your Promises. This can be controlled via Promise Revisions, which reflect the spec of a Promise at a given version, and Resource Bindings which tie a Resource Request to a version of a Promise. Follow the links below for details.
 
 - [Promise Revisions](./promise-revisions)
 - [Resource Bindings](./resource-bindings)
-
-
-

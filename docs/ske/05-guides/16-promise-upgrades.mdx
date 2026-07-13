@@ -1,0 +1,312 @@
+---
+title: Managing Promise Upgrades
+description: A guide to rolling out Promise upgrades across your fleet with Upgrade Plans and Upgrade Runs, including canary rollouts, maintenance windows, and scheduled upgrades
+sidebar_label: Promise Upgrades
+keywords: [kratix, ske, promise upgrades, upgrade plans, upgrade runs, canary, maintenance windows, change freeze, resource bindings, promise revisions]
+---
+
+Publishing a new version of a Promise creates a new
+[Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions). This guide covers rolling that version
+out across the Resource Requests still running an earlier version: in a controlled order, at a controlled pace, and
+within chosen time windows. You define the strategy with an
+[Upgrade Plan](/ske/reference/promise-upgrades/upgrade-plans) and execute it with an
+[Upgrade Run](/ske/reference/promise-upgrades/upgrade-runs). The scenarios below configure ordered rollout groups with a
+canary, gate upgrades behind maintenance and change-freeze windows, run upgrades on a schedule, and preview a run before
+it changes anything.
+
+:::info This guide assumes pinned Resource Bindings
+
+This process only works when Resource Bindings are **pinned** to a specific Promise version. By default, Kratix uses the
+`floating` strategy: new bindings track `latest` and are upgraded automatically as soon as a newer Promise Revision is
+published, which bypasses the staged rollout described here. Set
+[`resourceBindingVersionStrategy: pinned`](/main/reference/kratix-config/config#resourcebindingversionstrategy) in your
+Kratix Config so new bindings pin to the version they were created at.
+
+:::
+
+The examples use a fictional `redis` Promise. Teams across several namespaces have made Resource Requests against it,
+each labelled with its environment:
+
+```shell-session
+$ kubectl get redis --all-namespaces --show-labels
+NAMESPACE   NAME       AGE   LABELS
+team-a      cache      30d   env=dev
+team-b      sessions   21d   env=staging
+team-c      queue      14d   env=prod
+```
+
+Kratix has created a pinned Resource Binding for each request, all currently at `v1.0.0`. The `DESIRED` column is the
+version the binding targets (`spec.version`) and `APPLIED` is the version last reconciled:
+
+```shell-session
+$ kubectl get resourcebindings --all-namespaces
+NAMESPACE   NAME                   RESOURCE   PROMISE   DESIRED   APPLIED
+team-a      cache-redis-1564f      cache      redis     v1.0.0    v1.0.0
+team-b      sessions-redis-97398   sessions   redis     v1.0.0    v1.0.0
+team-c      queue-redis-ed095      queue      redis     v1.0.0    v1.0.0
+```
+
+`v2.0.0` of the `redis` Promise has just been published. The rest of this guide covers upgrading these resources from
+`v1.0.0` to `v2.0.0`.
+
+## How upgrades work
+
+Four custom resources are involved in a controlled upgrade:
+
+- **[Promise Revisions](/main/reference/promises/promise-upgrade/promise-revisions)** capture the spec of a Promise at a
+  given version. Publishing `v2.0.0` of the `redis` Promise creates a new revision alongside the existing `v1.0.0` one. A
+  revision is what a resource is upgraded to.
+
+- **[Resource Bindings](/main/reference/promises/promise-upgrade/resource-bindings)** tie a Resource Request to the
+  Promise Revision it is reconciled at. Kratix creates one for every Resource Request. An upgrade changes the binding's
+  `spec.version`, and the binding must be pinned for an Upgrade Plan to control when it moves.
+
+- **[Upgrade Plans](/ske/reference/promise-upgrades/upgrade-plans)** define the upgrade strategy: which Promise, which
+  versions to upgrade from and to, in what order, at what pace, and within which time windows.
+
+- **[Upgrade Runs](/ske/reference/promise-upgrades/upgrade-runs)** execute a plan once. A run snapshots the resources it
+  will upgrade, then works through the plan's rollout groups, patching each Resource Binding to the target version.
+
+## Example scenarios
+
+Each scenario below configures one part of an Upgrade Plan. They are not mutually exclusive: a single plan can define
+ordered rollout groups, upgrade windows, and an execution schedule together.
+
+### Scenario 1: Rollout groups with a canary
+
+An [Upgrade Plan](/ske/reference/promise-upgrades/upgrade-plans) divides the fleet into **rollout groups**, processed in
+order. A group must complete before the next begins, and if any resource in a group fails to upgrade, the run stops and
+the remaining groups are not processed. Placing a small group first makes it a canary: a faulty `v2.0.0` fails there
+before it reaches later groups.
+
+The following plan upgrades `dev` first, then `staging`, then `prod`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: UpgradePlan
+metadata:
+  name: redis-v1-to-v2
+spec:
+  promiseRef:
+    name: redis
+  upgradePath:
+    from:
+      - "v1.0.0"
+    to: "v2.0.0"
+  rolloutGroups:
+    # highlight-start
+    - name: canary
+      selectors:
+        matchLabels:
+          env: dev
+      maxConcurrent: 1
+    - name: staging
+      selectors:
+        matchLabels:
+          env: staging
+      maxConcurrent: "50%"
+    - name: production
+      selectors:
+        matchLabels:
+          env: prod
+      maxConcurrent: 1
+    # highlight-end
+```
+
+- Groups run in list order: `canary` completes before `staging`, and `staging` before `production`.
+- `maxConcurrent` limits how many resources in a group upgrade at once. It accepts an integer (`1`) or a percentage of
+  the group (`"50%"`). If omitted, all resources in the group may start together.
+- Selectors match the labels Kratix copies from a Resource Request onto its
+  [Resource Binding](/main/reference/promises/promise-upgrade/resource-bindings), so the `env` labels select the fleet.
+
+Because the run stops on the first failure, a faulty `v2.0.0` on a `dev` resource halts the run before `staging` or
+`prod` are patched, leaving those groups on `v1.0.0` while you investigate. To find which resource failed, inspect the
+run's events with `kubectl describe upgraderun <run-name>`; see
+[Identifying a failed resource](/ske/reference/promise-upgrades/upgrade-runs#identifying-a-failed-resource).
+
+:::note
+
+A resource whose labels match more than one group is included in each matching group; groups are not de-duplicated. Keep
+selectors mutually exclusive (as the `env` labels are here) to upgrade each resource exactly once.
+
+:::
+
+### Scenario 2: Maintenance windows and change freezes
+
+Rollout groups can restrict when upgrades start using **resource upgrade windows**. Each window has a `kind` (`allow` or
+`deny`), a cron `schedule` for when it opens, a `duration`, and a `timeZone`.
+
+An `allow` window restricts upgrades to a nightly maintenance slot:
+
+```yaml
+rolloutGroups:
+  - name: production
+    selectors:
+      matchLabels:
+        env: prod
+    # highlight-start
+    resourceUpgradeWindows:
+      - kind: allow
+        schedule: "0 22 * * *" # every day at 22:00
+        duration: "4h"         # open until 02:00
+        timeZone: "Europe/London"
+    # highlight-end
+```
+
+With only `allow` windows defined, upgrades start only during those windows. A `deny` window blocks upgrades for its
+duration. To freeze upgrades over a weekend:
+
+```yaml
+resourceUpgradeWindows:
+  # highlight-start
+  - kind: deny
+    schedule: "0 0 * * 6" # Saturday at midnight
+    duration: "48h"       # frozen all weekend
+    timeZone: "Europe/London"
+  # highlight-end
+```
+
+The two kinds can be combined to allow upgrades only within a maintenance window while still blocking them during a
+freeze:
+
+| Windows defined | Behaviour |
+|-----------------|-----------|
+| None | Upgrades may start at any time |
+| Allow only | Open during allow windows; denied outside them |
+| Deny only | Open at all times except during deny windows |
+| Allow and deny | Open during allow windows; a deny window takes precedence if both are active |
+
+:::note
+
+Resource Upgrade Windows only gate when a _new_ upgrade may **start**. A resource that is already mid-upgrade when a window closes is not
+interrupted; it runs to completion.
+
+:::
+
+See [Resource Upgrade Windows](/ske/reference/promise-upgrades/upgrade-plans#resource-upgrade-windows) for the full set
+of rules.
+
+### Scenario 3: Scheduled upgrades
+
+By default, you trigger an upgrade by creating an [Upgrade Run](/ske/reference/promise-upgrades/upgrade-runs) manually.
+Adding an `upgradeExecutionPolicy` to the plan makes SKE create runs automatically on a schedule.
+
+This plan runs every Saturday at 23:00:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: UpgradePlan
+metadata:
+  name: redis-v1-to-v2
+spec:
+  promiseRef:
+    name: redis
+  upgradePath:
+    from:
+      - "v1.0.0"
+    to: "v2.0.0"
+  # highlight-start
+  upgradeExecutionPolicy:
+    repeatSchedule: "0 23 * * 6" # every Saturday at 23:00
+    timeZone: "Europe/London"
+  # highlight-end
+  rolloutGroups:
+    - name: all
+      selectors:
+        matchLabels:
+          kratix.io/promise-name: redis
+```
+
+Use `repeatSchedule` (a cron expression) for recurring runs, `executeAt` (a one-off `YYYY-MM-DDTHH:mm` datetime) for a
+single run, or both. SKE creates a new Upgrade Run each time the schedule fires, named after the plan and the trigger
+time.
+
+An execution policy composes with rollout groups and upgrade windows: `upgradeExecutionPolicy` controls when a run is
+created, while the rollout groups control how it proceeds.
+
+:::note
+
+If a schedule fires while a run for the same plan is still in progress, SKE does not start a second run alongside it. It
+suspends the active run and starts a new one in its place. See
+[Superseded runs](/ske/reference/promise-upgrades/upgrade-runs#superseded-runs).
+
+:::
+
+See [Upgrade Execution Policy](/ske/reference/promise-upgrades/upgrade-plans#upgrade-execution-policy) for the full field
+reference.
+
+## Auditing an upgrade before it runs
+
+To review which resources a run will upgrade before any are changed, create the
+[Upgrade Run](/ske/reference/promise-upgrades/upgrade-runs) with `suspend: true`. A suspended run still snapshots the
+eligible resources and writes the snapshot to a ConfigMap, but does not start the upgrade.
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: platform.syntasso.io/v1alpha1
+kind: UpgradeRun
+metadata:
+  name: redis-v1-to-v2-preview
+spec:
+  upgradePlanRef:
+    name: redis-v1-to-v2
+  suspend: true
+EOF
+```
+
+The run records the snapshot ConfigMaps in `status.resourceListRefs`. Read the snapshot to see the resources grouped by
+rollout group, with the version each was on when the snapshot was taken:
+
+```shell-session
+$ kubectl get upgraderun redis-v1-to-v2-preview \
+    -o jsonpath='{.status.resourceListRefs[0].name}'
+redis-v1-to-v2-preview-resource-snapshot
+
+$ kubectl -n kratix-platform-system get configmap \
+    redis-v1-to-v2-preview-resource-snapshot -o jsonpath='{.data.resources}'
+```
+
+The snapshot lists each resource by namespace and name, grouped by rollout group, with the version captured at snapshot
+time (`lastAppliedVersion`) and its target (`specVersion`):
+
+```json
+{
+  "groups": [
+    {
+      "name": "canary",
+      "resources": [
+        { "namespace": "team-a", "name": "cache", "lastAppliedVersion": "v1.0.0", "specVersion": "v1.0.0" }
+      ]
+    },
+    {
+      "name": "staging",
+      "resources": [
+        { "namespace": "team-b", "name": "sessions", "lastAppliedVersion": "v1.0.0", "specVersion": "v1.0.0" }
+      ]
+    },
+    {
+      "name": "production",
+      "resources": [
+        { "namespace": "team-c", "name": "queue", "lastAppliedVersion": "v1.0.0", "specVersion": "v1.0.0" }
+      ]
+    }
+  ]
+}
+```
+
+If the list is correct, resume the run by setting `suspend` to `false`:
+
+```bash
+kubectl patch upgraderun redis-v1-to-v2-preview \
+  --type merge -p '{"spec":{"suspend":false}}'
+```
+
+To cancel instead, delete the run. Its snapshot ConfigMap is removed with it:
+
+```bash
+kubectl delete upgraderun redis-v1-to-v2-preview
+```
+
+See [Previewing an upgrade before it runs](/ske/reference/promise-upgrades/upgrade-runs#previewing-an-upgrade-before-it-runs)
+and the [Resource Snapshot](/ske/reference/promise-upgrades/upgrade-runs#resource-snapshot) reference for the full detail
+of what the snapshot contains.
