@@ -398,3 +398,32 @@ spec:
               - image: ghcr.io/syntasso/kratix-marketplace/namespace-configure-pipeline:v0.1.0
                 name: namespace-configure-pipeline
 ```
+
+## Promise API validations in Port {#validations}
+
+When the controller generates self-service actions for a Promise, it carries the
+validation rules from the Promise API into the Port action form. Users get
+immediate feedback on invalid input, before a request reaches the platform.
+
+The following validations are supported:
+
+| Promise API field type | Validations shown and enforced in Port |
+| --- | --- |
+| `string` | `pattern`, `minLength`, `maxLength`, `enum` |
+| `integer` / `number` | `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, `enum` |
+| `array` | `minItems`, `maxItems`, plus any of the above on `items` |
+| `object` | Nested fields become individual form inputs (named `parent__child`), each validated with the rules above. Nested `required` fields are required in the form. |
+
+### Limitations
+
+Port cannot express every validation a Promise API can. Any rule that Port
+cannot enforce is still enforced by Kubernetes when the request is applied to the Kubernetes cluster.
+
+* **Integers are treated as numbers.** Port has no integer type, so integer
+fields become number inputs. For integers, range rules still apply, but a decimal value such
+as `2.5` is accepted by the form and rejected later by Kubernetes.
+* `multipleOf`, `oneOf`/`allOf`/`anyOf`, and CEL rules (`x-kubernetes-validations`) are
+not supported by Port. They are enforced only when the request is applied.
+* **Numeric enums are not shown on catalogue entities.** A numeric `enum`
+(for example `enum: [1, 2, 3]`) works in the action form, but the entity view
+in the Port catalogue displays the field as a plain number.
