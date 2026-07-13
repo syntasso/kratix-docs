@@ -358,6 +358,12 @@ kratix-platform-controller-manager   1/1     1            1           1h
 ske-operator-controller-manager      1/1     1            1           1h
 ```
 
+For SKE versions that include the Platform Manager, you will also see a `ske-platform-manager` deployment, which manages SKE upgrade plans and runs:
+
+```shell-session
+ske-platform-manager                 1/1     1            1           1h
+```
+
 You can now proceed with the configuration of Kratix (i.e. registering destinations or
 installing promises). For that, refer to the Open-Source Kratix documentation.
 
@@ -473,6 +479,12 @@ You should see the following output:
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
 ske-operator-controller-manager      1/1     1            1           1h
+```
+
+For SKE versions that include the Platform Manager, you will also see a `ske-platform-manager` deployment, which manages SKE upgrade plans and runs:
+
+```shell-session
+ske-platform-manager                 1/1     1            1           1h
 ```
 
 You can now proceed with the configuration of Kratix (i.e. registering destinations or
