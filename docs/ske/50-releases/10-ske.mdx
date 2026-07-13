@@ -19,6 +19,17 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.52.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.52.0/) (2026-07-13)
+
+#### Features
+
+* Introduces the SKE Platform Manager, a new component that manages SKE upgrade plans and runs. The Platform Manager runs its own webhook server; when using the SKE Operator with cert-manager disabled, a separate TLS certificate for the Platform Manager is now required. For information on configuring the required certificates, see the [installation documentation](/ske/installing-ske/advanced-install#custom-certs).
+* Destinations now surface a warning when referencing a StateStore that does not exist.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.51.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.51.0/) (2026-07-07)
 
 #### Features
