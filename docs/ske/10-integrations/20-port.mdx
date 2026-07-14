@@ -167,7 +167,8 @@ that can generate resource requests that match the Promise CRD.
 
 Below is an example action stored in a workflow file called `port-action.yml` (the file
 name is configurable using the `PORT_GITHUB_WORKFLOW` environment variable). This example
-will support create, update, and delete flows as well as sharing log data back to Port:
+will support create, update, and delete flows as well as sharing log data back to Port.
+It stores each request as `<folder>/<namespace>/<kind>/<name>.yaml`:
 
 <details>
   <summary>Example `port-action.yml` contents</summary>
@@ -216,11 +217,13 @@ jobs:
             echo '${{ inputs.manifest }}' | jq .  > temp.json
             yaml_data=$(yq -p json -o yaml temp.json)
             name=$(echo '${{ inputs.manifest }}' | jq -r .metadata.name)
-            mkdir -p ${{ inputs.folder }}
+            namespace=$(echo '${{ inputs.manifest }}' | jq -r '.metadata.namespace // "default"')
+            kind=$(echo '${{ inputs.manifest }}' | jq -r '.kind | ascii_downcase')
+            mkdir -p "${{ inputs.folder }}/$namespace/$kind"
             if [ "${{ inputs.operation }}" = "DELETE" ]; then
-              rm -f "${{ inputs.folder }}/$name.yaml"
+              rm -f "${{ inputs.folder }}/$namespace/$kind/$name.yaml"
             else
-              echo "$yaml_data" > "${{ inputs.folder }}/$name.yaml"
+              echo "$yaml_data" > "${{ inputs.folder }}/$namespace/$kind/$name.yaml"
             fi
             rm -f temp.json
       - uses: port-labs/port-github-action@v1
