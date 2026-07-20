@@ -133,7 +133,7 @@ export function Marketplace(): JSX.Element {
             <p className="text--center">
               Explore the community Marketplace featuring pre-built{" "}
               <a href="#promises">Promises</a> and{" "}
-              <a href="#images">Pipeline images</a> for{" "}
+              <a href="#images">Pipeline Stages</a> for{" "}
               <Link href="/">Kratix</Link>, the open-source framework that helps you
               build flexible, composable internal developer platforms.
               Kratix lets you rapidly deliver resources as-a-service, embed key
@@ -175,7 +175,7 @@ export function Marketplace(): JSX.Element {
 
           <section id="images" className={styles.pipelineMarketplace}>
             <hgroup className="text--center">
-              <h2>Pipeline Images</h2>
+              <h2>Pipeline Stages</h2>
               <p className="text--center"></p>
             </hgroup>
 
