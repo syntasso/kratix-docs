@@ -1,0 +1,28 @@
+---
+title: Portal Controller
+description: Release information about the Portal Controller
+sidebar_label: Portal Controller
+---
+
+## Overview
+
+The Portal Controller syncs Kratix Promises and Resource requests into a developer portal, such as Backstage or Cortex, from a single, unified integration. It replaces the
+[Backstage Controller](./backstage-controller) and [SKE Cortex Controller](./cortex-controller), which are now deprecated in its favour. See
+[Portal Controller](/ske/integrations/portal-controller/intro) for the full documentation.
+
+The release manifest is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/
+```
+
+## Release Notes
+
+### [v0.1.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.1.0/)
+
+#### Features
+
+* Initial release.
+* Sync Promises and Resource requests into Backstage or Cortex via a single `SKEIntegration` of `type: portal-controller`.
+* `PortalCustomization` CRD for customizing generated entities, replacing `BackstageEntityCustomization`.
+* Migration guides for moving off the standalone Backstage and Cortex Controllers.
