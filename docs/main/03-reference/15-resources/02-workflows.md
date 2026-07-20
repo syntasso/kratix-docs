@@ -46,6 +46,12 @@ spec:
 The `configure` workflow runs when the Resource is created, updated or reconciled, or
 when the parent Promise is updated.
 
+:::info 
+
+You can determine whether a configure workflow is a create or an update by checking the `observedGeneration` in the Resource status. If it is an update, the observedGeneration will be greater than 1.
+
+:::
+
 ### Multiple Pipelines
 
 Resource Configure workflows allow for **multiple** Pipelines to be executed in
