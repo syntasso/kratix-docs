@@ -1,0 +1,67 @@
+---
+title: Introduction
+description: Introduction to the SKE Portal Controller
+sidebar_label: Overview
+keywords: [portal, internal developer portal, idp, backstage, cortex]
+---
+
+The Portal Controller is a single integration that syncs Kratix Promises and Resource requests
+into a developer portal, such as Backstage or Cortex. It replaces the standalone
+[Backstage Controller](../backstage/intro) and [Cortex Controller](../cortex/intro), which are
+now deprecated in favour of this controller.
+
+:::info Portal vs Port
+"Portal" (this section) is Syntasso's unified catalogue-sync layer for developer portals such as
+Backstage and Cortex. It is unrelated to [Port](../port) (port.io), a different third-party
+integration documented elsewhere in this section.
+:::
+
+## What the integration provides
+
+The Portal Controller enables platform teams to:
+
+- Connect the platform to one or more developer portals from a single `SKEIntegration`
+- Publish Kratix Promises and Resources as entities in Backstage, Cortex, or a bring-your-own portal
+- Opt Promises and Resources into a portal with a label, rather than a dedicated CRD per portal
+- Customise the generated entities per Promise with a `PortalCustomization`
+- Migrate from the standalone Backstage or Cortex controllers at your own pace, since both
+  continue to work alongside the Portal Controller for at least one more release
+
+## Architecture
+
+A platform team declares every portal the platform exposes on one `SKEIntegration`
+of `spec.type: portal-controller`. Each portal has a **portal type** (`backstage`, `cortex`,
+or a custom type) and its own URL, credential and configuration.
+
+A Promise (or Resource request) opts into a portal with a label:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-backstage: "true"
+```
+
+When the Promise syncs, the controller runs a pipeline made up of three stages:
+
+```
+generate  →  [customize …]  →  writer
+```
+
+- **generate** produces the entity documents for the portal (for example, a Backstage Component
+  and Template, or a Cortex entity and workflows).
+- **customize** *(optional)* runs zero or more author-supplied containers, declared on a
+  `PortalCustomization`, that edit those documents in place.
+- **writer** ships the finished documents to the portal, either through the platform's state
+  store (Backstage) or by calling the portal's API directly (Cortex).
+
+Portal types that call a live API, Cortex today, also run a one-time setup Job when the portal is created, and a long-lived status exporter that pushes resource status
+changes as they happen. See [What gets deployed per portal](./installation#what-gets-deployed-per-portal) for details.
+
+The following sections cover this in more detail:
+
+- [Installation](./installation) walks through installing the Portal Controller and connecting
+  it to a portal.
+- [Customization](./customization) covers the `PortalCustomization` resource and how to bind a
+  Promise to one.
+- [Migrating from Backstage](./migrating-from-backstage) and
+  [Migrating from Cortex](./migrating-from-cortex) cover moving an existing integration across.

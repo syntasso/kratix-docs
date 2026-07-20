@@ -23,7 +23,18 @@ Kratix comes with its own webhooks, so it needs certificates to be configurable.
 
 Kratix is usually deployed via the SKE Operator. The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE) and is the recommended approach for installing and managing your SKE installation. It is installed in the Platform Cluster, and will manage the installation of Kratix for you. To install the SKE Operator, follow the instructions in the [SKE Operator documentation](/ske/installing-ske/advanced-install).
 
-The SKE Operator can also deploy the Backstage Controller, which is an optional component that can be used to integrate your Platform with Backstage. The Backstage Controller will automatically generate the Backstage entities when Promises or resources are created or updated. To install the Backstage Controller, follow the instructions in the [Backstage Controller documentation](/ske/integrations/backstage/installation/generating-backstage-components#installing-the-backstage-controller). To populate the backstage catalog, SKE uses a Git Repository.
+The SKE Operator can also deploy the Portal Controller, which is an optional component that can be used to integrate your Platform with a developer portal such as Backstage or
+Cortex. The Portal Controller will automatically generate the portal entities when Promises or resources are created or updated. To install the Portal Controller, follow the
+instructions in the [Portal Controller documentation](/ske/integrations/portal-controller/installation). To populate the catalogue, SKE uses a Git Repository or, for Cortex, the
+Cortex API directly.
+
+:::info
+
+SKE also ships standalone Backstage and Cortex Controllers, now deprecated in favour of the Portal Controller above. See the
+[Backstage](/ske/integrations/portal-controller/migrating-from-backstage) and [Cortex](/ske/integrations/portal-controller/migrating-from-cortex) migration guides if you are
+running one of these today.
+
+:::
 
 
 :::tip Multiple Interfaces

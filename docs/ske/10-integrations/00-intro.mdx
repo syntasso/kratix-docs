@@ -20,10 +20,16 @@ The documentation is divided in the following subsections:
 - [Backstage](./backstage/intro) contains documentation on how to
   configure your Backstage instance with the [SKE plugin](./backstage/installation/plugins), as well as how to
   configure your Promises to auto populate the Backstage catalog using the [SKE
-  Backstage Controller](./backstage/installation/generating-backstage-components).
+  Backstage Controller](./backstage/installation/generating-backstage-components). The Backstage Controller is
+  deprecated in favour of the [Portal Controller](./portal-controller/intro).
 - [Cortex](./cortex/intro) documents how to configure Cortex with the
   [SKE Integration](./backstage/installation/plugins), as well as how to
   configure your Promises to auto populate the Cortex catalog with Entities and Workflows for
-  managing the lifecycle of Resource Requests.
+  managing the lifecycle of Resource Requests. The Cortex Controller is deprecated in favour of the
+  [Portal Controller](./portal-controller/intro).
+- [Portal Controller](./portal-controller/intro) is the unified integration for syncing Promises and Resources
+  into a developer portal such as Backstage or Cortex, replacing the standalone Backstage and Cortex
+  Controllers above.
 - [Port](./port) describes how to deploy and configure the SKE Port Controller which
-  keeps Port configuration aligned with your platform APIs.
+  keeps Port configuration aligned with your platform APIs. Port is unrelated to the
+  [Portal Controller](./portal-controller/intro) above, despite the similar name.
