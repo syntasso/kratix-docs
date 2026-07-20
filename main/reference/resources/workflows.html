@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.1d8f47c7.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.28810a8e.js" defer="defer"></script>
 <script src="/assets/js/main.75cae5d5.js" defer="defer"></script>
 </head>
 <body>
@@ -48,6 +48,7 @@ Promise definition as shown below.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="configure-workflows">Configure Workflows<a href="#configure-workflows" class="hash-link" aria-label="Direct link to Configure Workflows" title="Direct link to Configure Workflows" translate="no">​</a></h2>
 <p>The <code>configure</code> workflow runs when the Resource is created, updated or reconciled, or
 when the parent Promise is updated.</p>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>You can determine whether a configure workflow is a create or an update by checking the <code>observedGeneration</code> in the Resource status. If it is an update, the observedGeneration will be greater than 1.</p></div></div>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="multiple-pipelines">Multiple Pipelines<a href="#multiple-pipelines" class="hash-link" aria-label="Direct link to Multiple Pipelines" title="Direct link to Multiple Pipelines" translate="no">​</a></h3>
 <p>Resource Configure workflows allow for <strong>multiple</strong> Pipelines to be executed in
 sequence.</p>
