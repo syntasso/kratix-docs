@@ -55,6 +55,12 @@ The Cortex Controller takes the API of the Promise and uses this to create the f
 
 Cortex [supports the following API types:](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) `boolean`, `number`, `object`, `string`, as well as `arrays` of each of these types. Object arrays can only have a single level of nesting. Outside of an array, objects cannot exceed more than five levels of nesting. Promise schema constructs that include properties outside this set cannot be expressed as Workflow inputs, and when the controller encounters one, the Create, Update, and Delete Workflows in Cortex will not be generated.
 
+#### Optional fields in Resource Requests
+
+When a user leaves an optional field blank in a Cortex form, the generated Resource Request omits that field. Optional nested objects are also omitted when all of their fields are blank. This prevents blank values from failing validation against the Promise API.
+
+Required fields and boolean fields are always included. Valid values such as `false` for a boolean or `0` for a number are preserved. Empty arrays are included as `[]`.
+
 :::info Quoting numeric values in string inputs
 
 When a Cortex Workflow input is typed as `string` and a user enters a value that consists only of digits, make sure to wrap purely numeric values in quotes (for example, `"0001234"`) when filling the Cortex form so the value is interpreted as a string.
