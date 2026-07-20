@@ -16,6 +16,12 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cort
 
 ## Release Notes
 
+### [v0.10.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.10.1/) (2026-07-20)
+
+#### Fixes
+
+* Fixed an issue where blank optional fields in Cortex forms produced invalid Resource Requests. Generated Resource Requests now omit blank optional fields and nested objects, while preserving valid boolean and number values such as `false` and `0`.
+
 ### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.10.0/) (2026-06-30)
 
 #### Features
