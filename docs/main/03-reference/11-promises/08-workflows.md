@@ -41,6 +41,12 @@ spec:
 
 The `configure` workflow runs when the Promise is created, updated, or reconciled.
 
+:::info 
+
+You can determine whether a workflow is a create or an update by checking the `observedGeneration` in the Promise status
+
+:::
+
 ### Multiple Pipelines
 
 Promise Configure workflows allow for **multiple** Pipelines to be executed in sequence.
