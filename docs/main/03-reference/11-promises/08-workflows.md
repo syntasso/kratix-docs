@@ -43,7 +43,7 @@ The `configure` workflow runs when the Promise is created, updated, or reconcile
 
 :::info 
 
-You can determine whether a workflow is a create or an update by checking the `observedGeneration` in the Promise status
+You can determine whether a workflow is a create or an update by checking the `observedGeneration` in the Promise status. If it is an update, the observedGeneration will be greater than 1.
 
 :::
 
