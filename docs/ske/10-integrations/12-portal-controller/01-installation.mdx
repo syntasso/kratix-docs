@@ -31,8 +31,8 @@ Each entry under `spec.portals` describes one portal instance:
 | `type` | yes | The portal type this entry targets, for example `backstage` or `cortex`. |
 | `url` | depends on `type` | The portal's base URL. |
 | `secretRef` | depends on `type` | Names the portal's credential Secret (see [Credential Secret handling](#credential-secret-handling)). |
-| `config` | depends on `type` | Portal-specific settings. Values may be strings or objects/arrays. |
-| `adapterConfig` | no | Overrides the bundled default adapter image for this one portal, and/or passes portal-wide `generateFlags` to it. See [Adapter image resolution](#adapter-image-resolution) and [Portal-wide generate flags](#portal-wide-generate-flags). |
+| `config` | depends on `type` | Portal connection settings only (for Cortex, the keys below). Values may be strings or objects/arrays. Image pull secrets and the exporter Deployment overlay live on `adapterConfig`, not here. |
+| `adapterConfig` | depends on `type` | Sets the adapter image for this portal and, for a shipped type, its generate-stage flags. Optional for `backstage`/`cortex`; required for a bring-your-own portal type. See [Adapter image resolution](#adapter-image-resolution) and [Portal-wide generate flags](#portal-wide-generate-flags). |
 
 You can declare more than one portal, of the same or different types, on the same `SKEIntegration`. What each of these fields needs varies by `type`, Backstage and
 Cortex are covered separately below.
@@ -115,31 +115,32 @@ portals additionally run:
 
 Backstage does not need either of these, its writer ships straight to a state store with no live API to call, so there is nothing to keep a persistent connection to.
 
-You can tune the Cortex status exporter's pod (and the setup/sync Jobs for that portal) via `portals[].config`:
+You can tune the Cortex status exporter's pod, and the image pull secrets for its Deployment and the setup/sync Jobs, via `adapterConfig`:
 
 ```yaml
 portals:
   - name: prod
     type: cortex
-    # ... url, secretRef, repositoryName, provider, integrationAlias as above
-    config:
+    # ... url, secretRef, config (repositoryName, provider, integrationAlias) as above
+    adapterConfig:
       imagePullSecrets: # extra pull-secret names, always merged with syntasso-registry
         - customer-registry
-      deploymentSpec: # partial Deployment spec, merged into the exporter Deployment
-        template:
-          spec:
-            nodeSelector:
-              tier: portal
-            tolerations:
-              - key: dedicated
-                operator: Equal
-                value: portal
-                effect: NoSchedule
+      exporter:
+        deploymentSpec: # partial Deployment spec, merged into the exporter Deployment
+          template:
+            spec:
+              nodeSelector:
+                tier: portal
+              tolerations:
+                - key: dedicated
+                  operator: Equal
+                  value: portal
+                  effect: NoSchedule
 ```
 
-`deploymentSpec` is strategically merged into the exporter Deployment, prefer pod-level fields such as `nodeSelector`, `tolerations`, and `affinity`. Controller-owned fields (the
-exporter container itself, its Service Account, labels, credential injection, and image pull secrets) are always re-applied afterwards, so a `containers` entry in the overlay is
-discarded rather than replacing the exporter's own container.
+`exporter.deploymentSpec` is strategically merged into the exporter Deployment, prefer pod-level fields such as `nodeSelector`, `tolerations`, and `affinity`. Controller-owned
+fields (the exporter container itself, its Service Account, labels, credential injection, and image pull secrets) are always re-applied afterwards, so a `containers` entry in the
+overlay is discarded rather than replacing the exporter's own container.
 
 ## Credential Secret handling
 
@@ -184,25 +185,25 @@ If a Promise's label matches more than one portal of a type and no instance is g
 
 ## Adapter image resolution
 
-By default, every portal uses the adapter bundled inside the Portal Controller's own image, at the version set on `spec.version`. To pin a different adapter image for
-one portal, for example to bring your own portal integration, set `adapterConfig.image`:
+By default, a `backstage` or `cortex` portal uses the adapter bundled inside the Portal Controller's own image, at the version set on `spec.version`. To pin a different adapter
+image for one portal, set `adapterConfig.image` to a single image reference (`repo:tag` or `repo@sha256`, there is no separate version field):
 
 ```yaml
 portals:
   - name: prod
     type: backstage
     adapterConfig:
-      image: acme/custom-portal-adapter
-      version: v3
+      image: acme/custom-portal-adapter:v3
 ```
 
-`adapterConfig.image` is optional. An entry may set [`generateFlags`](#portal-wide-generate-flags) alone to keep running the bundled default adapter, set `image` (with
-`version` appended) to override it, or set both. `adapterConfig.version` may only be set alongside `adapterConfig.image`, there is no version-only override of the bundled default
-adapter, and setting `version` without `image` is rejected.
+For a bring-your-own portal type (any `type` the controller has no built-in adapter for), `adapterConfig.image` is **required**, there is no bundled default to fall back to. If it
+is missing, the `SKEIntegration` is rejected at admission, and the connection reports `IntegrationDeploymentReady: False` with reason `UnknownPortalType`. The full set of
+`adapterConfig` sub-fields for driving a custom adapter (`generate.env`, `writer`, `exporter`) is beyond this guide; `backstage` and `cortex` portals use their built-in behaviour
+and only need `image` (an optional override) and `generate.args` (below).
 
 ## Portal-wide generate flags
 
-`adapterConfig.generateFlags` is a list of flags passed verbatim to the adapter's `generate` stage for that portal. Every Promise and Resource routed through the portal
+`adapterConfig.generate.args` is a list of flags passed verbatim to the adapter's `generate` stage for that portal. Every Promise and Resource routed through the portal
 gets the same behaviour, so this is a portal-wide setting, not per-Promise. Two flags are currently wired:
 
 | Flag | Portal type | Effect |
@@ -216,8 +217,9 @@ portals:
     type: cortex
     # ... url, secretRef, config as above
     adapterConfig:
-      generateFlags:
-        - "--fixed-namespace=team-a"
+      generate:
+        args:
+          - "--fixed-namespace=team-a"
 ```
 
 These reproduce behaviour that the standalone controllers offered per-Promise (the Cortex `kratix.io/cortex-fixed-namespace` annotation and the Backstage
@@ -226,7 +228,7 @@ the per-Promise forms map across.
 
 :::warning
 
-Do not put credentials in `generateFlags`. Unlike a `secretRef` credential (injected into the writer container via `secretKeyRef`), these flags are passed as container arguments
+Do not put credentials in `generate.args`. Unlike a `secretRef` credential (injected into the writer container via `secretKeyRef`), these flags are passed as container arguments
 and are visible to anyone with read access to the Job in `kratix-platform-system`.
 
 :::
