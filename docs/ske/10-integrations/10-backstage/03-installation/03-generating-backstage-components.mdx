@@ -1,16 +1,37 @@
 ---
-title: Generating Backstage Components with the Backstage Controller
-description: Documentation for how to use the Backstage Controller to generate Backstage Components
-sidebar_label: Generating Backstage Components with the Backstage Controller
+title: Generating Backstage Components
+description: How to sync Promises and Resources into your Backstage catalogue
+sidebar_label: Generating Backstage Components
 ---
 
-:::warning Deprecated
+The recommended way to sync Promises and Resources into Backstage is the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces the standalone Backstage
+Controller. The Backstage Controller continues to work for at least one more release; see [Migrating from the Backstage Controller](/ske/integrations/portal-controller/migrating-from-backstage)
+to move an existing setup across.
 
-The Backstage Controller is deprecated in favour of the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces it (and the Cortex Controller) with a
-single, unified integration. It continues to work for at least one more release. See
-[Migrating from the Backstage Controller](/ske/integrations/portal-controller/migrating-from-backstage) when you are ready to move.
+## Set up with the Portal Controller
 
-:::
+1. Install the Portal Controller with a `backstage` portal, see [Portal Controller Installation](/ske/integrations/portal-controller/installation#configuring-a-backstage-portal).
+2. Label the Promise you want to publish with `kratix.io/portal-backstage: "true"`.
+3. To shape the generated Component or Template, bind a [PortalCustomization](/ske/integrations/portal-controller/customization) to the Promise.
+
+For example, to opt a Promise in:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/portal-backstage: "true"
+```
+
+You still need the [Backstage plugins](./plugins) installed and a [Backstage Destination](./creating-entity-state-store) configured. Those are unchanged by the move to the
+Portal Controller.
+
+<details>
+<summary>Looking for the legacy Backstage Controller docs?</summary>
+
+The instructions below use the deprecated Backstage Controller. They are kept for existing installations during migration; new setups should use the Portal Controller above.
 
 The Backstage Controller generates Backstage components and templates for Promises and Resource Requests.
 
@@ -237,3 +258,5 @@ For Promises, this is equal to `promise-backstage-gen` and for resources, `resou
 
 By default, Destination selectors defined in the customization will apply to all generated Backstage components.
 You can use these to make sure that generated components are only scheduled to your Backstage destinations.
+
+</details>

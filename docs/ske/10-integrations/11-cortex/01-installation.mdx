@@ -11,21 +11,21 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 ```
 
-:::warning Deprecated
+To integrate SKE with Cortex, you need to set up your Cortex workspace and install the Cortex integration on your Platform cluster.
 
-The SKE Cortex Controller is deprecated in favour of the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces it (and the Backstage Controller) with a
-single, unified integration. It continues to work for at least one more release. See
-[Migrating from the Cortex Controller](/ske/integrations/portal-controller/migrating-from-cortex) when you are ready to move.
+:::note
+
+The workspace, token, and GitOps steps on this page apply whether you run the recommended [Portal Controller](/ske/integrations/portal-controller/intro) or the legacy Cortex
+Controller. Only the controller install differs, the Portal Controller is now the recommended path.
 
 :::
-
-To integrate SKE with Cortex, you need to set up your Cortex workspace and install the SKE Cortex integration on your Platform cluster.
 
 This document will cover:
 
 - [Configuring the Cortex Workspace](#set-up-the-cortex-workspace)
 - [Creating a Cortex token for Kratix](#create-a-cortex-token-for-ske)
-- [Installing Cortex Controller](#install-the-ske-cortex-controller)
+- [Installing the Cortex integration](#install-the-cortex-integration)
+- [Configuring GitOps for Cortex-generated Resource Requests](#configure-gitops-for-cortex-generated-resource-requests)
 
 ## Set up the Cortex Workspace
 
@@ -51,7 +51,17 @@ The SKE Cortex integration will use the access token to authenticate. It will:
 
 Please ensure the token is generated with the right permissions.
 
-## Install the SKE Cortex Controller
+## Install the Cortex integration {#install-the-cortex-integration}
+
+The recommended way to install the Cortex integration is the [Portal Controller](/ske/integrations/portal-controller/intro): install it with a `cortex` portal, reusing the
+workspace, token, and GitOps setup on this page. See [Portal Controller Installation](/ske/integrations/portal-controller/installation#configuring-a-cortex-portal) for the
+`SKEIntegration` fields, and [Migrating from the Cortex Controller](/ske/integrations/portal-controller/migrating-from-cortex) if you are moving off the standalone controller.
+
+<details>
+<summary>Looking for the legacy Cortex Controller install docs?</summary>
+
+The instructions below install the deprecated standalone Cortex Controller. They are kept for existing installations during migration; new setups should use the Portal
+Controller above.
 
 ### Via the SKE Operator Helm Chart
 
@@ -200,6 +210,8 @@ kubectl apply --filename cortex-integration.yaml
 ```
 
 The operator will then install the Cortex Controller and the desired configurations.
+
+</details>
 
 ## Configure GitOps for Cortex-Generated Resource Requests
 

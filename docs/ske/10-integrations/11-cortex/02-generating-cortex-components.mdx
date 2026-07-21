@@ -6,13 +6,39 @@ slug: generating-cortex-components
 keywords: [cortex, installation, ske, controller]
 ---
 
-:::warning Deprecated
+import CortexCreateWorkflow from "/img/docs/ske/cortex-create-workflow.png"
+import CortexEntities from "/img/docs/ske/cortex-entities.png"
+import CortexRequestWorkflows from "/img/docs/ske/cortex-request-workflows.png"
 
-The SKE Cortex Controller is deprecated in favour of the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces it (and the Backstage Controller) with a
-single, unified integration. It continues to work for at least one more release. See
-[Migrating from the Cortex Controller](/ske/integrations/portal-controller/migrating-from-cortex) when you are ready to move.
+The recommended way to sync Promises and Resources into Cortex is the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces the standalone Cortex
+Controller. The Cortex Controller continues to work for at least one more release; see [Migrating from the Cortex Controller](/ske/integrations/portal-controller/migrating-from-cortex)
+to move an existing setup across.
 
-:::
+## Set up with the Portal Controller
+
+1. Set up your Cortex workspace, git integration, token, and GitOps reconciliation as described in [Configuring Cortex](./configuring-cortex), those steps are unchanged.
+2. Install the Portal Controller with a `cortex` portal, see [Portal Controller Installation](/ske/integrations/portal-controller/installation#configuring-a-cortex-portal).
+3. Label the Promise you want to publish with `kratix.io/portal-cortex: "true"`.
+
+For example, to opt a Promise in:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/portal-cortex: "true"
+```
+
+The generated entities, workflows, and the Cortex UI experience are the same as described for the legacy controller below. To pin all Resource Requests to a fixed namespace,
+use the portal-wide [`--fixed-namespace`](/ske/integrations/portal-controller/installation#portal-wide-generate-flags) generate flag instead of the
+`kratix.io/cortex-fixed-namespace` annotation.
+
+<details>
+<summary>Looking for the legacy Cortex Controller docs?</summary>
+
+The instructions below use the deprecated Cortex Controller. They are kept for existing installations during migration; new setups should use the Portal Controller above.
 
 With your Cortex Workspace configured and the Cortex Controller installed on your Platform Cluster, you will now be able to leverage the SKE Cortex integration. If you have not
 setup the workspace and installed the controller, follow the [Configuring Cortex guide](./configuring-cortex).
@@ -184,12 +210,6 @@ the Cortex users creating those requests.
 
 ## Managing Resource Requests in Cortex
 
-```mdx-code-block
-import CortexCreateWorkflow from "/img/docs/ske/cortex-create-workflow.png"
-import CortexEntities from "/img/docs/ske/cortex-entities.png"
-import CortexRequestWorkflows from "/img/docs/ske/cortex-request-workflows.png"
-```
-
 When a Promise has been successfully installed with the Cortex integration, Platform users can use Cortex workflows to manage the lifecycle of their services. From either the Entity Type
 view or the Workflows view, users can trigger the Create Workflow for the desired Entity Type that represents the Promise. When initiating the Workflow, they will be presented with the input
 form with fields that honour the Promise API.
@@ -220,3 +240,5 @@ Running the Update Workflow for the Resource Request will update the request in 
 Cortex will be updated accordingly.
 
 Triggering the Delete Workflow will remove the request from the Git Repository, trigger a deletion on the Platform Cluster and remove the Entity from Cortex.
+
+</details>
