@@ -179,3 +179,11 @@ spec:
 ```
 
 Bind the Promise to this profile with the `kratix.io/portal-customization` label (see [Customization](./customization#binding-a-promise-to-a-portalcustomization)).
+
+:::note
+
+This only stops the writer from **creating** those workflows, it does not remove workflows that already exist in Cortex. Unlike the legacy
+`kratix.io/cortex-skip-workflows` annotation, deleting the files does not tear down previously-created workflows. If you are adding this customization to a Promise whose workflows
+are already in Cortex, delete those workflows in Cortex manually.
+
+:::
