@@ -41,7 +41,7 @@ The Cortex adapter uses the Cortex API to generate [Entity Types](https://docs.c
 
 ### Global entities
 
-Two shared Cortex resources are created by the connection's setup Job, which runs when the `cortex` portal is created and re-runs when its configuration changes:
+Two shared Cortex resources are created by the portal's setup Job, which runs when the `cortex` portal is created and re-runs when its configuration changes:
 
 - **`kratix-promise` Entity Type**: the shared entity type used by all Promise entities.
 - **`instance-of-promise` Relationship Type**: the relationship type that links each Resource Request entity back to its parent Promise entity.

@@ -31,7 +31,7 @@ Each entry under `spec.portals` describes one portal instance:
 | `type` | yes | The portal type this entry targets, for example `backstage` or `cortex`. |
 | `url` | depends on `type` | The portal's base URL. |
 | `secretRef` | depends on `type` | Names the portal's credential Secret (see [Credential Secret handling](#credential-secret-handling)). |
-| `config` | depends on `type` | Portal connection settings only (for Cortex, the keys below). Values may be strings or objects/arrays. Image pull secrets and the exporter Deployment overlay live on `adapterConfig`, not here. |
+| `config` | depends on `type` | Settings for this portal only (for Cortex, the keys below). Values may be strings or objects/arrays. Image pull secrets and the exporter Deployment overlay live on `adapterConfig`, not here. |
 | `adapterConfig` | depends on `type` | Sets the adapter image for this portal and, for a shipped type, its generate-stage flags. Optional for `backstage`/`cortex`; required for a bring-your-own portal type. See [Adapter image resolution](#adapter-image-resolution) and [Portal-wide generate flags](#portal-wide-generate-flags). |
 
 You can declare more than one portal, of the same or different types, on the same `SKEIntegration`. What each of these fields needs varies by `type`, Backstage and
@@ -197,7 +197,7 @@ portals:
 ```
 
 For a bring-your-own portal type (any `type` the controller has no built-in adapter for), `adapterConfig.image` is **required**, there is no bundled default to fall back to. If it
-is missing, the `SKEIntegration` is rejected at admission, and the connection reports `IntegrationDeploymentReady: False` with reason `UnknownPortalType`. The full set of
+is missing, the `SKEIntegration` is rejected at admission, and reports `IntegrationDeploymentReady: False` with reason `UnknownPortalType`. The full set of
 `adapterConfig` sub-fields for driving a custom adapter (`generate.env`, `writer`, `exporter`) is beyond this guide; `backstage` and `cortex` portals use their built-in behaviour
 and only need `image` (an optional override) and `generate.args` (below).
 
