@@ -23,7 +23,7 @@ This guide maps every `cortex-config` ConfigMap field onto `portals[].config`, u
 | ConfigMap key `path` (optional) | `portals[].config.path` | Optional string |
 | `spec.cortex.secretRef` / admin Secret | `portals[].secretRef` + admin Secret in `kratix-platform-system` | Same admin-provisions-the-Secret pattern |
 | Promise label `kratix.io/cortex: "true"` | `kratix.io/portal-cortex: "true"` (or `kratix.io/portal-cortex.<instance>`) | Distinct label spaces, both controllers may coexist |
-| Annotation `kratix.io/cortex-fixed-namespace` | `portals[].adapterConfig.generateFlags: ["--fixed-namespace=<value>"]` | Now a portal-wide setting, see [Deprecated annotations](#deprecated-annotations) below |
+| Annotation `kratix.io/cortex-fixed-namespace` | `portals[].adapterConfig.generate.args: ["--fixed-namespace=<value>"]` | Now a portal-wide setting, see [Deprecated annotations](#deprecated-annotations) below |
 | Annotation `kratix.io/cortex-skip-workflows` | Not yet re-implemented | See [Deprecated annotations](#deprecated-annotations) below |
 
 `portals[].config` values must be strings for the Cortex settings above, a validating webhook rejects a missing or non-string required key.
@@ -125,7 +125,7 @@ Cortex Controller installed until every Promise you care about has moved labels.
 The Cortex Controller's per-Promise annotations are not read by the Portal Controller's Cortex adapter. They map across as follows:
 
 - **`kratix.io/cortex-fixed-namespace`** is reproduced by the portal-wide
-  [`adapterConfig.generateFlags`](./installation#portal-wide-generate-flags) flag `--fixed-namespace=<value>`, which hard-codes `metadata.namespace` and
+  [`adapterConfig.generate.args`](./installation#portal-wide-generate-flags) flag `--fixed-namespace=<value>`, which hard-codes `metadata.namespace` and
   hides the namespace input on generated workflows. The difference is scope, the annotation was per-Promise, this flag applies to every Promise routed through the portal. If
   you need different fixed namespaces for different Promises, define a separate Cortex portal per namespace and bind each Promise to the right one with a
   `kratix.io/portal-cortex.<instance>` label.
@@ -136,8 +136,9 @@ The Cortex Controller's per-Promise annotations are not read by the Portal Contr
       type: cortex
       # ... url, secretRef, config as usual
       adapterConfig:
-        generateFlags:
-          - "--fixed-namespace=team-a"
+        generate:
+          args:
+            - "--fixed-namespace=team-a"
   ```
 
 - **`kratix.io/cortex-skip-workflows`** is not yet re-implemented. `generate` always emits the full default document set. Keep Promises that still need this behaviour on the

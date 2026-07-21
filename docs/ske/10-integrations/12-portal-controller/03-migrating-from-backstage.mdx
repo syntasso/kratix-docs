@@ -113,7 +113,7 @@ patching the generated Backstage Template document.
 | `defaultNamespace` | The namespace field's default value | customize container sets the namespace parameter's `default` |
 | `namespaceFieldTitle` | The namespace field's `title` | customize container sets the namespace parameter's `title` |
 | `namespaceFieldDescription` | The namespace field's `description` | customize container sets the namespace parameter's `description` |
-| `singleSpecPage` | Whether spec properties render as one page vs. multiple steps | portal-wide `adapterConfig.generateFlags: ["--single-spec-page"]`, see below |
+| `singleSpecPage` | Whether spec properties render as one page vs. multiple steps | portal-wide `adapterConfig.generate.args: ["--single-spec-page"]`, see below |
 | `title` | `metadata.title` | customize container sets `metadata.title` |
 | `description` | `metadata.description` | customize container sets `metadata.description` |
 | `tags` | `metadata.tags` | customize container sets/appends `metadata.tags` |
@@ -122,15 +122,16 @@ patching the generated Backstage Template document.
 | `owner` | `spec.owner` | customize container sets `spec.owner` |
 
 `singleSpecPage` is the exception in this table, it does not become a customize container. It is reproduced directly by the portal-wide
-[`adapterConfig.generateFlags`](./installation#portal-wide-generate-flags) flag `--single-spec-page` on the Backstage portal:
+[`adapterConfig.generate.args`](./installation#portal-wide-generate-flags) flag `--single-spec-page` on the Backstage portal:
 
 ```yaml
 portals:
   - name: prod
     type: backstage
     adapterConfig:
-      generateFlags:
-        - "--single-spec-page"
+      generate:
+        args:
+          - "--single-spec-page"
 ```
 
 The difference is scope, `singleSpecPage` was per-Promise-group, this flag applies to every Promise routed through the portal.
