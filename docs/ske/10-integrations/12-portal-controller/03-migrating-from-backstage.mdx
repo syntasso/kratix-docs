@@ -18,7 +18,7 @@ This guide maps every field of `BackstageEntityCustomizationSpec` to its `Portal
 | `BackstageEntityCustomizationSpec` field | `PortalCustomization` equivalent | Nature of the change |
 |---|---|---|
 | `containers[]` | `spec.promise.containers[]` and/or `spec.resource.containers[]` | Direct move, same container shape |
-| `destinationSelectors[]` | *(no equivalent, see below)* | Not carried across |
+| `destinationSelectors[]` | customize container rewriting `/kratix/metadata/destination-selectors.yaml` (see below) | No dedicated field |
 | `entityGenerationOptions.promise.component.*` | customize container patching the generated Component (Promise lane) | Typed field becomes a container |
 | `entityGenerationOptions.promise.template.*` | customize container patching the generated Template (Promise lane) | Typed field becomes a container |
 | `entityGenerationOptions.resource.component.*` | customize container patching the generated Component (Resource lane) | Typed field becomes a container |
@@ -39,15 +39,39 @@ A container that only ever needs to see the Promise (for example, it only patche
 that needs to run per-Resource-instance goes in `spec.resource.containers[]`. If the original container did both jobs conditionally, split it into two simpler containers, one per
 lane, since each lane's container now only ever sees its own parent object.
 
-## 2. `spec.destinationSelectors[]` has no direct equivalent
+## 2. `spec.destinationSelectors[]` has no direct field equivalent
 
-This is the one field that does not carry across. `BackstageEntityCustomizationSpec.DestinationSelectors` let you steer where the generated Backstage entity documents were
-shipped, independently of the Promise's own scheduling. The Portal Controller derives the destination selector for you, automatically, from the portal it is syncing to, it
-does not read any author-supplied selector at all.
+`BackstageEntityCustomizationSpec.DestinationSelectors` let you steer where the generated Backstage entity documents were shipped, independently of the Promise's own scheduling.
+There is no `PortalCustomization` field for this, and setting the Promise's own `spec.destinationSelectors` has no effect, the generate stage does not read it and always writes a
+default `{environment: backstage}` selector for its output directory.
 
-There is currently no `PortalCustomization` field equivalent to `destinationSelectors[]`. If a customization relied on it to route entities to a non-default destination, that
-capability has no migration path today, treat it as a gap rather than assuming a workaround. The closest lever available is choosing the right portal on the
-`SKEIntegration` (which determines the state store the entity ultimately lands in), not a per-customization selector.
+You can control where the generated entities ship with a customize container that rewrites `/kratix/metadata/destination-selectors.yaml`. The generate stage writes one entry for
+its output directory with `matchLabels: {environment: backstage}`; a customize container can rewrite that entry's `matchLabels` to target a different destination. Keep exactly one
+entry per output directory, the work-writer rejects duplicate directory entries, so rewrite the existing entry rather than appending a second one for the same directory, and do
+not re-run the adapter's `generate` (which appends its own entry).
+
+```yaml
+apiVersion: portal.kratix.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: route-backstage-entities
+spec:
+  portal: backstage
+  promise:
+    containers:
+      - name: set-destination
+        image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+        command: ["sh", "-c"]
+        args:
+          - |
+            set -e
+            cat > /kratix/metadata/destination-selectors.yaml <<'YAML'
+            - directory: .
+              matchLabels:
+                environment: backstage
+                region: eu
+            YAML
+```
 
 ## 3. `entityGenerationOptions` becomes customize containers
 
