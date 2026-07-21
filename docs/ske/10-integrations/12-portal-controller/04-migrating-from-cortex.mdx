@@ -24,7 +24,7 @@ This guide maps every `cortex-config` ConfigMap field onto `portals[].config`, u
 | `spec.cortex.secretRef` / admin Secret | `portals[].secretRef` + admin Secret in `kratix-platform-system` | Same admin-provisions-the-Secret pattern |
 | Promise label `kratix.io/cortex: "true"` | `kratix.io/portal-cortex: "true"` (or `kratix.io/portal-cortex.<instance>`) | Distinct label spaces, both controllers may coexist |
 | Annotation `kratix.io/cortex-fixed-namespace` | `portals[].adapterConfig.generate.args: ["--fixed-namespace=<value>"]` | Now a portal-wide setting, see [Deprecated annotations](#deprecated-annotations) below |
-| Annotation `kratix.io/cortex-skip-workflows` | Not yet re-implemented | See [Deprecated annotations](#deprecated-annotations) below |
+| Annotation `kratix.io/cortex-skip-workflows` | customize container deleting the unwanted `workflow-*.yaml` files | See [Skipping Cortex workflows](#skipping-cortex-workflows-with-a-customize-container) below |
 
 `portals[].config` values must be strings for the Cortex settings above, a validating webhook rejects a missing or non-string required key.
 
@@ -141,5 +141,41 @@ The Cortex Controller's per-Promise annotations are not read by the Portal Contr
             - "--fixed-namespace=team-a"
   ```
 
-- **`kratix.io/cortex-skip-workflows`** is not yet re-implemented. `generate` always emits the full default document set. Keep Promises that still need this behaviour on the
-  legacy `kratix.io/cortex` label until it is available.
+- **`kratix.io/cortex-skip-workflows`** has no direct field equivalent, `generate` always emits the full default document set. You can reproduce it with a customize container
+  that deletes the unwanted workflow files before the writer ships them (see below).
+
+## Skipping Cortex workflows with a customize container
+
+The Cortex `generate` stage writes its documents to `/kratix/output`:
+
+```
+entity-type.yaml       # the Promise's Cortex entity type
+promise-entity.yaml    # the Promise entity
+workflow-create.yaml   # the Create workflow
+workflow-update.yaml   # the Update workflow
+workflow-delete.yaml   # the Delete workflow
+```
+
+A promise-lane customize container runs after `generate` and before the writer, so deleting a `workflow-*.yaml` file there stops the writer from creating that workflow in Cortex.
+For example, to keep only the Create workflow (the equivalent of `kratix.io/cortex-skip-workflows: "update,delete"`):
+
+```yaml
+apiVersion: portal.kratix.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: remove-workflows
+spec:
+  portal: cortex
+  promise:
+    containers:
+      - name: delete-workflows
+        image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+        command: ["sh"]
+        args:
+          - -c
+          - |
+            set -e
+            rm -f /kratix/output/workflow-update.yaml /kratix/output/workflow-delete.yaml
+```
+
+Bind the Promise to this profile with the `kratix.io/portal-customization` label (see [Customization](./customization#binding-a-promise-to-a-portalcustomization)).
