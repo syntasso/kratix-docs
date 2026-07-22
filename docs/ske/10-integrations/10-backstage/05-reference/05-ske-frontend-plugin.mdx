@@ -1,8 +1,8 @@
 ---
 title: SKE Frontend Plugin
 description: >-
-  Reference for the entity pages, components, annotations, and behaviours in
-  the ske-frontend Backstage plugin
+  Reference for the entity pages, components, hooks, annotations, and
+  behaviours in the ske-frontend Backstage plugin
 sidebar_label: SKE Frontend Plugin
 ---
 
@@ -390,33 +390,106 @@ pending deletion while the instance still exists and waits for a pull request
 to merge. A pending-deletion banner takes precedence over fetch errors and
 pending-review banners.
 
-## Public exports
+## Hooks
 
-The package's main entry point exports values for legacy integration and custom
-entity-page composition. The component exports are intended for use as JSX,
-not as functions called directly.
+### `useKratixResourceFetcher`
 
-The examples below focus on each export. Imports and surrounding Backstage app
-setup are omitted.
+`useKratixResourceFetcher` loads the Promise or Resource associated with the
+current catalog entity. It also manages loading and deletion state, checks for
+required annotations, and creates the status banners used by the plugin's
+Overview and Manage tabs.
 
-### `skeFrontendPlugin`
+Use this hook when building custom catalog entity content that needs the same
+data and state as the plugin's supplied components.
 
-`skeFrontendPlugin` is the plugin object created with Backstage's
-`createPlugin`. It owns the `ske-frontend` plugin ID and root route used by the
-legacy frontend system.
+The component calling the hook must be rendered within a Backstage catalog
+entity context. The hook uses `useEntity` to read the current entity and uses
+Backstage's discovery and fetch APIs to call the `ske` backend plugin.
 
-### `isKratixType`
+#### Options
 
-`isKratixType` is the only callable utility in the list. Calling
-`isKratixType('promise')` or `isKratixType('resource')` returns a predicate that
-accepts a catalog entity. Pass that predicate to `EntitySwitch.Case` to select
-the appropriate entity page.
+The hook accepts an optional options object:
+
+| Option | Type | Default | Meaning |
+|---|---|---|---|
+| `resourceType` | `'promise' \| 'resource'` | Detected | Entity type to load |
+
+When `resourceType` is omitted, the hook reads `kratix.io/type`. The value
+`promise` selects Promise loading. Any other value, including an absent
+annotation, selects Resource loading. Unlike `isKratixType`, the hook does not
+use `spec.type` as a fallback.
+
+Promise loading requires `kratix.io/promise-name`. Resource loading requires
+`kratix.io/group`, `kratix.io/version`, `kratix.io/kind`, `kratix.io/name`, and
+`kratix.io/namespace`. See [Entity annotations](#entity-annotations) for the
+complete configuration.
+
+#### Return value
+
+The hook returns a `KratixResourceResult` object:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `resource` | `object \| null` | Manifest returned by the backend |
+| `resourceType` | `'promise' \| 'resource'` | Type being loaded |
+| `currentStage` | `Stage` | Current request or deletion stage |
+| `setStage` | `(stage: Stage) => void` | Updates the current stage |
+| `entityIdentifier` | `EntityIdentifier` | Resource request identifiers |
+| `missingKratixAnnotations` | `boolean` | Required annotations are absent |
+| `bannerMessage` | `string` | Current error or deletion message |
+| `showBanner` | `boolean` | The supplied banner should be shown |
+| `banner` | `JSX.Element` | Banner ready to render |
+| `showDeletionBanner` | `boolean` | Alias of `showBanner` |
+
+`Stage` has the values `fetching`, `deleting`, `ready`, and `error`.
+`entityIdentifier` contains `apiVersion`, `kind`, `name`, `namespace`,
+`templateName`, and `requestsRepoUrl` for a Resource. It is not populated for a
+Promise.
+
+When required annotations are absent, the hook does not call the backend.
+Check `missingKratixAnnotations` before rendering data. Backend responses and
+banner precedence follow the behaviour described in
+[Loading data and displaying status](#loading-data-and-displaying-status).
+
+#### Example
+
+This custom component displays the status returned for the current Resource.
+It assumes the component is rendered on a catalog entity page:
 
 ```tsx
-<EntitySwitch.Case if={isKratixType('promise')}>
-  {promisePage}
-</EntitySwitch.Case>
+import {
+  useKratixResourceFetcher,
+} from '@syntasso/plugin-ske-frontend';
+
+export const ResourceStatus = () => {
+  const {
+    banner,
+    missingKratixAnnotations,
+    resource,
+    showBanner,
+  } = useKratixResourceFetcher({ resourceType: 'resource' });
+
+  if (missingKratixAnnotations) {
+    return <p>This catalog entity is missing its Resource annotations.</p>;
+  }
+
+  return (
+    <>
+      {showBanner && banner}
+      <pre>{JSON.stringify(resource?.status ?? {}, null, 2)}</pre>
+    </>
+  );
+};
 ```
+
+## Components
+
+The package exports React components for complete entity pages, individual
+tabs, and lower-level content. Use these exports as JSX rather than calling
+them as functions.
+
+The examples below focus on each component. Imports and surrounding Backstage
+app setup are omitted.
 
 ### `KratixPromiseEntityPage`
 
@@ -490,6 +563,30 @@ should use `KratixManageTab`, which loads and supplies those values.
   kratixResource={resource}
   setCurrentStage={setCurrentStage}
 />
+```
+
+## Plugin integration
+
+The package also exports values for integrating the plugin with Backstage's
+frontend systems.
+
+### `skeFrontendPlugin`
+
+`skeFrontendPlugin` is the plugin object created with Backstage's
+`createPlugin`. It owns the `ske-frontend` plugin ID and root route used by the
+legacy frontend system.
+
+### `isKratixType`
+
+`isKratixType` is a higher-order matching utility. Calling
+`isKratixType('promise')` or `isKratixType('resource')` returns a predicate that
+accepts a catalog entity. Pass that predicate to `EntitySwitch.Case` to select
+the appropriate entity page.
+
+```tsx
+<EntitySwitch.Case if={isKratixType('promise')}>
+  {promisePage}
+</EntitySwitch.Case>
 ```
 
 ### New Frontend System entry point
