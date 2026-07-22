@@ -233,11 +233,42 @@ skeDeployment:
 
 **Option 2: Reference pre-existing Secrets**
 
-To avoid inlining certificate data in your values file, pre-create Kubernetes Secrets containing the TLS data and reference them by name. The referenced Secrets must contain the keys: `ca.crt`, `tls.crt`, and `tls.key`.
+To avoid inlining certificate data in your values file, reference Kubernetes
+Secrets that contain the TLS data. The chart does not create or renew referenced
+Secrets.
 
-For the SKE Deployment, both `webhookTLSSecretRef` and `metricsServerTLSSecretRef` are required. If the SKE version includes the SKE Platform Manager, `platformManagerTLSSecretRef` is also required:
+Before installing the chart, ensure that:
+
+- the `kratix-platform-system` namespace exists
+- each referenced Secret exists in that namespace
+- each Secret contains the keys `ca.crt`, `tls.crt`, and `tls.key`
+
+The chart cannot reference a Secret in another namespace. Synchronise or copy
+any Secret from another namespace into `kratix-platform-system` before
+installing the chart.
+
+:::warning
+
+The Secret must exist before you run `helm install` or `helm upgrade`, and the
+identity running Helm must be able to read it. The installation will fail if
+the Secret is missing or does not contain **all** the required values.
+
+:::
+
+Set `global.skeOperator.tlsConfig.webhookTLSSecretRef` for the SKE Operator.
+For the SKE Deployment, both `webhookTLSSecretRef` and
+`metricsServerTLSSecretRef` are required. If the SKE version includes the SKE
+Platform Manager, `platformManagerTLSSecretRef` is also required:
 
 ```yaml
+global:
+  skeOperator:
+    tlsConfig:
+      certManager:
+        disabled: true
+      webhookTLSSecretRef:
+        name: "my-ske-operator-webhook-tls-secret"
+
 skeDeployment:
   enabled: true
   tlsConfig:
@@ -250,8 +281,6 @@ skeDeployment:
     platformManagerTLSSecretRef:
       name: "my-platform-manager-tls-secret"
 ```
-
-The chart will skip creating the TLS Secrets and use the referenced Secrets instead.
 
 Both the SKE Operator and SKE Deployment require valid TLS certificates for
 their webhook servers to securely communicate with the Kubernetes API. Below are
