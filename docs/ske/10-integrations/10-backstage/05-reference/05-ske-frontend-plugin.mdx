@@ -9,10 +9,8 @@ sidebar_label: SKE Frontend Plugin
 ## Overview
 
 `@syntasso/plugin-ske-frontend` adds Backstage Software Catalog pages for
-[Kratix Promises](/main/reference/promises/intro), which define platform
-service APIs through Kubernetes `CustomResourceDefinition` objects, and
-[Kratix Resources](/main/reference/resources/intro), which are custom resources
-submitted through those APIs.
+[Kratix Promises](/main/reference/promises/intro) and
+[Kratix Resources](/main/reference/resources/intro).
 
 Annotations on each catalog entity tell the plugin which page to show and how
 to load current data through the
@@ -24,9 +22,9 @@ their status, and update or delete them.
 The plugin supports both Backstage frontend systems:
 
 - The New Frontend System discovers the plugin's `alpha` entry point and adds
-  the relevant entity content automatically.
+  the relevant entity content automatically
 - The legacy frontend system provides entity pages and a matching function
-  that you add to your app's `EntitySwitch`.
+  that you add to your app's `EntitySwitch`
 
 For setup instructions, see
 [Installing and Configuring the Plugins](../installation/plugins).
@@ -40,9 +38,9 @@ instance.
 An entity matches when either:
 
 - `metadata.annotations['kratix.io/type']` exactly matches `promise` or
-  `resource`; or
+  `resource`
 - the annotation is absent and `spec.type` is `kratix-promise` or
-  `kratix-resource`.
+  `kratix-resource`
 
 If the `kratix.io/type` annotation is present, it takes precedence over
 `spec.type`. An unrecognised annotation value will therefore prevent the
@@ -52,8 +50,9 @@ If the `kratix.io/type` annotation is present, it takes precedence over
 
 Add `kratix.io/type: promise` to every Promise entity. Although the route
 matcher recognises `spec.type: kratix-promise`, the page also needs the
-annotation when it loads Promise data. Without it, the UI looks for Resource
-fields instead.
+annotation when it loads Promise data. Without it, the Promise Overview does
+not load. It shows a missing-annotation message for Resource fields instead of
+the Promise details.
 
 Resource entities can use either `kratix.io/type: resource` or
 `spec.type: kratix-resource`.
@@ -66,35 +65,77 @@ Resource entities can use either `kratix.io/type: resource` or
 
 The Promise page contains one **Overview** tab. It displays:
 
-- the name and API details of the service that users can create;
-- the catalog entity description;
-- the Promise status, when available;
+- the name and API details of the service that users can create
+- the catalog entity description
+- the Promise status, when available
 - a button for creating a service instance from the Promise's Backstage
-  Software Template; and
-- the Backstage Catalog Graph.
+  Software Template
+- the Backstage Catalog Graph
 
 When `kratix.io/backstage-promise-template` is present, the create button links
 directly to the Software Template in the `default` namespace. Without the
 annotation, the page links to Backstage's filtered Software Template list.
+
+:::note Software Template namespace
+
+The plugin resolves Software Templates in the `default` Backstage namespace.
+This applies to Promise create actions, Resource updates, and pull-request
+deletion workflows.
+
+:::
+
+**Example: Database Promise**
+
+For a Database Promise, the Overview card could display:
+
+| UI field | Example value |
+|---|---|
+| API Resource | `Database` |
+| API Group | `marketplace.kratix.io` |
+| Name | `database` |
+| Description | `PostgreSQL as a service` |
+| Action | **Create Database** |
 
 ### Resource Overview
 
 The Resource **Overview** tab displays:
 
 - the instance name, namespace, type, and the Promise from which it was
-  created;
-- the Promise summary, when supplied;
-- the current status returned by the backend, when available; and
-- the Backstage Catalog Graph.
+  created
+- the Promise summary, when supplied
+- the current status returned by the backend, when available
+- the Backstage Catalog Graph
 
 The Promise summary supports Markdown. The graph uses relationships already
 present on the Backstage entity, such as `spec.dependsOn`. The frontend plugin
 does not create relationships from the data returned by SKE.
 
+For example, this Resource depends on the Database Promise:
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: prod-db
+spec:
+  type: kratix-resource
+  lifecycle: production
+  owner: group:default/team-backend
+  dependsOn:
+    - component:default/database-promise
+```
+
 ### Resource Manage
 
 The Resource **Manage** tab loads the current instance data before presenting
 update and delete controls.
+
+:::info
+
+Without `kratix.io/backstage-promise-template`, the update area shows a missing
+annotation message. Direct deletion remains available.
+
+:::
 
 #### Update a Resource
 
@@ -102,16 +143,36 @@ The update form embeds the Backstage Software Template named by
 `kratix.io/backstage-promise-template`. It starts with these values from the
 current Resource data:
 
-- **`objname`**: taken from `metadata.name` and displayed read-only.
-- **`objnamespace`**: taken from `metadata.namespace` and displayed read-only.
-- **`spec`**: taken from `spec` and editable according to the Software
-  Template's parameter schema.
-- **`repoUrl`**: taken from `kratix.io/requests-repo-url`. It is included and
-  disabled when the annotation is present.
+| Field | Meaning |
+|---|---|
+| `objname` | Resource `metadata.name`. Read-only. |
+| `objnamespace` | Resource `metadata.namespace`. Read-only. |
+| `spec` | Editable Resource `spec`. |
+| `repoUrl` | Request repository. Disabled when supplied. |
+
+**Example: updating a PostgreSQL Resource**
+
+The Manage tab could initialise the update form with:
+
+```yaml
+objname: prod-db
+objnamespace: team-backend
+spec:
+  backupEnabled: true
+  dbName: postgres
+  lifecycle: prod
+repoUrl: github.com?owner=example-org&repo=platform-requests
+```
 
 Submitting the form starts a Backstage scaffolder task and opens the task page.
-The Software Template decides how to apply the changes, so it must be designed
-to run for an existing instance as well as a new one.
+
+:::warning Design Software Templates for updates
+
+The plugin always runs the referenced Software Template and does not check
+whether it can safely update an existing instance. The template must support
+existing instances as well as new ones.
+
+:::
 
 The embedded form registers Backstage's standard entity, owner, repository,
 and branch picker field extensions. The `Secret` field extension is not
@@ -139,6 +200,23 @@ When either annotation is absent, the plugin calls
 `POST /api/ske/delete-resource` on the SKE backend plugin to request deletion
 immediately.
 
+**Example: deleting a PostgreSQL Resource through a pull request**
+
+For a Resource configured for pull-request deletion, the plugin starts the
+Software Template with values shaped like:
+
+```yaml
+objname: prod-db
+objnamespace: team-backend
+spec:
+  backupEnabled: true
+  dbName: postgres
+  lifecycle: prod
+repoUrl: github.com?owner=example-org&repo=platform-requests
+prAction: Delete
+catalogPhase: pending-deletion
+```
+
 ## Entity annotations
 
 Annotations are the configuration contract between a Backstage catalog entity
@@ -146,85 +224,127 @@ and the frontend plugin. The snippets below show only the annotations read by
 the plugin. See [YAML File Format](./yaml-file-format) for complete entity
 examples.
 
+:::warning `kratix.io/status` must contain valid JSON
+
+This requirement applies only to `kratix.io/status`. When used as a fallback,
+the annotation is parsed as JSON before the plugin displays it as YAML. An
+invalid value prevents the details card from rendering.
+
+:::
+
 ### Promise annotations
+
+Promise annotations tell the plugin which Promise to load and what to display
+on its Overview card. They can also link the create action to a Software
+Template. The following example describes a Database Promise:
 
 ```yaml
 metadata:
   annotations:
     kratix.io/type: promise
-    kratix.io/promise-name: jenkins
-    kratix.io/api-name: Jenkins
+    kratix.io/promise-name: database
+    kratix.io/api-name: Database
     kratix.io/api-group: marketplace.kratix.io
     kratix.io/status: '{"message":"Available"}'
-    kratix.io/backstage-promise-template: jenkins-promise-template
+    kratix.io/backstage-promise-template: database-promise-template
 ```
 
-- **`kratix.io/type`** (required): tells the plugin to render the entity as a
-  Promise. Set the value to `promise`; `spec.type: kratix-promise` alone is not
-  sufficient.
-- **`kratix.io/promise-name`** (required): identifies the Promise that the
-  backend should load.
-- **`kratix.io/api-name`** (optional): displays the type of service that users
-  can create and labels the create button. It defaults to `n/a`.
-- **`kratix.io/api-group`** (optional): displays the underlying API group for
-  the service. It defaults to `n/a`.
-- **`kratix.io/status`** (optional): provides status data as JSON when the
-  backend cannot return current data. The plugin displays it as YAML.
-- **`kratix.io/backstage-promise-template`** (optional): names the Software
-  Template used by the create button. The Software Template is resolved in the
-  `default` namespace.
+In this example, `database-promise-template` matches the Software Template's
+`metadata.name`:
+
+```yaml
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: database-promise-template
+  namespace: default
+```
+
+The Software Template's parameters and steps are omitted because they do not
+affect how the plugin finds the entity.
+
+| Annotation | Required | Meaning |
+|---|---|---|
+| `kratix.io/type` | Yes | Selects Promise rendering and data loading. |
+| `kratix.io/promise-name` | Yes | Promise name used by the backend. |
+| `kratix.io/api-name` | No | Service type and create-button label. |
+| `kratix.io/api-group` | No | Service API group. |
+| `kratix.io/status` | No | Fallback status as JSON. |
+| `kratix.io/backstage-promise-template` | No | Software Template name. |
+
+`kratix.io/api-name` and `kratix.io/api-group` default to `n/a`. The plugin
+displays `kratix.io/status` as YAML. It resolves the Software Template in the
+`default` namespace.
 
 ### Resource annotations
+
+Resource annotations tell the plugin which Kubernetes Resource backs the
+catalog entity and what to display on its Overview tab. They can also link the
+Manage tab to a Software Template for updates. The following example describes
+a PostgreSQL Resource named `prod-db`:
 
 ```yaml
 metadata:
   annotations:
     kratix.io/type: resource
-    kratix.io/promise-name: jenkins
+    kratix.io/promise-name: database
     kratix.io/group: marketplace.kratix.io
     kratix.io/version: v1alpha1
-    kratix.io/kind: Jenkins
-    kratix.io/name: example
-    kratix.io/namespace: default
-    kratix.io/backstage-promise-template: jenkins-promise-template
-    kratix.io/promise-summary: Jenkins as a service
+    kratix.io/kind: database
+    kratix.io/name: prod-db
+    kratix.io/namespace: team-backend
+    kratix.io/status: >-
+      {"instanceName":"prod-db-postgresql","pgVersion":"14.17"}
+    kratix.io/backstage-promise-template: database-promise-template
+    kratix.io/promise-summary: PostgreSQL with automated backups
 ```
 
-- **`kratix.io/type`** (optional): tells the plugin to render the entity as a
-  Resource. Alternatively, use `spec.type: kratix-resource`.
-- **`kratix.io/group`** (required): supplies part of the Resource type that the
-  backend uses to find the instance.
-- **`kratix.io/version`** (required): supplies the API version that the backend
-  uses to find the instance.
-- **`kratix.io/kind`** (required): supplies the Resource type that the backend
-  uses to find the instance.
-- **`kratix.io/name`** (required): supplies the instance name.
-- **`kratix.io/namespace`** (required): supplies the namespace containing the
-  instance.
-- **`kratix.io/promise-name`** (optional): displays the service definition from
-  which the instance was created.
-- **`kratix.io/status`** (optional): provides status data as JSON when current
-  data is unavailable. Status returned by the backend takes precedence.
-- **`kratix.io/promise-summary`** (optional): adds a Markdown-formatted Promise
-  summary to the Resource Overview tab.
-- **`kratix.io/backstage-promise-template`** (required for updates): names the
-  Software Template embedded in the Manage tab. The Software Template is
-  resolved in the `default` namespace.
+| Annotation | Required | Meaning |
+|---|---|---|
+| `kratix.io/type` | No | Selects Resource rendering. |
+| `kratix.io/group` | Yes | API group used to find the Resource. |
+| `kratix.io/version` | Yes | API version used to find the Resource. |
+| `kratix.io/kind` | Yes | Kind used to find the Resource. |
+| `kratix.io/name` | Yes | Resource name. |
+| `kratix.io/namespace` | Yes | Resource namespace. |
+| `kratix.io/promise-name` | No | Promise name displayed by the plugin. |
+| `kratix.io/status` | No | Fallback status as JSON. |
+| `kratix.io/promise-summary` | No | Markdown summary for Overview. |
+| `kratix.io/backstage-promise-template` | For updates | Template name. |
+
+When `kratix.io/type` is absent, use `spec.type: kratix-resource`. Status
+returned by the backend takes precedence over `kratix.io/status`. The Software
+Template is resolved in the `default` namespace.
 
 ### Pull-request workflow annotations
 
 These optional Resource annotations support Software Template workflows that
 propose Resource changes through pull requests:
 
-- **`kratix.io/requests-repo-url`**: identifies the repository containing the
-  Resource's YAML configuration. The Manage tab pre-fills it for updates,
-  prevents it from being changed, and uses it to select pull-request deletion.
-- **`kratix.io/phase`**: describes the state of the change. Set it to
-  `pending-review` to show an open pull-request banner, or `pending-deletion`
-  to show a deletion-requested banner.
-- **`kratix.io/pull-request-url`**: adds a **View pull request** link to a
-  pending-review or pending-deletion banner. A pending-review banner is only
-  shown when this annotation is present.
+```yaml
+metadata:
+  annotations:
+    kratix.io/requests-repo-url: >-
+      github.com?owner=example-org&repo=platform-requests
+    kratix.io/phase: pending-review
+    kratix.io/pull-request-url: >-
+      https://github.com/example-org/platform-requests/pull/42
+```
+
+| Annotation | Meaning |
+|---|---|
+| `kratix.io/requests-repo-url` | Resource configuration repository. |
+| `kratix.io/phase` | Pull-request workflow state. |
+| `kratix.io/pull-request-url` | Pull-request link. |
+
+The Manage tab pre-fills `kratix.io/requests-repo-url`, prevents it from being
+changed, and uses it to select pull-request deletion. The value uses
+Backstage's RepoUrlPicker format:
+`<HOST>?owner=<OWNER>&repo=<REPOSITORY>`.
+
+Set `kratix.io/phase` to `pending-review` to show an open pull-request banner,
+or `pending-deletion` to show a deletion-requested banner. The banner includes
+a **View pull request** link when `kratix.io/pull-request-url` is present.
 
 ## Loading data and displaying status
 
@@ -246,15 +366,23 @@ the platform.
 
 The response affects the page as follows:
 
-- `200`: displays the returned Resource data and status. A
-  `metadata.deletionTimestamp` puts the page into the deleting state.
+- `200`: displays the returned Resource data and status, and puts the page into
+  the deleting state when `metadata.deletionTimestamp` is present
 - `404` for a Resource: treats the Resource as being deleted or already
-  removed.
-- `404` for a Promise: leaves the page available without current backend data.
-  This supports GitOps mode, where the configured repository may not contain
-  Promise definitions.
-- Any other response: displays an error banner. If the response contains a
-  `message`, the banner includes it.
+  removed
+- `404` for a Promise: leaves the page available without current backend data,
+  supporting GitOps mode where the repository may not contain Promise
+  definitions
+- Any other response: displays an error banner and includes the response
+  `message` when present
+
+:::note GitOps Promise status
+
+When the backend cannot find a Promise definition in its configured
+repository, Promise status can only come from `kratix.io/status` on the catalog
+entity.
+
+:::
 
 For Resource entities, pull-request banners use catalog entity annotations
 rather than the data returned by the backend. This allows the page to show a
@@ -264,52 +392,111 @@ pending-review banners.
 
 ## Public exports
 
-The package's main entry point exports these APIs for legacy integration and
-custom entity-page composition:
+The package's main entry point exports values for legacy integration and custom
+entity-page composition. The component exports are intended for use as JSX,
+not as functions called directly.
 
-- **`skeFrontendPlugin`**: legacy Backstage plugin instance with the
-  `ske-frontend` plugin ID.
-- **`isKratixType(type)`**: returns a function that can be used in an
-  `EntitySwitch` to match `promise` or `resource` entities.
-- **`KratixPromiseEntityPage`**: complete legacy Promise entity page containing
-  the Overview tab.
-- **`KratixResourceEntityPage`**: complete legacy Resource entity page
-  containing Overview and Manage tabs.
-- **`KratixOverviewTab`**: Overview content for either entity type. It accepts
-  optional `children` and `resourceType` props.
-- **`KratixManageTab`**: Manage content for a Resource. It accepts an optional
-  `resourceType` override. Promise management currently renders a placeholder.
-- **`KratixAboutCard`**: About card used by the Overview tab. It requires an
-  `entity` object and accepts an optional `entityType`.
-- **`KratixResourceManageContent`**: lower-level update and delete content used
-  by the Manage tab.
+The examples below focus on each export. Imports and surrounding Backstage app
+setup are omitted.
+
+### `skeFrontendPlugin`
+
+`skeFrontendPlugin` is the plugin object created with Backstage's
+`createPlugin`. It owns the `ske-frontend` plugin ID and root route used by the
+legacy frontend system.
+
+### `isKratixType`
+
+`isKratixType` is the only callable utility in the list. Calling
+`isKratixType('promise')` or `isKratixType('resource')` returns a predicate that
+accepts a catalog entity. Pass that predicate to `EntitySwitch.Case` to select
+the appropriate entity page.
+
+```tsx
+<EntitySwitch.Case if={isKratixType('promise')}>
+  {promisePage}
+</EntitySwitch.Case>
+```
+
+### `KratixPromiseEntityPage`
+
+`KratixPromiseEntityPage` is a React component that provides a complete
+`EntityLayout` for a Promise. It requires `children`, which it adds to the
+Overview tab alongside the plugin content.
+
+```tsx
+<KratixPromiseEntityPage>
+  {entityWarningContent}
+</KratixPromiseEntityPage>
+```
+
+### `KratixResourceEntityPage`
+
+`KratixResourceEntityPage` is a React component that provides a complete
+`EntityLayout` for a Resource. It requires `children` for the Overview tab and
+adds the Resource Manage tab.
+
+```tsx
+<KratixResourceEntityPage>
+  {entityWarningContent}
+</KratixResourceEntityPage>
+```
+
+### `KratixOverviewTab`
+
+`KratixOverviewTab` is a React component containing the Overview tab content
+for either a Promise or Resource. It accepts optional `children` and an
+optional `resourceType` override. Without the override, it infers the entity
+type from the catalog entity.
+
+```tsx
+<KratixOverviewTab resourceType="resource">
+  {entityWarningContent}
+</KratixOverviewTab>
+```
+
+### `KratixManageTab`
+
+`KratixManageTab` is a React component containing the Manage tab content. It
+accepts an optional `resourceType` override and otherwise infers the type from
+the catalog entity. Resource management includes update and delete controls.
+Promise management currently renders a placeholder.
+
+```tsx
+<KratixManageTab resourceType="resource" />
+```
+
+### `KratixAboutCard`
+
+`KratixAboutCard` is the details card rendered by the Overview tab. It requires
+the Promise or Resource returned by the SKE backend as its `entity` prop and
+accepts an optional `entityType` override.
+
+```tsx
+<KratixAboutCard entity={resource} entityType="resource" />
+```
+
+### `KratixResourceManageContent`
+
+`KratixResourceManageContent` is the lower-level update and delete component
+rendered by `KratixManageTab`. It expects the Resource identifier, current
+loading stage, stage setter, and current Resource data. Most applications
+should use `KratixManageTab`, which loads and supplies those values.
+
+```tsx
+<KratixResourceManageContent
+  entityIdentifier={entityIdentifier}
+  entityState={currentStage}
+  kratixResource={resource}
+  setCurrentStage={setCurrentStage}
+/>
+```
+
+### New Frontend System entry point
 
 The `@syntasso/plugin-ske-frontend/alpha` entry point exports the New Frontend
 System plugin as its default export. It registers:
 
-- Promise Overview content at `/` for Promise entities;
-- Resource Overview content at `/` for Resource entities; and
-- Resource Manage content at `/manage` for Resource entities.
-
-## Edge cases
-
-- All Software Templates are resolved in the `default` Backstage namespace.
-- Promise entities require `kratix.io/type: promise`.
-  `spec.type: kratix-promise` alone selects the page but does not make it load
-  Promise data correctly.
-- `kratix.io/status` must contain valid JSON when supplied. The plugin displays
-  the parsed value as YAML.
-- The Manage tab cannot render an update form without
-  `kratix.io/backstage-promise-template`, but direct deletion remains
-  available.
-- Resource updates always run the referenced Software Template. The frontend
-  plugin does not check whether that Software Template can safely update an
-  existing instance.
-- In GitOps mode, Promise status can only come from `kratix.io/status` when the
-  backend cannot find the Promise definition in the configured repository.
-
-## Related documentation
-
-- [Installing and Configuring the Plugins](../installation/plugins)
-- [YAML File Format](./yaml-file-format)
-- [SKE Backend Plugin](./ske-backend-plugin)
+- Promise Overview content at `/` for Promise entities
+- Resource Overview content at `/` for Resource entities
+- Resource Manage content at `/manage` for Resource entities

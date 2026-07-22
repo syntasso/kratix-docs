@@ -98,11 +98,10 @@ instance before continuing with the configuration steps below.
 ## Configuring the frontend plugin
 
 `@syntasso/plugin-ske-frontend` adds Backstage Software Catalog pages for
-[Kratix Promises](/main/reference/promises/intro), which define platform
-service APIs through Kubernetes `CustomResourceDefinition` objects, and
-[Kratix Resources](/main/reference/resources/intro), which are custom resources
-submitted through those APIs. The plugin lets teams browse services, create
-instances, and track their status without leaving Backstage.
+[Kratix Promises](/main/reference/promises/intro) and
+[Kratix Resources](/main/reference/resources/intro). The plugin lets teams
+browse services, create instances, and track their status without leaving
+Backstage.
 
 ### Update the EntityPage
 
@@ -167,8 +166,9 @@ The matcher selects Promise and Resource Components using either the `kratix.io/
 
 Add `kratix.io/type: promise` to every Promise Component. Although the route
 matcher recognises `spec.type: kratix-promise`, the page also needs the
-annotation when it loads Promise data. Without it, the UI looks for Resource
-fields instead.
+annotation when it loads Promise data. Without it, the Promise Overview does
+not load. It shows a missing-annotation message for Resource fields instead of
+the Promise details.
 
 :::
 
