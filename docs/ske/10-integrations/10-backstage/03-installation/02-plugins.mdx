@@ -153,8 +153,15 @@ const componentPage = (
 );
 ```
 
-This states that for any Backstage `Component` definitions, the frontend plugin will display the custom `KratixPromiseEntityPage` for Components of `type` `promise` or
-`kratix-promise` and the `KratixResourceEntityPage` for for Components of `type` `resource` or `kratix-resource.
+The matcher selects Promise and Resource Components using either the `kratix.io/type` annotation or `spec.type`. For example, a Resource can use `kratix.io/type: resource` or
+`spec.type: kratix-resource`.
+
+:::warning
+
+Promise Components must set `kratix.io/type: promise`. Although the route matcher recognises `spec.type: kratix-promise`, the Promise page's data-fetching code reads
+`kratix.io/type` to determine the entity type. Without the annotation, the page treats the Promise as a Resource.
+
+:::
 
 ### Plugin components
 
