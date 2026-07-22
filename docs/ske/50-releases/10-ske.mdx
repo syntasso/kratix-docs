@@ -19,6 +19,21 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.53.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.53.0/) (2026-07-22)
+
+#### Features
+
+* S3-compatible release storage now supports path-style addressing via `spec.releaseStorage.forcePathStyle`. Enable this for stores that do not support virtual-hosted-style addressing, such as an in-cluster MinIO instance.
+* Delete workflows can now pause execution using the `wait` step, giving platform teams control over deletion ordering and dependencies.
+
+#### Fixes
+
+* Fixed an issue on AKS where the API server webhook caused infinite reconciliation loops on certain resources.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.52.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.52.0/) (2026-07-13)
 
 #### Features
