@@ -17,8 +17,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.07548cf9.js" defer="defer"></script>
-<script src="/assets/js/main.0f3cb236.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.a2858546.js" defer="defer"></script>
+<script src="/assets/js/main.bf2a29d7.js" defer="defer"></script>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -94,12 +94,23 @@ issues. Example:<!-- -->
 <li class="">stores the optional message on that pipeline entry</li>
 <li class="">stops executing later Pipelines in the workflow</li>
 </ul>
-<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>Suspending a Pipeline will not stop the execution of later stages in the same Pipeline. If you want to guarantee that no other stage is executed, you can either:</p><ol>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="configure-workflow-specifics">Configure Workflow specifics<a href="#configure-workflow-specifics" class="hash-link" aria-label="Direct link to Configure Workflow specifics" title="Direct link to Configure Workflow specifics" translate="no">​</a></h4>
+<p>Suspending a Pipeline will not stop the execution of later stages in the same Pipeline. If you want to guarantee that no other stage is executed, you can either:</p>
+<ol>
 <li class="">Have the suspend as the last stage in the Pipeline.</li>
 <li class="">Have the suspend stage as the only stage in the Pipeline.</li>
 <li class="">Ensure that every stage checks for the workflow-control file.</li>
-</ol></div></div>
-<p>If <code>kratix.io/workflow-suspended</code> is removed, Kratix starts from the suspended
+</ol>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="delete-workflow-specifics">Delete Workflow specifics<a href="#delete-workflow-specifics" class="hash-link" aria-label="Direct link to Delete Workflow specifics" title="Direct link to Delete Workflow specifics" translate="no">​</a></h4>
+<p>While a Delete Pipeline can also write <code>suspend: true</code>, because it has only
+a single Pipeline the &quot;starting from the suspended Pipeline&quot; means Kratix
+re-runs that same Pipeline.</p>
+<p>While a Delete Pipeline is suspended, the Works it would otherwise clean up
+are <strong>not deleted</strong> — the Promise or Resource request stays in a
+<code>DeleteWorkflowSuspended</code> state until the label is removed and the Pipeline
+completes without suspending again.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="resuming-a-suspended-pipeline">Resuming a suspended pipeline<a href="#resuming-a-suspended-pipeline" class="hash-link" aria-label="Direct link to Resuming a suspended pipeline" title="Direct link to Resuming a suspended pipeline" translate="no">​</a></h4>
+<p>When <code>kratix.io/workflow-suspended</code> is removed, Kratix starts from the suspended
 Pipeline.</p>
 <p>When a Pipeline writes <code>retryAfter</code>, Kratix will treat the current pipeline as
 suspended. It will also:</p>
@@ -226,15 +237,20 @@ communicate between the Pipelines (e.g. via status updates).</p>
 documents from this directory.</p>
 <div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>note</div><div class="admonitionContent_BuS1"><p>Files written to <code>/kratix/output</code> in <code>delete</code> Pipelines will be ignored.</p></div></div>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="metadata">Metadata<a href="#metadata" class="hash-link" aria-label="Direct link to Metadata" title="Direct link to Metadata" translate="no">​</a></h3>
-<p>All containers in a <code>configure</code> Pipeline have access a shared <strong>metadata directory</strong>
-mounted at <code>/kratix/metadata</code>.</p>
+<p>All containers in a Pipeline, whether <code>configure</code> or <code>delete</code>, have access to a shared
+<strong>metadata directory</strong> mounted at <code>/kratix/metadata</code>.</p>
 <p>Pipeline containers can control aspects of how Kratix behaves by creating special files in
 this directory:</p>
 <ul>
-<li class=""><code>destination-selectors.yaml</code> can be added to any Promise to further refine where the
-resources in <code>/kratix/output</code> will be <a class="" href="/main/reference/destinations/multidestination-management">scheduled</a>.</li>
+<li class=""><code>destination-selectors.yaml</code> can be added to any <code>configure</code> Pipeline to further refine
+where the resources in <code>/kratix/output</code> will be
+<a class="" href="/main/reference/destinations/multidestination-management">scheduled</a>. Since <code>/kratix/output</code> is
+ignored in <code>delete</code> Pipelines, this file has no effect there.</li>
 <li class=""><code>status.yaml</code> allows the Pipeline to communicate information about the resource back to
 the requester. See the <a class="" href="/main/reference/resources/status">status documentation for more information</a>.</li>
+<li class=""><code>workflow-control.yaml</code> lets the Pipeline suspend or retry itself; see
+<a href="#workflow-control" class="">Workflow Control</a> above. This applies to both <code>configure</code> and
+<code>delete</code> Pipelines.</li>
 </ul>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="passing-data-between-containers">Passing data between containers<a href="#passing-data-between-containers" class="hash-link" aria-label="Direct link to Passing data between containers" title="Direct link to Passing data between containers" translate="no">​</a></h4>
 <p>Kratix scans for these files and ignores all other files in the <code>/kratix/metadata</code>
