@@ -97,19 +97,26 @@ instance before continuing with the configuration steps below.
 
 ## Configuring the frontend plugin
 
-`@syntasso/plugin-ske-frontend` brings dedicated entity pages for Kratix Promises and Resources into the Backstage catalog. Teams can browse Promises, view and create Requests, and
-track the status of their requests — without leaving Backstage.
+`@syntasso/plugin-ske-frontend` adds Backstage Software Catalog pages for
+[Kratix Promises](/main/reference/promises/intro), which define platform
+service APIs through Kubernetes `CustomResourceDefinition` objects, and
+[Kratix Resources](/main/reference/resources/intro), which are custom resources
+submitted through those APIs. The plugin lets teams browse services, create
+instances, and track their status without leaving Backstage.
 
 ### Update the EntityPage
 
-If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no
-changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for Backstage.
+If your Backstage app uses the
+[New Frontend System](https://backstage.io/docs/frontend-system/) (default since
+Backstage v1.49.0), the plugin is automatically discovered. No changes to
+`EntityPage.tsx` are needed. This is also the case if you are using Spotify
+Portal for Backstage.
 
 The plugin registers the following extensions via its `alpha` entry point:
 
-- **Promise Overview** — displays the Overview tab for Promise entities
-- **Resource Overview** — displays the Overview tab for Resource entities
-- **Resource Manage** — displays the Manage tab for Resource entities
+- **Promise Overview**: displays the Overview tab for Promise entities
+- **Resource Overview**: displays the Overview tab for Resource entities
+- **Resource Manage**: displays the Manage tab for Resource entities
 
 To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
 
@@ -153,34 +160,46 @@ const componentPage = (
 );
 ```
 
-This states that for any Backstage `Component` definitions, the frontend plugin will display the custom `KratixPromiseEntityPage` for Components of `type` `promise` or
-`kratix-promise` and the `KratixResourceEntityPage` for for Components of `type` `resource` or `kratix-resource.
+The matcher selects Promise and Resource Components using either the `kratix.io/type` annotation or `spec.type`. For example, a Resource can use `kratix.io/type: resource` or
+`spec.type: kratix-resource`.
+
+:::warning
+
+Add `kratix.io/type: promise` to every Promise Component. Although the route
+matcher recognises `spec.type: kratix-promise`, the page also needs the
+annotation when it loads Promise data. Without it, the UI looks for Resource
+fields instead.
+
+:::
 
 ### Plugin components
 
 #### Promise Overview
 
-`KratixPromiseEntityPage` renders a dedicated catalog page for Promise entities:
+`KratixPromiseEntityPage` renders a dedicated Software Catalog page for
+Promise entities:
 
-- API group and resource name
+- Name and API details for the service that users can create
 - Promise description and current status
-- Create button linking to the scaffolder template for new Resources
-- Dependency graph showing related Resource instances
+- Create button linking to the Software Template for new service instances
+- Dependency graph showing related instances
 
 #### Resource Overview
 
-`KratixResourceEntityPage` renders a dedicated catalog page for Resource entities:
+`KratixResourceEntityPage` renders a dedicated Software Catalog page for
+Resource entities:
 
-- Resource name, namespace, kind, and parent Promise
+- Instance name, namespace, type, and the Promise from which it was created
 - Optional Promise summary (markdown-rendered)
-- Current resource status
-- Dependency graph showing the relationship to the parent Promise
+- Current instance status
+- Dependency graph showing which Promise the instance came from
 
 #### Resource Manage
 
-The **Manage** tab on `KratixResourceEntityPage` provides Resource lifecycle actions:
+The **Manage** tab on `KratixResourceEntityPage` provides controls for an
+existing instance:
 
-- Pre-filled update form with the Resource's current spec
+- Pre-filled update form with the instance's current settings (`spec`)
 - Read-only name and namespace fields
 - Delete button with confirmation dialog
 
