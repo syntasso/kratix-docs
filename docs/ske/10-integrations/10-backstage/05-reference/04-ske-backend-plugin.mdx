@@ -1,0 +1,182 @@
+---
+title: SKE Backend Plugin
+description: Reference for the actions and endpoints shipped in the ske-backend Backstage plugin
+sidebar_label: SKE Backend Plugin
+---
+
+## Overview
+
+`@syntasso/plugin-ske-backend` is a Backstage backend plugin that gives Templates and other Backstage backend code a way to create, read, update, and delete Kratix resources.
+
+It ships two kinds of capability:
+
+- **Scaffolder actions** — steps you can add to a Backstage Template to configure a Kratix resource, write a manifest to the scaffolder workspace, or publish a catalog entity.
+- **HTTP endpoints** — a small REST API, used by the `ske-frontend` plugin, for reading and deleting a resource by its Kubernetes coordinates.
+
+The plugin can talk to your platform in one of three modes, set via `ske.mode` in `app-config.yaml`:
+
+- `kubernetes` (default) — reads and writes via the Kubernetes API
+- `gitops` — reads and writes via git
+- `hybrid` — reads via the Kubernetes API, writes via git
+
+See [Configuring the Plugins](../installation/plugins) for full installation and configuration instructions.
+
+## Actions
+
+| Action | What it does |
+|---|---|
+| `ske:configure-resource` | Creates or updates a Kratix resource from an input manifest, via the Kubernetes API or git depending on `ske.mode` |
+| `ske:write-manifest` | Writes a manifest to the scaffolder workspace, for use by later steps in the same Template |
+| `ske:publish-catalog` | Publishes a catalog entity file from the workspace to the catalog git repository |
+
+### `ske:configure-resource`
+
+Creates or updates a **[Resource Request](/main/reference/resources/intro)** — an instance of a Promise's CRD (e.g. a `Jenkins` resource from a `Jenkins` Promise) — by submitting the input manifest to the platform. This is the action a Template uses to actually request a Promise on behalf of the user filling in the Template's form.
+
+**Input**
+
+| Field | Type | Description |
+|---|---|---|
+| `manifest` | `string` | The [Resource Request](/main/reference/resources/intro) manifest, i.e. an instance of the CRD defined by the target Promise's API |
+
+**Output**
+
+| Field | Type | Description |
+|---|---|---|
+| `commitsha` | `string` (optional) | Commit SHA of the pushed manifest, when running in `gitops` or `hybrid` mode |
+| `resourceId` | `string` (optional) | Resource ID of the Kubernetes object, when running in `kubernetes` mode |
+
+```yaml
+steps:
+  - id: ske-configure-resource
+    name: Configure a Kratix Resource
+    action: ske:configure-resource
+    input:
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: Jenkins
+        metadata:
+          name: my-jenkins
+          namespace: default
+        spec:
+          plugins:
+            - name: git
+              version: 1.0.0
+```
+
+### `ske:write-manifest`
+
+Writes a file to the **scaffolder workspace** — the temporary working directory Backstage creates for the duration of a single Template run. Every step in that run reads and writes to the same workspace; it's discarded once the run finishes unless a later step ships its contents somewhere durable (git, the catalog, etc). This action is typically used to stage a Resource Request manifest, or a Backstage catalog entity file, so a later step (e.g. `ske:publish-catalog`, or a git-publish action) can commit it.
+
+**Input**
+
+| Field | Type | Description |
+|---|---|---|
+| `manifest` | `string` | The file contents to write — a Resource Request manifest, a Backstage catalog entity file, or any other text the Template needs to stage |
+| `targetPath` | `string` | Relative path *within the scaffolder workspace* to write the file to, e.g. `manifests/my-resource.yaml`. Intermediate directories are created automatically |
+
+**Output**
+
+| Field | Type | Description |
+|---|---|---|
+| `manifestPath` | `string` | Absolute path of the written file, on disk, inside the workspace |
+
+### `ske:publish-catalog`
+
+Publishes a **Backstage catalog entity file** — a YAML file in Backstage's own format (`apiVersion: backstage.io/v1alpha1`, `kind: Component`/`API`/etc.) that registers something in Backstage's software catalog — from the scaffolder workspace to the git repository backing that catalog. This is a Backstage concept, distinct from a Kratix Resource Request: it's what makes a Resource Request's corresponding Component *show up* in the Backstage UI.
+
+The typical flow is: `ske:write-manifest` stages a catalog entity file in the workspace, then `ske:publish-catalog` commits it to the catalog repo, where Backstage's catalog processor picks it up.
+
+**Input**
+
+| Field | Type | Description |
+|---|---|---|
+| `filePath` | `string` | Path, within the scaffolder workspace, of the catalog entity file to publish (e.g. what `ske:write-manifest` just wrote) |
+| `targetPath` | `string` | Full path within the catalog git repository (from repo root) to write the file to |
+| `repoUrl` | `string` | HTTPS URL of the catalog git repository |
+| `branchName` | `string` | Branch to commit to |
+| `type` | `string` | Git provider type. Currently only `github` is supported |
+| `token` | `string` (optional) | Personal access token for the git repository. If omitted, the GitHub App configured in Backstage is used as a fallback |
+| `username` | `string` (optional) | Git username for basic auth. Inferred from `type` if omitted |
+| `commitMessage` | `string` (optional) | Defaults to `chore: publish catalog entity at <targetPath>` |
+| `defaultAuthor` | `object` (optional) | Git commit author, with `name` and `email` |
+
+**Output**
+
+| Field | Type | Description |
+|---|---|---|
+| `commitSha` | `string` | SHA of the commit |
+| `targetPath` | `string` | Path in the catalog repository where the file was written |
+
+**Example: staging then publishing a catalog entity**
+
+```yaml
+steps:
+  - id: write-catalog
+    name: Write catalog entity
+    action: ske:write-manifest
+    input:
+      targetPath: catalog/catalog-info.yaml
+      manifest: |
+        apiVersion: backstage.io/v1alpha1
+        kind: Component
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace }}
+        spec:
+          type: service
+          lifecycle: production
+          owner: kratix-platform
+
+  - id: publish-catalog
+    name: Publish catalog entity
+    action: ske:publish-catalog
+    input:
+      filePath: catalog/catalog-info.yaml
+      targetPath: kratix/backstage/resources/${{ parameters.objnamespace }}/${{ parameters.objname }}/catalog-info.yaml
+      repoUrl: https://gitea-http.gitea/gitea_admin/kratix
+      branchName: main
+      type: github
+      token: ${{ parameters.token }}
+```
+
+## Endpoints
+
+The plugin registers under the `ske` plugin ID, so all endpoints are served under `/api/ske`.
+
+Both endpoints below are generic: they read or delete whatever object matches the `kind`/`apiVersion`/`name`/`namespace` you give them — via the Kubernetes API in `kubernetes` mode, or via git in `gitops`/`hybrid` mode, subject to the backend's configured access (RBAC for Kubernetes, git credentials otherwise). Nothing in the plugin restricts them to [Resource Requests](/main/reference/resources/intro) specifically — you could point them at a `Promise`, or any other CRD or object the backend can reach. In practice, `ske-frontend` only ever calls them for Resource Requests, so that's the intended usage, but it's a convention rather than an enforced scope.
+
+| Method & path | What it does |
+|---|---|
+| `GET /api/ske/resource` | Reads a single Kubernetes object by `name`, `namespace`, `kind`, and `apiVersion` query params |
+| `POST /api/ske/delete-resource` | Deletes a Kubernetes object, given `name`, `namespace`, `kind`, and `apiVersion` in the request body |
+
+### `GET /api/ske/resource`
+
+Reads an object's manifest. Used by `ske-frontend` to read a Resource Request's manifest, but works for any `kind`/`apiVersion`.
+
+**Query parameters**
+
+| Param | Required | Description |
+|---|---|---|
+| `name` | yes | Object name |
+| `kind` | yes | Object kind (e.g. the `kind` of a Resource Request, but not restricted to that) |
+| `apiVersion` | yes | Object apiVersion |
+| `namespace` | no | Defaults to `default` |
+
+Returns `{ "manifest": <object> }` on success, `404` if not found, `400` if a required param is missing.
+
+### `POST /api/ske/delete-resource`
+
+Deletes an object. Used by `ske-frontend` to delete a Resource Request, but works for any `kind`/`apiVersion`.
+
+**Body**
+
+| Field | Required | Description |
+|---|---|---|
+| `name` | yes | Object name |
+| `kind` | yes | Object kind (e.g. the `kind` of a Resource Request, but not restricted to that) |
+| `apiVersion` | yes | Object apiVersion |
+| `namespace` | no | Defaults to `default` |
+
+In `gitops` or `hybrid` mode, returns `{ "commitHash": <string> }`. In `kubernetes` mode, returns the Kubernetes deletion status.
