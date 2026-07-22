@@ -222,10 +222,11 @@ Works based on an external condition. Removing the `kratix.io/workflow-suspended
 re-runs the Delete Pipeline; if it completes without suspending again, the Works are
 deleted and the Promise deletion completes.
 
-A Delete Pipeline can also write its own `/kratix/metadata/status.yaml`, the same way a
-Configure Pipeline does. Writing a `message` key there surfaces that message via
-`kubectl get`, rather than only via `kubectl describe`. See the
-[status documentation](/main/reference/resources/status) for more detail.
+When Delete Pipeline is suspended, it can also write its own
+`/kratix/metadata/status.yaml`, the same way a Configure Pipeline does. Writing a
+`message` key there surfaces that message via `kubectl get`, rather than only via
+`kubectl describe`. See the [status documentation](/main/reference/resources/status)
+for more detail.
 
 The example below shows how a `promise.delete` workflow can be defined.
 

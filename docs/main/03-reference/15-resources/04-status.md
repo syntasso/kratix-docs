@@ -13,7 +13,22 @@ Resource back to the resource requester by writing information to
 `/kratix/metadata/status.yaml`. The file can contain arbitrary key values, with the
 `message` key being a special key that is communicated back to the user when
 running `kubectl get <resource-request>`. For example if the Pipeline container wrote the
-following to the `/kratix/metadata/status.yaml` file:
+As part of a Configure Pipeline you can optionally send information about the
+Resource back to the resource requester by writing information to
+`/kratix/metadata/status.yaml`.
+
+:::info
+
+Status is also available in Delete Pipelines, but only if you are using the suspend
+functionality. On an immediate delete the resource will not update status as the
+resource will be removed before status would be written.
+
+:::
+
+The file can contain arbitrary key values, with the `message` key being a special
+key that is communicated back to the user when running `kubectl get
+<resource-request>`. For example if the Pipeline container wrote the following to
+the `/kratix/metadata/status.yaml` file:
 
 ```yaml
 message: Resource provisioned with database size 10Gb

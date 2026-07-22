@@ -211,10 +211,12 @@ Resource's Works based on an external condition. Removing the `kratix.io/workflo
 label re-runs the Delete Pipeline; if it completes without suspending again, the Works
 are deleted and the Resource deletion completes.
 
-A Delete Pipeline can also write its own `/kratix/metadata/status.yaml`, the same way a
-Configure Pipeline does. Writing a `message` key there surfaces that message via
-`kubectl get`, rather than only via `kubectl describe`. See the
-[status documentation](/main/reference/resources/status) for more detail.
+On a typical Delete Pipeline the resource is removed before a status can be written.
+But when leveraging the suspend functionality the Delete Pipeline can also write its own
+`/kratix/metadata/status.yaml`, the same way a Configure Pipeline does. Writing a
+`message` key there surfaces that message via `kubectl get`, rather than only via
+`kubectl describe`. See the [status documentation](/main/reference/resources/status)
+for more detail.
 
 The example below shows how a `resource.delete` workflow can be defined.
 
