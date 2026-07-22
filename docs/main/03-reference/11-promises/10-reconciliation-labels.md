@@ -36,6 +36,13 @@ While the label is present:
 
 If the label is removed, Kratix resumes from the suspended Pipeline.
 
+:::note
+The same labels work with Configure and Delete Pipelines. During Delete
+Pipelines, Works created by the Promise are **not deleted**, and the
+`DeleteWorkflowCompleted` condition is set to `False` with reason
+`DeleteWorkflowSuspended`. Removing the label re-runs the Delete Pipeline.
+:::
+
 ## Pausing Reconciliation
 
 ```yaml

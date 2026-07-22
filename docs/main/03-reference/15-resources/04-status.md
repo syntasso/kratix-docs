@@ -8,12 +8,27 @@ import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-fl
 
 # Status
 
-As part of a Configure Pipeline you can optionally send information about the Resource
-back to the resource requester by writing information to
+As part of a Configure or Delete Pipeline you can optionally send information about the
+Resource back to the resource requester by writing information to
 `/kratix/metadata/status.yaml`. The file can contain arbitrary key values, with the
 `message` key being a special key that is communicated back to the user when
 running `kubectl get <resource-request>`. For example if the Pipeline container wrote the
-following to the `/kratix/metadata/status.yaml` file:
+As part of a Configure Pipeline you can optionally send information about the
+Resource back to the resource requester by writing information to
+`/kratix/metadata/status.yaml`.
+
+:::info
+
+Status is also available in Delete Pipelines, but only if you are using the suspend
+functionality. On an immediate delete the resource will not update status as the
+resource will be removed before status would be written.
+
+:::
+
+The file can contain arbitrary key values, with the `message` key being a special
+key that is communicated back to the user when running `kubectl get
+<resource-request>`. For example if the Pipeline container wrote the following to
+the `/kratix/metadata/status.yaml` file:
 
 ```yaml
 message: Resource provisioned with database size 10Gb
@@ -69,6 +84,12 @@ Resource and output these to the `status.yaml` again.
 Status can also be used as a method of communicating information back to the
 Delete workflow, such as the name of any external resources imperatively
 created in the pipeline that need to be deleted as part of the cleanup.
+
+The Delete Pipeline can also write its own `/kratix/metadata/status.yaml` directly,
+the same way a Configure Pipeline does. This is particularly useful together with
+[suspending a Delete Pipeline](workflows#suspending-or-retrying-a-delete-workflow): writing a
+`message` key to `status.yaml` surfaces that message via `kubectl get`, rather than
+only via `kubectl describe`.
 
 ## Multiple Pipelines
 

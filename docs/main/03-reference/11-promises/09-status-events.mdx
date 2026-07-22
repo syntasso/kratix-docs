@@ -19,6 +19,11 @@ A Promise exposes the following list of conditions:
 - `WorksSucceeded` – all Works created for the Promise has completed.
 - `Available` – Promise is ready to accept Resource requests.
 - `Reconciled` – Promise has been successfully reconciled; set to true when all the above conditions are all true.
+- `DeleteWorkflowCompleted` – only present while a Promise is being deleted and the Delete
+  workflow has not finished. Its `reason` is `DeleteWorkflowFailed` if the Delete Pipeline
+  failed, or `DeleteWorkflowSuspended` if the Delete Pipeline suspended itself via the
+  [workflow-control file](/main/reference/promises/workflows#suspending-a-workflow). This
+  condition is not present once deletion completes, since the Promise itself is removed.
 
 Example Promise conditions from `kubectl get promise <name> -o yaml`:
 

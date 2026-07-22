@@ -209,6 +209,25 @@ workflow.
 This Pipeline is responsible for cleaning up resources and configurations that were set up
 by the `promise.configure` workflow.
 
+### Suspending or Retrying a Delete workflow
+
+Like the Configure workflow, a Delete Pipeline can write
+[`/kratix/metadata/workflow-control.yaml`](../workflows#workflow-control)
+to suspend or retry itself before it finishes.
+
+While a Delete Pipeline is suspended, Kratix does not delete the Works created by the
+Promise, and the `DeleteWorkflowCompleted` condition is set to `False` with reason
+`DeleteWorkflowSuspended`. This lets a Delete Pipeline gate teardown of the Promise's
+Works based on an external condition. Removing the `kratix.io/workflow-suspended` label
+re-runs the Delete Pipeline; if it completes without suspending again, the Works are
+deleted and the Promise deletion completes.
+
+When Delete Pipeline is suspended, it can also write its own
+`/kratix/metadata/status.yaml`, the same way a Configure Pipeline does. Writing a
+`message` key there surfaces that message via `kubectl get`, rather than only via
+`kubectl describe`. See the [status documentation](/main/reference/resources/status)
+for more detail.
+
 The example below shows how a `promise.delete` workflow can be defined.
 
 ```yaml
