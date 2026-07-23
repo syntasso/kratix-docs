@@ -47,12 +47,13 @@ An entity matches when either:
 
 - `metadata.annotations['kratix.io/type']` exactly matches `promise` or
   `resource`
-- the annotation is absent and `spec.type` is `kratix-promise` or
+- the annotation is absent or empty and `spec.type` is `kratix-promise` or
   `kratix-resource`
 
-If the `kratix.io/type` annotation is present, it takes precedence over
-`spec.type`. An unrecognised annotation value will therefore prevent the
-`spec.type` fallback from matching.
+If the `kratix.io/type` annotation has a non-empty value, it takes precedence
+over `spec.type`. An unrecognised non-empty annotation value will therefore
+prevent the `spec.type` fallback from matching. An empty value is treated in
+the same way as an absent annotation.
 
 :::warning
 
@@ -214,6 +215,14 @@ Resource's YAML configuration file.
 The instance remains available until the pull request is merged and the
 platform processes the removal of its configuration file.
 
+:::warning Version availability
+
+The pull-request update and deletion behaviour is not included in
+`ske-frontend` v0.17.6. Use a later release that includes the pull-request
+Resource workflow before configuring these annotations.
+
+:::
+
 **Immediate deletion**
 
 When either annotation is absent, the plugin calls
@@ -317,6 +326,15 @@ When `kratix.io/type` is absent, use `spec.type: kratix-resource`. Status
 returned by the backend takes precedence over `kratix.io/status`. The Software
 Template is resolved in the `default` namespace.
 
+:::warning Supply the complete Resource identifier
+
+The current hook detects missing `kratix.io/kind`, `kratix.io/name`, and
+`kratix.io/namespace` values before it calls the backend. It does not detect a
+missing `kratix.io/group` or `kratix.io/version`; instead, it sends an invalid
+API version containing `undefined`. Always supply all five annotations.
+
+:::
+
 The following example describes a PostgreSQL Resource named `prod-db`:
 
 ```yaml
@@ -364,9 +382,13 @@ changed, and uses it to select pull-request deletion. The value uses
 Backstage's RepoUrlPicker format:
 `<HOST>?owner=<OWNER>&repo=<REPOSITORY>`.
 
-Set `kratix.io/phase` to `pending-review` to show an open pull-request banner,
-or `pending-deletion` to show a deletion-requested banner. The banner includes
-a **View pull request** link when `kratix.io/pull-request-url` is present.
+Set `kratix.io/phase` to `pending-review` and provide
+`kratix.io/pull-request-url` to show an open pull-request banner. The
+`pending-review` banner is not shown without the URL.
+
+Set `kratix.io/phase` to `pending-deletion` to show a deletion-requested
+banner. This banner does not require `kratix.io/pull-request-url`, but includes
+a **View pull request** link when the URL is present.
 
 <figure className="diagram">
   <img
@@ -397,15 +419,22 @@ the platform.
 
 The response affects the page as follows:
 
-- `200`: displays the returned Resource data and status, and puts the page into
-  the deleting state when `metadata.deletionTimestamp` is present
+- `200` without `metadata.deletionTimestamp`: stores and displays the returned
+  manifest and status
+- `200` with `metadata.deletionTimestamp`: puts the page into the deleting
+  state without storing the returned manifest. The Overview falls back to
+  catalog entity annotations, and Resource management controls are unavailable
 - `404` for a Resource: treats the Resource as being deleted or already
   removed
 - `404` for a Promise: leaves the page available without current backend data,
   supporting GitOps mode where the repository may not contain Promise
   definitions
-- Any other response: displays an error banner and includes the response
-  `message` when present
+- Any other response with a JSON body: displays an error banner and includes
+  the response `message` when present
+
+The hook does not catch discovery failures, rejected fetches, or responses that
+cannot be parsed as JSON. Those failures do not move the hook to
+`Stage.ERROR`.
 
 :::note GitOps Promise status
 
@@ -479,10 +508,15 @@ When `resourceType` is omitted, the hook reads `kratix.io/type`. The value
 annotation, selects Resource loading. Unlike `isKratixType`, the hook does not
 use `spec.type` as a fallback.
 
-Promise loading requires `kratix.io/promise-name`. Resource loading requires
-`kratix.io/group`, `kratix.io/version`, `kratix.io/kind`, `kratix.io/name`, and
-`kratix.io/namespace`. See [Entity annotations](#entity-annotations) for the
-complete configuration.
+Promise loading requires `kratix.io/promise-name`. When it is absent, the hook
+does not call the backend but remains in `Stage.FETCHING`; the supplied
+Overview and Manage tabs therefore continue to show their loading state.
+
+A valid Resource request requires `kratix.io/group`, `kratix.io/version`,
+`kratix.io/kind`, `kratix.io/name`, and `kratix.io/namespace`. The hook
+currently flags only a missing kind, name, or namespace through
+`missingKratixAnnotations`. See [Entity annotations](#entity-annotations) for
+the complete configuration.
 
 #### `KratixResourceResult`
 
@@ -512,7 +546,7 @@ interface KratixResourceResult {
 | `resourceType` | `ResourceType` | Type selected by the override or entity annotation |
 | `currentStage` | `Stage` | Current fetch or deletion stage |
 | `setStage` | `(stage: Stage) => void` | Updates `currentStage`; the `DELETING` stage also sets the deletion message |
-| `missingKratixAnnotations` | `boolean` | Whether required annotations are absent |
+| `missingKratixAnnotations` | `boolean` | Whether the Promise name, or the Resource kind, name, or namespace, is absent. Missing Resource group and version annotations are not detected |
 | `showDeletionBanner` | `boolean` | Backwards-compatible alias of `showBanner` |
 | `entityIdentifier` | `EntityIdentifier` | Resource identifiers and update-workflow configuration |
 
@@ -520,9 +554,10 @@ Although the interface declares `entityIdentifier` as an `EntityIdentifier`,
 the hook does not populate it when `resourceType` is `promise`. Only access
 this field for a Resource.
 
-When required annotations are absent, the hook does not call the backend.
-Check `missingKratixAnnotations` before rendering data. Backend responses and
-banner precedence follow the behaviour described in
+When annotations represented by `missingKratixAnnotations` are absent, the
+hook does not call the backend. Check `missingKratixAnnotations` before
+rendering data. Backend responses and banner precedence follow the behaviour
+described in
 [Loading data and displaying status](#loading-data-and-displaying-status).
 
 #### `Stage`
@@ -543,10 +578,11 @@ enum Stage {
 | `Stage.FETCHING` | `fetching` | The hook is waiting for the backend response |
 | `Stage.DELETING` | `deleting` | The Resource has a deletion timestamp, was not found, or deletion was requested |
 | `Stage.READY` | `ready` | Loading completed without an error |
-| `Stage.ERROR` | `error` | The request failed or required Resource annotations are absent |
+| `Stage.ERROR` | `error` | A JSON response reports an error, or the Resource kind, name, or namespace is absent |
 
 The initial stage is `Stage.FETCHING`. A `404` response moves a Resource to
 `Stage.DELETING`, but moves a Promise to `Stage.READY` to support GitOps mode.
+A Promise without `kratix.io/promise-name` remains in `Stage.FETCHING`.
 
 #### `EntityIdentifier`
 
