@@ -525,7 +525,7 @@ interface KratixResourceResult {
   setStage: (stage: Stage) => void;
   missingKratixAnnotations: boolean;
   showDeletionBanner: boolean;
-  entityIdentifier: EntityIdentifier;
+  entityIdentifier: EntityIdentifier | undefined;
 }
 ```
 
@@ -540,11 +540,10 @@ interface KratixResourceResult {
 | `setStage` | `(stage: Stage) => void` | Updates `currentStage`; the `DELETING` stage also sets the deletion message |
 | `missingKratixAnnotations` | `boolean` | Whether the Promise name, or the Resource kind, name, or namespace, is absent. Missing Resource group and version annotations are not detected |
 | `showDeletionBanner` | `boolean` | Backwards-compatible alias of `showBanner` |
-| `entityIdentifier` | `EntityIdentifier` | Resource identifiers and update-workflow configuration |
+| `entityIdentifier` | `EntityIdentifier \| undefined` | Resource identifiers and update-workflow configuration; `undefined` for a Promise |
 
-Although the interface declares `entityIdentifier` as an `EntityIdentifier`,
-the hook does not populate it when `resourceType` is `promise`. Only access
-this field for a Resource.
+The hook does not populate `entityIdentifier` when `resourceType` is `promise`.
+Only access this field for a Resource.
 
 When annotations represented by `missingKratixAnnotations` are absent, the
 hook does not call the backend. Check `missingKratixAnnotations` before
