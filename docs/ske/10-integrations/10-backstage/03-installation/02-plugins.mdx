@@ -189,17 +189,17 @@ Promise entities:
 `KratixResourceEntityPage` renders a dedicated Software Catalog page for
 Resource entities:
 
-- Instance name, namespace, type, and the Promise from which it was created
+- Resource name, namespace, kind, and parent Promise
 - Optional Promise summary (markdown-rendered)
-- Current instance status
-- Dependency graph showing which Promise the instance came from
+- Current resource status
+- Dependency graph showing the relationship to the parent Promise
 
 #### Resource Manage
 
 The **Manage** tab on `KratixResourceEntityPage` provides controls for an
 existing instance:
 
-- Pre-filled update form with the instance's current settings (`spec`)
+- Pre-filled update form with the Resource's current spec
 - Read-only name and namespace fields
 - Delete button with confirmation dialog
 
