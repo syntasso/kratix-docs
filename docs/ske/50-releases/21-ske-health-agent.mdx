@@ -22,12 +22,12 @@ Released in Helm Chart version [0.25.0](http://syntasso-enterprise-releases.s3-w
 
 #### Features
 
-* Health Check pods now run with a restricted, non-root pod-level security context by default, and the agent-owned containers are hardened. Workflow containers inherit these defaults and can override them per container where a root image is required. See the [Security context](/ske/reference/health-definition) section of the Health Definition reference.
+* Health Check pods now run with a restricted, non-root pod-level security context by default, and the agent-owned containers are hardened. Workflow containers inherit these defaults and can override them per container where a root image is required. See the [Security context](/ske/reference/healthdefinition) section of the Health Definition reference.
 * `spec.inputs` on a `HealthDefinition` is now optional.
 
 #### Bug Fixes
 
-* The Health Agent now creates the `CronJob` (and its `ServiceAccount`/RBAC) in, and runs the Health Check in, the same namespace as the `HealthDefinition`, independent of `spec.resourceRef.namespace`. See the [Namespace](/ske/reference/health-definition) section of the Health Definition reference and the [Health checks guide](/ske/guides/healthchecks).
+* The Health Agent now creates the `CronJob` (and its `ServiceAccount`/RBAC) in, and runs the Health Check in, the same namespace as the `HealthDefinition`, independent of `spec.resourceRef.namespace`. See the [Namespace](/ske/reference/healthdefinition) section of the Health Definition reference and the [Health checks guide](/ske/guides/healthchecks).
 
 #### Security Fixes
 
