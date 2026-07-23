@@ -161,23 +161,33 @@ spec:
           timeZone: "Europe/London"
 ```
 
-At least one rollout group is required. A resource whose labels match more than one group's selectors is included in
-each matching group. Rollout groups are not de-duplicated.
+At least one rollout group is required. A resource whose labels match more than
+one group's `matchLabels` or `matchExpressions` selectors is included in each
+matching group. Use `matchAll` when you need a group that captures resources
+not selected by earlier rollout groups.
 
 ### Selectors
 
-Selectors determine which resources belong to a rollout group by matching against the labels on their Resource Bindings.
-A selector can use `matchLabels`, `matchExpressions`, or both, following the same semantics as Kubernetes
-[label selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors).
+Selectors determine which resources belong to a rollout group. A selector can
+use **either**:
+
+- `matchLabels`, `matchExpressions`, or both, to match against labels on Resource Bindings using the same semantics as
+  Kubernetes [label selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors);
+  **or**
+- `matchAll: true`, to select all eligible resources for the plan.
 
 | Field | Description |
 |-------|-------------|
 | `matchLabels` | A map of key-value label pairs the Resource Binding must have exactly |
 | `matchExpressions` | A list of requirements, each with a `key`, an `operator` (`In`, `NotIn`, `Exists`, `DoesNotExist`), and, for `In`/`NotIn`, a list of `values` |
+| `matchAll` | A boolean. When set to `true`, selects all eligible resources that have not already been selected by an earlier rollout group |
 
-**All conditions must match.** A resource is included in a group only if it satisfies _every_ condition in the selector.
-Each `matchLabels` pair and each `matchExpressions` requirement is combined with a logical **AND** — never OR. This
-applies at both levels:
+When using `matchLabels`/`matchExpressions`, **all conditions must match**: a
+resource will be included in a group only if it satisfies _every_ condition in
+the selector.
+
+Each `matchLabels` pair and each `matchExpressions` requirement is combined with
+a logical **AND** — never **OR**, this applies at both levels:
 
 - When `matchLabels` and `matchExpressions` are both set, a resource must satisfy **all** of `matchLabels` **and all**
   of `matchExpressions`.
@@ -219,6 +229,52 @@ separate requirements in the list are combined with AND.
 
 Kratix copies the labels from a Resource Request onto its Resource Binding, so you can label either the Resource Request
 or the Resource Binding directly.
+
+`matchAll` is different: it **must be used alone and cannot be combined with
+`matchLabels`, `matchExpressions`**.
+
+#### Selecting all resources
+
+Use `matchAll: true` to define a group containing every Resource Binding that
+belongs to the referenced Promise and its current version matches
+`upgradePath.from`.
+
+In the following example, the `all-resources` group selects all resources for
+the referenced Promise and `upgradePath.from`:
+
+```yaml
+rolloutGroups:
+  - name: all-resources
+    selectors:
+      matchAll: true
+    maxConcurrent: "25%"
+```
+
+In this other example, the `dev` group selects eligible resources labelled
+`env: dev`. The `remaining` group selects every other eligible resource for the
+referenced Promise and `upgradePath.from`, without selecting the `dev` resources
+again:
+
+```yaml
+rolloutGroups:
+  - name: dev
+    selectors:
+      matchLabels:
+        env: dev
+    maxConcurrent: 1
+  - name: remaining
+    selectors:
+      matchAll: true
+    maxConcurrent: "25%"
+```
+
+:::warning
+
+`matchAll: true` must be the only selector in its rollout group. It cannot be
+combined with `matchLabels` or `matchExpressions`. A plan where this combination
+happens will be rejected at creation.
+
+:::
 
 :::tip
 
