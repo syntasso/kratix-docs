@@ -6,36 +6,51 @@ slug: generating-cortex-components
 keywords: [cortex, installation, ske, controller]
 ---
 
-With your Cortex Workspace configured and the Cortex Controller installed on your Platform Cluster, you will now be able to leverage the SKE Cortex integration. If you have not
-setup the workspace and installed the controller, follow the [Configuring Cortex guide](./configuring-cortex).
+import CortexCreateWorkflow from "/img/docs/ske/cortex-create-workflow.png"
+import CortexEntities from "/img/docs/ske/cortex-entities.png"
+import CortexRequestWorkflows from "/img/docs/ske/cortex-request-workflows.png"
 
-## How does it work?
+The recommended way to sync Promises and Resources into Cortex is the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces the standalone Cortex
+Controller. The Cortex Controller continues to work for at least one more release; see [Migrating from the Cortex Controller](/ske/integrations/portal-controller/migrating-from-cortex)
+to move an existing setup across.
 
-The SKE Cortex Controller uses the the Cortex API to generate [Entity Types](https://docs.cortex.io/ingesting-data-into-cortex/entities?q=workflows#entity-types) and
-[Workflows](https://docs.cortex.io/streamline/workflows) in Cortex, these can be used to manage the lifecycle of Resource Requests in the SKE Platform.
+## Set up with the Portal Controller
 
-### Global Entities
+1. Set up your Cortex workspace, git integration, token, and GitOps reconciliation as described in [Configuring Cortex](./configuring-cortex), those steps are unchanged.
+2. Install the Portal Controller with a `cortex` portal, see [Portal Controller Installation](/ske/integrations/portal-controller/installation#configuring-a-cortex-portal).
+3. Label the Promise you want to publish with `kratix.io/portal-cortex: "true"`.
 
-Two global Cortex resources are created once when the SKE Cortex Controller starts:
+For example, to opt a Promise in:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/portal-cortex: "true"
+```
+
+To pin all Resource Requests for a Promise to a fixed namespace, use the portal-wide
+[`--fixed-namespace`](/ske/integrations/portal-controller/installation#portal-wide-generate-flags) generate flag.
+
+## What gets created in Cortex
+
+The Cortex adapter uses the Cortex API to generate [Entity Types](https://docs.cortex.io/ingesting-data-into-cortex/entities?q=workflows#entity-types) and
+[Workflows](https://docs.cortex.io/streamline/workflows) in Cortex, which manage the lifecycle of Resource Requests in the SKE Platform.
+
+### Global entities
+
+Two shared Cortex resources are created by the portal's setup Job, which runs when the `cortex` portal is created and re-runs when its configuration changes:
 
 - **`kratix-promise` Entity Type**: the shared entity type used by all Promise entities.
 - **`instance-of-promise` Relationship Type**: the relationship type that links each Resource Request entity back to its parent Promise entity.
 
-:::warning
+Setup is idempotent, so it is safe to re-run.
 
-These global resources are only created or updated when the controller starts.  If either is manually deleted from Cortex, the controller will **not** recreate them automatically. A controller restart is required to restore them.
+### Per-Promise entities
 
-To restart the controller:
-
-```bash
-kubectl rollout restart deployment/ske-cortex-controller -n kratix-platform-system
-```
-
-:::
-
-### Per-Promise Entities
-
-For each labelled Promise, the SKE Cortex Controller will create and keep in sync the following objects in Cortex:
+For each labelled Promise, the integration creates and keeps in sync the following objects in Cortex:
 
 **Promise Entity Type**: represents the resource being Promised in Cortex, derived from the Promise API.
 
@@ -43,17 +58,17 @@ For each labelled Promise, the SKE Cortex Controller will create and keep in syn
 
 **Resource Request Entities**: one entity is created per Resource Request, typed after the Promise (e.g. `redis`). Each resource entity is linked to its parent Promise entity via the `instance-of-promise` relationship type, enabling navigation from a resource back to the Promise it was created from in the Cortex UI. Resource Request entities also record the email address of the user who triggered the Workflow as the entity owner, so platform teams can see who last created or updated a given resource.
 
-**Create, Update and Delete Workflows**: three workflows are generated to manage the lifecycle of Resource Requests. When a user uses the Create Workflow to make a Request, the Workflow generates a YAML document for that request and writes it to the Cortex Git Repository. When the Platform Cluster converges on this and creates the Resource Request, the Cortex Controller creates the corresponding Resource Request Entity in Cortex.
+**Create, Update and Delete Workflows**: three workflows are generated to manage the lifecycle of Resource Requests. When a user uses the Create Workflow to make a Request, the Workflow generates a YAML document for that request and writes it to the Cortex Git Repository. When the Platform Cluster converges on this and creates the Resource Request, the adapter creates the corresponding Resource Request Entity in Cortex.
 
 All per-Promise entities are tagged with the `kratix-resources` group, which allows all Kratix-managed objects (Promises and resource requests alike) to be surfaced together under a single catalogue item in Cortex.
 
 When a given Resource Request or Promise is deleted (either via the Workflow or the Kubernetes API), the corresponding objects in Cortex will also be deleted.
 
-### Generating the Workflows
+### Generating the workflows
 
-The Cortex Controller takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex.
+The Cortex adapter takes the API of the Promise and uses this to create the fields for the generated Entity Type in Cortex.
 
-Cortex [supports the following API types:](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) `boolean`, `number`, `object`, `string`, as well as `arrays` of each of these types. Object arrays can only have a single level of nesting. Outside of an array, objects cannot exceed more than five levels of nesting. Promise schema constructs that include properties outside this set cannot be expressed as Workflow inputs, and when the controller encounters one, the Create, Update, and Delete Workflows in Cortex will not be generated.
+Cortex [supports the following API types:](https://docs.cortex.io/ingesting-data-into-cortex/entities/adding-entities/entity-types#json-schema-for-custom-entity-types) `boolean`, `number`, `object`, `string`, as well as `arrays` of each of these types. Object arrays can only have a single level of nesting. Outside of an array, objects cannot exceed more than five levels of nesting. Promise schema constructs that include properties outside this set cannot be expressed as Workflow inputs, and when the adapter encounters one, the Create, Update, and Delete Workflows in Cortex will not be generated.
 
 #### Optional fields in Resource Requests
 
@@ -66,6 +81,46 @@ Required fields and boolean fields are always included. Valid values such as `fa
 When a Cortex Workflow input is typed as `string` and a user enters a value that consists only of digits, make sure to wrap purely numeric values in quotes (for example, `"0001234"`) when filling the Cortex form so the value is interpreted as a string.
 
 :::
+
+## Managing Resource Requests in Cortex
+
+When a Promise has been successfully installed with the Cortex integration, Platform users can use Cortex workflows to manage the lifecycle of their services. From either the Entity Type
+view or the Workflows view, users can trigger the Create Workflow for the desired Entity Type that represents the Promise. When initiating the Workflow, they will be presented with the input
+form with fields that honour the Promise API.
+
+<figure className="diagram">
+  <img className="large" src={CortexCreateWorkflow} alt="The input form for a Cortex create workflow for a Redis Promise" />
+
+  <figcaption>Cortex Create Workflow</figcaption>
+</figure>
+
+Upon submitting their request form, the Resource Request will be written to the configured Git Repository and created on the Platform Cluster. The creation of the request on the cluster will trigger a Kratix Workflow that creates an Entity representing the Resource Request in Cortex.
+
+<figure className="diagram">
+  <img className="large" src={CortexEntities} alt="The entity view in Cortex with one entity visible" />
+
+  <figcaption>Cortex Entity View</figcaption>
+</figure>
+
+The Resource Request can then be managed via the Entity in Cortex, which will expose both the Update and Delete workflows for the Entity.
+
+<figure className="diagram">
+  <img className="large" src={CortexRequestWorkflows} alt="The Cortex UI detailing the Update and Delete workflows for an Entity" />
+
+  <figcaption>Cortex Update and Delete Workflows</figcaption>
+</figure>
+
+Running the Update Workflow for the Resource Request will update the request in the Git Repository and eventually, the Kratix workflows for the request will re-run and the Entity in
+Cortex will be updated accordingly.
+
+Triggering the Delete Workflow will remove the request from the Git Repository, trigger a deletion on the Platform Cluster and remove the Entity from Cortex.
+
+<details>
+<summary>Looking for the legacy Cortex Controller docs?</summary>
+
+These sections apply to the deprecated standalone Cortex Controller. With the Portal Controller, opt a Promise in with the `kratix.io/portal-cortex` label (above) rather than
+`kratix.io/cortex`, and reproduce a fixed namespace with the `--fixed-namespace` generate flag rather than the annotation below. The skip-workflows and field-display annotations
+are not read by the Portal Controller's Cortex adapter, see [Migrating from the Cortex Controller](/ske/integrations/portal-controller/migrating-from-cortex).
 
 ## Labelling Promises for Cortex Integration
 
@@ -180,41 +235,4 @@ metadata:
 Use this when the Promise has a fixed namespace for all requests and the namespace is not a useful concept for
 the Cortex users creating those requests.
 
-## Managing Resource Requests in Cortex
-
-```mdx-code-block
-import CortexCreateWorkflow from "/img/docs/ske/cortex-create-workflow.png"
-import CortexEntities from "/img/docs/ske/cortex-entities.png"
-import CortexRequestWorkflows from "/img/docs/ske/cortex-request-workflows.png"
-```
-
-When a Promise has been successfully installed with the Cortex integration, Platform users can use Cortex workflows to manage the lifecycle of their services. From either the Entity Type
-view or the Workflows view, users can trigger the Create Workflow for the desired Entity Type that represents the Promise. When initiating the Workflow, they will be presented with the input
-form with fields that honour the Promise API.
-
-<figure className="diagram">
-  <img className="large" src={CortexCreateWorkflow} alt="The input form for a Cortex create workflow for a Redis Promise" />
-
-  <figcaption>Cortex Create Workflow</figcaption>
-</figure>
-
-Upon submitting their request form, the Resource Request will be written to the configured Git Repository and created on the Platform Cluster. The creation of the request on the cluster will trigger a Kratix Workflow that creates an Entity representing the Resource Request in Cortex.
-
-<figure className="diagram">
-  <img className="large" src={CortexEntities} alt="The entity view in Cortex with one entity visible" />
-
-  <figcaption>Cortex Entity View</figcaption>
-</figure>
-
-The Resource Request can then be managed via the Entity in Cortex, which will expose both the Update and Delete workflows for the Entity.
-
-<figure className="diagram">
-  <img className="large" src={CortexRequestWorkflows} alt="The Cortex UI detailing the Update and Delete workflows for an Entity" />
-
-  <figcaption>Cortex Update and Delete Workflows</figcaption>
-</figure>
-
-Running the Update Workflow for the Resource Request will update the request in the Git Repository and eventually, the Kratix workflows for the request will re-run and the Entity in
-Cortex will be updated accordingly.
-
-Triggering the Delete Workflow will remove the request from the Git Repository, trigger a deletion on the Platform Cluster and remove the Entity from Cortex.
+</details>

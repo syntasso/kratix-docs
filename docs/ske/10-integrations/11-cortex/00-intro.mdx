@@ -5,6 +5,14 @@ sidebar_label: Introduction
 keywords: [cortex, internal developer portal, idp]
 ---
 
+:::note
+
+This integration uses the [Portal Controller](../portal-controller/intro) to populate Cortex. If you are still running
+the standalone Cortex Controller, it continues to work for at least one more release, see
+[Migrating from the Cortex Controller](../portal-controller/migrating-from-cortex).
+
+:::
+
 Cortex is an Internal Developer Portal (IDP) that centralises self-service access across organisations. This pairs well with Syntasso Kratix Enterprise (SKE) which is a framework
 for building Platforms that provision Anything-As-A-Service. Coupled together, Cortex can serve as an entrypoint for the SKE Platform. SKE can orchestrate the deployment of services through the medium of Promises and surface the progress of these
 services being provisioned within the Cortex UI.
@@ -21,9 +29,9 @@ import CortexDiagram from "/img/docs/ske/cortex-resource-request-diagram.jpg"
 To integrate SKE with Cortex, you need to do the following:
 
 1. Configure your Cortex Workspace
-1. Install the Cortex Controller
+1. Install the Portal Controller with a `cortex` portal
 1. Set up GitOps tooling on your Platform cluster to reconcile on files written to the Git State Store by the Cortex Workflows
-1. Label your Promises with the Cortex label
+1. Label your Promises with `kratix.io/portal-cortex`
 
 The diagram below shows the architecture of the integration and flow of actions when a user makes a Resource Request via the Cortex UI.
 
@@ -35,5 +43,5 @@ The diagram below shows the architecture of the integration and flow of actions 
 
 The following sections will explore each of these steps in detail.
 
-* In [Configuring Cortex](./configuring-cortex), you will learn how to configure the Cortex Workspace, install the Cortex Controller and configure your Platform Cluster to create Cortex-generated resources
+* In [Configuring Cortex](./configuring-cortex), you will learn how to configure the Cortex Workspace, install the Portal Controller with a `cortex` portal, and configure your Platform Cluster to create Cortex-generated resources
 * In [Generating Cortex Components](./generating-cortex-components), you will learn how to automatically generate Cortex Workflows, Entity Types and Entities

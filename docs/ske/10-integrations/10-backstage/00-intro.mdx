@@ -13,6 +13,14 @@ import BackstageDiagram from "/img/docs/ske/backstage-diagram.png"
 
 import InstallationSteps from './_partials/installation-steps.mdx';
 
+:::note
+
+This integration uses the [Portal Controller](../portal-controller/intro) to generate Backstage entities. If you are
+still running the standalone Backstage Controller, it continues to work for at least one more release, see
+[Migrating from the Backstage Controller](../portal-controller/migrating-from-backstage).
+
+:::
+
 Backstage is a framework for building developer portals, while Kratix is a framework for building Platforms. Both systems can integrate with each other to provide an end-to-end
 self-service experience for developers.
 
@@ -37,8 +45,8 @@ The Backstage integration enables platform teams to:
 
 The integration is made up of SKE components, Backstage plugins, and shared storage. Each part has a specific role:
 
-- **Backstage Controller**: runs in the platform cluster and enables automatic Backstage entity generation for labelled Promises. It adds the generation workflow that produces
-  Backstage Components and Templates for Promises and Resource requests.
+- **Portal Controller**: runs in the platform cluster and generates Backstage Components and Templates for labelled Promises and their Resource requests. You configure it with a
+  `backstage` portal on an `SKEIntegration`, see [Portal Controller](../portal-controller/intro).
 - **SKE frontend plugin**: runs in Backstage and renders SKE-specific pages for Promise and Resource Components.
 - **SKE backend plugin**: runs in the Backstage backend and provides the actions used by generated Templates. It sends Resource requests to Kratix through Kubernetes API mode, GitOps
   mode, or Hybrid mode.
@@ -47,12 +55,12 @@ The integration is made up of SKE components, Backstage plugins, and shared stor
 
 To integrate Kratix with Backstage, you will need to do the following:
 
-1. Install the SKE Backstage Controller.
+1. Install the Portal Controller with a `backstage` portal.
 1. Configure Backstage to communicate with your Kubernetes cluster or GitOps repository.
 1. Install and configure the SKE Backstage plugins.
 1. Configure Kratix to send Backstage entities to a state store.
 1. Configure Backstage to read its catalogue from the same state store.
-1. Label your Promises for Backstage entity generation.
+1. Label your Promises with `kratix.io/portal-backstage` for entity generation.
 
   <figure className="diagram">
     <img

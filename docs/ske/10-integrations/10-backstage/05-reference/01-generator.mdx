@@ -5,11 +5,17 @@ sidebar_label: SKE Backstage Generator
 ---
 
 :::note
-If you are using the [Backstage Controller](../installation/generating-backstage-components) you will
-not need to use `ske-backstage-generator` directly.
+
+Most platforms should use the [Portal Controller](/ske/integrations/portal-controller/intro) instead of wiring the generator into pipelines by hand: install it with a
+`backstage` portal and label your Promise with `kratix.io/portal-backstage`, and it generates the same entities automatically. See
+[Generating Backstage Components](../installation/generating-backstage-components). This page documents running the generator manually as a pipeline stage, which you only need
+for advanced cases.
+
 :::
 
-`ske-backstage-generator` is an entrypoint built into the `ghcr.io/syntasso/backstage-controller` image. When added as a container in a Kratix Pipeline, it automatically generates the Backstage Template and Component manifests for your Promises and Resource Requests.
+The generator is now shipped as the **portal-adapter**, the entrypoint built into the `ghcr.io/syntasso/ske-portal-controller` image (the same binary that used to ship in the
+Backstage Controller image). When added as a container in a Kratix Pipeline, it automatically generates the Backstage Template and Component manifests for your Promises and
+Resource Requests, driven by the same environment variables and annotations documented below.
 
 These manifests are read by Backstage and are designed to work seamlessly with the SKE Backstage plugins.
 
@@ -17,7 +23,7 @@ These manifests are read by Backstage and are designed to work seamlessly with t
 
 ### SKE Backstage plugins
 
-The `ske-backstage-generator` uses an action from the `ske-backend` Backstage plugin.
+The `ske-portal-adapter` uses an action from the `ske-backend` Backstage plugin.
 This action is used within the generated Template to create a Resource Request.
 The generated Components are also used by the `ske-frontend` Backstage plugin to display
 Promise and Resource metadata.
@@ -35,7 +41,7 @@ for setup instructions.
 
 ## How does it work?
 
-`ske-backstage-generator` is intended to be run as part of your Configure Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template and Component manifests, and schedule them to your [Backstage Destination](#destination).
+`ske-portal-adapter` is intended to be run as part of your Configure Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template and Component manifests, and schedule them to your [Backstage Destination](#destination).
 
 ### Promise Configure
 
@@ -55,7 +61,7 @@ In a Resource Configure workflow, a single Backstage manifest will be generated:
 
 Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
 
-## Accessing the Backstage Controller image
+## Accessing the Portal Controller image
 
 ### Pulling the image locally
 
@@ -74,7 +80,7 @@ tool.
 Once you have authenticated, you can pull any released version of the image.
 
 ```bash
-docker pull ghcr.io/syntasso/backstage-controller:VERSION
+docker pull ghcr.io/syntasso/ske-portal-controller:VERSION
 ```
 
 ### Pulling the image from your cluster
@@ -91,10 +97,10 @@ directly to the Kubernetes cache. Different tools have different commands for th
 
 ```bash
 # For minikube
-minikube image load ghcr.io/syntasso/backstage-controller:VERSION
+minikube image load ghcr.io/syntasso/ske-portal-controller:VERSION
 
 # For KinD
-kind load docker-image ghcr.io/syntasso/backstage-controller:VERSION
+kind load docker-image ghcr.io/syntasso/ske-portal-controller:VERSION
 ```
 
 For other tools, follow their specific documentation.
@@ -103,7 +109,7 @@ When using the SKE Backstage Generator in your Workflows, you can define the sec
 
 ## Using the SKE Backstage Generator in your Workflows
 
-To use `ske-backstage-generator`, update your Promise definition to include it as a container in both the Promise Configure and Resource Configure workflows:
+To use `ske-portal-adapter`, update your Promise definition to include it as a container in both the Promise Configure and Resource Configure workflows:
 
 ```yaml title="Workflows section in a Promise file"
   # ...
@@ -119,8 +125,8 @@ To use `ske-backstage-generator`, update your Promise definition to include it a
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/backstage-controller:VERSION
-            name: ske-backstage-generator
+          - image: ghcr.io/syntasso/ske-portal-controller:VERSION
+            name: ske-portal-adapter
           #highlight-end
     resource:
       configure:
@@ -133,8 +139,8 @@ To use `ske-backstage-generator`, update your Promise definition to include it a
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-resource-pipeline
           #highlight-start
-          - image: ghcr.io/syntasso/backstage-controller:VERSION
-            name: ske-backstage-generator
+          - image: ghcr.io/syntasso/ske-portal-controller:VERSION
+            name: ske-portal-adapter
           #highlight-end
 ```
 
@@ -145,9 +151,9 @@ the Template to create a Resource, you should see the resource Component
 appearing as well as the Resource itself being created in your cluster.
 
 In order to have the full status of your Promise or Resource request displayed in Backstage,
-you should place `ske-backstage-generator` as the last container in the last pipeline of your workflow.
+you should place `ske-portal-adapter` as the last container in the last pipeline of your workflow.
 
-If `ske-backstage-generator` needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
+If `ske-portal-adapter` needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
 Component Promise](./generator-promise). Otherwise, you will observe only one of the components
 in Backstage, and Backstage will emit a warning:
 
@@ -199,11 +205,11 @@ secret.
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/backstage-controller:VERSION
-            name: ske-backstage-generator
+          - image: ghcr.io/syntasso/ske-portal-controller:VERSION
+            name: ske-portal-adapter
 ```
 
-This ensures that, when pulling the `backstage-controller` image, Kubernetes will use the
+This ensures that, when pulling the `ske-portal-controller` image, Kubernetes will use the
 `syntasso-registry` secret for authentication.
 
 ## Customising the generated Components
@@ -271,8 +277,8 @@ Pipeline Stage with the snippet below:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/backstage-controller:VERSION
-            name: ske-backstage-generator
+          - image: ghcr.io/syntasso/ske-portal-controller:VERSION
+            name: ske-portal-adapter
             #highlight-start
             env:
             - name: COMPONENT_OWNER
@@ -350,8 +356,8 @@ Pipeline Stage with the snippet below:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/backstage-controller:VERSION
-            name: ske-backstage-generator
+          - image: ghcr.io/syntasso/ske-portal-controller:VERSION
+            name: ske-portal-adapter
             #highlight-start
             env:
             - name: TEMPLATE_OWNER
@@ -389,8 +395,8 @@ for all resource requests:
           containers:
           - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
             name: jenkins-promise-pipeline
-          - image: ghcr.io/syntasso/backstage-controller:VERSION
-            name: ske-backstage-generator
+          - image: ghcr.io/syntasso/ske-portal-controller:VERSION
+            name: ske-portal-adapter
             #highlight-start
             env:
             - name: TEMPLATE_NAMESPACE

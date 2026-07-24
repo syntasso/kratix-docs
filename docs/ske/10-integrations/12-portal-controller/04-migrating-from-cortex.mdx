@@ -1,0 +1,189 @@
+---
+title: Migrating from the Cortex Controller
+description: Migrating from the standalone Cortex Controller to the Portal Controller
+sidebar_label: Migrating from Cortex
+slug: migrating-from-cortex
+keywords: [portal, cortex, migration, ske, controller]
+---
+
+The standalone Cortex Controller integration (`SKEIntegration type: cortex`) is deprecated in favour of the Portal Controller, using a `type: portal-controller` integration with a
+`portals[]` entry of `type: cortex`. Both can run side by side for at least two releases, distinct label spaces mean a Promise labelled only `kratix.io/cortex: "true"` keeps going
+to the Cortex Controller, while `kratix.io/portal-cortex: "true"` opts into the Portal Controller.
+
+This guide maps every `cortex-config` ConfigMap field onto `portals[].config`, using the same key names, and covers the Promise label change.
+
+## At a glance
+
+| Cortex Controller (`cortex-config` ConfigMap, `type: cortex`) | Portal Controller (`portals[]` on `type: portal-controller`) | Notes |
+|---|---|---|
+| ConfigMap key `repositoryName` | `portals[].config.repositoryName` | Required string, same value |
+| ConfigMap key `provider` | `portals[].config.provider` | Required string, `github` or `gitlab` |
+| ConfigMap key `integrationAlias` | `portals[].config.integrationAlias` | Required string, same value |
+| ConfigMap key `branch` (optional) | `portals[].config.branch` | Optional string |
+| ConfigMap key `path` (optional) | `portals[].config.path` | Optional string |
+| `spec.cortex.secretRef` / admin Secret | `portals[].secretRef` + admin Secret in `kratix-platform-system` | Same admin-provisions-the-Secret pattern |
+| Promise label `kratix.io/cortex: "true"` | `kratix.io/portal-cortex: "true"` (or `kratix.io/portal-cortex.<instance>`) | Distinct label spaces, both controllers may coexist |
+| Annotation `kratix.io/cortex-fixed-namespace` | `portals[].adapterConfig.generate.args: ["--fixed-namespace=<value>"]` | Now a portal-wide setting, see [Deprecated annotations](#deprecated-annotations) below |
+| Annotation `kratix.io/cortex-skip-workflows` | customize container deleting the unwanted `workflow-*.yaml` files | See [Skipping Cortex workflows](#skipping-cortex-workflows-with-a-customize-container) below |
+
+`portals[].config` values must be strings for the Cortex settings above, a validating webhook rejects a missing or non-string required key.
+
+## Worked example
+
+### Before (Cortex Controller)
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cortex-config
+  namespace: kratix-platform-system
+data:
+  repositoryName: syntasso/platform-catalog
+  provider: github
+  integrationAlias: github-main
+  branch: main
+---
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: cortex
+spec:
+  type: cortex
+  version: v1.2.0
+  cortex:
+    repositoryName: syntasso/platform-catalog
+    provider: github
+    integrationAlias: github-main
+    branch: main
+    secretRef:
+      name: cortex-token
+```
+
+Promise opt-in:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/cortex: "true"
+```
+
+### After (Portal Controller)
+
+Create the credential Secret yourself in `kratix-platform-system` (same pattern as today), then:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cortex-token
+  namespace: kratix-platform-system
+type: Opaque
+stringData:
+  token: <cortex-api-token>
+---
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.1.0
+  portals:
+    - name: prod
+      type: cortex
+      url: https://api.getcortexapp.com
+      secretRef:
+        name: cortex-token
+      config:
+        repositoryName: syntasso/platform-catalog
+        provider: github
+        integrationAlias: github-main
+        branch: main
+```
+
+Promise opt-in, switch labels when you are ready to move that Promise:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-cortex: "true"
+```
+
+## Coexistence during migration
+
+| Controller | Opt-in label | Connection source |
+|---|---|---|
+| Cortex Controller | `kratix.io/cortex` | `SKEIntegration type: cortex` + `cortex-config` |
+| Portal Controller | `kratix.io/portal-cortex[.instance]` | `SKEIntegration type: portal-controller` + `portals[]` entry `type: cortex` |
+
+The Portal Controller only discovers labels under the `kratix.io/portal-` prefix, so a Promise that still carries only `kratix.io/cortex: "true"` is never claimed by it. Keep the
+Cortex Controller installed until every Promise you care about has moved labels.
+
+## Deprecated annotations
+
+The Cortex Controller's per-Promise annotations are not read by the Portal Controller's Cortex adapter. They map across as follows:
+
+- **`kratix.io/cortex-fixed-namespace`** is reproduced by the portal-wide
+  [`adapterConfig.generate.args`](./installation#portal-wide-generate-flags) flag `--fixed-namespace=<value>`, which hard-codes `metadata.namespace` and
+  hides the namespace input on generated workflows. The difference is scope, the annotation was per-Promise, this flag applies to every Promise routed through the portal. If
+  you need different fixed namespaces for different Promises, define a separate Cortex portal per namespace and bind each Promise to the right one with a
+  `kratix.io/portal-cortex.<instance>` label.
+
+  ```yaml
+  portals:
+    - name: team-a
+      type: cortex
+      # ... url, secretRef, config as usual
+      adapterConfig:
+        generate:
+          args:
+            - "--fixed-namespace=team-a"
+  ```
+
+- **`kratix.io/cortex-skip-workflows`** has no direct field equivalent, `generate` always emits the full default document set. You can reproduce it with a customize container
+  that deletes the unwanted workflow files before the writer ships them (see below).
+
+## Skipping Cortex workflows with a customize container
+
+The Cortex `generate` stage writes its documents to `/kratix/output`:
+
+```
+entity-type.yaml       # the Promise's Cortex entity type
+promise-entity.yaml    # the Promise entity
+workflow-create.yaml   # the Create workflow
+workflow-update.yaml   # the Update workflow
+workflow-delete.yaml   # the Delete workflow
+```
+
+A promise-lane customize container runs after `generate` and before the writer, so deleting a `workflow-*.yaml` file there stops the writer from creating that workflow in Cortex.
+For example, to keep only the Create workflow (the equivalent of `kratix.io/cortex-skip-workflows: "update,delete"`):
+
+```yaml
+apiVersion: portal.kratix.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: remove-workflows
+spec:
+  portal: cortex
+  promise:
+    containers:
+      - name: delete-workflows
+        image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+        command: ["sh"]
+        args:
+          - -c
+          - |
+            set -e
+            rm -f /kratix/output/workflow-update.yaml /kratix/output/workflow-delete.yaml
+```
+
+Bind the Promise to this profile with the `kratix.io/portal-customization` label (see [Customization](./customization#binding-a-promise-to-a-portalcustomization)).
+
+:::note
+
+This only stops the writer from **creating** those workflows, it does not remove workflows that already exist in Cortex. Unlike the legacy
+`kratix.io/cortex-skip-workflows` annotation, deleting the files does not tear down previously-created workflows. If you are adding this customization to a Promise whose workflows
+are already in Cortex, delete those workflows in Cortex manually.
+
+:::
