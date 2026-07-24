@@ -126,8 +126,9 @@ run's events with `kubectl describe upgraderun <run-name>`; see
 
 :::note
 
-A resource whose labels match more than one group is included in each matching group; groups are not de-duplicated. Keep
-selectors mutually exclusive (as the `env` labels are here) to upgrade each resource exactly once.
+A resource whose labels match more than one `matchLabels` or `matchExpressions` selector is included in each matching
+group; those selectors are not de-duplicated. Keep selectors mutually exclusive (as the `env` labels are here), or use
+`matchAll: true` as a catch-all group for resources that earlier groups did not select.
 
 :::
 
