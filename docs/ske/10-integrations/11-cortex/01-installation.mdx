@@ -89,36 +89,34 @@ cortexIntegration:
 
 #### Deploying Within Air-gapped Environments
 
-##### Mirroring the Cortex Controller Images
+##### Mirror the Cortex Controller image
 
-You may want to manage the Cortex Controller images within your own environment either due to air-gapped requirements or other security measures.
+Mirror the following image using the same version that you set on the Cortex
+integration:
 
-To do this, you will need to set up image mirroring and configure the Cortex Controller distribution to pull images from your own registry.
-
-You must ensure that the Cortex Controller image is mirrored in your own image registry and tagged according to the version.
-
-```
-ghcr.io/syntasso/ske-cortex-controller
+```text
+ghcr.io/syntasso/ske-cortex-controller:<CORTEX_CONTROLLER_VERSION>
 ```
 
-As is the case for the SKE Operator and SKE Platform images, the Cortex Controller will use the registry configured via the `imageRegistry.host` in the SKE Operator Helm Chart when pulling images.
-If you have changed the name of the Cortex Controller image in your internal registry, ensure that the `imageRegistry.cortexControllerImage.name` is updated to reflect this.
+The Cortex Controller uses the registry configured by `imageRegistry.host` in
+the SKE Operator Helm chart. If you change the image path in your internal
+registry, set `imageRegistry.cortexControllerImage.name` to the new path.
 
-##### Mirroring the Cortex Release Manifests
+##### Mirror the Cortex release manifests
 
 Like the SKE distribution, you will need to ensure that the Cortex Controller deployment manifests are available the [SKE Release Storage](/ske/installing-ske/air-gapped#ske-release-storage); the S3-compatible bucket or Git repository that is accessible from the Platform Cluster.
 
 You need to ensure that the manifests are downloaded to the SKE Release Storage and that the directory structure matches the [Syntasso Enterprise Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/). For instance:
 
-```
+```text
 ske
   v0.43.0
     ske-distribution.yaml
     release-metadata.json
 
-backstage-controller
-  v0.5.5
-    backstage-controller-distribution.yaml
+ske-cortex-controller
+  v0.10.1
+    ske-cortex-controller-distribution.yaml
 ```
 
 #### Deploy the Cortex Controller
@@ -168,7 +166,7 @@ metadata:
   name: cortex-integration
 spec:
   type: cortex
-  version: v0.99.0 # replace this placeholder version with your desired version of the Cortex Controller
+  version: "<CORTEX_CONTROLLER_VERSION>"
   cortex:
     branch: main # any branch that exists; defaults to main
     integrationAlias: my-alias # needs to match the integrationAlias for your GitOps integration

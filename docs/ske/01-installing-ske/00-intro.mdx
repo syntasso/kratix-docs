@@ -4,6 +4,15 @@ description: Introduction to installing SKE
 sidebar_label: Introduction
 ---
 
+:::warning Fixed installation namespace
+
+SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
+You cannot override this namespace. The Helm installation can create it for
+you; for a manifest-based installation, create it before installing the SKE
+Operator.
+
+:::
+
 ## Upgrade Your Platform with Confidence
 
 Upgrades are not maintenance. They are how your platform evolves.
