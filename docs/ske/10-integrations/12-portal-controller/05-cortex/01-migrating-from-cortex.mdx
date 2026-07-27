@@ -125,7 +125,7 @@ Cortex Controller installed until every Promise you care about has moved labels.
 The Cortex Controller's per-Promise annotations are not read by the Portal Controller's Cortex adapter. They map across as follows:
 
 - **`kratix.io/cortex-fixed-namespace`** is reproduced by the portal-wide
-  [`adapterConfig.generate.args`](./installation#portal-wide-generate-flags) flag `--fixed-namespace=<value>`, which hard-codes `metadata.namespace` and
+  [`adapterConfig.generate.args`](../installation#portal-wide-generate-flags) flag `--fixed-namespace=<value>`, which hard-codes `metadata.namespace` and
   hides the namespace input on generated workflows. The difference is scope, the annotation was per-Promise, this flag applies to every Promise routed through the portal. If
   you need different fixed namespaces for different Promises, define a separate Cortex portal per namespace and bind each Promise to the right one with a
   `kratix.io/portal-cortex.<instance>` label.
@@ -178,7 +178,7 @@ spec:
             rm -f /kratix/output/workflow-update.yaml /kratix/output/workflow-delete.yaml
 ```
 
-Bind the Promise to this profile with the `kratix.io/portal-customization` label (see [Customization](./customization#binding-a-promise-to-a-portalcustomization)).
+Bind the Promise to this profile with the `kratix.io/portal-customization` label (see [Customization](../customization#binding-a-promise-to-a-portalcustomization)).
 
 :::note
 

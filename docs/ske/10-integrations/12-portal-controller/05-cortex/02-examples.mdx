@@ -1,0 +1,82 @@
+---
+title: Cortex examples
+description: Examples of customising Cortex documents with PortalCustomization
+sidebar_label: Cortex examples
+slug: cortex-examples
+keywords: [portal, customization, cortex, workflow, ske]
+---
+
+These examples show how a `PortalCustomization` can edit documents generated for Cortex. The Python used here is only an example. Use any language, image, or tool that can read and update the generated files.
+
+## Example Promise
+
+The examples on this page use a Kafka Promise with `team` and `size` fields. The Promise definition is shortened to show only its API.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Promise
+metadata:
+  name: kafka
+spec:
+  api:
+    spec:
+      type: object
+      properties:
+        team:
+          type: string
+        size:
+          type: string
+```
+
+## Reorder fields in a Cortex workflow
+
+Use this example when you want Cortex to show workflow input fields in a particular order. It reorders the `user-input` action in both generated workflows: `workflow-create.yaml` and `workflow-update.yaml`.
+
+Set `KEY_ORDER` to the comma-separated order you want. For this Promise, the order is `team`, `size`, `objnamespace`, then `objname`. Any other fields appear after these fields.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-workflow-key-order
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - name: reorder-workflow-keys
+          image: python:3.13-alpine
+          command: ["sh", "-c"]
+          env:
+            - name: KEY_ORDER
+              value: team,size,objnamespace,objname
+          args:
+            - |
+              pip install --quiet --root-user-action=ignore PyYAML==6.0.2
+              python - <<'PY'
+              import os
+              from pathlib import Path
+
+              import yaml
+
+              order = os.environ["KEY_ORDER"].split(",")
+
+
+              def rank(item):
+                  key = item["key"]
+                  return order.index(key) if key in order else len(order)
+
+
+              for name in ("workflow-create.yaml", "workflow-update.yaml"):
+                  path = Path("/kratix/output") / name
+                  workflow = yaml.safe_load(path.read_text())
+                  for action in workflow["actions"]:
+                      if action["slug"] == "user-input":
+                          action["schema"]["inputs"].sort(key=rank)
+                  path.write_text(
+                      yaml.safe_dump(workflow, sort_keys=False, width=4096)
+                  )
+              PY
+```
+
+Bind the relevant Promise to `kafka-workflow-key-order`. See [Customization](../customization#binding-a-promise-to-a-portalcustomization) for the binding label.
