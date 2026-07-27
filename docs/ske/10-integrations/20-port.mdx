@@ -407,6 +407,7 @@ spec:
 When the controller generates self-service actions for a Promise, it carries the
 validation rules from the Promise API into the Port action form. Users get
 immediate feedback on invalid input, before a request reaches the platform.
+Default values defined in the Promise API are pre-filled in the form.
 
 The following validations are supported:
 
@@ -425,8 +426,63 @@ cannot enforce is still enforced by Kubernetes when the request is applied to th
 * **Integers are treated as numbers.** Port has no integer type, so integer
 fields become number inputs. For integers, range rules still apply, but a decimal value such
 as `2.5` is accepted by the form and rejected later by Kubernetes.
-* `multipleOf`, `oneOf`/`allOf`/`anyOf`, and CEL rules (`x-kubernetes-validations`) are
-not supported by Port. They are enforced only when the request is applied.
+* `multipleOf`, `allOf`/`anyOf`, and CEL rules (`x-kubernetes-validations`) are not
+supported by Port and are enforced only when the request is applied. A selector-based
+`oneOf` is supported (see [Conditional fields with `oneOf`](#oneof)); other `oneOf`
+shapes are not translated to the form.
 * **Numeric enums are not shown on catalogue entities.** A numeric `enum`
 (for example `enum: [1, 2, 3]`) works in the action form, but the entity view
 in the Port catalogue displays the field as a plain number.
+
+## Conditional fields with `oneOf` {#oneof}
+
+A Promise API can use `oneOf` to offer a choice between mutually exclusive sets of
+fields. The controller translates this into a conditional form when a top-level string
+field (the selector) chooses between object blocks: each branch pins the selector to one
+`enum` value and requires the matching block.
+
+```yaml
+spec:
+  properties:
+    engine:
+      type: string
+      enum: [postgres, mysql]
+    postgres:
+      type: object
+      # ...postgres fields...
+    mysql:
+      type: object
+      # ...mysql fields...
+  oneOf:
+    - properties:
+        engine:
+          enum: [postgres]
+      required: [postgres]
+    - properties:
+        engine:
+          enum: [mysql]
+      required: [mysql]
+```
+
+Choosing a selector value shows and requires only that branch's fields; the other is
+hidden and dropped from the request, so it satisfies the API's `oneOf` when applied.
+
+Only this selector-based shape is supported. A `oneOf` without a selector field is not
+translated: all fields are shown and the constraint is enforced only on apply.
+
+## Control the order of form fields {#field-order}
+
+By default, Port decides the order of the inputs in an action form. To set an explicit
+order, add the `kratix.io/port-input-order` annotation to the Promise with a
+comma-separated list of input identifiers:
+
+```yaml
+metadata:
+  name: deployment
+  annotations:
+    kratix.io/port-input-order: "target,repositoryUrl,gitSecretRef"
+```
+
+The list is applied as given; any input left out keeps Port's default position. Use the
+flattened `parent__child` name for nested fields. If you are unsure of the exact
+identifiers, install the Promise and inspect the generated action.
