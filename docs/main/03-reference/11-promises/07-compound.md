@@ -53,7 +53,7 @@ Unavailable and will not serve Resource Requests.
 
 ## Requesting Component Promise Resources at a specific version
 
-Resource Requests output by a Compound Promise workflow are served by the component
+By default Resource Requests output by a Compound Promise workflow are served by the component
 Promise's `latest` Promise Revision, not by the version in `spec.requiredPromises`.
 To pin one to a specific version, create its
 [Resource Binding](./promise-upgrade/resource-bindings#pinning-a-resource-request-when-it-is-created)
