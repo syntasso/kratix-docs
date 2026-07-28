@@ -14,8 +14,9 @@ This Binding consists of a reference to the Resource Request and the Promise Rev
 
 :::info
 
-Resource Bindings are managed by Kratix. As a Kratix user, you will not need to create or delete Resource
-Bindings manually.
+Resource Bindings are managed by Kratix. For most workflows you will not need to create or delete Resource
+Bindings manually. The exception is
+[pinning a Resource Request when it is created](#pinning-a-resource-request-when-it-is-created).
 
 :::
 
@@ -79,6 +80,63 @@ spec:
 ```
 
 Following this update, Kratix will automatically reconcile and run the Resource Configure workflow for the Resource Request.
+
+## Pinning a Resource Request when it is created
+
+Kratix serves a brand new Resource Request using the `latest` Promise Revision. There is no field on the
+Resource Request itself to ask for a different version, so a request that must be served by a non-latest
+Revision needs its Resource Binding to exist **before** the Resource Request is created.
+
+This matters most for [Compound Promises](/main/reference/promises/compound), whose workflows output Resource Requests for component Promises.
+
+Kratix identifies a Resource Binding by its labels, so the name is yours to choose. Create it in the
+namespace the Resource Request will be created in, pointing at the version you want:
+
+```yaml title="binding.yaml"
+apiVersion: platform.kratix.io/v1alpha1
+kind: ResourceBinding
+metadata:
+  name: example-pinned-to-v0-1-0
+  namespace: default
+  #highlight-start
+  labels:
+    kratix.io/promise-name: redis # must match spec.promiseRef.name
+    kratix.io/resource-name: example # must match spec.resourceRef.name
+  #highlight-end
+spec:
+  promiseRef:
+    name: redis
+  resourceRef:
+    name: example
+    namespace: default
+  version: v0.1.0
+```
+
+:::warning
+
+Both labels are required. Without them Kratix cannot match the Binding to the Resource Request, and will
+create its own Binding at `latest` instead — leaving two Bindings for the same Resource, which is an error.
+
+:::
+
+Apply the Binding, then the Resource Request:
+
+```bash
+kubectl apply --filename binding.yaml
+kubectl apply --filename resource-request.yaml
+```
+
+Kratix adopts the Binding you created rather than creating one of its own, and reconciles the Resource using
+the `v0.1.0` Promise Revision. It does not overwrite a version you have already set. From that point the
+Binding behaves like any other: change `spec.version` to upgrade, and Kratix removes it with the Resource
+Request.
+
+:::info
+
+Both the Promise and a Promise Revision at the requested version must already exist. Kratix cannot resolve a
+Binding that points at a version that has never been installed.
+
+:::
 
 ## Deleting a Resource Binding
 
