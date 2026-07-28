@@ -58,6 +58,8 @@ data:
     logging:
       level: "info" # one of info, warning, debug, trace
       structured: false # if true, emit logs as json
+    git:
+      minimumFetchInterval: "5s" # how often to fetch remote Git state before a write; 0s fetches every time
     telemetry:
       traces:
         enabled: true # false to disable traces
@@ -153,6 +155,18 @@ The different log levels and their meanings are described in the table below:
 #### structured (default: false)
 
 Set to true to emit logs as json.
+
+### git
+
+Configuration for how Kratix interacts with Git [State Stores](/main/reference/statestore/intro).
+
+#### minimumFetchInterval (default: 5s)
+
+Before writing to a Git State Store, Kratix fetches the latest remote state and resets its cached clone to match. This makes writes start from the true remote state, so Kratix recovers when the repository has been changed outside of Kratix (for example a manual commit, or a Flux or Argo prune).
+
+`minimumFetchInterval` bounds how often that fetch happens. Writes to a State Store are serialised, so when many Workplacements reconcile against the same store in a burst, Kratix only refreshes the clone once per interval rather than fetching for every write. Set it to `0s` to fetch before every write.
+
+This value is loaded when the `kratix-platform-controller-manager` pod starts, so restart the pod after changing it.
 
 ### telemetry
 

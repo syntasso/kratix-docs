@@ -19,6 +19,16 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.54.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.54.0/) (2026-07-27)
+
+#### Fixes
+
+* Kratix now recovers when a Git State Store is changed outside of Kratix (for example a manual commit, or a Flux or Argo prune). Before each write, Kratix resets its cached clone to the latest remote state instead of rebasing, so writes always start from the true remote state. A new `git.minimumFetchInterval` [Kratix Config](https://docs.kratix.io/main/reference/kratix-config/config#git) option (default `5s`) bounds how often the remote is fetched.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.53.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.53.0/) (2026-07-22)
 
 #### Features
