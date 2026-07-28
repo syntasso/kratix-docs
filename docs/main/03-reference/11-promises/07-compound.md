@@ -32,7 +32,7 @@ creates a Revision for every version a Promise has been installed at, the
 requirement stays satisfied after the required Promise is upgraded.
 
 For example, if `postgresql` is installed at `v1.0.0-beta.5` and later upgraded to
-`v1.1.0`, a Compound Promise requiring `v1.0.0-beta.5` remains Available, as logn as
+`v1.1.0`, a Compound Promise requiring `v1.0.0-beta.5` remains Available, as long as
 the revision for `v1.0.0-beta.5` still exists.
 
 ### Requirement states
