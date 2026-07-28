@@ -178,7 +178,6 @@ spec:
     kind: <Bucket or GitRepository>
     name: default-name
   path: ./<path in state store to destination>/resources
-  validation: client
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -192,7 +191,6 @@ spec:
     kind: <Bucket or GitRepository>
     name: default-name
   path: ./<path in state store to destination>/dependencies
-  validation: client
 ```
 
 Once filled in with the correct values, apply the resource to the worker
