@@ -14,7 +14,7 @@ This Binding consists of a reference to the Resource Request and the Promise Rev
 
 :::info
 
-Resource Bindings are managed by Kratix. For most workflows you will not need to create or delete Resource
+Resource Bindings are managed by Kratix. In most cases you will not need to create or delete Resource
 Bindings manually. The exception is
 [pinning a Resource Request when it is created](#pinning-a-resource-request-when-it-is-created).
 
@@ -133,8 +133,11 @@ Request.
 
 :::info
 
-Both the Promise and a Promise Revision at the requested version must already exist. Kratix cannot resolve a
-Binding that points at a version that has never been installed.
+Both the Promise and a Promise Revision at the requested version must already exist. If the Binding points
+at a version that has never been installed, Kratix does not run the Resource Configure workflow: it records
+a `FailedPromiseRevisionLookup` warning event on the Resource Request and retries. Once a Promise Revision
+at that version exists, Kratix reconciles the Resource automatically. Neither the Binding nor the Resource
+Request needs to be changed.
 
 :::
 
