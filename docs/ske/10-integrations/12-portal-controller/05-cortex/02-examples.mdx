@@ -150,3 +150,43 @@ spec:
 ```
 
 Bind the relevant Promise to `kafka-delete-show-request`. See [Customization](../customization#binding-a-promise-to-a-portalcustomization) for the binding label.
+
+## Change the message shown after a workflow runs
+
+Use this example when you want to change the message Cortex shows a user after they submit a workflow. The `generate` step writes a default for each workflow, describing what the workflow did:
+
+| Generated file         | Default message   |
+| ---------------------- | ----------------- |
+| `workflow-create.yaml` | `Request created` |
+| `workflow-update.yaml` | `Request updated` |
+| `workflow-delete.yaml` | `Request deleted` |
+
+The example below customizes the workflow completion message for the Create and Update workflows.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-run-response-message
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - name: set-run-response
+          image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              yq -i '.runResponseTemplate = "Request has been submitted to Kratix for fulfillment."' /kratix/output/workflow-create.yaml
+              yq -i '.runResponseTemplate = "Update has been submitted to Kratix for fulfillment."' /kratix/output/workflow-update.yaml
+```
+
+Each workflow keeps its message in its own file, so change only the files you want. This example leaves `workflow-delete.yaml` with its generated default.
+
+Bind the relevant Promise to `kafka-run-response-message`. See [Customization](../customization#binding-a-promise-to-a-portalcustomization) for the binding label.
+
+## Advanced use cases
+
+A customize container can reshape a Workflow as far as Cortex allows, not just adjust what `generate` writes. For example, split the generated form into several [User Input blocks](https://docs.cortex.io/streamline/workflows/blocks) so users fill in one page at a time. A Branch block can then decide which page comes next, based on their answers. For changes this large, writing the whole workflow file in your customize container is usually simpler than patching the generated one, because little of the original structure survives.
