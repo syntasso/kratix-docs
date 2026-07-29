@@ -63,7 +63,7 @@ resource depending on the type of state store you are using.
 
     ```yaml
     ---
-    apiVersion: source.toolkit.fluxcd.io/v1beta1
+    apiVersion: source.toolkit.fluxcd.io/v1
     kind: Bucket
     metadata:
       name: default-name
@@ -164,7 +164,7 @@ for more information.
 
 ```yaml
 ---
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: kratix-workload-resources
@@ -178,9 +178,8 @@ spec:
     kind: <Bucket or GitRepository>
     name: default-name
   path: ./<path in state store to destination>/resources
-  validation: client
 ---
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: kratix-workload-dependencies
@@ -192,7 +191,6 @@ spec:
     kind: <Bucket or GitRepository>
     name: default-name
   path: ./<path in state store to destination>/dependencies
-  validation: client
 ```
 
 Once filled in with the correct values, apply the resource to the worker
