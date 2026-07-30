@@ -114,12 +114,12 @@ could accept a complete repository URL instead.
 
 The Promise workflow performs five steps:
 
-1. It combines the platform-configured Gitea URL with `spec.repo`.
-2. It creates a `GitStateStore` for the repository through the Kubernetes API.
-3. It creates a `Destination` that references the `GitStateStore` and labels it
+1. Combines the platform-configured Gitea URL with `spec.repo`.
+2. Creates a `GitStateStore` for the repository through the Kubernetes API.
+3. Creates a `Destination` that references the `GitStateStore` and labels it
    with the repository name.
-4. It writes the managed files to `/kratix/output`.
-5. It writes a dynamic Destination selector matching the repository label.
+4. Writes the managed files to `/kratix/output`.
+5. Writes a dynamic Destination selector matching the repository label.
 
 The credentials remain a platform concern. The generated `GitStateStore`
 references an existing Secret, so users do not include credentials in their
@@ -226,7 +226,7 @@ If that Destination is not ready yet, the Work remains unscheduled until it
 becomes available. Kratix then commits the files to the repository. The workflow
 does not need to clone the repository, create commits, or poll for readiness.
 
-Apply the example request to see it in action:
+Next, we apply the example request to see it in action:
 
 ```bash
 kubectl apply --filename request-repo-alpha.yaml
@@ -273,3 +273,6 @@ repository remains under the application team's control.
 The same pattern works for agent instructions, linters, CI workflows, catalogue
 metadata, and many other repository files. The Promise defines the desired
 state, and Kratix looks after it for as long as the request exists.
+
+Want to know about more patterns? Check out the "Guides" section our of docs to learn about workflow controls, 
+how to use waits in a pipeline, how to build compound Promises and other ways that Kratix makes Platform teams' lives easier.
