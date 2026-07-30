@@ -11,7 +11,7 @@ continues to work for at least one more release, but new Promises should adopt `
 on this schedule.
 
 This guide maps every field of `BackstageEntityCustomizationSpec` to its `PortalCustomization` equivalent, so nothing is silently dropped in migration. Read
-[Customization](./customization) for the `PortalCustomization` schema in full before working through this guide.
+[Customization](../customization) for the `PortalCustomization` schema in full before working through this guide.
 
 ## At a glance
 
@@ -122,7 +122,7 @@ patching the generated Backstage Template document.
 | `owner` | `spec.owner` | customize container sets `spec.owner` |
 
 `singleSpecPage` is the exception in this table, it does not become a customize container. It is reproduced directly by the portal-wide
-[`adapterConfig.generate.args`](./installation#portal-wide-generate-flags) flag `--single-spec-page` on the Backstage portal:
+[`adapterConfig.generate.args`](../installation#portal-wide-generate-flags) flag `--single-spec-page` on the Backstage portal:
 
 ```yaml
 portals:
@@ -180,7 +180,7 @@ spec:
             yq -i '.metadata.tags = (.metadata.tags // []) + ["tier-1", "managed-by-kratix"]' "$file"
 ```
 
-Bind the Promise to this profile with the label from [Customization](./customization#binding-a-promise-to-a-portalcustomization):
+Bind the Promise to this profile with the label from [Customization](../customization#binding-a-promise-to-a-portalcustomization):
 
 ```yaml
 metadata:
