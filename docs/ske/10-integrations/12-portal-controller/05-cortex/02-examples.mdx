@@ -174,13 +174,18 @@ spec:
     configure:
       containers:
         - name: set-run-response
-          image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
-          command: ["sh", "-c"]
+          image: ghcr.io/syntasso/portal-patch:latest
           args:
             - |
-              set -e
-              yq -i '.runResponseTemplate = "Request has been submitted to Kratix for fulfillment."' /kratix/output/workflow-create.yaml
-              yq -i '.runResponseTemplate = "Update has been submitted to Kratix for fulfillment."' /kratix/output/workflow-update.yaml
+              target:
+                file: workflow-create.yaml
+              patch:
+                runResponseTemplate: Request has been submitted to Kratix for fulfillment.
+            - |
+              target:
+                file: workflow-update.yaml
+              patch:
+                runResponseTemplate: Update has been submitted to Kratix for fulfillment.
 ```
 
 Each workflow keeps its message in its own file, so change only the files you want. This example leaves `workflow-delete.yaml` with its generated default.
