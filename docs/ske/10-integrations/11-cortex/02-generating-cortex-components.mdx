@@ -11,13 +11,13 @@ import CortexEntities from "/img/docs/ske/cortex-entities.png"
 import CortexRequestWorkflows from "/img/docs/ske/cortex-request-workflows.png"
 
 The recommended way to sync Promises and Resources into Cortex is the [Portal Controller](/ske/integrations/portal-controller/intro), which replaces the standalone Cortex
-Controller. The Cortex Controller continues to work for at least one more release; see [Migrating from the Cortex Controller](/ske/integrations/portal-controller/cortex/migrating-from-cortex)
+Controller. The Cortex Controller continues to work; see [Migrating from the Cortex Controller](/ske/integrations/portal-controller/cortex/migrating-from-cortex)
 to move an existing setup across.
 
 ## Set up with the Portal Controller
 
 1. Set up your Cortex workspace, git integration, token, and GitOps reconciliation as described in [Configuring Cortex](./configuring-cortex), those steps are unchanged.
-2. Install the Portal Controller with a `cortex` portal, see [Portal Controller Installation](/ske/integrations/portal-controller/installation#configuring-a-cortex-portal).
+2. Install the Portal Controller with a `cortex` portal, see [Portal Controller Installation](/ske/integrations/portal-controller/cortex/intro).
 3. Label the Promise you want to publish with `kratix.io/portal-cortex: "true"`.
 
 For example, to opt a Promise in:
