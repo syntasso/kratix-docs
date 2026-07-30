@@ -6,146 +6,66 @@ slug: installation
 keywords: [portal, installation, ske, controller]
 ---
 
+## Requirements
+
+| Component | Minimum version | Needed for |
+|---|---|---|
+| SKE Operator | `TODO` | Installing the `portal-controller` integration type |
+| Portal Controller | `v0.2.0` | This integration |
+| Portal Patch | `0.7.0` | [Declarative customization](./portal-patch/intro), optional |
+| `@syntasso/plugin-ske-backend` | `TODO` | Backstage portals |
+| `@syntasso/plugin-ske-frontend` | `TODO` | Backstage portals |
+| Backstage | `TODO` | Backstage portals, new backend system required |
+
 ## Install the Portal Controller
 
-:::important
+The Portal Controller is installed and upgraded by the
+[SKE Operator](../../installing-ske/advanced-install) from a single
+[`SKEIntegration`](../../reference/ske-operator#skeintegration-crd) resource of
+`spec.type: portal-controller`. Only one `SKEIntegration` of this type may exist on a platform at
+a time.
 
-The `portal-controller` integration type requires the SKE Operator version that introduced it, check the [SKE Operator release notes](../../releases/ske-operator) for the
-minimum version.
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.2.0
+  portals: []
+```
 
-:::
-
-The Portal Controller is installed and upgraded by the [SKE Operator](../../installing-ske/advanced-install) from a single [`SKEIntegration`](../../reference/ske-operator#skeintegration-crd)
-resource of `spec.type: portal-controller`. Only one `SKEIntegration` of this type may exist on a platform at a time.
-
-Applying the resource installs the Portal Controller Deployment, the `PortalCustomization` Custom Resource Definition, and the RBAC and Service Account it runs as, into the
+Applying the resource installs the Portal Controller Deployment, the `PortalCustomization` Custom
+Resource Definition, and the RBAC and Service Account it runs as, into the
 `kratix-platform-system` namespace.
 
 ## Connect a portal
 
-Each entry under `spec.portals` describes one portal instance:
+Each entry under `spec.portals` describes one portal:
 
 | Field | Required | Meaning |
 |---|---|---|
-| `name` | yes | Identifies the portal. Must be unique within `type` (you can have two Backstage portals, but not two both named `prod`). |
+| `name` | yes | Identifies the portal. Must be unique within `type`, so you can have two Backstage portals, but not two both named `prod`. |
 | `type` | yes | The portal type this entry targets, for example `backstage` or `cortex`. |
-| `url` | depends on `type` | The portal's base URL. |
-| `secretRef` | depends on `type` | Names the portal's credential Secret (see [Credential Secret handling](#credential-secret-handling)). |
-| `config` | depends on `type` | Settings for this portal only (for Cortex, the keys below). Values may be strings or objects/arrays. Image pull secrets and the exporter Deployment overlay live on `adapterConfig`, not here. |
-| `adapterConfig` | depends on `type` | Sets the adapter image for this portal and, for a shipped type, its generate-stage flags. Optional for `backstage`/`cortex`; required for a bring-your-own portal type. See [Adapter image resolution](#adapter-image-resolution) and [Portal-wide generate flags](#portal-wide-generate-flags). |
+| `url` | depends on `type` | The portal's base URL. Required for Cortex, unused by Backstage. |
+| `secretRef` | depends on `type` | Names the portal's credential Secret. Required for Cortex, unused by Backstage. |
+| `config` | depends on `type` | Settings for this portal only. The keys differ per type. |
+| `adapterConfig` | no, unless bring-your-own | Adapter image, pull secrets and generate flags. Required for a portal type the controller has no built-in adapter for. |
 
-You can declare more than one portal, of the same or different types, on the same `SKEIntegration`. What each of these fields needs varies by `type`, Backstage and
-Cortex are covered separately below.
+You can declare more than one portal, of the same or different types, on the same
+`SKEIntegration`. What each field needs varies by type:
 
-### Configuring a Backstage portal
-
-```yaml
-apiVersion: platform.syntasso.io/v1alpha1
-kind: SKEIntegration
-metadata:
-  name: portal-controller
-spec:
-  type: portal-controller
-  version: v0.1.0
-  portals:
-    - name: prod
-      type: backstage
-```
-
-A Backstage portal needs no `url`, `secretRef`, or `config`, the writer ships entity documents to a Kratix state store rather than calling a live Backstage API, so there is
-no credential to configure. You will need a Destination labelled `environment: backstage` for those documents to land on, see
-[Creating the Entity State Store](../backstage/installation/creating-entity-state-store#configure-a-destination-for-backstage).
-
-Backstage does not run a setup Job or a status exporter, see [What gets deployed per portal](#what-gets-deployed-per-portal) below for why that only applies to Cortex
-today.
-
-### Configuring a Cortex portal
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cortex-token
-  namespace: kratix-platform-system
-type: Opaque
-stringData:
-  token: <cortex-api-token>
----
-apiVersion: platform.syntasso.io/v1alpha1
-kind: SKEIntegration
-metadata:
-  name: portal-controller
-spec:
-  type: portal-controller
-  version: v0.1.0
-  portals:
-    - name: prod
-      type: cortex
-      url: https://api.getcortexapp.com
-      secretRef:
-        name: cortex-token
-      config:
-        repositoryName: syntasso/platform-catalog
-        provider: github
-        integrationAlias: github-main
-        branch: main
-```
-
-A Cortex portal requires `url` and `secretRef.name`, and `config` must include:
-
-| Key | Required | Meaning |
-|---|---|---|
-| `repositoryName` | yes | Git repository the Cortex workflows commit into. |
-| `provider` | yes | `github` or `gitlab`. |
-| `integrationAlias` | yes | Cortex git integration alias. |
-| `branch` | no | Optional branch override. |
-| `path` | no | Optional path within the repository. |
-
-Set up your Cortex workspace and git integration as described in [Configuring Cortex](../cortex/configuring-cortex#set-up-the-cortex-workspace) before connecting it here.
-
-## What gets deployed per portal
-
-Every portal syncs Promises and Resources through the same `generate → [customize] → writer` pipeline Jobs described in [Customization](./customization). Cortex
-portals additionally run:
-
-- A one-time, portal-scoped **setup Job**, that runs when the portal is created and re-runs when its configuration changes, to idempotently ensure the shared Cortex
-  relationship type and entity type this integration depends on exist.
-- A long-lived **status exporter**, a Deployment and Service (one replica, `ske-portal-exporter` Service Account) that pushes resource status changes to the Cortex API as they
-  happen, rather than waiting for the next sync Job. It is created and owned by the `SKEIntegration`, and removed if the portal is removed.
-
-Backstage does not need either of these, its writer ships straight to a state store with no live API to call, so there is nothing to keep a persistent connection to.
-
-You can tune the Cortex status exporter's pod, and the image pull secrets for its Deployment and the setup/sync Jobs, via `adapterConfig`:
-
-```yaml
-portals:
-  - name: prod
-    type: cortex
-    # ... url, secretRef, config (repositoryName, provider, integrationAlias) as above
-    adapterConfig:
-      imagePullSecrets: # extra pull-secret names, always merged with syntasso-registry
-        - customer-registry
-      exporter:
-        deploymentSpec: # partial Deployment spec, merged into the exporter Deployment
-          template:
-            spec:
-              nodeSelector:
-                tier: portal
-              tolerations:
-                - key: dedicated
-                  operator: Equal
-                  value: portal
-                  effect: NoSchedule
-```
-
-`exporter.deploymentSpec` is strategically merged into the exporter Deployment, prefer pod-level fields such as `nodeSelector`, `tolerations`, and `affinity`. Controller-owned
-fields (the exporter container itself, its Service Account, labels, credential injection, and image pull secrets) are always re-applied afterwards, so a `containers` entry in the
-overlay is discarded rather than replacing the exporter's own container.
+- [Configuring a Backstage portal](./backstage/intro)
+- [Configuring a Cortex portal](./cortex/intro)
 
 ## Credential Secret handling
 
-The Portal Controller does not create or manage a portal's credential Secret, and not every portal needs one, Backstage today does not. Where a portal's `secretRef` is
-set (required for Cortex), create the Secret yourself in `kratix-platform-system` before installing or upgrading, with the credential under a `token` key:
+The Portal Controller does not create or manage a portal's credential Secret, and not every portal
+needs one. Backstage does not, since it never calls a live API.
+
+Where a portal's `secretRef` is set, create the Secret yourself in `kratix-platform-system` before
+installing or upgrading, with the credential under a `token` key:
 
 ```yaml
 apiVersion: v1
@@ -158,13 +78,17 @@ stringData:
   token: <cortex-api-token>
 ```
 
-The operator only validates that a referenced Secret exists before installing or upgrading; if it is missing, the `SKEIntegration` reports `IntegrationDeploymentReady: False`
-until the Secret is created. Once installed, the credential is injected directly into the sync pipeline's writer container (and, for Cortex, the status exporter) and is never
-written to a shared volume or exposed to any other pipeline stage.
+The operator validates only that a referenced Secret exists, not that it contains a usable
+credential. If it is missing, the `SKEIntegration` reports `IntegrationDeploymentReady: False`
+until you create it.
+
+Once installed, the credential is injected directly into the sync pipeline's writer container, and
+for Cortex the status exporter, using a secret key reference. It is never written to a shared
+volume and never reaches the generate or configure stages.
 
 ## Bind a Promise to a portal
 
-A Promise (or, since the resource lane shipped, a Resource request) opts into a portal with a label:
+A Promise, or a Resource request, opts into a portal with a label:
 
 ```yaml
 metadata:
@@ -180,13 +104,58 @@ metadata:
     kratix.io/portal-backstage.prod: "true" # opt in to the portal named "prod"
 ```
 
-If a Promise's label matches more than one portal of a type and no instance is given, or matches no portal at all, the Promise reports `Ready: False` on its
-`PortalBindingReady` condition with a reason explaining why, rather than silently guessing.
+:::note
+On a Promise, only the presence of the label matters. Its value is not read, so
+`kratix.io/portal-backstage: "false"` still opts the Promise in. To opt a Promise out, remove the
+label.
+:::
+
+### Opting a single Resource out
+
+Resource requests inherit their Promise's labels. To keep one request out of the portal, set the
+same label to the string `"false"` on that request:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-backstage: "false" # this request only, on an opted-in Promise
+```
+
+The request is skipped silently, with no entity generated and no condition reported. Use the same
+key the Promise resolved to, including the instance suffix if it used one.
+
+### Binding status
+
+A Promise reports how its binding resolved on the `PortalBindingReady` condition:
+
+| Reason | Meaning |
+|---|---|
+| `BindingResolved` | The label resolved to exactly one portal |
+| `AmbiguousPortalInstance` | More than one portal of the type exists and no instance was named |
+| `PortalConnectionNotFound` | The named instance does not match a configured portal |
+| `PortalIntegrationNotFound` | No `portal-controller` `SKEIntegration` is installed |
+| `CustomizationNotFound` | The named `PortalCustomization` does not exist |
+| `AmbiguousCustomization` | More than one `PortalCustomization` label is present |
+
+Once bound, each sync reports on a per-type condition, `BackstagePortalSynced` or
+`CortexPortalSynced`:
+
+| Reason | Meaning |
+|---|---|
+| `EntitySynced` | The entity shipped successfully |
+| `SyncInProgress` | The sync Job is running |
+| `GenerateOrWriteFailed` | The Job failed before shipping the entity |
+| `PromiseHasNoAPI` | The Promise has no `spec.api` to render into an entity |
+
+On success the Promise is annotated with `kratix.io/portal-<type>-entity-url`, pointing at the
+entity in the portal.
 
 ## Adapter image resolution
 
-By default, a `backstage` or `cortex` portal uses the adapter bundled inside the Portal Controller's own image, at the version set on `spec.version`. To pin a different adapter
-image for one portal, set `adapterConfig.image` to a single image reference (`repo:tag` or `repo@sha256`, there is no separate version field):
+By default, a `backstage` or `cortex` portal uses the adapter bundled inside the Portal
+Controller's own image, at the version set on `spec.version`. To pin a different adapter image for
+one portal, set `adapterConfig.image` to a single image reference (`repo:tag` or `repo@sha256`,
+there is no separate version field):
 
 ```yaml
 portals:
@@ -196,44 +165,72 @@ portals:
       image: acme/custom-portal-adapter:v3
 ```
 
-For a bring-your-own portal type (any `type` the controller has no built-in adapter for), `adapterConfig.image` is **required**, there is no bundled default to fall back to. If it
-is missing, the `SKEIntegration` is rejected at admission, and reports `IntegrationDeploymentReady: False` with reason `UnknownPortalType`. The full set of
-`adapterConfig` sub-fields for driving a custom adapter (`generate.env`, `writer`, `exporter`) is beyond this guide; `backstage` and `cortex` portals use their built-in behaviour
-and only need `image` (an optional override) and `generate.args` (below).
+For a bring-your-own portal type, any `type` the controller has no built-in adapter for,
+`adapterConfig.image` is **required**. There is no bundled default to fall back to, so the
+`SKEIntegration` is rejected at admission if it is missing.
+
+### Other `adapterConfig` fields
+
+| Field | Applies to | Meaning |
+|---|---|---|
+| `image` | all types | Adapter image override |
+| `imagePullSecrets` | all types | Extra pull secret names, always merged with `syntasso-registry` |
+| `generate.args` | all types | Flags passed verbatim to the generate stage |
+| `generate.env` | bring-your-own only | Literal environment variables for the generate stage |
+| `writer.mode` | bring-your-own only | `adapter` or `platform` |
+| `writer.runsOnDelete` | bring-your-own only | Whether the writer runs on delete |
+| `exporter.enabled` | bring-your-own only | Whether to run a status exporter |
+| `exporter.deploymentSpec` | portals with an exporter | Overlay merged into the exporter Deployment |
+
+Built-in portal types use their own behaviour for the fields marked bring-your-own, so setting
+them on a `backstage` or `cortex` portal has no effect.
 
 ## Portal-wide generate flags
 
-`adapterConfig.generate.args` is a list of flags passed verbatim to the adapter's `generate` stage for that portal. Every Promise and Resource routed through the portal
-gets the same behaviour, so this is a portal-wide setting, not per-Promise. Two flags are currently wired:
+`adapterConfig.generate.args` is a list of flags passed verbatim to the adapter's `generate` stage
+for that portal. Every Promise and Resource routed through the portal gets the same behaviour, so
+this is a portal-wide setting, not a per-Promise one:
 
 | Flag | Portal type | Effect |
 |---|---|---|
-| `--fixed-namespace=<value>` | `cortex` | Hard-codes `metadata.namespace` to `<value>` and hides the namespace input field on generated workflows. `<value>` must be a valid DNS-1123 label, an invalid value fails the generate stage. |
-| `--single-spec-page` | `backstage` | Merges the generated Template's `spec` form pages into one, instead of one page per top-level `spec` property. |
+| `--single-spec-page` | `backstage` | Merges the generated Template's `spec` form pages into one, instead of one page per top-level `spec` property |
+| `--fixed-namespace=<value>` | `cortex` | Hard-codes the namespace on the generated create workflow and hides the namespace input. Must be a valid DNS-1123 label |
 
 ```yaml
 portals:
   - name: prod
     type: cortex
-    # ... url, secretRef, config as above
+    # ... url, secretRef, config as below
     adapterConfig:
       generate:
         args:
           - "--fixed-namespace=team-a"
 ```
 
-These reproduce behaviour that the standalone controllers offered per-Promise (the Cortex `kratix.io/cortex-fixed-namespace` annotation and the Backstage
-`singleSpecPage` option), now set once at the portal level. See the [Backstage](./migrating-from-backstage) and [Cortex](./cortex/migrating-from-cortex) migration guides for how
-the per-Promise forms map across.
+[Portal Patch](./portal-patch/intro) offers per-Promise equivalents of both, through the
+`singleSpecPage` and `hideNamespaceManifest` recipes. Use the flags when you want the behaviour
+everywhere on a portal, and a recipe when you want it for particular Promises.
 
 :::warning
-
-Do not put credentials in `generate.args`. Unlike a `secretRef` credential (injected into the writer container via `secretKeyRef`), these flags are passed as container arguments
-and are visible to anyone with read access to the Job in `kratix-platform-system`.
-
+Do not put credentials in `generate.args`. Unlike a `secretRef` credential, which is injected into
+the writer container as a secret key reference, these flags are passed as container arguments and
+are visible to anyone with read access to the Job in `kratix-platform-system`.
 :::
 
 ## Air-gapped environments
 
-The Portal Controller image can be mirrored to your own registry the same way as other SKE components. See
-[Deploying Within Air-gapped Environments](../backstage/air-gapped-installation/intro) for the general pattern of mirroring images and release manifests.
+Mirror the following images into your own registry:
+
+| Image | Needed for |
+|---|---|
+| `ghcr.io/syntasso/ske-portal-controller:<version>` | The controller and its bundled adapter, one image |
+| `ghcr.io/syntasso/portal-patch:<version>` | Only if you use [Portal Patch](./portal-patch/intro) recipes |
+| Any `adapterConfig.image` | Bring-your-own adapters |
+| Any `PortalCustomization` container image | Your own configure containers |
+
+The Kratix pipeline adapter image is also required, but it is part of the SKE platform install
+rather than this integration.
+
+Point the operator at your registry with its image registry configuration, the same way as other
+SKE components. Pull secrets come from `adapterConfig.imagePullSecrets`, which is always merged
+with `syntasso-registry`.
