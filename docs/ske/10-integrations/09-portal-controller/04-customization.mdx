@@ -17,11 +17,14 @@ generated documents in place:
 generate  →  configure (this profile's containers, in order)  →  writer
 ```
 
+The lane runs any container image you give it, so you can use your own tooling, an off-the-shelf
+image, or the helper described below.
+
 :::tip
-Most platforms do not need to write their own container. [Portal Patch](./portal-patch/intro) runs
-in this lane and applies declarative recipes, which covers setting owners and tags, removing form
-fields, and reshaping Cortex workflows. Write your own container when you need logic a recipe
-cannot express, such as deriving a value from the parent object.
+If you would rather not write a container, [Portal Patch](./portal-patch/intro) is a helper image
+we ship that applies declarative recipes in this lane, covering setting owners and tags, removing
+form fields, and reshaping Cortex workflows. It is entirely optional, and you can mix it with your
+own containers in the same pipeline.
 :::
 
 ## Creating a `PortalCustomization`

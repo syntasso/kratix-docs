@@ -7,14 +7,21 @@ keywords: [portal, portal-patch, customization, recipe, backstage, cortex]
 ---
 
 Portal Patch is a container image that edits the documents produced by the Portal Controller's
-`generate` stage, driven by declarative **recipes** rather than hand-written scripting. It is the
-recommended way to shape generated entities.
+`generate` stage, driven by declarative **recipes** rather than hand-written scripting.
 
-You can always write your own container instead, as described in
-[Customization](../customization), and you will need to for anything Portal Patch cannot express.
+:::info Portal Patch is optional
+Portal Patch is a convenience helper we ship, not a required part of the integration. The
+`configure` lane runs **any** container image you give it, so you are free to use your own image,
+a general-purpose tool, or a mix of both. Nothing in the Portal Controller depends on Portal Patch
+being present.
+
+Use it because it saves you writing a script, not because you have to.
+:::
+
 For the common cases, setting an owner, adding tags, removing a form field, reshaping a Cortex
-workflow, a recipe is shorter, order-independent, and fails loudly instead of silently producing
-the wrong document.
+workflow, a recipe is shorter than the equivalent script, is order-independent, and fails loudly
+instead of silently producing the wrong document. For anything it cannot express, write your own
+container as described in [Customization](../customization).
 
 ## How it runs
 
