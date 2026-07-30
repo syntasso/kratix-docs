@@ -21,7 +21,7 @@ integration documented elsewhere in this section.
 The Portal Controller enables platform teams to:
 
 - Connect the platform to one or more developer portals from a single `SKEIntegration`
-- Publish Kratix Promises and Resources as entities in Backstage, Cortex, or a bring-your-own portal
+- Publish Kratix Promises and Resources as entities in Backstage or Cortex
 - Opt Promises and Resources into a portal with a label, rather than a dedicated CRD per portal
 - Route developer requests through review, by raising them as pull requests instead of applying
   them directly
@@ -32,8 +32,8 @@ The Portal Controller enables platform teams to:
 ## Architecture
 
 A platform team declares every portal the platform exposes on one `SKEIntegration`
-of `spec.type: portal-controller`. Each portal has a **portal type** (`backstage`, `cortex`,
-or a custom type) and its own configuration.
+of `spec.type: portal-controller`. Each portal has a **portal type**, `backstage` or `cortex`, and
+its own configuration.
 
 A Promise (or Resource request) opts into a portal with a label:
 

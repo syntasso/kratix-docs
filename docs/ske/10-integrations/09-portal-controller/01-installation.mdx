@@ -51,7 +51,7 @@ Each entry under `spec.portals` describes one portal:
 | `url` | depends on `type` | The portal's base URL. Required for Cortex, unused by Backstage. |
 | `secretRef` | depends on `type` | Names the portal's credential Secret. Required for Cortex, unused by Backstage. |
 | `config` | depends on `type` | Settings for this portal only. The keys differ per type. |
-| `adapterConfig` | no, unless bring-your-own | Adapter image, pull secrets and generate flags. Required for a portal type the controller has no built-in adapter for. |
+| `adapterConfig` | no | Adapter image, pull secrets and generate flags. |
 
 You can declare more than one portal, of the same or different types, on the same
 `SKEIntegration`. What each field needs varies by type:
@@ -153,37 +153,28 @@ entity in the portal.
 ## Adapter image resolution
 
 By default, a `backstage` or `cortex` portal uses the adapter bundled inside the Portal
-Controller's own image, at the version set on `spec.version`. To pin a different adapter image for
-one portal, set `adapterConfig.image` to a single image reference (`repo:tag` or `repo@sha256`,
-there is no separate version field):
+Controller's own image, at the version set on `spec.version`. Most platforms never change this.
+
+To pin a different adapter image for one portal, for example to roll a fix out to a single portal
+before the rest, set `adapterConfig.image` to a single image reference (`repo:tag` or
+`repo@sha256`, there is no separate version field):
 
 ```yaml
 portals:
   - name: prod
     type: backstage
     adapterConfig:
-      image: acme/custom-portal-adapter:v3
+      image: ghcr.io/syntasso/ske-portal-controller:v0.2.1
 ```
-
-For a bring-your-own portal type, any `type` the controller has no built-in adapter for,
-`adapterConfig.image` is **required**. There is no bundled default to fall back to, so the
-`SKEIntegration` is rejected at admission if it is missing.
 
 ### Other `adapterConfig` fields
 
 | Field | Applies to | Meaning |
 |---|---|---|
-| `image` | all types | Adapter image override |
-| `imagePullSecrets` | all types | Extra pull secret names, always merged with `syntasso-registry` |
-| `generate.args` | all types | Flags passed verbatim to the generate stage |
-| `generate.env` | bring-your-own only | Literal environment variables for the generate stage |
-| `writer.mode` | bring-your-own only | `adapter` or `platform` |
-| `writer.runsOnDelete` | bring-your-own only | Whether the writer runs on delete |
-| `exporter.enabled` | bring-your-own only | Whether to run a status exporter |
-| `exporter.deploymentSpec` | portals with an exporter | Overlay merged into the exporter Deployment |
-
-Built-in portal types use their own behaviour for the fields marked bring-your-own, so setting
-them on a `backstage` or `cortex` portal has no effect.
+| `image` | all portals | Adapter image override |
+| `imagePullSecrets` | all portals | Extra pull secret names, always merged with `syntasso-registry` |
+| `generate.args` | all portals | Flags passed verbatim to the generate stage |
+| `exporter.deploymentSpec` | Cortex portals | Overlay merged into the status exporter's Deployment |
 
 ## Portal-wide generate flags
 
@@ -225,7 +216,7 @@ Mirror the following images into your own registry:
 |---|---|
 | `ghcr.io/syntasso/ske-portal-controller:<version>` | The controller and its bundled adapter, one image |
 | `ghcr.io/syntasso/portal-patch:<version>` | Only if you use [Portal Patch](./portal-patch/intro) recipes |
-| Any `adapterConfig.image` | Bring-your-own adapters |
+| Any `adapterConfig.image` | Only if you override the adapter image |
 | Any `PortalCustomization` container image | Your own configure containers |
 
 The Kratix pipeline adapter image is also required, but it is part of the SKE platform install
