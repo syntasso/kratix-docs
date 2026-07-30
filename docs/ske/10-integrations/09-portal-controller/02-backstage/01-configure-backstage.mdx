@@ -22,8 +22,10 @@ yarn add @syntasso/plugin-ske-frontend --cwd packages/app
 ```
 
 :::important
-Pull-request mode requires a backend version that provides the request-recording action. See the
-[requirements table](../installation#requirements) for minimum versions.
+`@syntasso/plugin-ske-backend` must be at least `0.21.0`, and `@syntasso/plugin-ske-frontend` at
+least `0.18.0`. Earlier backend versions do not provide the action that
+[pull-request mode](./delivery-modes) uses to record a request, so a submission opens the pull
+request and then fails.
 :::
 
 ### Backend
