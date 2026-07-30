@@ -1,0 +1,8 @@
+{
+  "label": "Deprecated",
+  "position": 90,
+  "link": {
+    "type": "generated-index",
+    "description": "Release information and notes for deprecated components. These continue to work, but are superseded and should be migrated away from."
+  }
+}

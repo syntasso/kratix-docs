@@ -2,20 +2,22 @@
 title: Backstage Generator
 description: Release information about the Backstage Generator
 sidebar_label: Backstage Generator
+slug: /ske/releases/pipeline-stages/backstage-generator
 ---
 
 
-:::warning
+:::warning Deprecated
 
-The SKE Backstage generator image is now part of the backstage controller image since `0.4.0`.
+The SKE Backstage generator is deprecated, along with the
+[Backstage Controller](/ske/releases/backstage-controller) it was folded into. Both are superseded
+by the [Portal Controller](/ske/integrations/portal-controller/intro), which generates Backstage
+entities without you wiring a generator into each Promise's pipeline by hand.
 
-The functionality provided stays the same. Please refer to the backstage controller releases page
-for latest version and release notes: [releases page](../backstage-controller).
+See [Migrating from the Backstage Controller](/ske/integrations/portal-controller/backstage/migrating-from-backstage)
+when you are ready to move.
 
-The existing ske-backstage-generator image will no longer receive any updates.
-
-If you are using the generator pipeline stage directly,
-please update your image reference to the Backstage Controller image.
+The generator image was folded into the Backstage Controller image in `0.4.0`, and the standalone
+`ske-backstage-generator` image receives no further updates.
 
 :::
 
