@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1080" role="img" aria-labelledby="title description">
+  <title id="title">Managing files in a dynamically registered Git repository with Kratix</title>
+  <desc id="description">A vertical flow. A user creates a Resource request. A Promise workflow registers the Git repository and generates managed files. Kratix schedules the files to the repository. Later Promise updates, Resource updates, and request deletion update or remove the managed files.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#5B0A94"/>
+    </marker>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#2C0548" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .title {
+        font: 700 26px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        fill: #2C0548;
+      }
+      .heading {
+        font: 700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        fill: #2C0548;
+      }
+      .body {
+        font: 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        fill: #3E4656;
+      }
+      .small {
+        font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        fill: #3E4656;
+      }
+      .step {
+        font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        fill: #FFFFFF;
+      }
+      .arrow-label {
+        font: 600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        fill: #5B0A94;
+      }
+    </style>
+  </defs>
+
+  <rect width="760" height="1080" rx="24" fill="#FFFFFF"/>
+  <text x="380" y="48" text-anchor="middle" class="title">A Git repository becomes a managed Destination</text>
+
+  <!-- Step 1 -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="85" width="520" height="120" rx="16" fill="#FFF4E6" stroke="#F08C00" stroke-width="2"/>
+  </g>
+  <circle cx="150" cy="85" r="20" fill="#F08C00"/>
+  <text x="150" y="91" text-anchor="middle" class="step">1</text>
+  <text x="380" y="125" text-anchor="middle" class="heading">User creates a Resource request</text>
+  <text x="380" y="158" text-anchor="middle" class="body">Repository details + desired configuration</text>
+  <text x="380" y="184" text-anchor="middle" class="small">For example: language, security contact, and schedule</text>
+
+  <path d="M380 205 V250" fill="none" stroke="#5B0A94" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Step 2 -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="265" width="520" height="150" rx="16" fill="#F8F3FF" stroke="#5B0A94" stroke-width="2"/>
+  </g>
+  <circle cx="150" cy="265" r="20" fill="#5B0A94"/>
+  <text x="150" y="271" text-anchor="middle" class="step">2</text>
+  <text x="380" y="307" text-anchor="middle" class="heading">The Promise workflow runs</text>
+  <text x="380" y="345" text-anchor="middle" class="body">Registers a GitStateStore and Destination</text>
+  <text x="380" y="378" text-anchor="middle" class="body">Generates files and a Destination selector</text>
+
+  <path d="M380 415 V460" fill="none" stroke="#5B0A94" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Step 3 -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="475" width="520" height="120" rx="16" fill="#E3FAFC" stroke="#0B7285" stroke-width="2"/>
+  </g>
+  <circle cx="150" cy="475" r="20" fill="#0B7285"/>
+  <text x="150" y="481" text-anchor="middle" class="step">3</text>
+  <text x="380" y="518" text-anchor="middle" class="heading">Kratix schedules the files</text>
+  <text x="380" y="552" text-anchor="middle" class="body">The selector matches the new repository Destination</text>
+  <text x="380" y="577" text-anchor="middle" class="small">Kratix handles repository writes and commits</text>
+
+  <path d="M380 595 V640" fill="none" stroke="#5B0A94" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Step 4 -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="655" width="520" height="120" rx="16" fill="#E6FCF5" stroke="#087F5B" stroke-width="2"/>
+  </g>
+  <circle cx="150" cy="655" r="20" fill="#087F5B"/>
+  <text x="150" y="661" text-anchor="middle" class="step">4</text>
+  <text x="380" y="698" text-anchor="middle" class="heading">The files appear in the Git repository</text>
+  <text x="380" y="731" text-anchor="middle" class="body">Managed files keep their paths from /kratix/output</text>
+  <text x="380" y="756" text-anchor="middle" class="small">Git history provides an audit trail</text>
+
+  <path d="M380 775 V820" fill="none" stroke="#5B0A94" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="398" y="805" class="arrow-label">later</text>
+
+  <!-- Ongoing lifecycle -->
+  <g filter="url(#shadow)">
+    <rect x="85" y="835" width="590" height="180" rx="18" fill="#F8F3FF" stroke="#5B0A94" stroke-width="2"/>
+  </g>
+  <text x="380" y="878" text-anchor="middle" class="heading">The Promise keeps managing the files</text>
+
+  <rect x="120" y="905" width="230" height="72" rx="10" fill="#FFFFFF" stroke="#D69DFF"/>
+  <text x="235" y="933" text-anchor="middle" class="body">Promise or Resource update</text>
+  <text x="235" y="960" text-anchor="middle" class="small">Request deletion</text>
+
+  <path d="M365 941 H410" fill="none" stroke="#5B0A94" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="425" y="905" width="215" height="72" rx="10" fill="#5B0A94"/>
+  <text x="532" y="933" text-anchor="middle" style="font: 600 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #FFFFFF;">Update or remove</text>
+  <text x="532" y="960" text-anchor="middle" style="font: 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #FFFFFF;">only the managed files</text>
+
+  <text x="380" y="1051" text-anchor="middle" class="small">The repository stays aligned with the Promise for the lifetime of the request</text>
+</svg>

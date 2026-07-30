@@ -37,6 +37,17 @@ one-off scaffolding task.
 To demonstrate the pattern, we built a `SecureRepo` Promise. It manages a small
 security baseline in a repository, customised from the user's input.
 
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src="/img/blog/dynamic-git-repository-flow.svg"
+    alt="A Resource request starts a Promise workflow, which registers a Git repository as a Kratix Destination and schedules managed files to it. Promise and Resource updates continue through the same lifecycle."
+  />
+  <figcaption>
+    A Promise dynamically registers a Git repository and manages its files over time
+  </figcaption>
+</figure>
+
 ### The Promise API
 
 The API captures the repository and the inputs used to generate its security
