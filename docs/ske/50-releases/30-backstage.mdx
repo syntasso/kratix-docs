@@ -23,6 +23,43 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.21.0/); [ske-frontend v0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.18.0/) (2026-07-30)
+
+These versions are required by the [Portal Controller](/ske/integrations/portal-controller/intro)'s
+`pull-request` delivery mode. Earlier backend versions do not provide the action that records a
+request, so a submission opens the pull request and then fails.
+
+#### Features
+
+* **Requests can be raised as pull requests for review.** Two new scaffolder actions,
+`ske:write-manifest` and `ske:record-request`, let a generated Template write a resource request to
+a repository, open a pull request for it, and tell Backstage that the request is awaiting approval.
+Nothing reaches the platform until the pull request is merged. See
+[Delivery modes](/ske/integrations/portal-controller/backstage/delivery-modes).
+
+* **Pending requests appear in the catalogue.** A request awaiting approval is published as a
+Component carrying a link to its pull request, so developers can find and follow it. It is removed
+once the request is fulfilled and the real resource entity appears.
+
+* **Update and delete go through the same review.** For a resource that was requested through a
+pull request, the Manage tab's Update and Delete raise pull requests of their own rather than
+changing the platform immediately, and the confirmation dialog says so. Resources created any other
+way are unaffected.
+
+* New `ske:publish-catalog` action for publishing catalog files.
+
+* Frontend hooks are now exported, for teams building their own entity pages.
+
+#### Bug Fixes
+
+* Pending request entity names are now unique per request, and keep their suffix when a long name
+is truncated.
+
+#### Maintenance
+
+* Pin the request-recording action and HTTP contracts against the platform side, so the plugin and
+the Portal Controller cannot drift apart silently.
+
 ### [ske-backend v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.20.0/); [ske-frontend v0.17.6](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.6/) (2026-07-01)
 
 #### Features
