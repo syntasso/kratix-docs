@@ -86,31 +86,28 @@ The interval on which Kratix will re-run the Workflows for both Promises and Res
 ### workPlacementRewriteInterval (default: 10h)
 
 The interval on which each WorkPlacement re-writes its files to the destination's
-state store, even when nothing has changed. This periodically re-asserts the
-desired files so any drift in the state store is corrected without waiting for a
-Workflow to re-run.
+state store, even when nothing has changed, so drift in the state store is
+corrected.
 
-The re-write is a no-op when the files already match: Git only commits and pushes
-when there is an actual change, and S3 skips objects whose contents are unchanged.
-Set the value to `0` to disable the periodic re-write entirely, so WorkPlacements
-are only reconciled in response to changes.
+WorkPlacements are already re-written whenever their Workflow re-runs on the
+[`reconciliationInterval`](#reconciliationinterval-default-10h). This setting adds
+a separate re-write timer that is independent of Workflow runs. Set it to `0` to
+disable it, so WorkPlacements are only re-written in response to changes.
+
+The re-write is a no-op when the files already match, as Git only commits and
+pushes when there is an actual change.
 
 :::warning
 Setting this too low can put significant load on your platform. Every
 WorkPlacement re-reconciles on each interval, and the cost scales with the number
-of WorkPlacements and files across all destinations. A short interval can lead to:
+of WorkPlacements across all destinations. A short interval can lead to:
 
-- **State store request load**: an S3 `HEAD` request per file to compare contents,
-  or a Git fetch and reset per WorkPlacement, on every interval. This can trip
-  provider rate limits (for example the GitHub API).
+- **State store load**: a Git fetch and reset per WorkPlacement on every interval,
+  which can trip provider rate limits (for example the GitHub API).
 - **Lock contention**: WorkPlacements sharing a state store are serialised behind a
   per-repository lock, so frequent re-writes can queue up and delay genuine changes.
-- **Controller and Kubernetes API pressure**: constant background reconciliation
-  competes with event-driven work and adds `get`/`update` calls against the API
-  server.
 
-Keep the interval as large as your drift-correction needs allow. The default of
-`10h` matches the Workflow `reconciliationInterval` cadence.
+Keep the interval as large as your drift-correction needs allow.
 :::
 
 ### controllerLeaderElection
