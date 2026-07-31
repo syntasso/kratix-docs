@@ -31,6 +31,27 @@ Both the [Backstage Controller](./backstage-controller) and the [SKE Cortex Cont
 migrate when it suits you. See [Migrating from Backstage](/ske/integrations/portal-controller/backstage/migrating-from-backstage) and
 [Migrating from Cortex](/ske/integrations/portal-controller/cortex/migrating-from-cortex).
 
+#### What you gain over the standalone controllers
+
+The Portal Controller generates the same entities the standalone controllers did. What changes is
+everything around them:
+
+| | Backstage Controller / SKE Cortex Controller | Portal Controller |
+|---|---|---|
+| **Portals per platform** | One `SKEIntegration` per type, so one Backstage and one Cortex | Every portal on one `SKEIntegration`, including two Backstage instances side by side |
+| **Opting a Promise in** | Per-portal wiring | One label, `kratix.io/portal-<type>`, and a single Resource can opt back out |
+| **Reviewing requests** | Not available: submitting a form applied it immediately | `pull-request` delivery mode raises the request as a pull request, and update and delete go through review too |
+| **Where entities are written** | A Destination you create and label `environment: backstage` beforehand | The portal creates and owns its Destination and state store, or adopts an existing one |
+| **Customizing entities** | `BackstageEntityCustomization`, one pipeline shared by the Promise and its Resources | `PortalCustomization` with independent promise and resource lanes |
+| **Expressing a customization** | Typed `entityGenerationOptions` fields, or a hand-written container | Declarative [Portal Patch](/ske/integrations/portal-controller/portal-patch/intro) recipes, with your own container still available |
+| **Cortex resource status** | Refreshed on the next sync | A status exporter pushes changes to Cortex as they happen |
+| **Reporting** | Per-controller | One `PortalBindingReady` condition plus a per-type sync condition and an entity URL annotation |
+
+Two things become portal-wide rather than per-Promise: the Cortex fixed namespace, previously the
+`kratix.io/cortex-fixed-namespace` annotation, and the Backstage single-page form. Both are now
+`adapterConfig.generate.args` flags on the portal. Where you need them per Promise, the
+`hideNamespaceManifest` and `singleSpecPage` Portal Patch recipes do that job.
+
 #### Features
 
 * **One integration, many portals.** Declare every portal your platform exposes on a single `SKEIntegration` of `type: portal-controller`. Portals of the same type can coexist,
