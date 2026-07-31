@@ -20,6 +20,14 @@ Adding this label to a Promise forces Kratix to rerun the Promise workflows outs
 
 The label is removed automatically once Kratix schedules the manual run so it can be applied again later.
 
+## Reconciling all Resources
+
+```yaml
+kratix.io/reconcile-resources: "true"
+```
+
+Adding this label to a Promise forces Kratix to reconcile all resources of this Promise. It has the same effect as adding the [Manual Reconcilation label](/main/reference/resources/reconciliation-labels#manual-reconciliation) to all Resources of that Promise yourself.
+
 ## Unsuspending a Workflow
 
 Promises can signal Kratix that the current workflow should be suspended via the workflow-control file (check docs for [Workflow Control](/main/reference/promises/workflows#suspending-a-workflow)). When the workflow is suspended, Kratix will add the following label to the Promise:
