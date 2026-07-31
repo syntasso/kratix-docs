@@ -36,16 +36,21 @@ migrate when it suits you. See [Migrating from Backstage](/ske/integrations/port
 The Portal Controller generates the same entities the standalone controllers did. What changes is
 everything around them:
 
-| | Backstage Controller / SKE Cortex Controller | Portal Controller |
-|---|---|---|
-| **Portals per platform** | One `SKEIntegration` per type, so one Backstage and one Cortex | Every portal on one `SKEIntegration`, including two Backstage instances side by side |
-| **Opting a Promise in** | Per-portal wiring | One label, `kratix.io/portal-<type>`, and a single Resource can opt back out |
-| **Reviewing requests** | Not available: submitting a form applied it immediately | `pull-request` delivery mode raises the request as a pull request, and update and delete go through review too |
-| **Where entities are written** | A Destination you create and label `environment: backstage` beforehand | The portal creates and owns its Destination and state store, or adopts an existing one |
-| **Customizing entities** | `BackstageEntityCustomization`, one pipeline shared by the Promise and its Resources | `PortalCustomization` with independent promise and resource lanes |
-| **Expressing a customization** | Typed `entityGenerationOptions` fields, or a hand-written container | Declarative [Portal Patch](/ske/integrations/portal-controller/portal-patch/intro) recipes, with your own container still available |
-| **Cortex resource status** | Refreshed on the next sync | A status exporter pushes changes to Cortex as they happen |
-| **Reporting** | Per-controller | One `PortalBindingReady` condition plus a per-type sync condition and an entity URL annotation |
+| | Standalone controllers | Portal Controller | Portals |
+|---|---|---|---|
+| **Portals per platform** | One `SKEIntegration` per type, so one Backstage and one Cortex | Every portal on one `SKEIntegration`, including two Backstage instances side by side | Both |
+| **Opting a Promise in** | Per-portal wiring | One label, `kratix.io/portal-<type>`, and a single Resource can opt back out | Both |
+| **Customizing what is generated** | Backstage had `BackstageEntityCustomization`, one pipeline shared by the Promise and its Resources. Cortex had a handful of annotations and no way to edit the generated documents | `PortalCustomization` with independent promise and resource lanes, for every portal type | Both |
+| **Expressing a customization** | Typed `entityGenerationOptions` fields, or a hand-written container | Declarative [Portal Patch](/ske/integrations/portal-controller/portal-patch/intro) recipes, with your own container still available | Both |
+| **Reporting** | Per-controller | One `PortalBindingReady` condition plus a per-type sync condition and an entity URL annotation | Both |
+| **Reviewing requests** | Not available: submitting a form applied it immediately | `pull-request` delivery mode raises the request as a pull request, and update and delete go through review too | Backstage |
+| **Where entities are written** | A Destination you create and label `environment: backstage` beforehand | The portal creates and owns its Destination and state store, or adopts an existing one | Backstage |
+
+For **Cortex** specifically, the headline change is customization. The standalone controller
+generated its entity and workflows the one way it knew how, and the only levers were annotations.
+A Cortex portal now runs the same `generate → configure → writer` pipeline as every other portal, so
+you can reshape the generated entity and workflows at both the Promise and the Resource level. See
+[Cortex examples](/ske/integrations/portal-controller/cortex/cortex-examples).
 
 Two things become portal-wide rather than per-Promise: the Cortex fixed namespace, previously the
 `kratix.io/cortex-fixed-namespace` annotation, and the Backstage single-page form. Both are now
@@ -67,8 +72,11 @@ only. See [Delivery modes](/ske/integrations/portal-controller/backstage/deliver
 * **Backstage portals manage their own destination.** A portal can create and own the Kratix Destination and state store it writes entities to, rather than requiring you to
 wire one up beforehand. Platforms that already manage Destinations can adopt an existing one instead. See [Backstage](/ske/integrations/portal-controller/backstage/intro).
 
-* **Live status in Cortex.** Cortex portals run a status exporter that pushes resource status changes to Cortex as they happen, rather than waiting for the next sync, plus a
-setup Job that provisions the shared entity and relationship types the integration depends on. See [Cortex](/ske/integrations/portal-controller/cortex/intro).
+* **Customizable Cortex entities and workflows.** A Cortex portal runs the same
+`generate → configure → writer` pipeline as every other portal type, so the generated entity and
+workflows can be reshaped at both the Promise and the Resource level. It also runs a status
+exporter and a setup Job that provisions the shared entity and relationship types the integration
+depends on. See [Cortex](/ske/integrations/portal-controller/cortex/intro).
 
 * **Shape entities declaratively.** The new `PortalCustomization` resource, which replaces `BackstageEntityCustomization`, runs containers that edit generated documents before
 they ship, with separate lanes for the Promise and its Resources. Paired with [Portal Patch](/ske/integrations/portal-controller/portal-patch/intro), most customizations are a few
