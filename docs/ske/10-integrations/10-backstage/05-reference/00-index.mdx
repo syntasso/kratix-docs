@@ -4,9 +4,22 @@ description: Reference documentation for the SKE Backstage integration.
 sidebar_label: Overview
 ---
 
+:::warning Deprecated
+
+The standalone Backstage Controller is deprecated in favour of the
+[Portal Controller](/ske/integrations/portal-controller/intro). It continues to work, see
+[Migrating from the Backstage Controller](/ske/integrations/portal-controller/backstage/migrating-from-backstage)
+when you are ready to move.
+
+:::
+
 Reference documentation for the SKE Backstage integration.
 
-- [**SKE Backstage Generator**](./generator) — Automatically populate your Backstage catalog from Promises using the SKE Backstage Generator.
-- [**YAML File Format**](./yaml-file-format) — The entity YAML format expected by the SKE plugins for Promises and Resource Requests.
 - [**SKE Component Promise**](./generator-promise) — Use the SKE Component Promise to manage Backstage components as a platform service.
 - [**SKE Backend Plugin**](./ske-backend-plugin) — Actions and endpoints shipped by the `ske-backend` Backstage plugin.
+
+The generator reference has moved. The generator now ships as the portal adapter, so both pages
+live with the Portal Controller:
+
+- [**Running the adapter as a pipeline stage**](/ske/integrations/portal-controller/backstage/pipeline-stage) — Generate entities from a Promise's own pipeline.
+- [**Entity YAML format**](/ske/integrations/portal-controller/backstage/entity-yaml-format) — The entity YAML the SKE plugins expect.

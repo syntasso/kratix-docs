@@ -1,0 +1,168 @@
+---
+title: Backstage
+description: Configuring a Backstage portal on the SKE Portal Controller
+sidebar_label: Overview
+slug: intro
+keywords: [portal, backstage, ske, controller, destination, state store]
+---
+
+A Backstage portal publishes Promises and Resources as Backstage catalog entities. Unlike Cortex,
+the Portal Controller never calls Backstage. It writes the generated `catalog-info.yaml` files to a
+Kratix Destination, which is a Git repository or bucket, and Backstage discovers them through its
+own catalog providers.
+
+That means a Backstage portal needs no `url` and no `secretRef`. What it does need is somewhere to
+write, which is what `config` describes.
+
+## Configuration
+
+A Backstage portal takes exactly three `config` keys, all optional:
+
+| Key | Meaning | Default |
+|---|---|---|
+| `mode` | The [delivery mode](./delivery-modes), `push` or `pull-request` | `push` |
+| `destination` | Where entities are written, either adopting an existing Destination or defining one | none |
+| `stateStore` | The state store backing an owned Destination | none |
+
+### Owning a Destination
+
+The simplest setup is to let the integration create and own its Destination and state store. Give
+`destination.spec.path`, which is where inside the store the entities live, and a `stateStore`
+block describing the store to create:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.2.0
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        mode: push
+        destination:
+          spec:
+            path: gitops/backstage/prod
+        stateStore:
+          kind: GitStateStore
+          spec:
+            url: https://github.com/acme/platform-catalog.git
+            branch: main
+            authMethod: basicAuth
+            secretRef:
+              name: backstage-catalog-repo
+              namespace: kratix-platform-system
+```
+
+The integration creates both objects, named `portal-backstage-prod` after the portal type and
+name, and owns them. Removing the portal removes them.
+
+`stateStore.kind` is required and must be `GitStateStore` or `BucketStateStore`. There is no
+default, because the two are distinct kinds and guessing would silently target the wrong one.
+
+<details>
+<summary>Using a bucket instead of Git</summary>
+
+Entities publish equally well from a bucket. Backstage must be able to read it.
+
+```yaml
+config:
+  destination:
+    spec:
+      path: gitops/backstage/prod
+  stateStore:
+    kind: BucketStateStore
+    spec:
+      bucketName: kratix
+      endpoint: s3.eu-west-1.amazonaws.com
+      authMethod: accessKey
+      secretRef:
+        name: backstage-catalog-bucket
+        namespace: kratix-platform-system
+```
+
+</details>
+
+You must create the credential Secret the state store references yourself. The `spec` block is
+passed through to the Kratix state store unchanged, so it takes the same fields as any
+`GitStateStore` or `BucketStateStore`.
+
+### Referencing an existing state store
+
+If you already manage state stores, name one instead of defining it. The integration still owns
+the Destination, but not the store:
+
+```yaml
+config:
+  destination:
+    spec:
+      path: gitops/backstage/prod
+  stateStore:
+    kind: BucketStateStore
+    name: default
+```
+
+### Adopting an existing Destination
+
+If you already manage Destinations, name one. Nothing is created:
+
+```yaml
+config:
+  mode: push
+  destination:
+    name: my-destination
+```
+
+An adopted Destination carries its own state store, so `stateStore` is ignored here. Set the
+Destination's own `path` on the Destination itself.
+
+## Configuration errors
+
+`destination` and `stateStore` are validated when the portal's setup Job runs, and a failure is
+reported as a `PortalSetupFailed` event on the `SKEIntegration`:
+
+| Message | Cause |
+|---|---|
+| `config.destination must set exactly one of name or spec, got both` | Adopting and owning at once |
+| `config.destination must set exactly one of name or spec, got neither` | An empty `destination` block |
+| `config.destination.spec.path is required` | Owning a Destination without a path |
+| `config.destination.spec requires a config.stateStore` | Owning a Destination with no store to back it |
+| `config.stateStore.kind is required and must be "GitStateStore" or "BucketStateStore"` | Missing or misspelled kind |
+| `config.stateStore must set exactly one of name or spec` | Referencing and defining at once |
+| `has invalid config.mode` | A `mode` other than `push` or `pull-request` |
+
+## What gets written where
+
+Entities are written under the state store's path, then the Destination's path:
+
+```
+<stateStore path>/<destination path>/dependencies/<promise>/portal-backstage-gen/<id>/catalog-info.yaml
+<stateStore path>/<destination path>/resources/kratix-platform-system/<promise>/<name>/portal-backstage-gen/<id>/catalog-info.yaml
+```
+
+- The **dependencies** tree holds Promise-level entities. Each file contains two documents, the
+  Promise `Component` and the scaffolder `Template` developers use to request a Resource.
+- The **resources** tree holds one `Component` per Resource request.
+
+You need both paths when configuring Backstage's catalog discovery, which is covered in
+[Configure Backstage](./configure-backstage).
+
+:::note
+The namespace segment in the resources path is always `kratix-platform-system`, regardless of
+where the Resource request lives. It is the namespace of the Kratix `Work`, not of the request, and
+it is not configurable.
+:::
+
+## Next steps
+
+- [Delivery modes](./delivery-modes) covers `push` versus `pull-request`.
+- [Configure Backstage](./configure-backstage) covers the plugins and catalog discovery you set up
+  on the Backstage side.
+- [Migrating from the Backstage Controller](./migrating-from-backstage) covers moving an existing
+  integration across.
+- [Entity YAML format](./entity-yaml-format) documents the entities the adapter generates.
+- [Running the adapter as a pipeline stage](./pipeline-stage) is for platforms that wire the
+  generator into each Promise's pipeline by hand rather than letting the controller do it.

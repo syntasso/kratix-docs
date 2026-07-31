@@ -1,0 +1,129 @@
+---
+title: Portal Patch
+description: Shaping generated portal entities with declarative Portal Patch recipes
+keywords: [portal, portal-patch, customization, recipe, backstage, cortex]
+slug: /ske/integrations/portal-controller/portal-patch/intro
+sidebar_label: Portal Patch
+---
+
+Portal Patch is a container image that edits the documents produced by the Portal Controller's
+`generate` stage, driven by declarative **recipes** rather than hand-written scripting.
+
+:::info Portal Patch is optional
+Portal Patch is a convenience helper we ship, not a required part of the integration. The
+`configure` lane runs **any** container image you give it, so you are free to use your own image,
+a general-purpose tool, or a mix of both. Nothing in the Portal Controller depends on Portal Patch
+being present.
+
+Use it because it saves you writing a script, not because you have to.
+:::
+
+For the common cases, setting an owner, adding tags, removing a form field, reshaping a Cortex
+workflow, a recipe is shorter than the equivalent script, is order-independent, and fails loudly
+instead of silently producing the wrong document. For anything it cannot express, write your own
+container as described in [Customization](../customization).
+
+## How it runs
+
+Portal Patch runs as one of the `configure` containers of a `PortalCustomization`, between
+`generate` and `writer`:
+
+```
+generate  →  configure (portal-patch)  →  writer
+```
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: standard-ownership
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:0.7.0
+          args:
+            - |
+              target:
+                kind: Component
+              patch:
+                spec:
+                  owner: platform-team
+                  lifecycle: production
+                metadata:
+                  tags: [tier-1, platform-owned]
+```
+
+Bind a Promise to it with the customization label:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-customization: standard-ownership
+```
+
+## Recipes are container arguments
+
+Each entry in `args` is one complete recipe, written as a YAML document. There are no flags and
+no configuration file: every argument is read as a recipe, in order.
+
+```yaml
+args:
+  - |
+    target:
+      kind: Template
+    patch:
+      metadata:
+        title: My Promise Template
+  - |
+    target:
+      kind: Template
+    op: singleSpecPage
+```
+
+Recipes apply in the order given, against the document as it stands after the previous recipe, so
+two recipes targeting the same document compose.
+
+See the [Recipe reference](./recipe-reference) for the full grammar and every operation.
+
+## The image tag is the grammar version
+
+Portal Patch is versioned separately from the Portal Controller, and **its image tag is the recipe
+grammar version**. A recipe written against one tag keeps working on that tag, so pin a version
+rather than tracking `latest`:
+
+```yaml
+image: ghcr.io/syntasso/portal-patch:0.7.0
+```
+
+Grammar versions are additive. Each release adds operations or selector forms; it does not change
+the meaning of recipes that already worked.
+
+## Failure behaviour
+
+Portal Patch is deliberately strict, because a selector that quietly matches nothing produces a
+document that looks fine and is wrong.
+
+- A recipe that fails to parse, matches no document, matches more than one document, or resolves
+  to a missing list item **fails the whole batch**. The container exits non-zero with one line on
+  stderr naming the offending recipe, and **no file is written**, not even by the recipes that did
+  apply.
+- Because configure containers run as init containers, a failure aborts the sync before the writer
+  runs, so nothing ships to the portal. The Promise reports the failure on its sync condition.
+- The one exception is a missing `catalog-info.yaml`. If that specific file does not exist, its
+  recipes are skipped with a log line and the run continues. Every other missing file is an error,
+  so a typo in `target.file` is never swallowed.
+
+## Choosing between a recipe and your own container
+
+| Use a recipe when | Write your own container when |
+|---|---|
+| Setting or removing fields on the generated documents | You need to read the parent object to derive a value |
+| Adding or replacing tags, owners, lifecycle, titles | You need to call an external service |
+| Removing or reshaping a form field on a Backstage Template | You need logic a declarative patch cannot express |
+| Projecting an entity attribute in a Cortex workflow | You are generating entirely new files |
+
+Both approaches use the same `configure` lane, and you can run a recipe container and your own
+container in the same pipeline.

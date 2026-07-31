@@ -1,0 +1,196 @@
+---
+title: Configure Backstage
+description: Installing the SKE plugins and configuring Backstage to discover Kratix entities
+sidebar_label: Configure Backstage
+slug: configure-backstage
+keywords: [portal, backstage, plugin, catalog, discovery, ske mode]
+---
+
+The Portal Controller writes entities to a repository. Backstage has to be told to read them, and
+needs the SKE plugins installed so that submitting a generated Template does something.
+
+This page covers the Backstage side. Configure the portal itself first, see
+[Backstage](./intro).
+
+## Install the plugins
+
+Two packages, one for each half of Backstage:
+
+```bash
+yarn add @syntasso/plugin-ske-backend --cwd packages/backend
+yarn add @syntasso/plugin-ske-frontend --cwd packages/app
+```
+
+:::important
+`@syntasso/plugin-ske-backend` must be at least `v0.21.0`, and `@syntasso/plugin-ske-frontend` at
+least `v0.18.0`. Earlier backend versions do not provide the action that
+[pull-request mode](./delivery-modes) uses to record a request, so a submission opens the pull
+request and then fails.
+:::
+
+### Backend
+
+Add the plugin in `packages/backend/src/index.ts`:
+
+```ts
+// SKE plugin
+backend.add(import('@syntasso/plugin-ske-backend'));
+```
+
+That single line registers the scaffolder actions the generated Templates use, the routes the
+frontend calls, and the catalogue provider that surfaces pending requests.
+
+The plugin creates one database table and runs its migrations at startup. If you run more than one
+Backstage replica, use PostgreSQL rather than SQLite.
+
+### Frontend
+
+In `packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
+
+```tsx
+import {
+  KratixPromiseEntityPage,
+  KratixResourceEntityPage,
+  isKratixType,
+} from '@syntasso/plugin-ske-frontend';
+```
+
+Then add two cases to the existing `componentPage` switch, **before** the default case:
+
+```tsx
+<EntitySwitch.Case if={isKratixType('promise')}>
+  <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
+</EntitySwitch.Case>
+
+<EntitySwitch.Case if={isKratixType('resource')}>
+  <KratixResourceEntityPage>
+    {entityWarningContent}
+  </KratixResourceEntityPage>
+</EntitySwitch.Case>
+```
+
+This gives Promise entities an overview page, and Resource entities an overview page plus a
+**Manage** tab for updating and deleting the resource.
+
+## Choose how the backend writes requests
+
+`ske.mode` decides how an approved request reaches the platform:
+
+| Mode | Reads from | Writes via |
+|---|---|---|
+| `kubernetes` (default) | Kubernetes API | Kubernetes API, as the signed-in user |
+| `gitops` | Git | Git |
+| `hybrid` | Kubernetes API | Git |
+
+This is backend-wide and independent of a portal's
+[delivery mode](./delivery-modes). The same generated Template works under all three.
+
+For `kubernetes`:
+
+```yaml
+ske:
+  mode: kubernetes
+  kubernetes:
+    platformName: platform # must match a cluster name in the `kubernetes` section
+```
+
+For `gitops` or `hybrid`, name the repository requests are committed to:
+
+```yaml
+ske:
+  mode: gitops
+  scm:
+    repoUrl: https://github.com/acme/platform-requests
+    username: ${GIT_USER}
+    token: ${GIT_TOKEN}
+    branch: main
+    path: kratix-requests
+    type: github # github | gitlab | bitbucket_cloud | azure
+```
+
+If you use pull-request delivery mode, you can tune how often Backstage re-checks which requests
+are still awaiting approval:
+
+```yaml
+ske:
+  pendingRequests:
+    refreshSeconds: 60 # default
+```
+
+## Give Backstage access to GitHub
+
+```yaml
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+```
+
+The credential needs:
+
+- **Contents: read** on the catalogue repository the Portal Controller writes to.
+- **Pull requests: write** on the repositories developers raise requests against, for
+  [pull-request mode](./delivery-modes).
+- **Contents: write** on the requests repository, if you use `ske.mode: gitops` or `hybrid`.
+
+:::warning
+Backstage never writes the catalogue repository, Kratix does, using the state store's own
+credential. But Backstage does read it. A token scoped only to the request repositories gives you
+working submissions and a silently empty catalogue.
+:::
+
+## Discover the generated entities
+
+The Portal Controller writes Promise entities and Resource entities into two separate trees, so
+configure one catalogue provider for each:
+
+```yaml
+catalog:
+  providers:
+    github:
+      platformPromiseCatalog:
+        organization: acme
+        catalogPath: /gitops/backstage/prod/dependencies/**/catalog-info.yaml
+        filters:
+          branch: main
+          repository: platform-catalog
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+      platformResourceCatalog:
+        organization: acme
+        catalogPath: /gitops/backstage/prod/resources/**/catalog-info.yaml
+        filters:
+          branch: main
+          repository: platform-catalog
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+```
+
+Fill the paths in from your portal's configuration:
+
+| Placeholder | Comes from |
+|---|---|
+| `gitops/backstage/prod` | The state store's `path`, then the Destination's `path` |
+| `repository` | The repository in the state store's `url` |
+| `branch` | The state store's `branch` |
+| `organization` | Your GitHub organisation |
+
+Two narrow providers rather than one glob over the whole prefix, because `catalogPath` takes a
+single glob and a wider one would ingest anything else that lands under it.
+
+The default catalogue rules already permit `Component` and `Template`, so no `catalog.rules` change
+is needed.
+
+## Verify
+
+Once Backstage has run a catalogue refresh you should see:
+
+- A `Component` for each Promise bound to the portal, with a matching scaffolder Template on the
+  **Create** page.
+- A `Component` for each Resource request, with **Manage** available on it.
+
+If entities never appear, check the catalogue repository actually contains
+`catalog-info.yaml` files under the two paths above, and that the GitHub credential can read that
+repository.

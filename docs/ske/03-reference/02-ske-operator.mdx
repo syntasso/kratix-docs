@@ -107,3 +107,47 @@ resource is managed by the SKE Operator.
 The Kratix resource is the owner of all resources installed as part of the [SKE
 distribution](../releases/ske#overview), and ensures that their state always matches the
 definition in the distribution manifest.
+
+## The SKEIntegration CRD {#skeintegration-crd}
+
+Where the `Kratix` CRD manages SKE itself, `SKEIntegration` (`platform.syntasso.io/v1alpha1`) is the same lifecycle-management pattern applied to an optional integration, such as
+Backstage, Cortex, or the [Portal Controller](../integrations/portal-controller/installation). Applying one installs and upgrades that integration's controller from a single,
+declarative resource.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: my-integration
+spec:
+  type: portal-controller # backstage | cortex | portal-controller
+  version: v1.2.0 # or "latest", to resolve the newest available release
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+- **`spec.type`** selects which integration this resource installs. Only one `SKEIntegration` of a given `type` may exist in a cluster at a time, a validating webhook rejects a
+  second.
+- **`spec.version`** is the desired version of that integration's controller image.
+- **`spec.deploymentConfig`** tunes the installed controller's resource requests/limits.
+- The rest of `spec` is type-specific, see [Backstage](../integrations/backstage/installation/generating-backstage-components#installing-the-backstage-controller),
+  [Cortex](../integrations/cortex/configuring-cortex#install-the-cortex-integration), or [Portal Controller](../integrations/portal-controller/installation) for the fields each
+  type adds.
+
+### Status
+
+Every `SKEIntegration` reports install health on `.status.conditions`, condition type `IntegrationDeploymentReady`:
+
+| Status | Reason | When |
+|---|---|---|
+| `False` | `NotAllReplicasAvailable` | Set on the first reconcile, and again whenever a previously-ready Deployment stops being available. |
+| `False` | `RegistrySecretNotFound` | A referenced credential Secret (for integration types that require one) has no matching Secret in `kratix-platform-system`. |
+| `True` | `AllReplicasAvailable` | The Deployment is available at the current generation and the installed version matches the resolved version. |
+
+`.status.ready` mirrors the condition. `.status.lastAppliedVersion` records the resolved version once ready, so later reconciles can detect a version bump.
