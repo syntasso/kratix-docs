@@ -75,14 +75,6 @@ const config = {
       {
         redirects: [
           {
-            from: "/ske/integrations/backstage/reference/generator",
-            to: "/ske/integrations/portal-controller/backstage/pipeline-stage",
-          },
-          {
-            from: "/ske/integrations/backstage/reference/yaml-file-format",
-            to: "/ske/integrations/portal-controller/backstage/entity-yaml-format",
-          },
-          {
             from: "/main/learn-more/status-conditions-events/promise-status-events",
             to: "/main/reference/promises/promise-status-events",
           },
