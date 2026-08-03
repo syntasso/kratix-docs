@@ -108,7 +108,7 @@ Default configurations for Kratix Workflows. Any options configured within indiv
 
 Controls whether periodic reconciliation reruns Promise and Resource Configure
 workflows after a failed run. When `false`, periodic reconciliation skips failed
-workflows, but specification changes and manual reconciliation of a
+workflows, but manual reconciliation of a
 [Promise](/main/reference/promises/reconciliation-labels#manual-reconciliation)
 or [Resource](/main/reference/resources/reconciliation-labels#manual-reconciliation)
 still rerun them. This setting does not affect successful runs or Delete workflows.

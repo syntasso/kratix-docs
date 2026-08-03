@@ -107,10 +107,8 @@ Pipeline, and no further Pipelines are executed in that run.
 
 By default, Kratix reruns the Configure workflow from the beginning when the
 [reconciliation interval](/main/reference/kratix-config/config#reconciliationinterval-default-10h)
-is reached. To rerun it sooner, update the Resource or Promise specification, or
-trigger a [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation).
-If [`workflows.reconcileAfterFailure`](/main/reference/kratix-config/config#reconcileafterfailure-default-true)
-is `false`, one of these explicit triggers is required.
+is reached. If [`workflows.reconcileAfterFailure`](/main/reference/kratix-config/config#reconcileafterfailure-default-true) is `true`, the workflow will be retried after the reconciliation interval. To rerun it sooner, trigger a
+[manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation).
 
 ### Suspending or Retrying a workflow {#suspending-a-workflow}
 
@@ -164,9 +162,9 @@ file to the `/kratix/metadata/status.yaml` file.
 
 ### Idempotency
 
-All commands which run in Configure workflows must be idempotent because the
-workflows can run repeatedly, including after specification changes, manual
-reconciliation, and periodic reconciliation.
+All commands which run in Configure workflows must be idempotent, as there is a guarantee
+that they will be run multiple times a day, and may be run much more frequently depending
+on other environmental impacts (e.g. Pod restarts).
 
 The `resource.configure` workflow is regularly executed. Kubernetes reconciles on a number
 different actions, including, but not limited to:

@@ -159,9 +159,9 @@ file to the `/kratix/metadata/status.yaml` file.
 
 ### Idempotency
 
-All commands which run in Configure workflows must be idempotent because the
-workflows can run repeatedly, including after specification changes, manual
-reconciliation, and periodic reconciliation.
+All commands which run in Configure workflows must be idempotent, as there is a guarantee
+that they will be run multiple times a day, and may be run much more frequently depending
+on other environmental impacts (e.g. Pod restarts).
 
 The `promise.configure` workflow is regularly executed. Kubernetes reconciles on a number
 different actions, including, but not limited to:
