@@ -379,9 +379,7 @@ Kratix reruns it at the next reconciliation interval by default. To rerun it
 sooner, trigger a manual reconciliation for the relevant object:
 [Promise](/main/reference/promises/reconciliation-labels#manual-reconciliation) or
 [Resource](/main/reference/resources/reconciliation-labels#manual-reconciliation).
-Manual reconciliation is required when `workflows.reconcileAfterFailure` is
-`false` and the specification does not change. Delete workflows are not retried
-by periodic reconciliation.
+Delete workflows are not retried by periodic reconciliation.
 
 ### Workflow Pod doesn't have Kubernetes API access
 

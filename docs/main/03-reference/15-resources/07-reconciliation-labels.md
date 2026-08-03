@@ -27,8 +27,7 @@ The `kratix.io/manual-reconciliation: "true"` label can also be applied to a [Re
 This is useful when a Resource has already been patched to the desired Promise
 version (its `spec.version` is at the target) but the pipeline previously failed.
 The label retries the workflow immediately instead of waiting for periodic
-reconciliation. It is required if `workflows.reconcileAfterFailure` is `false`
-and the specification does not change.
+reconciliation.
 
 When Kratix detects the label on a ResourceBinding it:
 

@@ -103,10 +103,8 @@ Pipeline, and no further Pipelines are executed in that run.
 
 By default, Kratix reruns the Configure workflow from the beginning when the
 [reconciliation interval](/main/reference/kratix-config/config#reconciliationinterval-default-10h)
-is reached. To rerun it sooner, update the Promise specification or trigger a
+is reached. If [`workflows.reconcileAfterFailure`](/main/reference/kratix-config/config#reconcileafterfailure-default-true) is `true`, the workflow will be retried after the reconciliation interval. To rerun it sooner, trigger a
 [manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation).
-If [`workflows.reconcileAfterFailure`](/main/reference/kratix-config/config#reconcileafterfailure-default-true)
-is `false`, one of these explicit triggers is required.
 
 ### Suspending or Retrying a workflow {#suspending-a-workflow}
 
