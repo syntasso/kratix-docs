@@ -32,6 +32,8 @@ data:
       renewDeadline: 10s
       retryPeriod: 2s
     resourceBindingVersionStrategy: "floating" # floating (default) or pinned
+    featureFlags:
+      dryRun: false # preview feature; see below
     workflows:
       jobOptions:
         defaultBackoffLimit: 6
@@ -100,6 +102,25 @@ Controls the `spec.version` Kratix sets on a [Resource Binding](/main/reference/
 - `pinned`: new Resource Bindings are set to the resolved latest version at the time of creation (for example `v1.2.0`). The binding stays locked to that Promise Revision, and later Promise upgrades do not automatically flow through to the Resource.
 
 This strategy only sets the _initial_ value of the binding. You can always change a binding's `spec.version` later to upgrade or pin a Resource — see the [Upgrading a Promise](/main/guides/upgrading-resource-requests) guide.
+
+### featureFlags
+
+Opts in to features that are off by default. Feature flags are read once at
+startup, so changing one requires restarting the
+`kratix-platform-controller-manager` pod.
+
+#### dryRun (default: false)
+
+Set to `true` to enable [Dry Run](/main/reference/dry-run), which previews the
+output of a Resource Request without applying it to a real Destination. While the
+flag is off, Kratix does not start the controller that reconciles `DryRun`
+objects and ignores dry-run labels elsewhere.
+
+:::warning
+Dry Run is a preview feature and is not production ready. Its API and behaviour
+may change without a migration path. See [Dry Run](/main/reference/dry-run) before
+enabling it.
+:::
 
 ### Workflows
 
