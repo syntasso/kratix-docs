@@ -24,7 +24,11 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 
 The `kratix.io/manual-reconciliation: "true"` label can also be applied to a [Resource Binding](../promises/promise-upgrade/resource-bindings) to request that Kratix reruns the Resource Configure workflow for the bound Resource Request.
 
-This is useful when a Resource has already been patched to the desired Promise version (its `spec.version` is at the target) but the pipeline previously failed. In this case the normal version-mismatch trigger will not fire again, so the label provides an explicit retry signal.
+This is useful when a Resource has already been patched to the desired Promise
+version (its `spec.version` is at the target) but the pipeline previously failed.
+The label retries the workflow immediately instead of waiting for periodic
+reconciliation. It is required if `workflows.reconcileAfterFailure` is `false`
+and the specification does not change.
 
 When Kratix detects the label on a ResourceBinding it:
 
@@ -32,12 +36,6 @@ When Kratix detects the label on a ResourceBinding it:
 2. Removes the label from the ResourceBinding.
 
 The Resource Configure workflow then reruns as described above.
-
-:::info
-
-Kratix will not re-trigger reconciliation for a Resource that has already failed at the target version unless this label is explicitly set on its ResourceBinding.
-
-:::
 
 ## Unsuspend a Workflow
 
