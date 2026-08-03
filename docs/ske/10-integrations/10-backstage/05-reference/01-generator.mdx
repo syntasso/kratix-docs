@@ -1,0 +1,425 @@
+---
+title: SKE Backstage Generator
+description: Documentation for how to use the SKE Backstage Generator to automatically populate your backstage catalog
+sidebar_label: SKE Backstage Generator
+---
+
+:::note
+If you are using the [Backstage Controller](../installation/generating-backstage-components) you will
+not need to use `ske-backstage-generator` directly.
+:::
+
+`ske-backstage-generator` is an entrypoint built into the `ghcr.io/syntasso/backstage-controller` image. When added as a container in a Kratix Pipeline, it automatically generates the Backstage Template and Component manifests for your Promises and Resource Requests.
+
+These manifests are read by Backstage and are designed to work seamlessly with the SKE Backstage plugins.
+
+## Prerequisites
+
+### SKE Backstage plugins
+
+The `ske-backstage-generator` uses an action from the `ske-backend` Backstage plugin.
+This action is used within the generated Template to create a Resource Request.
+The generated Components are also used by the `ske-frontend` Backstage plugin to display
+Promise and Resource metadata.
+
+In order to utilise the Templates and Components, you should also install both the
+`ske-backend` and `ske-frontend` plugins into your Backstage instance.
+
+See [Configuring the Plugins](../installation/plugins) for instructions.
+
+### Backstage Destination {#destination}
+
+You must have a Destination created with the `environment: backstage` label. See the
+[Kratix Backstage docs](../installation/creating-entity-state-store#configure-a-destination-for-backstage)
+for setup instructions.
+
+## How does it work?
+
+`ske-backstage-generator` is intended to be run as part of your Configure Pipeline for your Promise and Resource Workflows. It will auto-generate Backstage Template and Component manifests, and schedule them to your [Backstage Destination](#destination).
+
+### Promise Configure
+
+In a Promise Configure workflow, two Backstage manifests will be generated:
+
+- **Promise Component:** A Backstage Component representing the Promise.
+- **Promise Template:** A Backstage Template representing the Promise API (i.e. the CRD
+  for Resources created from this Promise).
+
+Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
+
+### Resource Configure
+
+In a Resource Configure workflow, a single Backstage manifest will be generated:
+
+- **Resource Component:** A Backstage Component representing the Resource.
+
+Check the [YAML File Format](./yaml-file-format) for examples of these manifests.
+
+## Accessing the Backstage Controller image
+
+### Pulling the image locally
+
+The image is hosted in a private registry. To access the image, you will need to
+authenticate using the [Syntasso registry token](../../../reference/tokens#syntasso-registry-token)
+you have been provided with. For Docker, you can run the following command, providing your
+token as the password when prompted:
+
+```bash
+docker login ghcr.io --username syntasso-pkg
+```
+
+If you are using a different container engine, follow the docs for your specific
+tool.
+
+Once you have authenticated, you can pull any released version of the image.
+
+```bash
+docker pull ghcr.io/syntasso/backstage-controller:VERSION
+```
+
+### Pulling the image from your cluster
+
+Your Kubernetes cluster must have permission to [pull this image from the
+private
+registry](https://kubernetes.io/docs/concepts/containers/images/#configuring-nodes-to-authenticate-to-a-private-registry).
+
+If your cluster is running in a secure environment, you may wish to pull this image and
+push it to an internal registry which your cluster has permission to pull from.
+
+If you are using a local cluster such as Minikube of KinD, of have used the [quick-start guide](/main/quick-start) to set up a development environment, you can load the image
+directly to the Kubernetes cache. Different tools have different commands for this. For example:
+
+```bash
+# For minikube
+minikube image load ghcr.io/syntasso/backstage-controller:VERSION
+
+# For KinD
+kind load docker-image ghcr.io/syntasso/backstage-controller:VERSION
+```
+
+For other tools, follow their specific documentation.
+
+When using the SKE Backstage Generator in your Workflows, you can define the secret you want to use for authentication within your Promise, see below for more details.
+
+## Using the SKE Backstage Generator in your Workflows
+
+To use `ske-backstage-generator`, update your Promise definition to include it as a container in both the Promise Configure and Resource Configure workflows:
+
+```yaml title="Workflows section in a Promise file"
+  # ...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/backstage-controller:VERSION
+            name: ske-backstage-generator
+          #highlight-end
+    resource:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: resource-configure
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-resource-pipeline
+          #highlight-start
+          - image: ghcr.io/syntasso/backstage-controller:VERSION
+            name: ske-backstage-generator
+          #highlight-end
+```
+
+Once your Promise is updated, the generator will be run as part of your
+Workflows. If you install the Promise, you should see a Component automatically
+appearing in your Backstage instance, together with a new Template. If you use
+the Template to create a Resource, you should see the resource Component
+appearing as well as the Resource itself being created in your cluster.
+
+In order to have the full status of your Promise or Resource request displayed in Backstage,
+you should place `ske-backstage-generator` as the last container in the last pipeline of your workflow.
+
+If `ske-backstage-generator` needs to be used more than once in a Workflow, you should utilise the [SKE Backstage
+Component Promise](./generator-promise). Otherwise, you will observe only one of the components
+in Backstage, and Backstage will emit a warning:
+
+```
+{"level":"warn","message":"Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml","plugin":"catalog","service":"backstage"}
+```
+
+### Authenticating against the image registry
+
+If you have not loaded the image to your Kubernetes cache or pushed it to an internal registry,
+you can define your authentication credentials via a `docker-registry` secret and refer to this secret
+in Pipeline definition in your Workflow.
+
+You can create the secret with the following command, replacing `YOUR_TOKEN` with the token you have
+been provided with:
+
+```yaml
+kubectl create secret docker-registry syntasso-registry \
+  --docker-server=ghcr.io \
+  --docker-username=syntasso-pkg \
+  --docker-password=YOUR_TOKEN \
+  --namespace kratix-platform-system
+```
+
+:::info
+
+The secret must exist in the `kratix-platform-system` namespace as well as any other namespaces where users
+be able to make requests
+
+:::
+
+The `imagePullSecrets` field in your Workflow can be used to refer to the new `syntasso-registry`
+secret.
+
+```yaml
+  # ...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+        spec:
+          #highlight-start
+          imagePullSecrets:
+            - name: syntasso-registry
+          #highlight-end
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/backstage-controller:VERSION
+            name: ske-backstage-generator
+```
+
+This ensures that, when pulling the `backstage-controller` image, Kubernetes will use the
+`syntasso-registry` secret for authentication.
+
+## Customising the generated Components
+
+By default, the generator will create the Backstage Promise `Component` with default values for the `metadata` and
+`spec` fields. For a Promise, for example, it will look like this:
+
+```yaml
+metadata:
+  name: <Promise Kind>-promise
+  title: <Promise Kind> Promise
+  description: <Promise Kind> as a Service
+  tags:
+    - kratix
+spec:
+  lifecycle: production
+  owner: kratix-platform
+  type: kratix-promise
+  # Other fields are left empty
+```
+You can customise these values by setting the following `env` variables in the
+workflow:
+
+* `COMPONENT_NAME`: the value of `metadata.name`
+* `COMPONENT_TITLE`: the value of `metadata.title`
+* `COMPONENT_DESCRIPTION`: the value of `metadata.description`
+* `COMPONENT_TAGS`: comma-separated list of values for `metadata.tags`
+* `COMPONENT_TYPE`: the value of `spec.type`
+* `COMPONENT_LIFECYCLE`: the value of `spec.lifecycle`
+* `COMPONENT_OWNER`: the value of `spec.owner`
+* `COMPONENT_SYSTEM`: the value of `spec.system`
+* `COMPONENT_SUBCOMPONENT_OF`: the value of `spec.subcomponentOf`
+* `COMPONENT_PROVIDES_APIS`: comma-separated list of values for `spec.providesApis`
+* `COMPONENT_CONSUMES_APIS`: comma-separated list of values for `spec.consumesApis`
+* `COMPONENT_DEPENDS_ON`: comma-separated list of values for `spec.dependsOn`
+
+You can also customise the fields by setting the following annotations in the Promise or Resource object directly:
+
+* `ske.backstage.component/name`: the value of `metadata.name`
+* `ske.backstage.component/title`: the value of `metadata.title`
+* `ske.backstage.component/description`: the value of `metadata.description`
+* `ske.backstage.component/tags`: comma-separated list of values for `metadata.tags`
+* `ske.backstage.component/type`: the value of `spec.type`
+* `ske.backstage.component/lifecycle`: the value of `spec.lifecycle`
+* `ske.backstage.component/owner`: the value of `spec.owner`
+* `ske.backstage.component/system`: the value of `spec.system`
+* `ske.backstage.component/subcomponentOf`: the value of `spec.subcomponentOf`
+* `ske.backstage.component/providesApis`: comma-separated list of values for `spec.providesApis`
+* `ske.backstage.component/consumesApis`: comma-separated list of values for `spec.consumesApis`
+* `ske.backstage.component/dependsOn`: comma-separated list of values for `spec.dependsOn`
+
+For example, to set `spec.owner` and `spec.providesApis`, you can update your
+Pipeline Stage with the snippet below:
+
+```yaml title="Promise workflow with custom Component values"
+  #...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/backstage-controller:VERSION
+            name: ske-backstage-generator
+            #highlight-start
+            env:
+            - name: COMPONENT_OWNER
+              value: "platform-team"
+            - name: COMPONENT_PROVIDES_APIS
+              value: "component/api/v1,component/api/v2"
+            #highlight-end
+```
+
+For any further customisation, you can directly modify the generated `Component`
+in the `/kratix/output/backstage/catalog-info.yaml` file.
+
+## Customising the generated Templates
+
+By default, the generator will create the Backstage `Template` with default
+values for the `metadata` and `spec` fields, as shown below:
+
+```yaml
+metadata:
+  name: <Promise Kind>-promise-template
+  title: <Promise Kind>
+  description: <Promise Kind> as a Service
+  tags:
+    - kratix
+    - <Promise Name>-promise
+spec:
+  lifecycle: experimental
+  owner: kratix-platform
+  type: kratix-resource
+  # steps and parameters will be generated based on the Promise API
+```
+
+You can customise these values by setting the following `env` variables in the
+workflow:
+
+* `TEMPLATE_TITLE`: the value of `metadata.title`
+* `TEMPLATE_DESCRIPTION`: the value of `metadata.description`
+* `TEMPLATE_TAGS`: comma-separated list of values for `metadata.tags`
+* `TEMPLATE_TYPE`: the value of `spec.type`
+* `TEMPLATE_LIFECYCLE`: the value of `spec.lifecycle`
+* `TEMPLATE_OWNER`: the value of `spec.owner`
+
+:::info
+
+The environment variables must be set in the generator stage in the
+`promise.configure` workflow, since that's where the Backstage Template is
+generated.
+
+:::
+
+You can also customise the fields by setting the following annotations in the
+Promise or Resource object directly:
+
+* `ske.backstage.template/title`: the value of `metadata.title`
+* `ske.backstage.template/description`: the value of `metadata.description`
+* `ske.backstage.template/tags`: comma-separated list of values for `metadata.tags`
+* `ske.backstage.template/type`: the value of `spec.type`
+* `ske.backstage.template/lifecycle`: the value of `spec.lifecycle`
+* `ske.backstage.template/owner`: the value of `spec.owner`
+
+
+For example, to set `metadata.title` and `spec.owner`, you can update your
+Pipeline Stage with the snippet below:
+
+```yaml title="Promise workflow with custom Template values"
+  #...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/backstage-controller:VERSION
+            name: ske-backstage-generator
+            #highlight-start
+            env:
+            - name: TEMPLATE_OWNER
+              value: "platform-team"
+            - name: TEMPLATE_TITLE
+              value: "My Super Service"
+            #highlight-end
+```
+
+### Customising the Steps and Parameters
+
+By default, the generator will create the Backstage Template with resource namespace as a required field.
+You can customise this behaviour by setting the following `env` variables in the workflow:
+
+* `TEMPLATE_NAMESPACE`: the default value of the resource namespace
+* `TEMPLATE_NAMESPACE_FIELD_TITLE`: the name of the resource namespace field in Backstage UI
+* `TEMPLATE_NAMESPACE_FIELD_DESCRIPTION`: the description of the resource namespace field in Backstage UI
+* `TEMPLATE_SINGLE_SPEC_PAGE`: set to `true` if you would like to generate a single page for the Spec in the Template, rather than a page per `.spec.<field>`
+* `TEMPLATE_HIDE_NAMESPACE`: set to `true` if you would like to hide the namespace field from the generated resource
+Template. Resource namespace will default to `TEMPLATE_NAMESPACE` when it is set, otherwise will be set to `default` namespace.
+
+For example, to generate the resource Template without the namespace field and set the resource namespace to `my-team`
+for all resource requests:
+
+```yaml title="Promise workflow with custom Template values"
+  #...
+  workflows:
+    promise:
+      configure:
+      - apiVersion: platform.kratix.io/v1alpha1
+        kind: Pipeline
+        metadata:
+          name: promise-configure
+        spec:
+          containers:
+          - image: ghcr.io/syntasso/kratix-marketplace/jenkins-configure-pipeline:v0.1.0
+            name: jenkins-promise-pipeline
+          - image: ghcr.io/syntasso/backstage-controller:VERSION
+            name: ske-backstage-generator
+            #highlight-start
+            env:
+            - name: TEMPLATE_NAMESPACE
+              value: "my-team"
+            - name: TEMPLATE_HIDE_NAMESPACE
+              value: "true"
+            #highlight-end
+```
+
+For any further customisation, you can directly modify the generated `Template`
+in the `/kratix/output/backstage/catalog-info.yaml` file.
+
+## Providing a Resource Summary
+
+On the Resource Component page, it's possible to include a free-form text block
+to provide documentation about the resource.
+
+To do this, set the `ske.backstage.component/summary` annotation on the Promise object:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  #...
+  annotations:
+    ske.backstage.component/summary: |
+      Some information about this Promise.
+
+      This accepts **markdown!**
+```
+
+The text will be rendered on each Resource Component page in Backstage.
