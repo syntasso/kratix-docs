@@ -43,6 +43,8 @@ resource is managed by the SKE Operator.
     name: my-kratix
   spec:
     version: vX.Y.Z # The desired version of SKE; set to "latest" to always use the latest
+    featureFlags:
+      dryRun: false # preview feature, see Kratix Config for details
     tlsConfig:
       certManager:
         disabled: false # Set to true to disable cert-manager integration
