@@ -21,10 +21,6 @@ Check the release notes below for information on each available version.
 
 ### [v0.54.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.54.0/) (2026-08-04)
 
-#### Features
-
-* Introduces the **Portal Controller**, a unified integration that syncs Kratix Promises and Resource requests into developer portals. Configure Backstage or Cortex portals via `SKEIntegration type: portal-controller`. The standalone Backstage and Cortex controllers are deprecated in favour of this integration. See the [Portal Controller documentation](/ske/integrations/portal-controller/intro).
-
 #### Fixes
 
 * Kratix now recovers when a Git State Store is changed outside of Kratix (for example a manual commit, or a Flux or Argo prune). Before each write, Kratix resets its cached clone to the latest remote state instead of rebasing, so writes always start from the true remote state. A new `git.minimumFetchInterval` [Kratix Config](https://docs.kratix.io/main/reference/kratix-config/config#git) option (default `5s`) bounds how often the remote is fetched.
