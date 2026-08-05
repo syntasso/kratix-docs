@@ -16,6 +16,7 @@ recommend running it against a production platform.
 the labels Kratix sets, and the format of the generated summary.
 - Breaking changes may land in any release, with no migration path and no
 deprecation period.
+- This preview feature is available in SKE version `v0.55.0-rc1` onwards.
 
 :::
 
@@ -155,8 +156,7 @@ Deleting the `DryRun` deletes the ephemeral Resource Request with it.
 | `Completed` | `False` | `PipelineFailed` | A pipeline failed. `message` carries the detail. |
 | `ComponentsSucceeded` | `True` or `False` | | Compound Promises only. See [Compound Promises](#compound-promises). |
 
-An absent `Completed` condition means the run has not finished. If it stays
-absent, see [Troubleshooting](#troubleshooting).
+An absent `Completed` condition means the run has not finished.
 
 ### Reading the summary
 
