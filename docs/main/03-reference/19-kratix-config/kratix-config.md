@@ -35,6 +35,7 @@ data:
     featureFlags:
       dryRun: false # preview feature; see below
     workflows:
+      reconcileAfterFailure: true
       jobOptions:
         defaultBackoffLimit: 6
         podTTLSecondsAfterFinished: 3600 # seconds to keep completed Job Pods before cleanup; omit to use Kubernetes default
@@ -84,7 +85,7 @@ Enable label selector caching of Secrets on the cluster to optimise memory usage
 
 ### reconciliationInterval (default: 10h)
 
-The interval on which Kratix will re-run the Workflows for both Promises and Resources.
+The interval on which Kratix will rerun Configure workflows for both Promises and Resources.
 
 ### controllerLeaderElection
 
@@ -125,6 +126,15 @@ enabling it.
 ### Workflows
 
 Default configurations for Kratix Workflows. Any options configured within individual workflows will take precedence over those in the Kratix Config.
+
+#### reconcileAfterFailure (default: true)
+
+Controls whether periodic reconciliation reruns Promise and Resource Configure
+workflows after a failed run. When `false`, periodic reconciliation skips failed
+workflows, but manual reconciliation of a
+[Promise](/main/reference/promises/reconciliation-labels#manual-reconciliation)
+or [Resource](/main/reference/resources/reconciliation-labels#manual-reconciliation)
+still rerun them. This setting does not affect successful runs or Delete workflows.
 
 #### jobOptions
 
