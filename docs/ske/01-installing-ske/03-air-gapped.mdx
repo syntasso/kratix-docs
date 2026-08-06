@@ -6,25 +6,38 @@ description: Installing and running Syntasso Kratix Enterprise in air-gapped env
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import PartialPointToKratix from '../../_partials/installation/_point_to_kratix.md';
 ```
 
-:::warning Fixed installation namespace
+This page covers the mirroring and configuration needed to install SKE in an air-gapped environment
+ — setting up your own image registry and release manifest location before pointing the SKE Operator
+  at them, rather than editing the manifests directly. Complete the steps here first, 
+  then follow [Advanced installation](./advanced-install), using the registry and manifest locations 
+  you've set up here in your `values.yaml` or ConfigMap.
+
+If your cluster isn't air-gapped, you likely don't need this page — check the [installation overview](./intro) 
+to confirm which method fits, or head to [Preconfigured installation](./preconfigured-install) for the 
+fastest path in development and test.
+
+<PartialPointToKratix />
+
+You may want to manage SKE manifests and images within your own environment either
+due to air-gapped requirements or other security and redundancy measures.
+
+If you want to host your own manifests and/or images you
+will need to ensure that your Platform cluster has access to the following resources:
+
+- An image registry containing the required SKE images and any optional SKE
+  integration images you use
+- A location where the SKE Release manifests can be found
+
+:::info Fixed installation namespace
 
 SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
 You cannot override this namespace. Create it before creating any registry,
 release-storage, or TLS Secrets used by the installation.
 
 :::
-
-You may want to manage SKE manifests and images within your own environment either
-due to air-gapped requirements or other security and redundancy measures.
-
-Regardless of the reason, if you want to host your own manifests and/or images you
-will need to ensure that your Platform cluster has access to the following resources:
-
-- An image registry containing the required SKE images and any optional SKE
-  integration images you use
-- A location where the SKE Release manifests can be found
 
 Depending on your environment configuration, you will be instructed how to create
 configuration and secrets the SKE Operator requires to access both the Image
@@ -50,8 +63,7 @@ You will be prompted for a password. The password is your Licence Key.
 Once you have logged in, you can pull the images using the `docker pull`
 command.
 
-:::info Tokens
-Review the [SKE tokens](/ske/reference/tokens) page for an overview on different SKE tokens and which one to use for registry access.
+There is more information on the [SKE tokens page](/ske/reference/tokens) about which one to use for registry access.
 :::
 
 ## Image registry
