@@ -1,15 +1,8 @@
-:::info
+:::tip Looking to install SKE?
 
-This guide is for **installing the latest OSS version of the Kratix project**
+Head to our [SKE installation page](/ske/installing-ske/intro) if you have a Syntasso Kratix Enterprise (SKE) license, or are you running an SKE POV.
+Don't have a token yet but want to try SKE's enterprise features? Head to [syntasso.io](https://www.syntasso.io/) and click "Try SKE today". 
 
-Depending on your goals, you might instead want to:
-
-- 👉 Install [Syntasso Kratix Enterprise (SKE) Quick Start](/ske/installing-ske/preconfigured-install):
-quick experimentation on a disposable cluster using enterprise features.
-
-- 👉 Install [Syntasso Kratix Enterprise (SKE) (Full
-Installation)](/ske/installing-ske/intro): for setting up a
-**production-grade**, secure, and compliant Kratix platform with full enterprise
-capabilities.
+Otherwise, carry on below for the open-source Kratix guide.
 
 :::

@@ -8,19 +8,19 @@ id: advanced-install
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import PartialPointToKratix from '../../_partials/installation/_point_to_kratix.md';
 ```
 
-:::warning Fixed installation namespace
+This page covers the advanced installation using the SKE Operator — the recommended approach for 
+production, or any environment where you need to customise or secure your SKE installation, 
+via either the Operator's Helm chart or its manifests directly.
 
-SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
-You cannot override this namespace. The Helm command in this guide creates it
-with `--create-namespace`. For a manifest-based installation, you must create
-the namespace before installing the SKE Operator.
+If you're setting up a quick development or test environment instead, 
+[Preconfigured installation](./preconfigured-install) will get you there faster. If your 
+cluster is air-gapped, complete [Air-gapped installation](./air-gapped) first — you'll need 
+your image registry and release manifest mirrors in place before running the commands below.
 
-Registry pull secrets, release-storage credentials, and referenced TLS Secrets
-must also exist in `kratix-platform-system`.
-
-:::
+<PartialPointToKratix />
 
 ## The SKE Operator
 
@@ -32,22 +32,31 @@ The operator has its own [releases](/ske/releases/ske-operator) and it manages
 instances of SKE as defined by a [Kratix Custom
 Resource](/ske/reference/ske-operator#kratix-crd).
 
-To install the SKE Operator and instantiate a new SKE instance, we provide several mechanisms:
+To install the SKE Operator and instantiate a new SKE instance, we provide two methods:
 
 * [With the SKE Operator Helm Chart](#via-helm-chart), you can deploy the Operator and SKE with all the customisations you need, including air-gapped environments.
 * [With the SKE Operator manifest and the Kratix CRD](#via-manifests), you have direct access to the files being deployed, and can customise it manually.
 
 The sections below cover each one of these methods of installation.
 
-## Via the Helm Chart {#via-helm-chart}
+:::info Fixed installation namespace
 
-:::info
+**Note** that no matter which installation method you choose, SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
+You cannot override this namespace. The Helm command in this guide creates it
+with `--create-namespace`. For a manifest-based installation, you must create
+the namespace before installing the SKE Operator.
+
+Registry pull secrets, release-storage credentials, and referenced TLS Secrets
+must also exist in `kratix-platform-system`.
+
+:::
+
+
+## Via the Helm Chart {#via-helm-chart}
 
 Syntasso Kratix Enterprise requires cert-manager to be installed on the cluster
 unless you are configuring [custom certificates](#custom-certs). Please
 refer to [its documentation for installation instructions](https://cert-manager.io/).
-
-:::
 
 To install SKE operator using the Helm chart, start by adding the Syntasso Helm
 repository:
@@ -63,12 +72,8 @@ Helm can accept values via the values file. Refer to the examples
 below for common configuration options. Any configuration should be placed in a
 `values.yaml` file that is then passed in to the `helm install` command.
 
-:::tip
-
 You can see all available configuration in the
 [helm chart repository](https://github.com/syntasso/helm-charts/blob/main/ske-operator/values.yaml).
-
-:::
 
 
 <details>
@@ -173,11 +178,7 @@ skeDeployment:
   version: "<SKE_VERSION>"
 ```
 
-:::tip
-
 For the latest available versions, see the [SKE releases](/ske/releases/ske) page.
-
-:::
 
 #### Custom Certs {#custom-certs}
 
@@ -504,11 +505,7 @@ spec:
   version: "<SKE_VERSION>"
 ```
 
-:::tip
-
 For the latest available versions, see the [SKE releases](/ske/releases/ske) page.
-
-:::
 
 Apply the file with `kubectl`:
 
