@@ -4,61 +4,32 @@ description: Introduction to installing SKE
 sidebar_label: Introduction
 ---
 
-:::warning Fixed installation namespace
+```mdx-code-block
+import PartialPointToKratix from '../../_partials/installation/_point_to_kratix.md';
+```
 
-SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
-You cannot override this namespace. The Helm installation can create it for
-you; for a manifest-based installation, create it before installing the SKE
-Operator.
+This section covers everything you need to get SKE installed and running: 
+choosing an installation method, adding supporting components like the GUI and Health Agent, 
+and keeping your platform upgraded once it's live.
 
-:::
-
-## Upgrade Your Platform with Confidence
-
-Upgrades are not maintenance. They are how your platform evolves.
-
-In this video, we explain why keeping your SKE platform continuously updated is essential to security, stability, and long term operability. Left unmanaged, platforms decay. With the right model, they continuously improve.
-
-We walk through the Kratix architecture and show how installation and upgrades use the exact same mechanism: a declarative change to the desired version. There are no bespoke upgrade scripts and no one off processes.
-
-You declare the version you want. The SKE Operator reconciles towards it incrementally, performing health checks at each stage. Progress only continues when the platform is stable. The result is predictable, observable, and safe upgrades by design.
-
-<div style={{
-  position: 'relative',
-  paddingBottom: '56.25%',
-  height: 0,
-  overflow: 'hidden',
-  maxWidth: '100%',
-  borderRadius: '12px'
-}}>
-  <iframe
-    src="https://www.youtube-nocookie.com/embed/8rqFhIo6Sns"
-    referrerPolicy="strict-origin-when-cross-origin"
-    title="Upgrade walkthrough"
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      border: 10
-    }}
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    allowFullScreen
-  />
-</div>
+<PartialPointToKratix />
 
 
-## Installing, Upgrading, and Removing SKE
+## Choosing an installation method
 
-This section details the methods you can use to install, upgrade and delete your SKE
-installation.
+Not sure which one applies to you?
 
-This section is divided into two:
+- For development, testing, or the fastest way to get started, use [Preconfigured installation](./preconfigured-install).
+- For production, or if you need to customise the installation, use [Advanced installation](./advanced-install). 
+  - If your cluster is also air-gapped, complete [Air-gapped installation](./air-gapped) first for the extra registry and manifest configuration you'll need.
 
-- In [Preconfigured installation](./preconfigured-install), you will find a preconfigured Job with all the required tools to install SKE in a given cluster. This is recommended for development and testing setups, and is the quickest way to get started.
-- In [Advanced installation](./advanced-install), you will find a more detailed guide to installing SKE in more complex environments, like production, where customisations to the installation are required. This is recommended for production setups, and is the most flexible way to install SKE.
-- In [Air-gapped installation](./air-gapped), you will find a guide on what you need to configure in order to deploy SKE in air-gapped environments.
-- In [Upgrades](./upgrades), you will find a guide to upgrading your SKE instance.
-- In [SKE Health Agent](./ske-health-agent), you will find a guide on how to install the SKE Health Agent in your Destinations.
-- In [SKE GUI](./ske-gui), you will find a guide on how to deploy the SKE GUI which allows you to view your Kratix Promises and Resources.
+## Additional components
+
+Once SKE is installed, you may also want:
+
+- [SKE Health Agent](./ske-health-agent) — install the Health Agent in your Destinations.
+- [SKE GUI](./ske-gui) — deploy the GUI to view your Kratix Promises and Resources.
+
+## Upgrading and removing SKE
+
+See [Upgrades](./upgrades) for how to move your SKE installation forward safely, using the same declarative mechanism as installation itself.
