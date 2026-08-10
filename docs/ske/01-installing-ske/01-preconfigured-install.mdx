@@ -6,20 +6,24 @@ sidebar_label: Preconfigured installation
 
 ```mdx-code-block
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import PartialPointToKratix from '../../_partials/installation/_point_to_kratix.md';
 ```
 
-:::info
+This page covers the preconfigured installation — the fastest way to get SKE running, 
+using a Job that installs all the required tools automatically, including cert-manager and Flux. 
+It's intended for development and testing on a clean, disposable cluster, not production, and 
+assumes cert-manager and Flux aren't already running there.
 
-In order to run through this page you need Syntasso Kratix Enterprise license **token**.
-Don't have one? [Request your free trial token here](https://www.syntasso.io/pricing)
+If that doesn't match your situation — you're targeting production, need to customise the install, 
+already have cert-manager, Flux, or another GitOps tool in place — see [Advanced installation](./advanced-install), 
+or check the [installation overview](./intro) to confirm which method fits.
 
-:::
+<PartialPointToKratix />
 
 This guide walks you through a **preconfigured installation** of
-Syntasso Kratix Enterprise (SKE) with a **preconfigured Backstage**. It is the fastest way to get started with SKE. It is not
-intended for production use, but rather to get you started and experimenting
-quickly. Check the [advanced installation](/ske/installing-ske/advanced-install)
-guide for alternatives for production use.
+Syntasso Kratix Enterprise (SKE) with a **preconfigured Backstage**. It is the fastest way to get started with SKE. 
+It is not intended for production use, but rather to get you started and experimenting
+quickly. 
 
 ## Prerequisites
 
@@ -58,6 +62,15 @@ Backstage. To highlight this, a preconfigured Backstage instance is included in
 the preconfigured installation.
 
 Before installing, create the namespace and secret referencing your [Syntasso registry token](../reference/tokens#syntasso-registry-token) so your cluster can access the private container registry:
+
+:::info Fixed installation namespace
+
+SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
+You cannot override this namespace. The Helm installation can create it for
+you; for a manifest-based installation, create it before installing the SKE
+Operator.
+
+:::
 
 ```bash
 kubectl create namespace kratix-platform-system
