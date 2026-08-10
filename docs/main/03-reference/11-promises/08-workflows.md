@@ -99,11 +99,12 @@ In this example, `pipeline-a` will run first, followed by `pipeline-b`.
 A Pipeline fails if any of its `containers` return a non-zero exit code.
 
 If this occurs, the workflow **halts**: no further containers are executed within the
-Pipeline, and no further Pipelines are executed in the workflow.
+Pipeline, and no further Pipelines are executed in that run.
 
-To re-run a workflow following a Pipeline failure, you can perform a
-[manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation) of the Promise, which will trigger the
-workflow again from the beginning.
+By default, Kratix reruns the Configure workflow from the beginning when the
+[reconciliation interval](/main/reference/kratix-config/config#reconciliationinterval-default-10h)
+is reached. If [`workflows.reconcileAfterFailure`](/main/reference/kratix-config/config#reconcileafterfailure-default-true) is `true`, the workflow will be retried after the reconciliation interval. To rerun it sooner, trigger a
+[manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation).
 
 ### Suspending or Retrying a workflow {#suspending-a-workflow}
 

@@ -373,13 +373,13 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep <promise/res
 
 ### Workflow Pod stuck in CrashLoopBackOff
 
-When a Workflow is scheduled, Kratix will create a pod to run the Workflow. If
-the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
-times the pod will eventually go into `CrashLoopBackoff`. In this scenario
-Kratix will not try to reschedule the pod. You can force Kratix to reschedule a
-new pod by triggering a manual reconciliation for the relevant object:
+When a Workflow is scheduled, Kratix creates a Pod to run it. Kubernetes retries
+a failing Workflow Job up to its `backoffLimit`. If a Configure workflow fails,
+Kratix reruns it at the next reconciliation interval by default. To rerun it
+sooner, trigger a manual reconciliation for the relevant object:
 [Promise](/main/reference/promises/reconciliation-labels#manual-reconciliation) or
-[Resource](/main/reference/resources/reconciliation-labels#manual-reconciliation)
+[Resource](/main/reference/resources/reconciliation-labels#manual-reconciliation).
+Delete workflows are not retried by periodic reconciliation.
 
 ### Workflow Pod doesn't have Kubernetes API access
 
