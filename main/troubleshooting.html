@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.f4e08549.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d6d37232.js" defer="defer"></script>
 <script src="/assets/js/main.605779df.js" defer="defer"></script>
 </head>
 <body>
@@ -307,13 +307,13 @@ Pod. Check the logs of the Kratix operator to see if there are any errors and
 fix the relating issues in the Workflow.</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kubectl </span><span class="token parameter variable" style="color:#36acaa">-n</span><span class="token plain"> kratix-platform-system logs </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">pod-name</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"> </span><span class="token parameter variable" style="color:#36acaa">-c</span><span class="token plain"> manager </span><span class="token operator" style="color:#393A34">|</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">grep</span><span class="token plain"> </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">promise/resource name</span><span class="token operator" style="color:#393A34">&gt;</span><br></div></code></pre></div></div>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workflow-pod-stuck-in-crashloopbackoff">Workflow Pod stuck in CrashLoopBackOff<a href="#workflow-pod-stuck-in-crashloopbackoff" class="hash-link" aria-label="Direct link to Workflow Pod stuck in CrashLoopBackOff" title="Direct link to Workflow Pod stuck in CrashLoopBackOff" translate="no">​</a></h3>
-<p>When a Workflow is scheduled, Kratix will create a pod to run the Workflow. If
-the Pod fails Kubernetes will restart the pod. If the pod is failing multiple
-times the pod will eventually go into <code>CrashLoopBackoff</code>. In this scenario
-Kratix will not try to reschedule the pod. You can force Kratix to reschedule a
-new pod by triggering a manual reconciliation for the relevant object:
+<p>When a Workflow is scheduled, Kratix creates a Pod to run it. Kubernetes retries
+a failing Workflow Job up to its <code>backoffLimit</code>. If a Configure workflow fails,
+Kratix reruns it at the next reconciliation interval by default. To rerun it
+sooner, trigger a manual reconciliation for the relevant object:
 <a class="" href="/main/reference/promises/reconciliation-labels#manual-reconciliation">Promise</a> or
-<a class="" href="/main/reference/resources/reconciliation-labels#manual-reconciliation">Resource</a></p>
+<a class="" href="/main/reference/resources/reconciliation-labels#manual-reconciliation">Resource</a>.
+Delete workflows are not retried by periodic reconciliation.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workflow-pod-doesnt-have-kubernetes-api-access">Workflow Pod doesn&#x27;t have Kubernetes API access<a href="#workflow-pod-doesnt-have-kubernetes-api-access" class="hash-link" aria-label="Direct link to Workflow Pod doesn&#x27;t have Kubernetes API access" title="Direct link to Workflow Pod doesn&#x27;t have Kubernetes API access" translate="no">​</a></h3>
 <p>A Workflow is, by default, given limited access to the Kubernetes API. You will
 see errors in the logs of the Workflow if it is trying to access the API without
