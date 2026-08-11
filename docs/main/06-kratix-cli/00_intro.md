@@ -15,6 +15,19 @@ installation.
 ## Installation
 
 <Tabs className="boxedTabs" groupId="stateStore">
+  <TabItem value="brew" label="Homebrew">
+    Run:
+    ```bash
+    brew install syntasso/tap/kratix
+    ```
+  </TabItem>
+  <TabItem value="krew" label="Krew">
+    Run:
+    ```bash
+    kubectl krew index add syntasso https://github.com/syntasso/krew-index
+    kubectl krew install syntasso/kratix
+    ```
+  </TabItem>
   <TabItem value="go" label="Installing with Go">
     Run:
     ```go
