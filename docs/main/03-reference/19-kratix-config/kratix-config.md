@@ -27,6 +27,7 @@ data:
     numberOfJobsToKeep: 5
     selectiveCache: false
     reconciliationInterval: "10h"
+    workPlacementRewriteInterval: "10h"
     controllerLeaderElection:
       leaseDuration: 15s
       renewDeadline: 10s
@@ -86,6 +87,33 @@ Enable label selector caching of Secrets on the cluster to optimise memory usage
 ### reconciliationInterval (default: 10h)
 
 The interval on which Kratix will rerun Configure workflows for both Promises and Resources.
+
+### workPlacementRewriteInterval (default: 10h)
+
+The interval on which each WorkPlacement re-writes its files to the destination's
+state store, even when nothing has changed, so drift in the state store is
+corrected.
+
+WorkPlacements are already re-written whenever their Workflow re-runs on the
+[`reconciliationInterval`](#reconciliationinterval-default-10h). This setting adds
+a separate re-write timer that is independent of Workflow runs. Set it to `0` to
+disable it, so WorkPlacements are only re-written in response to changes.
+
+The re-write is a no-op when the files already match, as Git only commits and
+pushes when there is an actual change.
+
+:::warning
+Setting this too low can put significant load on your platform. Every
+WorkPlacement re-reconciles on each interval, and the cost scales with the number
+of WorkPlacements across all destinations. A short interval can lead to:
+
+- **State store load**: a Git fetch and reset per WorkPlacement on every interval,
+  which can trip provider rate limits (for example the GitHub API).
+- **Lock contention**: WorkPlacements sharing a state store are serialised behind a
+  per-repository lock, so frequent re-writes can queue up and delay genuine changes.
+
+Keep the interval as large as your drift-correction needs allow.
+:::
 
 ### controllerLeaderElection
 
