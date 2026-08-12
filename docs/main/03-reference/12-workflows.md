@@ -292,8 +292,7 @@ rules:
   verbs: [get, list, update, create, patch]
 ```
 
-**Resource workflows** get a `Role` and `RoleBinding` in the pipeline's namespace, for
-example `env-resource-configure-slack-notify`:
+**Resource workflows** get a `Role` and `RoleBinding` in the pipeline's namespace:
 
 ```yaml
 rules:
@@ -308,8 +307,8 @@ rules:
 If the Promise sets [`pipelineNamespace`](#workflows-namespace), its Resource workflows run
 in a different namespace from the resource request. The permission then crosses a namespace
 boundary, so Kratix also creates a `ClusterRole` and `ClusterRoleBinding` containing the
-first rule above, named with the requesting namespace appended. For a request in the
-`team-a` namespace, this is `env-resource-configure-slack-notify-team-a`.
+first rule above, named with the requesting namespace appended, following this format: 
+`<promise name>-resource-configure-<pipeline name>-<namespace>`.
 
 Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
 them are deleted when the Promise is deleted. Supplying a

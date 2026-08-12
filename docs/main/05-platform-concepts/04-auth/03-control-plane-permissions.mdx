@@ -39,29 +39,13 @@ For the objects Kratix generates for each pipeline, and the rules they contain, 
 
 ## Why Kratix needs `escalate` and `bind`
 
-`escalate` and `bind` are verbs on `roles` and `clusterroles`. They are not verbs on
-`rolebindings` or `clusterrolebindings`.
-
-Kratix does not write `escalate` or `bind` into the roles it creates. They appear in no
-generated rule, and no pipeline ServiceAccount receives them. Kratix holds these verbs
-itself, and uses them at the point it creates a role.
-
-Kubernetes uses both verbs to prevent RBAC being used to grant yourself more than you
-already have. Two checks enforce this:
-
-- [Creating or updating a `Role` or `ClusterRole`](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-creation-or-update)
-  requires that you already hold every permission you are writing into it. `escalate` waives
-  this check.
-- [Creating a binding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-binding-creation-or-update)
-  requires that you hold every permission in the role being referenced. `bind` waives this
-  check, which is why it is a verb on the referenced role rather than on the binding.
-
 Kratix needs both because a Resource workflow's permissions include access to the
-Promise's own Resource kind. Those API groups do
-not exist until the Promise is installed, so they cannot be granted to Kratix in advance.
-Kratix therefore uses `escalate` and `bind` to grant a pipeline a permission that Kratix
-itself does not hold. The verbs are not passed on to the pipeline, so a pipeline pod cannot
-use them to escalate further.
+Promise's own Resource kind. Those API groups do not exist until the Promise is installed,
+so they cannot be granted to Kratix in advance. Kratix therefore needs `escalate` and `bind` 
+to grant a pipeline a permission that Kratix itself does not hold. The verbs are not passed
+on to the pipeline, so a pipeline pod cannot use them to escalate further.
 
 The RBAC objects Kratix generates with these verbs will always have deterministic names and a
 `kratix.io/promise-name: <promise-name>` label. They will be cleaned up with the deletion of the Promise.
+
+To learn more about `escalate` and `bind` permissions, check [Restrictions on Role Creation or Update](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-creation-or-update) and [Restrictions on Role Binding Creation and Update](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-binding-creation-or-update) on the Kubernetes documentation.
