@@ -253,7 +253,8 @@ This applies to both Promise and Resource Configure workflows.
 ### Role-based Access Control (RBAC)
 
 Each pipeline runs with its own service account and a default set of restrictive
-RBAC permissions. By default the service account is automatically created by
+RBAC permissions, enumerated in [Default Permissions](#default-permissions)
+below. By default the service account is automatically created by
 Kratix and the name is deterministic. You have three options for providing
 additional [RBAC
 permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to
@@ -272,6 +273,58 @@ the pipeline:
 
 The namespace a resource request pipeline runs in is the same as the namespace as the resource
 request. Promise pipelines run in the `kratix-platform-system` namespace.
+
+:::
+
+#### Default Permissions
+
+Alongside the [service account](#service-account), Kratix creates the RBAC objects a
+pipeline needs to write back `Work` objects and to update the Resource it is reconciling.
+These objects reuse the service account's name, so you can predict their names if you need
+to audit them or create your own. That name is
+`<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`.
+
+The examples below are for a Promise named `env` publishing an `envs.example.org` Resource
+API.
+
+**Promise workflows** get a `ClusterRole` and `ClusterRoleBinding` named after the
+pipeline, for example `env-promise-configure-tf-workspace`. `Promise` and `Work` are
+cluster-scoped, so a namespaced `Role` cannot grant this access:
+
+```yaml
+rules:
+- apiGroups: [platform.kratix.io]
+  resources: [promises, promises/status, works]
+  verbs: [get, list, update, create, patch]
+```
+
+**Resource workflows** get a `Role` and `RoleBinding` in the pipeline's namespace:
+
+```yaml
+rules:
+- apiGroups: [example.org]           # the Promise's own API group
+  resources: [envs, envs/status]
+  verbs: [get, list, update, create, patch]
+- apiGroups: [platform.kratix.io]
+  resources: [works]
+  verbs: ["*"]
+```
+
+If the Promise sets [`pipelineNamespace`](#workflows-namespace), its Resource workflows run
+in a different namespace from the resource request. The permission then crosses a namespace
+boundary, so Kratix also creates a `ClusterRole` and `ClusterRoleBinding` containing the
+first rule above, named with the requesting namespace appended, following this format: 
+`<promise name>-resource-configure-<pipeline name>-<namespace>`.
+
+Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
+them are deleted when the Promise is deleted. Supplying a
+[custom service account](#custom-service-account) changes the service account name only.
+The Role and binding names are still derived from the pipeline.
+
+:::note
+
+If you are interested in the permissions the Kratix controller holds, 
+see [Kratix Control Plane Permissions](/main/platform-concepts/auth/control-plane-permissions).
 
 :::
 
