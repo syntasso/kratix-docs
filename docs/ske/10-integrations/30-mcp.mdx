@@ -116,12 +116,14 @@ The server provides the AI agent with the tools to answer these questions and, w
 | Tool | What it does |
 |---|---|
 | `fetch_promises` | List available Promises |
+| `guide_request_workflow` | Guide a full request workflow — discovery, planning, validation, and submit readiness — in one call |
 | `describe_promise_requestable` | Promise summary, schema, and submit hints in one view |
 | `fetch_ready_destinations` | Destinations that can accept requests |
 | `fetch_destination_contexts` | Which destinations match a Promise's placement selectors |
 | `fetch_full_promises` | Promises expanded with their matching resource instances |
 | `fetch_promise_requests` | Requests scoped to a single Promise |
 | `get_request_status` | Look up a single request by name and namespace |
+| `find_request_status` | Find a request's status without knowing its exact name; picks the most recent match |
 | `validate_promise_request` | OpenAPI-schema preflight check before submitting |
 | `submit_promise_request` | Create a namespaced request; stamps the requesting user and emits a Kubernetes Event |
 
