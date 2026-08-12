@@ -81,6 +81,7 @@ spec:
       operator: "Equal"
       value: "workflows"
       effect: "NoSchedule"
+  restartPolicy: OnFailure # Optional; restart policy for the pipeline Job Pod. Defaults to OnFailure
   volumes:
     - name: myvolume # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:
@@ -137,6 +138,11 @@ is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
 * `backoffLimit` determines how many times Kubernetes retries a failing Job before
   marking it failed. Kratix does not set a default value for this field; if omitted,
   Kubernetes uses its own Job default.
+
+You can also control the [restart
+policy](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy)
+of the pipeline Job Pod by setting `restartPolicy` in the Pipeline spec. This
+defaults to `OnFailure`.
 
 #### Common Job signals
 
