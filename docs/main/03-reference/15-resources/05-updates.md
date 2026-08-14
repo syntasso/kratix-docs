@@ -1,7 +1,7 @@
 ---
-title: Updates
+title: Resource Updates
 sidebar_label: Updates
-description: Documentation on how updates behave for Resources
+description: How updating a Resource request works in Kratix, including status changes and how the pipeline responds.
 ---
 
 # Updates
@@ -32,7 +32,7 @@ see the [Upgrading a Promise](/main/guides/upgrading-resource-requests) guide.
 
 If an update to a Resource changes its scheduling, the change will be **ignored**.
 
-The Destination selected at the first the Workflow run is always used. To move a Resource
+The Destination selected at the first Workflow run is always used. To move a Resource
 from one Destination to another, you can delete and create it again.
 
 See [Managing Multiple Destinations](../destinations/multidestination-management#resources) for
