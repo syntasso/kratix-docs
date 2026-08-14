@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: SKE Promise Upgrades Introduction
 description: Documentation for the Custom Resources for Managing Promise Upgrades
 sidebar_label: Introduction
 keywords: [kratix, promises, upgrades]
