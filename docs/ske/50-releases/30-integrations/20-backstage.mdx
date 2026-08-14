@@ -24,6 +24,62 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.22.0/); [ske-frontend v0.19.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.19.0/) (2026-08-14)
+
+#### Features
+
+* Compatible with Backstage v1.51.0
+
+* **Improvements on the Pending Request page.** It now reports the requested kind and who
+submitted it, and its banner reflects what the pull request actually says, instead of announcing
+"awaiting approval" for a request that has already been merged.
+
+* **Settled requests are withdrawn.** A pull request closed without merging drops the request, a
+pending request disappears as soon as its resource lands rather than lingering for a refresh cycle,
+and a completed deletion no longer leaves a pending entity behind.
+
+* **Resources report when the platform has not caught up.** A resource whose generation is ahead of
+the observed generation shows a banner while the change is applied, and a warning if the configure
+workflow failed. This applies to any live resource, whatever the delivery mode. It reads live
+resource state, so it is not shown when `ske.mode` is `gitops`.
+
+* **The in-flight banner names the action**, saying whether an update or a deletion is awaiting
+approval, rather than inferring it from the pull request's branch.
+
+* **Delete decides what it will do at click time**, opening a pull request on a review-managed
+resource and deleting directly on one that was not. If the platform cannot be reached, it refuses
+and says why.
+
+* **Richer Promise and Resource pages:** Promise version and colour-coded availability on the About
+card, `metadata.links`, the full status behind a toggle, an open pull request shown as a two-step
+progress indicator, and Manage actions held while a pull request is already open for the resource.
+
+* **A catalogue filter for entities with an open pull request**, so a platform team can see
+everything awaiting review.
+
+* **New frontend system support.** The plugin's entity content is registered at `/kratix`, so it no
+longer collides with the catalogue's own Overview tab. Both install paths are documented in
+[Installing and Configuring the Plugins](/ske/integrations/backstage/installation/plugins).
+
+#### Bug Fixes
+
+* The requests repository field is editable when the resource does not record one, rather than empty
+and disabled, which made those resources impossible to update.
+
+* The delete confirmation says what pressing Yes will actually do.
+
+* A resource missing its Promise annotation is refused rather than deleted directly.
+
+* `ske.scm.username` is optional in the configuration schema, so a GitHub App installation token
+passes `backstage-cli config:check --strict`.
+
+#### Maintenance
+
+* The sweep that withdraws rejected requests runs every 900s by default, to stay inside the GitHub
+API rate limit when many requests are in flight.
+
+* Bump Backstage from 1.50.4 to 1.51.0.
+
 ### [ske-backend v0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.21.0/); [ske-frontend v0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.18.0/) (2026-07-30)
 
 These versions are required by the [Portal Controller](/ske/integrations/portal-controller/intro)'s
