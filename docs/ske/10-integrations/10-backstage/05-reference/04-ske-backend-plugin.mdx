@@ -161,10 +161,6 @@ Records a request that has been submitted but not yet applied to the platform, s
 
 This action produces no output.
 
-**The requester is not an input.** It is taken from the Backstage user who ran the Template, so a Template cannot set or override it. The pending request entity records it as `spec.requestedBy` and is owned by that user, which is what lets a developer find their own requests while they wait. A run with nobody signed in records no requester and falls back to the platform group.
-
-The action authenticates to the plugin as a service rather than as the signed-in user, so it needs no token of its own in the Template.
-
 ```yaml
 steps:
   - id: record-request
