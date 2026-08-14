@@ -28,6 +28,7 @@ See [Configuring the Plugins](../installation/plugins) for full installation and
 | `ske:configure-resource` | Creates or updates a Kratix resource from an input manifest, via the Kubernetes API or git depending on `ske.mode` |
 | `ske:write-manifest` | Writes a manifest to the scaffolder workspace, for use by later steps in the same Template |
 | `ske:publish-catalog` | Publishes a catalog entity file from the workspace to the catalog git repository |
+| `ske:record-request` | Records a submitted request so Backstage can show it as pending until the platform has applied it |
 
 ### `ske:configure-resource`
 
@@ -139,6 +140,53 @@ steps:
       type: github
       token: ${{ parameters.token }}
 ```
+
+### `ske:record-request`
+
+Records a request that has been submitted but not yet applied to the platform, so Backstage can show it while it is pending. The plugin publishes it as a **pending request** entity in the catalog, and removes it once the request has been applied and the real resource entity appears.
+
+[`pull-request` delivery mode](/ske/integrations/portal-controller/backstage/delivery-modes) depends on this action: the Template writes the manifest to a repository and opens a pull request, and this step records the request so it is visible while it waits. Without it, a submission opens the pull request and then fails. Push mode records nothing, because the resource is created directly and there is nothing to wait for.
+
+**Input**
+
+| Field | Type | Description |
+|---|---|---|
+| `promiseName` | `string` | Name of the Promise the request is against |
+| `name` | `string` | Name of the requested resource |
+| `namespace` | `string` (optional) | Namespace of the requested resource. Omit entirely for a cluster-scoped resource |
+| `action` | `string` | What this run does: `Request`, `Update`, or `Delete`. Capitalised, and the same vocabulary the Template uses in its branch names and pull-request titles |
+| `pullRequestUrl` | `string` | URL of the pull request carrying the request, read from the output of the step that opened it |
+| `requestsRepoUrl` | `string` | Repository the pull request was opened against |
+| `manifest` | `string` | The [Resource Request](/main/reference/resources/intro) manifest, verbatim — the same document staged for the pull request, so the record and the pull request cannot describe different requests |
+
+This action produces no output.
+
+**The requester is not an input.** It is taken from the Backstage user who ran the Template, so a Template cannot set or override it. The pending request entity records it as `spec.requestedBy` and is owned by that user, which is what lets a developer find their own requests while they wait. A run with nobody signed in records no requester and falls back to the platform group.
+
+The action authenticates to the plugin as a service rather than as the signed-in user, so it needs no token of its own in the Template.
+
+```yaml
+steps:
+  - id: record-request
+    name: Record request
+    action: ske:record-request
+    input:
+      promiseName: jenkins
+      name: ${{ parameters.objname }}
+      namespace: ${{ parameters.objnamespace }}
+      action: ${{ parameters.prAction }}
+      pullRequestUrl: ${{ steps['pull-request'].output.remoteUrl }}
+      requestsRepoUrl: ${{ parameters.repoUrl }}
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: Jenkins
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace }}
+        spec: ${{ parameters.spec | dump }}
+```
+
+Note the bracketed `steps['pull-request']` rather than dotted access: a step id containing a hyphen cannot be reached with a dot.
 
 ## Endpoints
 
