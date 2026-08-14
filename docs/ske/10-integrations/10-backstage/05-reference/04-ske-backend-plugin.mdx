@@ -28,6 +28,7 @@ See [Configuring the Plugins](../installation/plugins) for full installation and
 | `ske:configure-resource` | Creates or updates a Kratix resource from an input manifest, via the Kubernetes API or git depending on `ske.mode` |
 | `ske:write-manifest` | Writes a manifest to the scaffolder workspace, for use by later steps in the same Template |
 | `ske:publish-catalog` | Publishes a catalog entity file from the workspace to the catalog git repository |
+| `ske:record-request` | Records a submitted request so Backstage can show it as pending before it is applied to the platform |
 
 ### `ske:configure-resource`
 
@@ -138,6 +139,46 @@ steps:
       branchName: main
       type: github
       token: ${{ parameters.token }}
+```
+
+### `ske:record-request`
+
+Records a request that has been submitted but not yet applied to the platform, so Backstage can show it while it is pending. The plugin publishes it as a **pending request** entity in the catalog, and removes it once the request has been applied and the real resource entity appears.
+
+
+**Input**
+
+| Field | Type | Description |
+|---|---|---|
+| `promiseName` | `string` | Name of the Promise the request is against |
+| `name` | `string` | Name of the requested resource |
+| `namespace` | `string` | Namespace of the requested resource |
+| `action` | `string` | What this run does: `Request`, `Update`, or `Delete`. Capitalised, and the same vocabulary the Template uses in its branch names and pull-request titles |
+| `pullRequestUrl` | `string` | URL of the pull request carrying the request, read from the output of the step that opened it |
+| `requestsRepoUrl` | `string` | Repository the pull request was opened against |
+| `manifest` | `string` | The [Resource Request](/main/reference/resources/intro) manifest, verbatim — the same document staged for the pull request, so the record and the pull request cannot describe different requests |
+
+This action produces no output.
+
+```yaml
+steps:
+  - id: record-request
+    name: Record request
+    action: ske:record-request
+    input:
+      promiseName: jenkins
+      name: ${{ parameters.objname }}
+      namespace: ${{ parameters.objnamespace }}
+      action: ${{ parameters.prAction }}
+      pullRequestUrl: ${{ steps['pull-request'].output.remoteUrl }}
+      requestsRepoUrl: ${{ parameters.repoUrl }}
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: Jenkins
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace }}
+        spec: ${{ parameters.spec | dump }}
 ```
 
 ## Endpoints
