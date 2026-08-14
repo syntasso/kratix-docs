@@ -1,11 +1,11 @@
 ---
-title: Updates
-sidebar_label: Updates
+title: Promise Updates
+sidebar_label: How updating a Promise works in Kratix, including what triggers a reconciliation and how existing resources are affected.
 description: Documentation on how updates behave for Promises
 ---
 
 An update to a Promise will cause Kratix to reconcile on the new Promise definition,
-and any changes will be rolled out during this reconciliation.
+and roll out any changes during this reconciliation.
 
 All elements of a Promise are updatable. Any change to the Promise specification on the platform triggers all of the workflows to re-run. Changes may include:
 - Updating the Promise API, which rolls out an update to the underlying CRD for the
@@ -59,7 +59,7 @@ details on scheduling.
 ### Misplaced workloads
 
 An update to the Promise's scheduling may result in a set of Destinations previously
-targeted from old version of the Promise no longer being targeted.
+targeted from an old version of the Promise no longer being targeted.
 
 When this happens, existing files written to the Destination **are not removed**, but are
 marked as `misplaced` by Kratix and are **not updated any more**.
