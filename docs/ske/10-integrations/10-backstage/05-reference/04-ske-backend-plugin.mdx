@@ -145,7 +145,6 @@ steps:
 
 Records a request that has been submitted but not yet applied to the platform, so Backstage can show it while it is pending. The plugin publishes it as a **pending request** entity in the catalog, and removes it once the request has been applied and the real resource entity appears.
 
-[`pull-request` delivery mode](/ske/integrations/portal-controller/backstage/delivery-modes) depends on this action: the Template writes the manifest to a repository and opens a pull request, and this step records the request so it is visible while it waits. Without it, a submission opens the pull request and then fails. Push mode records nothing, because the resource is created directly and there is nothing to wait for.
 
 **Input**
 
