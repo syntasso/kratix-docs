@@ -1,6 +1,6 @@
 ---
 title: SKE Promise Upgrades Introduction
-description: Documentation for the Custom Resources for Managing Promise Upgrades
+description: How Promise upgrades work in Syntasso Kratix Enterprise, including versioning, rollout behaviour, and what changes for platform teams.
 sidebar_label: Introduction
 keywords: [kratix, promises, upgrades]
 ---
