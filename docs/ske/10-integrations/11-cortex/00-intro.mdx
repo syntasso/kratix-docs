@@ -1,24 +1,24 @@
 ---
-title: Introduction
-description: Introduction to SKE Cortex integration
+title: Cortex Integration Introduction
+description: Connect Syntasso Kratix Enterprise to Cortex to surface Promises and platform services in your Cortex catalog.
 sidebar_label: Introduction
 keywords: [cortex, internal developer portal, idp]
 ---
 
 :::warning Deprecated
 
-The standalone Cortex Controller is deprecated. It continues to work, see
+The standalone Cortex Controller is deprecated. It continues to work; see
 [Migrating from the Cortex Controller](../portal-controller/cortex/migrating-from-cortex)
 when you are ready to move.
 
 :::
 
-Cortex is an Internal Developer Portal (IDP) that centralises self-service access across organisations. This pairs well with Syntasso Kratix Enterprise (SKE) which is a framework
-for building Platforms that provision Anything-As-A-Service. Coupled together, Cortex can serve as an entrypoint for the SKE Platform. SKE can orchestrate the deployment of services through the medium of Promises and surface the progress of these
+Cortex is an Internal Developer Portal (IDP) that centralises self-service access across organisations. This pairs well with Syntasso Kratix Enterprise (SKE), which is a framework
+for building Platforms that provision Anything-As-A-Service. Coupled together, Cortex can serve as an entry point for the SKE Platform. SKE can orchestrate the deployment of services through the medium of Promises and surface the progress of these
 services being provisioned within the Cortex UI.
 
 With the SKE Cortex integration, you can automate the process of populating the Cortex catalog with Entities as well as generate Workflows that can be used to provision
-services backed by Kratix Promises. Developers using Cortex can then leverage Cortex to send requests to SKE via the Cortex Workflow to manage the lifecycle of their services.
+services backed by Kratix Promises. Developers using Cortex can then leverage Cortex to send requests to SKE via the Cortex Workflow to manage their services' lifecycle.
 
 ```mdx-code-block
 import CortexDiagram from "/img/docs/ske/cortex-resource-request-diagram.jpg"
@@ -33,7 +33,7 @@ To integrate SKE with Cortex, you need to do the following:
 1. Set up GitOps tooling on your Platform cluster to reconcile on files written to the Git State Store by the Cortex Workflows
 1. Label your Promises with the Cortex label
 
-The diagram below shows the architecture of the integration and flow of actions when a user makes a Resource Request via the Cortex UI.
+The diagram below shows the integration architecture and the flow of actions when a user makes a Resource Request via the Cortex UI.
 
 <figure className="diagram">
   <img className="large" src={CortexDiagram} alt="Cortex and Kratix Architecture" />
