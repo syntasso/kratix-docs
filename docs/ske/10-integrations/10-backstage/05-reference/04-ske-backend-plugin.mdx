@@ -28,7 +28,7 @@ See [Configuring the Plugins](../installation/plugins) for full installation and
 | `ske:configure-resource` | Creates or updates a Kratix resource from an input manifest, via the Kubernetes API or git depending on `ske.mode` |
 | `ske:write-manifest` | Writes a manifest to the scaffolder workspace, for use by later steps in the same Template |
 | `ske:publish-catalog` | Publishes a catalog entity file from the workspace to the catalog git repository |
-| `ske:record-request` | Records a submitted request so Backstage can show it as pending until the platform has applied it |
+| `ske:record-request` | Records a submitted request so Backstage can show it as pending before it is applied to the platform |
 
 ### `ske:configure-resource`
 
@@ -153,7 +153,7 @@ Records a request that has been submitted but not yet applied to the platform, s
 |---|---|---|
 | `promiseName` | `string` | Name of the Promise the request is against |
 | `name` | `string` | Name of the requested resource |
-| `namespace` | `string` (optional) | Namespace of the requested resource. Omit entirely for a cluster-scoped resource |
+| `namespace` | `string` | Namespace of the requested resource |
 | `action` | `string` | What this run does: `Request`, `Update`, or `Delete`. Capitalised, and the same vocabulary the Template uses in its branch names and pull-request titles |
 | `pullRequestUrl` | `string` | URL of the pull request carrying the request, read from the output of the step that opened it |
 | `requestsRepoUrl` | `string` | Repository the pull request was opened against |
@@ -185,8 +185,6 @@ steps:
           namespace: ${{ parameters.objnamespace }}
         spec: ${{ parameters.spec | dump }}
 ```
-
-Note the bracketed `steps['pull-request']` rather than dotted access: a step id containing a hyphen cannot be reached with a dot.
 
 ## Endpoints
 
