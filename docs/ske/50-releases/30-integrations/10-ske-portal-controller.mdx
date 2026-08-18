@@ -23,6 +23,9 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 #### Features
 
+* **Portal Sync condition is now filtered out from the generated Entity.**: similar to other Kratix-owned
+conditions, the Portal Sync conditions are no longer added to the resource Entity when they are generated.
+
 * **Push-mode Templates record the request.** A generated `push` Template now applies the resource
 request and then hands it to the Backstage backend, so the developer sees a pending request in the
 catalogue while the platform catches up rather than nothing at all. Pull-request Templates are
