@@ -75,6 +75,10 @@ const config = {
             {
                 redirects: [
                     {
+                        from: "/ske/integrations/backstage/installation/plugins",
+                        to: "/ske/integrations/portal-controller/backstage/configure-backstage",
+                    },
+                    {
                         from: "/main/learn-more/status-conditions-events/promise-status-events",
                         to: "/main/reference/promises/promise-status-events",
                     },
