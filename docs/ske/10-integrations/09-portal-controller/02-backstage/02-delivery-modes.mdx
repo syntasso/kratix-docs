@@ -95,27 +95,19 @@ immediately.
 
 ## What a developer sees while waiting
 
-A resource does not appear in the catalogue the moment it is requested. The platform has to create
-it, the portal has to generate its entity, and Backstage has to discover that entity. Until all
-three have happened the developer has submitted a form and has nothing to look at.
-
-Both modes close that gap the same way. Once a request is recorded, Backstage publishes a **pending
-request** entity in the catalogue, and withdraws it as soon as the real resource entity appears.
-What the entity says depends on what it is waiting for:
+A resource takes time to reach the catalogue: the platform has to create and reconcile it, the
+portal has to generate its entity, and Backstage has to discover it. Both modes fill that gap the
+same way, with a **pending request** entity published as soon as the request is recorded and
+withdrawn once the real resource entity appears.
 
 | Mode | Banner | Links |
 |---|---|---|
 | `push` | Submitted — waiting for the platform to create this resource. | None; nothing was opened |
 | `pull-request` | Waiting for approval — this resource will be provisioned when the pull request is merged. | The pull request awaiting approval |
 
-The pending entity is published before the scaffolder task finishes, so it is there by the time the
-developer lands on the task page. It is withdrawn within seconds of the resource entity being
-ingested.
-
-How long it stays visible is therefore set by how quickly the resource entity reaches your
-catalogue, not by Backstage. In `push` mode with `ske.mode: kubernetes` that can be seconds; a mode
-that commits to Git adds your GitOps agent's sync interval, and Git-based catalogue discovery adds
-its own polling interval on top.
+How long it stays is whatever those three steps take. Under `push` with `ske.mode: kubernetes`
+that can be seconds. A mode that commits to Git adds your GitOps agent's sync interval, and
+Git-based catalogue discovery adds its own polling interval.
 
 :::note
 There is no link to the pull request on the scaffolder's completion page. Developers find their
@@ -123,9 +115,6 @@ pull request through the pending request entity in the catalogue.
 :::
 
 ## Customizations and delivery modes
-
-Both modes now emit a `record-request` step, and it carries a copy of the request manifest. A recipe
-that rewrites the manifest has to reach that step too.
 
 :::warning
 [Portal Patch](../portal-patch/intro) recipes that target the `ske-configure-resource` step,
@@ -137,11 +126,13 @@ If a portal uses `pull-request` mode, avoid recipes that target that step.
 :::
 
 :::warning
-Under push mode, a `hideNamespaceManifest` recipe that targets only `ske-configure-resource` leaves
-the `record-request` step referring to the `objnamespace` parameter the same recipe set deletes.
+Both modes emit a `record-request` step carrying a copy of the request manifest. Under push mode, a
+`hideNamespaceManifest` recipe that targets only `ske-configure-resource` leaves that step referring
+to the `objnamespace` parameter the same recipe set deletes.
 
-This fails quietly. The recorded namespace resolves to nothing, so the request no longer matches the
-resource entity the platform ships, and the pending request is never withdrawn from the catalogue.
+Nothing fails at sync time. The recorded namespace resolves to nothing, so the request no longer
+matches the resource entity the platform ships, and the pending request is never withdrawn from the
+catalogue.
 
 Patch the record step as well:
 
@@ -167,9 +158,8 @@ patch:
     namespace: my-namespace
 ```
 
-This applies only to recipes reproducing `hideNamespace`. A Promise using the generator's own
-`templateHideNamespace` field needs none of this: the generator fills the record step in correctly
-by itself.
+Only recipes reproducing `hideNamespace` need this. A Promise that sets the generator's own
+`templateHideNamespace` field gets a correct record step without any recipe at all.
 :::
 
 Recipes that only patch the generated documents, such as setting an owner, adding tags, or
