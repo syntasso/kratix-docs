@@ -79,6 +79,29 @@ To pin one to a specific version, create its
 [Resource Binding](./promise-upgrade/resource-bindings#pinning-a-resource-request-when-it-is-created)
 before the Resource Request.
 
+### The Compound Promise owns its component versions
+
+A Resource Binding output by your workflow is workflow output like any other: it is
+delivered to the Platform through the state store and applied by the GitOps agent. The
+agent restores whatever version the Compound Promise emitted, so a change made to the
+Binding outside the workflow does not survive the agent's next sync.
+
+The version of a component Resource is therefore a property of the Compound Promise, not
+of the component Resource. To move a component to a new version, change the version your
+Compound Promise workflow emits and upgrade the Compound Promise. Do not edit the
+component's Resource Binding directly.
+
+:::warning
+
+This applies to automated upgrades too. If you use SKE [Upgrade Plans and Upgrade
+Runs](/ske/reference/promise-upgrades/intro), exclude component Resources from your rollout
+groups — see [Excluding Compound Promise
+components](/ske/reference/promise-upgrades/upgrade-plans#excluding-compound-promise-components).
+An Upgrade Run patches the Binding and reports the Resource as upgraded, because
+`lastAppliedVersion` genuinely does reach the target. The GitOps agent then reverts it.
+
+:::
+
 ## Recommended ownership labels
 
 A typical Compound Promise will execute a Resource Configure workflow that will
