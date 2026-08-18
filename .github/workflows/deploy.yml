@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The push to gh-pages is done with the deploy key, so the token only needs
+# read access for the initial checkout.
+permissions:
+  contents: read
+
+# Only run one deploy at a time; let the latest change win.
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - run: |
+          corepack enable
+          yarn install
+      - name: Set up gh-pages deploy key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GH_PAGES_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<'EOF'
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+          EOF
+      - name: Build and deploy to gh-pages
+        env:
+          # Push to gh-pages over SSH using the deploy key configured above.
+          USE_SSH: "true"
+          # Commit author for the gh-pages deploy commit.
+          GIT_USER_NAME: syntassodev
+          GIT_USER_EMAIL: kratix@syntasso.io
+          CUSTOM_COMMIT_MESSAGE: "[skip ci] Deploy website - based on ${{ github.sha }}"
+        run: yarn deploy
