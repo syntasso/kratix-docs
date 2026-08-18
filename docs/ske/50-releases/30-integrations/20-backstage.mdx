@@ -24,6 +24,18 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.23.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.23.0/); [ske-frontend v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.20.0/) (2026-08-18)
+
+#### Features
+
+* **Support for pending requests outside pull-request mode.** `ske:record-request` accepts a request
+with no pull request and no requests repository, and a pending request without one is shown as
+waiting on the platform rather than on a reviewer.
+
+  This is the plugin half only. Nothing changes until you upgrade to
+  [Portal Controller v0.11.0](./ske-portal-controller), which generates the Templates that record
+  push-mode requests.
+
 ### [ske-backend v0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.22.0/); [ske-frontend v0.19.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.19.0/) (2026-08-14)
 
 #### Features

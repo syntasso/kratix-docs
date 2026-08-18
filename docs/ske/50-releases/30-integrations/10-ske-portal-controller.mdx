@@ -19,6 +19,27 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.11.0/) (2026-08-18)
+
+#### Features
+
+* **Push-mode Templates record the request.** A generated `push` Template now applies the resource
+request and then hands it to the Backstage backend, so the developer sees a pending request in the
+catalogue while the platform catches up rather than nothing at all. Pull-request Templates are
+unchanged.
+
+:::warning Upgrade the Backstage plugins first
+This release requires **ske-backend v0.23.0** and **ske-frontend v0.20.0** or later.
+
+Upgrade the plugins **before** the Portal Controller. Doing it in that order is safe: the new
+plugins accept everything the current Templates send, so nothing changes until the controller
+follows.
+
+In the other order, newly generated push Templates carry a `record-request` step that an older
+backend rejects. Because that step runs **after** the request has been applied, the developer sees a
+failed task for a resource that was in fact created.
+:::
+
 ### [v0.2.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.2.0/) (2026-07-30)
 
 The first release of the Portal Controller: one integration for every developer portal your platform exposes.
