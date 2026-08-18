@@ -4,7 +4,7 @@ sidebar_label: Updates
 description: How updating a Resource request works in Kratix, including status changes and how the pipeline responds.
 ---
 
-# Updates
+# Resource Updates
 
 Kratix supports updating Resource Requests with new specifications.
 
