@@ -1,7 +1,7 @@
 ---
 title: Promise Updates
-sidebar_label: How updating a Promise works in Kratix, including what triggers a reconciliation and how existing resources are affected.
-description: Documentation on how updates behave for Promises
+sidebar_label: Promise Updates
+description: How updating a Promise works in Kratix, including what triggers a reconciliation and how existing resources are affected.
 ---
 
 An update to a Promise will cause Kratix to reconcile on the new Promise definition,
