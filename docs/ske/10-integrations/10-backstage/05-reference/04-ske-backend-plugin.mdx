@@ -143,7 +143,9 @@ steps:
 
 ### `ske:record-request`
 
-Records a request that has been submitted but not yet applied to the platform, so Backstage can show it while it is pending. The plugin publishes it as a **pending request** entity in the catalog, and removes it once the request has been applied and the real resource entity appears.
+Records a request that has been submitted but not yet visible in the catalog, so Backstage can show it while it is pending. The plugin publishes it as a **pending request** entity in the catalog, and removes it once the real resource entity appears.
+
+Both delivery modes use it. Under `pull-request` mode the request is waiting on a reviewer; under `push` mode it has already reached the platform and is waiting for the resource entity to be generated and discovered.
 
 
 **Input**
@@ -154,8 +156,8 @@ Records a request that has been submitted but not yet applied to the platform, s
 | `name` | `string` | Name of the requested resource |
 | `namespace` | `string` | Namespace of the requested resource |
 | `action` | `string` | What this run does: `Request`, `Update`, or `Delete`. Capitalised, and the same vocabulary the Template uses in its branch names and pull-request titles |
-| `pullRequestUrl` | `string` | URL of the pull request carrying the request, read from the output of the step that opened it |
-| `requestsRepoUrl` | `string` | Repository the pull request was opened against |
+| `pullRequestUrl` | `string` | Optional. URL of the pull request carrying the request, read from the output of the step that opened it. Omit it in push mode, where no pull request is opened |
+| `requestsRepoUrl` | `string` | Optional. Repository the request was written to. Omit it when no repository is involved, as in `ske.mode: kubernetes` |
 | `manifest` | `string` | The [Resource Request](/main/reference/resources/intro) manifest, verbatim — the same document staged for the pull request, so the record and the pull request cannot describe different requests |
 
 This action produces no output.
@@ -172,6 +174,28 @@ steps:
       action: ${{ parameters.prAction }}
       pullRequestUrl: ${{ steps['pull-request'].output.remoteUrl }}
       requestsRepoUrl: ${{ parameters.repoUrl }}
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: Jenkins
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace }}
+        spec: ${{ parameters.spec | dump }}
+```
+
+In push mode there is no pull request and, with `ske.mode: kubernetes`, no repository either. Omit
+both keys rather than sending them empty, and record the action as a literal:
+
+```yaml
+steps:
+  - id: record-request
+    name: Record request
+    action: ske:record-request
+    input:
+      promiseName: jenkins
+      name: ${{ parameters.objname }}
+      namespace: ${{ parameters.objnamespace }}
+      action: Request
       manifest: |
         apiVersion: marketplace.kratix.io/v1alpha1
         kind: Jenkins
