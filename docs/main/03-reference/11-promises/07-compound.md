@@ -110,8 +110,7 @@ This applies to automated upgrades too. If you use SKE [Upgrade Plans and Upgrad
 Runs](/ske/reference/promise-upgrades/intro), exclude component Resources from your rollout
 groups — see [Excluding Compound Promise
 components](/ske/reference/promise-upgrades/upgrade-plans#excluding-compound-promise-components).
-An Upgrade Run patches the Binding and reports the Resource as upgraded, because
-`lastAppliedVersion` genuinely does reach the target. The GitOps agent then reverts it.
+An Upgrade Run will patch the Binding and report the Resource as upgraded. The GitOps agent will then revert the upgrade.
 
 :::
 
