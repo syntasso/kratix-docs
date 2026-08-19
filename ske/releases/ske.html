@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.952d21e6.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9ac1dda9.js" defer="defer"></script>
 <script src="/assets/js/main.31e53956.js" defer="defer"></script>
 </head>
 <body>
@@ -61,6 +61,7 @@
 <ul>
 <li class="">S3-compatible release storage now supports path-style addressing via <code>spec.releaseStorage.forcePathStyle</code>. Enable this for stores that do not support virtual-hosted-style addressing, such as an in-cluster MinIO instance.</li>
 <li class="">Delete workflows can now pause execution using the <code>wait</code> step, giving platform teams control over deletion ordering and dependencies. See <a href="https://docs.kratix.io/main/guides/gating-deletion-with-workflow-control" target="_blank" rel="noopener noreferrer" class="">Gating Deletion with Workflow Control</a>.</li>
+<li class="">Upgrade Plan rollout group selectors now support <code>matchAll: true</code> to select all Resource Bindings that belong to the referenced Promise and match <code>upgradePath.from</code>.</li>
 </ul>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance-2">Maintenance<a href="#maintenance-2" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
 <ul>
