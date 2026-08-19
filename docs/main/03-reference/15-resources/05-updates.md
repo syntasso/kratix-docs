@@ -1,6 +1,6 @@
 ---
 title: Resource Updates
-sidebar_label: Resource Updates
+sidebar_label: Updates
 description: How updating a Resource request works in Kratix, including status changes and how the pipeline responds.
 ---
 
