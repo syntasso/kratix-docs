@@ -166,18 +166,17 @@ seaweedfs   1/1     1            1           1h
 
 The bucket is created by a helper container in the same Pod as the SeaweedFS
 server, and the Pod does not report `Ready` until the bucket exists. So a ready
-Deployment already tells you the bucket is there&mdash;there is no separate Job to
-wait for:
+Deployment already tells you the bucket is there:
 
 ```bash
 kubectl --context $PLATFORM wait pod --namespace seaweedfs \
   --selector run=seaweedfs --for=condition=ready --timeout=120s
 ```
 
-To look inside the bucket, use the S3 CLI the Kratix repository ships:
+To look inside the bucket, use the `s5cmd` utility provided in the Kratix repository:
 
 ```bash
-# downloads a preconfigured s5cmd to bin/s5cmd; nothing to export
+# downloads s5cmd and provides a convenience wrapper for easy access
 make s5cmd-cli
 
 # list the buckets

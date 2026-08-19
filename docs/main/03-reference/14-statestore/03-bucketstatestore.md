@@ -38,7 +38,7 @@ Any S3-Compatible provider will work with Kratix. See the documentation on how
 to use some of the available providers below:
 - [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html)
 - [GCS S3-compatible storage](https://cloud.google.com/storage/docs/interoperability)
-- [SeaweedFS](https://github.com/seaweedfs/seaweedfs/wiki/Amazon-S3-API)
+- [SeaweedFS](https://github.com/seaweedfs/seaweedfs)
 
 For other providers, please check their documentation for setting up a bucket and its credentials.
 

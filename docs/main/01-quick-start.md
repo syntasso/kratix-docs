@@ -67,7 +67,7 @@ quick-start that uses a single job to install Kratix with sensible defaults.
       Kratix webhooks
   1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/platform-concepts/kratix-resources)
       in the `kratix-system` namespace
-  1. Deploys [**SeaweedFS**](https://seaweedfs.com/), a local S3-compatible bucket for storing
+  1. Deploys [**SeaweedFS**](https://github.com/seaweedfs/seaweedfs), a local S3-compatible bucket for storing
       declarative workloads
   1. Installs and configures [**Flux**](https://fluxcd.io/) to apply changes from the
       SeaweedFS bucket via GitOps
