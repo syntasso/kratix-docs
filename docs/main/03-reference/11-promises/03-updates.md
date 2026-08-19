@@ -1,6 +1,6 @@
 ---
 title: Promise Updates
-sidebar_label: Promise Updates
+sidebar_label: Updates
 description: How updating a Promise works in Kratix, including what triggers a reconciliation and how existing resources are affected.
 ---
 
