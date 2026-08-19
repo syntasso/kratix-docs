@@ -6,11 +6,78 @@ slug: configure-backstage
 keywords: [portal, backstage, plugin, catalog, discovery, ske mode]
 ---
 
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import KubernetesIntegration from './_partials/kubernetes-integration.mdx';
+
 The Portal Controller writes entities to a repository. Backstage has to be told to read them, and
 needs the SKE plugins installed so that submitting a generated Template does something.
 
 This page covers the Backstage side. Configure the portal itself first, see
 [Backstage](./intro).
+
+## Prerequisites
+
+- **Backstage app running v1.40 or above**: The SKE plugins are tested up to v1.50.4. If you do not have a Backstage app, refer to the [Backstage official
+documentation](https://backstage.io/docs/getting-started) for instructions on how to create a Backstage app.
+
+- **Node.js 22+**: Starting from Backstage v1.50, Node.js 22 or higher is required due to native module dependencies. Ensure your build environment and Docker images use Node 22+.
+
+- **`NODE_OPTIONS` environment variable**: Set the following when starting your Backstage app:
+
+  ```bash
+  export NODE_OPTIONS=--no-node-snapshot
+  ```
+
+## Accessing the private npm registry {#local-development}
+
+The SKE plugins are distributed through a private npm registry. Please follow the steps below to enable access to it.
+
+<Tabs> <TabItem value="local" label="For local development">
+
+To access the private npm registry on your local machine, you will need npm config in a local `~/.npmrc` file in your home directory. Create this file if it doesn't already exist,
+and add the following content:
+
+```bash
+# replace <YOUR_TOKEN_HERE> with the provided Syntasso registry token
+@syntasso:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken="<YOUR_TOKEN_HERE>"
+always-auth=true
+```
+
+:::info
+
+For Yarn 3+, use the following command to set a local `.yarnrc.yml` file:
+
+```bash
+yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthToken": "<YOUR TOKEN HERE>", "npmRegistryServer": "https://npm.pkg.github.com"}}'
+```
+
+:::
+
+  </TabItem> <TabItem value="docker" label="For Docker">
+
+For Docker builds, you must update the `packages/backend/Dockerfile` in your Backstage app so that it can access the private npm registry.
+
+Update the `RUN` command that is running the `yarn install` to mount a secret, as described below:
+
+```Dockerfile
+RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
+    #highlight-next-line
+    --mount=type=secret,id=npmrc,target=/app/.npmrc,uid=1000,gid=1000 \
+    yarn install --frozen-lockfile --production --network-timeout 300000
+```
+
+When running `yarn build-image` you now need to pass in the additional args `--secret id=npmrc,src=$HOME/.npmrc` to provide the npm credentials to Docker. Alternatively, you can
+update the `build-image` script in the `package.json` file to include the additional required flag.
+
+:::warning
+
+Make sure that the `~/.npmrc` file is in the home directory of the user that is running the Docker build. Create it by following the **For local development** tab above.
+
+:::
+
+  </TabItem> </Tabs>
 
 ## Install the plugins
 
@@ -20,6 +87,8 @@ Two packages, one for each half of Backstage:
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
 yarn add @syntasso/plugin-ske-frontend --cwd packages/app
 ```
+
+If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](./air-gapped-plugins) to publish the plugins to your cloud instance before continuing.
 
 :::important
 `@syntasso/plugin-ske-backend` must be at least `v0.21.0`, and `@syntasso/plugin-ske-frontend` at
@@ -43,7 +112,18 @@ frontend calls, and the catalogue provider that surfaces pending requests.
 The plugin creates one database table and runs its migrations at startup. If you run more than one
 Backstage replica, use PostgreSQL rather than SQLite.
 
-### Frontend
+### Frontend {#update-the-entitypage}
+
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no
+changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for Backstage.
+
+The plugin registers the following extensions via its `alpha` entry point:
+
+- **Promise Overview** — displays the Overview tab for Promise entities
+- **Resource Overview** — displays the Overview tab for Resource entities
+- **Resource Manage** — displays the Manage tab for Resource entities
+
+To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
 
 In `packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
 
@@ -72,7 +152,10 @@ Then add two cases to the existing `componentPage` switch, **before** the defaul
 This gives Promise entities an overview page, and Resource entities an overview page plus a
 **Manage** tab for updating and deleting the resource.
 
-## Choose how the backend writes requests
+## Configuring the backend plugin
+
+The plugin can read from and write to your Kratix platform in three ways: directly via the Kubernetes API, indirectly via a Git repository (GitOps mode), or a combination of the two
+that reads via the Kubernetes API and writes via a Git repository (Hybrid mode). Follow the decision guidance below to decide on the approach most fitting for your platform.
 
 `ske.mode` decides how an approved request reaches the platform:
 
@@ -85,29 +168,6 @@ This gives Promise entities an overview page, and Resource entities an overview 
 This is backend-wide and independent of a portal's
 [delivery mode](./delivery-modes). The same generated Template works under all three.
 
-For `kubernetes`:
-
-```yaml
-ske:
-  mode: kubernetes
-  kubernetes:
-    platformName: platform # must match a cluster name in the `kubernetes` section
-```
-
-For `gitops` or `hybrid`, name the repository requests are committed to:
-
-```yaml
-ske:
-  mode: gitops
-  scm:
-    repoUrl: https://github.com/acme/platform-requests
-    username: ${GIT_USER}
-    token: ${GIT_TOKEN}
-    branch: main
-    path: kratix-requests
-    type: github # github | gitlab | bitbucket_cloud | azure
-```
-
 If you use pull-request delivery mode, you can tune how often Backstage re-checks which requests
 are still awaiting approval:
 
@@ -116,6 +176,205 @@ ske:
   pendingRequests:
     refreshSeconds: 60 # default
 ```
+
+### Configure Backend Access
+
+Choose the mode that best fits your environment and operational requirements:
+
+|                                                            | Kubernetes API | GitOps | Hybrid |
+| ---------------------------------------------------------- | -------------- | ------ | ------ |
+| Real-time status updates                                   | ✓              | ✗      | ✓      |
+| Full resource management (kubectl-compatible)              | ✓              | ✗      | ✓      |
+| Requires direct network access to the platform cluster     | ✓              | ✗      | ✓      |
+| Routes all changes through a Git repository                | ✗              | ✓      | ✓      |
+
+**Choose Kubernetes API mode** if Backstage can reach the platform cluster over your network. This provides the most complete feature set, including real-time status updates and
+full resource management.
+
+**Choose GitOps mode** if Backstage cannot access the platform cluster directly, or if your organisation requires all platform changes to flow through a Git repository.
+
+**Choose Hybrid mode** if Backstage can reach the platform cluster over your network *and* your organisation requires all platform changes to flow through a Git repository. Reads use
+the Kubernetes API (real-time status and visibility of resources created outside Backstage), while create, update, and delete operations are written to Git.
+
+<Tabs> <TabItem value="kubernetes" label="Kubernetes API (Recommended)">
+
+<KubernetesIntegration />
+
+You must now tell the backend plugin which of the configured clusters is the platform cluster. For that, add the following section to your `app-config.yaml`:
+
+```yaml
+ske:
+  kubernetes:
+    # make sure this matches the name of the cluster you want to use
+    platformName: kratixPlatform
+```
+
+If no `ske.kubernetes` section is present, the backend plugin will assume Backstage itself is running on the Platform cluster and will load the cluster configuration from the local
+machine/pod.
+
+  </TabItem> <TabItem value="gitops" label="GitOps">
+
+To configure Backstage to talk to Kubernetes via a Git repository, add the following section to your `app-config.yaml`:
+
+```yaml
+ske:
+  mode: gitops
+  scm:
+    token: "my-access-token" # optional; git access token
+    repoUrl: "https://github.com/my-org/my-repo" # repository url
+    type: "github" # optional; git provider, currently one of "github" or "gitlab" (used to determine username if `username` not set)
+    username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
+    path: "catalog" # optional; path within the repository (default: "")
+    branch: "main" # optional; branch to use (default: "main")
+    defaultAuthor: # optional; git author details
+      name: "my-name" # default: "SKE"
+      email: "my@email.com" # default: ske@backstage.io
+```
+
+The backend plugin uses basic auth to authenticate against the Git provider. If you wish to specify a username/password, or use a Git provider other than GitHub or Gitlab, set the
+`username` field, and set the `token` field to the password or token. Otherwise, the username will be inferred from the `type` (e.g. `"oauth2"` for Gitlab). One of `username` or
+`type` must be provided.
+
+The `token` is used by the Backstage plugin to retrieve information about Promises and Resource Requests from the configured Github Repository. If you have configured a Github App
+for the Github integration, you can leave this field empty and the plugin will use the Github app's short-lived tokens to authenticate.
+
+The `repoUrl` is the repository to which Backstage will push the resource requests; you must configure your platform to reconcile on new documents — see [Connect the Platform to the Git Repository](#connect-the-platform-to-the-git-repository) below.
+
+  </TabItem> <TabItem value="hybrid" label="Hybrid">
+
+In hybrid mode, the backend plugin reads resource state directly from the Kubernetes API — giving real-time status and visibility of resources created outside Backstage (for example,
+via `kubectl`) — while all create, update, and delete operations are written to a Git repository. It combines the Kubernetes API and GitOps modes and requires the configuration of
+both.
+
+Because reads use the Kubernetes API, first configure the Kubernetes integration:
+
+<KubernetesIntegration />
+
+Then enable hybrid mode and configure the Git repository that create, update, and delete operations are written to:
+
+```yaml
+ske:
+  mode: hybrid
+  kubernetes:
+    # must match the name of a cluster configured in the `kubernetes` section above
+    platformName: kratixPlatform
+  scm:
+    token: "my-access-token" # optional; git access token
+    repoUrl: "https://github.com/my-org/my-repo" # repository url
+    type: "github" # optional; git provider, currently one of "github" or "gitlab"
+    username: "my-username" # optional; username for basic auth (default: inferred based on `type`)
+    path: "catalog" # optional; path within the repository (default: "")
+    branch: "main" # optional; branch to use (default: "main")
+    defaultAuthor: # optional; git author details
+      name: "my-name" # default: "SKE"
+      email: "my@email.com" # default: ske@backstage.io
+```
+
+The `ske.scm` fields behave exactly as in GitOps mode. Because writes go to Git, the platform must also reconcile the repository back into the cluster — see [Connect the Platform to
+the Git Repository](#connect-the-platform-to-the-git-repository) below.
+
+  </TabItem>
+</Tabs>
+
+### Connect the Platform to the Git Repository
+
+:::note
+
+This step is required for **GitOps** and **Hybrid** modes, which write resource requests to a Git repository. It is not needed for Kubernetes API mode.
+
+:::
+
+Your platform needs to watch the Git repository and reconcile any documents that Backstage pushes to it. The steps below cover two common GitOps tools — choose the one your platform uses.
+
+<Tabs>
+  <TabItem value="flux" label="Flux">
+
+Create a `GitRepository` source pointing at the same repository you configured in `ske.scm`:
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: backstage-resources
+  namespace: flux-system
+spec:
+  interval: 10s
+  url: https://github.com/my-org/my-repo # must match ske.scm.repoUrl
+  ref:
+    branch: main # must match ske.scm.branch
+```
+
+Then create a `Kustomization` to reconcile documents from that source:
+
+```yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: backstage-resources
+  namespace: flux-system
+spec:
+  interval: 10s
+  sourceRef:
+    kind: GitRepository
+    name: backstage-resources
+  path: ./catalog  # must match ske.scm.path
+  prune: true
+```
+
+Apply both resources to your platform cluster:
+
+```bash
+kubectl apply -f gitrepository.yaml -f kustomization.yaml
+```
+
+:::tip
+
+For private repositories, you will need to create a Flux secret with your Git credentials and reference it in the `GitRepository` via `spec.secretRef`. See the [Flux documentation](https://fluxcd.io/docs/components/source/gitrepositories/#secret-reference) for details.
+
+:::
+
+  </TabItem>
+  <TabItem value="argo" label="Argo CD">
+
+Create an `Application` resource that points to the same repository and path you configured in `ske.scm`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backstage-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/my-org/my-repo # must match ske.scm.repoUrl
+    targetRevision: main # must match ske.scm.branch
+    path: catalog # must match ske.scm.path
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+Apply this to your platform cluster:
+
+```bash
+kubectl apply -f application.yaml
+```
+
+Argo CD will now watch the repository and apply any new documents Backstage pushes to it.
+
+:::tip
+
+For private repositories, configure Argo CD repository credentials first. See the [Argo CD repository docs](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/) for details.
+
+:::
+
+  </TabItem>
+</Tabs>
 
 ## Give Backstage access to GitHub
 
