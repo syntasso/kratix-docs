@@ -49,7 +49,7 @@ kind delete clusters --all
 
 kind create cluster \
     --name platform \
-    --image kindest/node:v1.27.3 \
+    --image kindest/node:v1.33.1 \
     --config config/samples/kind-platform-config.yaml
 ```
 
@@ -70,7 +70,7 @@ Create the **Worker** cluster with the following command:
 ```bash
 kind create cluster \
     --name worker \
-    --image kindest/node:v1.27.3 \
+    --image kindest/node:v1.33.1 \
     --config config/samples/kind-worker-config.yaml
 ```
 
@@ -187,7 +187,7 @@ bin/s5cmd ls
 The above command will give an output similar to:
 
 ```shell-session
-2025/12/02 15:10:00  kratix
+2026/08/19 12:42:29  s3://kratix
 ```
 
 You platform cluster is now ready to receive Kratix!

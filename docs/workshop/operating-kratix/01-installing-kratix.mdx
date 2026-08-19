@@ -208,8 +208,8 @@ Type:  Opaque
 
 Data
 ====
-accessKeyID:      10 bytes
-secretAccessKey:  10 bytes
+accessKeyID:      11 bytes
+secretAccessKey:  11 bytes
 ```
 
 For further details on State Stores, check the [State Store documentation
@@ -320,15 +320,15 @@ bin/s5cmd ls "s3://kratix/*"
 The above command will give an output similar to:
 
 ```shell-session
-2024/01/01 15:00:00               116  worker-cluster/dependencies/kratix-canary-namespace.yaml
-2024/01/01 15:00:00               206  worker-cluster/resources/kratix-canary-configmap.yaml
+2026/08/19 12:55:17                90  worker-cluster/dependencies/kratix-canary-namespace.yaml
+2026/08/19 12:55:17               181  worker-cluster/resources/kratix-canary-configmap.yaml
 ```
 
 You can also inspect the contents of the test documents. For example, take the
 `kratix-canary-namespace.yaml`:
 
 ```bash
-mc cat kind/kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
+bin/s5cmd cat s3://kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
 ```
 
 The above command will give an output similar to:
@@ -337,7 +337,6 @@ The above command will give an output similar to:
 apiVersion: v1
 kind: Namespace
 metadata:
-  creationTimestamp: null
   name: kratix-worker-system
 spec: {}
 status: {}
