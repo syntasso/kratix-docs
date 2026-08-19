@@ -35,7 +35,7 @@ or want to use a different tool to provision your clusters, skip requirements 1 
 
 To get setup locally quickly with KinD clusters you can use the `./scripts/quick-start.sh`
 from the root of the [Kratix repository](https://github.com/syntasso/kratix). This provisions
-an in-cluster `MinIO` to use as the backing [State Store](/main/reference/statestore/intro).
+an in-cluster `SeaweedFS` to use as the backing [State Store](/main/reference/statestore/intro).
 Alternatively you can provide the `--git` flag to create it with an in-cluster Gitea
 instance instead.
 
@@ -55,14 +55,14 @@ export PLATFORM="kind-platform"
 
 <PartialInstallStateStoreStart />
 
-If your are using local KinD clusters you can install MinIO or Gitea as an in-cluster State Store.
+If your are using local KinD clusters you can install SeaweedFS or Gitea as an in-cluster State Store.
 
 <Tabs className="boxedTabs" groupId="stateStore">
-  <TabItem value="minio" label="Bucket (on KinD)">
+  <TabItem value="bucket" label="Bucket (on KinD)">
 
   ```bash
-  # Install MinIO and register it as a BucketStateStore
-  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/minio-install.yaml
+  # Install SeaweedFS and register it as a BucketStateStore
+  kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/seaweedfs-install.yaml
   kubectl apply --context $PLATFORM --filename https://raw.githubusercontent.com/syntasso/kratix/main/config/samples/platform_v1alpha1_bucketstatestore.yaml
   ```
 
