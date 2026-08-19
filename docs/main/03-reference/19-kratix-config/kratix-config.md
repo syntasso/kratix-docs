@@ -87,6 +87,8 @@ Enable label selector caching of Secrets on the cluster to optimise memory usage
 ### reconciliationInterval (default: 10h)
 
 The interval on which Kratix will rerun Configure workflows for both Promises and Resources.
+This is the platform-wide default; a Promise can override it via
+[`spec.workflows.config.reconciliationInterval`](/main/reference/workflows#reconciliation-interval).
 
 ### workPlacementRewriteInterval (default: 10h)
 
