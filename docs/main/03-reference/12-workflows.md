@@ -55,8 +55,7 @@ See the [Pipelines](#pipelines) section to learn how to define a Pipeline.
 
 ## Reconciliation interval
 
-Kratix re-runs Configure workflows periodically, even when nothing has changed, to correct
-drift. By default this uses the platform-wide
+Kratix re-runs Configure workflows periodically, even when nothing has changed. By default this uses the platform-wide
 [`reconciliationInterval`](/main/reference/kratix-config/config#reconciliationinterval-default-10h)
 (10h). A Promise author can override it under `spec.workflows.config`:
 
@@ -68,15 +67,10 @@ spec:
 ```
 
 The value is a Go duration string of at least `1m`; zero, negative, and sub-minute values
-are rejected. It applies to the Promise's own workflow and to every Resource request, and
-governs failure retries as well as successful re-runs. When unset, Kratix falls back to the
-platform-wide interval, then to the 10h default.
+are rejected. It applies to the Promise's own workflow and to every Resource request. 
+When unset, Kratix falls back to the platform-wide interval, then to the 10h default.
 
-The interval is read from the
-[Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) an object is
-bound to, so changing it means publishing a new Promise version. To override it on an
-existing revision instead, see
-[Overriding the reconciliation interval](/main/reference/promises/promise-upgrade/promise-revisions#overriding-the-reconciliation-interval).
+The interval is read from the [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) associated with the Promise. To override it on an existing revision, see [Overriding the reconciliation interval](/main/reference/promises/promise-upgrade/promise-revisions#overriding-the-reconciliation-interval).
 
 ## Pipelines
 
