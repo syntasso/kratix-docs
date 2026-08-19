@@ -232,7 +232,6 @@ include resources in a group.
 When a [Compound Promise](/main/reference/promises/compound) outputs Resource Bindings for its component Promises, the
 Compound Promise owns those versions. The Bindings reach the Platform through the state store, so the GitOps agent
 restores the version the Compound Promise emitted. An Upgrade Run that patches one of these Bindings records the
-Resource as **Succeeded** — `lastAppliedVersion` does reach the target — and the agent reverts it on its next sync.
 
 Do not include these Resources in your rollout groups, and do not upgrade them directly. Upgrade them by upgrading the
 Compound Promise that owns them. Label your component Resources so your selectors can exclude them; the Compound Promise
