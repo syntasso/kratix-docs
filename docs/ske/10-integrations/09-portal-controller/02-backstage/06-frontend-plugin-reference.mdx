@@ -748,10 +748,8 @@ field offers only the services within the System that was picked:
               relations.partOf: '{{ parameters.spec.system }}'
 ```
 
-The properties sit under `spec`, which is why the reference is
-`parameters.spec.system` and not `parameters.system`.
 
-`ScopedEntityPicker` accepts every `ui:options` key `EntityPicker` does, such as
+`ScopedEntityPicker` accepts every `ui:options` keys the `EntityPicker` does, such as
 `defaultKind`, `defaultNamespace` and `allowArbitraryValues`, and passes them
 through unchanged. Only `catalogFilter` is treated specially.
 
@@ -762,12 +760,8 @@ Any string in `catalogFilter`, at any depth and inside lists, may contain
 across every step so far, so a reference may point at a field on an earlier
 page or on the same one.
 
-Resolution is all-or-nothing. If any reference in the filter resolves to
-nothing, the field queries the catalogue **not at all** and renders as a
-disabled input, still showing any value it holds. A partially resolved filter
-is never issued, because dropping a key would widen the query rather than
-narrow it: a filter with every key dropped would return the whole catalogue.
-An unclosed `{{` counts as unresolved for the same reason.
+Resolution is all-or-nothing: if any reference in the filter resolves to
+nothing, the field renders as a disabled input, still showing any value it holds.
 
 A `catalogFilter` with no references in it behaves exactly like `EntityPicker`.
 
@@ -780,26 +774,15 @@ A `catalogFilter` with no references in it behaves exactly like `EntityPicker`.
   compared as entity references, honouring `defaultKind` and `defaultNamespace`
   and ignoring case, so `payments-api` and
   `component:default/payments-api` are the same selection.
-- A selection is never cleared without evidence. An unresolved filter or a
-  failed catalogue read leaves it alone, so opening the Manage tab on an
-  existing Resource cannot silently drop a persisted value. A failed read is
-  reported through Backstage's error API rather than being swallowed.
 
 The field behaves the same way on the create form and on the [Manage
-tab](#resource-manage), since both render through the same scaffolder stepper.
+tab](#resource-manage).
 
 #### Choosing a filter key
 
-Any entity field or relation can be a filter key, and `ScopedEntityPicker`
-interprets none of them. Where a key holds a list, matching means "contains".
-Keys and values are matched case-insensitively.
+Any entity field or relation can be a filter key. Where a key holds a list, matching means "contains". Keys and values are matched case-insensitively.
 
-Prefer a `relations.*` key over the `spec.*` field it is derived from. Backstage
-completes a relation target into a full entity reference, so a Component
-declaring `spec.system: payments-system` carries
-`relations.partOf: system:default/payments-system` while `spec.system` keeps the
-bare name that was typed. An `EntityPicker` always submits a full reference, so
-the relation is what it will match. The common relations on a Component are:
+Besides keys over the `spec`, you can also use `relations.partOf`. The common relations on a Component are:
 
 | `spec` field | Relation |
 |---|---|
@@ -814,14 +797,6 @@ See [well-known
 relations](https://backstage.io/docs/features/software-catalog/well-known-relations)
 for the full list.
 
-#### Field ordering on generated Templates
-
-On a Template with per-property parameter pages, the pages are ordered
-alphabetically by the Promise's CRD spec key, so a referenced field's key must
-sort before the key of the field referencing it: `system` before
-`targetService` works, `service` before `system` does not. Both fields may also
-sit on the same page, as in the example above, which is what a Template
-collapsed into a single specification page gives you.
 
 #### Registering the field
 
