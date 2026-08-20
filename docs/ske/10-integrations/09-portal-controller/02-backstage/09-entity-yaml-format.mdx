@@ -56,6 +56,63 @@ spec:
   type: kratix-resource
 ```
 
+### Immutable spec fields
+
+A CRD can declare a field immutable, and the API server will reject any request that changes
+it. Backstage cannot see the CRD, so the generator carries that fact into the Template: for
+every spec property the CRD marks immutable, the generated parameter gains
+`x-kratix-immutable: true`.
+
+Given a Promise API field declared immutable with a
+[CEL validation rule](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#validation-rules):
+
+```yaml
+serialNumber:
+  description: Serial number of the device
+  type: string
+  x-kubernetes-validations:
+    - rule: self == oldSelf
+      message: serialNumber is immutable
+```
+
+the Template's parameters carry:
+
+```yaml
+serialNumber:
+  description: Serial number of the device
+  title: SerialNumber
+  type: string
+  x-kratix-immutable: true
+```
+
+The keyword is a plain JSON Schema annotation, not a `ui:` key. One Template serves both
+creating and updating a resource, and a `ui:` key would apply to both, whereas an immutable
+field must be editable on create and locked only on update. The SKE frontend plugin reads the
+keyword to disable the field on the update form.
+
+Its absence means mutable. Nothing else about the property changes, and a Promise whose API
+declares no immutability rules produces exactly the Template it did before.
+
+#### Which rules are recognised
+
+The rule must be the whole-field comparison on its own. Spacing and operand order do not
+matter, so `self == oldSelf`, `self==oldSelf` and `oldSelf == self` are all recognised.
+
+Anything else is treated as mutable and the field stays editable, including several rules that
+do make the field immutable. Deciding those would mean evaluating CEL, which the generator does
+not do:
+
+| Rule | Marked | Why |
+| --- | --- | --- |
+| `self == oldSelf` | yes | the whole field is frozen |
+| `self.env == oldSelf.env` | no | freezes one child across a transition, so the API server still accepts changes to both. Declare the rule on `env` itself to have `env` locked |
+| `self == oldSelf && self != ''` | no | frozen, but the comparison is one conjunct of several |
+| `!oldSelf.hasValue() \|\| self == oldSelf.value()` | no | frozen once set, via `optionalOldSelf` ratcheting |
+| `(self == oldSelf)`, `!(self != oldSelf)` | no | frozen, written in a form the generator does not read |
+
+Writing the rule on a parent is the more familiar idiom in Kubernetes, so it is worth
+restating: to have a field locked in the form, put the rule on that field.
+
 ## The Kratix Catalog Entities
 
 The front-end plugin provides specific entity pages for both Kratix Promises and Kratix
