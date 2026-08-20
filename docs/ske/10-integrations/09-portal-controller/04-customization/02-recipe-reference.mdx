@@ -29,8 +29,8 @@ patch:                 # required for merge, forbidden for every other op
 | `target.kind` | string | all | Selects the document whose top-level `kind` matches. Mutually exclusive with `target.file`. |
 | `target.file` | string | all | Selects a single-document file by bare filename. Mutually exclusive with `target.kind`. |
 | `target.list` | object or list | all | Selects an item, or a chain of nested items, within the document. |
-| `op` | string | all | `merge` (default), `remove`, `singleSpecPage`, `cortexEntityProjection`, `hideNamespaceManifest`. |
-| `patch` | map | `merge` | The changes to merge. Required for `merge`, rejected for every other operation. |
+| `op` | string | all | `merge` (default), `remove`, `insertBefore`, `insertAfter`, `singleSpecPage`, `cortexEntityProjection`, `hideNamespaceManifest`. |
+| `patch` | map | `merge`, `insertBefore`, `insertAfter` | The changes to merge, or the item to insert. Required for `merge`, `insertBefore` and `insertAfter`, rejected for every other operation. |
 | `field` | string | `cortexEntityProjection`, `hideNamespaceManifest` | Dot-separated path to a string field inside the selected item. |
 | `sourceAction` | string | `cortexEntityProjection` | The Cortex action producing the output. |
 | `outputKey` | string | `cortexEntityProjection` | The output key on that action. |
@@ -102,6 +102,10 @@ target:
       value: app
 ```
 
+The operation applies to the item the **last** selector names; every selector before it only
+descends. For `insertBefore` and `insertAfter`, that last item is the anchor, and the new item
+joins the list holding it.
+
 ## Operations
 
 ### `merge` (default)
@@ -157,6 +161,88 @@ op: remove
 ```
 
 To remove a field *within* an item rather than the item itself, use a `merge` with a `null` value.
+
+### `insertBefore` and `insertAfter`
+
+Adds `patch` to the selected list as a new item, immediately before or after the item the selector
+resolved to. The two operations differ in nothing else. Both require `target.list`, naming the
+**anchor** the new item sits beside, and a `patch`, which is the item to insert.
+
+Requires `ghcr.io/syntasso/portal-patch:0.8.0` or later.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.steps
+    key: id
+    value: ske-configure-resource
+op: insertAfter
+patch:
+  id: notify
+  name: Notify the team
+  action: ske:notify
+  input:
+    message: a resource was requested
+```
+
+Without these operations, adding one scaffolder step, one catalogue link or one Cortex workflow
+input means restating the whole array in a `merge` patch, because a list in `patch` replaces the
+target list wholesale. That restated array is a copy of what the generate stage produced, and it
+goes stale silently: the next generator change adds a step the copy does not have, the recipe
+still applies, and the new step disappears with no error. An insert names only the item it adds
+and the sibling it sits beside, so there is nothing to go stale.
+
+Both operations work on Cortex documents too. With a chain of selectors, the anchor is the item
+the last selector names, which is how one workflow input is added beside another without
+restating the action's `inputs` list:
+
+```yaml
+target:
+  file: workflow-create.yaml
+  list:
+    - path: actions
+      key: slug
+      value: user-input
+    - path: schema.inputs
+      key: key
+      value: app
+op: insertAfter
+patch:
+  name: region
+  key: region
+  type: INPUT_FIELD
+  required: false
+```
+
+Behaviour:
+
+- **The anchor is selected by key, never by index**, like every other `target.list` selector, so
+  the generate stage reordering the list still lands the new item beside the right sibling.
+- **`patch` is the inserted item, verbatim.** Nothing is merged into it and the anchor is left
+  exactly as the generate stage wrote it. The `null` sentinel has no meaning here: `if: null` in an
+  insert's `patch` inserts a key whose value is null, it does not delete a key.
+- **Only a list of maps can be inserted into.** The selector matches by reading a key off a map
+  item, and `patch` is itself a map. Lists of strings, such as `metadata.tags` or a parameter
+  page's `required`, offer nothing to anchor on and stay restate-only.
+- **A `patch` that repeats the anchor selector's own key and value is rejected** at parse time,
+  because it would leave that selector matching two items. This is the usual result of copying the
+  anchor's YAML as a starting point and forgetting to change the `id`. A duplicate under any other
+  key is accepted, and the recipe that then fails is a later one selecting on that key.
+
+Choose an anchor that is always present. Two common anchors are conditional:
+
+- `spec.output.links` on a Template exists in `pull-request` [delivery
+  mode](../backstage/delivery-modes) only, and delivery mode is set on the connection, not on the
+  `PortalCustomization`, so the same recipe can work on one connection and fail the batch on
+  another. Every generated Component carries exactly one `metadata.links` entry, titled `Support`,
+  which is a mode-independent anchor for adding a link.
+- Per-property `spec.parameters` pages disappear when the pages are collapsed, either by a
+  [`singleSpecPage`](#singlespecpage) recipe or by `--single-spec-page` in the connection's
+  adapter arguments, so an anchor on a per-property page's title then matches nothing. It fails
+  the other way too: a page you insert that nests its fields under `properties.spec` is absorbed
+  by a **later** `singleSpecPage`, which judges a page by that structure alone. To keep a page of
+  your own beside `Specification`, do not nest it under `properties.spec`.
 
 ### `singleSpecPage`
 
@@ -250,6 +336,9 @@ The common ones:
 | `list selector key=K value=V is ambiguous` | More than one item matches |
 | `target.list path "P": "S" not found` | A path segment does not exist |
 | `missing or empty patch` | A `merge` recipe with no `patch` |
+| `op: insertBefore requires target.list` | An insert with no anchor |
+| `op: insertAfter requires a patch (the item to insert)` | An insert with nothing to insert |
+| `patch sets K: "V", the same key and value the anchor selector matches` | The inserted item duplicates the anchor's own selector key and value |
 | `unknown op "X"` | Misspelled operation |
 | `field "F" has no ... placeholder` | The field exists but does not contain the expected placeholder |
 
@@ -262,6 +351,8 @@ generate stage wrote them.
 |---|---|---|
 | `merge` | yes | yes |
 | `remove` | yes | yes |
+| `insertBefore` | yes | yes |
+| `insertAfter` | yes | yes |
 | `singleSpecPage` | yes | no |
 | `hideNamespaceManifest` | yes, `push` mode only | no |
 | `cortexEntityProjection` | no | yes |
