@@ -79,6 +79,41 @@ To pin one to a specific version, create its
 [Resource Binding](./promise-upgrade/resource-bindings#pinning-a-resource-request-when-it-is-created)
 before the Resource Request.
 
+### The Compound Promise owns its component versions
+
+A Resource Binding output by your workflow is workflow output like any other: it is
+delivered to the Platform through the state store and applied by the GitOps agent. The
+agent restores whatever version the Compound Promise emitted, so a change made to the
+Binding outside the workflow does not survive the agent's next sync.
+
+The version of a component Resource is therefore a property of the Compound Promise, not
+of the component Resource. To move a component to a new version, change the version your
+Compound Promise workflow emits and upgrade the Compound Promise. Do not edit the
+By default, Resource Requests produced by a Compound Promise workflow are served by the component
+Promise's `latest` Promise Revision, not by the version in `spec.requiredPromises`.
+To pin one to a specific version, create its
+[Resource Binding](./promise-upgrade/resource-bindings#pinning-a-resource-request-when-it-is-created) before the Resource Request.
+
+Note that the Resource Binding defined in a workflow is an output like any other: it will be 
+delivered to the Platform through the state store and applied by the GitOps agent. The
+agent restores whatever version the Compound Promise emitted, so a change made to the
+Binding outside the workflow does not survive the agent's next sync.
+
+In other words, the version of the component Resource is owned by the Compound Promise, not
+of the component Resource itself. To move a component to a new version, change the version your
+Compound Promise workflow emits and upgrade the Compound Promise. Do not edit the
+component's Resource Binding directly.
+
+:::warning
+
+This applies to automated upgrades too. If you use SKE [Upgrade Plans and Upgrade
+Runs](/ske/reference/promise-upgrades/intro), exclude component Resources from your rollout
+groups — see [Excluding Compound Promise
+components](/ske/reference/promise-upgrades/upgrade-plans#excluding-compound-promise-components).
+An Upgrade Run will patch the Binding and report the Resource as upgraded. The GitOps agent will then revert the upgrade.
+
+:::
+
 ## Recommended ownership labels
 
 A typical Compound Promise will execute a Resource Configure workflow that will

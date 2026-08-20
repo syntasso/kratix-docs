@@ -2,6 +2,7 @@
 title: SKE Backend Plugin
 description: Reference for the actions and endpoints shipped in the ske-backend Backstage plugin
 sidebar_label: SKE Backend Plugin
+slug: backend-plugin
 ---
 
 ## Overview
@@ -19,7 +20,7 @@ The plugin can talk to your platform in one of three modes, set via `ske.mode` i
 - `gitops` — reads and writes via git
 - `hybrid` — reads via the Kubernetes API, writes via git
 
-See [Configuring the Plugins](../installation/plugins) for full installation and configuration instructions.
+See [Configure Backstage](./configure-backstage) for full installation and configuration instructions.
 
 ## Actions
 
@@ -28,6 +29,7 @@ See [Configuring the Plugins](../installation/plugins) for full installation and
 | `ske:configure-resource` | Creates or updates a Kratix resource from an input manifest, via the Kubernetes API or git depending on `ske.mode` |
 | `ske:write-manifest` | Writes a manifest to the scaffolder workspace, for use by later steps in the same Template |
 | `ske:publish-catalog` | Publishes a catalog entity file from the workspace to the catalog git repository |
+| `ske:record-request` | Records a submitted request so Backstage can show it as pending before it is applied to the platform |
 
 ### `ske:configure-resource`
 
@@ -138,6 +140,70 @@ steps:
       branchName: main
       type: github
       token: ${{ parameters.token }}
+```
+
+### `ske:record-request`
+
+Records a request that has been submitted but not yet visible in the catalog, so Backstage can show it while it is pending. The plugin publishes it as a **pending request** entity in the catalog, and removes it once the real resource entity appears.
+
+Both delivery modes use it. Under `pull-request` mode the request is waiting on a reviewer; under `push` mode it has already reached the platform and is waiting for the resource entity to be generated and discovered.
+
+
+**Input**
+
+| Field | Type | Description |
+|---|---|---|
+| `promiseName` | `string` | Name of the Promise the request is against |
+| `name` | `string` | Name of the requested resource |
+| `namespace` | `string` | Namespace of the requested resource |
+| `action` | `string` | What this run does: `Request`, `Update`, or `Delete`. Capitalised, and the same vocabulary the Template uses in its branch names and pull-request titles |
+| `pullRequestUrl` | `string` | Optional. URL of the pull request carrying the request, read from the output of the step that opened it. Omit it in push mode, where no pull request is opened |
+| `requestsRepoUrl` | `string` | Optional. Repository the request was written to. Omit it when no repository is involved, as in `ske.mode: kubernetes` |
+| `manifest` | `string` | The [Resource Request](/main/reference/resources/intro) manifest, verbatim — the same document staged for the pull request, so the record and the pull request cannot describe different requests |
+
+This action produces no output.
+
+```yaml
+steps:
+  - id: record-request
+    name: Record request
+    action: ske:record-request
+    input:
+      promiseName: jenkins
+      name: ${{ parameters.objname }}
+      namespace: ${{ parameters.objnamespace }}
+      action: ${{ parameters.prAction }}
+      pullRequestUrl: ${{ steps['pull-request'].output.remoteUrl }}
+      requestsRepoUrl: ${{ parameters.repoUrl }}
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: Jenkins
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace }}
+        spec: ${{ parameters.spec | dump }}
+```
+
+In push mode there is no pull request and, with `ske.mode: kubernetes`, no repository either. Omit
+both keys rather than sending them empty, and record the action as a literal:
+
+```yaml
+steps:
+  - id: record-request
+    name: Record request
+    action: ske:record-request
+    input:
+      promiseName: jenkins
+      name: ${{ parameters.objname }}
+      namespace: ${{ parameters.objnamespace }}
+      action: Request
+      manifest: |
+        apiVersion: marketplace.kratix.io/v1alpha1
+        kind: Jenkins
+        metadata:
+          name: ${{ parameters.objname }}
+          namespace: ${{ parameters.objnamespace }}
+        spec: ${{ parameters.spec | dump }}
 ```
 
 ## Endpoints
