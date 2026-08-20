@@ -128,8 +128,8 @@ can write. When registering a Worker cluster with Kratix, you will need to
 specify the State Store you intend to use. Kratix will then write to the
 specified State Store when scheduling workloads for deployment on that cluster.
 
-Create a new State Store that points to the MinIO bucket created in the
-[prerequisites](../prerequisites/create-clusters#minio-as-the-gitops-repository):
+Create a new State Store that points to the SeaweedFS bucket created in the
+[prerequisites](../prerequisites/create-clusters#seaweedfs-as-the-gitops-repository):
 
 ```yaml
 cat << EOF | kubectl --context $PLATFORM apply -f -
@@ -138,11 +138,11 @@ kind: BucketStateStore
 metadata:
   name: default
 spec:
-  endpoint: minio.kratix-platform-system.svc.cluster.local
+  endpoint: bucket.seaweedfs.svc.cluster.local
   insecure: true
   bucketName: kratix
   secretRef:
-    name: minio-credentials
+    name: bucket-credentials
     namespace: default
 EOF
 ```
@@ -159,47 +159,47 @@ bucketstatestore.platform.kratix.io/default created
 The State Store document contains the configuration needed to access the actual
 backing storage.
 
-In the example above, you created a new `BucketStateStore` as a MinIO bucket
+In the example above, you created a new `BucketStateStore` as a SeaweedFS bucket
 has been provisioned for storage, but you could use any other S3-compatible
 storage like Amazon S3 and Google Cloud Storage.
 
 The `spec` includes the details needed to access that specific kind of State
 Store. On the example above, you configured the `endpoint` to the cluster
-address of the MinIO server you deployed on the platform cluster. Since MinIO
+address of the SeaweedFS server you deployed on the platform cluster. Since SeaweedFS
 is running in-cluster and without TLS enabled, it is necessary to set `insecure`
 to true.
 
-You can see the MinIO service on the `kratix-platform-system`:
+You can see the bucket service in the `seaweedfs` namespace:
 
 ```bash
-kubectl --context $PLATFORM --namespace kratix-platform-system get service minio
+kubectl --context $PLATFORM --namespace seaweedfs get service bucket
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
-NAME    TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-minio   NodePort   10.96.96.166   <none>        80:31337/TCP   17h
+NAME     TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+bucket   NodePort   10.96.96.166   <none>        80:31337/TCP   17h
 ```
 
-`bucketName` refers to the actual bucket on the MinIO server. The bucket needs
-to exist prior to Kratix trying to use it. As a part of setting up MinIO you
-ran a Job to create the base `kratix` bucket.
+`bucketName` refers to the actual bucket on the SeaweedFS server. The bucket needs
+to exist prior to Kratix trying to use it. Setting up SeaweedFS created the base
+`kratix` bucket for you.
 
 Finally, `secretRef` points to a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/),
 in the same namespace as the State Store, containing the credentials to access
 the store. For `BucketStateStore`, Kratix expects to find an `accessKeyID` and
-a `secretAccessKey` when resolving the secret. As part of the MinIO deployment,
+a `secretAccessKey` when resolving the secret. As part of the SeaweedFS deployment,
 you also created the necessary Secret:
 
 ```bash
-kubectl --context $PLATFORM describe secret minio-credentials
+kubectl --context $PLATFORM describe secret bucket-credentials
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
-Name:         minio-credentials
+Name:         bucket-credentials
 Namespace:    default
 Labels:       <none>
 Annotations:  <none>
@@ -208,8 +208,8 @@ Type:  Opaque
 
 Data
 ====
-accessKeyID:      10 bytes
-secretAccessKey:  10 bytes
+accessKeyID:      11 bytes
+secretAccessKey:  11 bytes
 ```
 
 For further details on State Stores, check the [State Store documentation
@@ -311,24 +311,24 @@ In fact, as soon as a new Destination is registered, Kratix writes a test
 document to the State Store. You can use this test to validate that the entire
 system is wired up correctly.
 
-First, check the MinIO `kratix` bucket:
+First, check the `kratix` bucket:
 
 ```bash
-mc ls -r kind
+bin/s5cmd ls "s3://kratix/*"
 ```
 
 The above command will give an output similar to:
 
 ```shell-session
-[2024-01-01 15:00:00 GMT]   116B STANDARD kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
-[2024-01-01 15:00:00 GMT]   206B STANDARD kratix/worker-cluster/resources/kratix-canary-configmap.yaml
+2026/08/19 12:55:17                90  worker-cluster/dependencies/kratix-canary-namespace.yaml
+2026/08/19 12:55:17               181  worker-cluster/resources/kratix-canary-configmap.yaml
 ```
 
 You can also inspect the contents of the test documents. For example, take the
 `kratix-canary-namespace.yaml`:
 
 ```bash
-mc cat kind/kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
+bin/s5cmd cat s3://kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
 ```
 
 The above command will give an output similar to:
@@ -337,7 +337,6 @@ The above command will give an output similar to:
 apiVersion: v1
 kind: Namespace
 metadata:
-  creationTimestamp: null
   name: kratix-worker-system
 spec: {}
 status: {}
@@ -380,7 +379,7 @@ Your platform is ready to receive Promises! Well done!
 To recap the steps you took:
 
 1. ✅&nbsp;&nbsp;Installed Kratix on the platform cluster
-1. ✅&nbsp;&nbsp;Told Kratix about the MinIO bucket, as a Bucket State Store
+1. ✅&nbsp;&nbsp;Told Kratix about the SeaweedFS bucket, as a Bucket State Store
 1. ✅&nbsp;&nbsp;Told Kratix about the worker cluster, as a Destination
 
 ## 🎉 Congratulations
