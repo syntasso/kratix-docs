@@ -1,13 +1,13 @@
 ---
-title: SKE GUI
-description: Documentation for how to install the SKE GUI
+title: Installing the SKE GUI
+description: How to install and configure the Syntasso Kratix Enterprise GUI as part of your SKE deployment.
 sidebar_label: SKE GUI
 ---
 
-The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
+The SKE GUI is an easy-to-use UI for viewing and managing Kratix Promises and Resources.
 It introduces a clear, unified view of your entire platform, giving platform engineers visibility into resources and their states at a glance.
 
-This page provides information on how to install the SKE GUI. For documentation on how to use the GUI, please refer to [SKE GUI usage guide](/ske/guides/ske-gui).
+This page explains how to install the SKE GUI. For documentation on how to use the GUI, please refer to [SKE GUI usage guide](/ske/guides/ske-gui).
 
 <div style={{"text-align":"center"}}>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/8P3eA_FRt0Y?si=M24UWf8ZEjUDKrKO" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
@@ -50,7 +50,7 @@ kubectl create secret docker-registry YOUR-SECRET-NAME \
 ```
 
 The above command creates a Kubernetes Secret in namespace `kratix-platform-system`.
-To use this secret in SKE GUI chart, you can customise `imageRegistry.imagePullSecret` in your values file.
+To use this secret in the SKE GUI chart, you can customise `imageRegistry.imagePullSecret` in your values file.
 
 ```yaml
 # Configuration for the image registry
@@ -81,7 +81,7 @@ imageRegistry:
 
 #### Token to access SKE GUI
 
-The helm chart creates a service account in the `kratix-platform-system` namespace with permission to access the SKE GUI. If you do not wish to create such service account, or you would like to give the service account a custom name,
+The helm chart creates a service account in the `kratix-platform-system` namespace with permission to access the SKE GUI. If you do not wish to create such a service account, or you would like to give the service account a custom name,
 you can customise in the values file:
 
 ```yaml
@@ -168,7 +168,7 @@ kubectl -n kratix-platform-system port-forward svc/ske-gui 8080:80
 
 If you have created an ingress server with the helm chart, you can access the GUI through your configured hosts.
 
-There will be a prompt for you to enter a token to access the GUI, if you have created a service account with the helm chart,
+There will be a prompt for you to enter a token to access the GUI. If you have created a service account with the helm chart,
 you can generate a valid token by running:
 ```bash
 kubectl -n kratix-platform-system create token ske-gui-admin

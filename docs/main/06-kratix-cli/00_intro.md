@@ -1,6 +1,6 @@
 ---
-title: Introduction
-description: Introduction to Kratix and how to get started with the Kratix CLI
+title: Kratix CLI Introduction
+description: The Kratix command-line tool for scaffolding, building, and managing Promises — installation, commands, and reference.
 sidebar_label: Introduction
 id: intro
 ---
@@ -244,7 +244,7 @@ The `--operator-manifests` flag can be a single file or a directory containing t
 
 By default, the CLI will create a `promise.yaml` file and embed the Operator
 bundle in the `dependencies` of the Promise, which will usually make the Promise
-very large. Dependending on the size of the resulting Promise, you may get the
+very large. Depending on the size of the resulting Promise, you may get the
 following error when trying to `kubectl apply` it:
 
 ```
