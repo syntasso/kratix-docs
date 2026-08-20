@@ -1,0 +1,207 @@
+---
+title: SKE Health Agent
+description: Release information about SKE Health Agent
+sidebar_label: SKE Health Agent
+slug: /ske/releases/ske-health-agent
+---
+
+## Overview
+
+The SKE Health Agent is a health check agent to be executed in Kubernetes Destinations where health checks can be executed.
+
+The release manifest is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/
+```
+
+## Release Notes
+
+### [v0.12.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.12.0/) (2026-07-29)
+
+Released in Helm Chart version [0.27.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.27.0/)
+
+#### Bug Fixes
+
+* Health records can now be written to a [`BucketStateStore`](/main/reference/statestore/bucketstatestore) from IPv4-only networks. Amazon S3 endpoints were being rewritten to their dual-stack (IPv4/IPv6) variant, which is unreachable from an IPv4-only VPC; the configured endpoint is now used exactly as set.
+
+#### Maintenance
+
+* Base image updates.
+
+### [v0.11.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.11.1/) (2026-07-28)
+
+Released in Helm Chart version [0.26.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.26.0/)
+
+#### Bug Fixes
+
+* Health records can now be written to a `BucketStateStore` using [`authMethod: IAM`](/main/reference/statestore/bucketstatestore#iam) on EKS, where resolving the IAM credentials previously failed.
+
+#### Maintenance
+
+* Base image updates.
+
+### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.11.0/) (2026-07-23)
+
+Released in Helm Chart version [0.25.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.25.0/)
+
+#### Features
+
+* Health Check pods now run with a restricted, non-root pod-level security context by default, and the agent-owned containers are hardened. Workflow containers inherit these defaults and can override them per container where a root image is required. See the [Security context](/ske/reference/healthdefinition) section of the Health Definition reference.
+* `spec.inputs` on a `HealthDefinition` is now optional.
+
+#### Bug Fixes
+
+* The Health Agent now creates the `CronJob` (and its `ServiceAccount`/RBAC) in, and runs the Health Check in, the same namespace as the `HealthDefinition`, independent of `spec.resourceRef.namespace`. See the [Namespace](/ske/reference/healthdefinition) section of the Health Definition reference and the [Health checks guide](/ske/guides/healthchecks).
+
+#### Security Fixes
+
+* Dependency and security updates.
+
+### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.10.0/) (2026-06-10)
+
+Released in Helm Chart version [0.24.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.24.0/)
+
+#### Chores
+
+* Chainguard base image SHA updates
+
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.9.0/) (2026-06-08)
+
+#### Security Fixes
+
+* Dependencies security updates
+
+### [v0.8.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.8.1/) (2026-05-11)
+
+#### Security Fixes
+
+* Dependencies security updates
+
+### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.8.0/) (2026-05-11)
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.7.0/) (2026-04-29)
+
+Released in Helm Chart version [v0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.21.0/)
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.6.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.6.1/) (2026-04-09)
+
+Released in Helm Chart version [v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.20.0/)
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.5.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.5.4/) (2026-03-23)
+
+Contains dependency updates.
+
+:::important
+Please note that as of v0.5.3, the SKE Health Agent image will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, your cluster will be unable to pull
+the image and the health-agent pod will fail to start.
+:::
+
+### [v0.5.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.5.3/) (2026-03-04)
+
+Released in Helm Chart version [v0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.18.0/)
+
+### [v0.5.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.5.2/) (2026-02-11)
+
+Released in Helm Chart version [v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.17.0/)
+
+#### Bug Fixes
+
+* Bump OpenTelemetry dependencies
+
+### [v0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.5.0/) (2025-10-29)
+
+Released in Helm Chart version [v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.15.0/)
+
+#### Features
+
+* Image Pull Secret for the Health Check Adapter image can now be configured via
+  the Agent config map.
+
+### [v0.4.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.4.1/) (2025-10-28)
+
+Released in Helm Chart version [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.14.0/)
+
+#### Maintenance
+
+* Security updates
+
+### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.4.0/) (2025-08-19)
+
+Released in Helm Chart version [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.13.0/)
+
+#### Features
+
+* Job history can now be configured via the `SUCCESSFUL_JOBS_HISTORY_LIMIT` and
+  `FAILED_JOBS_HISTORY_LIMIT` environment variables. Those can be set in the
+  Deployment manifest.
+* Improve the health agent deployment labels, making it less likely to clash
+  with other deployments in the same namespace.
+* Bumped the Deployment resources limits and requests.
+
+#### Maintenance
+
+* Remove `sh` from the Health Adapter image.
+* Bump dependencies.
+
+### [v0.3.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.3.3/) (2025-06-23)
+
+Released in Helm Chart version [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.11.0/)
+
+#### Bug fixes
+
+* Fixes a bug where the `healthcheck-adapter` was not being built with cross-architecture support
+
+### [v0.3.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.3.2/) (2025-06-11)
+
+Released in Helm Chart version [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.10.0/)
+
+#### Maintenance
+
+* Security updates
+
+### [v0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.3.0/) (2025-04-24)
+
+Released in Helm Chart version [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.8.0/)
+
+#### Bug Fix
+
+* Fixes a bug where the agent would error creating cron jobs as the generated name could hit the 52 character limit. The cron job names are now truncated.
+
+#### Maintenance
+
+* Bump dependencies
+
+### [v0.2.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.2.1/) (2025-04-16)
+
+Released in Helm Chart version [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.7.0/)
+
+#### Features
+
+* Enable the pprof endpoint (8257b01)
+
+#### Maintenance
+
+* Bump dependencies
+
+### [v0.2.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.2.0/) (2025-01-15)
+
+Released in Helm Chart version [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.6.0/)
+
+#### Features
+
+* Initial release

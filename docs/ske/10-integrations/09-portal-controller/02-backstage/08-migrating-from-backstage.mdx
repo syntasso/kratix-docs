@@ -1,0 +1,305 @@
+---
+title: Migrating from the Backstage Controller
+description: Migrating from BackstageEntityCustomization to PortalCustomization
+sidebar_label: Migrating from Backstage
+slug: migrating-from-backstage
+keywords: [portal, backstage, migration, ske, controller]
+---
+
+`BackstageEntityCustomization`, owned by the Backstage Controller, is replaced by
+`PortalCustomization`, owned by the Portal Controller. The Backstage Controller is deprecated, but
+continues to work, so you can migrate at your own pace.
+
+This guide maps every field of `BackstageEntityCustomizationSpec` to its equivalent, so nothing is
+silently dropped. Read [Customization](../customization) and the
+[Portal Patch recipe reference](../portal-patch/recipe-reference) first.
+
+## At a glance
+
+| `BackstageEntityCustomizationSpec` field | Equivalent | Nature of the change |
+|---|---|---|
+| `containers[]` | `spec.promise.configure.containers[]` and/or `spec.resource.configure.containers[]` | Direct move, split by lane |
+| `destinationSelectors[]` | A configure container rewriting `destination-selectors.yaml` | No dedicated field |
+| `entityGenerationOptions.promise.component.*` | Portal Patch recipe on the `Component`, promise lane | Typed field becomes a recipe |
+| `entityGenerationOptions.promise.template.*` | Portal Patch recipe on the `Template`, promise lane | Typed field becomes a recipe |
+| `entityGenerationOptions.resource.component.*` | Portal Patch recipe on the `Component`, resource lane | Typed field becomes a recipe |
+
+The API group also changes. `BackstageEntityCustomization` was
+`platform.kratix.io/v1alpha1`; `PortalCustomization` is `platform.syntasso.io/v1alpha1`.
+
+## 1. `spec.containers[]` becomes a configure lane
+
+Both use the standard Kratix pipeline container shape, so the entries move across as-is. The only
+decision is which lane, and containers now sit under `configure`:
+
+```yaml
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: my-container
+          image: acme/my-container:v1
+```
+
+- The Backstage Controller ran the same containers for both Promise-level and Resource-level
+  generation. There was no way to run a container for only one.
+- `PortalCustomization` splits this in two. `spec.promise.configure` runs in the Promise-level Job,
+  `spec.resource.configure` runs once per Resource request.
+
+A container that only needs the Promise, for example one that patches the Template, goes in the
+promise lane. A container that needs to run per Resource goes in the resource lane. If the original
+did both conditionally, split it into two simpler containers, since each lane only ever sees its
+own parent object.
+
+:::important
+A Promise may bind to only one `PortalCustomization`. If you previously had several
+`BackstageEntityCustomization` objects applying to one Promise, merge them into a single profile
+with multiple containers.
+:::
+
+## 2. `entityGenerationOptions` becomes Portal Patch recipes
+
+`entityGenerationOptions` was a typed bag of fields read while generating the document. There is no
+equivalent typed field, because the Portal Controller's generate stage is not configurable
+per Promise. Instead, each field becomes a [Portal Patch](../portal-patch/intro) recipe that patches
+the generated document.
+
+This is a shape change, not a rename: the old options influenced generation, recipes edit the
+generated output. For fields that set a scalar, the result is identical.
+
+### Component fields
+
+These apply to the generated `Component`, in whichever lane the option was set on. Both
+`promise.component.*` and `resource.component.*` map the same way, into the promise lane and the
+resource lane respectively.
+
+| Old field | Recipe patch |
+|---|---|
+| `name` | `metadata.name` |
+| `title` | `metadata.title` |
+| `description` | `metadata.description` |
+| `tags` | `metadata.tags` |
+| `type` | `spec.type` |
+| `lifecycle` | `spec.lifecycle` |
+| `owner` | `spec.owner` |
+| `system` | `spec.system` |
+| `subcomponentOf` | `spec.subcomponentOf` |
+| `providesAPIs` | `spec.providesApis` |
+| `consumesAPIs` | `spec.consumesApis` |
+| `dependsOn` | `spec.dependsOn` |
+
+All of them go in one recipe:
+
+```yaml
+target:
+  kind: Component
+patch:
+  metadata:
+    title: Payments Database
+    tags: [tier-1, managed-by-kratix]
+  spec:
+    owner: platform-team
+    lifecycle: production
+    type: database
+```
+
+:::note
+Lists replace wholesale. `tags` here replaces any tags the generate stage produced rather than
+appending to them.
+:::
+
+### Template fields
+
+The Template only exists on the promise lane, since a Resource request has no scaffolder form of
+its own, so these all go in `spec.promise.configure`.
+
+| Old field | Migration |
+|---|---|
+| `title` | Recipe patching `metadata.title` on the `Template` |
+| `description` | Recipe patching `metadata.description` |
+| `tags` | Recipe patching `metadata.tags` |
+| `type` | Recipe patching `spec.type` |
+| `lifecycle` | Recipe patching `spec.lifecycle` |
+| `owner` | Recipe patching `spec.owner` |
+| `singleSpecPage` | The `singleSpecPage` recipe, or the portal-wide `--single-spec-page` flag |
+| `hideNamespace` | The `hideNamespaceManifest` recipe plus a patch removing the form field |
+| `defaultNamespace` | `defaultNamespace` on the `hideNamespaceManifest` recipe |
+| `namespaceFieldTitle` | Recipe patching the namespace property's `title` |
+| `namespaceFieldDescription` | Recipe patching the namespace property's `description` |
+
+#### `singleSpecPage`
+
+```yaml
+target:
+  kind: Template
+op: singleSpecPage
+```
+
+There is also a portal-wide
+[`--single-spec-page` flag](../installation#portal-wide-generate-flags). Use the flag when every
+Promise on the portal should behave this way, and the recipe when only some should. The old option
+was per-Promise-group, so the recipe is the closer match.
+
+#### `hideNamespace` and `defaultNamespace`
+
+These were one option in the old API and are two changes now, because hiding the field and fixing
+the namespace in the manifest are separate edits. Both go in the same container:
+
+```yaml
+args:
+  - |
+    target:
+      kind: Template
+      list:
+        path: spec.steps
+        key: id
+        value: ske-configure-resource
+    op: hideNamespaceManifest
+    field: input.manifest
+    defaultNamespace: platform-team
+  - |
+    target:
+      kind: Template
+      list:
+        path: spec.parameters
+        key: title
+        value: "MyKind Instance Metadata"
+    patch:
+      properties:
+        objnamespace: null
+      required: [objname]
+```
+
+Replace `MyKind` with your CRD's kind. The first recipe fixes the namespace in the generated
+manifest; the second removes the namespace field from the form and drops it from the required list.
+
+:::warning
+The `hideNamespaceManifest` recipe only works under `push`
+[delivery mode](./delivery-modes). Pull-request mode has no `ske-configure-resource` step, so the
+recipe matches nothing and fails the whole sync.
+
+For a pull-request-mode portal, use the portal-wide `--fixed-namespace` behaviour or leave the
+namespace visible.
+:::
+
+#### `namespaceFieldTitle` and `namespaceFieldDescription`
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: "MyKind Instance Metadata"
+patch:
+  properties:
+    objnamespace:
+      title: Team namespace
+      description: The namespace your team owns
+```
+
+## 3. `spec.destinationSelectors[]` has no direct equivalent
+
+`destinationSelectors` steered where generated entities shipped. There is no `PortalCustomization`
+field for it, and setting the Promise's own `spec.destinationSelectors` has no effect, since the
+generate stage does not read it.
+
+Most platforms no longer need this. A Backstage portal now names its own Destination through
+[`config.destination`](./intro#owning-a-destination), which is the supported way to control where
+entities land.
+
+If you still need per-Promise routing, a configure container can rewrite
+`/kratix/metadata/destination-selectors.yaml`. Keep exactly one entry per output directory, since
+the writer rejects duplicates, so rewrite the existing entry rather than appending:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: route-backstage-entities
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: set-destination
+          image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              cat > /kratix/metadata/destination-selectors.yaml <<'YAML'
+              - directory: .
+                matchLabels:
+                  environment: backstage
+                  region: eu
+              YAML
+```
+
+Portal Patch never touches destination selectors, so this remains a job for your own container.
+
+## 4. Worked example
+
+**Before**, typed options set the Component's owner and tags at generation time:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: BackstageEntityCustomization
+metadata:
+  name: cicd-backstage-customization
+spec:
+  entityGenerationOptions:
+    resource:
+      component:
+        owner: platform-team
+        tags:
+          - tier-1
+          - managed-by-kratix
+```
+
+**After**, a `PortalCustomization` with a resource-lane recipe:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: cicd-backstage-customization
+spec:
+  portalType: backstage
+  resource:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:0.7.0
+          args:
+            - |
+              target:
+                kind: Component
+              patch:
+                spec:
+                  owner: platform-team
+                metadata:
+                  tags: [tier-1, managed-by-kratix]
+```
+
+Bind the Promise to it:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-customization: cicd-backstage-customization
+```
+
+## 5. Migration checklist
+
+1. Install the Portal Controller and connect a `backstage` portal, see
+   [Installation](../installation) and [Backstage](./intro).
+2. Configure Backstage's catalogue discovery for the new paths, see
+   [Configure Backstage](./configure-backstage). The Portal Controller writes to a different layout
+   from the Backstage Controller.
+3. Convert each `BackstageEntityCustomization` to a `PortalCustomization`, merging any that applied
+   to the same Promise.
+4. Move the `kratix.io/portal-backstage` label onto each Promise you want synced.
+5. Confirm entities appear in Backstage, then remove the old `SKEIntegration` of `type: backstage`
+   and its `BackstageEntityCustomization` objects.

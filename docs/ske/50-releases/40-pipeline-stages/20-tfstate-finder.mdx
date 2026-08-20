@@ -1,0 +1,164 @@
+---
+title: Hashicorp Terraform
+description: Release information about the Hashicorp Terraform State Finder aspect
+sidebar_label: Hashicorp Terraform
+slug: /ske/releases/pipeline-stages/tfstate-finder
+---
+
+## Overview
+
+The Hashicorp Terraform State Finder Pipeline Stage is responsible for finding the
+Terraform state of a given resource. It is used to find the Terraform state of a
+given resource and write it to the status of the object.
+
+The Pipeline Stage is available as a Container image at:
+
+```
+ghcr.io/syntasso/ske-tfstate-finder:VERSION
+```
+
+Check the release notes below for information on each available version.
+
+:::important
+Please note that as of v0.8.0, the tf-state-finder image will be accessible at ghcr.io not registry.syntasso.io.
+
+Please ensure that your Syntasso Registry secret is updated to reflect this. If it is not updated, any Promises using the tf-state-finder
+will fail to pull the image within their Workflows
+:::
+
+## Release Notes
+
+### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.13.0/) (2026-06-19)
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+### [v0.12.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.12.0/) (2026-05-29)
+
+#### Security Fixes
+
+* Updating Chainguard SHA in SKE images.
+
+### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.11.0/) (2026-05-11)
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.10.0/) (2026-04-29)
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.9.0/) (2026-03-26)
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.8.0/) (2026-03-18)
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+#### Important
+
+* As of `v0.8.0`, `tf-state-finder` is published to `ghcr.io` instead of `registry.syntasso.io`.
+
+### [v0.7.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.4/) (2026-02-18)
+
+#### Bug Fixes
+
+* The TF state finder now correctly retrieves the commit SHA when it is not overridden in the Promise. This reduces the time Kratix takes to mark a resource as ready in these situations and speeds up resource deletions.
+
+### [v0.7.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.3/) (2025-11-19)
+
+#### Bug fixes
+
+* Ensure outputs can be retrieved from HCL JSON files.
+
+### [v0.7.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.2/) (2025-10-08)
+
+#### Bug fixes
+
+* No longer produces duplicate outputs for large state files
+* Ensure latest Git Commit is used when fetching run from TFE
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+### [v0.7.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.1/) (2025-03-11)
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.7.0/) (2025-02-11)
+
+#### Bug fixes
+
+* Support updating an existing `/kratix/metadata/status.yaml` file
+
+### [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.6.0/) (2025-02-07)
+
+#### Features
+
+* You can specify the exact [commit
+  SHA](/ske/integrations/tfe#providing-a-custom-sha) that should be used when
+  fetching the TF state from TFE. This is useful when you want to fetch the TF
+  state from a commit that is merged into the main branch outside of Kratix.
+* Always fetch the **latest** compatible TF state from TFE, previously the TF
+  state was fetched from the TFE Run for the commit Kratix created.
+
+### [v0.5.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.5.2/) (2024-10-16) {#v0.5.2}
+
+**Compatibility:** SKE >= v0.6.0
+
+#### Bug Fixes
+
+* Decompress Workload objects before processing them
+
+### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#aspects/ske-tfstate-finder/v0.4.0/) (2024-08-07)
+
+#### Features
+
+* improve logging
+
+#### Bug Fixes
+
+* no longer panic on errors
+
+### v0.3.0 (2024-08-06)
+
+#### Features
+
+* always write outputs to /kratix/metadata
+* check the run status when fetching outputs from tfe
+* ske-tfstate-finder image gets all TF Destinations/WorkPlacements
+* write object-relevant outputs to status automagically
+* write tf outputs to object status
+* support finding works of promises
+
+#### Bug Fixes
+
+* check tf credentials secret key not empty
+* each pipeline now runs with separate service account
+* handle existing status entries
+* handle no tf destinations found (inc. retries)
+* handle no tf outputs
+* handle the workplacement not having a VersionID
+* improve naming of output files in pipeline
+* only get promise work when it has resource requests
+* OUTPUT_TO_STATUS -&gt; SKIP_STATUS for a better default
+* write outputs as yaml, not json
+
+### v0.2.0 (2024-07-06)
+
+
+#### Features
+
+* check the run status when fetching outputs from tfe

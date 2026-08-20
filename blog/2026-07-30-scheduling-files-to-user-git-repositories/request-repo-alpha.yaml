@@ -1,0 +1,10 @@
+apiVersion: example.kratix.io/v1alpha1
+kind: SecureRepo
+metadata:
+  name: repo-alpha
+  namespace: default
+spec:
+  repo: repo-alpha
+  language: go
+  securityContact: security@example.com
+  scanSchedule: weekly

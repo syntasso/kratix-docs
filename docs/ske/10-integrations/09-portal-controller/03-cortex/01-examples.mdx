@@ -1,0 +1,197 @@
+---
+title: Cortex examples
+description: Examples of customising Cortex documents with PortalCustomization
+sidebar_label: Cortex examples
+slug: cortex-examples
+keywords: [portal, customization, cortex, workflow, ske]
+---
+
+These examples show how a `PortalCustomization` can edit documents generated for Cortex. The Python used here is only an example. Use any language, image, or tool that can read and update the generated files.
+
+## Example Promise
+
+The examples on this page use a Kafka Promise with `team` and `size` fields. The Promise definition is shortened to show only its API.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Promise
+metadata:
+  name: kafka
+spec:
+  api:
+    spec:
+      type: object
+      properties:
+        team:
+          type: string
+        size:
+          type: string
+```
+
+## Reorder fields in a Cortex workflow
+
+Use this example when you want Cortex to show workflow input fields in a particular order. It reorders the `user-input` action in both generated workflows: `workflow-create.yaml` and `workflow-update.yaml`.
+
+Set `KEY_ORDER` to the comma-separated order you want. For this Promise, the order is `team`, `size`, `objnamespace`, then `objname`. Any other fields appear after these fields.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-workflow-key-order
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - name: reorder-workflow-keys
+          image: python:3.13-alpine
+          command: ["sh", "-c"]
+          env:
+            - name: KEY_ORDER
+              value: team,size,objnamespace,objname
+          args:
+            - |
+              pip install --quiet --root-user-action=ignore PyYAML==6.0.2
+              python - <<'PY'
+              import os
+              from pathlib import Path
+
+              import yaml
+
+              order = os.environ["KEY_ORDER"].split(",")
+
+
+              def rank(item):
+                  key = item["key"]
+                  return order.index(key) if key in order else len(order)
+
+
+              for name in ("workflow-create.yaml", "workflow-update.yaml"):
+                  path = Path("/kratix/output") / name
+                  workflow = yaml.safe_load(path.read_text())
+                  for action in workflow["actions"]:
+                      if action["slug"] == "user-input":
+                          action["schema"]["inputs"].sort(key=rank)
+                  path.write_text(
+                      yaml.safe_dump(workflow, sort_keys=False, width=4096)
+                  )
+              PY
+```
+
+Bind the relevant Promise to `kafka-workflow-key-order`. See [Customization](../customization#binding-a-promise-to-a-portalcustomization) for the binding label.
+
+## Show request details before deletion
+
+Use this example when you want users to review the request before deleting it. It adds a first step to the generated Delete workflow. The step copies the Update workflow inputs, which Cortex pre-fills from the selected entity, and makes them read-only.
+
+The user must type `delete` before continuing. Cortex does not render a page if every field is read-only. Keep at least one editable field, such as this confirmation field, in the step.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-delete-show-request
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - args:
+            - |
+              set -eu
+              pip install --quiet --no-input --disable-pip-version-check pyyaml
+              python3 - <<'PY'
+              import copy
+              import yaml
+
+              DELETE_PATH = "/kratix/output/workflow-delete.yaml"
+              UPDATE_PATH = "/kratix/output/workflow-update.yaml"
+
+              update = yaml.safe_load(open(UPDATE_PATH))
+              delete = yaml.safe_load(open(DELETE_PATH))
+
+              # The update workflow's first step already collects every field,
+              # pre-filled from the selected entity. Reuse it to show the user
+              # the original request inputs before they delete.
+              show_request_step = copy.deepcopy(update["actions"][0])
+
+              # Lock every field so the user can read the original inputs but not change them.
+              for override in show_request_step["schema"]["inputOverrides"]:
+                  override["editable"] = False
+
+              # Cortex skips the page if no field is editable. Add one field the
+              # user must fill in, typing "delete" to confirm.
+              show_request_step["schema"]["inputs"].append({
+                  "name": "Confirm deletion",
+                  "description": "Type 'delete' to confirm.",
+                  "key": "confirm-delete",
+                  "required": True,
+                  "defaultValue": None,
+                  "placeholder": "delete",
+                  "validationRegex": "^delete$",
+                  "type": "INPUT_FIELD",
+              })
+
+              # Show the request inputs first, then run the existing delete steps.
+              show_request_step["outgoingActions"] = [action["slug"] for action in delete["actions"] if action["isRootAction"]]
+              for action in delete["actions"]:
+                  action["isRootAction"] = False
+              delete["actions"] = [show_request_step] + delete["actions"]
+
+              yaml.safe_dump(delete, open(DELETE_PATH, "w"), sort_keys=False, width=4096)
+              print("added a step showing the request inputs to the delete workflow")
+              PY
+          command:
+            - /bin/sh
+            - -c
+          image: python:3.12-slim
+          name: show-request-inputs
+```
+
+Bind the relevant Promise to `kafka-delete-show-request`. See [Customization](../customization#binding-a-promise-to-a-portalcustomization) for the binding label.
+
+## Change the message shown after a workflow runs
+
+Use this example when you want to change the message Cortex shows a user after they submit a workflow. The `generate` step writes a default for each workflow, describing what the workflow did:
+
+| Generated file         | Default message   |
+| ---------------------- | ----------------- |
+| `workflow-create.yaml` | `Request created` |
+| `workflow-update.yaml` | `Request updated` |
+| `workflow-delete.yaml` | `Request deleted` |
+
+The example below customizes the workflow completion message for the Create and Update workflows.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-run-response-message
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - name: set-run-response
+          image: ghcr.io/syntasso/portal-patch:0.7.0
+          args:
+            - |
+              target:
+                file: workflow-create.yaml
+              patch:
+                runResponseTemplate: Request has been submitted to Kratix for fulfillment.
+            - |
+              target:
+                file: workflow-update.yaml
+              patch:
+                runResponseTemplate: Update has been submitted to Kratix for fulfillment.
+```
+
+Each workflow keeps its message in its own file, so change only the files you want. This example leaves `workflow-delete.yaml` with its generated default.
+
+Bind the relevant Promise to `kafka-run-response-message`. See [Customization](../customization#binding-a-promise-to-a-portalcustomization) for the binding label.
+
+## Advanced use cases
+
+A customize container can reshape a Workflow as far as Cortex allows, not just adjust what `generate` writes. For example, split the generated form into several [User Input blocks](https://docs.cortex.io/streamline/workflows/blocks) so users fill in one page at a time. A Branch block can then decide which page comes next, based on their answers. For changes this large, writing the whole workflow file in your customize container is usually simpler than patching the generated one, because little of the original structure survives.

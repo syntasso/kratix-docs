@@ -1,0 +1,124 @@
+---
+title: SKE Cortex Controller
+description: Release information about the SKE Cortex Controller
+sidebar_label: SKE Cortex Controller
+slug: /ske/releases/cortex-controller
+---
+
+## Overview
+
+The SKE Cortex Controller allows you to automate the process of populating the Cortex catalog with Entities as well as generate Workflows that can be used to provision services backed by Kratix Promises. For the Cortex Configuration see documentation [here](/ske/integrations/cortex/intro).
+
+The release manifest is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/
+```
+
+## Release Notes
+
+### [v0.10.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.10.1/) (2026-07-20)
+
+#### Fixes
+
+* Fixed an issue where blank optional fields in Cortex forms produced invalid Resource Requests. Generated Resource Requests now omit blank optional fields and nested objects, while preserving valid boolean and number values such as `false` and `0`.
+
+### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.10.0/) (2026-06-30)
+
+#### Features
+
+* The inputs for the Cortex-generated manifest now support the generation of arrays of primitives, in line with the support now offered in Cortex. CRD properties that are arrays of
+strings, boolean, number and integer will be transformed into their equivalents in Cortex workflows inputs.
+
+#### Features
+
+* This fixes a bug whereby string input fields were not quotes in the generated resource request manifests. As a result, they were not always treated as strings.
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.9.0/) (2026-06-08)
+
+#### Security Fixes
+
+* Dependencies security updates
+
+### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.8.0/) (2026-06-02)
+
+#### Features
+
+* The [visibility of the namespace field in the Cortex UI](/ske/integrations/cortex/generating-cortex-components#customising-name-and-namespace-fields) can now be hidden and request deployed to a fixed namespace. The new `kratix.io/cortex-fixed-namespace` annotation makes it possible to set fixed namespace to deploy resources requests of promises to. When set, the `metadata.namespace`
+field is hidden in the workflow in the Cortex UI.
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.7.0/) (2026-05-20)
+
+#### Features
+
+* Allow [customising the display name and description](/ske/integrations/cortex/generating-cortex-components#customising-name-and-namespace-fields) of the Name and Namespace fields in generated Cortex workflows via Promise annotations.
+
+### [v0.6.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.6.0/) (2026-05-15)
+
+#### Features
+
+* Create global Cortex resources when the SKE Cortex Controller starts to allow allows all Kratix-managed objects (Promises and resource requests) to be surfaced together under a single catalogue item.
+* Allow skipping creation of Cortex workflows via annotations on Promises.
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.5.0/) (2026-05-11)
+
+#### Features
+
+* Added ownership to Cortex entities. Entities created from Resource Requests now include owner information.
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.4.0/) (2026-04-29)
+
+Released via the SKE Operator Helm Chart [version 0.66.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.66.0/)
+
+#### Fixes
+
+- Fixed an issue on deletes would fail when the controller couldn't list the resources.
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.3.0/) (2026-04-09)
+
+Released via the SKE Operator Helm Chart [version 0.65.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.65.0/)
+
+#### Security Fixes
+
+* Security updates
+
+### [v0.2.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.2.4/) (2026-03-24)
+
+### Fixes
+
+- Fixed an issue where the array key in the generated manifest would be missing when the array had a certain number of items.
+- In specific occasions, the generated workflow for Update would not pre-populate the previous values for the field. This is now fixed.
+- Fixed a bug that would generate invalid workflows when `spec.name` or `spec.namespace`
+  were defined in the Promise API.
+
+### [v0.2.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.2.3/) (2026-03-23)
+
+Contains dependency updates.
+
+### [v0.2.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-cortex-controller/v0.2.2/) (2026-02-26)
+
+Released via the SKE Operator Helm Chart [version 0.58.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.58.0/)
+
+#### Features
+
+- Initial release

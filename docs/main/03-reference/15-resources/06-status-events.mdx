@@ -17,6 +17,11 @@ Resources have the following list of conditions:
 - `ConfigureWorkflowCompleted` – all Configure workflow pipelines finished successfully.
 - `WorksSucceeded` – every Work created for the Resource has completed.
 - `Reconciled` – Resource has been successfully reconciled; set to true when all the above conditions are all true.
+- `DeleteWorkflowCompleted` – only present while a Resource is being deleted and the Delete
+  workflow has not finished. Its `reason` is `DeleteWorkflowFailed` if the Delete Pipeline
+  failed, or `DeleteWorkflowSuspended` if the Delete Pipeline suspended itself via the
+  [workflow-control file](/main/reference/promises/workflows#suspending-a-workflow). This
+  condition is not present once deletion completes, since the Resource itself is removed.
 
 Example output:
 

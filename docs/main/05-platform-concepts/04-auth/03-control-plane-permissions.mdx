@@ -1,0 +1,51 @@
+---
+description: What permissions the Kratix control plane itself requires, and why
+title: Control Plane Permissions
+id: control-plane-permissions
+---
+
+This page describes the permissions Kratix itself needs in order to run.
+
+RBAC around Kratix works in two directions. Access *to* Kratix controls which users and
+service accounts may install Promises or request Resources, and is covered in
+[Role Based Access Control](/main/platform-concepts/auth/rbac). This page covers the other
+direction: the `ClusterRole` bound to the Kratix controller's ServiceAccount, what each
+grant is for, and which grants can be narrowed.
+
+## The Kratix controller ClusterRole
+
+Kratix runs as a single controller in the `kratix-platform-system` namespace, bound to a
+cluster-scoped `ClusterRole`. You can read the live definition at any time:
+
+```bash
+kubectl get clusterrole kratix-platform-manager-role -o yaml
+```
+
+| Grant | Verbs | Needed for |
+|---|---|---|
+| `apiextensions.k8s.io`: `customresourcedefinitions` | create, delete, get, list, patch, update, watch | Each Promise that publishes an API installs a CRD for its Resource kind. This is how a Promise becomes requestable. |
+| `platform.kratix.io`: `promises`, `works`, `workplacements`, `destinations`, `gitstatestores`, `bucketstatestores`, `resourcebindings`, `promisereleases`, `promiserevisions`, `healthrecords`, `dryruns` | create, delete, get, list, patch, update, watch | Kratix's own API. The same set is granted again for `/status` (get, patch, update) and `/finalizers` (update). |
+| `batch`: `jobs` | create, delete, get, list, patch, update, watch | Every workflow pipeline runs as a Job. |
+| `""`: `pods` | delete, get, list, watch | Reading pipeline pod state and logs, and removing completed pipeline pods. |
+| `""`: `configmaps` | create, delete, list, update, watch | Inputs Kratix mounts into pipeline containers, including Destination selectors. |
+| `""`: `serviceaccounts` | create, delete, get, list, update, watch | Each pipeline runs under its own ServiceAccount, created by Kratix. |
+| `""`: `secrets` | get, list, watch | Reading credentials referenced by StateStores and Destinations. Kratix does not create or modify Secrets. |
+| `""` / `events.k8s.io`: `events` | create, patch | Recording events against Promises and Resources. |
+| `rbac.authorization.k8s.io`: `roles`, `clusterroles` | bind, create, delete, escalate, get, list, update, watch | Creating each pipeline's permissions. See [below](#why-kratix-needs-escalate-and-bind). |
+| `rbac.authorization.k8s.io`: `rolebindings`, `clusterrolebindings` | create, delete, get, list, update, watch | Binding those permissions to the pipeline ServiceAccount. |
+
+For the objects Kratix generates for each pipeline, and the rules they contain, see
+[Default Permissions](/main/reference/workflows#default-permissions).
+
+## Why Kratix needs `escalate` and `bind`
+
+Kratix needs both because a Resource workflow's permissions include access to the
+Promise's own Resource kind. Those API groups do not exist until the Promise is installed,
+so they cannot be granted to Kratix in advance. Kratix therefore needs `escalate` and `bind` 
+to grant a pipeline a permission that Kratix itself does not hold. The verbs are not passed
+on to the pipeline, so a pipeline pod cannot use them to escalate further.
+
+The RBAC objects Kratix generates with these verbs will always have deterministic names and a
+`kratix.io/promise-name: <promise-name>` label. They will be cleaned up with the deletion of the Promise.
+
+To learn more about `escalate` and `bind` permissions, check [Restrictions on Role Creation or Update](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-creation-or-update) and [Restrictions on Role Binding Creation and Update](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-binding-creation-or-update) on the Kubernetes documentation.

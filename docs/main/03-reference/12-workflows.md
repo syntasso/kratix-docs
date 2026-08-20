@@ -81,6 +81,7 @@ spec:
       operator: "Equal"
       value: "workflows"
       effect: "NoSchedule"
+  restartPolicy: OnFailure # Optional; restart policy for the pipeline Job Pod. Defaults to OnFailure
   volumes:
     - name: myvolume # Volume definitions, in addition to `/kratix` volumes (optional)
   containers:
@@ -138,6 +139,11 @@ is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
   marking it failed. Kratix does not set a default value for this field; if omitted,
   Kubernetes uses its own Job default.
 
+You can also control the [restart
+policy](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy)
+of the pipeline Job Pod by setting `restartPolicy` in the Pipeline spec. This
+defaults to `OnFailure`.
+
 #### Common Job signals
 
 These are typical symptoms when workflows are running as Jobs:
@@ -193,7 +199,7 @@ When a Pipeline writes `suspend: true`, Kratix:
 - stores the optional message on that pipeline entry
 - stops executing later Pipelines in the workflow
 
-:::info
+#### Configure Workflow specifics
 
 Suspending a Pipeline will not stop the execution of later stages in the same Pipeline. If you want to guarantee that no other stage is executed, you can either:
 
@@ -201,9 +207,22 @@ Suspending a Pipeline will not stop the execution of later stages in the same Pi
 1. Have the suspend stage as the only stage in the Pipeline.
 1. Ensure that every stage checks for the workflow-control file.
 
-:::
 
-If `kratix.io/workflow-suspended` is removed, Kratix starts from the suspended
+#### Delete Workflow specifics
+
+While a Delete Pipeline can also write `suspend: true`, because it has only
+a single Pipeline the "starting from the suspended Pipeline" means Kratix
+re-runs that same Pipeline.
+
+While a Delete Pipeline is suspended, the Works it would otherwise clean up
+are **not deleted** — the Promise or Resource request stays in a 
+`DeleteWorkflowSuspended` state until the label is removed and the Pipeline
+completes without suspending again.
+
+
+#### Resuming a suspended pipeline
+
+When `kratix.io/workflow-suspended` is removed, Kratix starts from the suspended
 Pipeline.
 
 When a Pipeline writes `retryAfter`, Kratix will treat the current pipeline as
@@ -234,7 +253,8 @@ This applies to both Promise and Resource Configure workflows.
 ### Role-based Access Control (RBAC)
 
 Each pipeline runs with its own service account and a default set of restrictive
-RBAC permissions. By default the service account is automatically created by
+RBAC permissions, enumerated in [Default Permissions](#default-permissions)
+below. By default the service account is automatically created by
 Kratix and the name is deterministic. You have three options for providing
 additional [RBAC
 permissions](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to
@@ -253,6 +273,58 @@ the pipeline:
 
 The namespace a resource request pipeline runs in is the same as the namespace as the resource
 request. Promise pipelines run in the `kratix-platform-system` namespace.
+
+:::
+
+#### Default Permissions
+
+Alongside the [service account](#service-account), Kratix creates the RBAC objects a
+pipeline needs to write back `Work` objects and to update the Resource it is reconciling.
+These objects reuse the service account's name, so you can predict their names if you need
+to audit them or create your own. That name is
+`<promise-name>-<workflow-type>-<workflow-action>-<pipeline-name>`.
+
+The examples below are for a Promise named `env` publishing an `envs.example.org` Resource
+API.
+
+**Promise workflows** get a `ClusterRole` and `ClusterRoleBinding` named after the
+pipeline, for example `env-promise-configure-tf-workspace`. `Promise` and `Work` are
+cluster-scoped, so a namespaced `Role` cannot grant this access:
+
+```yaml
+rules:
+- apiGroups: [platform.kratix.io]
+  resources: [promises, promises/status, works]
+  verbs: [get, list, update, create, patch]
+```
+
+**Resource workflows** get a `Role` and `RoleBinding` in the pipeline's namespace:
+
+```yaml
+rules:
+- apiGroups: [example.org]           # the Promise's own API group
+  resources: [envs, envs/status]
+  verbs: [get, list, update, create, patch]
+- apiGroups: [platform.kratix.io]
+  resources: [works]
+  verbs: ["*"]
+```
+
+If the Promise sets [`pipelineNamespace`](#workflows-namespace), its Resource workflows run
+in a different namespace from the resource request. The permission then crosses a namespace
+boundary, so Kratix also creates a `ClusterRole` and `ClusterRoleBinding` containing the
+first rule above, named with the requesting namespace appended, following this format: 
+`<promise name>-resource-configure-<pipeline name>-<namespace>`.
+
+Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
+them are deleted when the Promise is deleted. Supplying a
+[custom service account](#custom-service-account) changes the service account name only.
+The Role and binding names are still derived from the pipeline.
+
+:::note
+
+If you are interested in the permissions the Kratix controller holds, 
+see [Kratix Control Plane Permissions](/main/platform-concepts/auth/control-plane-permissions).
 
 :::
 
@@ -500,16 +572,21 @@ Files written to `/kratix/output` in `delete` Pipelines will be ignored.
 
 ### Metadata
 
-All containers in a `configure` Pipeline have access a shared **metadata directory**
-mounted at `/kratix/metadata`.
+All containers in a Pipeline, whether `configure` or `delete`, have access to a shared
+**metadata directory** mounted at `/kratix/metadata`.
 
 Pipeline containers can control aspects of how Kratix behaves by creating special files in
 this directory:
 
-- `destination-selectors.yaml` can be added to any Promise to further refine where the
-  resources in `/kratix/output` will be [scheduled](./destinations/multidestination-management).
+- `destination-selectors.yaml` can be added to any `configure` Pipeline to further refine
+  where the resources in `/kratix/output` will be
+  [scheduled](./destinations/multidestination-management). Since `/kratix/output` is
+  ignored in `delete` Pipelines, this file has no effect there.
 - `status.yaml` allows the Pipeline to communicate information about the resource back to
   the requester. See the [status documentation for more information](./resources/status).
+- `workflow-control.yaml` lets the Pipeline suspend or retry itself; see
+  [Workflow Control](#workflow-control) above. This applies to both `configure` and
+  `delete` Pipelines.
 
 #### Passing data between containers
 

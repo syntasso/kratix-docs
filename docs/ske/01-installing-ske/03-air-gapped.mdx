@@ -6,16 +6,38 @@ description: Installing and running Syntasso Kratix Enterprise in air-gapped env
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import PartialPointToKratix from '../../_partials/installation/_point_to_kratix.md';
 ```
+
+This page covers the mirroring and configuration needed to install SKE in an air-gapped environment
+ — setting up your own image registry and release manifest location before pointing the SKE Operator
+  at them, rather than editing the manifests directly. Complete the steps here first, 
+  then follow [Advanced installation](./advanced-install), using the registry and manifest locations 
+  you've set up here in your `values.yaml` or ConfigMap.
+
+If your cluster isn't air-gapped, you likely don't need this page — check the [installation overview](./intro) 
+to confirm which method fits, or head to [Preconfigured installation](./preconfigured-install) for the 
+fastest path in development and test.
+
+<PartialPointToKratix />
 
 You may want to manage SKE manifests and images within your own environment either
 due to air-gapped requirements or other security and redundancy measures.
 
-Regardless of the reason, if you want to host your own manifests and/or images you
+If you want to host your own manifests and/or images you
 will need to ensure that your Platform cluster has access to the following resources:
 
-- An image registry containing the SKE Operator and additional SKE integration images
+- An image registry containing the required SKE images and any optional SKE
+  integration images you use
 - A location where the SKE Release manifests can be found
+
+:::info Fixed installation namespace
+
+SKE and the SKE Operator must run in the `kratix-platform-system` namespace.
+You cannot override this namespace. Create it before creating any registry,
+release-storage, or TLS Secrets used by the installation.
+
+:::
 
 Depending on your environment configuration, you will be instructed how to create
 configuration and secrets the SKE Operator requires to access both the Image
@@ -41,19 +63,46 @@ You will be prompted for a password. The password is your Licence Key.
 Once you have logged in, you can pull the images using the `docker pull`
 command.
 
-:::info Tokens
-Review the [SKE tokens](/ske/reference/tokens) page for an overview on different SKE tokens and which one to use for registry access.
+There is more information on the [SKE tokens page](/ske/reference/tokens) about which one to use for registry access.
 :::
 
-## Image Registry
+## Image registry
 
 The SKE Operator and SKE images are stored in the GitHub Container Registry (GHCR).
 
-You must ensure that the following images are mirrored to your own image registry and
-tagged according to the version.
+### Images required for an Operator-managed installation
 
-- `ghcr.io/syntasso/ske-operator`
-- `ghcr.io/syntasso/ske-platform`
+Mirror these images for a standard SKE installation:
+
+| Component | Source image | Tag |
+| --- | --- | --- |
+| SKE Operator | `ghcr.io/syntasso/ske-operator:<SKE_OPERATOR_VERSION>` | The SKE Operator version installed by your chosen Helm chart, or the version of the Operator manifest you apply |
+| SKE | `ghcr.io/syntasso/ske-platform:<SKE_VERSION>` | The version set in `skeDeployment.version` or `spec.version` |
+
+The [preconfigured installation](/ske/installing-ske/preconfigured-install)
+pulls additional development and third-party images and is not covered by this
+air-gapped procedure. Use the [advanced installation](./advanced-install) for
+an air-gapped environment.
+
+### Images required by optional integrations
+
+The following images are not required for a base SKE installation. Mirror them
+only when you enable the corresponding integration:
+
+| Integration | Source image | Packaging |
+| --- | --- | --- |
+| Backstage Controller | `ghcr.io/syntasso/backstage-controller:<BACKSTAGE_CONTROLLER_VERSION>` | Contains both the controller and the Backstage Generator used by its Workflow Jobs |
+| Cortex Controller | `ghcr.io/syntasso/ske-cortex-controller:<CORTEX_CONTROLLER_VERSION>` | Contains the Cortex integration controller |
+
+The integration image tag is the version set on that integration, not the SKE
+version. See the [Backstage Controller installation](/ske/integrations/backstage/installation/generating-backstage-components)
+and [Cortex installation](/ske/integrations/cortex/configuring-cortex) guides for
+their supported versions and configuration.
+
+Other separately installed SKE components have their own image requirements:
+
+- [SKE Health Agent](/ske/installing-ske/ske-health-agent#image-registry-for-air-gapped-environments)
+- [SKE GUI](/ske/installing-ske/ske-gui#image-registry-for-air-gapped-environments)
 
 You can find the available versions of the images in the [Syntasso Enterprise
 Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/).
@@ -65,28 +114,46 @@ How to: Push the images to your internal registry
 
 </summary>
 
-Log in to the Syntasso registry
+Log in to the Syntasso registry:
 
 ```bash
-docker login ghcr.io -u syntasso-pkg -p {SYNTASSO_TOKEN}
+docker login --username syntasso-pkg ghcr.io
 ```
 
-Pull the images at the desired tag
+When prompted, enter your Syntasso registry token as the password.
+
+Set the versions and the destination registry:
 
 ```bash
-docker pull ghcr.io/syntasso/ske-platform:latest
+SKE_OPERATOR_VERSION="<SKE_OPERATOR_VERSION>"
+SKE_VERSION="<SKE_VERSION>"
+INTERNAL_REGISTRY="<INTERNAL_REGISTRY>"
 ```
 
-Tag the image to be pushed to your internal registry
+Pull the required core images:
 
 ```bash
-docker tag ghcr.io/syntasso/ske-platform:latest ${INTERNAL_REGISTRY}/syntasso/ske-platform:latest
+docker pull "ghcr.io/syntasso/ske-operator:${SKE_OPERATOR_VERSION}"
+docker pull "ghcr.io/syntasso/ske-platform:${SKE_VERSION}"
 ```
 
-Push the image to the internal registry
+Tag the images for your internal registry:
 
 ```bash
-docker push ${INTERNAL_REGISTRY}/syntasso/ske-platform:latest
+docker tag \
+  "ghcr.io/syntasso/ske-operator:${SKE_OPERATOR_VERSION}" \
+  "${INTERNAL_REGISTRY}/syntasso/ske-operator:${SKE_OPERATOR_VERSION}"
+
+docker tag \
+  "ghcr.io/syntasso/ske-platform:${SKE_VERSION}" \
+  "${INTERNAL_REGISTRY}/syntasso/ske-platform:${SKE_VERSION}"
+```
+
+Push the images:
+
+```bash
+docker push "${INTERNAL_REGISTRY}/syntasso/ske-operator:${SKE_OPERATOR_VERSION}"
+docker push "${INTERNAL_REGISTRY}/syntasso/ske-platform:${SKE_VERSION}"
 ```
 </details>
 

@@ -3,6 +3,6 @@
   "position": 8,
   "link": {
     "type": "generated-index",
-    "description": "How access to Kratix is authenticated and authorized."
+    "description": "How access to Kratix is authenticated and authorized, and what permissions the Kratix control plane itself requires."
   }
 }

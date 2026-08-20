@@ -1,7 +1,7 @@
 ---
-title: Generating Backstage Components with the Backstage Controller
+title: Generating Backstage Components
 description: Documentation for how to use the Backstage Controller to generate Backstage Components
-sidebar_label: Generating Backstage Components with the Backstage Controller
+sidebar_label: Generating Backstage Components
 ---
 
 The Backstage Controller generates Backstage components and templates for Promises and Resource Requests.
@@ -11,7 +11,7 @@ The Backstage Controller generates Backstage components and templates for Promis
 - **SKE Operator**: Installed at v0.28.0 or later. If you haven't installed the Operator, please refer to the [SKE installation guide](../../../installing-ske/advanced-install).
 - **SKE Backstage**: The generated Backstage Templates reference an action from the `ske-backend` Backstage plugin, this action is
 used to create a Resource Request. The generated Components are also used by the `ske-frontend` Backstage plugin to display
-Promise and Resource metadata. See [Configuring the Plugins](./plugins) for installation instructions.
+Promise and Resource metadata. See [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage) for installation instructions.
 - **Backstage Destination**: You must have a Destination created with the `environment: backstage` label. See the
 [Entity State Store docs](./creating-entity-state-store#configure-a-destination-for-backstage) for more information
 for setup instructions.
@@ -70,7 +70,7 @@ metadata:
   name: backstage-integration
 spec:
   type: backstage
-  version: v0.99.0 # replace this placeholder version with your desired version of the Backstage Controller
+  version: "<BACKSTAGE_CONTROLLER_VERSION>"
   deploymentConfig:
     resources:
       limits:
@@ -114,7 +114,7 @@ In a Resource Configure workflow, a single Backstage manifest will be generated:
 
 - **Resource Component:** A Backstage Component representing the Resource.
 
-See the [YAML File Format](../reference/yaml-file-format) for examples of these manifests
+See the [Entity YAML format](/ske/integrations/portal-controller/backstage/entity-yaml-format) for examples of these manifests
 
 ### Labelling Promises for automatic file generation
 

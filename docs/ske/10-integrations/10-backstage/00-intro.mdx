@@ -1,7 +1,7 @@
 ---
 
-title: Introduction
-description: Integrating SKE with Backstage
+title: DEPRECATED Backstage Integration Introduction 
+description: Deprecated integration to connect Syntasso Kratix Enterprise to Backstage to generate components and surface Promises directly in your developer portal.
 sidebar_label: Overview
 keywords: [backstage, internal developer portal, idp]
 
@@ -13,13 +13,21 @@ import BackstageDiagram from "/img/docs/ske/backstage-diagram.png"
 
 import InstallationSteps from './_partials/installation-steps.mdx';
 
+:::warning Deprecated
+
+The standalone Backstage Controller is deprecated. It continues to work; see
+[Migrating from the Backstage Controller](../portal-controller/backstage/migrating-from-backstage)
+when you are ready to move.
+
+:::
+
 Backstage is a framework for building developer portals, while Kratix is a framework for building Platforms. Both systems can integrate with each other to provide an end-to-end
 self-service experience for developers.
 
 With the SKE Integration for Backstage, you can automate the process of populating the Backstage catalogue with Components and Templates corresponding to Promises on the platform.
 Developers can then send requests to Kratix through Backstage Templates to create and manage Resources.
 
-This section explains the architecture of the integration and the steps required to install it in a Backstage environment.
+This section explains the integration architecture and the steps required to install it in a Backstage environment.
 
 ## What the integration provides
 
@@ -35,7 +43,7 @@ The Backstage integration enables platform teams to:
 
 
 
-The integration is made up of SKE components, Backstage plugins, and shared storage. Each part has a specific role:
+The integration consists of SKE components, Backstage plugins, and shared storage. Each part has a specific role:
 
 - **Backstage Controller**: runs in the platform cluster and enables automatic Backstage entity generation for labelled Promises. It adds the generation workflow that produces
   Backstage Components and Templates for Promises and Resource requests.
@@ -71,4 +79,4 @@ The following sections will go through each of these steps in detail:
 
 ## Getting started quickly
 
-If you want to try out the integration before committing to a full installation, the [Backstage Development Image](./backstage-development-image) provides a pre-configured Backstage instance for development and testing purposes.
+If you want to try out the integration before committing to a full installation, the [Backstage Development Image](/ske/integrations/portal-controller/backstage/development-image) provides a pre-configured Backstage instance for development and testing purposes.

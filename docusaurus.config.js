@@ -9,262 +9,306 @@ const darkTheme = themes.dracula;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Kratix",
-  tagline: "An open-source framework for building platforms",
-  url: "https://docs.kratix.io",
-  baseUrl: "/",
-  markdown: {
-    hooks: {
-      onBrokenMarkdownLinks: "throw",
-    }
-  },
-  onBrokenLinks: "throw",
-  favicon: "img/favicon.ico",
-
-  // GitHub pages deployment config.
-  organizationName: "syntasso", // Usually your GitHub org/user name.
-  projectName: "kratix-docs", // Usually your repo name.
-  trailingSlash: false,
-
-  // Even if you don't use internalization, you can use this field to set useful
-  // metadata like html lang. For example, if your site is Chinese, you may want
-  // to replace "en" with "zh-Hans".
-  i18n: {
-    defaultLocale: "en",
-    locales: ["en"],
-  },
-
-  presets: [
-    [
-      "@docusaurus/preset-classic",
-      /** @type {import('@docusaurus/preset-classic').Options} */
-      ({
-        docs: {
-          sidebarPath: require.resolve("./sidebars.js"),
-          // Sidebar expanded by default on docs pages
-          sidebarCollapsed: true,
-          // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/syntasso/kratix-docs/tree/main",
-          // remarkPlugins: [abbr],
-          routeBasePath: '/',
-        },
-        // uncomment to add the blog section to the website
-        blog: {
-          blogSidebarTitle: 'All posts',
-          blogSidebarCount: 'ALL',
-          showReadingTime: true,
-          // Remove this to remove the "edit this page" links.
-          // editUrl:
-          //   'https://github.com/syntasso/kratix-docs/tree/main',
-        },
-        theme: {
-          customCss: require.resolve("./src/css/custom.scss"),
-        },
-        googleTagManager: {
-          containerId: 'GTM-M8KNBP6C',
-        },
-      }),
-    ],
-  ],
-
-  plugins: [
-    "docusaurus-plugin-sass",
-    require.resolve("docusaurus-plugin-image-zoom"),
-    [
-      "@docusaurus/plugin-client-redirects",
-      {
-        redirects: [
-          {
-            from: "/main/learn-more/status-conditions-events/promise-status-events",
-            to: "/main/reference/promises/promise-status-events",
-          },
-          {
-            from: "/main/learn-more/status-conditions-events/resource-status-events",
-            to: "/main/reference/resources/resource-status-events",
-          },
-          {
-            from: "/main/learn-more/status-conditions-events/work-status-events",
-            to: "/main/platform-concepts/kratix-resources/work-status-events",
-          },
-          {
-            from: "/main/learn-more/kratix-resources",
-            to: "/main/platform-concepts/kratix-resources",
-          },
-          {
-            from: "/main/guides/rbac",
-            to: "/main/platform-concepts/auth/rbac",
-          },
-          {
-            from: "/main/learn-more",
-            to: "/main/how-kratix-complements",
-          },
-          {
-            from: "/main/learn-more/how-kratix-complements",
-            to: "/main/how-kratix-complements",
-          },
-          {
-            from: "/main/learn-more/how-kratix-complements/intro",
-            to: "/main/how-kratix-complements",
-          },
-          {
-            from: "/main/learn-more/how-kratix-complements/terraform",
-            to: "/main/how-kratix-complements/terraform",
-          },
-          {
-            from: "/main/learn-more/how-kratix-complements/crossplane",
-            to: "/main/how-kratix-complements/crossplane",
-          },
-          {
-            from: "/main/learn-more/how-kratix-complements/backstage",
-            to: "/main/how-kratix-complements/backstage",
-          },
-        ],
-      },
-    ],
-  ],
-
-  scripts: [
-      {
-        src: "https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on",
-        async: false,
-    },
-  ],
-
-  themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-    ({
-      metadata: [
-        {
-          name: "keywords",
-          content: "kratix docs, kratix documentation",
-        },
-      ],
-      docs: {
-        sidebar: {
-          hideable: true,
-        },
-      },
-      colorMode: {
-        respectPrefersColorScheme: true,
-      },
-      navbar: {
-        logo: {
-          alt: "Kratix Logo",
-          src: "/img/kratix-purple-io.svg",
-          srcDark: "/img/kratix-white-io.svg",
-          href: "https://kratix.io",
-        },
-        items: [
-          {
-            type: "doc",
-            docId: "main/intro",
-            position: "left",
-            label: "Docs",
-          },
-          {
-            type: "doc",
-            docId: "workshop/intro",
-            label: "Workshops",
-            position: "left",
-          },
-          {
-            to: "marketplace",
-            label: "Marketplace",
-            position: "left",
-          },
-          {
-            to: "blog",
-            label: "Blog",
-            position: "left",
-          },
-          {
-            to: "ske",
-            label: "Enterprise",
-            position: "left",
-          },
-          {
-            href: "https://github.com/syntasso/kratix",
-            position: "right",
-            label: "syntasso/kratix",
-            className: "header-github-link",
-            "aria-label": "GitHub repository",
-          },
-          {
-            href: "https://kratixworkspace.slack.com",
-            position: "right",
-            className: "header-slack-link",
-            "aria-label": "Kratix Slack Workspace",
-          },
-        ],
-      },
-      footer: {
-        style: "dark",
-        links: [
-          {
-            title: "Docs",
-            items: [
-              {
-                label: "Getting Started",
-                to: "/",
-              },
-            ],
-          },
-          {
-            title: "More",
-            items: [
-              {
-                label: "Kratix",
-                href: "https://kratix.io",
-              },
-              {
-                label: "GitHub",
-                href: "https://github.com/syntasso/kratix",
-              },
-              {
-                label: "Syntasso",
-                href: "https://syntasso.io",
-              },
-              {
-                label: "Privacy Policy",
-                href: "https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77",
-              },
-            ],
-          },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} Syntasso Limited. Built with Docusaurus.`,
-      },
-      prism: {
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        additionalLanguages: [
-          "shell-session",
-          "docker",
-          "bash",
-          "diff",
-          "json",
-          "yaml",
-          "ruby",
-        ],
-      },
-      algolia: {
-        // Algolia application ID
-        appId: "0T1XCKLOOH",
-        // Public API key
-        apiKey: "f03b43d042df527c0538ff3a332a39a7",
-        indexName: "kratix",
-        contextualSearch: true,
-      },
-      zoom: {
-        selector: '.diagram > .large',
-        config: {
-          // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
-          background: {
-            light: 'rgb(255, 255, 255)',
-            dark: 'rgb(50, 50, 50)'
-          }
+    title: "Kratix",
+    tagline: "An open-source framework for building platforms",
+    url: "https://docs.kratix.io",
+    baseUrl: "/",
+    markdown: {
+        hooks: {
+            onBrokenMarkdownLinks: "throw",
         }
-      }
-    }),
+    },
+    onBrokenLinks: "throw",
+    favicon: "img/favicon.ico",
+
+    // GitHub pages deployment config.
+    organizationName: "syntasso", // Usually your GitHub org/user name.
+    projectName: "kratix-docs", // Usually your repo name.
+    trailingSlash: false,
+
+    // Even if you don't use internalization, you can use this field to set useful
+    // metadata like html lang. For example, if your site is Chinese, you may want
+    // to replace "en" with "zh-Hans".
+    i18n: {
+        defaultLocale: "en",
+        locales: ["en"],
+    },
+
+    presets: [
+        [
+            "@docusaurus/preset-classic",
+            /** @type {import('@docusaurus/preset-classic').Options} */
+            ({
+                docs: {
+                    sidebarPath: require.resolve("./sidebars.js"),
+                    // Sidebar expanded by default on docs pages
+                    sidebarCollapsed: true,
+                    // Remove this to remove the "edit this page" links.
+                    editUrl: "https://github.com/syntasso/kratix-docs/tree/main",
+                    // remarkPlugins: [abbr],
+                    routeBasePath: '/',
+                },
+                // uncomment to add the blog section to the website
+                blog: {
+                    blogSidebarTitle: 'All posts',
+                    blogSidebarCount: 'ALL',
+                    showReadingTime: true,
+                    // Remove this to remove the "edit this page" links.
+                    // editUrl:
+                    //   'https://github.com/syntasso/kratix-docs/tree/main',
+                },
+                theme: {
+                    customCss: require.resolve("./src/css/custom.scss"),
+                },
+                googleTagManager: {
+                    containerId: 'GTM-M8KNBP6C',
+                },
+            }),
+        ],
+    ],
+
+    plugins: [
+        "docusaurus-plugin-sass",
+        require.resolve("docusaurus-plugin-image-zoom"),
+        [
+            "@docusaurus/plugin-client-redirects",
+            {
+                redirects: [
+                    {
+                        from: "/ske/integrations/backstage/installation/plugins",
+                        to: "/ske/integrations/portal-controller/backstage/configure-backstage",
+                    },
+                    {
+                        from: "/main/learn-more/status-conditions-events/promise-status-events",
+                        to: "/main/reference/promises/promise-status-events",
+                    },
+                    {
+                        from: "/main/learn-more/status-conditions-events/resource-status-events",
+                        to: "/main/reference/resources/resource-status-events",
+                    },
+                    {
+                        from: "/main/learn-more/status-conditions-events/work-status-events",
+                        to: "/main/platform-concepts/kratix-resources/work-status-events",
+                    },
+                    {
+                        from: "/main/learn-more/kratix-resources",
+                        to: "/main/platform-concepts/kratix-resources",
+                    },
+                    {
+                        from: "/main/guides/rbac",
+                        to: "/main/platform-concepts/auth/rbac",
+                    },
+                    {
+                        from: "/main/learn-more",
+                        to: "/main/how-kratix-complements",
+                    },
+                    {
+                        from: "/main/learn-more/how-kratix-complements",
+                        to: "/main/how-kratix-complements",
+                    },
+                    {
+                        from: "/main/learn-more/how-kratix-complements/intro",
+                        to: "/main/how-kratix-complements",
+                    },
+                    {
+                        from: "/main/learn-more/how-kratix-complements/terraform",
+                        to: "/main/how-kratix-complements/terraform",
+                    },
+                    {
+                        from: "/main/learn-more/how-kratix-complements/crossplane",
+                        to: "/main/how-kratix-complements/crossplane",
+                    },
+                    {
+                        from: "/main/learn-more/how-kratix-complements/backstage",
+                        to: "/main/how-kratix-complements/backstage",
+                    },
+                    {
+                        from: "/ske/kratix/air-gapped",
+                        to: "/ske/installing-ske/air-gapped"
+                    },
+                    {
+                        from: "/main/value-of-kratix",
+                        to: "/"
+                    },
+                    {
+                        from: "/ske/backstage/intro",
+                        to: "/ske/integrations/portal-controller/backstage/intro"
+                    },
+                    {
+                        from: "/workshop/installing-kratix",
+                        to: "/workshop/operating-kratix/installing-kratix"
+                    },
+                    {
+                        from: "/workshop/installing-a-promise",
+                        to: "/workshop/operating-kratix/installing-a-promise"
+                    },
+                    {
+                        from: "/workshop/part-ii/intro",
+                        to: "/workshop/writing-a-promise/intro"
+                    },
+                    {
+                        from: "/workshop/part-i/intro",
+                        to: "/workshop/operating-kratix/intro"
+                    },
+                    {
+                        from: "/workshop/multiple-promises",
+                        to: "/workshop/writing-a-promise/compound-promise"
+                    },
+                    {
+                        from: "/main/learn-more/controlling-with-labels",
+                        to: "/main/reference/promises/reconciliation-labels"
+                    },
+                    {
+                        from: "/workshop/part-0/intro",
+                        to: "/workshop/intro"
+                    },
+                ],
+            },
+        ],
+    ],
+
+    scripts: [
+        {
+            src: "https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on",
+            async: false,
+        },
+    ],
+
+    themeConfig:
+        /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+        ({
+            metadata: [
+                {
+                    name: "keywords",
+                    content: "kratix docs, kratix documentation",
+                },
+            ],
+            docs: {
+                sidebar: {
+                    hideable: true,
+                },
+            },
+            colorMode: {
+                respectPrefersColorScheme: true,
+            },
+            navbar: {
+                logo: {
+                    alt: "Kratix Logo",
+                    src: "/img/kratix-purple-io.svg",
+                    srcDark: "/img/kratix-white-io.svg",
+                    href: "https://kratix.io",
+                },
+                items: [
+                    {
+                        type: "doc",
+                        docId: "main/intro",
+                        position: "left",
+                        label: "Docs",
+                    },
+                    {
+                        type: "doc",
+                        docId: "workshop/intro",
+                        label: "Workshops",
+                        position: "left",
+                    },
+                    {
+                        to: "marketplace",
+                        label: "Marketplace",
+                        position: "left",
+                    },
+                    {
+                        to: "blog",
+                        label: "Blog",
+                        position: "left",
+                    },
+                    {
+                        to: "ske",
+                        label: "Enterprise",
+                        position: "left",
+                    },
+                    {
+                        href: "https://github.com/syntasso/kratix",
+                        position: "right",
+                        label: "syntasso/kratix",
+                        className: "header-github-link",
+                        "aria-label": "GitHub repository",
+                    },
+                    {
+                        href: "https://kratixworkspace.slack.com",
+                        position: "right",
+                        className: "header-slack-link",
+                        "aria-label": "Kratix Slack Workspace",
+                    },
+                ],
+            },
+            footer: {
+                style: "dark",
+                links: [
+                    {
+                        title: "Docs",
+                        items: [
+                            {
+                                label: "Getting Started",
+                                to: "/",
+                            },
+                        ],
+                    },
+                    {
+                        title: "More",
+                        items: [
+                            {
+                                label: "Kratix",
+                                href: "https://kratix.io",
+                            },
+                            {
+                                label: "GitHub",
+                                href: "https://github.com/syntasso/kratix",
+                            },
+                            {
+                                label: "Syntasso",
+                                href: "https://syntasso.io",
+                            },
+                            {
+                                label: "Privacy Policy",
+                                href: "https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77",
+                            },
+                        ],
+                    },
+                ],
+                copyright: `Copyright © ${new Date().getFullYear()} Syntasso Limited. Built with Docusaurus.`,
+            },
+            prism: {
+                theme: lightTheme,
+                darkTheme: darkTheme,
+                additionalLanguages: [
+                    "shell-session",
+                    "docker",
+                    "bash",
+                    "diff",
+                    "json",
+                    "yaml",
+                    "ruby",
+                ],
+            },
+            algolia: {
+                // Algolia application ID
+                appId: "0T1XCKLOOH",
+                // Public API key
+                apiKey: "f03b43d042df527c0538ff3a332a39a7",
+                indexName: "kratix",
+                contextualSearch: true,
+            },
+            zoom: {
+                selector: '.diagram > .large',
+                config: {
+                    // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+                    background: {
+                        light: 'rgb(255, 255, 255)',
+                        dark: 'rgb(50, 50, 50)'
+                    }
+                }
+            }
+        }),
 };
 
 module.exports = config;

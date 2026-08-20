@@ -1,0 +1,233 @@
+---
+title: Gating Deletion with Workflow Control
+description: Suspend a Delete Pipeline to hold a Resource's underlying infrastructure in place until an external condition is met.
+---
+
+```mdx-code-block
+import PartialGuidesPreRequisites from '@site/docs/_partials/_generic_prereqs_guides.md';
+```
+
+Delete Pipelines can suspend themselves the same way Configure Pipelines can, using the
+[Workflow Control file](/main/reference/workflows#workflow-control). This lets a Promise
+require an external condition — an approval, a backup, a check against another system —
+before the underlying Works, and the infrastructure they represent, are actually torn down.
+
+**In this guide, you will:**
+* Write a Resource Delete Pipeline that checks for an approval before continuing
+* Delete a Resource request and observe Kratix hold its Works in place while the Delete
+  Pipeline is suspended
+* Approve the deletion and watch Kratix resume the Delete Pipeline and remove the Works
+
+<PartialGuidesPreRequisites />
+
+## The scenario
+
+A platform team offers a `database` Promise. Deleting a `database` destroys real data, so
+the team wants a human to confirm the deletion before Kratix removes the underlying Work.
+The Delete Pipeline checks for a `ConfigMap` that represents that confirmation; if it is
+missing, the Pipeline suspends itself instead of completing.
+
+## 1. Define the Promise
+
+Create `database-promise.yaml`:
+
+```yaml title="database-promise.yaml"
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: database
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: databases.example.promise.syntasso.io
+    spec:
+      group: example.promise.syntasso.io
+      names:
+        kind: database
+        plural: databases
+        singular: database
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  properties:
+                    size:
+                      type: string
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: configure-pipeline
+          spec:
+            containers:
+              - name: configure
+                image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                command: ["/bin/sh", "-c"]
+                args:
+                  - |
+                    set -eu
+                    cat <<EOF > /kratix/output/configmap.yaml
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                      name: ${KRATIX_OBJECT_NAME}-generated
+                      namespace: default
+                    data:
+                      status: provisioned
+                    EOF
+      delete:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: delete-pipeline
+          spec:
+            rbac:
+              permissions:
+                - apiGroups: [""]
+                  resources: ["configmaps"]
+                  verbs: ["get"]
+            containers:
+              - name: check-deletion-approved
+                image: ghcr.io/syntasso/kratix-pipeline-utility:v0.0.1
+                command: ["/bin/sh", "-c"]
+                args:
+                  - |
+                    set -eu
+                    if kubectl get configmap "${KRATIX_OBJECT_NAME}-delete-approved" -n default >/dev/null 2>&1; then
+                      echo "deletion approved; proceeding"
+                    else
+                      echo "deletion not yet approved; suspending"
+                      cat <<EOF > /kratix/metadata/workflow-control.yaml
+                    suspend: true
+                    message: "waiting for deletion approval"
+                    EOF
+                    fi
+```
+
+The Delete Pipeline has a single container, `check-deletion-approved`, that looks for a
+`ConfigMap` named `<resource-name>-delete-approved`. If it is not found, the container
+writes `suspend: true` to `/kratix/metadata/workflow-control.yaml` instead of failing.
+
+Apply the Promise:
+
+```bash
+kubectl --context $PLATFORM apply --filename database-promise.yaml
+```
+
+## 2. Request a database
+
+Create `database-example.yaml`:
+
+```yaml title="database-example.yaml"
+apiVersion: example.promise.syntasso.io/v1alpha1
+kind: database
+metadata:
+  name: example
+spec:
+  size: small
+```
+
+```bash
+kubectl --context $PLATFORM apply --filename database-example.yaml
+```
+
+Wait for the Configure workflow to finish:
+
+```bash
+kubectl --context $PLATFORM wait database/example --for=condition=ConfigureWorkflowCompleted --timeout=60s
+```
+
+## 3. Delete the database and observe the suspension
+
+```bash
+kubectl --context $PLATFORM delete database example --wait=false
+```
+
+The Delete Pipeline runs, finds no approval `ConfigMap`, and suspends. Check the status:
+
+```bash
+kubectl --context $PLATFORM get database example -o yaml
+```
+
+The relevant parts of the output (other status fields are omitted below for brevity):
+
+```yaml
+status:
+  conditions:
+    # ...
+    - message: Delete pipeline is waiting before deleting Works
+      reason: DeleteWorkflowSuspended
+      status: "False"
+      type: DeleteWorkflowCompleted
+  kratix:
+    workflows:
+      pipelines:
+        - name: delete-pipeline
+          phase: Suspended
+          message: waiting for deletion approval
+```
+
+```bash
+kubectl --context $PLATFORM get database example -o jsonpath='{.metadata.labels}'
+```
+
+```json
+{"kratix.io/promise-name":"database","kratix.io/workflow-suspended":"true"}
+```
+
+While that label is present, Kratix does not delete the Works created for `example` — the
+underlying infrastructure stays exactly as it was. You can confirm this by listing the Works
+for the Resource; the count stays unchanged for as long as the label is present:
+
+```bash
+kubectl --context $PLATFORM get works -n default -l kratix.io/promise-name=database,kratix.io/resource-name=example
+```
+
+```
+NAME                                         STATUS
+database-example-configure-pipeline-c9180    Ready
+```
+
+## 4. Approve and resume the deletion
+
+Create the approval `ConfigMap` and remove the suspend label:
+
+```bash
+kubectl --context $PLATFORM create configmap example-delete-approved --namespace default
+kubectl --context $PLATFORM label database example kratix.io/workflow-suspended-
+```
+
+Removing the label re-runs the Delete Pipeline. This time it finds the approval `ConfigMap`
+and completes normally, so Kratix deletes the Works and finishes removing `example`:
+
+```bash
+kubectl --context $PLATFORM get database example
+```
+
+```
+Error from server (NotFound): databases.example.promise.syntasso.io "example" not found
+```
+
+## Promise Delete workflows
+
+A Promise's own Delete Pipeline (defined under `spec.workflows.promise.delete`) can suspend
+itself in exactly the same way. While suspended, the Works created by the Promise are held
+in place, and the Promise's `DeleteWorkflowCompleted` condition reports
+`DeleteWorkflowSuspended` — the same mechanism demonstrated above for Resource requests.
+
+## See also
+
+* [Workflow Control reference](/main/reference/workflows#workflow-control)
+* [Resource Reconciliation Labels](/main/reference/resources/reconciliation-labels#unsuspend-a-workflow)
+* [Promise Reconciliation Labels](/main/reference/promises/reconciliation-labels#unsuspending-a-workflow)

@@ -1,0 +1,170 @@
+---
+title: Cortex
+description: Configuring a Cortex portal on the SKE Portal Controller
+sidebar_label: Overview
+slug: intro
+keywords: [portal, cortex, ske, controller, workflow, exporter]
+---
+
+A Cortex portal publishes Promises and Resources as Cortex entities, and generates Cortex
+workflows so developers can request, update and delete Resources from Cortex.
+
+Unlike Backstage, the Portal Controller calls the Cortex API directly. That means a Cortex portal
+needs a URL and a credential, and it runs two things Backstage does not: a setup Job and a status
+exporter.
+
+Set up your Cortex workspace and Git integration before connecting it here, as described in
+[Configuring Cortex](../../cortex/configuring-cortex#set-up-the-cortex-workspace).
+
+## Configuration
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cortex-token
+  namespace: kratix-platform-system
+type: Opaque
+stringData:
+  token: <cortex-api-token>
+---
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.2.0
+  portals:
+    - name: prod
+      type: cortex
+      url: https://api.getcortexapp.com
+      secretRef:
+        name: cortex-token
+      config:
+        repositoryName: syntasso/platform-catalog
+        provider: github
+        integrationAlias: github-main
+        branch: main
+```
+
+`url` and `secretRef.name` are both required. The Secret must exist in `kratix-platform-system`
+with the credential under a `token` key, see
+[Credential Secret handling](../installation#credential-secret-handling).
+
+`config` takes:
+
+| Key | Required | Meaning | Default |
+|---|---|---|---|
+| `repositoryName` | yes | The Git repository the generated Cortex workflows commit requests into | |
+| `provider` | yes | `github` or `gitlab` | |
+| `integrationAlias` | yes | The Cortex Git integration alias | |
+| `branch` | no | Branch the workflows commit to | `main` |
+| `path` | no | Directory within the repository | `kratix-resource-requests` |
+
+Requests are committed to `<path>/<promise>/<namespace>-<name>.yaml`.
+
+## What gets deployed
+
+Alongside the usual `generate → configure → writer` pipeline, a Cortex portal runs:
+
+- A one-time, portal-scoped **setup Job** that idempotently ensures the shared Cortex relationship
+  type and entity type this integration depends on exist. It re-runs whenever the `SKEIntegration`
+  changes, which includes changes to unrelated portals on the same resource.
+- A long-lived **status exporter**, a Deployment and Service running one replica as the
+  `ske-portal-exporter` Service Account, which pushes resource status changes to the Cortex API as
+  they happen rather than waiting for the next sync. It is owned by the `SKEIntegration` and
+  removed when the portal is removed.
+
+### Tuning the exporter
+
+```yaml
+portals:
+  - name: prod
+    type: cortex
+    # ... url, secretRef, config as above
+    adapterConfig:
+      imagePullSecrets: # extra pull-secret names, always merged with syntasso-registry
+        - customer-registry
+      exporter:
+        deploymentSpec: # partial Deployment spec, merged into the exporter Deployment
+          template:
+            spec:
+              nodeSelector:
+                tier: portal
+              tolerations:
+                - key: dedicated
+                  operator: Equal
+                  value: portal
+                  effect: NoSchedule
+```
+
+`exporter.deploymentSpec` is merged into the exporter Deployment. Prefer pod-level fields such as
+`nodeSelector`, `tolerations` and `affinity`. Controller-owned fields, including the exporter
+container itself, its Service Account, labels, credential injection and pull secrets, are always
+re-applied afterwards, so a `containers` entry in the overlay is discarded rather than replacing the
+exporter's own container.
+
+## Fixing the namespace
+
+`adapterConfig.generate.args` accepts `--fixed-namespace=<value>` for a Cortex portal, which fixes
+the namespace on the generated create workflow and hides the namespace input:
+
+```yaml
+adapterConfig:
+  generate:
+    args:
+      - "--fixed-namespace=team-a"
+```
+
+The value must be a valid DNS-1123 label. This is portal-wide, so every Promise routed through the
+portal gets it.
+
+The update and delete workflows are unaffected, since they act on an entity the user picks and take
+its namespace from the entity itself.
+
+## Renaming the identity fields
+
+Four annotations on a Promise change how the Name and Namespace inputs are labelled on its
+generated workflows:
+
+| Annotation | Effect |
+|---|---|
+| `kratix.io/cortex-name-field-name` | The Name input's label |
+| `kratix.io/cortex-name-field-description` | The Name input's description |
+| `kratix.io/cortex-namespace-field-name` | The Namespace input's label |
+| `kratix.io/cortex-namespace-field-description` | The Namespace input's description |
+
+These are per-Promise and remain supported.
+
+## Deletion
+
+:::warning
+Deleting a Promise removes **every Cortex entity of that Promise's type**, not just the Promise
+entity. The Portal Controller issues a bulk delete for the Promise's type before removing the
+Promise entity, its workflows and its entity type.
+
+If Resources of that Promise still exist, their Cortex entities go with it. Detach the Promise from
+the portal first, by removing its `kratix.io/portal-cortex` label, if you want to keep them.
+:::
+
+Deleting a single Resource request removes only that Resource's entity.
+
+## Entity naming
+
+Generated entities use predictable tags, which matters if you write Cortex queries or scorecards
+against them:
+
+| Entity | Tag |
+|---|---|
+| Promise | `promise-<promise>` |
+| Resource | `<promise>-<name>-<namespace>` |
+
+Resource entities carry the Promise's name as their Cortex type, sit in the `kratix-resources`
+group, and hold their Kubernetes identity in custom metadata.
+
+## Next steps
+
+- [Cortex examples](./cortex-examples) shows ways to customise the generated documents.
+- [Migrating from the Cortex Controller](./migrating-from-cortex) covers moving an existing
+  integration across.

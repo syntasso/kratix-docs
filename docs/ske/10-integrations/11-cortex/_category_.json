@@ -1,6 +1,6 @@
 {
-  "label": "Cortex",
-  "position": 3,
+  "label": "Cortex Controller (deprecated)",
+  "position": 11,
   "link": {
     "type": "doc",
     "id": "ske/integrations/cortex/intro"

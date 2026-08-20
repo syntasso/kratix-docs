@@ -1,0 +1,351 @@
+---
+title: Backstage Plugins
+description: Release information about the Backstage Plugins
+sidebar_label: Backstage Plugins
+slug: /ske/releases/backstage
+---
+
+## Overview
+
+The SKE Backstage Frontend plugin extends Backstage so it can be used to view
+and manage SKE objects.
+
+The SKE Backstage Backend plugin enables the communication between the Backstage
+instance and the SKE Platform.
+
+The plugins are available as NPM packages at:
+
+```
+@syntasso/plugin-ske-frontend
+@syntasso/plugin-ske-backend
+```
+
+Check the release notes below for information on each available version.
+
+## Release Notes
+
+### [ske-backend v0.23.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.23.0/); [ske-frontend v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.20.0/) (2026-08-18)
+
+#### Features
+
+* **Support for pending requests outside pull-request mode.** `ske:record-request` accepts a request
+with no pull request and no requests repository, and a pending request without one is shown as
+waiting on the platform rather than on a reviewer.
+
+  This is the plugin half only. Nothing changes until you upgrade to
+  [Portal Controller v0.11.0](./ske-portal-controller), which generates the Templates that record
+  push-mode requests.
+
+### [ske-backend v0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.22.0/); [ske-frontend v0.19.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.19.0/) (2026-08-14)
+
+#### Features
+
+* Compatible with Backstage v1.51.0
+
+* **Improvements on the Pending Request page.** It now reports the requested kind and who
+submitted it, and its banner reflects what the pull request actually says, instead of announcing
+"awaiting approval" for a request that has already been merged.
+
+* **Settled requests are withdrawn.** A pull request closed without merging drops the request, a
+pending request disappears as soon as its resource lands rather than lingering for a refresh cycle,
+and a completed deletion no longer leaves a pending entity behind.
+
+* **Resources report when the platform has not caught up.** A resource whose generation is ahead of
+the observed generation shows a banner while the change is applied, and a warning if the configure
+workflow failed. This applies to any live resource, whatever the delivery mode. It reads live
+resource state, so it is not shown when `ske.mode` is `gitops`.
+
+* **The in-flight banner names the action**, saying whether an update or a deletion is awaiting
+approval, rather than inferring it from the pull request's branch.
+
+* **Delete decides what it will do at click time**, opening a pull request on a review-managed
+resource and deleting directly on one that was not. If the platform cannot be reached, it refuses
+and says why.
+
+* **Richer Promise and Resource pages:** Promise version and colour-coded availability on the About
+card, `metadata.links`, the full status behind a toggle, an open pull request shown as a two-step
+progress indicator, and Manage actions held while a pull request is already open for the resource.
+
+* **A catalogue filter for entities with an open pull request**, so a platform team can see
+everything awaiting review.
+
+* **New frontend system support.** The plugin's entity content is registered at `/kratix`, so it no
+longer collides with the catalogue's own Overview tab. Both install paths are documented in
+[Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage).
+
+#### Bug Fixes
+
+* The requests repository field is editable when the resource does not record one, rather than empty
+and disabled, which made those resources impossible to update.
+
+* The delete confirmation says what pressing Yes will actually do.
+
+* A resource missing its Promise annotation is refused rather than deleted directly.
+
+* `ske.scm.username` is optional in the configuration schema, so a GitHub App installation token
+passes `backstage-cli config:check --strict`.
+
+#### Maintenance
+
+* The sweep that withdraws rejected requests runs every 900s by default, to stay inside the GitHub
+API rate limit when many requests are in flight.
+
+* Bump Backstage from 1.50.4 to 1.51.0.
+
+### [ske-backend v0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.21.0/); [ske-frontend v0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.18.0/) (2026-07-30)
+
+These versions are required by the [Portal Controller](/ske/integrations/portal-controller/intro)'s
+`pull-request` delivery mode. Earlier backend versions do not provide the action that records a
+request, so a submission opens the pull request and then fails.
+
+#### Features
+
+* **Requests can be raised as pull requests for review.** Two new scaffolder actions,
+`ske:write-manifest` and `ske:record-request`, let a generated Template write a resource request to
+a repository, open a pull request for it, and tell Backstage that the request is awaiting approval.
+Nothing reaches the platform until the pull request is merged. See
+[Delivery modes](/ske/integrations/portal-controller/backstage/delivery-modes).
+
+* **Pending requests appear in the catalogue.** A request awaiting approval is published as a
+Component carrying a link to its pull request, so developers can find and follow it. It is removed
+once the request is fulfilled and the real resource entity appears.
+
+* **Update and delete go through the same review.** For a resource that was requested through a
+pull request, the Manage tab's Update and Delete raise pull requests of their own rather than
+changing the platform immediately, and the confirmation dialog says so. Resources created any other
+way are unaffected.
+
+* New `ske:publish-catalog` action for publishing catalog files.
+
+* Frontend hooks are now exported, for teams building their own entity pages.
+
+#### Bug Fixes
+
+* Pending request entity names are now unique per request, and keep their suffix when a long name
+is truncated.
+
+#### Maintenance
+
+* Pin the request-recording action and HTTP contracts against the platform side, so the plugin and
+the Portal Controller cannot drift apart silently.
+
+### [ske-backend v0.20.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.20.0/); [ske-frontend v0.17.6](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.6/) (2026-07-01)
+
+#### Features
+
+* New `hybrid` backend mode. In hybrid mode the plugin reads resource state from
+the Kubernetes API, giving real-time status and visibility of resources created
+outside Backstage (for example, via `kubectl`), while create, update, and
+delete operations are written to a Git repository. It requires both the
+`ske.kubernetes` and `ske.scm` configuration, and the platform must reconcile
+the Git repository back into the cluster. See [Configuring the backend
+plugin](/ske/integrations/portal-controller/backstage/configure-backstage#configuring-the-backend-plugin)
+for details.
+
+#### Bug Fixes
+
+* Resource update workflows now render correctly when they use any built-in plugin.
+
+### [ske-backend v0.19.5](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.5/); [ske-frontend v0.17.5](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.5/) (2026-05-19)
+
+#### Features
+
+* Support for the [new Backstage frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0). The plugin now registers entity content extensions automatically when used via the `alpha` entry point. The legacy frontend system continues to work as before.
+
+#### Maintenance
+
+* Requires Node.js 22 or higher
+* Bump dependencies
+
+### [ske-backend v0.19.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.4/) (2026-04-20)
+
+#### Bug Fix
+
+* This fixes a bug where, when using a Github App and GitOps mode, queries to the Github repo would fail with an authentication error. This fix ensures the Github App credentials are used to authenticate against the Github Repo.
+
+#### Maintenance
+
+* Bump dependencies to address security vulnerabilities
+
+### [ske-frontend v0.17.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.4/) (2026-03-25)
+
+#### Maintenance
+
+* Bump dependencies to address security vulnerabilities
+
+### [ske-backend v0.19.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.3/) (2026-03-25)
+
+#### Features
+
+* Bump dependencies to address security vulnerabilities
+
+### [ske-frontend v0.17.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.3/) (2025-11-20)
+
+#### Maintenance
+
+* Bump glob dependency to address [CVE-2025-6476](https://www.cvedetails.com/cve/CVE-2025-64756/)
+
+### [ske-backend v0.19.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.2/); [ske-frontend v0.17.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.2/) (2025-09-09)
+
+#### Features
+
+* Compatible with Backstage v1.42.4
+
+### [ske-backend v0.19.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.1/); [ske-frontend v0.17.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.1/) (2025-08-20)
+
+#### Maintenance
+
+* Better Promise summary wrapping in Resource details page.
+
+### [ske-backend v0.19.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.19.0/); [ske-frontend v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.17.0/) (2025-06-12)
+
+#### Features
+
+* Compatible with Backstage v1.39.0
+
+#### Maintenance
+
+* Security updates
+
+### [ske-backend v0.18.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.18.0/) (2025-06-02)
+
+#### Features
+
+* GitOps mode now supports Token generation from the authenticated GitHub user
+  when using the GitHub App authentication method. This allows users to
+  authenticate with Backstage and then use the GitOps mode without needing to
+  manually add a GitHub token to the app config.
+
+### [ske-backend v0.17.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.17.0/) (2025-05-20)
+
+#### Features
+
+* Better error handling when communicating with the Backend fails
+
+### [ske-backend v0.16.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.16.1/) (2025-05-16)
+
+#### Bug Fixes
+
+* No longer tries to parse the Backstage Access Token when not authenticating
+  with Kubernetes via OIDC. This was causing issues when both the Access Token
+  was present but not valid for Kubernetes communication.
+
+### [ske-frontend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.16.0/) (2025-05-09)
+
+#### 🚨 Breaking changes 🚨
+
+* The React components `KratixPromiseAboutCard` and `KratixResourceAboutCard`
+  have been removed. Those two were merged into the `KratixAboutCard` Component,
+  that can be used to display information about both the Promise and Resource.
+  This is only a breaking change if you were using one of those two components
+  directly; the `KratixPromiseEntityPage` and `KratixResourceEntityPage`
+  components (which are the ones documented in the installation steps) are
+  already using the new `KratixAboutCard` component.
+
+#### Features
+
+* Two new components are available: `KratixOverviewTab` and `KratixManageTab`.
+  Those are registered with Backstage via the plugin `.provide` method, and
+  should render the inside of the `Overview` and `Manage` tabs of the Entity
+  pages.
+* The `KratixPromiseEntityPage` and `KratixResourceEntityPage` components were
+  updated to use the new `KratixOverviewTab` and `KratixManageTab` components.
+
+### [ske-backend v0.16.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.16.0/); [ske-frontend v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.15.0/) (2025-05-07)
+
+#### 🚨 Breaking changes 🚨
+
+* backend: enable dynamically loading of the plugin. This means you no longer
+  need to manually add the scaffolding in your Backend app.
+
+  To migrate, locate the lines in your `packages/backend/src/index.ts` file that looks like this:
+
+  ```ts
+  import { scaffolderModuleSkeExtensions } from '@syntasso/plugin-ske-backend';
+
+  backend.add(import('@syntasso/plugin-ske-backend'));
+  backend.add(scaffolderModuleSkeExtensions);
+  ```
+
+  Update it to just:
+
+  ```ts
+  backend.add(import('@syntasso/plugin-ske-backend'));
+  ```
+
+#### Features
+
+* frontend: add compatibility with the new Frontend plugin architecture under the `alpha` sub-path.
+
+### [ske-backend v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.15.0/); [ske-frontend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.14.0/) (2025-04-16)
+
+#### Features
+
+* If `ske.mode` is set to `gitops`, the backend plugin will use the Git repository to execute CRUD operations on the Kubernetes Cluster
+    * This is to keep compatibility for existing deployments; upcoming features will only be available when the plugin is configured for direct API communication
+    * `gitops` mode will be removed in a future release
+* Compatibility with Backstage v1.37.1
+* UX improvements
+
+### [ske-backend v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.14.0/); [ske-frontend v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.13.0/) (2025-03-31)
+
+#### 🚨 Breaking changes 🚨
+
+* The plugins will no longer rely on a Git repository to execute CRUD operations on the Kubernetes Cluster. Instead, they will now use the Kubernetes API to manage the resources. This enables users to get the most up-to-date information on their resources, as well as manage resources created via other means, like via `kubectl`. The migration is quite simple and only requires changes to the Backstage app config. Read the [Configuring the backend plugin](/ske/integrations/portal-controller/backstage/configure-backstage#configuring-the-backend-plugin) documentation for more information.
+* The Backstage Component Promise is now deprecated; its features are now available within the plugins and SKE v0.21.0+.
+
+#### Features
+
+* Backend plugin now uses the Kubernetes API to fetch/create/update/delete resources
+* Support for OIDC and Service Account authentication
+* Users can now manage resource created outside backstage
+* UX improvements
+
+### [ske-backend v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.13.0/) (2024-12-27)
+
+#### Maintenance
+
+* compatibility with Backstage v1.34.1
+* no longer use deprecated `@backstage/backend-common` package
+
+### [ske-backend v0.12.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.12.0/) (2024-10-12)
+### [ske-frontend v0.12.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.12.0/) (2024-10-12)
+
+#### Features
+
+* compatibility with Backstage v1.32.5
+
+### [ske-frontend v0.11.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.11.1/) (2024-10-15)
+
+#### Bug Fixes
+
+* Fixed a bug where the "Create" button wasn't being displayed on the Promise Entity page when a custom `type` was specified.
+    - There's now a new `kratix.io/type` annotation that can be used to specify the type of the Component. Users of the SKE Backstage Generator ([v0.10.1](pipeline-stages/backstage-generator#v0.10.1)) will have this annotation automatically added to their Component YAML files.
+    - **This requires changes to your Catalog Entity page.** Please refer to the [Configure Backstage documentation](/ske/integrations/portal-controller/backstage/configure-backstage#update-the-entitypage) for instructions.
+
+### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/v0.11.0/) (2024-09-19)
+
+#### Bug Fixes
+
+* Fix bug where resources request created in namespaces other than 'default' could not be managed
+
+### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/v0.10.0/) (2024-09-18)
+
+#### Features
+
+* Add 'promise summary' section to resource about page
+* compatibility with Backstage 1.30.4
+
+#### Bug Fixes
+
+* fix manage resource duplicate creation
+
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/v0.9.0/) (2024-08-08)
+
+#### Features
+
+* compatibility with Backstage 1.29.2
+
+#### Bug Fixes
+
+* improve the update experience with language tweaks

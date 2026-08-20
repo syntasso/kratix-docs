@@ -33,6 +33,7 @@ jobs:
           CRAWLER_USER_ID: ${{ vars.CRAWLER_USER_ID }}
           CRAWLER_API_KEY: ${{ secrets.CRAWLER_API_KEY }}
         run: |
+          set -eux -o pipefail
           # Trigger the crawler
           crawler_id="$(curl -sH "Content-Type: application/json" \
             --user ${CRAWLER_USER_ID}:${CRAWLER_API_KEY} \

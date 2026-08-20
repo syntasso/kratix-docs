@@ -324,6 +324,16 @@ rbac:
     resources: ["statefulsets"]
 ```
 
+:::info
+
+Health Check pods run **non-root by default**. If your workflow image runs as root (many
+general-purpose utility images do), the container will not start until you override its
+`securityContext` — set `runAsUser` to a non-zero UID on clusters that mandate non-root, or
+`runAsNonRoot: false` where root is permitted. See
+[Health Definition: Security context](/ske/reference/healthdefinition#security-context) for details.
+
+:::
+
 The updated script will look like this:
 
 ```yaml

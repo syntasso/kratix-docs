@@ -1,0 +1,112 @@
+---
+title: Portal Controller
+description: Release information about the Portal Controller
+sidebar_label: Portal Controller
+slug: /ske/releases/ske-portal-controller
+---
+
+## Overview
+
+The Portal Controller syncs Kratix Promises and Resource requests into a developer portal, such as Backstage or Cortex, from a single, unified integration. It replaces the
+[Backstage Controller](./backstage-controller) and [SKE Cortex Controller](./cortex-controller), which are now deprecated in its favour. See
+[Portal Controller](/ske/integrations/portal-controller/intro) for the full documentation.
+
+The release manifest is available at:
+
+```
+http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/
+```
+
+## Release Notes
+
+### [v0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.3.0/) (2026-08-18)
+
+#### Features
+
+* **Portal Sync condition is now filtered out from the generated Entity.**: similar to other Kratix-owned
+conditions, the Portal Sync conditions are no longer added to the resource Entity when they are generated.
+
+* **Push-mode Templates record the request.** A generated `push` Template now applies the resource
+request and then hands it to the Backstage backend, so the developer sees a pending request in the
+catalogue while the platform catches up rather than nothing at all. Pull-request Templates are
+unchanged.
+
+:::warning Upgrade the Backstage plugins first
+This release requires **ske-backend v0.23.0** and **ske-frontend v0.20.0** or later.
+
+Upgrade the plugins **before** the Portal Controller. Doing it in that order is safe: the new
+plugins accept everything the current Templates send, so nothing changes until the controller
+follows.
+
+In the other order, newly generated push Templates carry a `record-request` step that an older
+backend rejects. Because that step runs **after** the request has been applied, the developer sees a
+failed task for a resource that was in fact created.
+:::
+
+### [v0.2.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.2.0/) (2026-07-30)
+
+The first release of the Portal Controller: one integration for every developer portal your platform exposes.
+
+Until now, each portal needed its own controller, its own `SKEIntegration`, and its own customization CRD. Adding a second portal meant running a second controller, and the two
+had little in common. The Portal Controller replaces that with a single integration that declares every portal on one resource, generates entities through one pipeline, and gives
+Promise authors one way to shape what those entities look like.
+
+Both the [Backstage Controller](./backstage-controller) and the [SKE Cortex Controller](./cortex-controller) are deprecated as of this release. They continue to work, so you can
+migrate when it suits you. See [Migrating from Backstage](/ske/integrations/portal-controller/backstage/migrating-from-backstage) and
+[Migrating from Cortex](/ske/integrations/portal-controller/cortex/migrating-from-cortex).
+
+#### What you gain over the standalone controllers
+
+The Portal Controller generates the same entities the standalone controllers did. What changes is
+everything around them:
+
+| | Standalone controllers | Portal Controller | Portals |
+|---|---|---|---|
+| **Portals per platform** | One `SKEIntegration` per type, so one Backstage and one Cortex | Every portal on one `SKEIntegration`, including two Backstage instances side by side | Both |
+| **Opting a Promise in** | Per-portal wiring | One label, `kratix.io/portal-<type>`, and a single Resource can opt back out | Both |
+| **Customizing what is generated** | Backstage had `BackstageEntityCustomization`, one pipeline shared by the Promise and its Resources. Cortex had a handful of annotations and no way to edit the generated documents | `PortalCustomization` with independent promise and resource lanes, for every portal type | Both |
+| **Expressing a customization** | Typed `entityGenerationOptions` fields, or a hand-written container | Declarative [Portal Patch](/ske/integrations/portal-controller/portal-patch/intro) recipes, with your own container still available | Both |
+| **Reporting** | Per-controller | One `PortalBindingReady` condition plus a per-type sync condition and an entity URL annotation | Both |
+| **Reviewing requests** | Not available: submitting a form applied it immediately | `pull-request` delivery mode raises the request as a pull request, and update and delete go through review too | Backstage |
+| **Where entities are written** | A Destination you create and label `environment: backstage` beforehand | The portal creates and owns its Destination and state store, or adopts an existing one | Backstage |
+
+For **Cortex** specifically, the headline change is customization. The standalone controller
+generated its entity and workflows the one way it knew how, and the only levers were annotations.
+A Cortex portal now runs the same `generate → configure → writer` pipeline as every other portal, so
+you can reshape the generated entity and workflows at both the Promise and the Resource level. See
+[Cortex examples](/ske/integrations/portal-controller/cortex/cortex-examples).
+
+Two things become portal-wide rather than per-Promise: the Cortex fixed namespace, previously the
+`kratix.io/cortex-fixed-namespace` annotation, and the Backstage single-page form. Both are now
+`adapterConfig.generate.args` flags on the portal. Where you need them per Promise, the
+`hideNamespaceManifest` and `singleSpecPage` Portal Patch recipes do that job.
+
+#### Features
+
+* **One integration, many portals.** Declare every portal your platform exposes on a single `SKEIntegration` of `type: portal-controller`. Portals of the same type can coexist,
+so a staging and a production Backstage are two entries rather than two installations. See [Installation](/ske/integrations/portal-controller/installation).
+
+* **Opt in with a label.** A Promise or Resource request joins a portal by carrying `kratix.io/portal-<type>`, instead of needing a dedicated resource per portal. A single
+Resource can opt back out without affecting its Promise. See [Bind a Promise to a portal](/ske/integrations/portal-controller/installation#bind-a-promise-to-a-portal).
+
+* **Request review with pull-request delivery.** Backstage portals can run in `pull-request` mode, where submitting the generated form raises a pull request against a Git
+repository instead of applying the request directly. Nothing reaches the platform until a human merges it, and updates and deletions go through the same review. Currently GitHub
+only. See [Delivery modes](/ske/integrations/portal-controller/backstage/delivery-modes).
+
+* **Backstage portals manage their own destination.** A portal can create and own the Kratix Destination and state store it writes entities to, rather than requiring you to
+wire one up beforehand. Platforms that already manage Destinations can adopt an existing one instead. See [Backstage](/ske/integrations/portal-controller/backstage/intro).
+
+* **Customizable Cortex entities and workflows.** A Cortex portal runs the same
+`generate → configure → writer` pipeline as every other portal type, so the generated entity and
+workflows can be reshaped at both the Promise and the Resource level. It also runs a status
+exporter and a setup Job that provisions the shared entity and relationship types the integration
+depends on. See [Cortex](/ske/integrations/portal-controller/cortex/intro).
+
+* **Shape entities declaratively.** The new `PortalCustomization` resource, which replaces `BackstageEntityCustomization`, runs containers that edit generated documents before
+they ship, with separate lanes for the Promise and its Resources. Paired with [Portal Patch](/ske/integrations/portal-controller/portal-patch/intro), most customizations are a few
+lines of declarative recipe rather than a hand-written script. See [Customization](/ske/integrations/portal-controller/customization).
+
+#### Known issues
+
+* Portal Patch recipes that target the `ske-configure-resource` step, including `hideNamespaceManifest`, fail under `pull-request` delivery mode, because that step only exists in
+`push` mode. A recipe that matches nothing aborts the sync, so no entity ships.

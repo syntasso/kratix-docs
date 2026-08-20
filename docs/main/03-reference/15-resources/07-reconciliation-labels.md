@@ -24,7 +24,10 @@ The label is removed automatically once Kratix schedules the manual run so it ca
 
 The `kratix.io/manual-reconciliation: "true"` label can also be applied to a [Resource Binding](../promises/promise-upgrade/resource-bindings) to request that Kratix reruns the Resource Configure workflow for the bound Resource Request.
 
-This is useful when a Resource has already been patched to the desired Promise version (its `spec.version` is at the target) but the pipeline previously failed. In this case the normal version-mismatch trigger will not fire again, so the label provides an explicit retry signal.
+This is useful when a Resource has already been patched to the desired Promise
+version (its `spec.version` is at the target) but the pipeline previously failed.
+The label retries the workflow immediately instead of waiting for periodic
+reconciliation.
 
 When Kratix detects the label on a ResourceBinding it:
 
@@ -32,12 +35,6 @@ When Kratix detects the label on a ResourceBinding it:
 2. Removes the label from the ResourceBinding.
 
 The Resource Configure workflow then reruns as described above.
-
-:::info
-
-Kratix will not re-trigger reconciliation for a Resource that has already failed at the target version unless this label is explicitly set on its ResourceBinding.
-
-:::
 
 ## Unsuspend a Workflow
 
@@ -47,7 +44,7 @@ Promises can signal Kratix that the current resource workflow should be suspende
 kratix.io/workflow-suspended: "true"
 ```
 
-This label marks a Resource configure workflow as suspended.
+This label marks a Resource Configure or Delete workflow as suspended.
 
 While the label is present:
 
@@ -55,6 +52,13 @@ While the label is present:
 - the current pipeline is marked as `Suspended` in `status.kratix.workflows.pipelines`
 
 If the label is removed, Kratix resumes from the suspended Pipeline.
+
+:::note
+The same labels work with Configure and Delete Pipelines. During Delete
+Pipelines, Works created by the Promise are **not deleted**, and the
+`DeleteWorkflowCompleted` condition is set to `False` with reason
+`DeleteWorkflowSuspended`. Removing the label re-runs the Delete Pipeline.
+:::
 
 ## Pausing Reconciliation
 

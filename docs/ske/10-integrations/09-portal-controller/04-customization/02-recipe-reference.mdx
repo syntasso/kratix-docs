@@ -1,0 +1,267 @@
+---
+title: Recipe reference
+description: The complete Portal Patch recipe grammar
+keywords: [portal, portal-patch, recipe, reference, target, patch]
+slug: /ske/integrations/portal-controller/portal-patch/recipe-reference
+sidebar_label: Recipe reference
+---
+
+A recipe is a single YAML document passed as one container argument. Every recipe selects a
+**target** and then applies an **operation** to it.
+
+```yaml
+target:
+  kind: Component      # or: file: workflow-create.yaml
+  list:                # optional, selects an item within the document
+    path: spec.parameters
+    key: title
+    value: Size
+op: merge              # optional, defaults to merge
+patch:                 # required for merge, forbidden for every other op
+  spec:
+    owner: platform-team
+```
+
+## Top-level fields
+
+| Field | Type | Used by | Meaning |
+|---|---|---|---|
+| `target.kind` | string | all | Selects the document whose top-level `kind` matches. Mutually exclusive with `target.file`. |
+| `target.file` | string | all | Selects a single-document file by bare filename. Mutually exclusive with `target.kind`. |
+| `target.list` | object or list | all | Selects an item, or a chain of nested items, within the document. |
+| `op` | string | all | `merge` (default), `remove`, `singleSpecPage`, `cortexEntityProjection`, `hideNamespaceManifest`. |
+| `patch` | map | `merge` | The changes to merge. Required for `merge`, rejected for every other operation. |
+| `field` | string | `cortexEntityProjection`, `hideNamespaceManifest` | Dot-separated path to a string field inside the selected item. |
+| `sourceAction` | string | `cortexEntityProjection` | The Cortex action producing the output. |
+| `outputKey` | string | `cortexEntityProjection` | The output key on that action. |
+| `attribute` | string | `cortexEntityProjection` | The entity attribute to project. |
+| `defaultNamespace` | string | `hideNamespaceManifest` | Namespace to substitute. Defaults to `default`. |
+
+Exactly one of `target.kind` or `target.file` is required. Recipes are validated in full before
+any file is read, so a malformed recipe fails before anything is touched.
+
+## Selecting a target
+
+### Which file
+
+Recipes resolve against `/kratix/output`. `target.kind` always reads `catalog-info.yaml`, which is
+what the Backstage generate stage writes. `target.file` names a sibling file in the same
+directory, which is how Cortex documents are addressed:
+
+```yaml
+target:
+  file: workflow-create.yaml
+```
+
+`target.file` must be a bare filename. A value containing a path separator is rejected.
+
+### Which document
+
+A Backstage `catalog-info.yaml` holds more than one document, the Component and the Template, so
+`target.kind` picks between them:
+
+```yaml
+target:
+  kind: Template
+```
+
+The kind must match exactly one document. Matching none, or more than one, is an error.
+
+A file selected with `target.file` must contain exactly one document, which is true of every
+Cortex document the adapter writes.
+
+### Which node inside the document
+
+Without `target.list`, the operation applies at the document root. With it, the operation applies
+to a selected list item. Items are selected **by key, never by index**, so recipes keep working
+when the generate stage reorders a list:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters   # dot-separated path to a list
+    key: title              # a field on each item
+    value: Size             # the value to match
+```
+
+All three of `path`, `key` and `value` are required. The selector must match exactly one item.
+
+To reach an item nested inside another item, give a chain. The first `path` resolves from the
+document root, and each later `path` resolves inside the item the previous selector chose:
+
+```yaml
+target:
+  file: workflow-create.yaml
+  list:
+    - path: actions
+      key: slug
+      value: user-input
+    - path: schema.inputs
+      key: key
+      value: app
+```
+
+## Operations
+
+### `merge` (default)
+
+Recursively merges `patch` into the target.
+
+```yaml
+target:
+  kind: Component
+patch:
+  spec:
+    owner: platform-team
+    lifecycle: production
+  metadata:
+    tags: [tier-1, platform-owned]
+```
+
+Merge semantics:
+
+- Scalars replace the value at the same key.
+- Maps merge key by key, at any depth.
+- **Lists replace wholesale.** A list in `patch` replaces the list in the document, it does not
+  append to it.
+- **A `null` value deletes the key.** This is how you remove a field.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: "MyKind Instance Metadata"
+patch:
+  properties:
+    objnamespace: null    # remove the namespace field from the form
+  required: [objname]     # replaces the existing required list
+```
+
+With `target.list`, the patch applies to the selected item, not to the document root.
+
+### `remove`
+
+Deletes the entire list item the selector resolves to. Requires `target.list` and rejects `patch`.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: Size
+op: remove
+```
+
+To remove a field *within* an item rather than the item itself, use a `merge` with a `null` value.
+
+### `singleSpecPage`
+
+**Backstage only.** Collapses a Template's per-property specification pages into one page titled
+"Specification". Rejects `target.list` and `patch`.
+
+```yaml
+target:
+  kind: Template
+op: singleSpecPage
+```
+
+The first page, which carries the instance metadata fields, is left untouched. Every remaining
+page is merged into a single page. If the Template has one page or fewer, the recipe does nothing
+and succeeds.
+
+### `hideNamespaceManifest`
+
+**Backstage only.** Replaces the namespace placeholder in a generated step's manifest with a fixed
+namespace, so the resource always lands in that namespace. Requires `target.list` and `field`, and
+rejects `patch`.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.steps
+    key: id
+    value: ske-configure-resource
+op: hideNamespaceManifest
+field: input.manifest
+defaultNamespace: platform-team
+```
+
+`defaultNamespace` must be a valid Kubernetes namespace name, at most 63 characters, and defaults
+to `default` when omitted.
+
+This only removes the namespace from the manifest. To also hide the namespace field on the form,
+pair it with a `merge` recipe that deletes `objnamespace` from the instance metadata page, as shown
+under [`merge`](#merge-default) above.
+
+:::warning Push delivery mode only
+This recipe targets the `ske-configure-resource` step, which only exists in `push`
+[delivery mode](../backstage/delivery-modes). Under `pull-request` mode the selector matches
+nothing, and Portal Patch fails the batch, which aborts the sync and ships nothing.
+
+If a Promise's portal uses `pull-request` mode, do not use this recipe.
+:::
+
+### `cortexEntityProjection`
+
+**Cortex only.** Rewrites a placeholder in a Cortex workflow so it projects one attribute of a
+picked entity, rather than the raw value. Requires `target.list`, `field`, `sourceAction`,
+`outputKey` and `attribute`, and rejects `patch`.
+
+```yaml
+target:
+  file: workflow-create.yaml
+  list:
+    - path: actions
+      key: slug
+      value: commit-file
+op: cortexEntityProjection
+field: schema.content
+sourceAction: user-input
+outputKey: app
+attribute: name
+```
+
+This turns a placeholder reading `actions.user-input.outputs.app` into
+`actions.user-input.outputs.app.name`. Only the named output is affected, so a similarly-named
+output such as `appVersion` is left alone.
+
+`outputKey` is the key as it appears on the workflow input. A top-level property `app` is `app`; a
+nested property `spec.database.name` is `database-name`; the identity fields are `objname` and
+`objnamespace`.
+
+`sourceAction`, `outputKey` and `attribute` may only contain letters, digits, hyphens and
+underscores.
+
+## Errors
+
+Every failure exits non-zero, writes one line naming the recipe to stderr, and writes no files.
+The common ones:
+
+| Message | Cause |
+|---|---|
+| `target.kind=X matches no document` | The document is not in the file, often the wrong lane |
+| `target.kind=X is ambiguous: matches N documents` | More than one document has that kind |
+| `list selector key=K value=V matches no item` | The item is absent, renamed, or the wrong delivery mode |
+| `list selector key=K value=V is ambiguous` | More than one item matches |
+| `target.list path "P": "S" not found` | A path segment does not exist |
+| `missing or empty patch` | A `merge` recipe with no `patch` |
+| `unknown op "X"` | Misspelled operation |
+| `field "F" has no ... placeholder` | The field exists but does not contain the expected placeholder |
+
+Recipes are all-or-nothing. If any recipe in the batch fails, the files are left exactly as the
+generate stage wrote them.
+
+## Which operations apply to which portal
+
+| Operation | Backstage | Cortex |
+|---|---|---|
+| `merge` | yes | yes |
+| `remove` | yes | yes |
+| `singleSpecPage` | yes | no |
+| `hideNamespaceManifest` | yes, `push` mode only | no |
+| `cortexEntityProjection` | no | yes |

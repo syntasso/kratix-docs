@@ -153,6 +153,12 @@ spec:
 
 This is what tells Kratix that this Promise depends on the other Promises, on the particular version specified. When the required Promises are not available at install time, you will see the warning on the output. When the required Promises are available, the Promise will be marked as Available.
 
+Kratix resolves each required version against the [Promise
+Revisions](../reference/promises/promise-upgrade/promise-revisions) of the required Promise, and Promise Revisions are
+retained by Kratix across Promise upgrades. See [Compound
+Promises](../reference/promises/compound) for the full resolution rules, for example what happens when a required
+Promise stops being Available.
+
 Next, let's take a look at the `destinationSelectors` key:
 
 ```yaml

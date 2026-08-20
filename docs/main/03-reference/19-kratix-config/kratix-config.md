@@ -27,12 +27,16 @@ data:
     numberOfJobsToKeep: 5
     selectiveCache: false
     reconciliationInterval: "10h"
+    workPlacementRewriteInterval: "10h"
     controllerLeaderElection:
       leaseDuration: 15s
       renewDeadline: 10s
       retryPeriod: 2s
     resourceBindingVersionStrategy: "floating" # floating (default) or pinned
+    featureFlags:
+      dryRun: false # preview feature; see below
     workflows:
+      reconcileAfterFailure: true
       jobOptions:
         defaultBackoffLimit: 6
         podTTLSecondsAfterFinished: 3600 # seconds to keep completed Job Pods before cleanup; omit to use Kubernetes default
@@ -58,6 +62,8 @@ data:
     logging:
       level: "info" # one of info, warning, debug, trace
       structured: false # if true, emit logs as json
+    git:
+      minimumFetchInterval: "5s" # how often to fetch remote Git state before a write; 0s fetches every time
     telemetry:
       traces:
         enabled: true # false to disable traces
@@ -80,7 +86,34 @@ Enable label selector caching of Secrets on the cluster to optimise memory usage
 
 ### reconciliationInterval (default: 10h)
 
-The interval on which Kratix will re-run the Workflows for both Promises and Resources.
+The interval on which Kratix will rerun Configure workflows for both Promises and Resources.
+
+### workPlacementRewriteInterval (default: 10h)
+
+The interval on which each WorkPlacement re-writes its files to the destination's
+state store, even when nothing has changed, so drift in the state store is
+corrected.
+
+WorkPlacements are already re-written whenever their Workflow re-runs on the
+[`reconciliationInterval`](#reconciliationinterval-default-10h). This setting adds
+a separate re-write timer that is independent of Workflow runs. Set it to `0` to
+disable it, so WorkPlacements are only re-written in response to changes.
+
+The re-write is a no-op when the files already match, as Git only commits and
+pushes when there is an actual change.
+
+:::warning
+Setting this too low can put significant load on your platform. Every
+WorkPlacement re-reconciles on each interval, and the cost scales with the number
+of WorkPlacements across all destinations. A short interval can lead to:
+
+- **State store load**: a Git fetch and reset per WorkPlacement on every interval,
+  which can trip provider rate limits (for example the GitHub API).
+- **Lock contention**: WorkPlacements sharing a state store are serialised behind a
+  per-repository lock, so frequent re-writes can queue up and delay genuine changes.
+
+Keep the interval as large as your drift-correction needs allow.
+:::
 
 ### controllerLeaderElection
 
@@ -99,9 +132,37 @@ Controls the `spec.version` Kratix sets on a [Resource Binding](/main/reference/
 
 This strategy only sets the _initial_ value of the binding. You can always change a binding's `spec.version` later to upgrade or pin a Resource — see the [Upgrading a Promise](/main/guides/upgrading-resource-requests) guide.
 
+### featureFlags
+
+Opts in to features that are off by default. Feature flags are read once at
+startup, so changing one requires restarting the
+`kratix-platform-controller-manager` pod.
+
+#### dryRun (default: false)
+
+Set to `true` to enable [Dry Run](/main/reference/dry-run), which previews the
+output of a Resource Request without applying it to a real Destination. While the
+flag is off, Kratix does not start the controller that reconciles `DryRun`
+objects and ignores dry-run labels elsewhere.
+
+:::warning
+Dry Run is a preview feature and is not production ready. Its API and behaviour
+may change without a migration path. See [Dry Run](/main/reference/dry-run) before
+enabling it.
+:::
+
 ### Workflows
 
 Default configurations for Kratix Workflows. Any options configured within individual workflows will take precedence over those in the Kratix Config.
+
+#### reconcileAfterFailure (default: true)
+
+Controls whether periodic reconciliation reruns Promise and Resource Configure
+workflows after a failed run. When `false`, periodic reconciliation skips failed
+workflows, but manual reconciliation of a
+[Promise](/main/reference/promises/reconciliation-labels#manual-reconciliation)
+or [Resource](/main/reference/resources/reconciliation-labels#manual-reconciliation)
+still rerun them. This setting does not affect successful runs or Delete workflows.
 
 #### jobOptions
 
@@ -153,6 +214,18 @@ The different log levels and their meanings are described in the table below:
 #### structured (default: false)
 
 Set to true to emit logs as json.
+
+### git
+
+Configuration for how Kratix interacts with Git [State Stores](/main/reference/statestore/intro).
+
+#### minimumFetchInterval (default: 5s)
+
+Before writing to a Git State Store, Kratix fetches the latest remote state and resets its cached clone to match. This makes writes start from the true remote state, so Kratix recovers when the repository has been changed outside of Kratix (for example a manual commit, or a Flux or Argo prune).
+
+`minimumFetchInterval` bounds how often that fetch happens. Writes to a State Store are serialised, so when many Workplacements reconcile against the same store in a burst, Kratix only refreshes the clone once per interval rather than fetching for every write. Set it to `0s` to fetch before every write.
+
+This value is loaded when the `kratix-platform-controller-manager` pod starts, so restart the pod after changing it.
 
 ### telemetry
 

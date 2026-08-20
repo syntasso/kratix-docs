@@ -1,0 +1,174 @@
+---
+title: Delivery modes
+description: Choosing between push and pull-request delivery for a Backstage portal
+sidebar_label: Delivery modes
+slug: delivery-modes
+keywords: [portal, backstage, delivery mode, pull request, push, review]
+---
+
+A Backstage portal's `config.mode` decides what happens when a developer fills in a generated
+Template and clicks submit.
+
+| Mode | What submitting does | Use when |
+|---|---|---|
+| `push` (default) | The request is applied to the platform immediately | Self-service should be instant |
+| `pull-request` | The request is raised as a pull request for review | A human must approve before anything is created |
+
+The mode is set per portal, and applies to every Promise routed through it:
+
+```yaml
+portals:
+  - name: prod
+    type: backstage
+    config:
+      mode: pull-request
+```
+
+:::info
+`config.mode` is not the same setting as the Backstage plugin's backend-wide `ske.mode`. This one
+decides whether a request goes through review. `ske.mode` decides how the backend writes an
+approved request, and is covered in [Configure Backstage](./configure-backstage).
+:::
+
+## Push mode
+
+The generated Template asks for the resource name, namespace, and the Promise's own `spec` fields,
+then runs two steps:
+
+1. **Configure resource**, applying the request to the platform.
+2. **Record request**, telling the Backstage backend a request has been submitted.
+
+There is nothing for the developer to choose beyond the form itself, and no repository is
+involved. How the request is written, directly through the Kubernetes API as the signed-in user or
+committed to a Git repository, depends on the backend's `ske.mode` setting rather than on this
+mode.
+
+Nothing is under review here, so the record exists only to make the request visible while the
+platform catches up. See [What a developer sees while waiting](#what-a-developer-sees-while-waiting).
+
+## Pull-request mode
+
+The generated Template gains a **Repository & Credentials** page asking which repository the
+request should be raised against, and then runs three steps:
+
+1. **Generate resource request**, writing the request manifest.
+2. **Pull Request**, opening a pull request against the chosen repository.
+3. **Record request**, telling the Backstage backend that a request is now awaiting approval.
+
+The request manifest lands in the repository at:
+
+```
+kratix-requests/<promise>/<namespace>/<name>.yaml
+```
+
+Nothing reaches the platform until that pull request is merged. Merging it commits the manifest,
+and your existing GitOps tooling applies it.
+
+### Branches and repositories
+
+The developer picks the repository per run, so different teams can raise requests against their own
+repositories through the same Template. Pull requests target `main` by default.
+
+Branches are named `backstage/<promise>/<name>`, and a re-run for the same resource reuses the
+existing branch and pull request rather than opening a second one. Deletions use a separate
+`backstage/<promise>/<name>-delete` branch, so requesting a deletion can never silently amend an
+in-flight update.
+
+:::warning GitHub only
+Pull-request mode uses GitHub's pull request API and the repository picker only accepts
+`github.com`. GitLab, Bitbucket and Azure repositories are not supported in this mode. Use `push`
+mode with the backend's `ske.mode: gitops` if you need a different provider.
+:::
+
+### Updating and deleting
+
+Both go through review as well, from the **Manage** tab on the resource in Backstage:
+
+- **Update** re-opens the Template pre-filled with the resource's current values, with the name and
+  namespace locked, and raises a pull request with the changes.
+- **Delete** raises a pull request that removes the request manifest. The resource stays until that
+  pull request is merged, and the confirmation dialog says so.
+
+Deletion only routes through review for resources that were themselves requested through
+pull-request mode. A resource created some other way, by `kubectl` or under push mode, is deleted
+immediately.
+
+## What a developer sees while waiting
+
+A resource takes time to reach the catalogue: the platform has to create and reconcile it, the
+portal has to generate its entity, and Backstage has to discover it. Both modes fill that gap the
+same way, with a **pending request** entity published as soon as the request is recorded and
+withdrawn once the real resource entity appears.
+
+| Mode | Banner | Links |
+|---|---|---|
+| `push` | Submitted — waiting for the platform to create this resource. | None; nothing was opened |
+| `pull-request` | Waiting for approval — this resource will be provisioned when the pull request is merged. | The pull request awaiting approval |
+
+How long it stays is whatever those three steps take. Under `push` with `ske.mode: kubernetes`
+that can be seconds. A mode that commits to Git adds your GitOps agent's sync interval, and
+Git-based catalogue discovery adds its own polling interval.
+
+:::note
+There is no link to the pull request on the scaffolder's completion page. Developers find their
+pull request through the pending request entity in the catalogue.
+:::
+
+## Customizations and delivery modes
+
+:::warning
+[Portal Patch](../portal-patch/intro) recipes that target the `ske-configure-resource` step,
+including the `hideNamespaceManifest` recipe, do not work under pull-request mode. That step only
+exists in push mode, so the recipe matches nothing, fails, and aborts the sync, which means no
+entity ships at all.
+
+If a portal uses `pull-request` mode, avoid recipes that target that step.
+:::
+
+:::warning
+Both modes emit a `record-request` step carrying a copy of the request manifest. Under push mode, a
+`hideNamespaceManifest` recipe that targets only `ske-configure-resource` leaves that step referring
+to the `objnamespace` parameter the same recipe set deletes.
+
+Nothing fails at sync time. The recorded namespace resolves to nothing, so the request no longer
+matches the resource entity the platform ships, and the pending request is never withdrawn from the
+catalogue.
+
+Patch the record step as well:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.steps
+    key: id
+    value: record-request
+op: hideNamespaceManifest
+field: input.manifest
+defaultNamespace: my-namespace
+---
+target:
+  kind: Template
+  list:
+    path: spec.steps
+    key: id
+    value: record-request
+patch:
+  input:
+    namespace: my-namespace
+```
+
+Only recipes reproducing `hideNamespace` need this. A Promise that sets the generator's own
+`templateHideNamespace` field gets a correct record step without any recipe at all.
+:::
+
+Recipes that only patch the generated documents, such as setting an owner, adding tags, or
+`singleSpecPage`, work in both modes.
+
+## Choosing
+
+Start with `push` unless you have a reason not to. It is simpler, has no repository prerequisites,
+works with any Git provider through `ske.mode: gitops`, and has no interaction with Portal Patch to
+think about.
+
+Move to `pull-request` when requests genuinely need human approval, and you are on GitHub.
