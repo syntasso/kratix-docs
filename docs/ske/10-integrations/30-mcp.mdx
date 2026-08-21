@@ -100,19 +100,25 @@ See the [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-s
 
 ## Per-caller Kubernetes permissions
 
-Every tool call runs against Kubernetes as the person who actually made the request, not as one shared service account. The server checks who's calling against your identity provider, then asks Kubernetes to act on their behalf using Kubernetes' own [impersonation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation) support, the same mechanism `kubectl`'s `--as` flag uses.
+:::note
+This section describes authorization once OIDC-based authentication is configured. If your deployment still uses the shared-token model described above, every request runs as the server's own service account regardless of who's asking, until you migrate to OIDC.
+:::
 
-Your own Kubernetes RBAC decides what happens from there. If a caller's identity provider group has a RoleBinding granting access to a resource, they get it. If it doesn't, they don't, exactly the way it already works for anyone else touching your cluster. There's nothing bespoke to trust here, and nothing new to learn if you already manage Kubernetes RBAC today.
+Each tool call runs against Kubernetes as the person who actually made the request, and not using that person's own Kubernetes credentials either, the server never sees or needs those. Here's the actual sequence:
+
+1. **You authenticate** against your identity provider (via OIDC). The server verifies your token and reads your username and group membership from it.
+2. **The server impersonates you.** Using its own privileged credentials, it asks Kubernetes to run your request as *you*, via Kubernetes' own [impersonation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation) feature, the same mechanism `kubectl`'s `--as` flag uses. The server's credentials never determine what you can do, they only grant it permission to make this request on your behalf.
+3. **Kubernetes decides, not the server.** It evaluates the impersonated request exactly as if you'd made it directly, against your existing [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) (Role-Based Access Control) rules, specifically whether a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) ties your group to a Role. If one does, you get whatever that Role grants. If it doesn't, you get nothing, the same as any other Kubernetes identity nobody's granted access to.
 
 ![Per-caller RBAC flow](/img/ske/mcp/per-caller-rbac.svg)
 
-The identity provider only ever decides who someone is and what groups they're in. Whether that translates into permission is a Kubernetes RBAC question, answered entirely by RoleBindings you already control.
+**What this needs from you**: the server's ServiceAccount needs `impersonate` permission on users and groups, already included in `deploy/kubernetes/`, and your identity provider needs to include group membership as a token claim, configured via `OIDC_GROUPS_CLAIM`. Beyond that, nothing changes about how you write or manage RBAC today, whatever RoleBindings you already have (or create) for a group apply the same way here as anywhere else.
 
 A few things that fall out of this worth knowing:
 
-- Two users with different Kubernetes RBAC get different results from the exact same tool call, no configuration on our side required.
+- Two users with different Kubernetes RBAC get different results from the exact same tool call, driven entirely by bindings you already control.
 - A denied write comes back naming the verb, resource, and namespace it was denied on, not a generic failure.
-- Audit Events are created by the server's own privileged identity, not the impersonated one, so a caller who lacks event-create permission in their own RBAC can't suppress their own audit trail.
+- Kubernetes Events, its own built-in audit record for what happened to a resource, are created by the server's own privileged identity rather than the impersonated one, so a caller who lacks permission to create Events in their own RBAC can't suppress their own audit trail.
 
 ## Querying your platform
 
