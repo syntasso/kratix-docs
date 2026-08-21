@@ -98,6 +98,22 @@ Add the following to `.vscode/mcp.json` in your workspace, or to your user setti
 
 See the [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more options.
 
+## Per-caller Kubernetes permissions
+
+Every tool call runs against Kubernetes as the person who actually made the request, not as one shared service account. The server checks who's calling against your identity provider, then asks Kubernetes to act on their behalf using Kubernetes' own [impersonation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation) support, the same mechanism `kubectl`'s `--as` flag uses.
+
+Your own Kubernetes RBAC decides what happens from there. If a caller's identity provider group has a RoleBinding granting access to a resource, they get it. If it doesn't, they don't, exactly the way it already works for anyone else touching your cluster. There's nothing bespoke to trust here, and nothing new to learn if you already manage Kubernetes RBAC today.
+
+![Per-caller RBAC flow](/img/ske/mcp/per-caller-rbac.svg)
+
+The identity provider only ever decides who someone is and what groups they're in. Whether that translates into permission is a Kubernetes RBAC question, answered entirely by RoleBindings you already control.
+
+A few things that fall out of this worth knowing:
+
+- Two users with different Kubernetes RBAC get different results from the exact same tool call, no configuration on our side required.
+- A denied write comes back naming the verb, resource, and namespace it was denied on, not a generic failure.
+- Audit Events are created by the server's own privileged identity, not the impersonated one, so a caller who lacks event-create permission in their own RBAC can't suppress their own audit trail.
+
 ## Querying your platform
 
 Once connected, users can ask natural language questions about the platform directly in their AI client:
