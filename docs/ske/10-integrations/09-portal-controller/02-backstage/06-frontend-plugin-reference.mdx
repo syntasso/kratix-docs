@@ -718,10 +718,10 @@ for use on Template forms, selected with `ui:field` on a property.
 
 ### `ScopedEntityPicker`
 
-`ScopedEntityPicker` is an `EntityPicker` whose `catalogFilter` may reference
-other fields of the same form, so one choice narrows the next. Backstage's own
-`EntityPicker` builds its filter from `ui:options` alone, so a picker that
-depends on another answer cannot be expressed with it.
+`ScopedEntityPicker` is an extension of Backstage's
+[EntityPicker](https://backstage.io/docs/features/software-templates/ui-options-examples/#entitypicker)
+whose `catalogFilter` may reference other fields of the same form, so one choice
+narrows the next.
 
 In this example the System field is an ordinary `EntityPicker`, and the Service
 field offers only the services within the System that was picked:
@@ -817,9 +817,6 @@ import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
   </ScaffolderFieldExtensions>
 </Route>;
 ```
-
-A Template that uses `ui:field: ScopedEntityPicker` in an application where the
-field is not registered renders that property as nothing at all, with no error.
 
 ## Plugin integration
 
