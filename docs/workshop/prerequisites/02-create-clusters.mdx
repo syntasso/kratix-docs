@@ -179,8 +179,11 @@ To look inside the bucket, use the `s5cmd` utility provided in the Kratix reposi
 # downloads s5cmd and provides a convenience wrapper for easy access
 make s5cmd-cli
 
+# add it to your PATH so `s5cmd` works from any directory
+export PATH="$PWD/bin:$PATH"
+
 # list the buckets
-bin/s5cmd ls
+s5cmd ls
 ```
 
 The above command will give an output similar to:

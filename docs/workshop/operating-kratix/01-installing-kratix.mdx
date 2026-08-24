@@ -47,6 +47,7 @@ the following environment variables set:
 ```bash
 export PLATFORM="kind-platform"
 export WORKER="kind-worker"
+export PATH="$PWD/bin:$PATH"   # the preconfigured s5cmd from the prerequisites
 ```
 
 This guide will go through the following steps:
@@ -314,7 +315,7 @@ system is wired up correctly.
 First, check the `kratix` bucket:
 
 ```bash
-bin/s5cmd ls "s3://kratix/*"
+s5cmd ls "s3://kratix/*"
 ```
 
 The above command will give an output similar to:
@@ -328,7 +329,7 @@ You can also inspect the contents of the test documents. For example, take the
 `kratix-canary-namespace.yaml`:
 
 ```bash
-bin/s5cmd cat s3://kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
+s5cmd cat s3://kratix/worker-cluster/dependencies/kratix-canary-namespace.yaml
 ```
 
 The above command will give an output similar to:
