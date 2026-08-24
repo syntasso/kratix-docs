@@ -44,8 +44,8 @@ cd kratix
 You can now create the **Platform** cluster with the following command:
 
 ```bash
-# make sure there are no clusters running
-kind delete clusters --all
+# remove any previous workshop clusters
+kind delete clusters platform worker
 
 kind create cluster \
     --name platform \
