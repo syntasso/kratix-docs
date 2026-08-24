@@ -231,6 +231,16 @@ If you are running the workshop on a Mac, you may need to update the
 
 :::
 
+:::info
+
+The `MINIO_*` names are not a leftover from a MinIO server: they are the
+environment variables read by the [`aminueza/minio` Terraform
+provider](https://registry.terraform.io/providers/aminueza/minio/latest), which
+you will use in the next part to manage buckets on any S3-compatible store —
+including the SeaweedFS one deployed in the prerequisites.
+
+:::
+
 These scripts do the following:
 
 - `build-pipeline` codifies the image building and loads the container image on
