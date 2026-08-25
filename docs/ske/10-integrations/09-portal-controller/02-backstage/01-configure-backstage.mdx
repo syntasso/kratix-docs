@@ -149,8 +149,23 @@ Then add two cases to the existing `componentPage` switch, **before** the defaul
 </EntitySwitch.Case>
 ```
 
+The matcher selects Promise and Resource Components using either the `kratix.io/type`
+annotation or `spec.type`. For example, a Resource can use `kratix.io/type: resource` or
+`spec.type: kratix-resource`.
+
+:::warning
+
+Add `kratix.io/type: promise` to every Promise Component. Although the route matcher
+recognises `spec.type: kratix-promise`, the page also needs the annotation when it loads
+Promise data. Without it, the Promise Overview does not load. It shows a
+missing-annotation message for Resource fields instead of the Promise details.
+
+:::
+
 This gives Promise entities an overview page, and Resource entities an overview page plus a
-**Manage** tab for updating and deleting the resource.
+**Manage** tab for updating and deleting the resource. For the full list of entity pages,
+components, annotations, and behaviours, see the
+[SKE Frontend Plugin reference](./frontend-plugin).
 
 ## Configuring the backend plugin
 

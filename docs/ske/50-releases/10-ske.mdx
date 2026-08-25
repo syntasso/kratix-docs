@@ -1,12 +1,12 @@
 ---
-title: Syntasso Kratix Enterprise
-description: Release information about SKE
+title: Syntasso Kratix Enterprise Release Notes
+description: Release notes for Syntasso Kratix Enterprise (SKE)
 sidebar_label: SKE
 ---
 
 ## Overview
 
-The Syntasso Kratix Enterprise is the enterprise distribution of Kratix.
+Syntasso Kratix Enterprise (SKE) is the enterprise distribution of Kratix.
 
 The release manifests are available at:
 
@@ -18,6 +18,16 @@ Check the release notes below for information on each available version.
 
 
 ## Release Notes
+
+### [v0.56.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.56.0/) (2026-08-19)
+
+#### Features
+
+* Kratix now re-runs promise and resource workflows after a failure, ensuring they always converge rather than remaining in a failed state.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
 
 ### [v0.55.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.55.0/) (2026-08-12)
 
@@ -50,6 +60,7 @@ Check the release notes below for information on each available version.
 
 * S3-compatible release storage now supports path-style addressing via `spec.releaseStorage.forcePathStyle`. Enable this for stores that do not support virtual-hosted-style addressing, such as an in-cluster MinIO instance.
 * Delete workflows can now pause execution using the `wait` step, giving platform teams control over deletion ordering and dependencies. See [Gating Deletion with Workflow Control](https://docs.kratix.io/main/guides/gating-deletion-with-workflow-control).
+* Upgrade Plan rollout group selectors now support `matchAll: true` to select all Resource Bindings that belong to the referenced Promise and match `upgradePath.from`.
 
 #### Maintenance
 

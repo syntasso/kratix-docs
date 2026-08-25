@@ -33,6 +33,16 @@ Please ensure that your Syntasso Registry secret is updated to reflect this. If 
 the image and the backstage-controller pod will fail to start.
 :::
 
+### [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/v0.11.0/) (2026-08-24)
+
+#### Bug Fixes
+
+* The `entityGenerationOptions` field is now marked deprecated in the `BackstageEntityCustomization` CRD schema, in favour of Portal Patch recipes. The field continues to be read and honoured, so there is no change in behaviour. See [Migrating from the Backstage Controller](/ske/integrations/portal-controller/backstage/migrating-from-backstage).
+
+#### Security Fixes
+
+* Base image updates to address security vulnerabilities.
+
 ### [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage-controller/v0.10.0/) (2026-06-12)
 
 #### Chores

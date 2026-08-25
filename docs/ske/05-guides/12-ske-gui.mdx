@@ -1,15 +1,15 @@
 ---
-title: SKE GUI
-description: How to use the SKE GUI
+title: Using the SKE GUI
+description: A guide to navigating and using the Syntasso Kratix Enterprise GUI to manage Promises, resources, and platform health.
 sidebar_label: SKE GUI
 ---
 
-The SKE GUI is a easy-to-use UI for viewing and managing Kratix Promises and Resources.
+The SKE GUI is an easy-to-use UI for viewing and managing Kratix Promises and Resources.
 It introduces a clear, unified view of your entire platform, giving platform engineers visibility into resources and their states at a glance.
 
-This page provides information on how to use the SKE GUI. For documentation on how to install it, please refer to the [installation guide](/ske/installing-ske/ske-gui).
+This page explains how to use the SKE GUI. For installation instructions, refer to the [installation guide](/ske/installing-ske/ske-gui).
 
-You can refer to this video for a walk through of how to use the GUI:
+You can refer to this video for a walkthrough of how to use the GUI:
 
 <div style={{"text-align":"center"}}>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/lLxT0mKXgA8?si=Awm6FDzbUAPNZk6h" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
@@ -40,7 +40,7 @@ import PromiseList from "./gui-promise-list-view.png"
 
 ## The Resource Views {#resources}
 
-Complementing the Promises view, the Resources tab allows you to see all the Kratix resources deployed across your cluster. With filtering capabilities, you can narrow down your view, for example, by Promise or Namespace.
+Complementing the Promises view, the Resources tab lets you see all Kratix resources deployed across your cluster. With filtering capabilities, you can narrow down your view, for example, by Promise or Namespace.
 
 ```mdx-code-block
 import ResourceList from "./gui-resource-list-view.png"
@@ -53,7 +53,7 @@ import ResourceList from "./gui-resource-list-view.png"
 </figure>
 
 
-Just like with Promises, you can click on any resource to view its details. This includes seeing when its pipeline last ran, jumping into the pipeline, inspecting executed pods, and investigating logs for all containers involved in the execution.
+As with Promises, you can click any resource to view its details. This includes seeing when its pipeline last ran, jumping into the pipeline, inspecting executed pods, and investigating logs for all containers involved in the execution.
 
 ```mdx-code-block
 import ResourceDetails from "./gui-resource-detail-view.png"
@@ -67,9 +67,9 @@ import ResourceDetails from "./gui-resource-detail-view.png"
 
 ## Kratix Objects Overview {#map}
 
-The Map view provides a visualisation of all your deployed Promises and Resources. To access the Map view, click on Map entry in the sidebar.
+The Map view visualises all your deployed Promises and Resources. To access the Map view, click on the Map entry in the sidebar.
 
-Within it, you can click on a Promise to see its associated resources, including the Resource Requests and the Pipeline Jobs. Clicking on the Resources would render a similar view.
+From there, you can click a Promise to see its associated resources, including Resource Requests and Pipeline Jobs. Clicking Resources renders a similar view.
 
 ```mdx-code-block
 import MapView from "./gui-map-view.png"
