@@ -19,6 +19,18 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.0/) (2026-08-XX)
+
+#### Features
+
+* **The Portal Controller no longer needs the `skeintegrations` CRD.** It reads its connections from a
+ConfigMap, so a platform that installs the Portal Controller by itself. See
+[Installing without the SKE Operator](/ske/integrations/portal-controller/installation#installing-without-the-ske-operator).
+
+:::warning Requires SKE Operator v0.34.0
+Upgrade to SKE operator to `v0.34.0` first.
+:::
+
 ### [v0.3.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.3.0/) (2026-08-18)
 
 #### Features
