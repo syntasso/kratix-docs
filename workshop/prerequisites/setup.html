@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.65fc2f44.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.47d78e2e.js" defer="defer"></script>
 <script src="/assets/js/main.186d576e.js" defer="defer"></script>
 </head>
 <body>
@@ -60,7 +60,11 @@ will install a Python version of <code>yq</code> which is not compatible with th
 Workshop. Make sure to install the Go version of <code>yq</code>, as linked above.</p></div></div>
 </li>
 <li class="">
-<p><code>mc</code> / <strong>MinIO Client</strong>: <br> The CLI for MinIO—allows you to run commands against MinIO clusters. <br> See <a href="https://docs.min.io/community/minio-object-store/" target="_blank" rel="noopener noreferrer" class="">the install guide</a>.</p>
+<p>An <strong>S3 CLI</strong> for inspecting the state store bucket: <br> the Kratix repository ships one,
+so there is nothing to install separately—<code>make s5cmd-cli</code> puts a preconfigured
+<a href="https://github.com/coreweave/s5cmd" target="_blank" rel="noopener noreferrer" class=""><code>s5cmd</code></a> at <code>bin/s5cmd</code>, already pointed at the local
+bucket (the next page adds it to your <code>PATH</code> so the workshops can call <code>s5cmd</code> directly). <br> If you would rather use your own S3 client, <code>make bucket-env</code> prints the
+endpoint and credentials to export.</p>
 </li>
 <li class="">
 <p><code>git</code> / <strong>Git</strong>: <br> The CLI for Git—allows you to clone the Kratix repository. <br> See <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" target="_blank" rel="noopener noreferrer" class="">the install guide</a>.</p>

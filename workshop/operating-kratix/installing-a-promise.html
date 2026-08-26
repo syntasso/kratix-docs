@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.65fc2f44.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.47d78e2e.js" defer="defer"></script>
 <script src="/assets/js/main.186d576e.js" defer="defer"></script>
 </head>
 <body>
@@ -39,11 +39,11 @@
 </ul>
 <p>Following the <a class="" href="/workshop/operating-kratix/installing-kratix">Installing Kratix</a> tutorial, you should now
 have Kratix up and running in your platform cluster. You should also have a
-worker cluster reconciling on the documents in the MinIO Bucket.</p>
+worker cluster reconciling on the documents in the SeaweedFS Bucket.</p>
 <p>Validate your installation by running:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kubectl </span><span class="token parameter variable" style="color:#36acaa">--context</span><span class="token plain"> </span><span class="token variable" style="color:#36acaa">$PLATFORM</span><span class="token plain"> get deployments </span><span class="token parameter variable" style="color:#36acaa">--namespace</span><span class="token plain"> kratix-platform-system</span><br></div></code></pre></div></div>
 <p>The above command will give an output similar to:</p>
-<div class="language-shell-session codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell-session codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token output">NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE</span><br></div><div class="token-line" style="color:#393A34"><span class="token output">kratix-platform-controller-manager   1/1     1            1           1h</span><br></div><div class="token-line" style="color:#393A34"><span class="token output">minio                                1/1     1            1           1h</span><br></div></code></pre></div></div>
+<div class="language-shell-session codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell-session codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token output">NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE</span><br></div><div class="token-line" style="color:#393A34"><span class="token output">kratix-platform-controller-manager   1/1     1            1           1h</span><br></div></code></pre></div></div>
 <p>You should also have a <code>kratix-worker-system</code> namespace in your worker cluster:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kubectl </span><span class="token parameter variable" style="color:#36acaa">--context</span><span class="token plain"> </span><span class="token variable" style="color:#36acaa">$WORKER</span><span class="token plain"> get namespace kratix-worker-system</span><br></div></code></pre></div></div>
 <p>The above command will give an output similar to:</p>
@@ -120,7 +120,7 @@ will be automatically installed in the new cluster.</p>
 only in certain clusters based on Promise configuration.</p>
 <p>Your environment now looks like this (with some detail omitted for clarity):</p>
 <!-- -->
-<figure class="diagram"><img class="large" src="/assets/images/topology-03-a01821e18a1428ee009a8121d5ce4961.png" alt="Deployed resources with a Promise"><figcaption>Jenkins dependencies are reconciled on all workers</figcaption></figure>
+<figure class="diagram"><img class="large" src="/assets/images/topology-03-b8138adb3ac103fe1f7e8b044dfc7a9f.png" alt="Deployed resources with a Promise"><figcaption>Jenkins dependencies are reconciled on all workers</figcaption></figure>
 <p>With both the API available in the platform, and the dependencies installed in
 the worker, the Jenkins Promise installation is now complete.</p>
 <p>It is now time to switch roles for a moment, and imagine you are a developer

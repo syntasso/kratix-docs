@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.65fc2f44.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.47d78e2e.js" defer="defer"></script>
 <script src="/assets/js/main.186d576e.js" defer="defer"></script>
 </head>
 <body>
@@ -55,7 +55,7 @@ Kubernetes distribution including:</p>
 </ul>
 <p>If you&#x27;re working in a shared or production-like environment, see the full
 <a class="" href="/category/installing-kratix">installation guide</a> to avoid configuration conflicts. The
-quick start deploys a local, insecure MinIO instance—intended only for local development.</p>
+quick start deploys a local, insecure SeaweedFS instance—intended only for local development.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="installation">Installation<a href="#installation" class="hash-link" aria-label="Direct link to Installation" title="Direct link to Installation" translate="no">​</a></h2>
 <p>Kratix extends the Kubernetes API by introducing custom resources and controllers.</p>
 <div class="theme-admonition theme-admonition-tip admonition_xJq3 alert alert--success"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path></svg></span>tip</div><div class="admonitionContent_BuS1"><p>While Kratix runs on Kubernetes, it orchestrates resources both in and outside of Kubernetes.
@@ -68,10 +68,10 @@ quick-start that uses a single job to install Kratix with sensible defaults.</p>
 Kratix webhooks</li>
 <li class="">Deploys the <a href="https://docs.kratix.io/main/platform-concepts/kratix-resources" target="_blank" rel="noopener noreferrer" class=""><strong>Kratix API server and controllers</strong></a>
 in the <code>kratix-system</code> namespace</li>
-<li class="">Deploys <a href="https://min.io/" target="_blank" rel="noopener noreferrer" class=""><strong>MinIO</strong></a>, a local S3-compatible bucket for storing
+<li class="">Deploys <a href="https://github.com/seaweedfs/seaweedfs" target="_blank" rel="noopener noreferrer" class=""><strong>SeaweedFS</strong></a>, a local S3-compatible bucket for storing
 declarative workloads</li>
 <li class="">Installs and configures <a href="https://fluxcd.io/" target="_blank" rel="noopener noreferrer" class=""><strong>Flux</strong></a> to apply changes from the
-MinIO bucket via GitOps</li>
+SeaweedFS bucket via GitOps</li>
 <li class="">Registers your Kubernetes cluster as a <a href="https://docs.kratix.io/main/reference/destinations/intro" target="_blank" rel="noopener noreferrer" class=""><strong>Destination</strong></a>
 so Kratix can schedule workloads to it</li>
 </ol></div></div></details>
@@ -131,7 +131,7 @@ GitOps repository. In this case the workflow for the PostgreSQL Promise was
 quite simple, it took the users input and used this to generate the required
 Kubernetes resources to create the PostgreSQL instance. Those resources were
 then scheduled to the Platform via the GitOps repo (in this simple scenario, an
-in-cluster s3 compatible bucket using MinIO). GitOps can take some time to
+in-cluster s3 compatible bucket using SeaweedFS). GitOps can take some time to
 sync, so it may take up to a minute or two before you see the Pod for the
 PostgreSQL instance</p>
 <p>You can see the workflows that were run by inspecting the Pods:</p>

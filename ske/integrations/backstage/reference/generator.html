@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.65fc2f44.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.47d78e2e.js" defer="defer"></script>
 <script src="/assets/js/main.186d576e.js" defer="defer"></script>
 </head>
 <body>
@@ -95,7 +95,7 @@ you should place <code>ske-backstage-generator</code> as the last container in t
 <p>If <code>ske-backstage-generator</code> needs to be used more than once in a Workflow, you should utilise the <a class="" href="/ske/integrations/backstage/reference/generator-promise">SKE Backstage
 Component Promise</a>. Otherwise, you will observe only one of the components
 in Backstage, and Backstage will emit a warning:</p>
-<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">{&quot;level&quot;:&quot;warn&quot;,&quot;message&quot;:&quot;Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml&quot;,&quot;plugin&quot;:&quot;catalog&quot;,&quot;service&quot;:&quot;backstage&quot;}</span><br></div></code></pre></div></div>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">{&quot;level&quot;:&quot;warn&quot;,&quot;message&quot;:&quot;Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://bucket.seaweedfs.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://bucket.seaweedfs.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml&quot;,&quot;plugin&quot;:&quot;catalog&quot;,&quot;service&quot;:&quot;backstage&quot;}</span><br></div></code></pre></div></div>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="authenticating-against-the-image-registry">Authenticating against the image registry<a href="#authenticating-against-the-image-registry" class="hash-link" aria-label="Direct link to Authenticating against the image registry" title="Direct link to Authenticating against the image registry" translate="no">​</a></h3>
 <p>If you have not loaded the image to your Kubernetes cache or pushed it to an internal registry,
 you can define your authentication credentials via a <code>docker-registry</code> secret and refer to this secret
