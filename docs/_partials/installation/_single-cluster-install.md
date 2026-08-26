@@ -4,8 +4,8 @@ Install Kratix and its Dependencies with the command below:
 kubectl apply --filename https://github.com/syntasso/kratix/releases/latest/download/install-all-in-one.yaml
 ```
 
-The above will install Kratix, MinIO, and a GitOps agent. MinIO will be the [State Store](/main/reference/statestore/intro)
-for the Kratix to write to and the GitOps agent will watch the MinIO Bucket for any changes that need to be applied to
+The above will install Kratix, SeaweedFS, and a GitOps agent. SeaweedFS will be the [State Store](/main/reference/statestore/intro)
+for the Kratix to write to and the GitOps agent will watch the SeaweedFS Bucket for any changes that need to be applied to
 the cluster. Kratix supports a variety of [State Stores](/main/reference/statestore/intro)
 and multiple different State Stores can be used.
 
