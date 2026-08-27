@@ -66,7 +66,7 @@ spec:
       reconciliationInterval: 30m
 ```
 
-The value is a Go duration string of at least `1m`; zero, negative, and sub-minute values
+The value is a string in [Go time.ParseDuration format](https://golang.org/pkg/time/#ParseDuration) of at least `1m`; zero, negative, and sub-minute values
 are rejected. It applies to the Promise's own workflow and to every Resource request. 
 When unset, Kratix falls back to the platform-wide interval, then to the 10h default.
 
