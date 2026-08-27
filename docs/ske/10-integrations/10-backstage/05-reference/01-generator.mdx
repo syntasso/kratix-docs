@@ -152,7 +152,7 @@ Component Promise](./generator-promise). Otherwise, you will observe only one of
 in Backstage, and Backstage will emit a warning:
 
 ```
-{"level":"warn","message":"Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://minio.kratix-platform-system.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml","plugin":"catalog","service":"backstage"}
+{"level":"warn","message":"Detected conflicting entityRef component:default/my-request-jenkins already referenced by url:http://bucket.seaweedfs.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure/5cfaf/backstage/catalog-info.yaml and now also url:http://bucket.seaweedfs.svc.cluster.local/kratix/backstage/resources/default/cicd/my-request/instance-configure-2/5cfaf/backstage/catalog-info.yaml","plugin":"catalog","service":"backstage"}
 ```
 
 ### Authenticating against the image registry

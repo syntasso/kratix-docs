@@ -132,7 +132,7 @@ A Promise reports how its binding resolved on the `PortalBindingReady` condition
 | `BindingResolved` | The label resolved to exactly one portal |
 | `AmbiguousPortalInstance` | More than one portal of the type exists and no instance was named |
 | `PortalConnectionNotFound` | The named instance does not match a configured portal |
-| `PortalConfigNotFound` | No portal configuration is installed |
+| `PortalIntegrationNotFound` | No `portal-controller` `SKEIntegration` is installed |
 | `CustomizationNotFound` | The named `PortalCustomization` does not exist |
 | `AmbiguousCustomization` | More than one `PortalCustomization` label is present |
 
@@ -205,6 +205,145 @@ everywhere on a portal, and a recipe when you want it for particular Promises.
 Do not put credentials in `generate.args`. Unlike a `secretRef` credential, which is injected into
 the writer container as a secret key reference, these flags are passed as container arguments and
 are visible to anyone with read access to the Job in `kratix-platform-system`.
+:::
+
+## Making the controller's Jobs follow your cluster's rules
+
+The Portal Controller creates Kubernetes Jobs to do its work. It creates one when a Promise or
+Resource syncs to a portal, and one when a portal connection is first set up.
+
+Those Jobs run in your cluster, so they need to comply with your cluster's policies. For example, if an admission policy requires specific labels on every workload, Jobs that don't include those labels will be rejected, preventing the portal integration from running. You may also want them on particular nodes, inside a resource quota, or cleaned up on
+your usual schedule.
+
+You configure these settings in the `ske-portal-workloads-config` ConfigMap in the `kratix-platform-system` namespace, under the workloads.yaml key:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-portal-workloads-config
+  namespace: kratix-platform-system
+data:
+  workloads.yaml: |
+    jobTemplate:
+      metadata:
+        labels:
+          app.kubernetes.io/name: ske-portal
+          acs.customer.com/securityZone: dmz
+        annotations:
+          acs.customer.com/owner: platform-team
+      spec:
+        backoffLimit: 5
+        ttlSecondsAfterFinished: 3600
+        template:
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+```
+
+`jobTemplate` is a partial Kubernetes
+[JobTemplateSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/cron-job-v1/#JobTemplateSpec).
+The controller merges it into each Job it builds: Promise sync Jobs, Resource sync Jobs, and portal
+setup Jobs.
+
+This ConfigMap is the only place these settings live. There is no matching field on the
+`SKEIntegration`. You create it, edit it and delete it yourself, and it applies to every portal
+connection.
+
+:::note
+Kubernetes Jobs cannot be changed after they are created, so the controller replaces them. When you
+edit `workloads.yaml`, the Jobs it affects are recreated with the new configuration. Delete the ConfigMap
+and they go back to the controller's defaults.
+:::
+
+### Labels and annotations reach the pods
+
+Anything under `jobTemplate.metadata` lands on the Job and on the pods it creates, so you declare it
+once. Admission policies usually check pods, so this is normally what you want.
+
+If you want something on the pods only, put it under `jobTemplate.spec.template.metadata`. When the
+same key appears in both places, the pod-level value wins.
+
+:::info Quote your values
+In YAML, `4711` is a number and `yes` is a boolean, but Kubernetes labels, annotations and
+`nodeSelector` values all have to be text. Put quote marks around anything that is not obviously a
+word:
+
+```yaml
+labels:
+  acme.com/cost-centre: "4711"   # not 4711
+  audited: "yes"                 # not yes
+```
+
+This is the most common mistake. An unquoted value is rejected, and
+[When the file is wrong](#when-the-file-is-wrong) shows where the error appears.
+:::
+
+### What you cannot set
+
+Everything in the template is yours except the following. The controller sets these back to its own
+values after merging, because it reads them to find and clean up its own Jobs:
+
+| Field | Why the controller keeps it |
+|---|---|
+| `metadata.name`, `metadata.namespace` | It finds and cleans up its Jobs by name |
+| `metadata.ownerReferences` | This is how a Promise notices its Job has finished |
+| `metadata.finalizers` | A finalizer would stop the controller deleting its own Job |
+| Which containers exist | You can change a container it builds, but not add one. The default containers are `reader`, `generate`, `work-writer`, `status-writer` |
+| Labels and annotations starting `kratix.io/`, and `app.kubernetes.io/managed-by` | These are how the controller finds its Jobs and protects them from being cleaned up early |
+
+Labels such as `app.kubernetes.io/name`, `app.kubernetes.io/component` and
+`app.kubernetes.io/version` are yours to set.
+
+:::tip Setting resources on a container
+You cannot add a container, but you can change one the controller builds, by naming it. This is how
+you set CPU, memory or ephemeral storage limits:
+
+```yaml
+jobTemplate:
+  spec:
+    template:
+      spec:
+        containers:
+          - name: generate
+            resources:
+              limits:
+                memory: 512Mi
+                ephemeral-storage: 1Gi
+```
+:::
+
+### When the file is wrong
+
+If `workloads.yaml` cannot be read, the controller creates no new Jobs until you fix it, and records
+a warning on the ConfigMap itself. Existing Jobs are left alone.
+
+```shell-session
+kubectl -n kratix-platform-system describe configmap ske-portal-workloads-config
+```
+
+```
+Events:
+  Type     Reason                       Age    From                     Message
+  ----     ------                       ----   ----                     -------
+  Warning  PortalWorkloadConfigInvalid  110s   portal-setup-controller  could not parse the portal
+  workloads configuration: jobTemplate: json: cannot unmarshal number into Go struct field
+  ObjectMeta.metadata.labels of type string
+```
+
+That message is the unquoted number from the tip above.
+
+The controller rejects anything it cannot make sense of: unknown fields, misspelled fields, values of
+the wrong type, and an empty (`null`) `metadata` or `spec`. It does not ignore them. That way a typo
+cannot quietly drop the labels your policy needs.
+
+Two things keep working while the file is broken. Cleaning up after a portal connection you have
+removed from your configuration still runs. So does deleting a Resource, because its Job has to run
+for the Resource to finish being removed.
+
+:::note
+The warning appears on the ConfigMap, not on the Promises whose Jobs were not created. If a Promise
+has stopped syncing to its portal and you cannot see why, check this ConfigMap's events.
 :::
 
 ## Installing without the SKE Operator

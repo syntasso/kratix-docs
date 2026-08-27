@@ -553,7 +553,7 @@ At this point, your Promise directory structure should look like:
 
 <br />
 
-Before installing your Promise, verify that Kratix and MinIO are installed and
+Before installing your Promise, verify that Kratix and SeaweedFS are installed and
 healthy.
 
 :::tip
@@ -576,8 +576,21 @@ You should see something similar to
 ```console
 NAME                                                  READY   STATUS       RESTARTS   AGE
 kratix-platform-controller-manager-769855f9bb-8srtj   2/2     Running      0          1h
-minio-6f75d9fbcf-5cn7w                                1/1     Running      0          1h
 ```
+
+SeaweedFS runs in its own namespace, so check it separately:
+
+```bash
+kubectl --context $PLATFORM get pods --namespace seaweedfs
+```
+
+```console
+NAME                         READY   STATUS    RESTARTS   AGE
+seaweedfs-64c868686c-6fklj   2/2     Running   0          1h
+```
+
+Both containers should be ready. The Pod does not report `Ready` until the
+`kratix` bucket exists, so `2/2` also confirms the bucket is there.
 
 If that is not the case, please go back to [Prepare your
 environment](#prepare-your-environment) and follow the instructions.

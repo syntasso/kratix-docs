@@ -215,8 +215,8 @@ docker run \
     --volume ${outputDir}:/kratix/output \
     --volume ${inputDir}:/kratix/input \
     --volume ${metadataDir}:/kratix/metadata \
-    --env MINIO_USER=minioadmin \
-    --env MINIO_PASSWORD=minioadmin \
+    --env MINIO_USER=kratixadmin \
+    --env MINIO_PASSWORD=kratixadmin \
     --env MINIO_ENDPOINT=localhost:31337 \
     kratix-workshop/app-pipeline-image:v1.0.0 sh -c "$command"
 EOF
@@ -228,6 +228,16 @@ chmod +x scripts/*
 
 If you are running the workshop on a Mac, you may need to update the
 `MINIO_ENDPOINT` above to `host.docker.internal:31337`.
+
+:::
+
+:::info
+
+The `MINIO_*` names are not a leftover from a MinIO server: they are the
+environment variables read by the [`aminueza/minio` Terraform
+provider](https://registry.terraform.io/providers/aminueza/minio/latest), which
+you will use in the next part to manage buckets on any S3-compatible store —
+including the SeaweedFS one deployed in the prerequisites.
 
 :::
 
