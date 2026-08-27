@@ -212,13 +212,10 @@ are visible to anyone with read access to the Job in `kratix-platform-system`.
 The Portal Controller creates Kubernetes Jobs to do its work. It creates one when a Promise or
 Resource syncs to a portal, and one when a portal connection is first set up.
 
-Those Jobs run in your cluster, so they have to live by its rules. If you have an admission policy
-that requires certain labels on every workload, it refuses these Jobs and the portal integration
-never runs. You may also want them on particular nodes, inside a resource quota, or cleaned up on
+Those Jobs run in your cluster, so they need to comply with your cluster's policies. For example, if an admission policy requires specific labels on every workload, Jobs that don't include those labels will be rejected, preventing the portal integration from running. You may also want them on particular nodes, inside a resource quota, or cleaned up on
 your usual schedule.
 
-You control all of that from a ConfigMap called `ske-portal-workloads-config`, in
-`kratix-platform-system`, under a `workloads.yaml` key:
+You configure these settings in the `ske-portal-workloads-config` ConfigMap in the `kratix-platform-system` namespace, under the workloads.yaml key:
 
 ```yaml
 apiVersion: v1
@@ -255,8 +252,8 @@ connection.
 
 :::note
 Kubernetes Jobs cannot be changed after they are created, so the controller replaces them. When you
-edit `workloads.yaml`, the Jobs it affects are recreated with the new metadata. Delete the ConfigMap
-and they go back to carrying only the controller's own labels.
+edit `workloads.yaml`, the Jobs it affects are recreated with the new configuration. Delete the ConfigMap
+and they go back to the controller's defaults.
 :::
 
 ### Labels and annotations reach the pods
@@ -292,7 +289,7 @@ values after merging, because it reads them to find and clean up its own Jobs:
 | `metadata.name`, `metadata.namespace` | It finds and cleans up its Jobs by name |
 | `metadata.ownerReferences` | This is how a Promise notices its Job has finished |
 | `metadata.finalizers` | A finalizer would stop the controller deleting its own Job |
-| Which containers exist | You can change a container it builds, but not add one. An added container would run with the pipeline's Kubernetes permissions |
+| Which containers exist | You can change a container it builds, but not add one. The default containers are `reader`, `generate`, `work-writer`, `status-writer` |
 | Labels and annotations starting `kratix.io/`, and `app.kubernetes.io/managed-by` | These are how the controller finds its Jobs and protects them from being cleaned up early |
 
 Labels such as `app.kubernetes.io/name`, `app.kubernetes.io/component` and
