@@ -34,6 +34,8 @@ metadata:
 spec:
   ...
   workflows:
+    config:
+      reconciliationInterval: 30m # Optional. How often workflows re-run.
     resource:
       configure:
         - # Pipeline definitions (multiple)
@@ -49,7 +51,26 @@ spec:
 A particular workflow (e.g. `resource.configure`) is an array of Kratix Pipeline objects
 that will be executed in order.
 
-See the next section to learn how to define a Pipeline.
+See the [Pipelines](#pipelines) section to learn how to define a Pipeline.
+
+## Reconciliation interval
+
+Kratix re-runs Configure workflows periodically, even when nothing has changed. By default this uses the platform-wide
+[`reconciliationInterval`](/main/reference/kratix-config/config#reconciliationinterval-default-10h)
+(10h). A Promise author can override it under `spec.workflows.config`:
+
+```yaml
+spec:
+  workflows:
+    config:
+      reconciliationInterval: 30m
+```
+
+The value is a string in [Go time.ParseDuration format](https://golang.org/pkg/time/#ParseDuration) of at least `1m`; zero, negative, and sub-minute values
+are rejected. It applies to the Promise's own workflow and to every Resource request. 
+When unset, Kratix falls back to the platform-wide interval, then to the 10h default.
+
+The interval is read from the [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) associated with the Promise. To override it on an existing revision, see [Overriding the reconciliation interval](/main/reference/promises/promise-upgrade/promise-revisions#overriding-the-reconciliation-interval).
 
 ## Pipelines
 
