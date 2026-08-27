@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.47d78e2e.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.99f0b3dd.js" defer="defer"></script>
 <script src="/assets/js/main.186d576e.js" defer="defer"></script>
 </head>
 <body>
@@ -41,7 +41,9 @@ the <code>kratix-platform-controller-manager</code> pod starts within the same n
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="selectivecache-default-false">selectiveCache (default: false)<a href="#selectivecache-default-false" class="hash-link" aria-label="Direct link to selectiveCache (default: false)" title="Direct link to selectiveCache (default: false)" translate="no">​</a></h3>
 <p>Enable label selector caching of Secrets on the cluster to optimise memory usage. Secrets used by Kratix must be labelled with <code>app.kubernetes.io/part-of=kratix</code>.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="reconciliationinterval-default-10h">reconciliationInterval (default: 10h)<a href="#reconciliationinterval-default-10h" class="hash-link" aria-label="Direct link to reconciliationInterval (default: 10h)" title="Direct link to reconciliationInterval (default: 10h)" translate="no">​</a></h3>
-<p>The interval on which Kratix will rerun Configure workflows for both Promises and Resources.</p>
+<p>The interval on which Kratix will rerun Configure workflows for both Promises and Resources.
+This is the platform-wide default; a Promise can override it via
+<a class="" href="/main/reference/workflows#reconciliation-interval"><code>spec.workflows.config.reconciliationInterval</code></a>.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workplacementrewriteinterval-default-10h">workPlacementRewriteInterval (default: 10h)<a href="#workplacementrewriteinterval-default-10h" class="hash-link" aria-label="Direct link to workPlacementRewriteInterval (default: 10h)" title="Direct link to workPlacementRewriteInterval (default: 10h)" translate="no">​</a></h3>
 <p>The interval on which each WorkPlacement re-writes its files to the destination&#x27;s
 state store, even when nothing has changed, so drift in the state store is
