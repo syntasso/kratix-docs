@@ -19,6 +19,16 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.58.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.58.0/) (2026-09-02)
+
+#### Fixes
+
+* Fixed a zombie-process leak in the SKE core image. Every Git State Store reconcile shells
+  out to `git`, which forks a `git remote-https` helper; if the parent was killed mid-operation,
+  the orphaned helper reparented to PID 1, which never reaped it — eventually exhausting the
+  pod's PID limit and breaking reconciliation (and `kubectl exec`) entirely. The image now runs
+  under `tini` as PID 1, so orphaned helpers are reaped correctly.
+
 ### [v0.57.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.57.0/) (2026-08-27)
 
 #### Features
