@@ -17,6 +17,23 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-heal
 
 ## Release Notes
 
+### [v0.12.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.12.2/) (2026-09-02)
+
+Released in Helm Chart version [0.29.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.29.0/)
+
+#### Bug Fixes
+
+* Fixed a zombie-process leak in the SKE Health Agent image. Every health record written
+  to a Git State Store shells out to `git`, which forks a `git remote-https` helper; if the
+  parent was killed mid-operation, the orphaned helper reparented to PID 1, which never
+  reaped it — eventually exhausting the pod's PID limit and stopping health reporting
+  entirely. The image now runs under `tini` as PID 1, so orphaned helpers are reaped
+  correctly. Bucket State Stores are unaffected.
+
+#### Security Fixes
+
+* Base image updates to address security vulnerabilities.
+
 ### [v0.12.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.12.1/) (2026-08-24)
 
 Released in Helm Chart version [0.28.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.28.0/)
