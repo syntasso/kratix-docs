@@ -28,6 +28,16 @@ Check the release notes below for information on each available version.
   the orphaned helper reparented to PID 1, which never reaped it — eventually exhausting the
   pod's PID limit and breaking reconciliation (and `kubectl exec`) entirely. The image now runs
   under `tini` as PID 1, so orphaned helpers are reaped correctly.
+* The dependency Work for a Promise is now only updated when its contents actually change,
+  instead of on every reconcile.
+* WorkPlacements that never wrote to their State Store can now be deleted. On a Destination with
+  `filepath.mode: none`, cleanup previously required a state marker file that is only created on
+  the first write, so a WorkPlacement deleted before writing anything was stuck and could never
+  be removed.
+
+#### Security Fixes
+
+* Updated to include latest security updates.
 
 ### [v0.57.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.57.0/) (2026-08-27)
 
