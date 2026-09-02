@@ -17,7 +17,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.267b353f.css">
-<script src="/assets/js/runtime~main.ba19fe8c.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.04eecfd8.js" defer="defer"></script>
 <script src="/assets/js/main.186d576e.js" defer="defer"></script>
 </head>
 <body>
@@ -33,6 +33,25 @@
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/</span><br></div></code></pre></div></div>
 <p>Check the release notes below for information on each available version.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="release-notes">Release Notes<a href="#release-notes" class="hash-link" aria-label="Direct link to Release Notes" title="Direct link to Release Notes" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0580-2026-09-02"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.58.0/" target="_blank" rel="noopener noreferrer" class="">v0.58.0</a> (2026-09-02)<a href="#v0580-2026-09-02" class="hash-link" aria-label="Direct link to v0580-2026-09-02" title="Direct link to v0580-2026-09-02" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes">Fixes<a href="#fixes" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<ul>
+<li class="">Fixed a zombie-process leak in the SKE core image. Every Git State Store reconcile shells
+out to <code>git</code>, which forks a <code>git remote-https</code> helper; if the parent was killed mid-operation,
+the orphaned helper reparented to PID 1, which never reaped it — eventually exhausting the
+pod&#x27;s PID limit and breaking reconciliation (and <code>kubectl exec</code>) entirely. The image now runs
+under <code>tini</code> as PID 1, so orphaned helpers are reaped correctly.</li>
+<li class="">The dependency Work for a Promise is now only updated when its contents actually change,
+instead of on every reconcile.</li>
+<li class="">WorkPlacements that never wrote to their State Store can now be deleted. On a Destination with
+<code>filepath.mode: none</code>, cleanup previously required a state marker file that is only created on
+the first write, so a WorkPlacement deleted before writing anything was stuck and could never
+be removed.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes">Security Fixes<a href="#security-fixes" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<ul>
+<li class="">Updated to include latest security updates.</li>
+</ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0570-2026-08-27"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.57.0/" target="_blank" rel="noopener noreferrer" class="">v0.57.0</a> (2026-08-27)<a href="#v0570-2026-08-27" class="hash-link" aria-label="Direct link to v0570-2026-08-27" title="Direct link to v0570-2026-08-27" translate="no">​</a></h3>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features">Features<a href="#features" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
@@ -66,7 +85,7 @@
 <li class="">A Resource Binding can now be pre-created to pin a Resource Request to a specific Promise version at creation time. This is particularly useful for Compound Promises, where workflows output Resource Requests for component Promises. For more information, see <a class="" href="/main/reference/promises/promise-upgrade/resource-bindings#pinning-a-resource-request-when-it-is-created">Pinning a Resource Request when it is created</a>.</li>
 <li class="">Compound Promises now uses Promise Revisions to resolve required promises. See <a class="" href="/main/reference/promises/compound#how-required-promises-are-resolved">How required Promises are resolved</a> for more details.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes">Fixes<a href="#fixes" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-1">Fixes<a href="#fixes-1" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Kratix now recovers when a Git State Store is changed outside of Kratix (for example a manual commit, or a Flux or Argo prune). Before each write, Kratix resets its cached clone to the latest remote state instead of rebasing, so writes always start from the true remote state. A new <code>git.minimumFetchInterval</code> <a href="https://docs.kratix.io/main/reference/kratix-config/config#git" target="_blank" rel="noopener noreferrer" class="">Kratix Config</a> option (default <code>5s</code>) bounds how often the remote is fetched.</li>
 </ul>
@@ -101,7 +120,7 @@
 <li class="">PromiseRevision and Resource Bindings are now always enabled — the feature flag has been removed.</li>
 <li class="">Updating a resource or Promise no longer suspends active pipeline Jobs mid-execution.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-1">Fixes<a href="#fixes-1" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-2">Fixes<a href="#fixes-2" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Promises now reconcile correctly when their associated Work resources change.</li>
 </ul>
@@ -115,7 +134,7 @@
 <li class="">Base image updates and package maintenance.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0490-2026-06-05"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.49.0/" target="_blank" rel="noopener noreferrer" class="">v0.49.0</a> (2026-06-05)<a href="#v0490-2026-06-05" class="hash-link" aria-label="Direct link to v0490-2026-06-05" title="Direct link to v0490-2026-06-05" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-2">Fixes<a href="#fixes-2" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-3">Fixes<a href="#fixes-3" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Fixed an intermittent crash in the <code>status-writer</code> pipeline sidecar when a parallel pipeline writes to the same Promise status concurrently, causing the Promise to become stuck in <code>PipelinesInProgress</code>.</li>
 </ul>
@@ -135,14 +154,14 @@
 <li class="">Pipeline Jobs now carry an owner reference to their parent resource or Promise, making job-to-resource relationships discoverable.</li>
 <li class="">Unpausing a Resource Request no longer triggers an unnecessary reconciliation.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-3">Fixes<a href="#fixes-3" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-4">Fixes<a href="#fixes-4" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Fixed: invalid Resource Binding version no longer prevents resource deletion.</li>
 <li class=""><code>UpgradeFailed</code> status now propagates correctly to Resource Bindings.</li>
 <li class="">Fixed inconsistent upgrade status for Resource Bindings during promise upgrades.</li>
 <li class="">Improved error message when an SSH private key is missing from the configured Secret.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes">Security Fixes<a href="#security-fixes" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-1">Security Fixes<a href="#security-fixes-1" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated <code>golang.org/x/crypto</code> and <code>golang.org/x/net</code> dependencies to address recent CVEs.</li>
 </ul>
@@ -156,7 +175,7 @@
 <li class="">UpgradeRun now captures a snapshot of resource groups at creation time, recording which resources belong to each rollout group in a ConfigMap referenced from <code>status.resourceListRefs</code>.</li>
 <li class="">Image pull secrets are no longer injected when not explicitly defined. Customers using private or air-gapped registries no longer need to create a dummy <code>syntasso-registry</code> secret in target namespaces.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-4">Fixes<a href="#fixes-4" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-5">Fixes<a href="#fixes-5" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Fix an issue where Resource Bindings would be left behind after deleting a Promise.</li>
 <li class="">Fix an issue where multiple Promise Revisions could be created for the same Promise version, causing failures on reconciliation.</li>
@@ -167,7 +186,7 @@
 <li class="">Base image updates and package maintenance.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0460-2026-04-28"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.46.0/" target="_blank" rel="noopener noreferrer" class="">v0.46.0</a> (2026-04-28)<a href="#v0460-2026-04-28" class="hash-link" aria-label="Direct link to v0460-2026-04-28" title="Direct link to v0460-2026-04-28" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-5">Fixes<a href="#fixes-5" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-6">Fixes<a href="#fixes-6" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Ensure we are not throwing an error when listing resource requests if the CRD does not exist.</li>
 <li class="">Reset reconcile condition when running from suspended.</li>
@@ -181,7 +200,7 @@
 <ul>
 <li class="">Introducing the ability to retry Promise and Resource Workflows via an optional Workflow Control file, with detailed retry states now visible in the <code>status.kratix</code> of Promises and Requests. Check the <a class="" href="/main/reference/workflows#workflow-control">reference</a> docs for more details.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-6">Fixes<a href="#fixes-6" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-7">Fixes<a href="#fixes-7" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Use label selectors for the Kratix Promise webhook.</li>
 <li class="">Ensure pipeline jobs are cleaned up when the workflow is Suspended and not Completed.</li>
@@ -200,7 +219,7 @@
 <li class="">The DefaultResourceRequirements for workflows can be configured via the <a class="" href="/main/reference/kratix-config/config">Kratix Config</a></li>
 <li class="">Improve logging to detail the Resource Requests a reconciliation belongs to</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-7">Fixes<a href="#fixes-7" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-8">Fixes<a href="#fixes-8" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Promise revisions can now be created successfully even when the Promise version
 contains special characters.<!-- -->
@@ -223,7 +242,7 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <ul>
 <li class="">Introduce perform improvements for the Work Placement controller</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-8">Fixes<a href="#fixes-8" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-9">Fixes<a href="#fixes-9" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Ensure the jobs to delete are calculated properly when cleaning up old jobs</li>
 <li class="">Update descriptions for Kratix CRDs</li>
@@ -234,7 +253,7 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <li class="">Base image updates (Chainguard) and package maintenance.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0420-2026-02-13"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.42.0/" target="_blank" rel="noopener noreferrer" class="">v0.42.0</a> (2026-02-13)<a href="#v0420-2026-02-13" class="hash-link" aria-label="Direct link to v0420-2026-02-13" title="Direct link to v0420-2026-02-13" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-9">Fixes<a href="#fixes-9" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-10">Fixes<a href="#fixes-10" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">OpenTelemetry dependency updates.</li>
 </ul>
@@ -243,7 +262,7 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <li class="">Base image updates (Chainguard) and package maintenance.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0410-2025-12-24"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.41.0/" target="_blank" rel="noopener noreferrer" class="">v0.41.0</a> (2025-12-24)<a href="#v0410-2025-12-24" class="hash-link" aria-label="Direct link to v0410-2025-12-24" title="Direct link to v0410-2025-12-24" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-10">Fixes<a href="#fixes-10" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-11">Fixes<a href="#fixes-11" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Resource Bindings will now properly use the <code>latest</code> Promise Revision by default.</li>
 </ul>
@@ -261,14 +280,14 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <li class="">This release introduces the short names <code>wp</code> and <code>dest</code> for <code>workPlacements</code> and <code>Destinations</code> respectively.</li>
 <li class="">Better GitStateStore authentication: Kratix now automatically retries authentication after trimming trailing whitespace from secrets.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-11">Fixes<a href="#fixes-11" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-12">Fixes<a href="#fixes-12" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Improve the OpenTelemetry tracing by only tracing Kratix-related API operations.</li>
 <li class="">Improve the log levels to ensure messages are logged at the correct level of severity.</li>
 <li class="">Improve the OpenTelemetry tracing to detail the <code>kratix.action</code> within the trace attributes.</li>
 <li class="">Update WorkPlacements to ensure they are not re-reconciled unnecessarily.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-1">Security Fixes<a href="#security-fixes-1" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-2">Security Fixes<a href="#security-fixes-2" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates including the previously mentioned <a href="https://security.snyk.io/vuln/SNYK-GOLANG-GOLANGORGXCRYPTOSSHAGENT-12668891" target="_blank" rel="noopener noreferrer" class="">vulnerability</a> associated with an indirect dependency of SKE core.</li>
 </ul>
@@ -302,12 +321,12 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <li class="">Added support for running workflows in a specific namespace regardless of where resource requests are created, as documented <a class="" href="/main/reference/workflows#workflows-namespace">here</a>.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0340-2025-08-28"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.34.0/" target="_blank" rel="noopener noreferrer" class="">v0.34.0</a> (2025-08-28)<a href="#v0340-2025-08-28" class="hash-link" aria-label="Direct link to v0340-2025-08-28" title="Direct link to v0340-2025-08-28" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-12">Fixes<a href="#fixes-12" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-13">Fixes<a href="#fixes-13" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Fixed a bug where empty work status conditions would cause errors.</li>
 <li class="">Improved handling of VersionID cache to prevent status update failures.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-2">Security Fixes<a href="#security-fixes-2" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-3">Security Fixes<a href="#security-fixes-3" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates.</li>
 </ul>
@@ -321,7 +340,7 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <ul>
 <li class="">Added support for multiple HealthRecords in a HealthStatus field, as documented <a class="" href="/main/guides/resource-health#the-health-status">here</a></li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-3">Security Fixes<a href="#security-fixes-3" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-4">Security Fixes<a href="#security-fixes-4" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates.</li>
 </ul>
@@ -332,7 +351,7 @@ the images and the kratix-controller-manager pod will fail to start.</p></div></
 <li class="">Failing to clone a Git State Store will no longer trigger an error. Instead,
 the error will be logged and Kratix will try again after a short period.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-4">Security Fixes<a href="#security-fixes-4" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-5">Security Fixes<a href="#security-fixes-5" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates.</li>
 </ul>
@@ -341,11 +360,11 @@ the error will be logged and Kratix will try again after a short period.</li>
 <ul>
 <li class="">Introduce new <code>status.workflows</code>, <code>status.workflowsSucceeded</code>, and <code>status.workflowsFailed</code> fields for Promises and Resource Requests.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-13">Fixes<a href="#fixes-13" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-14">Fixes<a href="#fixes-14" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Fix an issue where workgroupIDs were not being correctly interpolated into events.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-5">Security Fixes<a href="#security-fixes-5" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-6">Security Fixes<a href="#security-fixes-6" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
@@ -358,12 +377,12 @@ For more details please refer to <a class="" href="/main/reference/promises/prom
 <li class="">You can now pause reconciliation of a Promise and all its resource requests by a label.
 For more details please refer to <a class="" href="/main/reference/promises/reconciliation-labels#pausing-reconciliation">Pausing Reconciliation</a>.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-14">Fixes<a href="#fixes-14" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-15">Fixes<a href="#fixes-15" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Kratix will not write the <code>kratix-write-probe.txt</code> file when a State Store is registered.
 Permissions and connection to the State Store will be checked in other ways.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-6">Security Fixes<a href="#security-fixes-6" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-7">Security Fixes<a href="#security-fixes-7" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include the latest security updates</li>
 </ul>
@@ -375,7 +394,7 @@ Permissions and connection to the State Store will be checked in other ways.</li
 <li class="">Pipelines can now define node selectors and tolerations to control workload placement on specific nodes.</li>
 <li class="">GitStateStore now supports SSH access with users other than git.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-7">Security Fixes<a href="#security-fixes-7" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-8">Security Fixes<a href="#security-fixes-8" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include the latest security updates</li>
 </ul>
@@ -398,11 +417,11 @@ detailing the Kratix Controller&#x27;s performance as a whole. These can be coll
 <li class="">The Default Reconciliation Interval is configurable via the <a class="" href="/main/reference/kratix-config/config">Kratix Config</a></li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0240-2025-04-15"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.24.0/" target="_blank" rel="noopener noreferrer" class="">v0.24.0</a> (2025-04-15)<a href="#v0240-2025-04-15" class="hash-link" aria-label="Direct link to v0240-2025-04-15" title="Direct link to v0240-2025-04-15" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-15">Fixes<a href="#fixes-15" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="fixes-16">Fixes<a href="#fixes-16" class="hash-link" aria-label="Direct link to Fixes" title="Direct link to Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Resource Requests workflows will now retrigger every 10hrs.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-8">Security Fixes<a href="#security-fixes-8" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-9">Security Fixes<a href="#security-fixes-9" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
@@ -429,7 +448,7 @@ detailing the Kratix Controller&#x27;s performance as a whole. These can be coll
 <ul>
 <li class="">Support manual reconciliation of a Promise or Resource Delete workflow.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-9">Security Fixes<a href="#security-fixes-9" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-10">Security Fixes<a href="#security-fixes-10" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
@@ -464,7 +483,7 @@ Resources that can be used to monitor the health of a Resource. Check the <a cla
 <ul>
 <li class="">BucketStateStore can now delete files from GCS buckets.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-10">Security Fixes<a href="#security-fixes-10" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-11">Security Fixes<a href="#security-fixes-11" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
@@ -488,12 +507,12 @@ to <code>all</code>, all files in the State Store for that Destination will be d
 when the Destination itself is deleted. <code>none</code> is the default behaviour, where
 no files are deleted.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-11">Security Fixes<a href="#security-fixes-11" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-12">Security Fixes<a href="#security-fixes-12" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v0120-2024-12-12"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.12.0/" target="_blank" rel="noopener noreferrer" class="">v0.12.0</a> (2024-12-12)<a href="#v0120-2024-12-12" class="hash-link" aria-label="Direct link to v0120-2024-12-12" title="Direct link to v0120-2024-12-12" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-12">Security Fixes<a href="#security-fixes-12" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-13">Security Fixes<a href="#security-fixes-13" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
@@ -515,7 +534,7 @@ resource requests for that Promise</li>
 <li class="">Prevent the deletion of Destination Selectors configmaps is deleted while a resource request&#x27;s Job is still in flight</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v090-2024-11-12"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.9.0/" target="_blank" rel="noopener noreferrer" class="">v0.9.0</a> (2024-11-12)<a href="#v090-2024-11-12" class="hash-link" aria-label="Direct link to v090-2024-11-12" title="Direct link to v090-2024-11-12" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-13">Security Fixes<a href="#security-fixes-13" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-fixes-14">Security Fixes<a href="#security-fixes-14" class="hash-link" aria-label="Direct link to Security Fixes" title="Direct link to Security Fixes" translate="no">​</a></h4>
 <ul>
 <li class="">Updated to include latest security updates</li>
 </ul>
@@ -577,6 +596,6 @@ Resource Requests.</li>
 <ul>
 <li class="">OSS Kratix features pulled in</li>
 <li class="">security updates</li>
-</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/syntasso/kratix-docs/tree/main/docs/ske/50-releases/10-ske.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/ske/releases"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Releases</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/category/platform"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Platform</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#release-notes" class="table-of-contents__link toc-highlight">Release Notes</a><ul><li><a href="#v0570-2026-08-27" class="table-of-contents__link toc-highlight">v0.57.0 (2026-08-27)</a></li><li><a href="#v0560-2026-08-19" class="table-of-contents__link toc-highlight">v0.56.0 (2026-08-19)</a></li><li><a href="#v0550-2026-08-12" class="table-of-contents__link toc-highlight">v0.55.0 (2026-08-12)</a></li><li><a href="#v0540-2026-08-04" class="table-of-contents__link toc-highlight">v0.54.0 (2026-08-04)</a></li><li><a href="#v0530-2026-07-22" class="table-of-contents__link toc-highlight">v0.53.0 (2026-07-22)</a></li><li><a href="#v0520-2026-07-13" class="table-of-contents__link toc-highlight">v0.52.0 (2026-07-13)</a></li><li><a href="#v0510-2026-07-07" class="table-of-contents__link toc-highlight">v0.51.0 (2026-07-07)</a></li><li><a href="#v0500-2026-06-24" class="table-of-contents__link toc-highlight">v0.50.0 (2026-06-24)</a></li><li><a href="#v0490-2026-06-05" class="table-of-contents__link toc-highlight">v0.49.0 (2026-06-05)</a></li><li><a href="#v0480-2026-06-03" class="table-of-contents__link toc-highlight">v0.48.0 (2026-06-03)</a></li><li><a href="#v0470-2026-05-18" class="table-of-contents__link toc-highlight">v0.47.0 (2026-05-18)</a></li><li><a href="#v0460-2026-04-28" class="table-of-contents__link toc-highlight">v0.46.0 (2026-04-28)</a></li><li><a href="#v0450-2026-04-17" class="table-of-contents__link toc-highlight">v0.45.0 (2026-04-17)</a></li><li><a href="#v0440-2026-03-26" class="table-of-contents__link toc-highlight">v0.44.0 (2026-03-26)</a></li><li><a href="#maintenance-13" class="table-of-contents__link toc-highlight">Maintenance</a></li><li><a href="#v0430-2026-03-04" class="table-of-contents__link toc-highlight">v0.43.0 (2026-03-04)</a></li><li><a href="#v0420-2026-02-13" class="table-of-contents__link toc-highlight">v0.42.0 (2026-02-13)</a></li><li><a href="#v0410-2025-12-24" class="table-of-contents__link toc-highlight">v0.41.0 (2025-12-24)</a></li><li><a href="#v0400-2025-12-09" class="table-of-contents__link toc-highlight">v0.40.0 (2025-12-09)</a></li><li><a href="#v0390-2025-11-05" class="table-of-contents__link toc-highlight">v0.39.0 (2025-11-05)</a></li><li><a href="#v0380-2025-10-21" class="table-of-contents__link toc-highlight">v0.38.0 (2025-10-21)</a></li><li><a href="#v0370-2025-10-07" class="table-of-contents__link toc-highlight">v0.37.0 (2025-10-07)</a></li><li><a href="#v0360-2025-10-01" class="table-of-contents__link toc-highlight">v0.36.0 (2025-10-01)</a></li><li><a href="#v0350-2025-09-16" class="table-of-contents__link toc-highlight">v0.35.0 (2025-09-16)</a></li><li><a href="#v0340-2025-08-28" class="table-of-contents__link toc-highlight">v0.34.0 (2025-08-28)</a></li><li><a href="#v0330-2025-08-11" class="table-of-contents__link toc-highlight">v0.33.0 (2025-08-11)</a></li><li><a href="#v0320-2025-07-30" class="table-of-contents__link toc-highlight">v0.32.0 (2025-07-30)</a></li><li><a href="#v0310-2025-07-15" class="table-of-contents__link toc-highlight">v0.31.0 (2025-07-15)</a></li><li><a href="#v0300-2025-07-10" class="table-of-contents__link toc-highlight">v0.30.0 (2025-07-10)</a></li><li><a href="#v0290-2025-06-27" class="table-of-contents__link toc-highlight">v0.29.0 (2025-06-27)</a></li><li><a href="#v0280-2025-06-16" class="table-of-contents__link toc-highlight">v0.28.0 (2025-06-16)</a></li><li><a href="#v0270-2025-05-06" class="table-of-contents__link toc-highlight">v0.27.0 (2025-05-06)</a></li><li><a href="#v0260-2025-04-29" class="table-of-contents__link toc-highlight">v0.26.0 (2025-04-29)</a></li><li><a href="#v0250-2025-04-25" class="table-of-contents__link toc-highlight">v0.25.0 (2025-04-25)</a></li><li><a href="#v0240-2025-04-15" class="table-of-contents__link toc-highlight">v0.24.0 (2025-04-15)</a></li><li><a href="#v0230-2025-04-03" class="table-of-contents__link toc-highlight">v0.23.0 (2025-04-03)</a></li><li><a href="#v0220-2025-03-25" class="table-of-contents__link toc-highlight">v0.22.0 (2025-03-25)</a></li><li><a href="#v0210-2025-03-18" class="table-of-contents__link toc-highlight">v0.21.0 (2025-03-18)</a></li><li><a href="#v0200-2025-03-11" class="table-of-contents__link toc-highlight">v0.20.0 (2025-03-11)</a></li><li><a href="#v0190-2025-03-04" class="table-of-contents__link toc-highlight">v0.19.0 (2025-03-04)</a></li><li><a href="#v0180-2025-02-26" class="table-of-contents__link toc-highlight">v0.18.0 (2025-02-26)</a></li><li><a href="#v0170-2025-01-29" class="table-of-contents__link toc-highlight">v0.17.0 (2025-01-29)</a></li><li><a href="#v0160-2024-01-14" class="table-of-contents__link toc-highlight">v0.16.0 (2024-01-14)</a></li><li><a href="#v0150-2024-01-08" class="table-of-contents__link toc-highlight">v0.15.0 (2024-01-08)</a></li><li><a href="#v0140-2024-12-27" class="table-of-contents__link toc-highlight">v0.14.0 (2024-12-27)</a></li><li><a href="#v0130-2024-12-17" class="table-of-contents__link toc-highlight">v0.13.0 (2024-12-17)</a></li><li><a href="#v0120-2024-12-12" class="table-of-contents__link toc-highlight">v0.12.0 (2024-12-12)</a></li><li><a href="#v0110-2024-12-04" class="table-of-contents__link toc-highlight">v0.11.0 (2024-12-04)</a></li><li><a href="#v0100-2024-11-27" class="table-of-contents__link toc-highlight">v0.10.0 (2024-11-27)</a></li><li><a href="#v090-2024-11-12" class="table-of-contents__link toc-highlight">v0.9.0 (2024-11-12)</a></li><li><a href="#v080-2024-11-05" class="table-of-contents__link toc-highlight">v0.8.0 (2024-11-05)</a></li><li><a href="#v070-2024-10-30" class="table-of-contents__link toc-highlight">v0.7.0 (2024-10-30)</a></li><li><a href="#v060-2024-10-01" class="table-of-contents__link toc-highlight">v0.6.0 (2024-10-01)</a></li><li><a href="#v050-2024-09-26" class="table-of-contents__link toc-highlight">v0.5.0 (2024-09-26)</a></li><li><a href="#v040-2024-09-17" class="table-of-contents__link toc-highlight">v0.4.0 (2024-09-17)</a></li><li><a href="#v030-2024-08-20" class="table-of-contents__link toc-highlight">v0.3.0 (2024-08-20)</a></li><li><a href="#v020-2024-08-13" class="table-of-contents__link toc-highlight">v0.2.0 (2024-08-13)</a></li><li><a href="#v010-2024-08-02" class="table-of-contents__link toc-highlight">v0.1.0 (2024-08-02)</a></li></ul></li></ul></div></div></div></div></main></div></div></div><img id="ske-scarf-pixel" style="height:1px;width:1px" referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f09f95ff-0179-40f1-a33c-826b0e29c3de"><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/">Getting Started</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://kratix.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Kratix<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/syntasso/kratix" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://syntasso.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Syntasso<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77" target="_blank" rel="noopener noreferrer" class="footer__link-item">Privacy Policy<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Syntasso Limited. Built with Docusaurus.</div></div></div></footer></div>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/syntasso/kratix-docs/tree/main/docs/ske/50-releases/10-ske.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/ske/releases"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Releases</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/category/platform"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Platform</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#release-notes" class="table-of-contents__link toc-highlight">Release Notes</a><ul><li><a href="#v0580-2026-09-02" class="table-of-contents__link toc-highlight">v0.58.0 (2026-09-02)</a></li><li><a href="#v0570-2026-08-27" class="table-of-contents__link toc-highlight">v0.57.0 (2026-08-27)</a></li><li><a href="#v0560-2026-08-19" class="table-of-contents__link toc-highlight">v0.56.0 (2026-08-19)</a></li><li><a href="#v0550-2026-08-12" class="table-of-contents__link toc-highlight">v0.55.0 (2026-08-12)</a></li><li><a href="#v0540-2026-08-04" class="table-of-contents__link toc-highlight">v0.54.0 (2026-08-04)</a></li><li><a href="#v0530-2026-07-22" class="table-of-contents__link toc-highlight">v0.53.0 (2026-07-22)</a></li><li><a href="#v0520-2026-07-13" class="table-of-contents__link toc-highlight">v0.52.0 (2026-07-13)</a></li><li><a href="#v0510-2026-07-07" class="table-of-contents__link toc-highlight">v0.51.0 (2026-07-07)</a></li><li><a href="#v0500-2026-06-24" class="table-of-contents__link toc-highlight">v0.50.0 (2026-06-24)</a></li><li><a href="#v0490-2026-06-05" class="table-of-contents__link toc-highlight">v0.49.0 (2026-06-05)</a></li><li><a href="#v0480-2026-06-03" class="table-of-contents__link toc-highlight">v0.48.0 (2026-06-03)</a></li><li><a href="#v0470-2026-05-18" class="table-of-contents__link toc-highlight">v0.47.0 (2026-05-18)</a></li><li><a href="#v0460-2026-04-28" class="table-of-contents__link toc-highlight">v0.46.0 (2026-04-28)</a></li><li><a href="#v0450-2026-04-17" class="table-of-contents__link toc-highlight">v0.45.0 (2026-04-17)</a></li><li><a href="#v0440-2026-03-26" class="table-of-contents__link toc-highlight">v0.44.0 (2026-03-26)</a></li><li><a href="#maintenance-13" class="table-of-contents__link toc-highlight">Maintenance</a></li><li><a href="#v0430-2026-03-04" class="table-of-contents__link toc-highlight">v0.43.0 (2026-03-04)</a></li><li><a href="#v0420-2026-02-13" class="table-of-contents__link toc-highlight">v0.42.0 (2026-02-13)</a></li><li><a href="#v0410-2025-12-24" class="table-of-contents__link toc-highlight">v0.41.0 (2025-12-24)</a></li><li><a href="#v0400-2025-12-09" class="table-of-contents__link toc-highlight">v0.40.0 (2025-12-09)</a></li><li><a href="#v0390-2025-11-05" class="table-of-contents__link toc-highlight">v0.39.0 (2025-11-05)</a></li><li><a href="#v0380-2025-10-21" class="table-of-contents__link toc-highlight">v0.38.0 (2025-10-21)</a></li><li><a href="#v0370-2025-10-07" class="table-of-contents__link toc-highlight">v0.37.0 (2025-10-07)</a></li><li><a href="#v0360-2025-10-01" class="table-of-contents__link toc-highlight">v0.36.0 (2025-10-01)</a></li><li><a href="#v0350-2025-09-16" class="table-of-contents__link toc-highlight">v0.35.0 (2025-09-16)</a></li><li><a href="#v0340-2025-08-28" class="table-of-contents__link toc-highlight">v0.34.0 (2025-08-28)</a></li><li><a href="#v0330-2025-08-11" class="table-of-contents__link toc-highlight">v0.33.0 (2025-08-11)</a></li><li><a href="#v0320-2025-07-30" class="table-of-contents__link toc-highlight">v0.32.0 (2025-07-30)</a></li><li><a href="#v0310-2025-07-15" class="table-of-contents__link toc-highlight">v0.31.0 (2025-07-15)</a></li><li><a href="#v0300-2025-07-10" class="table-of-contents__link toc-highlight">v0.30.0 (2025-07-10)</a></li><li><a href="#v0290-2025-06-27" class="table-of-contents__link toc-highlight">v0.29.0 (2025-06-27)</a></li><li><a href="#v0280-2025-06-16" class="table-of-contents__link toc-highlight">v0.28.0 (2025-06-16)</a></li><li><a href="#v0270-2025-05-06" class="table-of-contents__link toc-highlight">v0.27.0 (2025-05-06)</a></li><li><a href="#v0260-2025-04-29" class="table-of-contents__link toc-highlight">v0.26.0 (2025-04-29)</a></li><li><a href="#v0250-2025-04-25" class="table-of-contents__link toc-highlight">v0.25.0 (2025-04-25)</a></li><li><a href="#v0240-2025-04-15" class="table-of-contents__link toc-highlight">v0.24.0 (2025-04-15)</a></li><li><a href="#v0230-2025-04-03" class="table-of-contents__link toc-highlight">v0.23.0 (2025-04-03)</a></li><li><a href="#v0220-2025-03-25" class="table-of-contents__link toc-highlight">v0.22.0 (2025-03-25)</a></li><li><a href="#v0210-2025-03-18" class="table-of-contents__link toc-highlight">v0.21.0 (2025-03-18)</a></li><li><a href="#v0200-2025-03-11" class="table-of-contents__link toc-highlight">v0.20.0 (2025-03-11)</a></li><li><a href="#v0190-2025-03-04" class="table-of-contents__link toc-highlight">v0.19.0 (2025-03-04)</a></li><li><a href="#v0180-2025-02-26" class="table-of-contents__link toc-highlight">v0.18.0 (2025-02-26)</a></li><li><a href="#v0170-2025-01-29" class="table-of-contents__link toc-highlight">v0.17.0 (2025-01-29)</a></li><li><a href="#v0160-2024-01-14" class="table-of-contents__link toc-highlight">v0.16.0 (2024-01-14)</a></li><li><a href="#v0150-2024-01-08" class="table-of-contents__link toc-highlight">v0.15.0 (2024-01-08)</a></li><li><a href="#v0140-2024-12-27" class="table-of-contents__link toc-highlight">v0.14.0 (2024-12-27)</a></li><li><a href="#v0130-2024-12-17" class="table-of-contents__link toc-highlight">v0.13.0 (2024-12-17)</a></li><li><a href="#v0120-2024-12-12" class="table-of-contents__link toc-highlight">v0.12.0 (2024-12-12)</a></li><li><a href="#v0110-2024-12-04" class="table-of-contents__link toc-highlight">v0.11.0 (2024-12-04)</a></li><li><a href="#v0100-2024-11-27" class="table-of-contents__link toc-highlight">v0.10.0 (2024-11-27)</a></li><li><a href="#v090-2024-11-12" class="table-of-contents__link toc-highlight">v0.9.0 (2024-11-12)</a></li><li><a href="#v080-2024-11-05" class="table-of-contents__link toc-highlight">v0.8.0 (2024-11-05)</a></li><li><a href="#v070-2024-10-30" class="table-of-contents__link toc-highlight">v0.7.0 (2024-10-30)</a></li><li><a href="#v060-2024-10-01" class="table-of-contents__link toc-highlight">v0.6.0 (2024-10-01)</a></li><li><a href="#v050-2024-09-26" class="table-of-contents__link toc-highlight">v0.5.0 (2024-09-26)</a></li><li><a href="#v040-2024-09-17" class="table-of-contents__link toc-highlight">v0.4.0 (2024-09-17)</a></li><li><a href="#v030-2024-08-20" class="table-of-contents__link toc-highlight">v0.3.0 (2024-08-20)</a></li><li><a href="#v020-2024-08-13" class="table-of-contents__link toc-highlight">v0.2.0 (2024-08-13)</a></li><li><a href="#v010-2024-08-02" class="table-of-contents__link toc-highlight">v0.1.0 (2024-08-02)</a></li></ul></li></ul></div></div></div></div></main></div></div></div><img id="ske-scarf-pixel" style="height:1px;width:1px" referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f09f95ff-0179-40f1-a33c-826b0e29c3de"><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/">Getting Started</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://kratix.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Kratix<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/syntasso/kratix" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://syntasso.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Syntasso<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77" target="_blank" rel="noopener noreferrer" class="footer__link-item">Privacy Policy<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Syntasso Limited. Built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>
