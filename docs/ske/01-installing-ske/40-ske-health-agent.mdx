@@ -135,6 +135,7 @@ data:
   url: # address
   secretName: <secret name>
   branch: # optional (default: main)
+  destinationName: # optional; see "Running the agent on multiple Destinations"
 ---
 apiVersion: v1
 kind: Secret
@@ -163,6 +164,7 @@ data:
   secretName: <secret name> # required for accessKey
   path: # path within the bucket; optional
   insecure: # "true" or "false" (default: "false"); optional string
+  destinationName: # optional; see "Running the agent on multiple Destinations"
 ---
 apiVersion: v1
 kind: Secret
@@ -179,3 +181,18 @@ stringData:
 The configuration should be created _after_ installing agent, otherwise the namespace will not exist.
 
 :::
+
+### Running the agent on multiple Destinations
+
+The agent names each health record after the promise and the resource it checks. If
+agents on two Destinations check the same resource, they generate the same name and
+overwrite each other's record.
+
+To keep the records separate, set `destinationName` in each agent's ConfigMap to a value
+unique to that Destination; the name of the Kratix Destination is a good choice. The
+value becomes part of the health record's name, so the Platform keeps one record per
+Destination and shows them all in the resource's health status.
+
+If you set or change `destinationName` on an agent that has already written records, the
+records written under the old name are not cleaned up automatically; delete them from the
+state store manually.
