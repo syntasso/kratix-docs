@@ -15,7 +15,67 @@ estate, or a mix into Kratix Promises and Resource Requests. It finds the
 infrastructure patterns that repeat across an account and proposes each one as a
 reusable, requestable platform capability.
 
-Insert very important docs here 🍩
+It is assistive by default. Every step proposes and waits, nothing is applied
+to your platform until a human says yes, and a deterministic CLI gate blocks
+anything with unresolved critical or high review findings.
+
+## How it works
+
+The `cloud-to-kratix-promise` skill drives one workflow, in order:
+
+1. **Discover** — checks which discovery tools are actually available (provider
+   CLI, MCP connector, IaC state), confirms the provider with you, then
+   inventories the account for real. It never proceeds on assumed or fabricated
+   resource data.
+2. **Classify** — clusters resources that repeat the same shape and proposes
+   the split between reusable patterns and loose one-off resources before
+   drafting anything, so you can scope down to the clearest wins first.
+3. **Clarify** — asks one direct question per ambiguous grouping, batched
+   together and framed around real-world behaviour. Drafting stays blocked
+   until you answer or explicitly say "use your best judgement".
+4. **Build** — hands each approved capability to `kratix-build-promise` for a
+   real Promise, with an API schema and working pipeline code, then drafts the
+   Resource Requests representing what is already running.
+5. **Review** — adversarially checks every draft against Syntasso's platform
+   doctrine (is this orchestration with ownership and a lifecycle, or just
+   automation?) and records each finding in a `review-findings.yaml` artifact.
+6. **Gate** — `kratix skelift review` fails on any unresolved critical or high
+   finding, and `kratix skelift check` validates the generated Promises and
+   examples structurally. These commands are the enforcement, not the prose
+   review above them.
+7. **Apply, only after approval** — the drafts, review, and gate results are
+   shown to you first. An explicit yes is required before anything reaches the
+   platform.
+
+## Usage
+
+With the skills installed, start your agent and point it at an estate:
+
+```text
+What's running in my AWS account? Turn the repeated patterns into
+Kratix Promises and Resource Requests.
+```
+
+Expect the agent to confirm which account and tooling it found before
+inventorying, then ask a small batch of questions about scope and any
+ambiguous groupings. Each run produces:
+
+| Output | Contents |
+|---|---|
+| `promises/` | One generated Promise per approved capability |
+| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile` |
+| `resource-requests/` | Drafted Resource Requests for the live instances, not applied |
+| `review-findings.yaml` | Every review finding, including explicit pass notes |
+
+Gate the run before applying anything:
+
+```bash
+kratix skelift review --review-file review-findings.yaml
+kratix skelift check --promise-dir promises --example-dir resource-requests
+```
+
+Both exit non-zero on failure, so they can back a CI check as well as a
+conversation.
 
 ## What gets installed
 
