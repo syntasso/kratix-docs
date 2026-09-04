@@ -10,71 +10,10 @@ This integration is in Preview mode and is not covered by the Syntasso SLA. If y
 
 ## Overview
 
-SKE Lift turns an existing cloud estate, e.g. AWS, Azure, GCP, a Kubernetes-native
-estate, or a mix into Kratix Promises and Resource Requests. It finds the
-infrastructure patterns that repeat across an account and proposes each one as a
-reusable, requestable platform capability.
-
-It is assistive by default. Every step proposes and waits, nothing is applied
-to your platform until a human says yes, and a deterministic CLI gate blocks
-anything with unresolved critical or high review findings.
-
-## How it works
-
-The `cloud-to-kratix-promise` skill drives one workflow, in order:
-
-1. **Discover** — checks which discovery tools are actually available (provider
-   CLI, MCP connector, IaC state), confirms the provider with you, then
-    inventories the account. Everything it reports comes from the account itself, never from assumption.
-2. **Classify** — clusters resources that repeat the same shape and proposes
-   the split between reusable patterns and loose one-off resources before
-   drafting anything, so you can scope down to the clearest wins first.
-3. **Clarify** — asks one direct question per ambiguous grouping, batched
-   together and framed around real-world behaviour. Drafting stays blocked
-   until you answer or explicitly say "use your best judgement".
-4. **Build** — hands each approved capability to `kratix-build-promise` for a
-   real Promise, with an API schema and working pipeline code, then drafts the
-   Resource Requests representing what is already running.
-5. **Review** — adversarially checks every draft against Syntasso's platform
-   doctrine (is this orchestration with ownership and a lifecycle, or just
-   automation?) and records each finding in a `review-findings.yaml` artifact.
-6. **Gate** — `kratix skelift review` fails on any unresolved critical or high
-   finding, and `kratix skelift check` validates the generated Promises and
-   examples structurally. These commands are the enforcement, not the prose
-   review above them.
-7. **Apply, only after approval** — the drafts, review, and gate results are
-   shown to you first. An explicit yes is required before anything reaches the
-   platform.
-
-## Usage
-
-With the skills installed, start your agent and point it at an estate:
-
-```text
-What's running in my AWS account? Turn the repeated patterns into
-Kratix Promises and Resource Requests.
-```
-
-Expect the agent to confirm which account and tooling it found before
-inventorying, then ask a small batch of questions about scope and any
-ambiguous groupings. Each run produces:
-
-| Output | Contents |
-|---|---|
-| `promises/` | One generated Promise per approved capability |
-| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile` |
-| `resource-requests/` | Drafted Resource Requests for the live instances, not applied |
-| `review-findings.yaml` | Every review finding, including explicit pass notes |
-
-Gate the run before applying anything:
-
-```bash
-kratix skelift review --review-file review-findings.yaml
-kratix skelift check --promise-dir promises --example-dir resource-requests
-```
-
-Both exit non-zero on failure, so they can back a CI check as well as a
-conversation.
+SKE Lift turns an existing cloud estate into Kratix Promises and Resource
+Requests. It works against AWS, Azure, GCP, a Kubernetes-native estate, or a
+mix of them. It looks for the infrastructure patterns that repeat across an
+account, and proposes each one as a platform capability your users can request.
 
 ## What gets installed
 
@@ -121,21 +60,20 @@ Pipe the token in on stdin to keep it out of your shell history:
 echo "<YOUR_ENTERPRISE_RELEASES_TOKEN>" | kratix plugin add skelift --token-stdin
 ```
 
-The token can also be passed as a flag, which is more convenient but leaves the
+You can also pass the token as a flag. Note that this will leave the
 value in your shell history:
 
 ```bash
 kratix plugin add skelift --token <YOUR_ENTERPRISE_RELEASES_TOKEN>
 ```
 
-The command reports what it installed and where. Unlike other SKE plugins, you
-do not need to download release artifacts or place binaries yourself.
+The command reports what it installed and where.
 
 ### Add the plugin directory to your PATH
 
-The Kratix CLI finds plugins on your `PATH` and nowhere else, so the install
-directory has to be on it. If the command reports that
-`~/.kratix/plugins/bin` is not on your `PATH`, add it to your shell profile:
+The Kratix CLI looks for plugins on your `PATH` and nowhere else. If the install
+command reports that `~/.kratix/plugins/bin` is not on yours, add it to your
+shell profile:
 
 ```bash
 export PATH="$HOME/.kratix/plugins/bin:$PATH"
@@ -143,8 +81,8 @@ export PATH="$HOME/.kratix/plugins/bin:$PATH"
 
 ### Restart your agent
 
-Agents read skills at start-up. Restart Claude Code, or your agent of choice,
-before expecting the skills to be available.
+Agents read skills when they start. Restart Claude Code, or whichever agent you
+use, before looking for the new skills.
 
 ## Verify the installation
 
@@ -157,19 +95,11 @@ kratix plugin list
 You should see `kratix skelift check` and `kratix skelift review` listed, with
 `~/.kratix/plugins/bin` as their location.
 
-To confirm a plugin runs, request its help:
+Check that a plugin runs by asking for its help:
 
 ```bash
 kratix skelift review --help
-```
-
-You should see output similar to:
-
-```bash
-Validate a review-findings artifact and fail if unresolved critical or high findings remain.
-
-Usage:
-  review [flags]
+kratix skelift check --help
 ```
 
 Confirm the skills are on disk:
@@ -178,11 +108,67 @@ Confirm the skills are on disk:
 ls ~/.kratix/skills
 ```
 
+## How it works
+
+The `cloud-to-kratix-promise` skill runs a fixed sequence:
+
+1. **Discover** — finds out which discovery tools are available to it (a
+   provider CLI, an MCP connector, or infrastructure-as-code state), confirms
+   the provider with you, then inventories the account. Everything it reports
+   comes from reading the account, not from assumption.
+2. **Classify** — groups the resources that share the same shape, and proposes
+   which of them are reusable patterns and which are one-offs. It does this
+   before drafting anything, so you can narrow the scope first.
+3. **Clarify** — asks you about each grouping it is unsure of, in a single batch
+   of questions about how the resources behave in practice. Drafting does not
+   start until you answer, or tell it to use its own judgement.
+4. **Build** — passes each approved capability to `kratix-build-promise`, which
+   writes the Promise itself: an API schema and working pipeline code. It then
+   drafts the Resource Requests for what is already running.
+5. **Review** — checks every draft against Syntasso's platform doctrine, looking
+   for capabilities that only automate a task rather than owning a service
+   through its lifecycle. Each finding is recorded in `review-findings.yaml`.
+6. **Gate** — `kratix skelift review` fails if any critical or high finding is
+   unresolved, and `kratix skelift check` validates the structure of the
+   generated Promises and examples. The review step records findings; these
+   commands are what enforce them.
+7. **Apply, only after approval** — you see the drafts, the review, and the gate
+   results first. Nothing reaches the platform until you say so.
+
+## Usage
+
+Once the skills are installed, start your agent and point it at a cloud account:
+
+```text
+What's running in my AWS account? Turn the repeated patterns into
+Kratix Promises and Resource Requests.
+```
+
+The agent confirms which account and tooling it found before it inventories
+anything, then asks a short batch of questions about scope and about any
+groupings it is unsure of. Each run produces:
+
+| Output | Contents |
+|---|---|
+| `promises/` | One generated Promise per approved capability |
+| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile` |
+| `resource-requests/` | Drafted Resource Requests for the live instances, not applied |
+| `review-findings.yaml` | Every review finding, including explicit pass notes |
+
+Run the gates before applying anything:
+
+```bash
+kratix skelift review --review-file review-findings.yaml
+kratix skelift check --promise-dir promises --example-dir resource-requests
+```
+
+Both exit non-zero on failure, so you can run them in CI as well as alongside
+the agent.
+
 ## Updating SKE Lift
 
 Run the install command again. Each run installs the current release and
-overwrites whatever is already at those paths, so any local edits to an
-installed skill are lost.
+overwrites what is already at those paths, so this will overwrite any manual edits you have on the skills.
 
 ```bash
 echo "<YOUR_ENTERPRISE_RELEASES_TOKEN>" | kratix plugin add skelift --token-stdin
@@ -190,9 +176,9 @@ echo "<YOUR_ENTERPRISE_RELEASES_TOKEN>" | kratix plugin add skelift --token-stdi
 
 ## Using the skills with other agents
 
-Claude Code is configured automatically. For any other agent, point it at
-`~/.kratix/skills`, which holds the same skills as plain directories of
-Markdown. Consult your agent's documentation for how it discovers skills.
+Claude Code is set up for you. For any other agent, point it at
+`~/.kratix/skills`, where the skills are stored as plain directories of
+Markdown. See your agent's documentation for how it discovers skills.
 
 ## Related docs
 
