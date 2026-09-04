@@ -54,10 +54,10 @@ which begins with `github_pat_`.
 
 ## Install
 
-Pipe the token in on stdin to keep it out of your shell history:
+You can save the token in a variable and then pipe it on stdin to keep it out of your shell history:
 
 ```bash
-echo "<YOUR_ENTERPRISE_RELEASES_TOKEN>" | kratix plugin add skelift --token-stdin
+echo $ENTERPRISE_RELEASES_TOKEN | kratix plugin add skelift --token-stdin
 ```
 
 You can also pass the token as a flag. Note that this will leave the
@@ -119,8 +119,7 @@ The `cloud-to-kratix-promise` skill runs a fixed sequence:
 2. **Classify** — groups the resources that share the same shape, and proposes
    which of them are reusable patterns and which are one-offs. It does this
    before drafting anything, so you can narrow the scope first.
-3. **Clarify** — asks you about each grouping it is unsure of, in a single batch
-   of questions about how the resources behave in practice. Drafting does not
+3. **Clarify** — asks you about each grouping it's unsure of, batched into a single set of questions about how the resources behave in practice. Drafting does not
    start until you answer, or tell it to use its own judgement.
 4. **Build** — passes each approved capability to `kratix-build-promise`, which
    writes the Promise itself: an API schema and working pipeline code. It then
