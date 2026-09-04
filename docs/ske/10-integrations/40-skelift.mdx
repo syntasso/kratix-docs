@@ -25,8 +25,7 @@ The `cloud-to-kratix-promise` skill drives one workflow, in order:
 
 1. **Discover** — checks which discovery tools are actually available (provider
    CLI, MCP connector, IaC state), confirms the provider with you, then
-   inventories the account for real. It never proceeds on assumed or fabricated
-   resource data.
+    inventories the account. Everything it reports comes from the account itself, never from assumption.
 2. **Classify** — clusters resources that repeat the same shape and proposes
    the split between reusable patterns and loose one-off resources before
    drafting anything, so you can scope down to the clearest wins first.
