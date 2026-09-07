@@ -88,7 +88,7 @@ yarn add @syntasso/plugin-ske-backend --cwd packages/backend
 yarn add @syntasso/plugin-ske-frontend @backstage/plugin-permission-react --cwd packages/app
 ```
 
-:::info Peer dependencies (`v0.21.1` and later)
+:::note Peer dependencies (`v0.21.1` and later)
 From `@syntasso/plugin-ske-frontend` `v0.21.1`, the packages the frontend plugin
 shares with the host app (`@backstage/plugin-catalog`, `@backstage/plugin-catalog-graph`,
 `@backstage/plugin-catalog-react`, `@backstage/plugin-scaffolder`,
@@ -102,8 +102,6 @@ Yarn does not fail the install over a missing peer — it prints a warning
 still completes, so it is easy to miss until the app fails to build against the absent
 package.
 :::
-
-If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](./air-gapped-plugins) to publish the plugins to your cloud instance before continuing.
 
 :::important
 `@syntasso/plugin-ske-backend` must be at least `v0.21.0`, and `@syntasso/plugin-ske-frontend` at
@@ -181,6 +179,11 @@ This gives Promise entities an overview page, and Resource entities an overview 
 **Manage** tab for updating and deleting the resource. For the full list of entity pages,
 components, annotations, and behaviours, see the
 [SKE Frontend Plugin reference](./frontend-plugin).
+
+:::warning Spotify Portal for Backstage
+If you are using Spotify Portal for Backstage, publish the plugins to your cloud instance before
+completing the install — see the [Spotify Portal installation guide](./air-gapped-plugins).
+:::
 
 ## Configuring the backend plugin
 
