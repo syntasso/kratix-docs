@@ -85,8 +85,16 @@ Two packages, one for each half of Backstage:
 
 ```bash
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
-yarn add @syntasso/plugin-ske-frontend --cwd packages/app
+yarn add @syntasso/plugin-ske-frontend @backstage/plugin-permission-react --cwd packages/app
 ```
+
+From `@syntasso/plugin-ske-frontend` `v0.21.1`, the packages the frontend plugin
+shares with the host app (`@backstage/plugin-catalog`, `plugin-catalog-graph`,
+`plugin-catalog-react`, `plugin-scaffolder`, `plugin-scaffolder-react` and
+`plugin-permission-react`) are declared as **peer dependencies**, so your app must
+provide them. Most already ship with a standard Backstage app; the one that
+usually does not is `@backstage/plugin-permission-react`, which is why it is added
+explicitly above.
 
 If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](./air-gapped-plugins) to publish the plugins to your cloud instance before continuing.
 
@@ -95,6 +103,15 @@ If you are using Spotify Portal for Backstage, follow the [Spotify Portal instal
 least `v0.18.0`. Earlier backend versions do not provide the action that
 [pull-request mode](./delivery-modes) uses to record a request, so a submission opens the pull
 request and then fails.
+:::
+
+:::caution Upgrading to `v0.21.1` or later
+`v0.21.1` moves shared Backstage packages to peer dependencies. If your app does not
+already provide `@backstage/plugin-permission-react`, add it (as shown above) before
+you upgrade — otherwise `yarn install` fails with
+`app@workspace doesn't provide @backstage/plugin-permission-react`. This peer change is
+what fixes the `No path for routeRef{...id=catalog-graph}` error on resource pages that
+duplicate plugin copies could otherwise cause.
 :::
 
 ### Backend

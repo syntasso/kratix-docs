@@ -24,6 +24,25 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-frontend v0.21.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.21.1/) (2026-09-07)
+
+#### Fixes
+
+* **No more `No path for routeRef` error on resource pages.** The packages the frontend plugin shares
+with the host app (`@backstage/plugin-catalog`, `plugin-catalog-graph`, `plugin-catalog-react`,
+`plugin-scaffolder`, `plugin-scaffolder-react`, `plugin-permission-react`) are now **peer
+dependencies**. This stops the package manager from giving the plugin private copies whose routeRef
+objects differ from the app's, which surfaced as `No path for routeRef{...id=catalog-graph}` on the
+resource view when a lockfile ended up with duplicate copies.
+
+:::caution Upgrading requires a dependency change
+Because shared packages are now peer dependencies, your app must provide them. Most already ship with
+a standard Backstage app; add `@backstage/plugin-permission-react` if yours does not, **before**
+upgrading — otherwise `yarn install` fails with
+`app@workspace doesn't provide @backstage/plugin-permission-react`. See
+[Install the plugins](/ske/integrations/portal-controller/backstage/configure-backstage#install-the-plugins).
+:::
+
 ### [ske-frontend v0.21.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.21.0/) (2026-08-24)
 
 #### Features
