@@ -1,6 +1,6 @@
 ---
-title: SKE Lift (Preview)
-description: Install SKE Lift, the agent skills and Kratix CLI plugins that turn an existing cloud estate into governed Kratix Promises.
+title: SKE Lift (Preview): Turn Existing Cloud Infrastructure into Platform Capabilities
+description: Discover reusable patterns in your existing AWS, Azure, GCP, or Kubernetes infrastructure and turn them into governed Kratix Promises with SKE Lift.
 sidebar_label: SKE Lift (Preview)
 ---
 
@@ -102,7 +102,7 @@ kratix skelift review --help
 kratix skelift check --help
 ```
 
-Confirm the skills are on disk:
+Confirm the skills are installed:
 
 ```bash
 ls ~/.kratix/skills
@@ -167,7 +167,7 @@ the agent.
 ## Updating SKE Lift
 
 Run the install command again. Each run installs the current release and
-overwrites what is already at those paths, so this will overwrite any manual edits you have on the skills.
+overwrites what is already at those paths, so it will overwrite any manual edits you've made to the skills.
 
 ```bash
 echo "<YOUR_ENTERPRISE_RELEASES_TOKEN>" | kratix plugin add skelift --token-stdin
@@ -175,7 +175,7 @@ echo "<YOUR_ENTERPRISE_RELEASES_TOKEN>" | kratix plugin add skelift --token-stdi
 
 ## Using the skills with other agents
 
-Claude Code is set up for you. For any other agent, point it at
+Claude Code is automatically configured for you. For any other agent, point it at
 `~/.kratix/skills`, where the skills are stored as plain directories of
 Markdown. See your agent's documentation for how it discovers skills.
 
