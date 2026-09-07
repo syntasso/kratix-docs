@@ -33,11 +33,8 @@ plugin's shared Backstage packages are now peer dependencies, so an app can no l
 mismatched copies of them.
 
 :::caution Upgrading requires a dependency change
-Because shared packages are now peer dependencies, your app must provide them. Most already ship with
-a standard Backstage app; add `@backstage/plugin-permission-react` if yours does not. Yarn does not
-fail the install over a missing peer — it prints a warning
-(`YN0002: … doesn't provide @backstage/plugin-permission-react`) and `yarn install` still completes,
-so it is easy to miss until the app fails to build against the absent package. Add the dependency
+Shared Backstage packages are now peer dependencies, so your app must provide them — in particular
+`@backstage/plugin-permission-react`, which a standard Backstage app usually does not include. Add it
 before you upgrade. See
 [Install the plugins](/ske/integrations/portal-controller/backstage/configure-backstage#install-the-plugins).
 :::
