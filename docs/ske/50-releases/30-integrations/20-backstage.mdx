@@ -28,12 +28,9 @@ Check the release notes below for information on each available version.
 
 #### Fixes
 
-* **No more `No path for routeRef` error on resource pages.** The packages the frontend plugin shares
-with the host app (`@backstage/plugin-catalog`, `plugin-catalog-graph`, `plugin-catalog-react`,
-`plugin-scaffolder`, `plugin-scaffolder-react`, `plugin-permission-react`) are now **peer
-dependencies**. This stops the package manager from giving the plugin private copies whose routeRef
-objects differ from the app's, which surfaced as `No path for routeRef{...id=catalog-graph}` on the
-resource view when a lockfile ended up with duplicate copies.
+* **Fixed the `No path for routeRef{...id=catalog-graph}` error on resource pages.** The frontend
+plugin's shared Backstage packages are now peer dependencies, so an app can no longer end up running
+mismatched copies of them.
 
 :::caution Upgrading requires a dependency change
 Because shared packages are now peer dependencies, your app must provide them. Most already ship with
