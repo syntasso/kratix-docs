@@ -19,6 +19,15 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.4.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.1/) (2026-09-07)
+
+#### Bug Fixes
+
+* **Resource-request pipelines no longer leak ServiceAccounts and RBAC.** Each resource request used
+to get its own ServiceAccount, Role and RoleBinding, and none of them were ever deleted. The
+resource-request pipelines of a Promise now share a single set, and deleting a Promise cleans up
+everything it created — including what earlier versions left behind.
+
 ### [v0.4.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.0/) (2026-08-27)
 
 :::warning Requires SKE Operator v0.34.0
