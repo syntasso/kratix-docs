@@ -338,7 +338,8 @@ them changes.
 
 ## Step 3: Check the new path is working {#check-it-works}
 
-Do not skip this step. It is the whole reason the order above is safe.
+Do not skip this step. It is the whole reason the order above is safe. Everything here runs
+against the **Platform** cluster, and only reads.
 
 First, the source itself:
 
@@ -442,6 +443,24 @@ them goes, in Step 4.
 Only once Step 3 looks right. Removing the sync while it still has `prune: true` and still
 owns those records is what deletes them, which is exactly what you want. It is also exactly
 what you do not want if the new path is not yet working.
+
+:::danger Check which cluster and which sync
+
+Everything in this step runs against the **Platform** cluster, and targets only the sync
+that reads health records **into** the Platform.
+
+There is usually a GitOps agent on the Destination too, and it does an unrelated job: it
+applies the `HealthDefinition`s that tell the health agent what to check, along with every
+other workload Kratix schedules there. Removing that one stops the health checks running at
+all, and takes the Destination's other workloads with it.
+
+Confirm your context before you delete anything:
+
+```bash
+kubectl config current-context
+```
+
+:::
 
 <Tabs className="boxedTabs" groupId="gitopsAgent">
   <TabItem value="argo" label="ArgoCD">
