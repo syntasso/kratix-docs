@@ -17,9 +17,17 @@ The Agent will:
 
 ## Requirements
 
-The Agent will write the health information to a state store.
-The Platform cluster must have a GitOps agent listening to the state store,
-so the resource health can be applied back to the Platform cluster.
+The Agent will write the health information to a state store. Something on the Platform
+cluster then has to pick those records up, and there are two ways to do that:
+
+* A **GitOps agent** on the Platform listening to the state store. This works for both
+  Git and bucket state stores.
+* The **SKE Platform Manager** reading the records itself, by way of a `HealthSource`. This
+  needs the state store to be a bucket, and needs no GitOps agent on the Platform. See
+  [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+
+You need one of the two, not both, though running both at once is supported while you
+migrate from one to the other.
 
 ## Install
 
@@ -215,8 +223,8 @@ supported. Use a standard blob storage account.
 
 :::tip
 
-If your State Store is a bucket, the SKE Platform Manager can read health records from it
-directly, instead of you running a GitOps agent on the Platform to sync them. See
+With a bucket you have the choice described in [Requirements](#requirements): let the SKE
+Platform Manager read the records itself rather than syncing them with a GitOps agent. See
 [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
 
 :::
