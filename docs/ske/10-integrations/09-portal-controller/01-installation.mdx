@@ -215,6 +215,9 @@ Resource syncs to a portal, and one when a portal connection is first set up.
 Those Jobs run in your cluster, so they need to comply with your cluster's policies. For example, if an admission policy requires specific labels on every workload, Jobs that don't include those labels will be rejected, preventing the portal integration from running. You may also want them on particular nodes, inside a resource quota, or cleaned up on
 your usual schedule.
 
+These settings cover the controller's Jobs. The long-lived status exporter that Cortex portals run
+is a Deployment rather than a Job, so this ConfigMap does not apply to it.
+
 You configure these settings in the `ske-portal-workloads-config` ConfigMap in the `kratix-platform-system` namespace, under the workloads.yaml key:
 
 ```yaml
@@ -289,28 +292,80 @@ values after merging, because it reads them to find and clean up its own Jobs:
 | `metadata.name`, `metadata.namespace` | It finds and cleans up its Jobs by name |
 | `metadata.ownerReferences` | This is how a Promise notices its Job has finished |
 | `metadata.finalizers` | A finalizer would stop the controller deleting its own Job |
-| Which containers exist | You can change a container it builds, but not add one. The default containers are `reader`, `generate`, `work-writer`, `status-writer` |
+| Which containers exist | You can change a container it builds, but not add one. A sync Job runs `reader`, `generate` and `work-writer` (`writer` on Cortex portals) as init containers, followed by `status-writer`. A setup Job runs a single `setup` container |
 | Labels and annotations starting `kratix.io/`, and `app.kubernetes.io/managed-by` | These are how the controller finds its Jobs and protects them from being cleaned up early |
 
 Labels such as `app.kubernetes.io/name`, `app.kubernetes.io/component` and
 `app.kubernetes.io/version` are yours to set.
 
-:::tip Setting resources on a container
-You cannot add a container, but you can change one the controller builds, by naming it. This is how
-you set CPU, memory or ephemeral storage limits:
+You cannot add a container, but you can change one the controller builds, by naming it. The two
+sections below show the settings platform teams reach for most often.
+
+:::info Match the list a container is in
+A container the controller builds in `initContainers` has to be patched under `initContainers`, and
+one it builds in `containers` under `containers`. An entry in the wrong list names a container that
+does not exist there, and is dropped without an error. The table above says which is which.
+:::
+
+### Setting resources on a container
+
+This is how you set CPU, memory or ephemeral storage limits:
 
 ```yaml
 jobTemplate:
   spec:
     template:
       spec:
-        containers:
+        initContainers:
           - name: generate
             resources:
               limits:
                 memory: 512Mi
                 ephemeral-storage: 1Gi
 ```
+
+### Setting environment variables on a container
+
+Naming a container also lets you add environment variables to it. Use this to pass cluster-wide
+settings to the containers that call out of the cluster, such as the egress proxy your network
+requires, or `SSL_CERT_FILE` for a private certificate authority.
+
+`generate` and `writer` are the containers that talk to your portal's API on a sync Job, and `setup`
+is the one that does so on a setup Job:
+
+```yaml
+jobTemplate:
+  spec:
+    template:
+      spec:
+        initContainers:
+          - name: generate
+            env:
+              - name: HTTPS_PROXY
+                value: "http://proxy.example.internal:3128"
+              - name: NO_PROXY
+                value: "localhost,127.0.0.1,.svc,.svc.cluster.local,.cluster.local"
+        containers:
+          - name: setup
+            env:
+              - name: HTTPS_PROXY
+                value: "http://proxy.example.internal:3128"
+              - name: NO_PROXY
+                value: "localhost,127.0.0.1,.svc,.svc.cluster.local,.cluster.local"
+```
+
+On a Cortex portal, add a `writer` entry beside `generate` with the same variables.
+
+Your variables are added to the ones the controller already sets on that container, which are left
+alone. Set `NO_PROXY` alongside any proxy variable, so the containers that only talk to the
+Kubernetes API keep reaching it directly.
+
+One document is merged onto every Job, and an entry for a container that a Job does not run is
+ignored. That is what lets the same file cover both sync Jobs and setup Jobs.
+
+:::warning Give every entry a name
+`name` is how the merge finds the container to change. An entry without one matches no container,
+and the Jobs it would apply to are not created until you add the name.
 :::
 
 ### When the file is wrong
