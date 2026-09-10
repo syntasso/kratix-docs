@@ -53,7 +53,7 @@ are separate objects, on opposite sides, pointed at the same bucket:
 
 | | Where it lives | What it is | Access |
 | --- | --- | --- | --- |
-| **State Store** (`health-state-store-config`) | Destination | How the health agent is told where to **write** records. Unchanged by this guide. | write |
+| **State Store** (`health-state-store-config`) | Destination | How the health agent is told where to **write** records. Step 1 changes what it points at, never its role, and it may be Git or a bucket. | write |
 | The **bucket** | Neither | The storage itself. Both sides name it, and it is the only thing they share. | — |
 | **`HealthSource`** | Platform | A new object telling the SKE Platform Manager where to **read** records from. | read |
 
@@ -112,13 +112,29 @@ You will need:
 - A Destination already reporting health through a State Store, following the
   [Health Checks guide](/ske/guides/healthchecks).
 - An S3-compatible bucket, or an Azure Blob Storage container, that the Destination can
-  write to and the Platform can read.
+  write to and the Platform can read. **It has to be a bucket**, for the reason below.
 - **No new software.** The component that reads the bucket is a controller inside the SKE
   Platform Manager you already run, and the `HealthSource` CRD ships with it. There is
   nothing to install and no extra RBAC to grant.
 
 What you *will* do is create one `HealthSource` per Destination, and grant two separate
 sets of credentials. Which brings us to the part worth getting right first.
+
+:::warning If your health records are in Git today
+
+**The SKE Platform Manager can only read health records from a bucket.** A `HealthSource`
+takes a `spec.bucket` and nothing else; there is no Git equivalent. Git records reach the
+Platform the way they always have, through a GitOps agent, and that path is not going away.
+
+The health *agent* still supports both, so this is not a limitation you hit on the
+Destination. It only applies to the Platform's side of the handover.
+
+So if you are on Git, this migration is a bigger change than repointing the Platform: Step 1
+also moves the records from a Git repository into a bucket. Health stays available
+throughout, and the order is unchanged, but plan for a new bucket and a new write credential
+rather than reusing what the agent has.
+
+:::
 
 ## The permission split {#permissions}
 
