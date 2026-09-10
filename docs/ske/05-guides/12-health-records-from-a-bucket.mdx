@@ -113,9 +113,17 @@ You will need:
   [Health Checks guide](/ske/guides/healthchecks).
 - An S3-compatible bucket, or an Azure Blob Storage container, that the Destination can
   write to and the Platform can read. **It has to be a bucket**, for the reason below.
-- **No new software.** The component that reads the bucket is a controller inside the SKE
-  Platform Manager you already run, and the `HealthSource` CRD ships with it. There is
-  nothing to install and no extra RBAC to grant.
+- **An SKE new enough to have the reader.** There is nothing separate to install and no
+  extra RBAC to grant: the component that reads the bucket is a controller inside the SKE
+  Platform Manager, and the `HealthSource` CRD and its permissions ship with it. But an
+  older SKE will not have it, so check before you plan anything:
+
+  ```bash
+  kubectl get crd healthsources.platform.syntasso.io
+  ```
+
+  If that returns `NotFound`, upgrade SKE first. Nothing else in this guide will work
+  without it, and Step 2 is where you would find out.
 
 What you *will* do is create one `HealthSource` per Destination, and grant two separate
 sets of credentials. Which brings us to the part worth getting right first.
@@ -547,7 +555,49 @@ delete them directly. They are the ones **without** the source label:
 kubectl get healthrecords -A -l '!platform.syntasso.io/health-source'
 ```
 
-That Destination is now migrated. Repeat from Step 1 for the next one.
+That Destination is now migrated.
+
+## Migrating a fleet {#fleet}
+
+Steps 1 to 4 cover one Destination, and that is the unit of this migration. There is no
+fleet-wide switch: each Destination needs its own `HealthSource` and its own read-only
+credential, which is the same property that stops one Destination's credential reaching
+another's records.
+
+So the fleet migration is the four steps, repeated. Two things make that safer than doing
+them in bulk:
+
+1. **Take one Destination all the way through first**, and prefer a non-production one. The
+   parts most likely to bite are environmental rather than conceptual: endpoint reachability
+   from the Platform, whether the credential really is read-only, whether `spec.path` matches
+   what the agent writes. You want to meet those once, not across the fleet at the same time.
+2. **Then go one Destination at a time.** Nothing is shared between them, so a Destination
+   that goes wrong is contained, and Step 4 is still the last thing you do for each.
+
+To see how far along you are, list the sources and check each is `Ready`:
+
+```bash
+kubectl get healthsources
+```
+
+A Destination with no `HealthSource` has not been migrated. To find records still arriving
+the old way, across every Destination, look for the ones with no source label:
+
+```bash
+kubectl get healthrecords -A -l '!platform.syntasso.io/health-source'
+```
+
+Once that returns nothing and every source reads `Ready=True`, the whole fleet is on the new
+path, and no GitOps agent is syncing health any more.
+
+:::tip
+
+Do not leave the fleet half-migrated for longer than you have to. It is a supported state,
+but every Destination still in the overlap has a
+[frozen record that can pin a resource unhealthy](#the-overlap-window), and that is easy to
+misread weeks later when you have forgotten which Destinations are mid-migration.
+
+:::
 
 ## Undoing a step {#rollback}
 
