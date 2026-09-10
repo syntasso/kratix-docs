@@ -1,0 +1,611 @@
+---
+title: Move health records onto a bucket
+description: Migrate a Destination's health records from a GitOps sync onto a bucket the SKE Platform Manager reads directly, one step at a time, without a gap in health
+sidebar_label: Health Records from a Bucket
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+By default, health records travel from a Destination to the Platform through a State Store
+that a GitOps agent on the Platform syncs. The SKE Platform Manager can instead read those
+records from a bucket itself, which removes the GitOps agent from the health path entirely.
+
+This guide migrates **one Destination** at a time, and is written so that health is never
+missing at any step. You can stop after any step and be in a working state, and you can
+undo any step you have taken.
+
+**In this guide you will**
+
+1. [Point the Destination's agent at a bucket](#point-the-agent) (the write side)
+1. [Create a HealthSource on the Platform](#create-the-source) (the read side)
+1. [Check the new path is working](#check-it-works)
+1. [Remove the GitOps sync](#remove-the-sync)
+
+## What changes
+
+Only the last leg of the journey changes: how a record gets from the State Store onto the
+Platform. Everything before it is the same, and the resource's `status.healthStatus` ends
+up in the same shape either way, so nothing that consumes health can tell the difference.
+
+```
+Today, through a GitOps sync:
+
+  health check ──> health agent ──> bucket or Git ──> GitOps agent ──> HealthRecord
+   (destination)   (destination)                       (platform)       (platform)
+
+After this guide, read by the Platform Manager:
+
+  health check ──> health agent ──> bucket ──────────────────────────> HealthRecord
+   (destination)   (destination)                  SKE Platform         (platform)
+                                                  Manager polls
+```
+
+The GitOps agent on the Platform leaves the health path entirely. The health agent on the
+Destination stays exactly where it is, and keeps doing the same job.
+
+### Three names for two sides of one bucket
+
+`HealthSource` is **not** a new name for the State Store, and it does not replace it. They
+are separate objects, on opposite sides, pointed at the same bucket:
+
+| | Where it lives | What it is | Access |
+| --- | --- | --- | --- |
+| **State Store** (`health-state-store-config`) | Destination | How the health agent is told where to **write** records. Unchanged by this guide. | write |
+| The **bucket** | Neither | The storage itself. Both sides name it, and it is the only thing they share. | — |
+| **`HealthSource`** | Platform | A new object telling the SKE Platform Manager where to **read** records from. | read |
+
+So after this migration the agent is still writing to a State Store, exactly as before. What
+is new is a `HealthSource` on the Platform reading the same bucket, in place of a GitOps
+agent syncing it.
+
+A `HealthSource` deliberately does not reference a Kratix `BucketStateStore`, even when one
+already points at the same bucket. That is [the permission split](#permissions), and it is
+the next thing to get right.
+
+## Why you might want this
+
+Two reasons, and only the first is likely to be why you are here:
+
+- **ArgoCD cannot reconcile from a bucket**, and
+  [may never be able to](https://github.com/argoproj/argo-cd/issues/2558). If you run
+  ArgoCD, delivering health through a State Store today means running Flux alongside it just
+  for the `health/` path. Reading the bucket in the Platform Manager removes that.
+- **Git history grows without bound.** Every execution of every health check produces a
+  new `HealthRecord`, because the record carries the timestamp of the run under
+  `data.lastRun`. On Git, that is a commit per check per resource, forever.
+
+:::note
+
+The Git path is not deprecated, and nothing here is required. If you are happy with your
+GitOps agent syncing health records, you can keep it. This is an additional option.
+
+:::
+
+:::warning You are giving up a history you may not know you rely on
+
+That commit per check per resource is noise, but it is also a record of how every check
+behaved over time. **The bucket path keeps only current state**: one object per resource,
+overwritten in place, with no history of earlier runs.
+
+Two consequences worth weighing before you start:
+
+- Commits already in your Git repository stay there. Removing the sync in Step 4 does not
+  rewrite history. But the repository stops gaining new health commits as soon as you
+  repoint the agent in Step 1.
+- Nothing in this path replaces that history. If you need to know how a resource's health
+  behaved over time, or whether a check is flapping, publish Platform and Destination
+  **metrics to a time-series database**. That is the supported answer, and it is a separate
+  piece of work from this migration.
+
+If anything today reads health out of Git commits, such as an audit process or a dashboard,
+find it before Step 1 rather than after Step 4.
+
+:::
+
+## Before you start
+
+You will need:
+
+- A Destination already reporting health through a State Store, following the
+  [Health Checks guide](/ske/guides/healthchecks).
+- An S3-compatible bucket, or an Azure Blob Storage container, that the Destination can
+  write to and the Platform can read.
+- **No new software.** The component that reads the bucket is a controller inside the SKE
+  Platform Manager you already run, and the `HealthSource` CRD ships with it. There is
+  nothing to install and no extra RBAC to grant.
+
+What you *will* do is create one `HealthSource` per Destination, and grant two separate
+sets of credentials. Which brings us to the part worth getting right first.
+
+## The permission split {#permissions}
+
+The two sides of this path need different access, and deliberately so:
+
+| Side | Needs | Why |
+| --- | --- | --- |
+| The **Destination** (health agent) | **write** to the bucket | It puts a record file per resource, and deletes it when the resource goes. |
+| The **Platform** (SKE Platform Manager) | **read** the bucket | It lists the prefix and gets objects whose revision has changed. It never writes to the bucket. |
+
+The credential you give a `HealthSource` only needs permission to **list and get** objects
+under its `spec.path`. Give it nothing more.
+
+:::tip Recommended shape
+
+If you already have a Kratix `BucketStateStore` pointing at this bucket, **do not reuse its
+credential for the `HealthSource`**. A State Store must hold a credential Kratix can write
+with, and one State Store usually serves the whole fleet.
+
+Instead, create a **second** set of read-only keys and reference those from the
+`HealthSource`. A `HealthSource` deliberately carries its own credential rather than
+referencing a `BucketStateStore`, so that one Destination's credential cannot reach another
+Destination's records.
+
+:::
+
+## Order of operations
+
+**The order below is the point of this guide.** Bucket first, source second, check third,
+remove the GitOps sync last.
+
+Any other order leaves a window where health is missing from the Platform. If you remove
+the GitOps sync before the new path is confirmed working, every resource on that Destination
+loses its health status until you have finished. If anything gates on health, such as an
+[UpgradeRun](/ske/guides/promise-upgrades), it will then be acting on missing data.
+
+Running both paths at once is supported. That overlap is what makes this safe, and
+[what you see during it](#the-overlap-window) is described below.
+
+## Step 1: Point the Destination's agent at a bucket {#point-the-agent}
+
+On the **Destination**, the agent's `health-state-store-config` ConfigMap in the
+`k8s-health-agent-system` namespace decides where records are written. Set it to a bucket.
+
+<Tabs className="boxedTabs" groupId="bucketProvider">
+  <TabItem value="s3" label="S3-compatible">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: # address, without a scheme
+    bucketName: # bucket name
+    authMethod: accessKey # or IAM (default: accessKey)
+    secretName: health-store-writer # required for accessKey
+    path: health/worker-1 # the prefix this Destination writes under
+    destinationName: worker-1 # see the warning below
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-writer
+    namespace: k8s-health-agent-system
+  stringData:
+    accessKeyID: # Access Key ID, with write access
+    secretAccessKey: # Secret Access Key
+  ```
+
+  </TabItem>
+
+  <TabItem value="azure" label="Azure Blob Storage">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    provider: azure
+    endpoint: https://<account>.blob.core.windows.net # the storage-account URL
+    bucketName: # the container name
+    authMethod: sharedKey # azure's only method
+    secretName: health-store-writer
+    path: health/worker-1
+    destinationName: worker-1
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-writer
+    namespace: k8s-health-agent-system
+  stringData:
+    accountKey: # the storage-account key
+  ```
+
+  :::warning
+
+  Storage accounts with **hierarchical namespace (HNS / ADLS Gen2)** enabled are not
+  supported. Use a standard blob storage account.
+
+  :::
+
+  </TabItem>
+</Tabs>
+
+The agent writes one flat file per resource under `path`, named after the Promise,
+namespace, resource and Destination.
+
+:::warning Set `destinationName` if Destinations share a prefix
+
+Without `destinationName`, agents on two Destinations checking the same resource generate
+the **same** file name and overwrite each other in the bucket. Either give each Destination
+its own `path`, or set `destinationName`. If in doubt, do both. See
+[Running the agent on multiple Destinations](/ske/installing-ske/ske-health-agent#running-the-agent-on-multiple-destinations).
+
+:::
+
+Health is still present on the Platform at this point, but understand exactly what has
+changed. The agent now writes to the new bucket, so if the old State Store was a different
+bucket or a Git repository, **the records there stop being updated**. Your GitOps sync keeps
+applying them, so nothing disappears. They are frozen at their last value, though, and
+their `lastRun` stops advancing.
+
+That is safe, and it is why the next steps are short. It is also the reason not to leave the
+overlap window open for long: because [the worse state wins](#the-overlap-window), a frozen
+record that last reported `unhealthy` will keep the resource reading `unhealthy` even after
+the new path reports it healthy. Move on to Step 2 rather than leaving a Destination here.
+
+## Step 2: Create a HealthSource on the Platform {#create-the-source}
+
+On the **Platform**, a `HealthSource` names one place to read records from: one bucket, one
+prefix, one read-only credential. Create one per Destination.
+
+One source *can* read a prefix holding several Destinations' records, and they stay distinct
+because their object keys differ. Prefer one source per Destination anyway: it is what keeps
+one Destination's credential from reaching another Destination's records, and it lets a
+single Destination's health path fail on its own rather than taking the fleet's with it.
+
+<Tabs className="boxedTabs" groupId="bucketProvider">
+  <TabItem value="s3" label="S3-compatible">
+
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-reader-worker-1
+    namespace: default
+  stringData:
+    accessKeyID: # read-only Access Key ID
+    secretAccessKey: # read-only Secret Access Key
+  ---
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: HealthSource
+  metadata:
+    name: worker-1
+  spec:
+    bucket:
+      endpoint: # same endpoint the agent writes to, without a scheme
+      bucketName: # same bucket
+      authMethod: accessKey # or IAM
+      secretRef:
+        name: health-store-reader-worker-1
+        namespace: default
+    path: health/worker-1 # the same prefix the agent writes under
+    pollInterval: 10m
+  ```
+
+  </TabItem>
+
+  <TabItem value="azure" label="Azure Blob Storage">
+
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-reader-worker-1
+    namespace: default
+  stringData:
+    accountKey: # a read-only storage-account key
+  ---
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: HealthSource
+  metadata:
+    name: worker-1
+  spec:
+    bucket:
+      provider: azure
+      endpoint: https://<account>.blob.core.windows.net
+      bucketName: # the container name
+      authMethod: sharedKey
+      secretRef:
+        name: health-store-reader-worker-1
+        namespace: default
+    path: health/worker-1
+    pollInterval: 10m
+  ```
+
+  </TabItem>
+</Tabs>
+
+`HealthSource` is cluster-scoped, and its name labels every record it applies, so keep the
+name short and recognisable: the Destination's name is a good choice.
+
+:::tip Keep `spec.path` tight
+
+The reader can only discover that an object is not a health record by fetching it. A prefix
+that also covers unrelated objects costs one fetch per unrelated object every time one of
+them changes.
+
+:::
+
+## Step 3: Check the new path is working {#check-it-works}
+
+Do not skip this step. It is the whole reason the order above is safe.
+
+First, the source itself:
+
+```bash
+kubectl get healthsources
+```
+
+```console
+NAME       BUCKET   READY   REASON           OBSERVED   LAST GOOD POLL   AGE
+worker-1   kratix   True    PollSucceeded    14         12s              2m
+```
+
+You are looking for `READY=True`, an `OBSERVED` count that matches the number of resources
+this Destination reports on, and a recent `LAST GOOD POLL`. If `READY` is not `True`, the
+`REASON` column names the thing at fault. See [Troubleshooting](#troubleshooting).
+
+For the full picture, including how many records the last poll applied and failed:
+
+```bash
+kubectl describe healthsource worker-1
+```
+
+Next, confirm the records themselves arrived. Every record the reader applies is labelled
+with its source:
+
+```bash
+kubectl get healthrecords -A -l platform.syntasso.io/health-source=worker-1
+```
+
+Each of those carries the object key it came from, which is how you tie a record back to a
+file in the bucket:
+
+```bash
+kubectl get healthrecord <name> -n <namespace> \
+  -o jsonpath='{.metadata.annotations.platform\.syntasso\.io/object-key}'
+```
+
+Finally, and most importantly, check a resource still reports the health you expect:
+
+```bash
+kubectl get <resource> <name> -n <namespace> -o jsonpath='{.status.healthStatus}' | jq
+```
+
+At this point you should see **two** records for the resource, which is expected and is
+covered next.
+
+## The overlap window {#the-overlap-window}
+
+While both paths are running, **a resource shows two health records**: one delivered by
+your GitOps agent, one applied by the reader. This is normal. If you see it and have not
+been told to expect it, it looks like something is broken, and the temptation is to roll
+back.
+
+They coexist rather than fight because they have different object names. The agent names
+the records it writes after the Promise, namespace and resource, with no source in the
+name. The reader instead derives a name from its own `HealthSource` name and the object
+key, so the two never collide.
+
+Kratix's aggregation lists both, and **the worse state wins**. Kratix orders states worst
+to best:
+
+```
+unhealthy → degraded → unknown → healthy → ready
+```
+
+and `status.healthStatus.state` takes the worst state across every record for that
+resource, while `status.healthStatus.healthRecords` lists them all with their `source`.
+
+This is what makes the overlap safe: while both paths report, the resource cannot appear
+healthier than the worst thing either path knows about. It fails towards caution.
+
+It cuts the other way too, and this is the one thing to watch. From Step 1 onwards the old
+record is **frozen** (the agent no longer updates it), so it reports whatever it last saw,
+forever. If that last value was `unhealthy`, the resource keeps reading `unhealthy` however
+healthy the new path says it is, until Step 4 removes the old record. Compare `lastRun`
+between the two records in `status.healthStatus.healthRecords` to tell a live disagreement
+from a stale one:
+
+```bash
+kubectl get <resource> <name> -n <namespace> \
+  -o jsonpath='{range .status.healthStatus.healthRecords[*]}{.source.name}{"\t"}{.state}{"\t"}{.lastRun}{"\n"}{end}'
+```
+
+The record whose `lastRun` is advancing is the new path. The one that has stopped is the old
+one, and it goes in Step 4.
+
+:::info The Git record goes when its sync goes
+
+The reader will never delete the records your GitOps agent applied. Its listing and its
+pruning are both scoped to the `platform.syntasso.io/health-source` label it sets itself,
+so it cannot touch a record it did not apply.
+
+That is deliberate, and it is what makes running both paths safe. It has a consequence,
+though: the old records do not disappear on their own. They go when the GitOps sync that maintains
+them goes, in Step 4.
+
+:::
+
+## Step 4: Remove the GitOps sync {#remove-the-sync}
+
+Only once Step 3 looks right. Removing the sync while it still has `prune: true` and still
+owns those records is what deletes them, which is exactly what you want. It is also exactly
+what you do not want if the new path is not yet working.
+
+<Tabs className="boxedTabs" groupId="gitopsAgent">
+  <TabItem value="argo" label="ArgoCD">
+
+  If health was the only reason you ran a GitOps agent against this State Store, remove the
+  Application that syncs the health path:
+
+  ```bash
+  kubectl delete application health-records -n argocd
+  ```
+
+  With automated pruning enabled, ArgoCD deletes the `HealthRecord`s it created as it goes.
+
+  If the Application syncs more than health, narrow its source rather than deleting it:
+  remove the health path from `spec.source.path` (or from the directory include) and sync.
+
+  :::note
+
+  If ArgoCD is the reason you are here, this is the step that pays for the migration: once
+  the health path is gone, you no longer need Flux alongside ArgoCD, and you can remove that
+  too.
+
+  :::
+
+  </TabItem>
+
+  <TabItem value="flux" label="Flux">
+
+  Remove the `Kustomization` that syncs the health path, and the `GitRepository` behind it
+  if nothing else uses it:
+
+  ```bash
+  kubectl delete kustomization health-records -n flux-system
+  kubectl delete gitrepository health-records -n flux-system
+  ```
+
+  The `Kustomization` being removed looks like this, where `prune: true` is what removes the
+  old records with it:
+
+  ```yaml
+  apiVersion: kustomize.toolkit.fluxcd.io/v1
+  kind: Kustomization
+  metadata:
+    name: health-records
+    namespace: flux-system
+  spec:
+    interval: 3s
+    sourceRef:
+      kind: GitRepository
+      name: health-records
+    path: "health"
+    prune: true
+  ```
+
+  </TabItem>
+</Tabs>
+
+Then confirm each resource is down to one record, delivered by the reader:
+
+```bash
+kubectl get <resource> <name> -n <namespace> -o jsonpath='{.status.healthStatus}' | jq
+```
+
+If the old records outlive their sync (because pruning was off, for instance), you can
+delete them directly. They are the ones **without** the source label:
+
+```bash
+kubectl get healthrecords -A -l '!platform.syntasso.io/health-source'
+```
+
+That Destination is now migrated. Repeat from Step 1 for the next one.
+
+## Undoing a step {#rollback}
+
+At every step, the way back is short:
+
+| After | To undo |
+| --- | --- |
+| Step 1 | Point the agent's ConfigMap back at the old State Store. |
+| Step 2 | `kubectl delete healthsource <name>`. Every record it applied is garbage collected with it, because each one is owned by the source. |
+| Step 3 | Nothing to undo: it only reads. |
+| Step 4 | Restore the GitOps `Application` or `Kustomization` you removed. It re-applies the records from the State Store. |
+
+Because the GitOps sync is untouched until Step 4, undoing Steps 1 to 3 leaves you exactly
+where you started, with health still flowing.
+
+## Troubleshooting {#troubleshooting}
+
+When a poll fails, `Ready` goes `False` with a reason that names the thing at fault. The
+reason is the next place to look, not the controller logs. A poll that works clears it.
+
+| Reason | What it means | Where to look |
+| --- | --- | --- |
+| `PollSucceeded` | `Ready=True`. The source was read and everything in it applied. | — |
+| `SourceMisconfigured` | The spec itself is not usable: for example an `authMethod` the provider does not support, or a missing `secretRef`. | `spec.bucket` |
+| `CredentialsUnavailable` | There is nothing to authenticate with: the Secret is missing, or missing a key. | The Secret in `spec.bucket.secretRef` |
+| `CredentialsRejected` | The store was given credentials and refused them. | The keys themselves, and their permissions |
+| `BucketNotFound` | The bucket or container does not exist at that endpoint. | `spec.bucket.bucketName` and `endpoint` |
+| `SourceUnreachable` | The listing failed for another reason, such as network, DNS or TLS. | Connectivity from the Platform to the endpoint |
+| `RecordsUnreadable` | The listing worked, but some objects could not be read or parsed. Usually a `spec.path` that is too broad and covers objects that are not health records. | `spec.path`, and `status.recordsFailed` |
+| `PlatformUnavailable` | The records were read, but applying them to the Platform failed. | The Platform's own API |
+
+A source that keeps failing backs off: the gap between attempts doubles from
+`spec.pollInterval`, up to 30 minutes, or up to `spec.pollInterval` itself if you have set it
+longer than that. One Warning Event covers the run of failures rather than one per
+attempt. When the reason changes, the backoff resets, because a different fault is a fresh
+problem rather than a continuation of the old one.
+
+Two behaviours worth knowing, because both look like faults and neither is:
+
+- **`recordsApplied` settling at 0 is correct.** Only records whose object revision has
+  changed are fetched and applied, so a Destination whose health is steady polls to zero.
+  Watch `lastSuccessfulPollTime`, not `recordsApplied`.
+- **An empty listing prunes everything from that source.** The agent removes a record file
+  when the resource it reports on goes. A prefix with no objects therefore means that
+  Destination has stopped reporting, and every record the source applied is removed.
+  Pruning only happens on a listing that completed, so a failed poll never deletes anything.
+
+## HealthSource reference {#reference}
+
+`HealthSource` is cluster-scoped. Its name must be at most 63 characters, because it labels
+every record the source applies.
+
+### `spec`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `bucket` | object | **Required.** The object store to read from. See [`spec.bucket`](#spec-bucket). |
+| `path` | string | The prefix within the bucket to read, matching the `path` the agents writing here are configured with. Everything below it is read recursively, so it may hold a directory per Destination or record files directly. Keep it tight. |
+| `pollInterval` | duration | How often the source is listed. Minimum `1s`. Default `10m`. |
+
+### `spec.bucket` {#spec-bucket}
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `endpoint` | string | **Required.** Under `generic`, a bare host with no scheme. Under `azure`, the storage-account URL (`https://<account>.blob.core.windows.net`); a bare host gets `https` unless `insecure` is set. |
+| `bucketName` | string | **Required.** The bucket to read from; under `azure`, the container. |
+| `provider` | enum | `generic` for any S3-compatible store, `azure` for Azure Blob Storage. Default `generic`. |
+| `authMethod` | enum | `accessKey`, `IAM`, or `sharedKey`. `accessKey` and `sharedKey` read from `secretRef`; `IAM` uses the ambient instance identity. `sharedKey` is `azure`'s only method, and `azure`'s only. Omitted means `accessKey` under `generic` and `sharedKey` under `azure`. |
+| `secretRef` | object | `name` and `namespace` of the Secret holding the credentials. Required for every `authMethod` except `IAM`, which ignores it. Keys are `accessKeyID` and `secretAccessKey` for `accessKey`, or `accountKey` for `sharedKey`. Needs only list and get on `spec.path`. |
+| `insecure` | boolean | Connect over HTTP rather than HTTPS. Under `azure` it applies only when the endpoint omits a scheme; an endpoint that spells one keeps it. Default `false`. |
+| `useDualStack` | boolean | Opt in to Amazon's dual-stack endpoints. Off by default, because they are unreachable from IPv4-only VPCs. No effect on non-Amazon endpoints, and not supported under `azure`. |
+
+### `status`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `conditions` | array | `Ready` is `True` once a poll has read the source and applied everything in it. `False` carries one of the reasons in [Troubleshooting](#troubleshooting). |
+| `observedGeneration` | integer | The generation of the spec the last poll acted on. |
+| `lastPollTime` | timestamp | When the source was last listed, successfully or not. |
+| `lastSuccessfulPollTime` | timestamp | When a poll last read the source and applied what it read. Unlike `lastPollTime` it does not move when a poll fails, so the gap between the two is how long this source's records have been stale. |
+| `recordsObserved` | integer | The number of keys the last successful listing returned. |
+| `recordsApplied` | integer | The number of records the last poll applied. Steady state is `0`. |
+| `recordsFailed` | integer | The number of keys the last poll could not read or parse. |
+
+### Metadata on applied records
+
+Every `HealthRecord` the reader applies carries:
+
+| Key | Description |
+| --- | --- |
+| `platform.syntasso.io/health-source` (label) | The name of the `HealthSource` that applied it. Scopes everything the reader does, so it can never touch a record it did not apply. |
+| `platform.syntasso.io/object-key` (annotation) | The object key in the bucket the record was read from. |
+| `platform.syntasso.io/object-revision` (annotation) | The object revision that was read, which is how the reader decides whether to fetch again. |
+
+Each record is also owned by its `HealthSource`, so deleting the source garbage collects
+every record it applied.

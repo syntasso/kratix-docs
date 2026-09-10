@@ -158,6 +158,7 @@ metadata:
   namespace: k8s-health-agent-system
 data:
   stateStoreKind: BucketStateStore
+  provider: # generic or azure (default: generic)
   endpoint: # address
   bucketName: # bucket name
   authMethod: # accessKey or IAM (default: accessKey)
@@ -175,6 +176,50 @@ stringData:
   accessKeyID: # Access Key ID
   secretAccessKey: # Secret Access Key
 ```
+
+To use Azure Blob Storage, set `provider: azure`. The `endpoint` becomes the
+storage-account URL, `bucketName` becomes the container, and the only supported
+`authMethod` is `sharedKey`, whose Secret holds a single `accountKey`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-state-store-config
+  namespace: k8s-health-agent-system
+data:
+  stateStoreKind: BucketStateStore
+  provider: azure
+  endpoint: https://<account>.blob.core.windows.net # the storage-account URL
+  bucketName: # the container name
+  authMethod: sharedKey
+  secretName: <secret name>
+  path: # path within the container; optional
+  destinationName: # optional; see "Running the agent on multiple Destinations"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <secret name>
+  namespace: k8s-health-agent-system
+stringData:
+  accountKey: # the storage-account key
+```
+
+:::warning
+
+Storage accounts with **hierarchical namespace (HNS / ADLS Gen2)** enabled are not
+supported. Use a standard blob storage account.
+
+:::
+
+:::tip
+
+If your State Store is a bucket, the SKE Platform Manager can read health records from it
+directly, instead of you running a GitOps agent on the Platform to sync them. See
+[Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+
+:::
 
 :::warning
 
