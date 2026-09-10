@@ -329,31 +329,7 @@ jobTemplate:
 Naming a container also lets you set environment variables on it, so it picks up settings your
 cluster requires of anything talking to the outside world.
 
-Cortex portals are where this matters. On a sync Job, `writer` is the container that calls the
-Cortex API:
-
-```yaml
-jobTemplate:
-  spec:
-    template:
-      spec:
-        initContainers:
-          - name: writer
-            env:
-              - name: YOUR_ENV_VAR
-                value: "your-value"
-```
-
-The setup Job that runs when you first connect a Cortex portal calls the Cortex API too. Its
-container is called `setup`, and it is that Job's only container, so it goes under `containers`
-rather than `initContainers`.
-
-Your variables are added to the ones the controller already sets on that container, which are left
-alone.
-
-### Setting a variable on every container
-
-To reach everything the controller runs, name all of the containers. A single document is merged
+Name all of the containers to reach everything the controller runs. A single document is merged
 onto every Job, and an entry for a container that a Job does not run is ignored, so one file covers
 both portal types, sync Jobs and setup Jobs:
 
@@ -394,6 +370,11 @@ Each Job takes the entries matching the containers it runs. A Backstage sync Job
 `generate`, `work-writer` and `status-writer`; a Cortex sync Job takes `writer` in place of
 `work-writer`; a setup Job takes `setup`. A delete Job runs fewer containers than a configure Job,
 and takes the entries for the ones it does run.
+
+Your variables are added to the ones the controller already sets on those containers, which are
+left alone. If the setting is only needed where the controller calls a portal's API, that is
+`writer` on a Cortex sync Job and `setup` on a Cortex setup Job. Backstage portals make no such
+calls: they reach the Kubernetes API only.
 
 :::warning Give every entry a name
 `name` is how the merge finds the container to change. An entry without one matches no container,
