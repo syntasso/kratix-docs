@@ -9,8 +9,7 @@ sidebar_label: Job customization
 The Portal Controller creates Kubernetes Jobs to do its work. It creates one when a Promise or
 Resource syncs to a portal, and one when a portal connection is first set up.
 
-Those Jobs run in your cluster, so they need to comply with your cluster's policies. For example, if an admission policy requires specific labels on every workload, Jobs that don't include those labels will be rejected, preventing the portal integration from running. You may also want them on particular nodes, inside a resource quota, or cleaned up on
-your usual schedule.
+Those Jobs run in your cluster, so they need to comply with your cluster's policies.
 
 These settings cover the controller's Jobs. The long-lived status exporter that Cortex portals run
 is a Deployment rather than a Job, so this ConfigMap does not apply to it.
