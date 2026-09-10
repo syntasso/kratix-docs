@@ -46,6 +46,10 @@ After this guide, read by the Platform Manager:
 The GitOps agent on the Platform leaves the health path entirely. The health agent on the
 Destination stays exactly where it is, and keeps doing the same job.
 
+Both of those last legs are what the
+[Health Checks guide](/ske/guides/healthchecks#how-do-health-checks-work-in-ske) calls a
+**HealthCheck Monitor**. This migration swaps one for the other, and changes nothing else.
+
 ### Three names for two sides of one bucket
 
 `HealthSource` is **not** a new name for the State Store, and it does not replace it. They
