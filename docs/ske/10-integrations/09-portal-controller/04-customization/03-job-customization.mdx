@@ -1,0 +1,210 @@
+---
+title: Job customization
+description: Configuring the Kubernetes Jobs the Portal Controller creates, with the ske-portal-workloads-config ConfigMap
+keywords: [portal, jobs, workloads, labels, annotations, resources, ske, controller]
+slug: /ske/integrations/portal-controller/customization/job-customization
+sidebar_label: Job customization
+---
+
+The Portal Controller creates Kubernetes Jobs to do its work. It creates one when a Promise or
+Resource syncs to a portal, and one when a portal connection is first set up.
+
+Those Jobs run in your cluster, so they need to comply with your cluster's policies.
+
+These settings cover the controller's Jobs. The long-lived status exporter that Cortex portals run
+is a Deployment rather than a Job, so this ConfigMap does not apply to it.
+
+You configure these settings in the `ske-portal-workloads-config` ConfigMap in the `kratix-platform-system` namespace, under the workloads.yaml key:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-portal-workloads-config
+  namespace: kratix-platform-system
+data:
+  workloads.yaml: |
+    jobTemplate:
+      metadata:
+        labels:
+          app.kubernetes.io/name: ske-portal
+          acs.customer.com/securityZone: dmz
+        annotations:
+          acs.customer.com/owner: platform-team
+      spec:
+        backoffLimit: 5
+        ttlSecondsAfterFinished: 3600
+        template:
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+```
+
+`jobTemplate` is a partial Kubernetes
+[JobTemplateSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/cron-job-v1/#JobTemplateSpec).
+The controller merges it into each Job it builds: Promise sync Jobs, Resource sync Jobs, and portal
+setup Jobs.
+
+This ConfigMap is the only place these settings live. There is no matching field on the
+`SKEIntegration`. You create it, edit it and delete it yourself, and it applies to every portal
+connection.
+
+:::note
+Kubernetes Jobs cannot be changed after they are created, so the controller replaces them. When you
+edit `workloads.yaml`, the Jobs it affects are recreated with the new configuration. Delete the ConfigMap
+and they go back to the controller's defaults.
+:::
+
+## Labels and annotations reach the pods
+
+Anything under `jobTemplate.metadata` lands on the Job and on the pods it creates, so you declare it
+once. Admission policies usually check pods, so this is normally what you want.
+
+If you want something on the pods only, put it under `jobTemplate.spec.template.metadata`. When the
+same key appears in both places, the pod-level value wins.
+
+:::info Quote your values
+In YAML, `4711` is a number and `yes` is a boolean, but Kubernetes labels, annotations and
+`nodeSelector` values all have to be text. Put quote marks around anything that is not obviously a
+word:
+
+```yaml
+labels:
+  acme.com/cost-centre: "4711"   # not 4711
+  audited: "yes"                 # not yes
+```
+
+This is the most common mistake. An unquoted value is rejected, and
+[When the file is wrong](#when-the-file-is-wrong) shows where the error appears.
+:::
+
+## What you cannot set
+
+Everything in the template is yours except the following. The controller sets these back to its own
+values after merging, because it reads them to find and clean up its own Jobs:
+
+| Field | Why the controller keeps it |
+|---|---|
+| `metadata.name`, `metadata.namespace` | It finds and cleans up its Jobs by name |
+| `metadata.ownerReferences` | This is how a Promise notices its Job has finished |
+| `metadata.finalizers` | A finalizer would stop the controller deleting its own Job |
+| Which containers exist | You can change a container it builds, but not add one. A sync Job runs `reader`, `generate` and `work-writer` (`writer` on Cortex portals) as init containers, followed by `status-writer`. A setup Job runs a single `setup` container |
+| Labels and annotations starting `kratix.io/`, and `app.kubernetes.io/managed-by` | These are how the controller finds its Jobs and protects them from being cleaned up early |
+
+Labels such as `app.kubernetes.io/name`, `app.kubernetes.io/component` and
+`app.kubernetes.io/version` are yours to set.
+
+You cannot add a container, but you can change one the controller builds, by naming it. The two
+sections below show the settings platform teams reach for most often.
+
+:::info Put your entry in the list the container runs in
+Every container runs in one of two lists, `initContainers` or `containers`, and your entry has to go
+in the same list as the container you are changing. The table above says which list each one is in.
+An entry in the other list matches no container, and is dropped without an error.
+:::
+
+## Setting resources on a container
+
+This is how you set CPU, memory or ephemeral storage limits:
+
+```yaml
+jobTemplate:
+  spec:
+    template:
+      spec:
+        initContainers:
+          - name: generate
+            resources:
+              limits:
+                memory: 512Mi
+                ephemeral-storage: 1Gi
+```
+
+## Setting environment variables on a container
+
+Naming a container also lets you set environment variables on it.
+
+Name all of the containers to reach everything the controller runs. A single document is merged
+onto every Job, and an entry for a container that a Job does not run is ignored, so one file covers
+both portal types, sync Jobs and setup Jobs:
+
+```yaml
+jobTemplate:
+  spec:
+    template:
+      spec:
+        initContainers:
+          - name: reader
+            env:
+              - name: YOUR_ENV_VAR
+                value: "your-value"
+          - name: generate
+            env:
+              - name: YOUR_ENV_VAR
+                value: "your-value"
+          - name: writer
+            env:
+              - name: YOUR_ENV_VAR
+                value: "your-value"
+          - name: work-writer
+            env:
+              - name: YOUR_ENV_VAR
+                value: "your-value"
+        containers:
+          - name: status-writer
+            env:
+              - name: YOUR_ENV_VAR
+                value: "your-value"
+          - name: setup
+            env:
+              - name: YOUR_ENV_VAR
+                value: "your-value"
+```
+
+Each Job takes the entries matching the containers it runs. A Backstage sync Job takes `reader`,
+`generate`, `work-writer` and `status-writer`; a Cortex sync Job takes `writer` in place of
+`work-writer`; a setup Job takes `setup`. A delete Job runs fewer containers than a configure Job,
+and takes the entries for the ones it does run.
+
+Your variables are added to the ones the controller already sets on those containers, which are
+left alone. If the setting is only needed where the controller calls a portal's API, that is
+`writer` on a Cortex sync Job and `setup` on a Cortex setup Job. Backstage portals make no such
+calls: they reach the Kubernetes API only.
+
+:::warning Give every entry a name
+`name` is how the merge finds the container to change. An entry without one matches no container,
+and the Jobs it would apply to are not created until you add the name.
+:::
+
+## When the file is wrong
+
+If `workloads.yaml` cannot be read, the controller creates no new Jobs until you fix it, and records
+a warning on the ConfigMap itself. Existing Jobs are left alone.
+
+```shell-session
+kubectl -n kratix-platform-system describe configmap ske-portal-workloads-config
+```
+
+```
+Events:
+  Type     Reason                       Age    From                     Message
+  ----     ------                       ----   ----                     -------
+  Warning  PortalWorkloadConfigInvalid  110s   portal-setup-controller  could not parse the portal
+  workloads configuration: jobTemplate: json: cannot unmarshal number into Go struct field
+  ObjectMeta.metadata.labels of type string
+```
+
+That message is the unquoted number from the tip above.
+
+The controller rejects anything it cannot make sense of: unknown fields, misspelled fields, values of
+the wrong type, and an empty (`null`) `metadata` or `spec`. It does not ignore them. That way a typo
+cannot quietly drop the labels your policy needs.
+
+Two things keep working while the file is broken. Cleaning up after a portal connection you have
+removed from your configuration still runs. So does deleting a Resource, because its Job has to run
+for the Resource to finish being removed.
+
+:::note
+The warning appears on the ConfigMap, not on the Promises whose Jobs were not created. If a Promise
+has stopped syncing to its portal and you cannot see why, check this ConfigMap's events.
+:::
