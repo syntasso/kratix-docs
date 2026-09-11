@@ -20,6 +20,13 @@ You will also need a configured and deployed Health Agent. You can do that by fo
 
 Health Checks are implemented in SKE via `HealthDefinition` objects. A Health Definition is the outline of the task that will be performed on a Destination to verify the health of a Resource Request.
 
+The check runs on the Destination and its result is written to a State Store. Getting that result from the State Store onto the Platform can be done by either of two components that we're calling the **HealthCheck Monitor**:
+
+* A **GitOps agent** on the Platform cluster, listening to the State Store and applying the `HealthRecord`s it finds. This works whether the State Store is Git or a bucket, and it is what this tutorial uses.
+* The **SKE Platform Manager**, reading the records from the State Store itself, with no GitOps agent involved. This requires the State Store to be a bucket. See [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+
+Whichever HealthCheck Monitor you choose, everything after it is the same. Once the `HealthRecord` is on the Platform, Kratix processes it and updates the resource `status`, and that does not vary with your choice.
+
 The diagram below shows how Health Checks are processed in SKE:
 
 ```mdx-code-block
@@ -38,8 +45,8 @@ Let's go through the diagram in detail:
 2. As part of the outputs of that workflow, you can include a `HealthDefinition` object, including all the necessary information to execute the Health Check Workflow on the Destination.
 3. Once that HealthDefinition is picked up and applied at the target Destination, the Health Check agent will execute the Health Check Workflow and produce a `HealthRecord` document.
 4. The `HealthRecord` is then written to a State Store,
-5. The `HealthRecord` is then applied back to the Platform cluster via a GitOps agent listening to the State Store.
-6. The Health Check monitor within SKE will then process the `HealthRecord` and update the resource `status` with the results.
+5. A HealthCheck Monitor then gets the `HealthRecord` onto the Platform cluster: either a GitOps agent on the Platform listening to the State Store, as in this tutorial, or the SKE Platform Manager reading the records from a bucket directly. See [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket) for the second option and how to migrate to it.
+6. Kratix will then process the `HealthRecord` and update the resource `status` with the results. This step is the same whichever HealthCheck Monitor delivered the record in step 5.
 
 :::warning
 
@@ -212,7 +219,7 @@ Since the health check is schedule to run every minute, if you keep watching the
 
 :::
 
-Since the workflow completed successfully, the SKE Health Agent running in your Destination should have written a `HealthRecord` to the State Store. Since you have a GitOps agent listening to that State Store, the Health Record will be applied back to the Platform cluster.
+Since the workflow completed successfully, the SKE Health Agent running in your Destination should have written a `HealthRecord` to the State Store. In this tutorial you have a GitOps agent listening to that State Store, so the Health Record will be applied back to the Platform cluster. (If your State Store is a bucket, the SKE Platform Manager can read it directly instead: see [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).)
 
 At this stage, you should see the Health check results in your Redis resource:
 

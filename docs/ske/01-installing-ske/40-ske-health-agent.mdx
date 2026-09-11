@@ -17,9 +17,28 @@ The Agent will:
 
 ## Requirements
 
-The Agent will write the health information to a state store.
-The Platform cluster must have a GitOps agent listening to the state store,
-so the resource health can be applied back to the Platform cluster.
+The Agent will write the health information to a state store. Something on the Platform
+cluster then has to pick those records up, and there are two ways to do that:
+
+* A **GitOps agent** on the Platform listening to the state store. This works for both
+  Git and bucket state stores.
+* The **SKE Platform Manager** reading the records itself, by way of a `HealthSource`. This
+  needs the state store to be a bucket, and needs no GitOps agent on the Platform. See
+  [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+
+You need one of the two, not both, though running both at once is supported while you
+migrate from one to the other.
+
+:::note
+
+Running both only behaves as you would expect as long as they are not reading the same
+records from the same place. If a GitOps agent and a `HealthSource` both deliver the same
+records from the same store, each resource ends up with two `HealthRecord`s on the Platform
+and the worse of the two states wins. That is exactly what the
+[migration guide](/ske/guides/health-records-from-a-bucket#the-overlap-window) relies on and
+explains, but it is not a state to sit in by accident.
+
+:::
 
 ## Install
 
@@ -158,6 +177,7 @@ metadata:
   namespace: k8s-health-agent-system
 data:
   stateStoreKind: BucketStateStore
+  provider: # generic or azure (default: generic)
   endpoint: # address
   bucketName: # bucket name
   authMethod: # accessKey or IAM (default: accessKey)
@@ -175,6 +195,80 @@ stringData:
   accessKeyID: # Access Key ID
   secretAccessKey: # Secret Access Key
 ```
+
+For a standard AWS S3 bucket, that looks like this:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-state-store-config
+  namespace: k8s-health-agent-system
+data:
+  stateStoreKind: BucketStateStore
+  endpoint: s3.<AWS_REGION>.amazonaws.com
+  bucketName: <BUCKET_NAME>
+  authMethod: accessKey # use IAM instead to take the pod's instance identity
+  secretName: health-store-credentials
+  path: health
+  destinationName: <DESTINATION_NAME>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: health-store-credentials
+  namespace: k8s-health-agent-system
+stringData:
+  accessKeyID: <YOUR_ACCESS_KEY_ID>
+  secretAccessKey: <YOUR_SECRET_ACCESS_KEY>
+```
+
+With `authMethod: IAM` the agent uses the ambient instance identity and the Secret is not
+needed at all.
+
+To use Azure Blob Storage, set `provider: azure`. The `endpoint` becomes the
+storage-account URL, `bucketName` becomes the container, and the only supported
+`authMethod` is `sharedKey`, whose Secret holds a single `accountKey`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-state-store-config
+  namespace: k8s-health-agent-system
+data:
+  stateStoreKind: BucketStateStore
+  provider: azure
+  endpoint: https://<account>.blob.core.windows.net # the storage-account URL
+  bucketName: # the container name
+  authMethod: sharedKey
+  secretName: <secret name>
+  path: # path within the container; optional
+  destinationName: # optional; see "Running the agent on multiple Destinations"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: <secret name>
+  namespace: k8s-health-agent-system
+stringData:
+  accountKey: # the storage-account key
+```
+
+:::warning
+
+Storage accounts with **hierarchical namespace (HNS / ADLS Gen2)** enabled are not
+supported. Use a standard blob storage account.
+
+:::
+
+:::info You don't need a GitOps agent for buckets
+
+If your state store is a bucket, the SKE Platform Manager can read the records itself, so
+there is no GitOps agent to run on the Platform for health checks. See
+[Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+
+:::
 
 :::warning
 
