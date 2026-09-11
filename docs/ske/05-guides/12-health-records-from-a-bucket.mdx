@@ -50,8 +50,10 @@ flowchart LR
     store[("State Store<br/>bucket or Git")]
 
     subgraph platform[Platform]
-        gitops[GitOps agent]
-        spm[SKE Platform Manager]
+        subgraph monitor[HealthCheck Monitor]
+            gitops[GitOps agent]
+            spm[SKE Platform Manager]
+        end
         record[HealthRecord]
     end
 
