@@ -40,17 +40,27 @@ Only the last leg of the journey changes: how a record gets from the State Store
 Platform. Everything before it is the same, and the resource's `status.healthStatus` ends
 up in the same shape either way, so nothing that consumes health can tell the difference.
 
-```text
-Before, through a GitOps sync:
+```mermaid
+flowchart LR
+    subgraph destination[Destination]
+        check[Health check]
+        agent[SKE Health Agent]
+    end
 
-  health check ──> health agent ──> bucket or Git ──> GitOps agent ──> HealthRecord
-   (destination)   (destination)                       (platform)       (platform)
+    store[("State Store<br/>bucket or Git")]
 
-After this guide, read by the Platform Manager:
+    subgraph platform[Platform]
+        gitops[GitOps agent]
+        spm[SKE Platform Manager]
+        record[HealthRecord]
+    end
 
-  health check ──> health agent ──> bucket ──────────────────────────> HealthRecord
-   (destination)   (destination)                  SKE Platform         (platform)
-                                                  Manager polls
+    check --> agent --> store
+    store -->|before| gitops --> record
+    store -.->|"after (bucket only)"| spm -.-> record
+
+    classDef new stroke-width:2px,stroke-dasharray:4 3
+    class spm new
 ```
 
 The GitOps agent on the Platform leaves the health path entirely. The health agent on the
