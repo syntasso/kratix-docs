@@ -9,9 +9,11 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 ```
 
-By default, health records travel from a Destination to the Platform through a State Store
-that a GitOps agent on the Platform syncs. The SKE Platform Manager can instead read those
-records from a bucket itself, which removes the GitOps agent from the health path entirely.
+Up until SKE version `<ADD_VERSION_HERE>` and SKE Health Agent version `<ADD_VERSION_HERE>`, the
+only way to get health records onto the Platform was a GitOps agent reading them from the
+State Store. Starting with SKE version `<ADD_VERSION_HERE>` and SKE Health Agent version
+`<ADD_VERSION_HERE>`, the SKE Platform Manager can read the records from a bucket itself, which
+removes the GitOps agent from the health path entirely.
 
 This guide migrates **one Destination** at a time, and is written so that health is never
 missing at any step. You can stop after any step and be in a working state, and you can
@@ -30,8 +32,8 @@ Only the last leg of the journey changes: how a record gets from the State Store
 Platform. Everything before it is the same, and the resource's `status.healthStatus` ends
 up in the same shape either way, so nothing that consumes health can tell the difference.
 
-```
-Today, through a GitOps sync:
+```text
+Before, through a GitOps sync:
 
   health check ──> health agent ──> bucket or Git ──> GitOps agent ──> HealthRecord
    (destination)   (destination)                       (platform)       (platform)
@@ -88,24 +90,11 @@ GitOps agent syncing health records, you can keep it. This is an additional opti
 
 :::
 
-:::warning You are giving up a history you may not know you rely on
+:::warning
 
-That commit per check per resource is noise, but it is also a record of how every check
-behaved over time. **The bucket path keeps only current state**: one object per resource,
-overwritten in place, with no history of earlier runs.
-
-Two consequences worth weighing before you start:
-
-- Commits already in your Git repository stay there. Removing the sync in Step 4 does not
-  rewrite history. But the repository stops gaining new health commits as soon as you
-  repoint the agent in Step 1.
-- Nothing in this path replaces that history. If you need to know how a resource's health
-  behaved over time, or whether a check is flapping, publish Platform and Destination
-  **metrics to a time-series database**. That is the supported answer, and it is a separate
-  piece of work from this migration.
-
-If anything today reads health out of Git commits, such as an audit process or a dashboard,
-find it before Step 1 rather than after Step 4.
+If you rely on Git commits to map the history of a resource's health, you lose that when you
+migrate to a bucket. A bucket keeps only the current record for each resource, overwritten in
+place. Use metrics in a time-series database if you need health over time.
 
 :::
 
@@ -117,17 +106,21 @@ You will need:
   [Health Checks guide](/ske/guides/healthchecks).
 - An S3-compatible bucket, or an Azure Blob Storage container, that the Destination can
   write to and the Platform can read. **It has to be a bucket**, for the reason below.
-- **An SKE new enough to have the reader.** There is nothing separate to install and no
-  extra RBAC to grant: the component that reads the bucket is a controller inside the SKE
-  Platform Manager, and the `HealthSource` CRD and its permissions ship with it. But an
-  older SKE will not have it, so check before you plan anything:
+- **An SKE new enough (version `<ADD_VERSION_HERE>` or above) to have the reader.** There is
+  nothing separate to install and no extra RBAC to grant: the SKE Platform Manager reads the
+  bucket, and the `HealthSource` CRD and its permissions ship with it. An older SKE will not
+  have it, so check before you plan anything:
 
   ```bash
   kubectl get crd healthsources.platform.syntasso.io
   ```
 
-  If that returns `NotFound`, upgrade SKE first. Nothing else in this guide will work
-  without it, and Step 2 is where you would find out.
+  :::note
+
+  If that returns `NotFound`, upgrade SKE first. Nothing else in this guide will work without
+  it, and Step 2 is where you would find out.
+
+  :::
 
 What you *will* do is create one `HealthSource` per Destination, and grant two separate
 sets of credentials. Which brings us to the part worth getting right first.
@@ -138,8 +131,9 @@ sets of credentials. Which brings us to the part worth getting right first.
 takes a `spec.bucket` and nothing else; there is no Git equivalent. Git records reach the
 Platform the way they always have, through a GitOps agent, and that path is not going away.
 
-The health *agent* still supports both, so this is not a limitation you hit on the
-Destination. It only applies to the Platform's side of the handover.
+The [SKE Health Agent](/ske/installing-ske/ske-health-agent) still supports both, so this is
+not a limitation you hit on the Destination. It only applies to the Platform's side of the
+handover.
 
 So if you are on Git, this migration is a bigger change than repointing the Platform: Step 1
 also moves the records from a Git repository into a bucket. Health stays available
@@ -154,8 +148,8 @@ The two sides of this path need different access, and deliberately so:
 
 | Side | Needs | Why |
 | --- | --- | --- |
-| The **Destination** (health agent) | **write** to the bucket | It puts a record file per resource, and deletes it when the resource goes. |
-| The **Platform** (SKE Platform Manager) | **read** the bucket | It lists the prefix and gets objects whose revision has changed. It never writes to the bucket. |
+| The **Destination** ([SKE Health Agent](/ske/installing-ske/ske-health-agent)) | **write** to the bucket | It puts a record file per resource, and deletes it when the resource goes. |
+| The **Platform** (SKE Platform Manager) | **read** the bucket | It reads the `HealthRecord`s from the bucket. It never writes to it. |
 
 The credential you give a `HealthSource` only needs permission to **list and get** objects
 under its `spec.path`. Give it nothing more.
@@ -166,10 +160,27 @@ If you already have a Kratix `BucketStateStore` pointing at this bucket, **do no
 credential for the `HealthSource`**. A State Store must hold a credential Kratix can write
 with, and one State Store usually serves the whole fleet.
 
-Instead, create a **second** set of read-only keys and reference those from the
-`HealthSource`. A `HealthSource` deliberately carries its own credential rather than
-referencing a `BucketStateStore`, so that one Destination's credential cannot reach another
-Destination's records.
+Instead, create a **second** credential and reference that from the `HealthSource`. A
+`HealthSource` deliberately carries its own credential rather than referencing a
+`BucketStateStore`, so that one Destination's credential cannot reach another Destination's
+records.
+
+On an S3-compatible store, make that credential read-only: it needs nothing beyond list and
+get on `spec.path`.
+
+:::
+
+:::warning Azure Shared Key cannot be read-only
+
+Under `provider: azure` the reader authenticates with a storage-account key, and that is its
+only option. A Shared Key authorises full read **and write** access to everything in the
+storage account. It cannot be reduced to read-only, and it cannot be scoped to one container
+or prefix.
+
+So on Azure the permission split above is what the Platform *uses*, not what the credential
+*enforces*. The reader only ever lists and gets, but the key you give it could do more. Limit
+the blast radius instead: use a storage account dedicated to health records, so a key that
+leaks reaches only health records, and keep it out of anything that also holds Kratix state.
 
 :::
 
@@ -284,7 +295,7 @@ the new path reports it healthy. Move on to Step 2 rather than leaving a Destina
 ## Step 2: Create a HealthSource on the Platform {#create-the-source}
 
 On the **Platform**, a `HealthSource` names one place to read records from: one bucket, one
-prefix, one read-only credential. Create one per Destination.
+prefix, one credential of its own. Create one per Destination.
 
 One source *can* read a prefix holding several Destinations' records, and they stay distinct
 because their object keys differ. Prefer one source per Destination anyway: it is what keeps
@@ -331,7 +342,7 @@ single Destination's health path fail on its own rather than taking the fleet's 
     name: health-store-reader-worker-1
     namespace: default
   stringData:
-    accountKey: # a read-only storage-account key
+    accountKey: # the storage-account key: see the warning below
   ---
   apiVersion: platform.syntasso.io/v1alpha1
   kind: HealthSource
@@ -429,7 +440,7 @@ key, so the two never collide.
 Kratix's aggregation lists both, and **the worse state wins**. Kratix orders states worst
 to best:
 
-```
+```text
 unhealthy → degraded → unknown → healthy → ready
 ```
 
@@ -497,10 +508,19 @@ kubectl config current-context
   Application that syncs the health path:
 
   ```bash
-  kubectl delete application health-records -n argocd
+  argocd app delete health-records --cascade
   ```
 
-  With automated pruning enabled, ArgoCD deletes the `HealthRecord`s it created as it goes.
+  Deleting the Application has to **cascade**, or it goes away and leaves its
+  `HealthRecord`s behind. Automated pruning does not do this for you: it governs ongoing
+  reconciliation, not what happens when the Application is removed. A cascading delete
+  requires the `resources-finalizer.argocd.argoproj.io` finalizer on the Application, which
+  `argocd app delete --cascade` adds for you. See ArgoCD's
+  [Application Deletion](https://argo-cd.readthedocs.io/en/stable/user-guide/app_deletion/)
+  documentation.
+
+  If you delete it with `kubectl` instead, add that finalizer first, then confirm the
+  records really are gone with the check below rather than assuming.
 
   If the Application syncs more than health, narrow its source rather than deleting it:
   remove the health path from `spec.source.path` (or from the directory include) and sync.
@@ -552,28 +572,48 @@ Then confirm each resource is down to one record, delivered by the reader:
 kubectl get <resource> <name> -n <namespace> -o jsonpath='{.status.healthStatus}' | jq
 ```
 
-If the old records outlive their sync (because pruning was off, for instance), you can
-delete them directly. They are the ones **without** the source label:
+If the old records outlive their sync, because pruning was off or a delete did not cascade,
+delete them yourself. They are the ones **without** the source label, so list them first:
 
 ```bash
 kubectl get healthrecords -A -l '!platform.syntasso.io/health-source'
 ```
+
+:::warning Read that list before deleting it
+
+An unlabelled record means "not applied by a `HealthSource`", which covers the stale records
+you want gone **and** the live records of every Destination you have not migrated yet. During
+a fleet migration those look identical.
+
+Check the list is only the Destination you just migrated. Then delete by name:
+
+```bash
+kubectl delete healthrecord <NAME> -n <NAMESPACE>
+```
+
+Deleting them by label in one command will take the health of every unmigrated Destination
+with it.
+
+:::
+
+Leaving a stale record in place is not cosmetic: it is frozen, so if it last reported
+`unhealthy` it keeps [pinning the resource unhealthy](#the-overlap-window).
 
 That Destination is now migrated.
 
 ## Migrating a fleet {#fleet}
 
 Steps 1 to 4 cover one Destination, and that is the unit of this migration. There is no
-fleet-wide switch: each Destination needs its own `HealthSource` and its own read-only
-credential, which is the same property that stops one Destination's credential reaching
-another's records.
+fleet-wide switch: each Destination needs its own `HealthSource` and its own credential,
+which is the same property that stops one Destination's credential reaching another's
+records.
 
 So the fleet migration is the four steps, repeated. Two things make that safer than doing
 them in bulk:
 
 1. **Take one Destination all the way through first**, and prefer a non-production one. The
    parts most likely to bite are environmental rather than conceptual: endpoint reachability
-   from the Platform, whether the credential really is read-only, whether `spec.path` matches
+   from the Platform, whether the credential has the access it needs, whether `spec.path` matches
    what the agent writes. You want to meet those once, not across the fleet at the same time.
 2. **Then go one Destination at a time.** Nothing is shared between them, so a Destination
    that goes wrong is contained, and Step 4 is still the last thing you do for each.
@@ -670,7 +710,7 @@ every record the source applies.
 | `bucketName` | string | **Required.** The bucket to read from; under `azure`, the container. |
 | `provider` | enum | `generic` for any S3-compatible store, `azure` for Azure Blob Storage. Default `generic`. |
 | `authMethod` | enum | `accessKey`, `IAM`, or `sharedKey`. `accessKey` and `sharedKey` read from `secretRef`; `IAM` uses the ambient instance identity. `sharedKey` is `azure`'s only method, and `azure`'s only. Omitted means `accessKey` under `generic` and `sharedKey` under `azure`. |
-| `secretRef` | object | `name` and `namespace` of the Secret holding the credentials. Required for every `authMethod` except `IAM`, which ignores it. Keys are `accessKeyID` and `secretAccessKey` for `accessKey`, or `accountKey` for `sharedKey`. Needs only list and get on `spec.path`. |
+| `secretRef` | object | `name` and `namespace` of the Secret holding the credentials. Required for every `authMethod` except `IAM`, which ignores it. Keys are `accessKeyID` and `secretAccessKey` for `accessKey`, or `accountKey` for `sharedKey`. The reader only ever lists and gets under `spec.path`, though an Azure `sharedKey` cannot itself be restricted to that. |
 | `insecure` | boolean | Connect over HTTP rather than HTTPS. Under `azure` it applies only when the endpoint omits a scheme; an endpoint that spells one keeps it. Default `false`. |
 | `useDualStack` | boolean | Opt in to Amazon's dual-stack endpoints. Off by default, because they are unreachable from IPv4-only VPCs. No effect on non-Amazon endpoints, and not supported under `azure`. |
 
