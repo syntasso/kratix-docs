@@ -9,11 +9,15 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 ```
 
-Up until SKE version `<ADD_VERSION_HERE>` and SKE Health Agent version `<ADD_VERSION_HERE>`, the
-only way to get health records onto the Platform was a GitOps agent reading them from the
-State Store. Starting with SKE version `<ADD_VERSION_HERE>` and SKE Health Agent version
-`<ADD_VERSION_HERE>`, the SKE Platform Manager can read the records from a bucket itself, which
-removes the GitOps agent from the health path entirely.
+Up until SKE version v0.58.0, the only way to get health records onto the Platform was a
+GitOps agent reading them from the State Store. Starting with SKE version **v0.59.0**, the
+SKE Platform Manager can read the records from a bucket itself, which removes the GitOps
+agent from the health path entirely.
+
+Reading from an S3-compatible bucket needs nothing new on the Destination: the SKE Health
+Agent has written to bucket State Stores for a long time, and the records it writes are
+unchanged. Azure Blob Storage is the exception, and needs SKE Health Agent **v0.14.0** or
+above, which is the release that can write to it.
 
 This guide migrates **one Destination** at a time, and is written so that health is never
 missing at any step. You can stop after any step and be in a working state, and you can
@@ -105,8 +109,10 @@ You will need:
 - A Destination already reporting health through a State Store, following the
   [Health Checks guide](/ske/guides/healthchecks).
 - An S3-compatible bucket, or an Azure Blob Storage container, that the Destination can
-  write to and the Platform can read. **It has to be a bucket**, for the reason below.
-- **An SKE new enough (version `<ADD_VERSION_HERE>` or above) to have the reader.** There is
+  write to and the Platform can read. **It has to be a bucket**, for the reason below. For
+  Azure you also need SKE Health Agent v0.14.0 or above on the Destination; for an
+  S3-compatible bucket any agent version that already writes to one will do.
+- **An SKE new enough (version v0.59.0 or above) to have the reader.** There is
   nothing separate to install and no extra RBAC to grant: the SKE Platform Manager reads the
   bucket, and the `HealthSource` CRD and its permissions ship with it. An older SKE will not
   have it, so check before you plan anything:
