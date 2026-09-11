@@ -129,9 +129,10 @@ You will need:
 - A Destination already reporting health through a State Store, following the
   [Health Checks guide](/ske/guides/healthchecks).
 - An S3-compatible bucket, or an Azure Blob Storage container, that the Destination can
-  write to and the Platform can read. For
-  Azure you also need SKE Health Agent v0.14.0 or above on the Destination; for an
-  S3-compatible bucket any agent version that already writes to one will do.
+  write to and the Platform can read. It has to be one of those two: the Platform Manager
+  reads health records from a bucket, never from Git. For Azure you also need SKE Health
+  Agent v0.14.0 or above on the Destination; for an S3-compatible bucket any agent version
+  that already writes to one will do.
 - **An SKE new enough (version v0.59.0 or above) to have the reader.** There is nothing separate to install and no
   extra RBAC to grant: the SKE Platform Manager reads the bucket, and the `HealthSource` CRD
   and its permissions ship with it. An older SKE will not have it, so check before you plan
@@ -150,7 +151,6 @@ You will need:
 
 What you will do is create one `HealthSource` per Destination, and grant two separate
 sets of credentials. Which brings us to the part worth getting right first.
-
 
 ## The permission split {#permissions}
 
