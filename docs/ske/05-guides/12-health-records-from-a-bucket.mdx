@@ -14,10 +14,14 @@ GitOps agent reading them from the State Store. Starting with SKE version **v0.5
 SKE Platform Manager can read the records from a bucket itself, which removes the GitOps
 agent from the health path entirely.
 
-Reading from an S3-compatible bucket needs nothing new on the Destination: the SKE Health
-Agent has written to bucket State Stores for a long time, and the records it writes are
-unchanged. Azure Blob Storage is the exception, and needs SKE Health Agent **v0.14.0** or
-above, which is the release that can write to it.
+Which versions you need on the Destination depends on the kind of store, because the
+component that writes to it lives in the SKE Health Agent. Every storage backend therefore
+needs an agent release that can write to it:
+
+* **S3-compatible**: nothing new. The agent has written to bucket State Stores for a long
+  time, and the records it writes are unchanged.
+* **Azure Blob Storage**: SKE Health Agent **v0.14.0** or above, the release that adds the
+  Azure writer.
 
 This guide migrates **one Destination** at a time, and is written so that health is never
 missing at any step. You can stop after any step and be in a working state, and you can
