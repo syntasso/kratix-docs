@@ -126,10 +126,10 @@ You will need:
   write to and the Platform can read. **It has to be a bucket**, for the reason below. For
   Azure you also need SKE Health Agent v0.14.0 or above on the Destination; for an
   S3-compatible bucket any agent version that already writes to one will do.
-- **An SKE new enough (version v0.59.0 or above) to have the reader.** There is
-  nothing separate to install and no extra RBAC to grant: the SKE Platform Manager reads the
-  bucket, and the `HealthSource` CRD and its permissions ship with it. An older SKE will not
-  have it, so check before you plan anything:
+- **An SKE new enough (version v0.59.0 or above) to have the reader.** There is nothing separate to install and no
+  extra RBAC to grant: the SKE Platform Manager reads the bucket, and the `HealthSource` CRD
+  and its permissions ship with it. An older SKE will not have it, so check before you plan
+  anything:
 
   ```bash
   kubectl get crd healthsources.platform.syntasso.io
