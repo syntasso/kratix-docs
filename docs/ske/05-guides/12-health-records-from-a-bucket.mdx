@@ -147,22 +147,6 @@ You will need:
 What you will do is create one `HealthSource` per Destination, and grant two separate
 sets of credentials. Which brings us to the part worth getting right first.
 
-:::warning If your health records are in Git today
-
-**The SKE Platform Manager can only read health records from a bucket.** A `HealthSource`
-takes a `spec.bucket` and nothing else; there is no Git equivalent. Git records reach the
-Platform the way they always have, through a GitOps agent, and that path is not going away.
-
-The [SKE Health Agent](/ske/installing-ske/ske-health-agent) still supports both, so this is
-not a limitation you hit on the Destination. It only applies to the Platform's side of the
-handover.
-
-So if you are on Git, this migration is a bigger change than repointing the Platform: Step 1
-also moves the records from a Git repository into a bucket. Health stays available
-throughout, and the order is unchanged, but plan for a new bucket and a new write credential
-rather than reusing what the agent has.
-
-:::
 
 ## The permission split {#permissions}
 
