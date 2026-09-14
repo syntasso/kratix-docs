@@ -304,8 +304,8 @@ the new path reports it healthy. Move on to Step 2 rather than leaving a Destina
 
 ## Step 2: Create a HealthSource on the Platform {#create-the-source}
 
-On the **Platform**, a `HealthSource` names one place to read records from: one bucket, one
-prefix, one credential of its own. Create one per Destination.
+On the **Platform**, a [`HealthSource`](/ske/reference/healthsource) names one place to read
+records from: one bucket, one prefix, one credential of its own. Create one per Destination.
 
 One source *can* read a prefix holding several Destinations' records, and they stay distinct
 because their object keys differ. Prefer one source per Destination anyway: it is what keeps
@@ -405,7 +405,8 @@ You are looking for `READY=True`, an `OBSERVED` count that matches the number of
 this Destination reports on, and a recent `LAST GOOD POLL`. If `READY` is not `True`, the
 `REASON` column names the thing at fault. See [Troubleshooting](#troubleshooting).
 
-For the full picture, including how many records the last poll applied and failed:
+For the full picture, including how many records the last poll applied and failed, and what
+every [status field](/ske/reference/healthsource#status) means:
 
 ```bash
 kubectl describe healthsource worker-1
@@ -698,8 +699,3 @@ Two behaviours worth knowing, because both look like faults and neither is:
   when the resource it reports on goes. A prefix with no objects therefore means that
   Destination has stopped reporting, and every record the source applied is removed.
   Pruning only happens on a listing that completed, so a failed poll never deletes anything.
-
-## HealthSource reference {#reference}
-
-Every field, condition reason and the metadata the reader stamps on each record are documented
-in the [Health Source reference](/ske/reference/healthsource).
