@@ -212,6 +212,15 @@ Running both paths at once is supported. That overlap is what makes this safe, a
 On the **Destination**, the agent's `health-state-store-config` ConfigMap in the
 `k8s-health-agent-system` namespace decides where records are written. Set it to a bucket.
 
+:::note Edit it where it is authored
+
+If that ConfigMap is itself delivered by GitOps — because the agent is installed through a
+Promise or another sync with self-heal enabled — a `kubectl edit` on the Destination is
+reverted on the next sync. Make this change at whatever authors the ConfigMap, and let it
+travel down the same path it always does.
+
+:::
+
 <Tabs className="boxedTabs" groupId="bucketProvider">
   <TabItem value="s3" label="S3-compatible">
 
@@ -229,6 +238,7 @@ On the **Destination**, the agent's `health-state-store-config` ConfigMap in the
     secretName: health-store-writer # required for accessKey
     path: health/worker-1 # the prefix this Destination writes under
     destinationName: worker-1 # see the warning below
+    insecure: "true" # only for a store that speaks plain HTTP; omit otherwise
   ---
   apiVersion: v1
   kind: Secret
@@ -279,8 +289,11 @@ On the **Destination**, the agent's `health-state-store-config` ConfigMap in the
   </TabItem>
 </Tabs>
 
-The agent writes one flat file per resource under `path`, named after the Promise,
-namespace, resource and Destination.
+The agent writes one file per resource, named after the Promise, namespace, resource and
+Destination — inside a `health/` directory it creates below `path`. So with the example
+above the objects land under `health/worker-1/health/`. Nothing to correct for: the
+`HealthSource` in Step 2 reads its prefix recursively, so both sides keep naming the same
+`path`.
 
 :::warning Set `destinationName` if Destinations share a prefix
 
@@ -334,6 +347,7 @@ single Destination's health path fail on its own rather than taking the fleet's 
       endpoint: # same endpoint the agent writes to, without a scheme
       bucketName: # same bucket
       authMethod: accessKey # or IAM
+      insecure: true # only for a store that speaks plain HTTP; omit otherwise
       secretRef:
         name: health-store-reader-worker-1
         namespace: default
@@ -419,8 +433,8 @@ with its source:
 kubectl get healthrecords -A -l platform.syntasso.io/health-source=worker-1
 ```
 
-Each of those carries the object key it came from, which is how you tie a record back to a
-file in the bucket:
+Each of those carries the object key it came from — relative to the source's `spec.path` —
+which is how you tie a record back to a file in the bucket:
 
 ```bash
 kubectl get healthrecord <name> -n <namespace> \
@@ -609,6 +623,11 @@ with it.
 
 Leaving a stale record in place is not cosmetic: it is frozen, so if it last reported
 `unhealthy` it keeps [pinning the resource unhealthy](#the-overlap-window).
+
+One loose end is cosmetic: the frozen record **files** are still sitting in the old State
+Store. Nothing reads them any more, and the agent that wrote them no longer manages them, so
+they stay there until you delete them — on Git, one last commit removing the `health/`
+directory closes the book.
 
 That Destination is now migrated.
 

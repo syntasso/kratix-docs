@@ -79,7 +79,7 @@ Every `HealthRecord` the reader applies carries:
 | Key | Description |
 | --- | --- |
 | `platform.syntasso.io/health-source` (label) | The `HealthSource` that applied it. Scopes everything the reader does, so it never touches a record it did not apply. |
-| `platform.syntasso.io/object-key` (annotation) | The object key in the bucket the record was read from. |
+| `platform.syntasso.io/object-key` (annotation) | The object key the record was read from, relative to `spec.path`. |
 | `platform.syntasso.io/object-revision` (annotation) | The revision that was read, which is how the reader decides whether to fetch again. |
 
 Each record is also owned by its `HealthSource`, so deleting the source garbage collects every
