@@ -493,8 +493,7 @@ column names the thing at fault.
 The `endpoint`, `bucketName` and `path` must match what the agent on that Destination is
 configured with, or the source polls successfully and observes nothing.
 
-For the full field reference, and for moving an existing Destination off a GitOps sync
-without a gap in health, see
+To move an existing Destination off a GitOps sync without a gap in health, see
 [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
 
 ### Running the agent on multiple Destinations
@@ -630,14 +629,3 @@ spec:
 
 A resource checked on more than one Destination now shows one record per Destination in its
 `status.healthStatus`, and the worst state across them wins.
-:::note One source, or one per Destination?
-
-Sharing a prefix means one `HealthSource` and one credential for the whole fleet, which is
-the simplest thing to run.
-
-The alternative is a prefix per Destination (`health/dev`, `health/prod`, `health/test`) and
-a `HealthSource` each. That costs more objects, and buys two things: a credential that can
-only reach one Destination's records, and a source that fails on its own rather than taking
-the fleet's health with it. Prefer it for a large or mixed-trust fleet.
-
-:::
