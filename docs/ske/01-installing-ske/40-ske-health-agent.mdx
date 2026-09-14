@@ -511,3 +511,108 @@ Destination and shows them all in the resource's health status.
 If you set or change `destinationName` on an agent that has already written records, the
 records written under the old name are not cleaned up automatically; delete them from the
 state store manually.
+
+#### Example: one Platform, three Destinations
+
+A Platform cluster with three Destinations registered in Kratix as `dev`, `prod` and `test`.
+All three run the SKE Health Agent, and all three write to the same bucket under the same
+`health` prefix. `destinationName` is what keeps their records apart.
+
+<Tabs className="boxedTabs" groupId="multiDestination">
+  <TabItem value="dev" label="dev Destination">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: dev
+  ```
+
+  </TabItem>
+
+  <TabItem value="prod" label="prod Destination">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: prod
+  ```
+
+  </TabItem>
+
+  <TabItem value="test" label="test Destination">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: test
+  ```
+
+  </TabItem>
+</Tabs>
+
+Only `destinationName` differs. Each agent needs its own Secret on its own cluster, but the
+credentials can be the same, since all three are writing to the same place.
+
+On the **Platform**, one `HealthSource` covers all three, because they share a prefix:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: HealthSource
+metadata:
+  name: all-destinations
+spec:
+  bucket:
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretRef:
+      name: health-store-reader
+      namespace: default
+  path: health
+  pollInterval: 10m
+```
+
+A resource checked on more than one Destination now shows one record per Destination in its
+`status.healthStatus`, and the worst state across them wins.
+
+:::note One source, or one per Destination?
+
+Sharing a prefix means one `HealthSource` and one credential for the whole fleet, which is
+the simplest thing to run.
+
+The alternative is a prefix per Destination (`health/dev`, `health/prod`, `health/test`) and
+a `HealthSource` each. That costs more objects, and buys two things: a credential that can
+only reach one Destination's records, and a source that fails on its own rather than taking
+the fleet's health with it. Prefer it for a large or mixed-trust fleet.
+
+:::
