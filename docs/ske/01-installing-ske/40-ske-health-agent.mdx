@@ -143,17 +143,10 @@ helm install health-agent syntasso/k8s-health-agent --values values.yaml
 ### Set up access to the State Store
 
 You will need to create a ConfigMap and Secret with the credentials to access the state
-store. The format depends on the type of state store you use: an S3-compatible bucket,
-Azure Blob Storage, or a Git repository.
+store. The format depends on the kind of state store you use:
 
-:::warning
-
-The configuration should be created _after_ installing the agent, otherwise the namespace will not exist.
-
-:::
-
-<Tabs className="boxedTabs" groupId="healthStateStore">
-  <TabItem value="s3" label="S3-compatible">
+<Tabs className="boxedTabs" groupId="healthStateStoreKind">
+  <TabItem value="bucket" label="S3-Compatible">
 
   ```yaml
   apiVersion: v1
@@ -166,7 +159,7 @@ The configuration should be created _after_ installing the agent, otherwise the 
     provider: # generic or azure (default: generic)
     endpoint: # address
     bucketName: # bucket name
-    authMethod: # accessKey or IAM (default: accessKey)
+    authMethod: # accessKey or IAM (default: accessKey); sharedKey for azure
     secretName: <secret name> # required for accessKey
     path: # path within the bucket; optional
     insecure: # "true" or "false" (default: "false"); optional string
@@ -182,7 +175,49 @@ The configuration should be created _after_ installing the agent, otherwise the 
     secretAccessKey: # Secret Access Key
   ```
 
-  For a standard AWS S3 bucket, that looks like this:
+  </TabItem>
+
+  <TabItem value="git" label="Git repository">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: GitStateStore
+    url: # address
+    branch: # optional (default: main)
+    authMethod: # basicAuth (default)
+    secretName: <secret name>
+    path: # path within the repository; optional
+    destinationName: # optional; see "Running the agent on multiple Destinations"
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: <secret name>
+    namespace: k8s-health-agent-system
+  stringData:
+    # for basicAuth
+    username: # username
+    password: # password / API Token
+  ```
+
+  </TabItem>
+</Tabs>
+
+:::warning
+
+The configuration should be created _after_ installing the agent, otherwise the namespace will not exist.
+
+:::
+
+#### Examples
+
+<Tabs className="boxedTabs" groupId="healthStateStoreExample">
+  <TabItem value="s3" label="S3-compatible">
 
   ```yaml
   apiVersion: v1
@@ -194,7 +229,7 @@ The configuration should be created _after_ installing the agent, otherwise the 
     stateStoreKind: BucketStateStore
     endpoint: s3.<AWS_REGION>.amazonaws.com
     bucketName: <BUCKET_NAME>
-    authMethod: accessKey # use IAM instead to take the pod's instance identity
+    authMethod: accessKey
     secretName: health-store-credentials
     path: health
     destinationName: <DESTINATION_NAME>
@@ -209,16 +244,11 @@ The configuration should be created _after_ installing the agent, otherwise the 
     secretAccessKey: <YOUR_SECRET_ACCESS_KEY>
   ```
 
-  With `authMethod: IAM` the agent uses the ambient instance identity and the Secret is not
-  needed at all.
+  With `authMethod: IAM` the agent uses the ambient instance identity and needs no Secret.
 
   </TabItem>
 
   <TabItem value="azure" label="Azure Blob Storage">
-
-  Set `provider: azure`. The `endpoint` becomes the storage-account URL, `bucketName`
-  becomes the container, and the only supported `authMethod` is `sharedKey`, whose Secret
-  holds a single `accountKey`:
 
   ```yaml
   apiVersion: v1
@@ -229,31 +259,29 @@ The configuration should be created _after_ installing the agent, otherwise the 
   data:
     stateStoreKind: BucketStateStore
     provider: azure
-    endpoint: https://<account>.blob.core.windows.net # the storage-account URL
-    bucketName: # the container name
+    endpoint: https://<ACCOUNT>.blob.core.windows.net
+    bucketName: <CONTAINER_NAME>
     authMethod: sharedKey
-    secretName: <secret name>
-    path: # path within the container; optional
-    destinationName: # optional; see "Running the agent on multiple Destinations"
+    secretName: health-store-credentials
+    path: health
+    destinationName: <DESTINATION_NAME>
   ---
   apiVersion: v1
   kind: Secret
   metadata:
-    name: <secret name>
+    name: health-store-credentials
     namespace: k8s-health-agent-system
   stringData:
-    accountKey: # the storage-account key
+    accountKey: <YOUR_STORAGE_ACCOUNT_KEY>
   ```
 
   :::warning
 
   Storage accounts with **hierarchical namespace (HNS / ADLS Gen2)** enabled are not
-  supported. Use a standard blob storage account.
+  supported. Use a standard blob storage account. Azure Blob Storage also needs SKE Health
+  Agent v0.14.0 or above, the release that adds the Azure writer.
 
   :::
-
-  Azure Blob Storage needs SKE Health Agent v0.14.0 or above, the release that adds the
-  Azure writer.
 
   </TabItem>
 
@@ -267,20 +295,21 @@ The configuration should be created _after_ installing the agent, otherwise the 
     namespace: k8s-health-agent-system
   data:
     stateStoreKind: GitStateStore
-    url: # address
-    secretName: <secret name>
-    branch: # optional (default: main)
-    destinationName: # optional; see "Running the agent on multiple Destinations"
+    url: <REPOSITORY_URL>
+    branch: main
+    authMethod: basicAuth
+    secretName: health-store-credentials
+    path: health
+    destinationName: <DESTINATION_NAME>
   ---
   apiVersion: v1
   kind: Secret
   metadata:
-    name: <secret name>
+    name: health-store-credentials
     namespace: k8s-health-agent-system
   stringData:
-    # for basicAuth
-    username: # username
-    password: # password / API Token
+    username: <YOUR_USERNAME>
+    password: <YOUR_PASSWORD_OR_API_TOKEN>
   ```
 
   :::note
@@ -295,9 +324,8 @@ The configuration should be created _after_ installing the agent, otherwise the 
 
 ### Set up the HealthSource on the Platform
 
-This is the other half of the handover, and it is only needed if you want the SKE Platform
-Manager to read the records rather than running a GitOps agent on the Platform. Skip it if
-a GitOps agent already syncs your health records.
+If you're using S3-Compatible Buckets or Blob Storage, you need to configure the SKE
+Platform Manager to read the records rather than running a GitOps agent.
 
 A `HealthSource` names one place to read from: one bucket, one prefix, one credential. It is
 cluster-scoped, and it belongs on the **Platform** cluster, not the Destination. Create it
