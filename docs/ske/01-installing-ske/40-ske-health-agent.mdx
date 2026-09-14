@@ -516,7 +516,33 @@ state store manually.
 
 A Platform cluster with three Destinations registered in Kratix as `dev`, `prod` and `test`.
 All three run the SKE Health Agent, and all three write to the same bucket under the same
-`health` prefix. `destinationName` is what keeps their records apart.
+`health` prefix.
+
+```mermaid
+flowchart LR
+    subgraph destinations[Destinations]
+        dev[dev agent]
+        prod[prod agent]
+        test[test agent]
+    end
+
+    bucket[("kratix<br/>health/")]
+
+    subgraph platform[Platform]
+        source[HealthSource<br/>all-destinations]
+        status[Resource<br/>status.healthStatus]
+    end
+
+    dev -->|redis-default-example-dev-abc12.yaml| bucket
+    prod -->|redis-default-example-prod-de34f.yaml| bucket
+    test -->|redis-default-example-test-5678g.yaml| bucket
+    bucket --> source --> status
+
+    style source fill:#9B59D026,stroke:#9B59D0,stroke-width:2px
+```
+
+`destinationName` is the part of each file name that keeps the three apart. Without it all
+three agents write `redis-default-example-<hash>.yaml` and overwrite one another.
 
 <Tabs className="boxedTabs" groupId="multiDestination">
   <TabItem value="dev" label="dev Destination">
@@ -604,33 +630,6 @@ spec:
 
 A resource checked on more than one Destination now shows one record per Destination in its
 `status.healthStatus`, and the worst state across them wins.
-
-```mermaid
-flowchart LR
-    subgraph destinations[Destinations]
-        dev[dev agent]
-        prod[prod agent]
-        test[test agent]
-    end
-
-    bucket[("kratix<br/>health/")]
-
-    subgraph platform[Platform]
-        source[HealthSource<br/>all-destinations]
-        status[Resource<br/>status.healthStatus]
-    end
-
-    dev -->|redis-default-example-dev-abc12.yaml| bucket
-    prod -->|redis-default-example-prod-de34f.yaml| bucket
-    test -->|redis-default-example-test-5678g.yaml| bucket
-    bucket --> source --> status
-
-    style source fill:#9B59D026,stroke:#9B59D0,stroke-width:2px
-```
-
-`destinationName` is the part of each file name that keeps the three apart. Without it all
-three agents write `redis-default-example-<hash>.yaml` and overwrite one another.
-
 :::note One source, or one per Destination?
 
 Sharing a prefix means one `HealthSource` and one credential for the whole fleet, which is
