@@ -25,6 +25,20 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+## [0.2.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/v0.2.4/) (2026-09-15)
+
+### Features
+
+* Added opt-in per-caller Kubernetes authorization for OIDC deployments. Promise request operations can now run as the verified human or machine caller, allowing Kubernetes Roles and RoleBindings to control who may read or create requests.
+* Added configurable identity prefixes, group claims and group allowlists, with separate mappings for human and machine callers.
+* Added access-review-backed namespace filtering and clear permission errors when Kubernetes denies an operation.
+* Added full caller attribution to submitted requests and Kubernetes Events.
+
+### Upgrade Notes
+
+* The feature is disabled by default, so existing shared-token and OIDC installations retain their current authorization behaviour until impersonation is enabled.
+* Helm users should upgrade to `ske-mcp-server` chart `1.1.0`. See [Enable per-caller RBAC](/ske/integrations/mcp#enable-per-caller-rbac) for the required settings and Kubernetes permissions.
+
 ## [0.2.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/v0.2.3/) (2026-08-18)
 
 ### Features
