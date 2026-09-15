@@ -619,16 +619,17 @@ with it.
 
 :::
 
-The deletion above — of the Application or Kustomization that was carrying health records
-onto the Platform — can leave two things behind, and they are not equally important.
+The deletion Application or Kustomization that was carrying health records onto 
+the Platform can leave two things behind:
 
-**`HealthRecord` objects the deleted sync failed to prune are still live state.** They sit on the
+**`HealthRecord` objects the deleted sync failed to prune**: they sit on the
 Platform, Kratix still counts them towards the resource's health, and each is frozen at the
 last state it reported — one that froze on `unhealthy`
 [keeps the resource reading unhealthy](#the-overlap-window) however healthy the new path
-says it is. This is what the list-and-delete above removes. Do it now, not later.
+says it is. This is what the list-and-delete above removes. Make sure to remove
+them as part of this migration.
 
-**Record files in the old State Store are dead weight.** The Git repository (or bucket) you
+**Record files in the old State Store**: The Git repository (or bucket) you
 migrated away from still holds the files the agent used to write there. Nothing carries
 them onto the Platform any more, and the agent stopped touching them in Step 1, so they
 affect nothing. Delete them whenever convenient — on Git, one last commit removing the
