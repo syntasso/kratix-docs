@@ -7,12 +7,13 @@ id: healthsource
 
 # Health Source
 
-The Health Source Custom Resource Definition (CRD) tells the SKE Platform Manager where to read
-Health Records from: one bucket, one prefix, one credential. It is the alternative to a GitOps
-agent syncing the same records.
+The Health Source Custom Resource Definition (CRD) tells the SKE Platform
+Manager where to read Health Records from: one bucket, one prefix, one
+credential. It is the alternative to a GitOps agent syncing the same records.
 
-It is **cluster-scoped**, and it is not a Destination: one source may carry records from many
-Destinations, which stay distinct because their object keys differ.
+It is **cluster-scoped**, and it is not a Destination: one source may carry
+records from many Destinations, which stay distinct because their object keys
+differ.
 
 ```yaml
 apiVersion: platform.syntasso.io/v1alpha1
@@ -82,12 +83,13 @@ Every `HealthRecord` the reader applies carries:
 | `platform.syntasso.io/object-key` (annotation) | The object key the record was read from, relative to `spec.path`. |
 | `platform.syntasso.io/object-revision` (annotation) | The revision that was read, which is how the reader decides whether to fetch again. |
 
-Each record is also owned by its `HealthSource`, so deleting the source garbage collects every
-record it applied.
+Each record is also owned by its `HealthSource`, so deleting the source garbage
+collects every record it applied.
 
 ## Setting one up
 
-To configure a Health Source, see
-[Set up the HealthSource on the Platform](/ske/installing-ske/ske-health-agent#set-up-the-healthsource-on-the-platform).
-To move an existing Destination off a GitOps sync onto a bucket without a gap in health, see
-[Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+To configure a Health Source, see [Set up the HealthSource on the
+Platform](/ske/installing-ske/ske-health-agent#set-up-the-healthsource-on-the-platform).
+To move an existing Destination off a GitOps sync onto a bucket without a gap in
+health, see [Move health records onto a
+bucket](/ske/guides/health-records-from-a-bucket).
