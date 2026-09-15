@@ -36,7 +36,7 @@ For more advanced or production-ready customization, see the [Configuring Backst
 Before you begin, ensure you have:
 
 - A running **Kubernetes cluster**
-- Access to an **S3-compatible bucket** (e.g., MinIO, GCS, or S3)
+- Access to an **S3-compatible bucket** (e.g., SeaweedFS, GCS, or S3)
 
 ---
 
@@ -99,7 +99,7 @@ data:
           secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
           # OPTIONAL: Modify to match the endpoint for your S3 compatible bucket.
           # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/preconfigured-install
-          endpoint: 'http://minio.kratix-platform-system.svc.cluster.local'
+          endpoint: 'http://bucket.seaweedfs.svc.cluster.local'
           s3ForcePathStyle: true
     techdocs:
       builder: "local"
@@ -139,7 +139,7 @@ data:
             - allow: [User, Group]
       providers:
         awsS3:
-          kratix-minio:
+          kratix-bucket:
           # OPTIONAL: Modify to match your bucket name and configuration.
           # The default setting works with the Kratix quickstart setup: https://docs.kratix.io/ske/installing-ske/preconfigured-install
             bucketName: kratix
@@ -215,14 +215,14 @@ spec:
             secretKeyRef:
               # OPTIONAL: Modify to match the secret for access to your bucket.
               # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/preconfigured-install
-              name: minio-credentials
+              name: bucket-credentials
               key: accessKeyID
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
               # OPTIONAL: Modify to match the secret for access to your bucket.
               # The default setting works with the Kratix quick start setup: https://docs.kratix.io/ske/installing-ske/preconfigured-install
-              name: minio-credentials
+              name: bucket-credentials
               key: secretAccessKey
         - name: SA_TOKEN
           valueFrom:

@@ -77,16 +77,16 @@ spec:
                   - name: MINIO_ENDPOINT
                     valueFrom:
                       secretKeyRef:
-                        name: app-promise-minio-creds
+                        name: app-promise-bucket-creds
                         key: endpoint
                   - name: MINIO_USER
                     valueFrom:
                       secretKeyRef:
-                        name: app-promise-minio-creds
+                        name: app-promise-bucket-creds
                         key: username
                   - name: MINIO_PASSWORD
                     valueFrom:
                       secretKeyRef:
-                        name: app-promise-minio-creds
+                        name: app-promise-bucket-creds
                         key: password
 status: {}

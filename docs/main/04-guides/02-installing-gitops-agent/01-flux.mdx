@@ -46,16 +46,16 @@ resource depending on the type of state store you are using.
 
 <Tabs className="boxedTabs" groupId="stateStore">
 
-  <TabItem value="minio" label="Bucket (on KinD)">
+  <TabItem value="bucket" label="Bucket (on KinD)">
 
-    Create a `flux-statestore.yaml` for giving Flux access to the Minio
-    bucket. Below is an example of a `Bucket` configured to talk to a MinIO
+    Create a `flux-statestore.yaml` for giving Flux access to the SeaweedFS
+    bucket. Below is an example of a `Bucket` configured to talk to a SeaweedFS
     instance running locally. For more information on the different
     configuration and authentication options for the `Bucket` resource, see the
     [FluxCD docs](https://fluxcd.io/flux/components/source/buckets/).
 
     :::info
-    This example depends on a secret called `minio-credentials` existing in the
+    This example depends on a secret called `bucket-credentials` existing in the
     `flux-system` namespace. This is only necessary if the repository is private
     and there are a number of authentication options described in the
     [FluxCD docs](https://fluxcd.io/flux/components/source/gitrepositories/#secret-reference).
@@ -75,12 +75,12 @@ resource depending on the type of state store you are using.
       endpoint: 172.18.0.2:31337
       insecure: true
       secretRef:
-        name: minio-credentials
+        name: bucket-credentials
     ---
     apiVersion: v1
     kind: Secret
     metadata:
-      name: minio-credentials
+      name: bucket-credentials
       namespace: flux-system
     type: Opaque
     stringData:

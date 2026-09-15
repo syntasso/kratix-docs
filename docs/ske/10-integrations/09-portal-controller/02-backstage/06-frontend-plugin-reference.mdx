@@ -710,6 +710,114 @@ setter, and current Resource data. Most applications should use
 />
 ```
 
+## Scaffolder field extensions
+
+The package also exports [custom field
+extensions](https://backstage.io/docs/features/software-templates/writing-custom-field-extensions)
+for use on Template forms, selected with `ui:field` on a property.
+
+### `ScopedEntityPicker`
+
+`ScopedEntityPicker` is an extension of Backstage's
+[EntityPicker](https://backstage.io/docs/features/software-templates/ui-options-examples/#entitypicker)
+whose `catalogFilter` may reference other fields of the same form, so one choice
+narrows the next.
+
+In this example the System field is an ordinary `EntityPicker`, and the Service
+field offers only the services within the System that was picked:
+
+```yaml
+- title: Specification
+  properties:
+    spec:
+      properties:
+        system:
+          type: string
+          title: System
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: System
+        targetService:
+          type: string
+          title: Service
+          ui:field: ScopedEntityPicker
+          ui:options:
+            catalogFilter:
+              kind: Component
+              relations.partOf: '{{ parameters.spec.system }}'
+```
+
+
+`ScopedEntityPicker` accepts every `ui:options` keys the `EntityPicker` does, such as
+`defaultKind`, `defaultNamespace` and `allowArbitraryValues`, and passes them
+through unchanged. Only `catalogFilter` is treated specially.
+
+#### Resolving the filter
+
+Any string in `catalogFilter`, at any depth and inside lists, may contain
+`{{ parameters.<path> }}`. The path is read from the form data accumulated
+across every step so far, so a reference may point at a field on an earlier
+page or on the same one.
+
+Resolution is all-or-nothing: if any reference in the filter resolves to
+nothing, the field renders as a disabled input, still showing any value it holds.
+
+A `catalogFilter` with no references in it behaves exactly like `EntityPicker`.
+
+#### Behaviour when the referenced field changes
+
+- The picker re-queries the catalogue whenever the resolved filter changes, and
+  offers the new scope's entities.
+- A selection already made is **kept** if it is in the new scope, and **cleared**
+  if the catalogue read for the new scope comes back without it. Values are
+  compared as entity references, honouring `defaultKind` and `defaultNamespace`
+  and ignoring case, so `payments-api` and
+  `component:default/payments-api` are the same selection.
+
+The field behaves the same way on the create form and on the [Manage
+tab](#resource-manage).
+
+#### Choosing a filter key
+
+Any entity field or relation can be a filter key. Where a key holds a list, matching means "contains". Keys and values are matched case-insensitively.
+
+Besides keys over the `spec`, you can also use `relations.partOf`. The common relations on a Component are:
+
+| `spec` field | Relation |
+|---|---|
+| `spec.owner` | `relations.ownedBy` |
+| `spec.system` | `relations.partOf` |
+| `spec.subcomponentOf` | `relations.partOf` |
+| `spec.dependsOn` | `relations.dependsOn` |
+| `spec.providesApis` | `relations.providesApi` |
+| `spec.consumesApis` | `relations.consumesApi` |
+
+See [well-known
+relations](https://backstage.io/docs/features/software-catalog/well-known-relations)
+for the full list.
+
+
+#### Registering the field
+
+Applications on Backstage's new frontend system need no wiring: the
+[`/alpha` entry point](#new-frontend-system-entry-point) registers the field,
+and the Manage tab already includes it.
+
+On the legacy frontend system, register it in your app's scaffolder route
+alongside any other custom fields:
+
+```tsx
+import { ScopedEntityPickerFieldExtension } from '@syntasso/plugin-ske-frontend';
+import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
+
+<Route path="/create" element={<ScaffolderPage />}>
+  <ScaffolderFieldExtensions>
+    <ScopedEntityPickerFieldExtension />
+  </ScaffolderFieldExtensions>
+</Route>;
+```
+
 ## Plugin integration
 
 The package also exports values for integrating the plugin with Backstage's

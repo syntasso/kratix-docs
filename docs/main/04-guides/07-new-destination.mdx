@@ -59,7 +59,7 @@ Kratix reconcile the system. For that, you need to first create the new
 Kubernetes cluster:
 
 ```bash
-kind create cluster --image kindest/node:v1.27.3 --name worker-2
+kind create cluster --image kindest/node:v1.33.1 --name worker-2
 export WORKER_2="kind-worker-2"
 ```
 
@@ -93,7 +93,7 @@ spec:
     kind: BucketStateStore
 ```
 
-The Destination will use the pre-existing MinIO [State Store](/main/reference/statestore/intro).
+The Destination will use the pre-existing SeaweedFS [State Store](/main/reference/statestore/intro).
 Apply the Destination document to the platform cluster:
 
 ```bash

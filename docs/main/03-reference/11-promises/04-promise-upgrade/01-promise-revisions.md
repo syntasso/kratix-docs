@@ -83,6 +83,28 @@ installed Promise.
 
 :::
 
+## Overriding the reconciliation interval
+
+A Promise author sets the
+[reconciliation interval](/main/reference/workflows#reconciliation-interval) in the Promise
+spec, which Kratix snapshots into each Promise Revision. A platform engineer can override
+that snapshot for a single revision, without publishing a new Promise version, with the
+`kratix.io/reconciliation-interval` annotation:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: PromiseRevision
+metadata:
+  name: redis-abcde
+  annotations:
+    kratix.io/reconciliation-interval: 30m
+```
+
+The annotation applies to the Promise (when the revision is `latest`) and to every Resource
+bound to the revision. Its value is a Go duration string of at least `1m`; unparseable or
+sub-minute values are rejected when the annotation is set or changed, and Kratix falls back
+to the revision's spec snapshot.
+
 ## Deleting a Promise Revision
 
 Upon initiating the deletion of a Promise Revision, the Resource Requests created from that Promise Revision will be

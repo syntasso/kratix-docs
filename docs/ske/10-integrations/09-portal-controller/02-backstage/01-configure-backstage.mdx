@@ -85,16 +85,34 @@ Two packages, one for each half of Backstage:
 
 ```bash
 yarn add @syntasso/plugin-ske-backend --cwd packages/backend
-yarn add @syntasso/plugin-ske-frontend --cwd packages/app
+yarn add @syntasso/plugin-ske-frontend @backstage/plugin-permission-react --cwd packages/app
 ```
 
-If you are using Spotify Portal for Backstage, follow the [Spotify Portal installation guide](./air-gapped-plugins) to publish the plugins to your cloud instance before continuing.
+:::note Peer dependencies (`v0.21.1` and later)
+From `@syntasso/plugin-ske-frontend` `v0.21.1`, the packages the frontend plugin
+shares with the host app (`@backstage/plugin-catalog`, `@backstage/plugin-catalog-graph`,
+`@backstage/plugin-catalog-react`, `@backstage/plugin-scaffolder`,
+`@backstage/plugin-scaffolder-react` and `@backstage/plugin-permission-react`) are
+declared as **peer dependencies**, so your app must provide them. Most already ship
+with a standard Backstage app; the one that usually does not is
+`@backstage/plugin-permission-react`, which is why it is added explicitly above.
+
+Yarn does not fail the install over a missing peer — it prints a warning
+(`YN0002: … doesn't provide @backstage/plugin-permission-react`) and `yarn install`
+still completes, so it is easy to miss until the app fails to build against the absent
+package.
+:::
 
 :::important
 `@syntasso/plugin-ske-backend` must be at least `v0.21.0`, and `@syntasso/plugin-ske-frontend` at
 least `v0.18.0`. Earlier backend versions do not provide the action that
 [pull-request mode](./delivery-modes) uses to record a request, so a submission opens the pull
 request and then fails.
+:::
+
+:::warning Spotify Portal for Backstage
+If you are using Spotify Portal for Backstage, publish the plugins to your cloud instance before
+completing the install — see the [Spotify Portal installation guide](./air-gapped-plugins).
 :::
 
 ### Backend

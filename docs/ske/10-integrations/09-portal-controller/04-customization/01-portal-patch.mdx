@@ -18,8 +18,8 @@ being present.
 Use it because it saves you writing a script, not because you have to.
 :::
 
-For the common cases, setting an owner, adding tags, removing a form field, reshaping a Cortex
-workflow, a recipe is shorter than the equivalent script, is order-independent, and fails loudly
+For the common cases, setting an owner, adding tags, removing a form field, adding a step beside
+an existing one, reshaping a Cortex workflow, a recipe is shorter than the equivalent script, is order-independent, and fails loudly
 instead of silently producing the wrong document. For anything it cannot express, write your own
 container as described in [Customization](../customization).
 
@@ -121,6 +121,7 @@ document that looks fine and is wrong.
 | Use a recipe when | Write your own container when |
 |---|---|
 | Setting or removing fields on the generated documents | You need to read the parent object to derive a value |
+| Adding a step, link or workflow input beside an existing one | You need to build a list whose contents depend on the request |
 | Adding or replacing tags, owners, lifecycle, titles | You need to call an external service |
 | Removing or reshaping a form field on a Backstage Template | You need logic a declarative patch cannot express |
 | Projecting an entity attribute in a Cortex workflow | You are generating entirely new files |

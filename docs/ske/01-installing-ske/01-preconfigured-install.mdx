@@ -44,7 +44,7 @@ before continuing.
 
 If you're working in a shared or production-like environment, see the full
 [installation guide](/ske/installing-ske/intro) to avoid configuration
-conflicts. The  preconfigured installation deploys a local, insecure MinIO instance—intended
+conflicts. The  preconfigured installation deploys a local, insecure SeaweedFS instance—intended
 only for local development.
 
 ## Installation
@@ -146,7 +146,6 @@ NAME                                                       READY   STATUS      R
 backstage-84c6c6bc97-x9vp4                                 1/1     Running     0          48s
 backstage-controller-controller-manager-59f5dc86fd-dd8d7   1/1     Running     0          88s
 kratix-platform-controller-manager-57865f86c5-lp8bm        1/1     Running     0          88s
-minio-6c6bdc6456-hkw86                                     1/1     Running     0          88s
 ske-quick-start-installer-fmfbq                            0/1     Completed   0          113s
 
 ```
@@ -351,7 +350,7 @@ GitOps repository. In this case the workflow for the PostgreSQL Promise was
 quite simple, it took the users input and used this to generate the required
 Kubernetes resources to create the PostgreSQL instance. Those resources were
 then scheduled to the Platform via the GitOps repo (in this simple scenario, an
-in-cluster s3 compatible bucket using MinIO).
+in-cluster s3 compatible bucket using SeaweedFS).
 
 You can see the workflows that were run by inspecting the Pods:
 ```bash

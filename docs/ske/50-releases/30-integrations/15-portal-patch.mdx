@@ -36,6 +36,20 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#portal-p
 
 ## Release Notes
 
+### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#portal-patch/v0.8.0/) (2026-08-28)
+
+#### Features
+
+* **Insert list items relative to existing content.** The new `insertBefore` and `insertAfter`
+operations add an item beside an anchor selected by key, without restating the generated array.
+Use them to add scaffolder steps, catalogue links, or workflow inputs. See
+[`insertBefore` and `insertAfter`](/ske/integrations/portal-controller/portal-patch/recipe-reference#insertbefore-and-insertafter).
+
+#### Bug Fixes
+
+* `singleSpecPage` now works in `pull-request` delivery mode. It preserves non-specification pages,
+including Repository & Credentials, and collapses only the specification pages.
+
 ### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#portal-patch/v0.7.0/) (2026-07-30)
 
 The first release of Portal Patch.

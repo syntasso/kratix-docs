@@ -43,7 +43,7 @@ Kubernetes distribution including:
 
 If you're working in a shared or production-like environment, see the full
 [installation guide](/category/installing-kratix) to avoid configuration conflicts. The
-quick start deploys a local, insecure MinIO instance—intended only for local development.
+quick start deploys a local, insecure SeaweedFS instance—intended only for local development.
 
 ## Installation
 
@@ -67,10 +67,10 @@ quick-start that uses a single job to install Kratix with sensible defaults.
       Kratix webhooks
   1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/platform-concepts/kratix-resources)
       in the `kratix-system` namespace
-  1. Deploys [**MinIO**](https://min.io/), a local S3-compatible bucket for storing
+  1. Deploys [**SeaweedFS**](https://github.com/seaweedfs/seaweedfs), a local S3-compatible bucket for storing
       declarative workloads
   1. Installs and configures [**Flux**](https://fluxcd.io/) to apply changes from the
-      MinIO bucket via GitOps
+      SeaweedFS bucket via GitOps
   1. Registers your Kubernetes cluster as a [**Destination**](https://docs.kratix.io/main/reference/destinations/intro)
       so Kratix can schedule workloads to it
 </details>
@@ -243,7 +243,7 @@ GitOps repository. In this case the workflow for the PostgreSQL Promise was
 quite simple, it took the users input and used this to generate the required
 Kubernetes resources to create the PostgreSQL instance. Those resources were
 then scheduled to the Platform via the GitOps repo (in this simple scenario, an
-in-cluster s3 compatible bucket using MinIO). GitOps can take some time to
+in-cluster s3 compatible bucket using SeaweedFS). GitOps can take some time to
 sync, so it may take up to a minute or two before you see the Pod for the
 PostgreSQL instance
 

@@ -1,5 +1,5 @@
 Following the previous step of this tutorial, you should now
-have a deployment of both Kratix and MinIO running on your platform cluster
+have a deployment of both Kratix and SeaweedFS running on your platform cluster
 with no installed Promises.
 
 You should also have two environment variables, `PLATFORM` and `WORKER`.
@@ -18,11 +18,21 @@ The above command will give an output similar to:
 ```shell-session
 NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
 kratix-platform-controller-manager   1/1     1            1           1h
-minio                                1/1     1            1           1h
+```
+
+SeaweedFS runs in its own namespace, so check it separately:
+
+```bash
+kubectl --context $PLATFORM get deployments --namespace seaweedfs
+```
+
+```shell-session
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+seaweedfs   1/1     1            1           1h
 ```
 
 You should also have a State Store created and configured to point to the
-`kratix` bucket on MinIO. Verify the `bucketstatestores`:
+`kratix` bucket on SeaweedFS. Verify the `bucketstatestores`:
 
 ```bash
 kubectl --context $PLATFORM get bucketstatestores.platform.kratix.io

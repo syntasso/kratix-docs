@@ -29,8 +29,8 @@ patch:                 # required for merge, forbidden for every other op
 | `target.kind` | string | all | Selects the document whose top-level `kind` matches. Mutually exclusive with `target.file`. |
 | `target.file` | string | all | Selects a single-document file by bare filename. Mutually exclusive with `target.kind`. |
 | `target.list` | object or list | all | Selects an item, or a chain of nested items, within the document. |
-| `op` | string | all | `merge` (default), `remove`, `singleSpecPage`, `cortexEntityProjection`, `hideNamespaceManifest`. |
-| `patch` | map | `merge` | The changes to merge. Required for `merge`, rejected for every other operation. |
+| `op` | string | all | `merge` (default), `remove`, `insertBefore`, `insertAfter`, `singleSpecPage`, `cortexEntityProjection`, `hideNamespaceManifest`. |
+| `patch` | map | `merge`, `insertBefore`, `insertAfter` | The changes to merge, or the item to insert. Required for `merge`, `insertBefore` and `insertAfter`, rejected for every other operation. |
 | `field` | string | `cortexEntityProjection`, `hideNamespaceManifest` | Dot-separated path to a string field inside the selected item. |
 | `sourceAction` | string | `cortexEntityProjection` | The Cortex action producing the output. |
 | `outputKey` | string | `cortexEntityProjection` | The output key on that action. |
@@ -102,6 +102,10 @@ target:
       value: app
 ```
 
+The operation applies to the item the **last** selector names; every selector before it only
+descends. For `insertBefore` and `insertAfter`, that last item is the anchor, and the new item
+joins the list holding it.
+
 ## Operations
 
 ### `merge` (default)
@@ -157,6 +161,28 @@ op: remove
 ```
 
 To remove a field *within* an item rather than the item itself, use a `merge` with a `null` value.
+
+### `insertBefore` and `insertAfter`
+
+Adds `patch` to the selected list as a new item, immediately before or after the item the selector
+resolved to. The two operations differ in nothing else. Both require `target.list`, naming the
+**anchor** the new item sits beside, and a `patch`, which is the item to insert.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.steps
+    key: id
+    value: ske-configure-resource
+op: insertAfter
+patch:
+  id: notify
+  name: Notify the team
+  action: ske:notify
+  input:
+    message: a resource was requested
+```
 
 ### `singleSpecPage`
 
@@ -250,6 +276,9 @@ The common ones:
 | `list selector key=K value=V is ambiguous` | More than one item matches |
 | `target.list path "P": "S" not found` | A path segment does not exist |
 | `missing or empty patch` | A `merge` recipe with no `patch` |
+| `op: insertBefore requires target.list` | An insert with no anchor |
+| `op: insertAfter requires a patch (the item to insert)` | An insert with nothing to insert |
+| `patch sets K: "V", the same key and value the anchor selector matches` | The inserted item duplicates the anchor's own selector key and value |
 | `unknown op "X"` | Misspelled operation |
 | `field "F" has no ... placeholder` | The field exists but does not contain the expected placeholder |
 
@@ -262,6 +291,8 @@ generate stage wrote them.
 |---|---|---|
 | `merge` | yes | yes |
 | `remove` | yes | yes |
+| `insertBefore` | yes | yes |
+| `insertAfter` | yes | yes |
 | `singleSpecPage` | yes | no |
 | `hideNamespaceManifest` | yes, `push` mode only | no |
 | `cortexEntityProjection` | no | yes |

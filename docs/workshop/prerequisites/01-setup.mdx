@@ -39,8 +39,11 @@ tools:
 
    :::
 
-1. `mc` / **MinIO Client**: <br /> The CLI for MinIO&mdash;allows you to run commands against MinIO clusters. <br
-   /> See [the install guide](https://docs.min.io/community/minio-object-store/).
+1. An **S3 CLI** for inspecting the state store bucket: <br /> the Kratix repository ships one,
+   so there is nothing to install separately&mdash;`make s5cmd-cli` puts a preconfigured
+   [`s5cmd`](https://github.com/coreweave/s5cmd) at `bin/s5cmd`, already pointed at the local
+   bucket (the next page adds it to your `PATH` so the workshops can call `s5cmd` directly). <br /> If you would rather use your own S3 client, `make bucket-env` prints the
+   endpoint and credentials to export.
 
 1. `git` / **Git**: <br /> The CLI for Git&mdash;allows you to clone the Kratix repository. <br
    /> See [the install guide](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
