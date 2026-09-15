@@ -238,7 +238,6 @@ travel down the same path it always does.
     secretName: health-store-writer # required for accessKey
     path: health/worker-1 # the prefix this Destination writes under
     destinationName: worker-1 # see the warning below
-    insecure: "true" # only for a store that speaks plain HTTP; omit otherwise
   ---
   apiVersion: v1
   kind: Secret
@@ -347,7 +346,6 @@ single Destination's health path fail on its own rather than taking the fleet's 
       endpoint: # same endpoint the agent writes to, without a scheme
       bucketName: # same bucket
       authMethod: accessKey # or IAM
-      insecure: true # only for a store that speaks plain HTTP; omit otherwise
       secretRef:
         name: health-store-reader-worker-1
         namespace: default
