@@ -39,6 +39,8 @@ The MCP server is an OAuth 2.1 resource server. Configure your identity provider
 - A group-membership claim if you bind Kubernetes RBAC to groups
 - The scopes needed by each user: `promises:read`, `requests:read`, `requests:write` and `destinations:read`
 
+For human callers, the server uses every value in the configured group claim. It does not filter a broader directory group list down to Kubernetes-specific groups. Configure the identity provider to emit a dedicated claim if users belong to groups that the server should not pass to Kubernetes.
+
 The identity provider must support the OAuth authorisation-code flow used by your MCP clients. If clients register themselves, it must also support Dynamic Client Registration or provide an equivalent process for registering them.
 
 Configure the Deployment with at least:

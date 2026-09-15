@@ -1,6 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 340" role="img"
      aria-label="A caller authenticates to their identity provider. The MCP server verifies the caller's token, then impersonates that caller when calling the Kubernetes API. A caller whose group matches a RoleBinding reaches a Role and gets its permissions. A caller with no matching RBAC binding for either their username or their group reaches nothing and gets no permissions, even though the server treated both callers identically.">
-  <rect width="1240" height="340" fill="#ffffff" />
+  <rect id="bg" width="1240" height="340" fill="#ffffff" />
+
+  <style>
+    @media (prefers-color-scheme: dark) {
+      #bg                 { fill: #1e2027; }
+      [fill="#1c1e26"]    { fill: #e6e6e9; }
+      [fill="#565b6b"]    { fill: #a8aebd; }
+      [stroke="#565b6b"]  { stroke: #a8aebd; }
+      [fill="#ffffff"]    { fill: #24262e; }
+      [stroke="#d7d7d2"]  { stroke: #4a4d59; }
+      [fill="#e8eafb"]    { fill: #2a2d52; }
+      [stroke="#4453c7"]  { stroke: #8f9bf0; }
+      [fill="#e5f4ec"]    { fill: #17362a; }
+      [stroke="#1f8a5f"]  { stroke: #4fc08a; }
+      [fill="#1f8a5f"]    { fill: #4fc08a; }
+      [fill="#f6e9de"]    { fill: #3b2a1c; }
+      [stroke="#b4622a"]  { stroke: #e0925c; }
+      [fill="#b4622a"]    { fill: #e0925c; }
+    }
+  </style>
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
