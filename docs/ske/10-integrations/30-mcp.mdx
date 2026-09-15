@@ -20,39 +20,73 @@ Platform teams deploy the server once. Users register it with their AI client of
 
 ## Prerequisites
 
-To get started, you will need a [Syntasso registry token](../reference/tokens#syntasso-registry-token). You can request a token via the [Syntasso](https://www.syntasso.io/pricing) website by clicking the "Try SKE Today" button.
-
-In addition:
-
-- An MCP-compatible AI client installed on user machines (see [Connecting users](#connecting-users) for examples)
+- A [Syntasso registry token](../reference/tokens#syntasso-registry-token)
 - A Kubernetes cluster running Kratix
-- The published server image at `ghcr.io/syntasso/ske-mcp-server:latest`
+- A public HTTPS URL for the MCP endpoint
+- An OpenID Connect (OIDC) identity provider that can issue access tokens to your MCP clients
+- An MCP-compatible AI client on each user's machine
 
 ## Deploying the server
 
 The server must run on the **same cluster as Kratix**, where it can reach the Kratix API resources directly. It deploys into the `kratix-platform-system` namespace alongside the Kratix platform components.
 
-Apply the manifests from the release and create the auth secret:
+### Configure OIDC
+
+The MCP server is an OAuth 2.1 resource server. Configure your identity provider to issue signed access tokens with:
+
+- An audience matching the server's canonical MCP URL, for example `https://mcp.example.com/mcp`
+- A stable subject claim for each person
+- A group-membership claim if you bind Kubernetes RBAC to groups
+- The scopes needed by each user: `promises:read`, `requests:read`, `requests:write` and `destinations:read`
+
+The identity provider must support the OAuth authorisation-code flow used by your MCP clients. If clients register themselves, it must also support Dynamic Client Registration or provide an equivalent process for registering them.
+
+Configure the Deployment with at least:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `OIDC_ISSUER` | Exact HTTPS issuer URL for accepted tokens | Required |
+| `MCP_RESOURCE_URL` | Public HTTPS URL of this server's `/mcp` endpoint and its expected token audience | Required |
+| `OIDC_GROUPS_CLAIM` | Token claim containing the caller's groups | `groups` |
+| `IMPERSONATION_USER_PREFIX` | Prefix added to human identities before Kubernetes sees them | `mcp:user:` |
+| `IMPERSONATION_GROUP_PREFIX` | Prefix added to token groups before Kubernetes sees them | Empty |
+
+Your identity provider may require additional configuration, such as an audience mapper or a rule that identifies machine clients correctly.
+
+### Enable per-caller RBAC
+
+If you install with the `ske-mcp-server` Helm chart, per-caller authorisation is opt-in. Configure the effective group names that the server may impersonate:
+
+```yaml
+rbac:
+  impersonation:
+    enabled: true
+    groupPrefix: "mcp:group:"
+    groupAllowlist:
+      - "mcp:group:platform-viewers"
+```
+
+The release manifests under `deploy/kubernetes/` already grant the server permission to impersonate users and an explicit allowlist of groups. Edit that group allowlist to match your identity provider before applying the manifests:
 
 ```bash
 kubectl apply -f deploy/kubernetes/
-kubectl create secret generic ske-mcp-server-auth \
-  --namespace kratix-platform-system \
-  --from-literal=token="$(openssl rand -hex 32)"
 ```
 
-The server exposes a Streamable HTTP endpoint at `/mcp`, protected by a shared bearer token. Requests are attributed per user via the `X-User-Identity` header.
+Both installation methods give the ServiceAccount permission to impersonate callers. You must separately create Roles and RoleBindings for the Promise request resources those callers may use. The server does not create customer-specific access rules.
+
+:::info Development mode
+`MCP_AUTH_TOKEN` enables a shared bearer token for local development. It disables OIDC, OAuth scopes and per-caller impersonation, so every Kubernetes operation uses the server's ServiceAccount. Do not use this mode for customer-facing deployments.
+:::
 
 ## Connecting users
 
-The server uses [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) transport, which any MCP-compatible AI client can connect to. The platform team should distribute a ready-to-run command with `<SERVER_URL>` and `<TOKEN>` already substituted; users should not need to look these up themselves. Consult your client's documentation for full MCP registration instructions. Below are examples for three popular clients.
+The server uses the [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) transport. Give users the server URL; each user then completes their own browser-based OAuth login. Do not distribute a shared bearer token.
 
 **Claude Code**
 
 ```bash
-claude mcp add --scope user --transport http ske-mcp-server <SERVER_URL>/mcp \
-  --header "Authorization: Bearer <TOKEN>" \
-  --header "X-User-Identity: $(whoami)"
+claude mcp add --scope user --transport http ske-mcp-server <SERVER_URL>/mcp
+claude mcp login ske-mcp-server
 ```
 
 See the [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for more options.
@@ -65,15 +99,13 @@ Add the following to `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "ske-mcp-server": {
-      "url": "<SERVER_URL>/mcp",
-      "headers": {
-        "Authorization": "Bearer <TOKEN>",
-        "X-User-Identity": "your-username"
-      }
+      "url": "<SERVER_URL>/mcp"
     }
   }
 }
 ```
+
+Cursor opens the OAuth login flow when it first connects.
 
 See the [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol) for more options.
 
@@ -86,44 +118,53 @@ Add the following to `.vscode/mcp.json` in your workspace, or to your user setti
   "servers": {
     "ske-mcp-server": {
       "type": "http",
-      "url": "<SERVER_URL>/mcp",
-      "headers": {
-        "Authorization": "Bearer <TOKEN>",
-        "X-User-Identity": "your-username"
-      }
+      "url": "<SERVER_URL>/mcp"
     }
   }
 }
 ```
 
+VS Code opens the OAuth login flow when it first connects. If your identity provider does not support Dynamic Client Registration, add the registered client ID through VS Code's `oauth` configuration.
+
 See the [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more options.
 
 ## Per-caller Kubernetes permissions
 
-:::note
-This section describes authorization once OIDC-based authentication is configured. If your deployment still uses the shared-token model described above, every request runs as the server's own service account regardless of who's asking, until you migrate to OIDC.
-:::
+When OIDC and impersonation RBAC are enabled, request-resource operations run as the verified caller:
 
-Reading and writing your platform requests — listing them, submitting a new one, checking status — runs against Kubernetes as the person who actually made the request. It doesn't use that person's own Kubernetes credentials either; the server never sees or needs those. (Browsing the Promise and Destination catalog, and writing the audit trail below, always run under the server's own identity, not yours — that's deliberate, and covered further down.) Here's the actual sequence for a request operation:
-
-1. **You authenticate** against your identity provider (via OIDC). The server verifies your token and reads your identity and group membership from it.
-2. **The server impersonates you.** Using its own privileged credentials, it asks Kubernetes to run your request as *you*, via Kubernetes' own [impersonation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation) feature, the same mechanism `kubectl`'s `--as` flag uses. For this request, the server's own credentials never determine what you can do, they only grant it permission to make the request on your behalf.
-3. **Kubernetes decides, not the server.** It evaluates the impersonated request exactly as if you'd made it directly, against your existing [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) (Role-Based Access Control) rules, specifically whether a [RoleBinding or ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) ties your username or group to a Role or ClusterRole. If one does, you get whatever it grants. If none does, you get nothing, the same as any other Kubernetes identity nobody's granted access to.
+1. **The user authenticates.** The identity provider issues a token containing their identity, groups and OAuth scopes.
+2. **The server verifies and maps the identity.** It validates the token, then derives the Kubernetes username and groups. The server uses its own ServiceAccount credential; it never receives or forwards the user's Kubernetes credentials.
+3. **Kubernetes authorises the operation.** The server sends `Impersonate-User` and `Impersonate-Group` headers. Kubernetes evaluates every RoleBinding and ClusterRoleBinding applying to that effective identity.
 
 ![Per-caller RBAC flow](/img/ske/mcp/per-caller-rbac.svg)
 
-**What this needs from you**, for a human user connecting their own AI client as described above:
+### Bind human callers to request permissions
 
-- The server's ServiceAccount needs `impersonate` permission on users and groups; `deploy/kubernetes/` includes that permission itself, plus one example group already allowed, `mcp:clients`. Kubernetes requires this ServiceAccount to be authorized for *every* group a caller's token asserts, not just the ones you intend to bind RBAC to — if a caller's token carries even one group outside this allowlist, Kubernetes denies the whole impersonated request, it doesn't just ignore that group. In practice, that means your identity provider's group claim (`OIDC_GROUPS_CLAIM`) should carry only groups you actually intend to use with this server, with each one added to the ClusterRole's group allowlist.
-- The identity Kubernetes actually sees isn't your raw username or group name: it's `IMPERSONATION_USER_PREFIX` (default `mcp:user:`) prepended to your subject, and `IMPERSONATION_GROUP_PREFIX` (default empty) prepended to each group. An existing RoleBinding written against your literal username or group name won't match until you either update it to the prefixed form or set the matching prefix to empty. Beyond that, nothing changes about how you write or manage RBAC today.
+The effective Kubernetes identity includes the configured prefixes. With the example Helm values above:
 
-A machine caller authenticating with its own client credentials (rather than a human's) works differently: the server ignores its token's groups entirely and always impersonates a fixed identity instead — `IMPERSONATION_CLIENT_PREFIX` (default `mcp:client:`) plus its client ID, with `IMPERSONATION_CLIENT_GROUPS` (empty by default) as its groups. You can bind RBAC directly to one machine caller's individual identity (a RoleBinding on `mcp:client:<its-client-id>`) without setting anything; `IMPERSONATION_CLIENT_GROUPS` is only for granting the *same* access to every machine caller at once through one shared group, which is what the shipped `mcp:clients` example group is for.
+- The subject `alice` becomes `mcp:user:alice`.
+- The token group `platform-viewers` becomes `mcp:group:platform-viewers`.
 
-A few things that fall out of this worth knowing:
+Write RoleBindings against these effective values. Existing bindings against the raw subject or group will not match unless you leave the corresponding prefix empty.
 
-- Two users with different Kubernetes RBAC get different results from the exact same request, driven entirely by bindings you already control.
-- A denied write comes back naming the verb, resource, and namespace it was denied on, not a generic failure.
-- Kubernetes Events, its own built-in audit record for what happened to a resource, are created by the server's own privileged identity rather than the impersonated one, so a caller who lacks Event-create permission in their own RBAC can't use that to keep it off their own audit trail.
+Every effective group in a caller's token must also appear in the ServiceAccount's impersonation allowlist. If one group is missing, Kubernetes rejects the entire impersonated request.
+
+### Configure machine callers
+
+A machine using the client-credentials flow has a fixed identity:
+
+- Username: `IMPERSONATION_CLIENT_PREFIX` plus its client ID; the default prefix is `mcp:client:`.
+- Groups: `IMPERSONATION_CLIENT_GROUPS`; token group claims are ignored.
+
+You can bind RBAC directly to one machine username. Use `IMPERSONATION_CLIENT_GROUPS` when several machine clients should share the same permissions, and include those groups in the ServiceAccount's impersonation allowlist.
+
+### Caveats
+
+- Promise and Destination catalogue reads use the server's ServiceAccount because every authenticated caller receives the same read-only catalogue.
+- Namespace filtering uses Kubernetes access reviews before listing request resources. Namespaces the caller cannot list are omitted without revealing how many were filtered.
+- Creating a request is attempted directly as the caller. A denied write names the verb, resource and namespace.
+- Kubernetes automatically adds groups such as `system:authenticated`; RBAC applying to those groups also affects the caller.
+- Kubernetes Events describing successful submissions are created through the server's ServiceAccount, so the caller cannot suppress them through their own RBAC. Events are operational records rather than a replacement for Kubernetes Audit logging.
 
 ## Querying your platform
 
@@ -162,4 +203,4 @@ To inspect the server interactively independent of any AI client, use the [MCP I
 |---|---|
 | Transport | Streamable HTTP |
 | URL | `<SERVER_URL>/mcp` |
-| Header | `Authorization: Bearer <MCP_AUTH_TOKEN>` |
+| Authentication | Complete the OAuth flow in the Inspector's Auth Settings |

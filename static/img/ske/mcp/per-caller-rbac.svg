@@ -14,7 +14,7 @@
     </marker>
   </defs>
 
-  <text x="130" y="28" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" letter-spacing="0.5" fill="#565b6b">1. IDENTITY PROVIDER</text>
+  <text x="130" y="28" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" letter-spacing="0.5" fill="#565b6b">1. CALLER + IDENTITY PROVIDER</text>
   <text x="410" y="28" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" letter-spacing="0.5" fill="#565b6b">2. MCP SERVER</text>
   <text x="720" y="28" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" letter-spacing="0.5" fill="#565b6b">3. KUBERNETES RBAC</text>
   <text x="1090" y="28" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" letter-spacing="0.5" fill="#565b6b">4. RESULT</text>
@@ -32,11 +32,11 @@
   <text x="410" y="93" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12.5" fill="#1c1e26">impersonates caller</text>
 
   <line x1="510" y1="85" x2="595" y2="85" stroke="#565b6b" stroke-width="1.3" marker-end="url(#arrow)" />
-  <text x="552" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#565b6b">Impersonate-User/Group</text>
+  <text x="552" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#565b6b">impersonation</text>
 
   <rect x="600" y="55" width="230" height="60" rx="8" fill="#ffffff" stroke="#d7d7d2" stroke-width="1.4" />
   <text x="715" y="76" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="13" fill="#1c1e26">RoleBinding</text>
-  <text x="715" y="94" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#565b6b">subject: Group platform-viewers</text>
+  <text x="715" y="94" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#565b6b">Group mcp:group:platform-viewers</text>
 
   <line x1="830" y1="85" x2="945" y2="85" stroke="#1f8a5f" stroke-width="1.6" marker-end="url(#arrowGranted)" />
 
@@ -57,11 +57,11 @@
   <text x="410" y="268" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12.5" fill="#1c1e26">impersonates caller</text>
 
   <line x1="510" y1="260" x2="595" y2="260" stroke="#565b6b" stroke-width="1.3" marker-end="url(#arrow)" />
-  <text x="552" y="253" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#565b6b">Impersonate-User/Group</text>
+  <text x="552" y="253" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#565b6b">impersonation</text>
 
   <rect x="600" y="230" width="230" height="60" rx="8" fill="none" stroke="#565b6b" stroke-width="1.2" stroke-dasharray="4 4" />
   <text x="715" y="256" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="12" font-style="italic" fill="#565b6b">no RoleBinding for</text>
-  <text x="715" y="273" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-style="italic" fill="#565b6b">group sales-team</text>
+  <text x="715" y="273" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" font-style="italic" fill="#565b6b">Group mcp:group:sales-team</text>
 
   <line x1="830" y1="260" x2="945" y2="260" stroke="#b4622a" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrowDenied)" />
 
