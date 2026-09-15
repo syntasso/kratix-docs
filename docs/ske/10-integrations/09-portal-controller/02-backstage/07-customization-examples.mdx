@@ -1,0 +1,59 @@
+---
+title: Backstage customization examples
+description: Examples of customising Backstage entities with PortalCustomization
+sidebar_label: Backstage customization examples
+slug: backstage-customization-examples
+keywords: [portal, customization, backstage, template, ske]
+---
+
+These examples show how a `PortalCustomization` can shape the Backstage entities the Portal
+Controller generates, using [Portal Patch](../portal-patch/intro) recipes.
+
+## Add a description to request forms
+
+By default a request form opens straight onto its fields, with nothing to say what the resource
+is. A `description` on a page of the Template's `spec.parameters` fills that gap: Backstage
+renders it as Markdown above that page's fields, both when the resource is requested and when it
+is updated.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: database-request-form
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:0.8.0
+          args:
+            - |
+              target:
+                kind: Template
+                list:
+                  path: spec.parameters
+                  key: title
+                  value: "MyKind Instance Metadata"
+              patch:
+                description: |
+                  ## What this template creates
+
+                  A managed database for your service, backed up nightly and reachable only
+                  from inside the cluster.
+
+                  - One database instance, sized for the load you expect
+                  - A connection secret published alongside your component
+                  - Nightly backups, kept for 30 days
+
+                  **Before you start**, check [choosing a driver](https://example.com/docs).
+```
+
+Bind the Promise to it:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-customization: database-request-form
+```
