@@ -14,10 +14,12 @@ const config = {
     url: "https://docs.kratix.io",
     baseUrl: "/",
     markdown: {
+        mermaid: true,
         hooks: {
             onBrokenMarkdownLinks: "throw",
         }
     },
+    themes: ["@docusaurus/theme-mermaid"],
     onBrokenLinks: "throw",
     favicon: "img/favicon.ico",
 

@@ -3,6 +3,11 @@ title: SKE Health Agent
 description: Documentation about the SKE Health Agent
 ---
 
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
 The SKE Health Agent is a health check agent to be installed in Kubernetes Destinations
 where health checks can be executed.
 
@@ -17,9 +22,28 @@ The Agent will:
 
 ## Requirements
 
-The Agent will write the health information to a state store.
-The Platform cluster must have a GitOps agent listening to the state store,
-so the resource health can be applied back to the Platform cluster.
+The Agent will write the health information to a state store. Something on the Platform
+cluster then has to pick those records up, and there are two ways to do that:
+
+* A **GitOps agent** on the Platform listening to the state store. This works for both
+  Git and bucket state stores.
+* The **SKE Platform Manager** reading the records itself, by way of a `HealthSource`. This
+  needs the state store to be a bucket, and needs no GitOps agent on the Platform. See
+  [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
+
+You need one of the two, not both, though running both at once is supported while you
+migrate from one to the other.
+
+:::note
+
+Running both only behaves as you would expect as long as they are not reading the same
+records from the same place. If a GitOps agent and a `HealthSource` both deliver the same
+records from the same store, each resource ends up with two `HealthRecord`s on the Platform
+and the worse of the two states wins. That is exactly what the
+[migration guide](/ske/guides/health-records-from-a-bucket#the-overlap-window) relies on and
+explains, but it is not a state to sit in by accident.
+
+:::
 
 ## Install
 
@@ -118,69 +142,360 @@ helm install health-agent syntasso/k8s-health-agent --values values.yaml
 
 ### Set up access to the State Store
 
-You will need to create a ConfigMap and Secret with the credentials to access the state store.
-The format will depend on the type of state store you wish to use.
-The agent currently support two different types of state stores: S3-compatible buckets and Git repositories.
+You will need to create a ConfigMap and Secret with the credentials to access the state
+store. The format depends on the kind of state store you use:
 
-To configure a Git repository, create a ConfigMap and Secret with the following content:
+<Tabs className="boxedTabs" groupId="healthStateStoreKind">
+  <TabItem value="bucket" label="S3-Compatible">
 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: health-state-store-config
-  namespace: k8s-health-agent-system
-data:
-  stateStoreKind: GitStateStore
-  url: # address
-  secretName: <secret name>
-  branch: # optional (default: main)
-  destinationName: # optional; see "Running the agent on multiple Destinations"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <secret name>
-  namespace: k8s-health-agent-system
-stringData:
-  # for basicAuth
-  username: # username
-  password: # password / API Token
-```
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    provider: # generic or azure (default: generic)
+    endpoint: # address
+    bucketName: # bucket name
+    authMethod: # accessKey or IAM (default: accessKey); sharedKey for azure
+    secretName: <secret name> # required for accessKey
+    path: # path within the bucket; optional
+    insecure: # "true" or "false" (default: "false"); optional string
+    destinationName: # optional; see "Running the agent on multiple Destinations"
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: <secret name>
+    namespace: k8s-health-agent-system
+  stringData:
+    accessKeyID: # Access Key ID
+    secretAccessKey: # Secret Access Key
+  ```
 
-To configure a S3-compatible bucket, create a ConfigMap and Secret with the following content:
+  </TabItem>
 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: health-state-store-config
-  namespace: k8s-health-agent-system
-data:
-  stateStoreKind: BucketStateStore
-  endpoint: # address
-  bucketName: # bucket name
-  authMethod: # accessKey or IAM (default: accessKey)
-  secretName: <secret name> # required for accessKey
-  path: # path within the bucket; optional
-  insecure: # "true" or "false" (default: "false"); optional string
-  destinationName: # optional; see "Running the agent on multiple Destinations"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <secret name>
-  namespace: k8s-health-agent-system
-stringData:
-  accessKeyID: # Access Key ID
-  secretAccessKey: # Secret Access Key
-```
+  <TabItem value="git" label="Git repository">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: GitStateStore
+    url: # address
+    branch: # optional (default: main)
+    authMethod: # basicAuth (default)
+    secretName: <secret name>
+    path: # path within the repository; optional
+    destinationName: # optional; see "Running the agent on multiple Destinations"
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: <secret name>
+    namespace: k8s-health-agent-system
+  stringData:
+    # for basicAuth
+    username: # username
+    password: # password / API Token
+  ```
+
+  </TabItem>
+</Tabs>
 
 :::warning
 
-The configuration should be created _after_ installing agent, otherwise the namespace will not exist.
+The configuration should be created _after_ installing the agent, otherwise the namespace will not exist.
 
 :::
+
+#### Examples
+
+<Tabs className="boxedTabs" groupId="healthStateStoreExample">
+  <TabItem value="s3" label="S3-compatible">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: <BUCKET_NAME>
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: <DESTINATION_NAME>
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-credentials
+    namespace: k8s-health-agent-system
+  stringData:
+    accessKeyID: <YOUR_ACCESS_KEY_ID>
+    secretAccessKey: <YOUR_SECRET_ACCESS_KEY>
+  ```
+
+  With `authMethod: IAM` the agent uses the ambient instance identity and needs no Secret.
+
+  </TabItem>
+
+  <TabItem value="azure" label="Azure Blob Storage">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    provider: azure
+    endpoint: https://<ACCOUNT>.blob.core.windows.net
+    bucketName: <CONTAINER_NAME>
+    authMethod: sharedKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: <DESTINATION_NAME>
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-credentials
+    namespace: k8s-health-agent-system
+  stringData:
+    accountKey: <YOUR_STORAGE_ACCOUNT_KEY>
+  ```
+
+  :::warning
+
+  Storage accounts with **hierarchical namespace (HNS / ADLS Gen2)** enabled are not
+  supported. Use a standard blob storage account. Azure Blob Storage also needs SKE Health
+  Agent v0.14.0 or above, the release that adds the Azure writer.
+
+  :::
+
+  </TabItem>
+
+  <TabItem value="git" label="Git repository">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: GitStateStore
+    url: <REPOSITORY_URL>
+    branch: main
+    authMethod: basicAuth
+    secretName: health-store-credentials
+    path: health
+    destinationName: <DESTINATION_NAME>
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-credentials
+    namespace: k8s-health-agent-system
+  stringData:
+    username: <YOUR_USERNAME>
+    password: <YOUR_PASSWORD_OR_API_TOKEN>
+  ```
+
+  :::note
+
+  A Git state store needs a GitOps agent on the Platform to pick the records up. The SKE
+  Platform Manager reads buckets only, so the next section does not apply to Git.
+
+  :::
+
+  </TabItem>
+</Tabs>
+
+### Set up the HealthSource on the Platform
+
+If you're using S3-Compatible Buckets or Blob Storage, you need to configure the SKE
+Platform Manager to read the records rather than running a GitOps agent.
+
+A `HealthSource` names one place to read from: one bucket, one prefix, one credential. It is
+cluster-scoped, and it belongs on the **Platform** cluster, not the Destination. Create it
+once the agent above is writing.
+
+:::info The credentials are deliberately separate
+
+The Destination needs **write** access to the store; the Platform needs only **read**. Give
+the `HealthSource` its own credential rather than reusing the agent's, so one Destination's
+credential cannot reach another Destination's records. On an S3-compatible store, that
+credential needs nothing beyond list and get under `spec.path`.
+
+:::
+
+<Tabs className="boxedTabs" groupId="healthSourceProvider">
+  <TabItem value="s3" label="S3-compatible">
+
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-reader
+    namespace: default
+  stringData:
+    accessKeyID: <YOUR_READ_ONLY_ACCESS_KEY_ID>
+    secretAccessKey: <YOUR_READ_ONLY_SECRET_ACCESS_KEY>
+  ---
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: HealthSource
+  metadata:
+    name: <DESTINATION_NAME>
+  spec:
+    bucket:
+      endpoint: # the same endpoint the agent writes to, without a scheme
+      bucketName: # the same bucket
+      authMethod: accessKey # or IAM
+      secretRef:
+        name: health-store-reader
+        namespace: default
+    path: # the same prefix the agent writes under
+    pollInterval: 10m
+  ```
+
+  </TabItem>
+
+  <TabItem value="azure" label="Azure Blob Storage">
+
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-reader
+    namespace: default
+  stringData:
+    accountKey: <YOUR_STORAGE_ACCOUNT_KEY>
+  ---
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: HealthSource
+  metadata:
+    name: <DESTINATION_NAME>
+  spec:
+    bucket:
+      provider: azure
+      endpoint: https://<account>.blob.core.windows.net
+      bucketName: # the container name
+      authMethod: sharedKey
+      secretRef:
+        name: health-store-reader
+        namespace: default
+    path: # the same prefix the agent writes under
+    pollInterval: 10m
+  ```
+
+  :::warning
+
+  An Azure Shared Key authorises full read **and write** access across the whole storage
+  account. It cannot be made read-only, and it cannot be scoped to one container or prefix,
+  and `sharedKey` is the only method Azure supports here. Limit the blast radius instead: use
+  a storage account dedicated to health records.
+
+  :::
+
+  </TabItem>
+</Tabs>
+
+Check it is working:
+
+```bash
+kubectl get healthsources
+```
+
+```console
+NAME     BUCKET   READY   REASON          OBSERVED   LAST GOOD POLL   AGE
+worker-1 kratix   True    PollSucceeded   14         12s              2m
+```
+
+`READY` should be `True`, `OBSERVED` should match the number of resources the Destination
+reports on, and `LAST GOOD POLL` should be recent. If `READY` is not `True`, the `REASON`
+column names the thing at fault.
+
+#### Examples
+
+<Tabs className="boxedTabs" groupId="healthSourceExample">
+  <TabItem value="s3" label="S3-compatible">
+
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-reader
+    namespace: default
+  stringData:
+    accessKeyID: <YOUR_READ_ONLY_ACCESS_KEY_ID>
+    secretAccessKey: <YOUR_READ_ONLY_SECRET_ACCESS_KEY>
+  ---
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: HealthSource
+  metadata:
+    name: worker-1
+  spec:
+    bucket:
+      endpoint: s3.<AWS_REGION>.amazonaws.com
+      bucketName: <BUCKET_NAME>
+      authMethod: accessKey
+      secretRef:
+        name: health-store-reader
+        namespace: default
+    path: health
+    pollInterval: 10m
+  ```
+
+  </TabItem>
+
+  <TabItem value="azure" label="Azure Blob Storage">
+
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-reader
+    namespace: default
+  stringData:
+    accountKey: <YOUR_STORAGE_ACCOUNT_KEY>
+  ---
+  apiVersion: platform.syntasso.io/v1alpha1
+  kind: HealthSource
+  metadata:
+    name: worker-1
+  spec:
+    bucket:
+      provider: azure
+      endpoint: https://<ACCOUNT>.blob.core.windows.net
+      bucketName: <CONTAINER_NAME>
+      authMethod: sharedKey
+      secretRef:
+        name: health-store-reader
+        namespace: default
+    path: health
+    pollInterval: 10m
+  ```
+
+  </TabItem>
+</Tabs>
+
+The `endpoint`, `bucketName` and `path` must match what the agent on that Destination is
+configured with, or the source polls successfully and observes nothing.
+
+For every field, see the [Health Source reference](/ske/reference/healthsource). To move an
+existing Destination off a GitOps sync without a gap in health, see
+[Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
 
 ### Running the agent on multiple Destinations
 
@@ -196,3 +511,122 @@ Destination and shows them all in the resource's health status.
 If you set or change `destinationName` on an agent that has already written records, the
 records written under the old name are not cleaned up automatically; delete them from the
 state store manually.
+
+#### Example: one Platform, three Destinations
+
+A Platform cluster with three Destinations registered in Kratix as `dev`, `prod` and `test`.
+All three run the SKE Health Agent, and all three write to the same bucket under the same
+`health` prefix.
+
+```mermaid
+flowchart LR
+    subgraph destinations[Destinations]
+        dev[dev agent]
+        prod[prod agent]
+        test[test agent]
+    end
+
+    bucket[("kratix<br/>health/")]
+
+    subgraph platform[Platform]
+        source[HealthSource<br/>all-destinations]
+        status[Resource<br/>status.healthStatus]
+    end
+
+    dev -->|redis-default-example-dev-abc12.yaml| bucket
+    prod -->|redis-default-example-prod-de34f.yaml| bucket
+    test -->|redis-default-example-test-5678g.yaml| bucket
+    bucket --> source --> status
+
+    style source fill:#9B59D026,stroke:#9B59D0,stroke-width:2px
+```
+
+`destinationName` is the part of each file name that keeps the three apart. Without it all
+three agents write `redis-default-example-<hash>.yaml` and overwrite one another.
+
+<Tabs className="boxedTabs" groupId="multiDestination">
+  <TabItem value="dev" label="dev Destination">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: dev
+  ```
+
+  </TabItem>
+
+  <TabItem value="prod" label="prod Destination">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: prod
+  ```
+
+  </TabItem>
+
+  <TabItem value="test" label="test Destination">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: BucketStateStore
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretName: health-store-credentials
+    path: health
+    destinationName: test
+  ```
+
+  </TabItem>
+</Tabs>
+
+Only `destinationName` differs. Each agent needs its own Secret on its own cluster, but the
+credentials can be the same, since all three are writing to the same place.
+
+On the **Platform**, one `HealthSource` covers all three, because they share a prefix:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: HealthSource
+metadata:
+  name: all-destinations
+spec:
+  bucket:
+    endpoint: s3.<AWS_REGION>.amazonaws.com
+    bucketName: kratix
+    authMethod: accessKey
+    secretRef:
+      name: health-store-reader
+      namespace: default
+  path: health
+  pollInterval: 10m
+```
+
+A resource checked on more than one Destination now shows one record per Destination in its
+`status.healthStatus`, and the worst state across them wins.
