@@ -22,9 +22,10 @@ image, or the helper described below.
 
 :::tip
 If you would rather not write a container, [Portal Patch](./portal-patch/intro) is a helper image
-we ship that applies declarative recipes in this lane, covering setting owners and tags, removing
-form fields, adding an item to a generated list, and reshaping Cortex workflows. It is entirely optional, and you can mix it with your
-own containers in the same pipeline.
+we ship that applies declarative recipes in this lane, covering setting owners and tags,
+introducing a resource on its request form, removing form fields, adding an item to a generated
+list, and reshaping Cortex workflows. It is entirely optional, and you can mix it with your own
+containers in the same pipeline.
 :::
 
 ## Creating a `PortalCustomization`
@@ -172,4 +173,6 @@ condition described in [Installation](./installation#bind-a-promise-to-a-portal)
 ## Examples
 
 - [Portal Patch recipe reference](./portal-patch/recipe-reference) for the full declarative grammar.
+- [Backstage customization examples](./backstage/backstage-customization-examples) for worked
+  examples against Backstage entities.
 - [Cortex examples](./cortex/cortex-examples) for worked examples against Cortex documents.
