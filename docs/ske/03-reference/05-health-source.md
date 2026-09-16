@@ -9,7 +9,9 @@ id: healthsource
 
 The Health Source Custom Resource Definition (CRD) tells the SKE Platform
 Manager where to read Health Records from: one bucket, one prefix, one
-credential. It is the alternative to a GitOps agent syncing the same records.
+credential. It is an alternative to using a GitOps agent when you use
+Bucket-backed (or Azure Blob-backed) storage and do not want to install
+a dedicated GitOps agent in your platform just to sync Health Records.
 
 It is **cluster-scoped**, and it is not a Destination: one source may carry
 records from many Destinations, which stay distinct because their object keys

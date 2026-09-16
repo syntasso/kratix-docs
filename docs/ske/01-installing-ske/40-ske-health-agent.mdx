@@ -27,7 +27,7 @@ cluster then has to pick those records up, and there are two ways to do that:
 
 * A **GitOps agent** on the Platform listening to the state store. This works for both
   Git and bucket state stores.
-* The **SKE Platform Manager** reading the records itself, by way of a `HealthSource`. This
+* The **SKE Platform Manager** reading the records itself using a `HealthSource`. This
   needs the state store to be a bucket, and needs no GitOps agent on the Platform. See
   [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket).
 
@@ -324,8 +324,7 @@ The configuration should be created _after_ installing the agent, otherwise the 
 
 ### Set up the HealthSource on the Platform
 
-If you're using S3-Compatible Buckets or Blob Storage, you need to configure the SKE
-Platform Manager to read the records rather than running a GitOps agent.
+If you are using Azure Blob Storage, or you do not want to run a GitOps agent on the Platform for health records, configure the SKE Platform Manager to read bucket records with a HealthSource. If your existing GitOps agent already syncs health records from Git or an S3-compatible bucket and that works for you, skip this section.
 
 A `HealthSource` names one place to read from: one bucket, one prefix, one credential. It is
 cluster-scoped, and it belongs on the **Platform** cluster, not the Destination. Create it
