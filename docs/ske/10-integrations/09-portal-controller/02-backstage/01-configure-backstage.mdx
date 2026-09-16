@@ -159,6 +159,13 @@ resource. Without it the page shows the Template's own step names, which are the
 and an update. Backstage cannot register the module for you because it replaces the scaffolder
 plugin's API. See [`scaffolderModuleResourceRequestCopy`](./frontend-plugin#resource-request-copy).
 
+:::note Hosted Backstage
+On a host where you cannot edit the app, such as Roadie or Spotify Portal for Backstage, the module
+cannot be added. The task page then shows the Template's own step names, "Submitting your Postgresql
+request" and "Registering your Postgresql request in the catalog", which do not say whether the run
+creates or updates the resource.
+:::
+
 In `packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
 
 ```tsx
