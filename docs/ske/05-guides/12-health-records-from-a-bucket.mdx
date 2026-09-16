@@ -100,12 +100,12 @@ A `HealthSource` deliberately does not reference a Kratix `BucketStateStore`,
 even when one already points at the same bucket. That is [the permission
 split](#permissions), and it is the next thing to get right.
 
-## Why you might want this
+## When to use this
 
-Two reasons, and only the first is likely to be why you are here:
+You should use this solution when:
 
-- **ArgoCD cannot reconcile from a bucket**, and [may never be able
-  to](https://github.com/argoproj/argo-cd/issues/2558). If you run ArgoCD,
+- **You are using ArgoCD, which cannot reconcile from a bucket**, and [may never be able
+  to](https://github.com/argoproj/argo-cd/issues/2558). When running ArgoCD,
   delivering health through a State Store today means running Flux alongside it
   just for the `health/` path. Reading the bucket in the Platform Manager
   removes that.
