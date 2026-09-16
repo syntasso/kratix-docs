@@ -143,6 +143,22 @@ The plugin registers the following extensions via its `alpha` entry point:
 
 To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
 
+Then add the plugin's `scaffolderModuleResourceRequestCopy` module to your app's `features` in
+`packages/app/src/App.tsx`:
+
+```ts
+import { scaffolderModuleResourceRequestCopy } from '@syntasso/plugin-ske-frontend/alpha';
+
+const app = createApp({
+  features: [scaffolderModuleResourceRequestCopy /* , ... */],
+});
+```
+
+This makes the scaffolder task page describe a request as creating, updating or deleting the
+resource. Without it the page shows the Template's own step names, which are the same for a create
+and an update. Backstage cannot register the module for you because it replaces the scaffolder
+plugin's API. See [`scaffolderModuleResourceRequestCopy`](./frontend-plugin#resource-request-copy).
+
 In `packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
 
 ```tsx
