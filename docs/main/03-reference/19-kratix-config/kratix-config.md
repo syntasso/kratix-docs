@@ -39,6 +39,7 @@ data:
       reconcileAfterFailure: true
       jobOptions:
         defaultBackoffLimit: 6
+        defaultTTLSecondsAfterFinished: 3600 # seconds to keep a finished Job and its Pods; omit to disable automatic Job cleanup
         podTTLSecondsAfterFinished: 3600 # seconds to keep completed Job Pods before cleanup; omit to use Kubernetes default
       defaultImagePullPolicy: IfNotPresent # can be `IfNotPresent`, `Always`, or `Never`
       defaultContainerResources: # optional; default CPU/memory requests and limits for pipeline containers
@@ -173,6 +174,14 @@ Options for the Jobs that are created by Kratix Workflows.
 ##### defaultBackoffLimit
 
 The number of times to retry a failing workflow Job before marking it failed. This configures the [backoffLimit](https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy) in Workflow Jobs. This will default to the Kubernetes Job default of 6.
+
+##### defaultTTLSecondsAfterFinished
+
+The number of seconds Kubernetes retains a finished workflow Job and its Pods.
+A Pipeline can override this value with `spec.jobOptions.ttlSecondsAfterFinished`.
+Values below 120 use 120 seconds and write a warning to the controller logs.
+Omit this setting to disable automatic Job cleanup. See [TTL mechanism for
+finished Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/).
 
 ##### podTTLSecondsAfterFinished
 
