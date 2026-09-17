@@ -1,8 +1,8 @@
 ---
-description: Install SKE via Helm and other tools
-title: Advanced installation
-sidebar_label: Advanced installation
-id: advanced-install
+description: Install SKE with the SKE Operator, via its Helm chart or its manifests
+title: Installing SKE with the Operator
+sidebar_label: Installing SKE with the Operator
+id: install-with-operator
 ---
 
 ```mdx-code-block
@@ -11,14 +11,12 @@ import TabItem from '@theme/TabItem';
 import PartialPointToKratix from '../../_partials/installation/_point_to_kratix.md';
 ```
 
-This page covers the advanced installation using the SKE Operator — the recommended approach for 
-production, or any environment where you need to customise or secure your SKE installation, 
-via either the Operator's Helm chart or its manifests directly.
+This page covers installing SKE with the SKE Operator, via either the Operator's Helm chart
+or its manifests directly.
 
-If you're setting up a quick development or test environment instead, 
-[Preconfigured installation](./preconfigured-install) will get you there faster. If your 
-cluster is air-gapped, complete [Air-gapped installation](./air-gapped) first — you'll need 
-your image registry and release manifest mirrors in place before running the commands below.
+If your cluster is air-gapped, complete [Air-gapped installation](./air-gapped)
+first — you'll need your image registry and release manifest mirrors in place
+before running the commands below.
 
 <PartialPointToKratix />
 

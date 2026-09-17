@@ -8,7 +8,7 @@ The Backstage Controller generates Backstage components and templates for Promis
 
 ## Prerequisites
 
-- **SKE Operator**: Installed at v0.28.0 or later. If you haven't installed the Operator, please refer to the [SKE installation guide](../../../installing-ske/advanced-install).
+- **SKE Operator**: Installed at v0.28.0 or later. If you haven't installed the Operator, please refer to the [SKE installation guide](../../../installing-ske/install-with-operator).
 - **SKE Backstage**: The generated Backstage Templates reference an action from the `ske-backend` Backstage plugin, this action is
 used to create a Resource Request. The generated Components are also used by the `ske-frontend` Backstage plugin to display
 Promise and Resource metadata. See [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage) for installation instructions.
@@ -20,7 +20,7 @@ for setup instructions.
 
 ### Via the SKE Operator Helm Chart
 
-The Backstage Controller is installed by the [SKE Operator](../../../installing-ske/advanced-install) and can be deployed via the SKE Operator Helm Chart.
+The Backstage Controller is installed by the [SKE Operator](../../../installing-ske/install-with-operator) and can be deployed via the SKE Operator Helm Chart.
 
 To deploy the Backstage Controller via the SKE Operator Helm Chart, configure the `backstageIntegration` values. Most crucially, you will need to set `backstageIntegration.enabled` to `true`.
 

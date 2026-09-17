@@ -75,6 +75,14 @@ const config = {
             {
                 redirects: [
                     {
+                        from: "/ske/installing-ske/preconfigured-install",
+                        to: "/ske/installing-ske/install-with-operator",
+                    },
+                    {
+                        from: "/ske/installing-ske/advanced-install",
+                        to: "/ske/installing-ske/install-with-operator",
+                    },
+                    {
                         from: "/ske/integrations/backstage/installation/plugins",
                         to: "/ske/integrations/portal-controller/backstage/configure-backstage",
                     },
