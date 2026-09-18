@@ -21,7 +21,7 @@ Central to the Platform is the Platform Cluster. This is the cluster where Krati
 
 Kratix comes with its own webhooks, so it needs certificates to be configurable. You can provide the certificates yourself, or use cert-manager to generate them. To install cert-manager, follow the instructions in the [cert-manager documentation](https://cert-manager.io/docs/installation/).
 
-Kratix is usually deployed via the SKE Operator. The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE) and is the recommended approach for installing and managing your SKE installation. It is installed in the Platform Cluster, and will manage the installation of Kratix for you. To install the SKE Operator, follow the instructions in the [SKE Operator documentation](/ske/installing-ske/advanced-install).
+Kratix is usually deployed via the SKE Operator. The SKE Operator provides full lifecycle support for Syntasso Kratix Enterprise (SKE) and is the recommended approach for installing and managing your SKE installation. It is installed in the Platform Cluster, and will manage the installation of Kratix for you. To install the SKE Operator, follow the instructions in the [SKE Operator documentation](/ske/installing-ske/install-with-operator).
 
 The SKE Operator can also deploy the Portal Controller, which is an optional component that can be used to integrate your Platform with a developer portal such as Backstage or
 Cortex. The Portal Controller will automatically generate the portal entities when Promises or resources are created or updated. To install the Portal Controller, follow the
