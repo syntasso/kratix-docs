@@ -509,3 +509,9 @@ Once Backstage has run a catalogue refresh you should see:
 If entities never appear, check the catalogue repository actually contains
 `catalog-info.yaml` files under the two paths above, and that the GitHub credential can read that
 repository.
+
+
+## Task log detail
+
+Backstage builds each task's logger at `LOG_LEVEL`, defaulting to `info`. The SKE actions log their
+mechanics at `debug`, so set `LOG_LEVEL=debug` on the backend to see them.

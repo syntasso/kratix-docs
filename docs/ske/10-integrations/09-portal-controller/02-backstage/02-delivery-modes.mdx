@@ -153,16 +153,6 @@ resource does not exist yet; an update lands on the resource. The destination is
 step runs and then fixed for that task, so a create reopened long after the fact still points at a
 pending request that has since been replaced.
 
-## How much detail the task logs show
-
-Backstage builds each task's logger at `LOG_LEVEL`, defaulting to `info`. The SKE actions log their
-mechanics — cloning, staging files, reading the cluster, recording the request — at `debug`, so the
-default task page shows the step names and nothing else. Warnings and errors always show, so a run
-that fails still says why.
-
-Set `LOG_LEVEL=debug` on the Backstage backend to see the detail. It is a backend-wide setting, not
-a per-task one, so it also raises the verbosity of everything else the backend logs.
-
 ## Customizations and delivery modes
 
 :::warning
