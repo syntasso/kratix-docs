@@ -114,7 +114,7 @@ module, which the install steps add to your app, fills that gap. The task page r
 
 | Step | Create | Update | Delete (pull-request mode) |
 |---|---|---|---|
-| Push: submit | Creating your Postgresql request | Updating dev-postgres Postgresql request | |
+| Push: submit | Creating your dev-postgres Postgresql request | Updating dev-postgres Postgresql request | |
 | Pull request: prepare | Drafting your request | Drafting your changes | Drafting the deletion, shown skipped |
 | Pull request: open | Opening a PR to create dev-postgres Postgresql | Opening a PR to update dev-postgres Postgresql | Opening a PR to delete dev-postgres Postgresql |
 | Both: register | Registering your request in the catalog | Registering your update in the catalog | Registering your deletion in the catalog |
@@ -137,10 +137,21 @@ How long it stays is whatever those three steps take. Under `push` with `ske.mod
 that can be seconds. A mode that commits to Git adds your GitOps agent's sync interval, and
 Git-based catalogue discovery adds its own polling interval.
 
-:::note
-There is no link to the pull request on the scaffolder's completion page. Developers find their
-pull request through the pending request entity in the catalogue.
-:::
+## Where a completed task leads
+
+When the run finishes, the task page carries the developer on rather than leaving them to search
+the catalogue:
+
+| Mode | Links on the completed task |
+|---|---|
+| `push` | **View in Catalog** |
+| `pull-request` | **View in Catalog**, then **Pull Request** |
+
+**View in Catalog** goes to the resource's own entity when the platform has already published one,
+and to the pending request otherwise. A create therefore lands on the pending request, since the
+resource does not exist yet; an update lands on the resource. The destination is decided when the
+step runs and then fixed for that task, so a create reopened long after the fact still points at a
+pending request that has since been replaced.
 
 ## Customizations and delivery modes
 
