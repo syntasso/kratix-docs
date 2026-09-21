@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkkratix_docs=globalThis.webpackChunkkratix_docs||[]).push([[7636],{57636(a,e,s){s.d(e,{createCynefinServices:()=>c.t});var c=s(93279);s(4954)}}]);

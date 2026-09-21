@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkkratix_docs=globalThis.webpackChunkkratix_docs||[]).push([[2355],{52355(e,a,s){s.d(a,{createEventModelingServices:()=>c.g});var c=s(82688);s(4954)}}]);
