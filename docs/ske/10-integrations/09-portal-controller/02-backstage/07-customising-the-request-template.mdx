@@ -24,20 +24,57 @@ import FormWidget from "/img/docs/ske/backstage/request-template-widget.png"
 
 The Portal Controller turns a Promise's API into a Backstage `Template`, the request template a
 developer fills in to ask for a resource. Most of what you want that template to do, you write
-into the CRD in `spec.api`: required fields, dropdowns, defaults, validation, fields nobody can
-change later, and fields that only appear once something else is chosen.
+into the CRD in `spec.api`.
 
-For the rest, bind the Promise to a [`PortalCustomization`](../customization) and patch the
-request template after the generator has built it.
+Where the API cannot express it, bind the Promise to a
+[`PortalCustomization`](../customization) and patch the request template after the generator has
+built it.
 
-The examples below are fragments of one `postgresql` Promise. Each sits under `spec.api`, in
-`spec.versions[0].schema.openAPIV3Schema.properties.spec`.
+The examples on this page are fragments of one `postgresql` Promise. Each one is a property of
+`spec`, which is the block highlighted below:
+
+```yaml title="postgresql Promise"
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: postgresql
+spec:
+  api:
+    apiVersion: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    metadata:
+      name: postgresqls.marketplace.kratix.io
+    spec:
+      group: marketplace.kratix.io
+      names:
+        kind: postgresql
+        plural: postgresqls
+        singular: postgresql
+      scope: Namespaced
+      versions:
+        - name: v1alpha1
+          served: true
+          storage: true
+          schema:
+            openAPIV3Schema:
+              type: object
+              properties:
+                spec:
+                  type: object
+                  # highlight-start
+                  properties:
+                    size:
+                      type: string
+                      title: Instance size
+                    # every example on this page goes here
+                  # highlight-end
+```
 
 ## Behaviour that comes from your API
 
-Everything in this section is a change to the Promise itself. No customization is involved: the
-generator reads these keywords off the CRD and the request template carries them through to
-Backstage.
+Everything in this section is a change to the Promise itself. No `PortalCustomization` is
+involved: the generator reads these keywords off the CRD and the request template carries them
+through to Backstage.
 
 ### Required fields
 
@@ -80,16 +117,15 @@ size:
   <img
     className="fullwidth"
     src={FormEnum}
-    alt="The Instance size field showing small selected, with a dropdown arrow and the helper text below it"
+    alt="The Instance size dropdown open, listing small, medium and large, with small highlighted"
   />
-  <figcaption>An <code>enum</code> becomes a dropdown, and <code>default</code> decides what it opens on</figcaption>
+  <figcaption>Opening the field lists exactly the <code>enum</code> values, with the <code>default</code> highlighted</figcaption>
 </figure>
 
 `title` is the field label and `description` is the helper text underneath it. Set a `title` on
-nested properties too. Without one the generator builds the label out of the parent's title, so a
-`dayOfWeek` inside `maintenance` reaches the form as `Maintenance window.DayOfWeek`.
+nested properties too, so they get a label of their own.
 
-### Fields nobody can change after creation
+### Immutable fields
 
 Freeze a field with a CEL validation rule on the CRD:
 
@@ -118,11 +154,7 @@ there is nothing yet to preserve.
   <figcaption>Region is locked on the Manage tab while the rest of the form stays editable</figcaption>
 </figure>
 
-Only `self == oldSelf` freezes the whole field, in either operand order. A narrower rule such as
-`self.tier == oldSelf.tier` still holds at the API server, but it does not lock the field in the
-form.
-
-### Either/or configuration
+### Mutually exclusive options
 
 `oneOf` lets a developer configure one of several things rather than all of them. Each option
 lists the properties it needs, and Backstage renders a radio button per option, showing only the
@@ -137,9 +169,9 @@ backups:
     - required: [s3]
     - required: [gcs]
   properties:
-    retentionDays:
+    expireAfterDays:
       type: integer
-      title: Retention (days)
+      title: Expire after (days)
       default: 30
     s3:
       type: object
@@ -167,7 +199,7 @@ backups:
   <img
     className="fullwidth"
     src={FormOneOfS3}
-    alt="The Backups page with the S3 option selected, showing Retention, Bucket and Role ARN fields"
+    alt="The Backups page with the S3 option selected, showing Expire after, Bucket and Role ARN fields"
   />
   <figcaption>With S3 selected, the form asks for a bucket and a role ARN</figcaption>
 </figure>
@@ -176,14 +208,14 @@ backups:
   <img
     className="fullwidth"
     src={FormOneOfGCS}
-    alt="The same Backups page with the Gcs option selected, showing Retention, Bucket and Service account fields instead"
+    alt="The same Backups page with the Gcs option selected, showing Expire after, Bucket and Service account fields instead"
   />
-  <figcaption>Switching to Gcs replaces those with a bucket and a service account. Retention belongs to neither option, so it stays</figcaption>
+  <figcaption>Switching to Gcs replaces those with a bucket and a service account. Expire after belongs to neither option, so it stays put</figcaption>
 </figure>
 
 Backstage labels each radio button after the property its option requires, which is where "S3"
-and "Gcs" come from. A property no option requires, like `retentionDays`, is shared and appears
-whichever option is selected.
+and "Gcs" come from. A property no option requires, like `expireAfterDays`, is shared and
+appears whichever option is selected.
 
 Give every option at least one property in `required`. An option without one is an error, and the
 Promise fails to sync. The developer has to pick an option, so the field itself becomes required.
@@ -265,9 +297,19 @@ maintenance:
 
 ### How the form is paged
 
-The generator currently gives each top-level property of `spec` a page of its own, ordered by
-property name rather than by title. For the Promise above, that is a ten-page wizard in an order
-nobody chose, where "Instance size" turns up eighth because its property is called `size`:
+Every `spec` property goes on a single page, titled "Specification", and
+[`ui:order`](#field-order) sets the order the fields appear in.
+
+:::info This default is changing
+Until the change lands, the generator gives each top-level property of `spec` a page of its own,
+ordered by property name rather than by title. For the Promise above that is a ten-page wizard in
+an order nobody chose, where "Instance size" turns up eighth because its property is called
+`size`.
+
+The portal-wide [`--single-spec-page` flag](../installation#portal-wide-generate-flags) switches
+between the two layouts, and stays available after the default flips for the Promises that want a
+page per property.
+:::
 
 <figure className="diagram">
   <img
@@ -275,18 +317,14 @@ nobody chose, where "Instance size" turns up eighth because its property is call
     src={FormPages}
     alt="A Backstage request form with eleven numbered steps: Instance Metadata, Backups, Dedicated node, Extensions, Maintenance window, Region, Replicas, Instance size, Storage (GB), Team email and Review"
   />
-  <figcaption>One page per top-level <code>spec</code> property, ordered by property name</figcaption>
+  <figcaption>The old layout: one page per top-level <code>spec</code> property, ordered by property name</figcaption>
 </figure>
-
-A single page suits most Promises better, and is becoming the default. Until it does, you can
-[collapse the pages yourself](#page-layout-and-field-order). When the default changes, a page per
-property remains available for the Promises that want it.
 
 ### Reference
 
 | CRD schema | Effect on the form |
 |---|---|
-| `title` | Field label. Nested properties without one are prefixed with the parent's title |
+| `title` | Field label |
 | `description` | Helper text below the field |
 | `required` | Field is mandatory and marked with an asterisk |
 | `default` | Field is prefilled with the value |
@@ -310,7 +348,7 @@ Each example below is a single [Portal Patch](../portal-patch/intro) recipe, one
 and binding a Promise to it. The request template only exists on the promise lane, so every
 recipe here belongs in `spec.promise.configure`.
 
-### Introduce the resource on its form
+### Add a description to the template
 
 By default a request form opens straight onto its fields, with nothing to say what the resource
 is. A `description` on a page of the template's `spec.parameters` fills that gap: Backstage
@@ -347,22 +385,9 @@ patch:
   <figcaption>The description renders as Markdown above the page's fields</figcaption>
 </figure>
 
-### Page layout and field order
+### Field order
 
-`singleSpecPage` folds the per-property pages into one page called "Specification" and leaves the
-instance metadata page alone:
-
-```yaml
-target:
-  kind: Template
-op: singleSpecPage
-```
-
-There is also a portal-wide
-[`--single-spec-page` flag](../installation#portal-wide-generate-flags), which does the same for
-every Promise on the portal.
-
-On a single page, `ui:order` sets the order the fields appear in:
+`ui:order` sets the order the fields appear in on the Specification page:
 
 ```yaml
 target:
@@ -404,7 +429,7 @@ ui:order: [size, region, "*"]
     src={FormSinglePage}
     alt="The same PostgreSQL request form reduced to three steps, with the specification fields on a single page in a chosen order"
   />
-  <figcaption>The same Promise with every recipe on this page applied: eleven steps become three, in the order the recipe names</figcaption>
+  <figcaption>The Specification page with the fields in the order <code>ui:order</code> names</figcaption>
 </figure>
 
 ### Show a field only for certain choices
