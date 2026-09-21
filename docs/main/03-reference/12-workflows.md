@@ -163,8 +163,7 @@ or in each Pipeline:
   can override it with `spec.jobOptions.backoffLimit`.
 * `defaultTTLSecondsAfterFinished` in the ConfigMap sets how long Kubernetes
   retains a finished Job and its Pods. A Pipeline can override it with
-  `spec.jobOptions.ttlSecondsAfterFinished`. Values below 120 use 120 seconds and
-  write a warning to the controller logs. If no TTL is set, Kubernetes does not
+  `spec.jobOptions.ttlSecondsAfterFinished`. The minimum is 120 seconds, and values below it will write a warning to the controller logs and cause Kratix to use 120 seconds. If no TTL is set, Kubernetes does not
   automatically delete the Job.
 
 You can also control the [restart

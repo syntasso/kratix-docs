@@ -179,7 +179,7 @@ The number of times to retry a failing workflow Job before marking it failed. Th
 
 The number of seconds Kubernetes retains a finished workflow Job and its Pods.
 A Pipeline can override this value with `spec.jobOptions.ttlSecondsAfterFinished`.
-Values below 120 use 120 seconds and write a warning to the controller logs.
+The minimum accepted value is 120 (seconds). Values below 120 will write a warning to the controller logs and Kratix will use 120 seconds instead.
 Omit this setting to disable automatic Job cleanup. See [TTL mechanism for
 finished Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/).
 
