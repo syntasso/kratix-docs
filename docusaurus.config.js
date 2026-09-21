@@ -87,6 +87,10 @@ const config = {
                         to: "/ske/integrations/portal-controller/backstage/configure-backstage",
                     },
                     {
+                        from: "/ske/integrations/portal-controller/backstage/backstage-customization-examples",
+                        to: "/ske/integrations/portal-controller/backstage/shaping-the-request-form",
+                    },
+                    {
                         from: "/main/learn-more/status-conditions-events/promise-status-events",
                         to: "/main/reference/promises/promise-status-events",
                     },

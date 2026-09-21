@@ -1,0 +1,632 @@
+---
+title: Shaping the request form
+description: How a Promise's API shapes the Backstage request form, and how to change it further with a PortalCustomization
+sidebar_label: Shaping the request form
+slug: shaping-the-request-form
+keywords: [portal, customization, backstage, template, form, schema, ske]
+---
+
+```mdx-code-block
+import FormPages from "/img/docs/ske/backstage/request-form-pages.png"
+import FormOneOf from "/img/docs/ske/backstage/request-form-oneof.png"
+import FormSinglePage from "/img/docs/ske/backstage/request-form-single-page.png"
+import FormConditional from "/img/docs/ske/backstage/request-form-conditional.png"
+import FormImmutable from "/img/docs/ske/backstage/request-form-immutable.png"
+```
+
+When the Portal Controller syncs a Promise to a Backstage portal, it turns the Promise's API into
+a Backstage `Template`. The form your developers fill in is generated from the CRD in
+`spec.api`, so most of the behaviour you want is something you write in the Promise, not in
+Backstage.
+
+There are two levers, and it is worth knowing which one you need:
+
+1. **The Promise API.** Required fields, dropdowns, defaults, validation, immutable fields and
+   conditional fields all come from standard OpenAPI schema keywords on the CRD. No extra
+   configuration.
+2. **A [`PortalCustomization`](../customization)**. Layout, field order, widgets and anything
+   else that is presentation rather than API lives here, applied with
+   [Portal Patch](../portal-patch/intro) recipes after the Template is generated.
+
+Every example on this page is a fragment of a `postgresql` Promise whose CRD is at
+`spec.api`, under `spec.versions[0].schema.openAPIV3Schema.properties.spec`.
+
+## What your Promise API already controls
+
+### Make a field required
+
+List it in `required` on the object that holds it. Backstage marks the field with an asterisk and
+refuses to advance past the page until it has a value.
+
+```yaml
+spec:
+  type: object
+  required:
+    - size
+  properties:
+    size:
+      type: string
+```
+
+### Offer a fixed set of choices
+
+`enum` renders a dropdown, and `default` preselects a value.
+
+```yaml
+size:
+  type: string
+  title: Instance size
+  description: How much CPU and memory the database gets.
+  enum: [small, medium, large]
+  default: small
+```
+
+`title` becomes the field label and `description` becomes the helper text below it. Without a
+`title`, the generator derives a label from the property name, so set one on every property you
+expect a developer to read.
+
+### Freeze a field after creation
+
+A field a developer may choose once, but never change, is an immutable field. Declare it with a
+CEL validation rule on the CRD:
+
+```yaml
+region:
+  type: string
+  title: Region
+  description: Region the database is created in.
+  enum: [eu-west-1, us-east-1]
+  x-kubernetes-validations:
+    - rule: self == oldSelf
+      message: region is immutable
+```
+
+The rule does two jobs. The Kubernetes API server rejects any update that changes the field, and
+the generator marks the property so the SKE frontend renders it read-only on the
+[Manage tab](./frontend-plugin#resource-manage). The field stays editable on the create form,
+where there is no previous value to preserve.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormImmutable}
+    alt="The Manage tab of a PostgreSQL resource, with every field prefilled from the live resource and the Region field greyed out"
+  />
+  <figcaption>On the Manage tab, Region is locked while every other field stays editable</figcaption>
+</figure>
+
+Only the exact rule `self == oldSelf`, in either operand order, freezes the whole field. A
+narrower transition rule such as `self.tier == oldSelf.tier` is still enforced by the API server,
+but it does not lock the field in the form.
+
+### Offer a choice between two shapes
+
+`oneOf` is how you say "configure this, or configure that, but not both". Each option lists the
+properties it requires, and Backstage renders a radio selector that shows only the chosen
+option's fields.
+
+```yaml
+backups:
+  type: object
+  title: Backups
+  description: Where backups are shipped.
+  oneOf:
+    - required: [s3]
+    - required: [gcs]
+  properties:
+    retentionDays:
+      type: integer
+      title: Retention (days)
+      default: 30
+    s3:
+      type: object
+      properties:
+        bucket:
+          type: string
+          title: Bucket
+        roleArn:
+          type: string
+          title: Role ARN
+    gcs:
+      type: object
+      properties:
+        bucket:
+          type: string
+          title: Bucket
+        serviceAccount:
+          type: string
+          title: Service account
+```
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormOneOf}
+    alt="A Backups form page with S3 and Gcs radio options, showing the S3 bucket and role ARN fields for the selected option"
+  />
+  <figcaption>A <code>oneOf</code> becomes a radio selector, with only the selected option's fields shown</figcaption>
+</figure>
+
+Four things to know about `oneOf`:
+
+- A property not named in any option, such as `retentionDays` above, is treated as shared and
+  appears under every option.
+- Every option must list at least one `required` property. An option with none is an error and
+  the sync fails.
+- The generator labels each option from its required property names, so the two options above
+  read as "S3" and "Gcs". To give them proper names, see
+  [Rename the options of a choice](#rename-the-options-of-a-choice).
+- The `s3` and `gcs` objects have no `title` of their own, which is why the screenshot shows a
+  derived `Backups.S3` heading. Give every nested object a `title`, as described under
+  [Collect a list or a nested object](#collect-a-list-or-a-nested-object).
+
+A `oneOf` also makes the field itself required, since the developer has to pick one of the
+options.
+
+### Validate what a developer types
+
+Standard schema keywords become client-side validation, so a bad value is caught before the
+request reaches the platform.
+
+```yaml
+teamEmail:
+  type: string
+  title: Team email
+  description: Who to page when this database misbehaves.
+  pattern: '^[^@]+@example\.com$'
+  minLength: 5
+  maxLength: 64
+replicas:
+  type: integer
+  title: Replicas
+  minimum: 1
+  maximum: 5
+```
+
+:::info
+When a property has a `pattern`, the generator appends `Must match regular expression '<pattern>'`
+to its description. Backstage renders descriptions as text, and a regular expression that looks
+like a URL or an email address can be turned into a link, which makes the pattern hard to read.
+For anything more complex than a short pattern, give the field a
+[custom validation message](#write-a-better-validation-message) instead.
+:::
+
+### Collect a list or a nested object
+
+An `array` renders as a list the developer adds items to, and a nested `object` renders as a
+group of fields.
+
+```yaml
+extensions:
+  type: array
+  title: Extensions
+  description: Postgres extensions to enable.
+  maxItems: 5
+  items:
+    type: string
+maintenance:
+  type: object
+  title: Maintenance window
+  properties:
+    dayOfWeek:
+      type: string
+      title: Day of week
+      enum: [sunday, monday, tuesday]
+      default: sunday
+    hourUTC:
+      type: integer
+      title: Hour (UTC)
+      minimum: 0
+      maximum: 23
+      default: 2
+```
+
+:::warning
+Set `title` on every nested property. Without one, the generator builds a label by prefixing the
+parent's title, so a `dayOfWeek` inside `maintenance` renders as
+`Maintenance window.DayOfWeek` rather than `Day of week`.
+:::
+
+`uniqueItems` is not available. The generator supports it, but Kubernetes rejects any CRD that
+sets `uniqueItems: true`, so it can never reach a form. Enforce uniqueness in your Promise
+workflow instead.
+
+### Hide a field from the form
+
+A property with `x-kubernetes-preserve-unknown-fields: true` is left out of the generated form
+entirely. This is the right choice for free-form configuration a developer is not expected to
+fill in through the portal:
+
+```yaml
+freeform:
+  type: object
+  x-kubernetes-preserve-unknown-fields: true
+```
+
+The field still exists on the API, so a request made with `kubectl` can set it.
+
+### Understand the default page layout
+
+By default every top-level property of `spec` becomes its own page in the form wizard, and the
+pages are ordered alphabetically **by property name**, not by title. A Promise with nine
+properties produces a ten-page form whose order rarely matches how a developer thinks about the
+resource:
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormPages}
+    alt="A Backstage request form with eleven numbered steps: Instance Metadata, Backups, Dedicated node, Extensions, Maintenance window, Region, Replicas, Instance size, Storage (GB), Team email and Review"
+  />
+  <figcaption>Out of the box, each top-level <code>spec</code> property gets a page, ordered by property name. "Instance size" is step 8 because its property is named <code>size</code></figcaption>
+</figure>
+
+To collapse the pages and choose the order yourself, see
+[Put every field on one page, in the order you choose](#put-every-field-on-one-page-in-the-order-you-choose).
+
+### Reference
+
+| CRD schema | Effect on the form |
+|---|---|
+| `title` | Field label. Nested properties without one are prefixed with the parent's title |
+| `description` | Helper text below the field |
+| `required` | Field is mandatory and marked with an asterisk |
+| `default` | Field is prefilled with the value |
+| `enum` | Dropdown of the listed values |
+| `pattern`, `minLength`, `maxLength` | String validation. The pattern is also appended to the description |
+| `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, `multipleOf` | Numeric validation |
+| `format` | Passed through to Backstage, for example `email` |
+| `type: array`, `minItems`, `maxItems` | A list the developer adds items to |
+| `type: object` with `properties` | A group of nested fields |
+| `oneOf` with `required` per option | Radio selector showing only the chosen option's fields |
+| `x-kubernetes-validations` with `self == oldSelf` | Read-only on the Manage tab, editable on create |
+| `x-kubernetes-preserve-unknown-fields: true` | Property is left out of the form |
+| `nullable` | Adds `null` to the field's type |
+| `uniqueItems` | Unusable. Kubernetes rejects a CRD that sets it |
+
+## Going further with a `PortalCustomization`
+
+Anything above is a change to your API. When what you want is presentation only, bind the Promise
+to a [`PortalCustomization`](../customization) and patch the generated Template.
+
+Each example below is one recipe, passed as one entry in the container's `args`. A profile that
+applies several recipes lists them all on the same container:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: postgresql-request-form
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:0.8.0
+          args:
+            - |
+              # first recipe
+            - |
+              # second recipe
+```
+
+Bind the Promise to it:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-customization: postgresql-request-form
+```
+
+The Template only exists on the promise lane, so every recipe on this page goes in
+`spec.promise.configure`.
+
+### Introduce the resource on its form
+
+By default a request form opens straight onto its fields, with nothing to say what the resource
+is. A `description` on a page of the Template's `spec.parameters` fills that gap: Backstage
+renders it as Markdown above that page's fields, both when the resource is requested and when it
+is updated.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: "Postgresql Instance Metadata"
+patch:
+  description: |
+    ## What this template creates
+
+    A managed database for your service, backed up nightly and reachable only
+    from inside the cluster.
+
+    - One database instance, sized for the load you expect
+    - A connection secret published alongside your component
+    - Nightly backups, kept for 30 days
+
+    **Before you start**, check [choosing a driver](https://example.com/docs).
+```
+
+### Put every field on one page, in the order you choose
+
+The `singleSpecPage` operation collapses the per-property pages into one page titled
+"Specification", leaving the instance metadata page alone:
+
+```yaml
+target:
+  kind: Template
+op: singleSpecPage
+```
+
+With one page, `ui:order` controls the order the fields appear in:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: Specification
+patch:
+  properties:
+    spec:
+      ui:order:
+        [
+          size,
+          storageGB,
+          dedicatedNode,
+          region,
+          replicas,
+          teamEmail,
+          backups,
+          maintenance,
+          extensions,
+        ]
+```
+
+:::warning
+`ui:order` must account for every property on the page. If one is missing, Backstage renders the
+message `uiSchema order list does not contain properties '<name>'` and dumps the raw schema in
+place of the form. Either list them all, or end the list with `"*"` to place everything you did
+not name:
+
+```yaml
+ui:order: [size, region, "*"]
+```
+:::
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormSinglePage}
+    alt="The same PostgreSQL request form reduced to three steps, with the specification fields on a single page in a chosen order"
+  />
+  <figcaption>The same Promise with every recipe on this page applied: eleven steps become three, and the fields appear in the order the recipe names</figcaption>
+</figure>
+
+If every Promise on the portal should behave this way, use the portal-wide
+[`--single-spec-page` flag](../installation#portal-wide-generate-flags) instead of a recipe on
+each Promise.
+
+### Show extra fields only when a value is selected
+
+To reveal fields based on what a developer picked in a dropdown, move those fields out of
+`properties` and into a JSON Schema `dependencies` block keyed on the controlling field.
+
+The fields must already exist on your CRD, otherwise the API server strips the values from the
+request. What this recipe changes is only when the developer sees them.
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: Specification
+patch:
+  properties:
+    spec:
+      properties:
+        storageGB: null
+        dedicatedNode: null
+      dependencies:
+        size:
+          oneOf:
+            - properties:
+                size:
+                  enum: [small]
+            - properties:
+                size:
+                  enum: [medium]
+            - properties:
+                size:
+                  enum: [large]
+                storageGB:
+                  type: integer
+                  title: Storage (GB)
+                  description: Provisioned storage. Only configurable on large instances.
+                  minimum: 100
+                  maximum: 2000
+                dedicatedNode:
+                  type: boolean
+                  title: Dedicated node
+                  description: Run this instance on a node of its own.
+              required: [storageGB]
+```
+
+Setting a property to `null` removes it, so `storageGB` and `dedicatedNode` no longer appear
+alongside every other field. Each branch of the `dependencies` block names one value of `size`,
+and the branch for `large` adds the two fields back and makes `storageGB` mandatory.
+
+Keep both names in `ui:order`, even though they are no longer in `properties`. A name that
+matches nothing is ignored, and it means the revealed fields appear where you want them rather
+than at the end of the page.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormConditional}
+    alt="The specification page with Instance size set to large, revealing a required Storage (GB) field and a Dedicated node checkbox directly below it"
+  />
+  <figcaption>Selecting <code>large</code> reveals Storage (GB) and Dedicated node. Selecting <code>small</code> or <code>medium</code> hides them again</figcaption>
+</figure>
+
+List every branch, including the ones that add nothing. If a developer selects a value no branch
+names, the form will not submit, and it reports
+`'Specification' must match exactly one schema in oneOf` rather than anything a developer can act
+on.
+
+:::warning A hidden field still sends its value
+Backstage does not clear a value when the field that revealed it is hidden again. A developer who
+selects `large`, types a storage size, then changes back to `small` submits a request carrying
+both `size: small` and the storage size they typed.
+
+Conditional visibility is a convenience, not a constraint. Where the combination actually matters,
+enforce it on the CRD so the API server rejects it:
+
+```yaml
+spec:
+  type: object
+  x-kubernetes-validations:
+    - rule: "self.size == 'large' || !has(self.storageGB)"
+      message: storageGB may only be set when size is large
+```
+:::
+
+### Write a better validation message
+
+`errorMessage` replaces the message Backstage shows when a keyword fails, keyed by the keyword
+that produced it. Pair it with `ui:help` for guidance shown before the developer gets it wrong,
+and shorten the description so the raw pattern is no longer in it:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: Specification
+patch:
+  properties:
+    spec:
+      properties:
+        teamEmail:
+          description: Who to page when this database misbehaves.
+          ui:help: Use a team alias, not a personal address.
+          errorMessage:
+            pattern: must be an @example.com address
+```
+
+### Change how a field is rendered
+
+Any `ui:` key Backstage understands can be patched onto a property. `ui:widget` picks a different
+widget for the same data:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: Specification
+patch:
+  properties:
+    spec:
+      properties:
+        region:
+          ui:widget: radio
+```
+
+The widget has to suit the property's type. A widget that does not fit, such as `checkboxes` on
+an array of free-text strings, renders nothing at all rather than reporting an error, so check
+the result in Backstage after changing one. See Backstage's
+[ui:options examples](https://backstage.io/docs/features/software-templates/ui-options-examples/)
+for the widgets available.
+
+To narrow one dropdown by what was chosen in another, the SKE frontend ships a
+[`ScopedEntityPicker`](./frontend-plugin#scopedentitypicker) field extension that you select the
+same way, with `ui:field`.
+
+### Rename the options of a choice
+
+A `oneOf` generated from the CRD labels each option after its required properties, which gives
+names like "S3" and "Gcs". To name them properly, patch the whole `oneOf` list:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: Specification
+patch:
+  properties:
+    spec:
+      properties:
+        backups:
+          oneOf:
+            - title: Amazon S3
+              type: object
+              required: [s3]
+              properties:
+                retentionDays: {type: integer, title: Retention (days), default: 30}
+                s3:
+                  type: object
+                  properties:
+                    bucket: {type: string, title: Bucket}
+                    roleArn: {type: string, title: Role ARN}
+            - title: Google Cloud Storage
+              type: object
+              required: [gcs]
+              properties:
+                retentionDays: {type: integer, title: Retention (days), default: 30}
+                gcs:
+                  type: object
+                  properties:
+                    bucket: {type: string, title: Bucket}
+                    serviceAccount: {type: string, title: Service account}
+```
+
+Lists replace wholesale, so the patch has to restate every option in full, not just the titles.
+Keep `required` on each option the same as the CRD's, otherwise the form lets a developer submit
+a request the API server rejects.
+
+### Remove a field from the form
+
+Set the property to `null`. This removes it from the form only, so use it for a field your
+workflow fills in rather than one a developer must supply:
+
+```yaml
+target:
+  kind: Template
+  list:
+    path: spec.parameters
+    key: title
+    value: "Postgresql Instance Metadata"
+patch:
+  properties:
+    objnamespace: null
+  required: [objname]
+```
+
+Removing a field from a page also means removing it from that page's `required` list, which
+replaces wholesale.
+
+:::warning
+Removing `objnamespace` takes the field off the form but leaves the generated step's manifest
+asking for it, so every request lands with an empty namespace. Pair it with the
+[`hideNamespaceManifest`](../portal-patch/recipe-reference#hidenamespacemanifest) recipe, which
+substitutes a fixed namespace instead.
+:::
+
+## Related pages
+
+- [Customization](../customization) for the `PortalCustomization` resource and how to bind a
+  Promise to one
+- [Portal Patch recipe reference](../portal-patch/recipe-reference) for the full recipe grammar
+- [SKE Frontend Plugin](./frontend-plugin) for the Manage tab and the field extensions the
+  plugin ships
+- [Writing a Promise](/main/guides/writing-a-promise) for the Promise API itself
