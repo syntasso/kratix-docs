@@ -35,6 +35,8 @@ spec:
   # The address of the git repository. If auth method is basic auth or githubApp, use `http`/`https` format: required
   # if your using ssh auth then ensure its of the format git@github.com:<org>/<repo>.git
   url: https://github.com/syntasso/kratix-repo
+  # Skip TLS verification: optional, defaults to true
+  insecure: true
 ```
 
 ## Auth
