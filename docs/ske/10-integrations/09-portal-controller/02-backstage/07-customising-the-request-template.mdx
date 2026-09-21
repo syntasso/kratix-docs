@@ -1,33 +1,43 @@
 ---
-title: Shaping the request form
-description: How a Promise's API shapes the Backstage request form, and how to change it further with a PortalCustomization
-sidebar_label: Shaping the request form
-slug: shaping-the-request-form
+title: Customising the request template
+description: How a Promise's API shapes the Backstage request template, and how to change it further with a PortalCustomization
+sidebar_label: Customising the request template
+slug: customising-the-request-template
 keywords: [portal, customization, backstage, template, form, schema, ske]
 ---
 
 ```mdx-code-block
-import FormPages from "/img/docs/ske/backstage/request-form-pages.png"
-import FormOneOfS3 from "/img/docs/ske/backstage/request-form-oneof-s3.png"
-import FormOneOfGCS from "/img/docs/ske/backstage/request-form-oneof-gcs.png"
-import FormPattern from "/img/docs/ske/backstage/request-form-pattern.png"
-import FormSinglePage from "/img/docs/ske/backstage/request-form-single-page.png"
-import FormConditional from "/img/docs/ske/backstage/request-form-conditional.png"
-import FormImmutable from "/img/docs/ske/backstage/request-form-immutable.png"
+import FormRequired from "/img/docs/ske/backstage/request-template-required.png"
+import FormEnum from "/img/docs/ske/backstage/request-template-enum.png"
+import FormImmutable from "/img/docs/ske/backstage/request-template-immutable.png"
+import FormOneOfS3 from "/img/docs/ske/backstage/request-template-oneof-s3.png"
+import FormOneOfGCS from "/img/docs/ske/backstage/request-template-oneof-gcs.png"
+import FormPattern from "/img/docs/ske/backstage/request-template-pattern.png"
+import FormNested from "/img/docs/ske/backstage/request-template-nested.png"
+import FormPages from "/img/docs/ske/backstage/request-template-pages.png"
+import FormIntro from "/img/docs/ske/backstage/request-template-intro.png"
+import FormSinglePage from "/img/docs/ske/backstage/request-template-single-page.png"
+import FormConditional from "/img/docs/ske/backstage/request-template-conditional.png"
+import FormValidationMessage from "/img/docs/ske/backstage/request-template-validation-message.png"
+import FormWidget from "/img/docs/ske/backstage/request-template-widget.png"
 ```
 
-The Portal Controller turns a Promise's API into a Backstage `Template`, and that Template is the
-form your developers fill in. Most of what you want the form to do, you write into the CRD in
-`spec.api`: required fields, dropdowns, defaults, validation, fields nobody can change later, and
-fields that only appear once something else is chosen.
+The Portal Controller turns a Promise's API into a Backstage `Template`, the request template a
+developer fills in to ask for a resource. Most of what you want that template to do, you write
+into the CRD in `spec.api`: required fields, dropdowns, defaults, validation, fields nobody can
+change later, and fields that only appear once something else is chosen.
 
 For the rest, bind the Promise to a [`PortalCustomization`](../customization) and patch the
-Template the generator produced.
+request template after the generator has built it.
 
 The examples below are fragments of one `postgresql` Promise. Each sits under `spec.api`, in
 `spec.versions[0].schema.openAPIV3Schema.properties.spec`.
 
-## What your Promise API controls
+## Behaviour that comes from your API
+
+Everything in this section is a change to the Promise itself. No customization is involved: the
+generator reads these keywords off the CRD and the request template carries them through to
+Backstage.
 
 ### Required fields
 
@@ -44,6 +54,15 @@ spec:
       type: string
 ```
 
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormRequired}
+    alt="Two required fields marked with asterisks, one showing a browser validation message reading Please fill out this field"
+  />
+  <figcaption>A required field blocks the page until it has a value</figcaption>
+</figure>
+
 ### Dropdowns and defaults
 
 `enum` gives the developer a dropdown, and `default` preselects one of the values.
@@ -56,6 +75,15 @@ size:
   enum: [small, medium, large]
   default: small
 ```
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormEnum}
+    alt="The Instance size field showing small selected, with a dropdown arrow and the helper text below it"
+  />
+  <figcaption>An <code>enum</code> becomes a dropdown, and <code>default</code> decides what it opens on</figcaption>
+</figure>
 
 `title` is the field label and `description` is the helper text underneath it. Set a `title` on
 nested properties too. Without one the generator builds the label out of the parent's title, so a
@@ -226,6 +254,15 @@ maintenance:
       default: 2
 ```
 
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormNested}
+    alt="The Maintenance window group with Day of week and Hour fields, above an Extensions list holding two entries"
+  />
+  <figcaption>A nested object becomes a titled group, and an array becomes a list with add, reorder and remove controls</figcaption>
+</figure>
+
 ### How the form is paged
 
 The generator currently gives each top-level property of `spec` a page of its own, ordered by
@@ -242,8 +279,8 @@ nobody chose, where "Instance size" turns up eighth because its property is call
 </figure>
 
 A single page suits most Promises better, and is becoming the default. Until it does, you can
-[collapse the pages yourself](#one-page-in-the-order-you-choose). When the default changes, a page
-per property remains available for the Promises that want it.
+[collapse the pages yourself](#page-layout-and-field-order). When the default changes, a page per
+property remains available for the Promises that want it.
 
 ### Reference
 
@@ -262,21 +299,21 @@ per property remains available for the Promises that want it.
 | `oneOf` with `required` per option | Radio buttons showing only the selected option's fields |
 | `x-kubernetes-validations` with `self == oldSelf` | Read-only on the Manage tab, editable on create |
 
-## Changing what the generator produced
+## Behaviour you add with a `PortalCustomization`
 
-A `PortalCustomization` runs after the Template is generated and patches it in place. Reach for
-one when what you want belongs to the Template rather than to your API, such as layout and
+A `PortalCustomization` runs after the request template is generated and patches it in place. Use
+one when what you want belongs to the template rather than to your API, such as layout and
 wording, or when Backstage can do something your CRD has no way to ask for.
 
 Each example below is a single [Portal Patch](../portal-patch/intro) recipe, one entry in the
 `args` of the profile's container. [Customization](../customization) covers writing the profile
-and binding a Promise to it. The Template only exists on the promise lane, so every recipe here
-belongs in `spec.promise.configure`.
+and binding a Promise to it. The request template only exists on the promise lane, so every
+recipe here belongs in `spec.promise.configure`.
 
 ### Introduce the resource on its form
 
 By default a request form opens straight onto its fields, with nothing to say what the resource
-is. A `description` on a page of the Template's `spec.parameters` fills that gap: Backstage
+is. A `description` on a page of the template's `spec.parameters` fills that gap: Backstage
 renders it as Markdown above that page's fields, both when the resource is requested and when it
 is updated.
 
@@ -301,7 +338,16 @@ patch:
     **Before you start**, check [choosing a driver](https://example.com/docs).
 ```
 
-### One page, in the order you choose
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormIntro}
+    alt="The first page of the request form, opening with a heading, a paragraph, a bulleted list and a link before the Name and Namespace fields"
+  />
+  <figcaption>The description renders as Markdown above the page's fields</figcaption>
+</figure>
+
+### Page layout and field order
 
 `singleSpecPage` folds the per-property pages into one page called "Specification" and leaves the
 instance metadata page alone:
@@ -469,6 +515,15 @@ patch:
             pattern: must be an @example.com address
 ```
 
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormValidationMessage}
+    alt="The Team email field holding an invalid address, showing the message must be an @example.com address and the help text below it"
+  />
+  <figcaption>The custom message replaces the regular expression error, with <code>ui:help</code> underneath it</figcaption>
+</figure>
+
 ### Change how a field is rendered
 
 Any `ui:` key Backstage understands can be patched onto a property. `ui:widget` picks a different
@@ -488,6 +543,15 @@ patch:
         region:
           ui:widget: radio
 ```
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormWidget}
+    alt="The Region field rendered as two radio buttons, eu-west-1 and us-east-1, instead of a dropdown"
+  />
+  <figcaption>The same <code>enum</code> as radio buttons rather than a dropdown</figcaption>
+</figure>
 
 Pick a widget that suits the property's type. One that does not fit, such as `checkboxes` on an
 array of free text, renders nothing at all rather than complaining, so open the form after
