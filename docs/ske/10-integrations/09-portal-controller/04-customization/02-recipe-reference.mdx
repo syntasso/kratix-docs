@@ -189,6 +189,11 @@ patch:
 **Backstage only.** Collapses a Template's per-property specification pages into one page titled
 "Specification". Rejects `target.list` and `patch`.
 
+:::note
+A single page is the default, so this recipe only matters on a portal that set
+[`--single-spec-page=false`](../installation#portal-wide-generate-flags).
+:::
+
 ```yaml
 target:
   kind: Template
@@ -198,10 +203,6 @@ op: singleSpecPage
 The first page, which carries the instance metadata fields, is left untouched. Every remaining
 page is merged into a single page. If the Template has one page or fewer, the recipe does nothing
 and succeeds.
-
-A single page is already the default, so this recipe only has an effect on a portal where
-[`--single-spec-page=false`](../installation#portal-wide-generate-flags) turned it off, and you
-want particular Promises on one page anyway.
 
 ### `hideNamespaceManifest`
 
