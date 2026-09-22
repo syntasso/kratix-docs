@@ -21,6 +21,18 @@ Check the release notes below for information on each available version.
 
 ### [v0.59.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.59.0/) (2026-09-21)
 
+:::warning Portal and Backstage Controller versions
+
+This release removes the workflow counters from Promise and resource request status. If you run
+either controller alongside SKE, upgrade it at the same time:
+
+* **Portal Controller** — use [`v0.4.2`](/ske/releases/ske-portal-controller)
+* **Backstage Controller** — use [`v0.11.1`](/ske/releases/backstage-controller)
+
+On earlier versions, resource requests will not reconcile after the upgrade.
+
+:::
+
 #### Features
 
 * The SKE Platform Manager can now read health records directly from a bucket (S3-compatible
