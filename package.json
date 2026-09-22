@@ -19,6 +19,7 @@
     "@docusaurus/plugin-client-redirects": "^3.10.1",
     "@docusaurus/plugin-ideal-image": "^3.10.1",
     "@docusaurus/preset-classic": "^3.10.1",
+    "@docusaurus/theme-mermaid": "3.10.1",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.14.1",
     "@giscus/react": "^3.1.0",

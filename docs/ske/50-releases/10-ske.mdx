@@ -19,6 +19,43 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.59.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.59.0/) (2026-09-21)
+
+:::warning Portal and Backstage Controller versions
+
+This release removes the workflow counters from Promise and resource request status. If you run
+either controller alongside SKE, upgrade it at the same time:
+
+* **Portal Controller** — use [`v0.4.2`](/ske/releases/ske-portal-controller)
+* **Backstage Controller** — use [`v0.11.1`](/ske/releases/backstage-controller)
+
+On earlier versions, resource requests will not reconcile after the upgrade.
+
+:::
+
+#### Features
+
+* The SKE Platform Manager can now read health records directly from a bucket (S3-compatible
+  or Azure Blob Storage) via a new `HealthSource` resource, removing the need for a GitOps
+  agent on the Platform cluster to deliver health information. For more information, see the
+  [Move health records onto a bucket](/ske/guides/health-records-from-a-bucket) guide.
+* Upgrade runs replaced by a newer run now enter a `Superseded` state instead of staying active.
+* A resource's health records are now listed in a consistent order, sorted by namespace
+  and then name.
+
+#### Fixes
+
+* Workflow pipelines that pause themselves with `retryAfter` now resume reliably, running
+  once on resume instead of sometimes re-running repeatedly before settling.
+* Health records no longer appear on the wrong resource when two Promises each have a resource
+  with the same name in the same namespace.
+* Two health records deleted at the same time no longer block each other from finishing,
+  leaving both stuck `Terminating`.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.58.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.58.0/) (2026-09-02)
 
 #### Fixes

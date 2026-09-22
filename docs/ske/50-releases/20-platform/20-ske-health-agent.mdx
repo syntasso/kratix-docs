@@ -17,6 +17,17 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-heal
 
 ## Release Notes
 
+### [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.14.0/) (2026-09-21)
+
+Released in Helm Chart version [0.31.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.31.0/)
+
+#### Features
+
+* The Health Agent can now write health check results to Azure Blob Storage. Set
+  `provider: azure` in the agent's state store ConfigMap; see
+  [Set up access to the State Store](/ske/installing-ske/ske-health-agent#set-up-access-to-the-state-store).
+  SKE v0.59 or above is needed to read these results and reflect them in the platform.
+
 ### [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.13.0/) (2026-09-07)
 
 Released in Helm Chart version [0.30.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.30.0/)
