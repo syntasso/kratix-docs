@@ -317,10 +317,14 @@ A `PortalCustomization` runs after the request template is generated and patches
 one when what you want belongs to the template rather than to your API, such as layout and
 wording, or when Backstage can do something your CRD has no way to ask for.
 
-Each example below is a single [Portal Patch](../portal-patch/intro) recipe, one entry in the
-`args` of the profile's container. [Customization](../customization) covers writing the profile
-and binding a Promise to it. The request template only exists on the promise lane, so every
-recipe here belongs in `spec.promise.configure`.
+Each example below is a complete `PortalCustomization`. The change itself is a
+[Portal Patch](../portal-patch/intro) recipe, one entry under `args`, applied to the documents
+the generator wrote. A Promise binds to a single `PortalCustomization`, so to make more than one
+of these changes, add each recipe as another `args` entry rather than creating a second resource.
+[Customization](../customization) covers binding a Promise to one.
+
+The request template only exists on the promise lane, so every recipe here belongs in
+`spec.promise.configure`.
 
 ### Add a description to the template
 
@@ -330,25 +334,41 @@ renders it as Markdown above that page's fields, both when the resource is reque
 is updated.
 
 ```yaml
-target:
-  kind: Template
-  list:
-    path: spec.parameters
-    key: title
-    value: "Postgresql Instance Metadata"
-patch:
-  description: |
-    ## What this template creates
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: postgresql-request-template
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          args:
+            - |
+              target:
+                kind: Template
+                list:
+                  path: spec.parameters
+                  key: title
+                  value: "Postgresql Instance Metadata"
+              patch:
+                description: |
+                  ## What this template creates
 
-    A managed database for your service, backed up nightly and reachable only
-    from inside the cluster.
+                  A managed database for your service, backed up nightly and reachable only
+                  from inside the cluster.
 
-    - One database instance, sized for the load you expect
-    - A connection secret published alongside your component
-    - Nightly backups, kept for 30 days
+                  - One database instance, sized for the load you expect
+                  - A connection secret published alongside your component
+                  - Nightly backups, kept for 30 days
 
-    **Before you start**, check [choosing a driver](https://example.com/docs).
+                  **Before you start**, check [choosing a driver](https://example.com/docs).
 ```
+
+`Postgresql Instance Metadata` is the title the generator gives the first page, built from your
+CRD's kind. Substitute your own, or the selector matches nothing and the sync fails.
 
 <figure className="diagram">
   <img
@@ -364,27 +384,40 @@ patch:
 `ui:order` sets the order the fields appear in:
 
 ```yaml
-target:
-  kind: Template
-  list:
-    path: spec.parameters
-    key: title
-    value: Specification
-patch:
-  properties:
-    spec:
-      ui:order:
-        [
-          size,
-          storageGB,
-          dedicatedNode,
-          region,
-          replicas,
-          teamEmail,
-          backups,
-          maintenance,
-          extensions,
-        ]
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: postgresql-request-template
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          args:
+            - |
+              target:
+                kind: Template
+                list:
+                  path: spec.parameters
+                  key: title
+                  value: Specification
+              patch:
+                properties:
+                  spec:
+                    ui:order:
+                      [
+                        size,
+                        storageGB,
+                        dedicatedNode,
+                        region,
+                        replicas,
+                        teamEmail,
+                        backups,
+                        maintenance,
+                        extensions,
+                      ]
 ```
 
 :::warning
@@ -413,41 +446,54 @@ developer picks `large`, take it out of `properties` and describe it in a `depen
 instead:
 
 ```yaml
-target:
-  kind: Template
-  list:
-    path: spec.parameters
-    key: title
-    value: Specification
-patch:
-  properties:
-    spec:
-      properties:
-        storageGB: null
-        dedicatedNode: null
-      dependencies:
-        size:
-          oneOf:
-            - properties:
-                size:
-                  enum: [small]
-            - properties:
-                size:
-                  enum: [medium]
-            - properties:
-                size:
-                  enum: [large]
-                storageGB:
-                  type: integer
-                  title: Storage (GB)
-                  description: Provisioned storage. Only configurable on large instances.
-                  minimum: 100
-                  maximum: 2000
-                dedicatedNode:
-                  type: boolean
-                  title: Dedicated node
-                  description: Run this instance on a node of its own.
-              required: [storageGB]
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: postgresql-request-template
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          args:
+            - |
+              target:
+                kind: Template
+                list:
+                  path: spec.parameters
+                  key: title
+                  value: Specification
+              patch:
+                properties:
+                  spec:
+                    properties:
+                      storageGB: null
+                      dedicatedNode: null
+                    dependencies:
+                      size:
+                        oneOf:
+                          - properties:
+                              size:
+                                enum: [small]
+                          - properties:
+                              size:
+                                enum: [medium]
+                          - properties:
+                              size:
+                                enum: [large]
+                              storageGB:
+                                type: integer
+                                title: Storage (GB)
+                                description: Provisioned storage. Only configurable on large instances.
+                                minimum: 100
+                                maximum: 2000
+                              dedicatedNode:
+                                type: boolean
+                                title: Dedicated node
+                                description: Run this instance on a node of its own.
+                            required: [storageGB]
 ```
 
 Setting `storageGB` and `dedicatedNode` to `null` takes them off the form. The `dependencies`
@@ -497,21 +543,34 @@ failed. Pair it with `ui:help` to tell the developer what you want before they g
 trim the description so the raw pattern is no longer in it:
 
 ```yaml
-target:
-  kind: Template
-  list:
-    path: spec.parameters
-    key: title
-    value: Specification
-patch:
-  properties:
-    spec:
-      properties:
-        teamEmail:
-          description: Who to page when this database misbehaves.
-          ui:help: Use a team alias, not a personal address.
-          errorMessage:
-            pattern: must be an @example.com address
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: postgresql-request-template
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          args:
+            - |
+              target:
+                kind: Template
+                list:
+                  path: spec.parameters
+                  key: title
+                  value: Specification
+              patch:
+                properties:
+                  spec:
+                    properties:
+                      teamEmail:
+                        description: Who to page when this database misbehaves.
+                        ui:help: Use a team alias, not a personal address.
+                        errorMessage:
+                          pattern: must be an @example.com address
 ```
 
 <figure className="diagram">
@@ -529,18 +588,31 @@ Any `ui:` key Backstage understands can be patched onto a property. `ui:widget` 
 widget for the same data, so an enum of two values can be radio buttons rather than a dropdown:
 
 ```yaml
-target:
-  kind: Template
-  list:
-    path: spec.parameters
-    key: title
-    value: Specification
-patch:
-  properties:
-    spec:
-      properties:
-        region:
-          ui:widget: radio
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: postgresql-request-template
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          args:
+            - |
+              target:
+                kind: Template
+                list:
+                  path: spec.parameters
+                  key: title
+                  value: Specification
+              patch:
+                properties:
+                  spec:
+                    properties:
+                      region:
+                        ui:widget: radio
 ```
 
 <figure className="diagram">
