@@ -14,7 +14,6 @@ import FormOneOfS3 from "/img/docs/ske/backstage/request-template-oneof-s3.png"
 import FormOneOfGCS from "/img/docs/ske/backstage/request-template-oneof-gcs.png"
 import FormPattern from "/img/docs/ske/backstage/request-template-pattern.png"
 import FormNested from "/img/docs/ske/backstage/request-template-nested.png"
-import FormPages from "/img/docs/ske/backstage/request-template-pages.png"
 import FormIntro from "/img/docs/ske/backstage/request-template-intro.png"
 import FormSinglePage from "/img/docs/ske/backstage/request-template-single-page.png"
 import FormConditional from "/img/docs/ske/backstage/request-template-conditional.png"
@@ -295,31 +294,6 @@ maintenance:
   <figcaption>A nested object becomes a titled group, and an array becomes a list with add, reorder and remove controls</figcaption>
 </figure>
 
-### How the form is paged
-
-Every `spec` property goes on a single page, titled "Specification", and
-[`ui:order`](#field-order) sets the order the fields appear in.
-
-:::info This default is changing
-Until the change lands, the generator gives each top-level property of `spec` a page of its own,
-ordered by property name rather than by title. For the Promise above that is a ten-page wizard in
-an order nobody chose, where "Instance size" turns up eighth because its property is called
-`size`.
-
-The portal-wide [`--single-spec-page` flag](../installation#portal-wide-generate-flags) switches
-between the two layouts, and stays available after the default flips for the Promises that want a
-page per property.
-:::
-
-<figure className="diagram">
-  <img
-    className="fullwidth"
-    src={FormPages}
-    alt="A Backstage request form with eleven numbered steps: Instance Metadata, Backups, Dedicated node, Extensions, Maintenance window, Region, Replicas, Instance size, Storage (GB), Team email and Review"
-  />
-  <figcaption>The old layout: one page per top-level <code>spec</code> property, ordered by property name</figcaption>
-</figure>
-
 ### Reference
 
 | CRD schema | Effect on the form |
@@ -387,7 +361,7 @@ patch:
 
 ### Field order
 
-`ui:order` sets the order the fields appear in on the Specification page:
+`ui:order` sets the order the fields appear in:
 
 ```yaml
 target:
