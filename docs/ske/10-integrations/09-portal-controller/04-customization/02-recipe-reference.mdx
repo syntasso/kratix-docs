@@ -199,6 +199,10 @@ The first page, which carries the instance metadata fields, is left untouched. E
 page is merged into a single page. If the Template has one page or fewer, the recipe does nothing
 and succeeds.
 
+A single page is already the default, so this recipe only has an effect on a portal where
+[`--single-spec-page=false`](../installation#portal-wide-generate-flags) turned it off, and you
+want particular Promises on one page anyway.
+
 ### `hideNamespaceManifest`
 
 **Backstage only.** Replaces the namespace placeholder in a generated step's manifest with a fixed

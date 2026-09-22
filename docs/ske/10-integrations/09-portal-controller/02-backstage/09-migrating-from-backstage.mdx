@@ -122,7 +122,7 @@ its own, so these all go in `spec.promise.configure`.
 | `type` | Recipe patching `spec.type` |
 | `lifecycle` | Recipe patching `spec.lifecycle` |
 | `owner` | Recipe patching `spec.owner` |
-| `singleSpecPage` | The `singleSpecPage` recipe, or the portal-wide `--single-spec-page` flag |
+| `singleSpecPage` | Now the default. `singleSpecPage: false` becomes the portal-wide `--single-spec-page=false` flag |
 | `hideNamespace` | The `hideNamespaceManifest` recipe plus a patch removing the form field |
 | `defaultNamespace` | `defaultNamespace` on the `hideNamespaceManifest` recipe |
 | `namespaceFieldTitle` | Recipe patching the namespace property's `title` |
@@ -136,10 +136,10 @@ target:
 op: singleSpecPage
 ```
 
-There is also a portal-wide
-[`--single-spec-page` flag](../installation#portal-wide-generate-flags). Use the flag when every
-Promise on the portal should behave this way, and the recipe when only some should. The old option
-was per-Promise-group, so the recipe is the closer match.
+One page is now the default, so `singleSpecPage: true` needs nothing carried over. To keep the
+old per-property layout, set
+[`--single-spec-page=false`](../installation#portal-wide-generate-flags) on the portal, and use
+the recipe above for any Promise you still want on one page.
 
 #### `hideNamespace` and `defaultNamespace`
 

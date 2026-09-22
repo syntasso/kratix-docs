@@ -312,6 +312,25 @@ maintenance:
 | `oneOf` with `required` per option | Radio buttons showing only the selected option's fields |
 | `x-kubernetes-validations` with `self == oldSelf` | Read-only on the Manage tab, editable on create |
 
+## Page layout
+
+Every `spec` property shares one form page, titled "Specification". To give each top-level
+property a page of its own, turn that off for the portal:
+
+```yaml
+portals:
+  - name: prod
+    type: backstage
+    # ... config as usual
+    adapterConfig:
+      generate:
+        args:
+          - "--single-spec-page=false"
+```
+
+This is a portal-wide setting on the `SKEIntegration`, so every Promise on that portal follows
+it. [Field order](#field-order) sets the order fields appear in within the page.
+
 ## Behaviour you add with a `PortalCustomization`
 
 A `PortalCustomization` runs after the request template is generated and patches it in place. Use
