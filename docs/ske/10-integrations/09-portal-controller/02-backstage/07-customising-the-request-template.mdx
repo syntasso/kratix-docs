@@ -15,8 +15,9 @@ import FormOneOfGCS from "/img/docs/ske/backstage/request-template-oneof-gcs.png
 import FormPattern from "/img/docs/ske/backstage/request-template-pattern.png"
 import FormNested from "/img/docs/ske/backstage/request-template-nested.png"
 import FormIntro from "/img/docs/ske/backstage/request-template-intro.png"
-import FormSinglePage from "/img/docs/ske/backstage/request-template-single-page.png"
-import FormConditional from "/img/docs/ske/backstage/request-template-conditional.png"
+import FormFieldOrder from "/img/docs/ske/backstage/request-template-field-order.png"
+import FormConditionalHidden from "/img/docs/ske/backstage/request-template-conditional-hidden.png"
+import FormConditionalShown from "/img/docs/ske/backstage/request-template-conditional-shown.png"
 import FormValidationMessage from "/img/docs/ske/backstage/request-template-validation-message.png"
 import FormWidget from "/img/docs/ske/backstage/request-template-widget.png"
 ```
@@ -323,8 +324,8 @@ the generator wrote. A Promise binds to a single `PortalCustomization`, so to ma
 of these changes, add each recipe as another `args` entry rather than creating a second resource.
 [Customization](../customization) covers binding a Promise to one.
 
-The request template only exists on the promise lane, so every recipe here belongs in
-`spec.promise.configure`.
+Put every recipe here in `spec.promise.configure`. The request template is generated once per
+Promise, not once per request.
 
 ### Add a description to the template
 
@@ -406,37 +407,23 @@ spec:
               patch:
                 properties:
                   spec:
-                    ui:order:
-                      [
-                        size,
-                        storageGB,
-                        dedicatedNode,
-                        region,
-                        replicas,
-                        teamEmail,
-                        backups,
-                        maintenance,
-                        extensions,
-                      ]
+                    ui:order: [size, storageGB, region, replicas, "*"]
 ```
 
 :::warning
 `ui:order` has to account for every property on the page. Miss one and Backstage replaces the
 form with `uiSchema order list does not contain properties '<name>'` and a dump of the raw schema.
-Either name them all, or end the list with `"*"` to catch whatever you did not name:
-
-```yaml
-ui:order: [size, region, "*"]
-```
+The `"*"` above catches everything not named before it; without it, every property has to appear
+in the list.
 :::
 
 <figure className="diagram">
   <img
     className="fullwidth"
-    src={FormSinglePage}
-    alt="The same PostgreSQL request form reduced to three steps, with the specification fields on a single page in a chosen order"
+    src={FormFieldOrder}
+    alt="Instance size, Storage (GB) and Region appearing in that order on the form"
   />
-  <figcaption>The Specification page with the fields in the order <code>ui:order</code> names</figcaption>
+  <figcaption>The first fields appear in the order <code>ui:order</code> names them</figcaption>
 </figure>
 
 ### Show a field only for certain choices
@@ -470,7 +457,6 @@ spec:
                   spec:
                     properties:
                       storageGB: null
-                      dedicatedNode: null
                     dependencies:
                       size:
                         oneOf:
@@ -487,36 +473,39 @@ spec:
                                 type: integer
                                 title: Storage (GB)
                                 description: Provisioned storage. Only configurable on large instances.
-                                minimum: 100
-                                maximum: 2000
-                              dedicatedNode:
-                                type: boolean
-                                title: Dedicated node
-                                description: Run this instance on a node of its own.
                             required: [storageGB]
 ```
 
-Setting `storageGB` and `dedicatedNode` to `null` takes them off the form. The `dependencies`
-block is keyed on `size`, the field whose value decides what appears, and gives it one branch per
-value. The `large` branch puts both fields back and makes `storageGB` mandatory, while `small`
-and `medium` add nothing, so both fields stay hidden.
+Setting `storageGB` to `null` takes it off the form. The `dependencies` block is keyed on `size`,
+the field whose value decides what appears, and gives it one branch per value. The `large` branch
+puts `storageGB` back and makes it mandatory, while `small` and `medium` add nothing, so it stays
+hidden.
 
 Every value needs a branch, even the ones that add nothing. Miss one and the form refuses to
 submit with `'Specification' must match exactly one schema in oneOf`, which tells a developer
 nothing they can act on.
 
-The fields still have to exist on your CRD. This recipe only changes when they are visible, and
-the API server strips anything the CRD does not declare. Leave both names in `ui:order` too: a
-name matching nothing is ignored, and it puts the revealed fields where you want them instead of
-at the end of the page.
+The field still has to exist on your CRD. This recipe only changes when it is visible, and the
+API server strips anything the CRD does not declare. Leave its name in `ui:order` too: a name
+matching nothing is ignored, and it puts the revealed field where you want it instead of at the
+end of the page.
 
 <figure className="diagram">
   <img
     className="fullwidth"
-    src={FormConditional}
-    alt="The specification page with Instance size set to large, revealing a required Storage (GB) field and a Dedicated node checkbox directly below it"
+    src={FormConditionalHidden}
+    alt="Instance size set to small, with Region following it directly and no Storage field"
   />
-  <figcaption>Picking <code>large</code> reveals Storage (GB) and Dedicated node. Picking <code>small</code> or <code>medium</code> hides them again</figcaption>
+  <figcaption>On <code>small</code>, Storage (GB) is not on the form at all</figcaption>
+</figure>
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={FormConditionalShown}
+    alt="Instance size set to large, with a required Storage (GB) field between it and Region"
+  />
+  <figcaption>On <code>large</code>, it appears where <code>ui:order</code> puts it, and is required</figcaption>
 </figure>
 
 :::warning A hidden field still sends its value
@@ -524,8 +513,7 @@ Backstage does not clear a value when the field that revealed it disappears. Pic
 storage size, change back to `small`, and the request carries both `size: small` and the storage
 size you typed.
 
-Hiding a field is a convenience, not a constraint. Where the combination genuinely matters, rule
-it out on the CRD so the API server rejects it:
+Add the same rule to the CRD, so the API server rejects a request that breaks it:
 
 ```yaml
 spec:
@@ -624,11 +612,10 @@ spec:
   <figcaption>The same <code>enum</code> as radio buttons rather than a dropdown</figcaption>
 </figure>
 
-Pick a widget that suits the property's type. One that does not fit, such as `checkboxes` on an
-array of free text, renders nothing at all rather than complaining, so open the form after
-changing one. Backstage's
+Backstage's
 [ui:options examples](https://backstage.io/docs/features/software-templates/ui-options-examples/)
-list the widgets available.
+list the widgets available. A widget that does not suit the property's type renders nothing at
+all rather than reporting an error.
 
 To narrow one dropdown by what was chosen in another, the SKE frontend ships a
 [`ScopedEntityPicker`](./frontend-plugin#scopedentitypicker) that you select the same way, with
