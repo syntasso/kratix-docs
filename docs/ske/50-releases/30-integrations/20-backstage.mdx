@@ -5,6 +5,10 @@ sidebar_label: Backstage Plugins
 slug: /ske/releases/backstage
 ---
 
+```mdx-code-block
+import ResourceStatus from "/img/docs/ske/backstage/resource-status.png"
+```
+
 ## Overview
 
 The SKE Backstage Frontend plugin extends Backstage so it can be used to view
@@ -23,6 +27,21 @@ The plugins are available as NPM packages at:
 Check the release notes below for information on each available version.
 
 ## Release Notes
+
+### ske-frontend (unreleased)
+
+#### Features
+
+* **Revamped the Resource Kratix tab (now called Status).** It gives the resource's overall status in one word and displays details such as resource status, health checks, and provisioning steps.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={ResourceStatus}
+    alt="The Status tab of a WebApp Resource: a Needs attention banner, the Details card, three health checks with one unhealthy, the folded Steps card, and a Links card"
+  />
+  <figcaption>The Status tab of a Resource with one failing health check</figcaption>
+</figure>
 
 ### [ske-frontend v0.21.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.21.1/) (2026-09-07)
 

@@ -11,7 +11,7 @@ slug: frontend-plugin
 import PromiseOverview from "/img/docs/ske/backstage/promise-overview.png"
 import ResourceDeletePullRequest from "/img/docs/ske/backstage/resource-delete-pr.png"
 import ResourceManage from "/img/docs/ske/backstage/resource-manage.png"
-import ResourceOverview from "/img/docs/ske/backstage/resource-overview.png"
+import ResourceStatus from "/img/docs/ske/backstage/resource-status.png"
 import ResourcePullRequestBanner from "/img/docs/ske/backstage/resource-pr-banner.png"
 ```
 
@@ -94,60 +94,43 @@ deletion workflows.
 
 :::
 
-**Example: Database Promise**
+**Example: WebApp Promise**
 
-For a Database Promise, the Overview card could display:
+For a WebApp Promise, the tab displays:
 
 <figure className="diagram">
   <img
     className="fullwidth"
     src={PromiseOverview}
-    alt="The Backstage Overview tab for the ske-postgresql Promise, showing its API details, status, and relationships"
+    alt="The Backstage Kratix tab for the WebApp Promise, showing its API details, status, create button and relations"
   />
-  <figcaption>Overview of the ske-postgresql Promise in Backstage</figcaption>
+  <figcaption>The WebApp Promise in Backstage</figcaption>
 </figure>
 
-### Resource Overview
+### Resource Status
 
-The Resource **Overview** tab displays:
+The Resource page includes a **Status** tab, which displays:
 
-- the instance name, namespace, type, and the Promise from which it was
-  created
-- the Promise summary, when supplied
-- the current status returned by the backend, when available
-- the Backstage Catalog Graph
+- a banner giving the resource's overall status in one word, read from Kratix's
+  `Reconciled` condition
+- **Details**: the instance name, namespace, kind and the Promise it came from,
+  plus everything the resource reports about itself, and the whole manifest
+  behind **View source**
+- **Health checks**, when the Promise writes HealthRecords
+- **Steps**, one row per pipeline of the resource's configure workflow
+- **Links**, every web address in the reported status
 
-The Promise summary supports Markdown. The graph uses relationships already
-present on the Backstage entity, such as `spec.dependsOn`. The frontend plugin
-does not create relationships from the Kubernetes data returned by SKE.
-
-For example, this Resource depends on the Database Promise:
-
-```yaml
-apiVersion: backstage.io/v1alpha1
-kind: Component
-metadata:
-  name: dev
-  title: dev-postgres ske-postgresql
-spec:
-  type: kratix-resource
-  lifecycle: production
-  owner: group:default/kratix-platform
-  dependsOn:
-    - component:default/ske-postgresql-promise
-```
-
-And it shows up like this:
+Every card is read from fields Kratix writes on the resource, so a Promise needs
+no configuration for the tab to be useful. Health checks are the exception: that
+card appears only for a Promise whose workflow writes HealthRecords.
 
 <figure className="diagram">
   <img
     className="fullwidth"
-    src={ResourceOverview}
-    alt="The Backstage Overview tab for the dev-postgres Resource, showing its details, status, and relationships"
+    src={ResourceStatus}
+    alt="The Status tab of a WebApp Resource: a Needs attention banner, the Details card, three health checks with one unhealthy, the folded Steps card, and a Links card"
   />
-  <figcaption>
-    Overview of the dev-postgres Resource and its Promise relationship
-  </figcaption>
+  <figcaption>The Status tab of a Resource with one failing health check</figcaption>
 </figure>
 
 ### Resource Manage
@@ -176,15 +159,15 @@ current Resource data:
 | `repoUrl` | Request repository. Disabled when supplied. |
 | `prAction` | Always `Update`, so the Template records the run as an update rather than a new request, and the task page can say so. |
 
-**Example: updating a PostgreSQL Resource**
+**Example: updating a WebApp Resource**
 
 <figure className="diagram">
   <img
     className="fullwidth"
     src={ResourceManage}
-    alt="The Backstage Software Template form used to configure a ske-postgresql Resource"
+    alt="The Backstage Software Template form used to configure a WebApp Resource"
   />
-  <figcaption>Software Template form for a ske-postgresql Resource</figcaption>
+  <figcaption>Software Template form for a WebApp Resource</figcaption>
 </figure>
 
 Submitting the form starts a Backstage scaffolder task and opens the task page.
@@ -232,7 +215,7 @@ there is a pull-request for deletion:
   <img
     className="fullwidth"
     src={ResourceDeletePullRequest}
-    alt="A Backstage Resource page showing that a pull request to delete the Resource is open"
+    alt="The top of a Resource page, with a banner saying deletion is waiting for approval and linking the pull request"
   />
   <figcaption>Deletion-requested banner with a link to the pull request</figcaption>
 </figure>
@@ -299,7 +282,7 @@ invalid value prevents the details card from rendering.
 ### Resource annotations
 
 Resource annotations tell the plugin which Kubernetes Resource backs the
-catalog entity and what to display on its Overview tab. They can also link the
+catalog entity and what to display on its Status tab. They can also link the
 Manage tab to a Software Template for updates. The following table shows the
 list of annotations we can have:
 
@@ -388,7 +371,7 @@ a **View pull request** link when the URL is present.
   <img
     className="fullwidth"
     src={ResourcePullRequestBanner}
-    alt="A Backstage Resource page showing that a pull request for the Resource is open"
+    alt="The top of a Resource page, showing the two-step progress of an open pull request and a link to it"
   />
   <figcaption>Open pull-request banner for a Resource</figcaption>
 </figure>
@@ -416,8 +399,8 @@ The response affects the page as follows:
 - `200` without `metadata.deletionTimestamp`: stores and displays the returned
   manifest and status
 - `200` with `metadata.deletionTimestamp`: puts the page into the deleting
-  state without storing the returned manifest. The Overview falls back to
-  catalog entity annotations, and Resource management controls are unavailable
+  state without storing the returned manifest. The page falls back to catalog
+  entity annotations, and Resource management controls are unavailable
 - `404` for a Resource: treats the Resource as being deleted or already
   removed
 - `404` for a Promise: leaves the page available without current backend data,
@@ -656,7 +639,7 @@ it adds to the Overview tab alongside the plugin content.
 ### `KratixResourceEntityPage`
 
 It provides a complete `EntityLayout` for a Resource, requires content for the
-Overview tab, and adds the Manage tab.
+Status tab, and adds the Manage tab.
 
 ```tsx
 <KratixResourceEntityPage>
@@ -666,9 +649,9 @@ Overview tab, and adds the Manage tab.
 
 ### `KratixOverviewTab`
 
-It provides the Overview tab content for a Promise or Resource. It accepts
-optional content and a `resourceType` override; otherwise, it infers the type
-from the catalog entity.
+It provides the Overview tab content for a Promise, and the Status tab content
+for a Resource. It accepts optional content and a `resourceType` override;
+otherwise, it infers the type from the catalog entity.
 
 ```tsx
 <KratixOverviewTab resourceType="resource">
@@ -856,7 +839,7 @@ The plugin checks the entity type and adds the relevant configuration:
 | Entity | Route | Content |
 |---|---|---|
 | Promise | `/` | Overview tab |
-| Resource | `/` | Overview tab |
+| Resource | `/` | Status tab |
 | Resource | `/manage` | Manage tab with update and delete controls |
 
 These paths are relative to the catalog entity page, rather than top-level
