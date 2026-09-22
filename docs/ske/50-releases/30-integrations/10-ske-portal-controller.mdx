@@ -19,6 +19,18 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.4.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.2/) (2026-09-22)
+
+:::warning Requires SKE v0.59.0
+SKE `v0.59.0` changed how Kratix records workflow progress on Promises and resource requests, and
+this version tracks that change. On earlier Portal Controller versions, resource requests stay
+unreconciled once SKE is upgraded.
+:::
+
+#### Maintenance
+
+* Base image updates. Bump dependencies.
+
 ### [v0.4.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.1/) (2026-09-07)
 
 #### Bug Fixes
