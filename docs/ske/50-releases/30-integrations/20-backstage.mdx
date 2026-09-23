@@ -6,6 +6,7 @@ slug: /ske/releases/backstage
 ---
 
 ```mdx-code-block
+import PromiseStatus from "/img/docs/ske/backstage/promise-status.png"
 import ResourceStatus from "/img/docs/ske/backstage/resource-status.png"
 ```
 
@@ -42,6 +43,23 @@ Check the release notes below for information on each available version.
   />
   <figcaption>The Status tab of a Resource with one failing health check</figcaption>
 </figure>
+
+* **Revamped the Promise Kratix tab (now called Status).** It says in one word whether the platform can fulfil requests for the Promise, lists the workflows it ran to get there, and lists every request made against it with the team it belongs to and its current state. A Promise installed as a requirement of another names the Promise it is part of.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={PromiseStatus}
+    alt="The Status tab of a redis Promise: an Available banner, the Promise it is part of, the Details card, the Workflows card, and a table of eight resource requests with mixed states"
+  />
+  <figcaption>The Status tab of a Promise, with requests in several states</figcaption>
+</figure>
+
+:::note Request states need the cluster read
+
+The states in the resource requests table come from the platform cluster through the SKE Backend plugin, one namespace at a time as the signed-in user. A namespace a user may not list still shows its requests, with their state reading **Unknown**, and `ske.mode: gitops` cannot supply states at all.
+
+:::
 
 ### [ske-frontend v0.21.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.21.1/) (2026-09-07)
 

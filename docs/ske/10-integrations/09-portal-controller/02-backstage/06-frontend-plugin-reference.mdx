@@ -8,7 +8,7 @@ slug: frontend-plugin
 ---
 
 ```mdx-code-block
-import PromiseOverview from "/img/docs/ske/backstage/promise-overview.png"
+import PromiseStatus from "/img/docs/ske/backstage/promise-status.png"
 import ResourceDeletePullRequest from "/img/docs/ske/backstage/resource-delete-pr.png"
 import ResourceManage from "/img/docs/ske/backstage/resource-manage.png"
 import ResourceStatus from "/img/docs/ske/backstage/resource-status.png"
@@ -60,7 +60,7 @@ the same way as an absent annotation.
 
 Add `kratix.io/type: promise` to every Promise entity. Although the route
 matcher recognises `spec.type: kratix-promise`, the page also needs the
-annotation when it loads Promise data. Without it, the Promise Overview does
+annotation when it loads Promise data. Without it, the Promise Status tab does
 not load. It shows a missing-annotation message for Resource fields instead of
 the Promise details.
 
@@ -71,16 +71,33 @@ Resource entities can use either `kratix.io/type: resource` or
 
 ## Entity pages
 
-### Promise Overview
+### Promise Status
 
-The Promise page contains one **Overview** tab. It displays:
+The Promise page includes a **Status** tab, which displays:
 
-- the name and API details of the service that users can create
-- the catalog entity description
-- the Promise status, when available
-- a button for creating a service instance from the Promise's Backstage
-  Software Template
-- the Backstage Catalog Graph
+- a banner giving the Promise's overall state in one word — **Available**,
+  **Installing**, **Updating**, **Installation failed**, **Unavailable**,
+  **Paused** or **Suspended** — with the version installed and how long it has
+  been able to fulfil requests
+- the Promise this one is part of, when another Promise requires it
+- **Details**: the Promise's name, the API resource it serves and its API group,
+  with everything the Promise reports about itself behind **See more details**,
+  the whole Promise behind **View source**, and the button that requests one
+- **Workflows**: one group per workflow, each with its own steps
+- **Resource requests**: every request made against the Promise, with the team
+  it belongs to and the state the cluster reports for it
+
+Every card is read from fields Kratix writes on the Promise, so a Promise needs
+no configuration for the tab to be useful.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={PromiseStatus}
+    alt="The Status tab of a redis Promise: an Available banner, the Promise it is part of, the Details card, the Workflows card, and a table of eight resource requests with mixed states"
+  />
+  <figcaption>The Status tab of a Promise, with requests in several states</figcaption>
+</figure>
 
 When `kratix.io/backstage-promise-template` is present, the create button links
 directly to the Software Template in the `default` namespace. Without the
@@ -94,18 +111,44 @@ deletion workflows.
 
 :::
 
-**Example: WebApp Promise**
+#### Which workflows are listed
 
-For a WebApp Promise, the tab displays:
+Only the two workflows Kratix's own Promise lifecycle defines are listed:
+`configure` and `delete`. Any other key under `status.kratix.workflows` belongs
+to something else driving the same workflow engine — the portal controller
+writes its own, for instance — and listing those would credit the Promise author
+with work they did not write.
 
-<figure className="diagram">
-  <img
-    className="fullwidth"
-    src={PromiseOverview}
-    alt="The Backstage Kratix tab for the WebApp Promise, showing its API details, status, create button and relations"
-  />
-  <figcaption>The WebApp Promise in Backstage</figcaption>
-</figure>
+#### What the resource requests table needs
+
+The table reads twice, and each read answers a different question.
+
+**The Backstage catalog** says which requests exist. Every request entity carries
+a `kratix.io/promise-name` annotation, which is what the table queries for, and
+the catalog is the only source that knows about a request whose resource has not
+been created yet.
+
+**The platform cluster** says what state each request is in. That read goes
+through the SKE Backend plugin, which must be installed for the states to
+appear.
+
+Two things follow for an operator:
+
+- **Reads are per namespace, as the signed-in user.** Kubernetes treats an
+  omitted namespace as every namespace, which needs a broader permission than
+  "can read the resources in my team's namespace". A user who may not list a
+  namespace still sees its requests, with their state reading **Unknown**.
+- **`ske.mode: gitops` cannot supply states.** Finding a Promise's requests in a
+  git state store means walking a repository tree rather than reading one known
+  path, so the table lists what the catalog knows with every state unknown.
+  `hybrid` reads from the cluster and is unaffected.
+
+#### Which team a request belongs to
+
+The team comes from a `kratix.io/team` annotation on the request. Nothing writes
+one for a request made with `kubectl`, and the row then falls back to the
+namespace the request went to, shown in italics. A cluster-scoped resource has
+no namespace to fall back to and shows an em dash.
 
 ### Resource Status
 
@@ -434,7 +477,7 @@ pending-review banners.
 `useKratixResourceFetcher` loads the Promise or Resource associated with the
 current catalog entity. It also manages loading and deletion state, checks for
 required annotations, and creates the status banners used by the plugin's
-Overview and Manage tabs.
+Status and Manage tabs.
 
 Use this hook when building custom catalog entity content that needs the same
 data and state as the plugin's supplied components.
@@ -487,7 +530,7 @@ use `spec.type` as a fallback.
 
 Promise loading requires `kratix.io/promise-name`. When it is absent, the hook
 does not call the backend but remains in `Stage.FETCHING`; the supplied
-Overview and Manage tabs therefore continue to show their loading state.
+Status and Manage tabs therefore continue to show their loading state.
 
 A valid Resource request requires `kratix.io/group`, `kratix.io/version`,
 `kratix.io/kind`, `kratix.io/name`, and `kratix.io/namespace`. The hook
@@ -628,7 +671,7 @@ app setup are omitted.
 ### `KratixPromiseEntityPage`
 
 It provides a complete `EntityLayout` for a Promise, and requires content, which
-it adds to the Overview tab alongside the plugin content.
+it adds to the Status tab alongside the plugin content.
 
 ```tsx
 <KratixPromiseEntityPage>
@@ -649,7 +692,7 @@ Status tab, and adds the Manage tab.
 
 ### `KratixOverviewTab`
 
-It provides the Overview tab content for a Promise, and the Status tab content
+It provides the Status tab content for a Promise, and the Status tab content
 for a Resource. It accepts optional content and a `resourceType` override;
 otherwise, it infers the type from the catalog entity.
 
@@ -671,7 +714,7 @@ include update and delete controls; Promises show a placeholder.
 
 ### `KratixAboutCard`
 
-It provides the details card for the Overview tab. It requires a Promise or
+It provides the details card for a Promise or Resource page. It requires a Promise or
 Resource from the SKE backend and accepts an optional `entityType` override.
 
 ```tsx
@@ -838,7 +881,7 @@ The plugin checks the entity type and adds the relevant configuration:
 
 | Entity | Route | Content |
 |---|---|---|
-| Promise | `/` | Overview tab |
+| Promise | `/` | Status tab |
 | Resource | `/` | Status tab |
 | Resource | `/manage` | Manage tab with update and delete controls |
 
