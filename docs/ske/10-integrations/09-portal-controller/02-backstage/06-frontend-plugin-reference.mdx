@@ -118,7 +118,9 @@ Two things follow for an operator:
 The Resource page includes a **Status** tab, which displays:
 
 - a banner giving the resource's overall status in one word, read from Kratix's
-  `Reconciled` condition
+  `Reconciled` condition, or from the health checks once the platform has
+  delivered — **Unhealthy** and **Degraded** are the checks' own words, so the
+  banner names which kind of unwell rather than only that something is
 - **Details**: the instance name, namespace, kind and the Promise it came from,
   plus everything the resource reports about itself, and the whole manifest
   behind **View source**
@@ -134,9 +136,9 @@ card appears only for a Promise whose workflow writes HealthRecords.
   <img
     className="fullwidth"
     src={ResourceStatus}
-    alt="The Status tab of a WebApp Resource: a Needs attention banner, the Details card, three health checks with one unhealthy, the folded Steps card, and a Links card"
+    alt="The Status tab of a Redis resource: an Unhealthy banner saying 1 of 2 health checks are not passing, the Details card, the two checks with one of them unhealthy, and the folded Steps card"
   />
-  <figcaption>The Status tab of a Resource with one failing health check</figcaption>
+  <figcaption>The Status tab of a resource with one failing health check</figcaption>
 </figure>
 
 ### Resource Manage

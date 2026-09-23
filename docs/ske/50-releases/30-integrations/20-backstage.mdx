@@ -33,15 +33,15 @@ Check the release notes below for information on each available version.
 
 #### Features
 
-* **Revamped the Resource Kratix tab (now called Status).** It gives the resource's overall status in one word and displays details such as resource status, health checks, and provisioning steps.
+* **Revamped the Resource Kratix tab (now called Status).** It gives the resource's overall status in one word and displays details such as resource status, health checks, and provisioning steps. Where the health checks have the last word, that word is theirs — **Unhealthy** or **Degraded** — so the banner names which kind of unwell the resource is.
 
 <figure className="diagram">
   <img
     className="fullwidth"
     src={ResourceStatus}
-    alt="The Status tab of a WebApp Resource: a Needs attention banner, the Details card, three health checks with one unhealthy, the folded Steps card, and a Links card"
+    alt="The Status tab of a Redis resource: an Unhealthy banner saying 1 of 2 health checks are not passing, the Details card, the two checks with one of them unhealthy, and the folded Steps card"
   />
-  <figcaption>The Status tab of a Resource with one failing health check</figcaption>
+  <figcaption>The Status tab of a resource with one failing health check</figcaption>
 </figure>
 
 * **Revamped the Promise Kratix tab (now called Status).** It says in one word whether the platform can fulfil requests for the Promise, lists the workflows it ran to get there, and lists every request made against it with the team it belongs to and its current state.
