@@ -75,20 +75,19 @@ Resource entities can use either `kratix.io/type: resource` or
 
 The Promise page includes a **Status** tab, which displays:
 
-- a banner giving the Promise's overall state in one word — **Available**,
-  **Installing**, **Updating**, **Installation failed**, **Unavailable**,
-  **Paused** or **Suspended** — with the version installed and how long it has
-  been able to fulfil requests
-- the Promise this one is part of, when another Promise requires it
-- **Details**: the Promise's name, the API resource it serves and its API group,
-  with everything the Promise reports about itself behind **See more details**,
-  the whole Promise behind **View source**, and the button that requests one
+- a banner giving the Promise's overall state in one word with the version
+  installed and how long it has been able to fulfil requests - the Promise this
+  one is part of, when another Promise requires it
+- **Details**: the Promise's name, the API resource it serves and its API group
 - **Workflows**: one group per workflow, each with its own steps
-- **Resource requests**: every request made against the Promise, with the team
-  it belongs to and the state the cluster reports for it
+- **Resource requests**: every request made against the Promise
 
-Every card is read from fields Kratix writes on the Promise, so a Promise needs
-no configuration for the tab to be useful.
+:::note
+
+**`ske.mode: gitops` cannot supply states.** Live status is only available when
+*`ske.mode` is set to `kubernetes` or `hybrid`.
+
+:::
 
 <figure className="diagram">
   <img
@@ -111,44 +110,8 @@ deletion workflows.
 
 :::
 
-#### Which workflows are listed
-
-Only the two workflows Kratix's own Promise lifecycle defines are listed:
-`configure` and `delete`. Any other key under `status.kratix.workflows` belongs
-to something else driving the same workflow engine — the portal controller
-writes its own, for instance — and listing those would credit the Promise author
-with work they did not write.
-
-#### What the resource requests table needs
-
-The table reads twice, and each read answers a different question.
-
-**The Backstage catalog** says which requests exist. Every request entity carries
-a `kratix.io/promise-name` annotation, which is what the table queries for, and
-the catalog is the only source that knows about a request whose resource has not
-been created yet.
-
-**The platform cluster** says what state each request is in. That read goes
-through the SKE Backend plugin, which must be installed for the states to
-appear.
-
 Two things follow for an operator:
 
-- **Reads are per namespace, as the signed-in user.** Kubernetes treats an
-  omitted namespace as every namespace, which needs a broader permission than
-  "can read the resources in my team's namespace". A user who may not list a
-  namespace still sees its requests, with their state reading **Unknown**.
-- **`ske.mode: gitops` cannot supply states.** Finding a Promise's requests in a
-  git state store means walking a repository tree rather than reading one known
-  path, so the table lists what the catalog knows with every state unknown.
-  `hybrid` reads from the cluster and is unaffected.
-
-#### Which team a request belongs to
-
-The team comes from a `kratix.io/team` annotation on the request. Nothing writes
-one for a request made with `kubectl`, and the row then falls back to the
-namespace the request went to, shown in italics. A cluster-scoped resource has
-no namespace to fall back to and shows an em dash.
 
 ### Resource Status
 
