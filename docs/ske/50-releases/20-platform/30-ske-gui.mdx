@@ -25,6 +25,28 @@ the image and the ske-gui pod will fail to start.
 
 ## Release Notes
 
+### [v0.17.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui/v0.17.2/) (2026-09-23)
+
+Released in Helm Chart version [v0.26.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui-helm-chart/0.26.0/)
+
+#### Security Fixes
+
+* The bundled Headlamp has been updated to pick up gRPC `1.83.2`, clearing five high-severity
+advisories in the GUI's backend dependencies.
+* OpenTelemetry has been updated to `1.45.0`, addressing
+[CVE-2026-81870](https://github.com/advisories/GHSA-8wmf-6v46-5gfg), where exporter endpoint
+URLs could be written to internal diagnostic logs.
+
+#### Features
+
+* Browser tab titles now include the cluster name, so tabs open against different clusters can
+be told apart at a glance.
+* Picks up a month of upstream Headlamp improvements.
+
+#### Maintenance
+
+* Base image updates. Bump dependencies.
+
 ### [v0.17.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui/v0.17.1/) (2026-08-20)
 
 Released in Helm Chart version [v0.25.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-gui-helm-chart/0.25.0/)
