@@ -28,6 +28,38 @@ spec:
           type: string
 ```
 
+## Change the name of a workflow
+
+Use this example when you want to change the name of a Cortex workflow. The `generate` step provides a default name for each workflow, describing what the workflow does:
+
+| Generated file         | Default name           |
+| ---------------------- | ---------------------- |
+| `workflow-create.yaml` | `Create kafka request` |
+| `workflow-update.yaml` | `Update kafka request` |
+| `workflow-delete.yaml` | `Delete kafka request` |
+
+The example below customizes the workflow name of the Create workflow.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-workflow-name
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - name: set-workflow-name
+          image: ghcr.io/syntasso/portal-patch:0.7.0
+          args:
+            - |
+              target:
+                file: workflow-create.yaml
+              patch:
+                name: Create Production Kafka Cluster
+```
+
 ## Reorder fields in a Cortex workflow
 
 Use this example when you want Cortex to show workflow input fields in a particular order. It reorders the `user-input` action in both generated workflows: `workflow-create.yaml` and `workflow-update.yaml`.
