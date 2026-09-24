@@ -183,7 +183,7 @@ this is a portal-wide setting, not a per-Promise one:
 
 | Flag | Portal type | Effect |
 |---|---|---|
-| `--single-spec-page` | `backstage` | Merges the generated Template's `spec` form pages into one, instead of one page per top-level `spec` property |
+| `--single-spec-page` | `backstage` | Whether the generated Template's `spec` fields share one form page. On by default; set `--single-spec-page=false` for a page per top-level `spec` property |
 | `--fixed-namespace=<value>` | `cortex` | Hard-codes the namespace on the generated create workflow and hides the namespace input. Must be a valid DNS-1123 label |
 
 ```yaml
@@ -197,9 +197,9 @@ portals:
           - "--fixed-namespace=team-a"
 ```
 
-[Portal Patch](./portal-patch/intro) offers per-Promise equivalents of both, through the
-`singleSpecPage` and `hideNamespaceManifest` recipes. Use the flags when you want the behaviour
-everywhere on a portal, and a recipe when you want it for particular Promises.
+[Portal Patch](./portal-patch/intro) offers per-Promise equivalents through the `singleSpecPage`
+and `hideNamespaceManifest` recipes. Use a flag when you want the behaviour everywhere on a
+portal, and a recipe when you want it for particular Promises.
 
 :::warning
 Do not put credentials in `generate.args`. Unlike a `secretRef` credential, which is injected into

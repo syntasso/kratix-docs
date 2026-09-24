@@ -189,6 +189,11 @@ patch:
 **Backstage only.** Collapses a Template's per-property specification pages into one page titled
 "Specification". Rejects `target.list` and `patch`.
 
+:::note
+A single page is the default, so this recipe only matters on a portal that set
+[`--single-spec-page=false`](../installation#portal-wide-generate-flags).
+:::
+
 ```yaml
 target:
   kind: Template
