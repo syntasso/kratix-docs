@@ -27,8 +27,8 @@ developer fills in to ask for a resource. Most of what you want that template to
 into the CRD in `spec.api`.
 
 Where the API cannot express it, bind the Promise to a
-[`PortalCustomization`](../customization) and patch the request template after the Portal Controller's generator has
-built it.
+[`PortalCustomization`](../customization) and patch the request template after the Portal
+Controller's generator has built it.
 
 The examples on this page are fragments of one `postgresql` Promise. Each one is a property of
 `spec`, which is the block highlighted below:
@@ -478,9 +478,10 @@ spec:
                             required: [storageGB]
 ```
 
-Setting `storageGB` to `null` removes it from the form. The dependencies block is keyed on `size`, the field whose value determines what appears, with one branch for each value.
-puts `storageGB` back and makes it mandatory, while `small` and `medium` add nothing, so it stays
-hidden.
+Setting `storageGB` to `null` removes it from the form. The `dependencies` block is keyed on
+`size`, the field whose value determines what appears, with one branch for each value. The `large`
+branch puts `storageGB` back and makes it mandatory, while `small` and `medium` add nothing, so it
+stays hidden.
 
 Every value needs a branch, even the ones that add nothing. Miss one and the form refuses to
 submit with `'Specification' must match exactly one schema in oneOf`, which tells a developer
