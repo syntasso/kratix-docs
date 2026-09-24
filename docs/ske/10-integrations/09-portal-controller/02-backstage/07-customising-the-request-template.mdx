@@ -22,12 +22,12 @@ import FormValidationMessage from "/img/docs/ske/backstage/request-template-vali
 import FormWidget from "/img/docs/ske/backstage/request-template-widget.png"
 ```
 
-The Portal Controller turns a Promise's API into a Backstage `Template`, the request template a
+The Portal Controller turns a Promise's API into a Backstage `Template`—the request template a
 developer fills in to ask for a resource. Most of what you want that template to do, you write
 into the CRD in `spec.api`.
 
 Where the API cannot express it, bind the Promise to a
-[`PortalCustomization`](../customization) and patch the request template after the generator has
+[`PortalCustomization`](../customization) and patch the request template after the Portal Controller's generator has
 built it.
 
 The examples on this page are fragments of one `postgresql` Promise. Each one is a property of
@@ -73,7 +73,7 @@ spec:
 ## Behaviour that comes from your API
 
 Everything in this section is a change to the Promise itself. No `PortalCustomization` is
-involved: the generator reads these keywords off the CRD and the request template carries them
+involved: the generator reads these keywords from the CRD and the request template carries them
 through to Backstage.
 
 ### Required fields
@@ -322,7 +322,7 @@ Each example below is a complete `PortalCustomization`. The change itself is a
 [Portal Patch](../portal-patch/intro) recipe, one entry under `args`, applied to the documents
 the generator wrote. A Promise binds to a single `PortalCustomization`, so to make more than one
 of these changes, add each recipe as another `args` entry rather than creating a second resource.
-[Customization](../customization) covers binding a Promise to one.
+[Customization](../customization) covers binding a Promise to a customization.
 
 Put every recipe here in `spec.promise.configure`. The request template is generated once per
 Promise, not once per request.
@@ -478,8 +478,7 @@ spec:
                             required: [storageGB]
 ```
 
-Setting `storageGB` to `null` takes it off the form. The `dependencies` block is keyed on `size`,
-the field whose value decides what appears, and gives it one branch per value. The `large` branch
+Setting `storageGB` to `null` removes it from the form. The dependencies block is keyed on `size`, the field whose value determines what appears, with one branch for each value.
 puts `storageGB` back and makes it mandatory, while `small` and `medium` add nothing, so it stays
 hidden.
 
