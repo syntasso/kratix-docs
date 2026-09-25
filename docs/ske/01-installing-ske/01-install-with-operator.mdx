@@ -178,6 +178,27 @@ skeDeployment:
 
 For the latest available versions, see the [SKE releases](/ske/releases/ske) page.
 
+#### Resource requests and limits {#resources}
+
+The chart sets requests and limits for every pod it installs. A block you set is applied as written, so to run without a CPU limit remove the `cpu` key from `limits`:
+
+```yaml
+skeDeployment:
+  deploymentConfig:
+    resources:
+      limits:
+        cpu: null
+```
+
+or `--set skeDeployment.deploymentConfig.resources.limits.cpu=null`. The same shape applies to `skeOperator.resources`, `skeDeployment.deployJob.resources`, `skeDeployment.platformManagerDeploymentConfig.resources`, and `deploymentConfig.resources` on each integration.
+
+Two things to know when editing these values:
+
+- `null` removes a key; `{}` does not. Helm merges an empty map over the chart's defaults, so `limits: {}` keeps them. Set the keys you want removed to `null`, or write the whole block.
+- Setting `resources: null` removes the block from the rendered CR, which means the SKE distribution's own values apply, including its CPU limit. To change the limits, change the keys inside the block.
+
+Kubernetes requires a request to be no higher than its limit, and copies a limit into the request when the request is not set. If you remove both the CPU request and the CPU limit the operator accepts it but warns, because the pod is then scheduled with the minimum CPU weight.
+
 #### Custom Certs {#custom-certs}
 
 By default, the SKE Operator and the SKE instance it deploys use cert-manager to

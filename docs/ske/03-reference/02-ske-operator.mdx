@@ -55,7 +55,7 @@ resource is managed by the SKE Operator.
       metricsServerCertSecretName: my-metrics-secret # Required if cert-manager is disabled
       platformManagerCertSecretName: my-platform-manager-secret # Required if cert-manager is disabled and the SKE version includes the SKE Platform Manager
     deploymentConfig:
-      resources: # Customize resource requests & limits for the Kratix deployment
+      resources: # Applied as written; leave cpu out of limits to run without a CPU limit
         limits:
           memory: 500Mi
           cpu: 300m
@@ -110,6 +110,10 @@ The Kratix resource is the owner of all resources installed as part of the [SKE
 distribution](../releases/ske#overview), and ensures that their state always matches the
 definition in the distribution manifest.
 
+`deploymentConfig.resources` is applied to the Kratix deployment exactly as written. A `limits` or `requests` block you set replaces the one in the SKE distribution, so leaving `cpu` out of `limits` removes the CPU limit, and an empty block (`limits: {}`) removes limits entirely. If `resources` is not set, the distribution's values are kept. The same applies to `platformManagerDeploymentConfig` and to each `SKEIntegration`.
+
+Kubernetes still requires a request to be no higher than its limit, and copies a limit into the request when the request is not set. Setting neither a CPU request nor a CPU limit is allowed, but the operator will warn: the pod is scheduled with the minimum CPU weight and gets very little CPU when the node is busy.
+
 ## The SKEIntegration CRD {#skeintegration-crd}
 
 Where the `Kratix` CRD manages SKE itself, `SKEIntegration` (`platform.syntasso.io/v1alpha1`) is the same lifecycle-management pattern applied to an optional integration, such as
@@ -137,7 +141,7 @@ spec:
 - **`spec.type`** selects which integration this resource installs. Only one `SKEIntegration` of a given `type` may exist in a cluster at a time, a validating webhook rejects a
   second.
 - **`spec.version`** is the desired version of that integration's controller image.
-- **`spec.deploymentConfig`** tunes the installed controller's resource requests/limits.
+- **`spec.deploymentConfig`** tunes the installed controller's resource requests/limits, applied as written in the same way as for the Kratix deployment.
 - The rest of `spec` is type-specific, see [Backstage](../integrations/backstage/installation/generating-backstage-components#installing-the-backstage-controller),
   [Cortex](../integrations/cortex/configuring-cortex#install-the-cortex-integration), or [Portal Controller](../integrations/portal-controller/installation) for the fields each
   type adds.
