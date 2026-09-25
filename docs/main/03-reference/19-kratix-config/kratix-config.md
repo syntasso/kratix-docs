@@ -190,10 +190,6 @@ When to pull the images specified in Workflows. This configures the [imagePullPo
 
 The [Security Context](/main/reference/workflows#security-context) to apply to all Workflow Pods.
 
-#### defaultContainerResources
-
-Defines the resource requirements that Workflow Jobs should default to. This controls the `spec.resources` for the generated pods.
-
 ### logging
 
 Logging configuration for the Kratix Controller Manager pod logs.
