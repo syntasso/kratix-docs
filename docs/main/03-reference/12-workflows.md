@@ -95,6 +95,8 @@ spec:
   jobOptions:
     # Number of times Kubernetes retries a failing workflow Job before marking it failed.
     backoffLimit: 4
+    # Number of seconds Kubernetes retains the Job after it finishes.
+    ttlSecondsAfterFinished: 600
   nodeSelector: # Optional; node labels for scheduling the pipeline Job Pod
     disk: ssd
   tolerations: # Optional; tolerations for scheduling on tainted nodes
@@ -152,13 +154,17 @@ the future.
 ### Job Lifecycle
 
 Kratix runs each Pipeline as a [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/).
-You can control how many completed Jobs are kept and how many times a failing Job
-is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
+You can configure these Jobs with the [`kratix` ConfigMap](/main/reference/kratix-config/config)
+or in each Pipeline:
 
-* `numberOfJobsToKeep` sets the maximum number of successful pipeline Jobs to retain.
-* `backoffLimit` determines how many times Kubernetes retries a failing Job before
-  marking it failed. Kratix does not set a default value for this field; if omitted,
-  Kubernetes uses its own Job default.
+* `numberOfJobsToKeep` in the ConfigMap sets the maximum number of successful
+  Pipeline Jobs to retain.
+* `defaultBackoffLimit` in the ConfigMap sets the default retry limit. A Pipeline
+  can override it with `spec.jobOptions.backoffLimit`.
+* `defaultTTLSecondsAfterFinished` in the ConfigMap sets how long Kubernetes
+  retains a finished Job and its Pods. A Pipeline can override it with
+  `spec.jobOptions.ttlSecondsAfterFinished`. The minimum is 120 seconds, and values below it will write a warning to the controller logs and cause Kratix to use 120 seconds. If no TTL is set, Kubernetes does not
+  automatically delete the Job.
 
 You can also control the [restart
 policy](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy)
