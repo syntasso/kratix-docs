@@ -24,6 +24,11 @@ spec:
   # A reference the Promise the Health Check should be performed against
   promiseRef:
     name: promise-name
+  # Set by the platform, not by the Pipeline. Kratix stamps the version of the
+  # Promise that produced this Health Definition as it leaves the workflow,
+  # overwriting any value the Pipeline wrote. Absent when the Promise has no
+  # kratix.io/promise-version label.
+  promiseVersion: v2.0.0
   # The time or interval the check should run against
   # This can follow Cron syntax or macros such as @hourly
   schedule: "* * * * *"
@@ -50,6 +55,21 @@ spec:
         - image: ghcr.io/myorg/health-check
           name: health
 ```
+
+## Promise version
+
+A Health Definition written by a Configure workflow belongs to one version of the Promise.
+Kratix sets `spec.promiseVersion` to that version on the way out of the workflow, so nothing in the
+Pipeline needs to know it. If the Pipeline sets the field itself, the platform's value wins. When the
+Promise has no `kratix.io/promise-version` label the field is left as the Pipeline wrote it.
+
+Kratix rewrites the Health Definition document to add the field, so comments and key order inside
+that document are not preserved. Other documents in the same file, and files that contain no Health
+Definition, are shipped as written.
+
+At the same time Kratix resets the Resource's `status.healthStatus` to `state: unknown` for that
+version, so a result from a previous version is not mistaken for the health of the new one. See the
+[Resource status reference](/main/reference/resources/status#health-checks).
 
 ## Namespace
 

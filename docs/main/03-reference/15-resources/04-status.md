@@ -27,7 +27,9 @@ resource will be removed before status would be written.
 
 The file can contain arbitrary key values, with the `message` key being a special
 key that is communicated back to the user when running `kubectl get
-<resource-request>`. For example if the Pipeline container wrote the following to
+<resource-request>`. Two keys are owned by Kratix and cannot be written from
+`status.yaml`: `kratix` and `healthStatus`. A workflow that writes either fails its
+status update. For example if the Pipeline container wrote the following to
 the `/kratix/metadata/status.yaml` file:
 
 ```yaml
@@ -273,8 +275,9 @@ data:
     acceptingConnection: true
 ```
 
-Eventually the `status` of the corresponding request is updated with the information in
-the Health Record.
+Eventually the `status.healthStatus` of the corresponding request is updated with the
+information in the Health Record. `state` is the worst state across every record for
+the Resource, and `healthRecords` lists each record that contributed.
 
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
@@ -284,9 +287,24 @@ metadata:
   namespace: default
 # ...
 status:
-  healthRecord:
+  healthStatus:
     state: ready
-    lastRun: 1531958400
-    details:
-      acceptingConnections: true
+    promiseVersion: v2.0.0
+    healthRecords:
+      - state: ready
+        lastRun: 1531958400
+        source:
+          name: dev-psql-health
+          namespace: default
+        details:
+          acceptingConnection: true
 ```
+
+`promiseVersion` is the version of the Promise whose Configure workflow last produced
+a Health Definition for this Resource, taken from the Promise's `kratix.io/promise-version`
+label. Each time such a workflow completes, Kratix resets `state` to `unknown` and records
+that version, so a result left over from a previous version is not read as the health of
+the new one. The `state` returns to a real value when the next Health Record arrives.
+Resources of an unversioned Promise have no `promiseVersion` and are never reset.
+
+`healthStatus` is owned by Kratix. A workflow cannot set it from `status.yaml`.
