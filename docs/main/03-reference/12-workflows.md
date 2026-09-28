@@ -337,10 +337,25 @@ boundary, so Kratix also creates a `ClusterRole` and `ClusterRoleBinding` contai
 first rule above, named with the requesting namespace appended, following this format: 
 `<promise name>-resource-configure-<pipeline name>-<namespace>`.
 
+**Resource workflows of a versioned Promise**, one with a `kratix.io/promise-version`
+label, get a separate set of these objects for each promise version. This keeps the
+permissions of one version's pipelines apart from another's, even while both run at the
+same time. Their names end in a five-character hash of the promise version, for example
+`env-resource-configure-instance-3f9a1`. Long names are shortened so that, with the hash,
+they fit in 63 characters. Promise workflows, and Resource workflows of a Promise without a
+version, use the names above with no hash.
+
 Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
-them are deleted when the Promise is deleted. Supplying a
-[custom service account](#custom-service-account) changes the service account name only.
-The Role and binding names are still derived from the pipeline.
+them are deleted when the Promise is deleted. The objects of Resource workflows also carry
+`kratix.io/promise-version: <version>`, set to `not-set` when the Promise has no version. A
+version's objects are deleted when its
+[Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions#deleting-a-promise-revision)
+is deleted.
+
+Supplying a [custom service account](#custom-service-account) changes the service account
+name only. The Role and binding names are still derived from the pipeline. Every promise
+version binds its permissions to that same service account, so it has the permissions of all
+installed versions.
 
 :::note
 
@@ -462,6 +477,13 @@ spec:
   the resource request is made
 - `env-promise-configure-tf-workspace` would be created in the
   `kratix-platform-system` namespace
+
+If the Promise has a `kratix.io/promise-version` label, each promise version gets its own
+Resource workflow service account, named with the version hash described in
+[Default Permissions](#default-permissions), for example
+`env-resource-delete-slack-notify-3f9a1`. If something outside Kratix needs a fixed service
+account name, such as an IAM Roles for Service Accounts (IRSA) trust policy or a GKE Workload
+Identity binding, use a [custom service account](#custom-service-account).
 
 #### Custom Service Account
 You can provide a custom service account for the pipeline by providing the `.rbac.serviceAccount` field in the pipeline spec.
