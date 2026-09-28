@@ -204,11 +204,11 @@ skeDeployment:
         memory: 1Gi
 ```
 
-Helm merges your values over the defaults, so you can also write only the keys you are changing. Every other key keeps its default.
+Resources not explicitly set will be kept at their default values.
 
 :::info Removing a request or limit
 
-Because Helm merges your values over the defaults, leaving a key out of your values file keeps the default rather than removing it. To remove a key, set it to `null`. This runs Kratix with no CPU limit and leaves the other values at their defaults:
+To remove a key, set it to `null`. This runs Kratix with no CPU limit and leaves the other values at their defaults:
 
 ```yaml
 skeDeployment:
@@ -218,19 +218,9 @@ skeDeployment:
         cpu: null
 ```
 
-An empty map does not do the same thing: `limits: {}` merges over the defaults and keeps them. Setting the whole block to `null` (`resources: null`) removes it from the rendered CR entirely, and the pod then gets the values built into SKE itself, which are not the chart defaults in the table above.
-
-If you remove both the CPU request and the CPU limit, the operator accepts it but warns, because the pod is then scheduled with the minimum CPU weight.
 
 :::
 
-:::info Going back to the defaults
-
-Delete the override from your values file (or drop the `--set` flag) and run `helm upgrade` again with your full values file. The chart default comes back and the operator updates the pod.
-
-If you upgrade with `--reuse-values`, Helm keeps every override from the previous release, including a `null` you have since deleted from your file. Pass your values file explicitly to make sure the defaults are restored.
-
-:::
 
 #### Custom Certs {#custom-certs}
 
