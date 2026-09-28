@@ -180,7 +180,35 @@ For the latest available versions, see the [SKE releases](/ske/releases/ske) pag
 
 #### Resource requests and limits {#resources}
 
-The chart sets requests and limits for every pod it installs. A block you set is applied as written, so to run without a CPU limit remove the `cpu` key from `limits`:
+The chart sets requests and limits on every pod it installs. These are the defaults:
+
+| Values key | Pod | Requests | Limits |
+|---|---|---|---|
+| `skeOperator.resources` | SKE Operator | 100m CPU, 256Mi memory | 100m CPU, 256Mi memory |
+| `skeDeployment.deploymentConfig.resources` | Kratix | 100m CPU, 256Mi memory | 100m CPU, 256Mi memory |
+| `skeDeployment.platformManagerDeploymentConfig.resources` | SKE Platform Manager | 100m CPU, 128Mi memory | 200m CPU, 128Mi memory |
+| `skeDeployment.deployJob.resources` | post-install Jobs | 100m CPU, 256Mi memory | 200m CPU, 512Mi memory |
+| `<integration>.deploymentConfig.resources` | each integration controller | 100m CPU, 256Mi memory | 100m CPU, 256Mi memory |
+
+To change them, set the requests and limits you want under the matching key in your values file. This gives Kratix more CPU and memory than the default:
+
+```yaml
+skeDeployment:
+  deploymentConfig:
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+```
+
+Helm merges your values over the defaults, so you can also write only the keys you are changing. Every other key keeps its default.
+
+:::info Removing a request or limit
+
+Because Helm merges your values over the defaults, leaving a key out of your values file keeps the default rather than removing it. To remove a key, set it to `null`. This runs Kratix with no CPU limit and leaves the other values at their defaults:
 
 ```yaml
 skeDeployment:
@@ -190,14 +218,19 @@ skeDeployment:
         cpu: null
 ```
 
-or `--set skeDeployment.deploymentConfig.resources.limits.cpu=null`. The same shape applies to `skeOperator.resources`, `skeDeployment.deployJob.resources`, `skeDeployment.platformManagerDeploymentConfig.resources`, and `deploymentConfig.resources` on each integration.
+An empty map does not do the same thing: `limits: {}` merges over the defaults and keeps them. Setting the whole block to `null` (`resources: null`) removes it from the rendered CR entirely, and the pod then gets the values built into SKE itself, which are not the chart defaults in the table above.
 
-Two things to know when editing these values:
+If you remove both the CPU request and the CPU limit, the operator accepts it but warns, because the pod is then scheduled with the minimum CPU weight.
 
-- `null` removes a key; `{}` does not. Helm merges an empty map over the chart's defaults, so `limits: {}` keeps them. Set the keys you want removed to `null`, or write the whole block.
-- Setting `resources: null` removes the block from the rendered CR, which means the SKE distribution's own values apply, including its CPU limit. To change the limits, change the keys inside the block.
+:::
 
-Kubernetes requires a request to be no higher than its limit, and copies a limit into the request when the request is not set. If you remove both the CPU request and the CPU limit the operator accepts it but warns, because the pod is then scheduled with the minimum CPU weight.
+:::info Going back to the defaults
+
+Delete the override from your values file (or drop the `--set` flag) and run `helm upgrade` again with your full values file. The chart default comes back and the operator updates the pod.
+
+If you upgrade with `--reuse-values`, Helm keeps every override from the previous release, including a `null` you have since deleted from your file. Pass your values file explicitly to make sure the defaults are restored.
+
+:::
 
 #### Custom Certs {#custom-certs}
 
