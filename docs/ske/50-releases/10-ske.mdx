@@ -19,6 +19,31 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.60.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.60.0/) (2026-09-29)
+
+#### Features
+
+* Git State Stores can now validate TLS certificates for HTTPS connections, including GitHub App
+  authentication endpoints. Set `spec.insecure: false` to turn validation on. It defaults to `true`,
+  so existing State Stores are unchanged. For more information, see the
+  [GitStateStore](/main/reference/statestore/gitstatestore) documentation.
+* Finished workflow Jobs and their Pods can now be cleaned up automatically. Set a default with
+  `defaultTTLSecondsAfterFinished` in the `kratix` ConfigMap, or per Pipeline with
+  `spec.jobOptions.ttlSecondsAfterFinished`. For more information, see the
+  [Workflows](/main/reference/workflows) documentation.
+
+#### Fixes
+
+* The arm64 SKE image now ships an arm64 `tini`, so SKE can be scheduled on ARM nodes.
+* The manual reconciliation label is now removed from Promises and resources that have no
+  configure workflow.
+
+#### Maintenance
+
+* Promise and resource events are now published only when a status condition changes, and the
+  `ReconcileStarted` event has been removed.
+* Base image updates and package maintenance.
+
 ### [v0.59.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.59.0/) (2026-09-21)
 
 :::warning Portal and Backstage Controller versions
