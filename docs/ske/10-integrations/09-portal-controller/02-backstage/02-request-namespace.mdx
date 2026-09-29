@@ -195,6 +195,10 @@ spec:
   size: small
 ```
 
+The Group also becomes the owner of the resource's entry in the Backstage catalog, so the resource
+appears on the Group's page. An owner set explicitly with the resource's
+`ske.backstage.component/owner` annotation still takes precedence.
+
 ### When a request is refused
 
 The request is refused, with a message naming the Group, when:
