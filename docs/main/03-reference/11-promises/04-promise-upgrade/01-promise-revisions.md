@@ -111,8 +111,7 @@ Upon initiating the deletion of a Promise Revision, the Resource Requests create
 deleted alongside their Resource Bindings.
 
 Once no Resource Bindings are left on the revision's version, Kratix also deletes the service accounts, Roles,
-ClusterRoles and bindings that the Resource workflows of that version ran with. The Resource Requests' delete
-workflows still run with those permissions, because they finish before the Resource Bindings are removed.
+ClusterRoles and bindings that the Resource workflows of that version ran with.
 
 :::info
 

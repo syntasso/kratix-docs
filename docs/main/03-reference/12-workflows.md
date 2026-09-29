@@ -353,9 +353,7 @@ version's objects are deleted when its
 is deleted.
 
 Supplying a [custom service account](#custom-service-account) changes the service account
-name only. The Role and binding names are still derived from the pipeline. Every promise
-version binds its permissions to that same service account, so it has the permissions of all
-installed versions.
+name only. The Role and binding names are still derived from the pipeline.
 
 :::note
 
@@ -481,9 +479,7 @@ spec:
 If the Promise has a `kratix.io/promise-version` label, each promise version gets its own
 Resource workflow service account, named with the version hash described in
 [Default Permissions](#default-permissions), for example
-`env-resource-delete-slack-notify-3f9a1`. If something outside Kratix needs a fixed service
-account name, such as an IAM Roles for Service Accounts (IRSA) trust policy or a GKE Workload
-Identity binding, use a [custom service account](#custom-service-account).
+`env-resource-delete-slack-notify-3f9a1`.
 
 #### Custom Service Account
 You can provide a custom service account for the pipeline by providing the `.rbac.serviceAccount` field in the pipeline spec.
