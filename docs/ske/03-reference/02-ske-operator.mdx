@@ -55,7 +55,7 @@ resource is managed by the SKE Operator.
       metricsServerCertSecretName: my-metrics-secret # Required if cert-manager is disabled
       platformManagerCertSecretName: my-platform-manager-secret # Required if cert-manager is disabled and the SKE version includes the SKE Platform Manager
     deploymentConfig:
-      resources: # Customize resource requests & limits for the Kratix deployment
+      resources:
         limits:
           memory: 500Mi
           cpu: 300m
@@ -137,7 +137,7 @@ spec:
 - **`spec.type`** selects which integration this resource installs. Only one `SKEIntegration` of a given `type` may exist in a cluster at a time, a validating webhook rejects a
   second.
 - **`spec.version`** is the desired version of that integration's controller image.
-- **`spec.deploymentConfig`** tunes the installed controller's resource requests/limits.
+- **`spec.deploymentConfig`** tunes the installed controller's resource requests/limits
 - The rest of `spec` is type-specific, see [Backstage](../integrations/backstage/installation/generating-backstage-components#installing-the-backstage-controller),
   [Cortex](../integrations/cortex/configuring-cortex#install-the-cortex-integration), or [Portal Controller](../integrations/portal-controller/installation) for the fields each
   type adds.

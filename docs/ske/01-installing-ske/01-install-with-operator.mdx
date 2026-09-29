@@ -178,6 +178,50 @@ skeDeployment:
 
 For the latest available versions, see the [SKE releases](/ske/releases/ske) page.
 
+#### Resource requests and limits {#resources}
+
+The chart sets requests and limits on every pod it installs. These are the defaults:
+
+| Values key | Pod | Requests | Limits |
+|---|---|---|---|
+| `skeOperator.resources` | SKE Operator | 100m CPU, 256Mi memory | 100m CPU, 256Mi memory |
+| `skeDeployment.deploymentConfig.resources` | Kratix | 100m CPU, 256Mi memory | 100m CPU, 256Mi memory |
+| `skeDeployment.platformManagerDeploymentConfig.resources` | SKE Platform Manager | 100m CPU, 128Mi memory | 200m CPU, 128Mi memory |
+| `skeDeployment.deployJob.resources` | post-install Jobs | 100m CPU, 256Mi memory | 200m CPU, 512Mi memory |
+| `<integration>.deploymentConfig.resources` | each integration controller | 100m CPU, 256Mi memory | 100m CPU, 256Mi memory |
+
+To change them, set the requests and limits you want under the matching key in your values file. This gives Kratix more CPU and memory than the default:
+
+```yaml
+skeDeployment:
+  deploymentConfig:
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+```
+
+Resources not explicitly set will be kept at their default values.
+
+:::info Removing a request or limit
+
+To remove a key, set it to `null`. This runs Kratix with no CPU limit and leaves the other values at their defaults:
+
+```yaml
+skeDeployment:
+  deploymentConfig:
+    resources:
+      limits:
+        cpu: null
+```
+
+
+:::
+
+
 #### Custom Certs {#custom-certs}
 
 By default, the SKE Operator and the SKE instance it deploys use cert-manager to
