@@ -25,6 +25,43 @@ To see which version of the helm chart corresponds to which version of the SKE-O
 
 ## Release Notes
 
+### [v0.35.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.35.0/) (2026-09-29)
+
+Released in Helm Chart version [0.94.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.94.0/)
+
+:::warning Breaking change for hand-written `resources` blocks
+
+A `resources` block in a `Kratix` or `SKEIntegration` `deploymentConfig` is now applied exactly as
+written, instead of being merged with the distribution's defaults. A partial block no longer
+inherits the values it leaves out: for example, `limits: {memory: 500Mi}` used to keep
+`cpu: 100m`, and now sets no CPU limit. If you have written a partial block into these resources,
+add any values you want to keep before upgrading. Helm users are unaffected, because the chart
+always renders a complete block.
+
+:::
+
+#### Features
+
+* `deploymentConfig.resources` on the `Kratix` and `SKEIntegration` resources is now applied as
+  written, so you can remove a request or limit, such as the CPU limit, by leaving it out. Leaving
+  `resources` unset keeps the distribution's defaults. The webhooks warn, but do not reject, when a
+  block sets neither a CPU request nor a CPU limit. For more information, see
+  [Resource requests and limits](/ske/installing-ske/install-with-operator#resources).
+* A `Kratix` or `SKEIntegration` that the operator rejects now raises a Warning event, not only a
+  log line.
+
+#### Bug Fixes
+
+* Resources set through Helm values now reach the pods as written. `skeOperator.resources`
+  replaces the operator container's resources instead of merging with them, so `limits: null`
+  removes the limits. An explicitly empty `resources: {}` is now rendered on the `Kratix` and
+  `SKEIntegration` resources. The post-install Jobs now use `skeDeployment.deployJob.resources`
+  instead of fixed values.
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.34.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.34.1/) (2026-09-21)
 
 Released in Helm Chart version [0.92.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.92.0/)
