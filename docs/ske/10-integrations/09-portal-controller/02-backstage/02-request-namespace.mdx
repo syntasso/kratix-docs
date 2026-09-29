@@ -10,7 +10,8 @@ By default, the request form a Backstage portal generates asks the developer to 
 namespace their resource goes into. A Backstage portal's `config.requestNamespace` setting can
 change that. With `from: group`, the developer picks one of their Backstage Groups instead, and the
 request goes to the Kubernetes namespace with that Group's name. If your Group names do not match
-your namespaces, you can take the namespace from an annotation on the Group instead.
+your namespaces, you can take the namespace from an annotation on the Group instead. With
+`from: fixed`, every request goes to one namespace you choose.
 
 This lets you give each team its own namespace without asking developers to remember or type it.
 
@@ -114,6 +115,7 @@ spec:
 |---|---|
 | `form` (default) | A namespace, typed by the developer. Leaving `requestNamespace` out has the same effect. |
 | `group` | One of the developer's Backstage Groups. The request goes to the namespace with the Group's name. |
+| `fixed` | Nothing. Every request goes to the one namespace you set. See [Send every request to one namespace](#send-every-request-to-one-namespace). |
 
 The setting applies to every Promise bound to that portal. Other portals keep their own setting.
 
@@ -172,6 +174,25 @@ usually do not let you add your own annotations to them. To add one, you normall
 small catalogue processor or transformer in your Backstage app that sets the annotation on each
 imported Group. See the documentation for the provider you use.
 :::
+
+### Send every request to one namespace
+
+If every resource on a portal belongs in the same namespace, set `from: fixed` and name the
+namespace:
+
+```yaml
+requestNamespace:
+  from: fixed
+  namespace: platform-team
+```
+
+The request form then has no namespace field, and every new request goes to `platform-team`.
+`namespace` is required with `from: fixed`, must be a valid namespace name, and is not allowed with
+any other `from`.
+
+`from: fixed` only decides where new requests go. Updating or deleting a resource keeps the
+namespace it already lives in, so resources created before you switched to `from: fixed` stay where
+they are. A resource that records a Group can still only be changed by members of that Group.
 
 ## What the developer sees
 
@@ -280,7 +301,10 @@ behave as before.
 
 The Portal Patch recipes that hide the namespace, such as
 [`hideNamespaceManifest`](../portal-patch/recipe-reference#hidenamespacemanifest), do not apply to a
-portal that uses `from: group`.
+portal that uses `from: group` or `from: fixed`.
+
+If you use those recipes to send every request to one namespace, switch to `from: fixed` instead.
+The recipes leave the request record without a namespace, and `from: fixed` does not.
 
 ## Related pages
 
