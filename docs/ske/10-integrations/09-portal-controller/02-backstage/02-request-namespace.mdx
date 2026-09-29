@@ -1,0 +1,287 @@
+---
+title: Choosing the request namespace from a Backstage Group
+description: Let developers pick one of their Backstage Groups instead of typing a Kubernetes namespace when they request a resource
+sidebar_label: Request namespace
+slug: request-namespace
+keywords: [portal, backstage, namespace, group, team, requestNamespace, request form]
+---
+
+By default, the request form a Backstage portal generates asks the developer to type the Kubernetes
+namespace their resource goes into. A Backstage portal's `config.requestNamespace` setting can
+change that. With `from: group`, the developer picks one of their Backstage Groups instead, and the
+request goes to the Kubernetes namespace with that Group's name. If your Group names do not match
+your namespaces, you can take the namespace from an annotation on the Group instead.
+
+This lets you give each team its own namespace without asking developers to remember or type it.
+
+Cluster-scoped Promises are not affected by this setting.
+
+## Prerequisites
+
+{/* TODO(release): confirm all three versions below when the releases are cut. */}
+
+- **`@syntasso/plugin-ske-backend` `v0.24.0` or later.** This release adds the
+  `ske:resolve-namespace` scaffolder action that the generated Template calls.
+- **`@syntasso/plugin-ske-frontend` `v0.22.0` or later.** This release keeps the Group when a
+  developer updates or deletes a resource from the **Manage** tab, and shows it locked.
+- **Portal Controller `v0.5.0` or later.** This release generates Templates that use the setting.
+- **A Kubernetes namespace for each Group** that will request resources, named exactly after the
+  Group, or after the value of the Group's annotation if you
+  [use an annotation](#take-the-namespace-from-a-group-annotation). See [The namespace must already exist](#the-namespace-must-already-exist).
+- **Backstage Groups that list their members** in `spec.members`. See
+  [Who can pick a Group](#who-can-pick-a-group).
+- **Groups that come only from sources you trust.** See
+  [Only accept Groups from trusted sources](#only-accept-groups-from-trusted-sources).
+
+:::warning Upgrade the backend plugin first
+Install the backend plugin release before you set `from: group`. If Backstage runs an older
+backend plugin, the request form fails when a developer submits it.
+:::
+
+## Only accept Groups from trusted sources
+
+:::danger Do this before you switch `from: group` on
+The Group check trusts the Backstage catalogue. Whoever can add a Group to the catalogue decides
+who is a member of it, and so who can send requests to the Kubernetes namespace with that Group's
+name. If you [use an annotation](#take-the-namespace-from-a-group-annotation), whoever can set the
+annotation on a Group also decides which namespace its members send requests to.
+
+If users can register their own catalogue locations, they can create a Group named after any
+namespace, list themselves in `spec.members`, and then create and change resources in that
+namespace.
+:::
+
+Make sure Groups reach the catalogue only from sources the platform team controls, such as:
+
+- an organisation provider that reads your identity system, for example GitHub, LDAP or
+  Microsoft Entra ID;
+- catalogue locations that only the platform team can change.
+
+One way to enforce this for catalogue locations is with `catalog.rules` in `app-config.yaml`. Leave
+`Group` out of the global `allow` list, and allow it only on the location you trust:
+
+```yaml
+catalog:
+  rules:
+    # Kinds any location may add. Keep the kinds you already allow here, but not Group.
+    - allow: [Component, API, Location, Template]
+  locations:
+    - type: url
+      target: https://github.com/acme/platform-org/blob/main/org.yaml
+      rules:
+        - allow: [Group]
+```
+
+A location's own `rules` are added to the global list for that location only. Setting
+`catalog.rules` replaces Backstage's default rules, so list every kind you still need. See
+[Catalog rules](https://backstage.io/docs/features/software-catalog/configuration)
+in the Backstage documentation.
+
+## Configuration
+
+{/* TODO(release): confirm the Portal Controller version in this example. */}
+
+Set `requestNamespace` in the `config` of a `type: backstage` entry in `portals[]`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.5.0
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        mode: push
+        # highlight-start
+        requestNamespace:
+          from: group
+        # highlight-end
+        destination:
+          spec:
+            path: gitops/backstage/prod
+        stateStore:
+          kind: GitStateStore
+          name: default
+```
+
+`requestNamespace.from` takes one of two values:
+
+| Value | What the request form asks for |
+|---|---|
+| `form` (default) | A namespace, typed by the developer. Leaving `requestNamespace` out has the same effect. |
+| `group` | One of the developer's Backstage Groups. The request goes to the namespace with the Group's name. |
+
+The setting applies to every Promise bound to that portal. Other portals keep their own setting.
+
+Any other value is rejected. The Promise-level sync pipeline for that portal fails with a message
+that names the portal and the value you set, and the Templates for that portal stop being updated
+until you correct it.
+
+### Take the namespace from a Group annotation
+
+By default, the namespace is the Group's name. Set `requestNamespace.annotation` to use the value of
+an annotation on the picked Group instead:
+
+```yaml
+requestNamespace:
+  from: group
+  annotation: acme.io/k8s-namespace
+```
+
+Use this when your Group names do not match your namespaces. This is common when Groups are
+imported from an identity system, where a team's Group might be called `payments-team` but its
+namespace is `payments`.
+
+`annotation` must be a valid Kubernetes annotation key, for example `acme.io/k8s-namespace`, and is
+only allowed together with `from: group`. If either is not the case, the Promise-level sync pipeline
+for that portal fails with a message that names the portal.
+
+Each Group that will request resources then carries the annotation, with its namespace as the
+value:
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: payments-team
+  namespace: default
+  annotations:
+    acme.io/k8s-namespace: payments
+spec:
+  type: team
+  children: []
+  members:
+    - alice
+    - bob
+```
+
+With this Group and `annotation: acme.io/k8s-namespace`, requests made for `payments-team` go to the
+`payments` Kubernetes namespace.
+
+The Group's name is never used as a fallback. If the picked Group has no such annotation, or its
+value is empty, the request is refused. With an annotation set, only its value has to be a valid
+namespace name; the Group's own name can be anything, such as `Payments Team`. See [When a request is refused](#when-a-request-is-refused).
+
+:::info Groups imported by an organisation provider
+The GitHub, LDAP and Microsoft Entra ID providers create Groups from your identity system, and
+usually do not let you add your own annotations to them. To add one, you normally need to write a
+small catalogue processor or transformer in your Backstage app that sets the annotation on each
+imported Group. See the documentation for the provider you use.
+:::
+
+## What the developer sees
+
+With `from: group`, the first page of the request form has a **Group** field and no namespace
+field. The Group field lists only the Groups the signed-in user is a direct member of.
+
+When the developer submits the form, the resource request is created in the namespace with the
+chosen Group's name. The request also records which Group it was made for, in the
+`kratix.io/backstage-group` annotation. For example, a request made for the `payments` Group in
+Backstage's `default` catalogue namespace looks like this:
+
+```yaml
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: postgresql
+metadata:
+  name: orders-db
+  namespace: payments
+  annotations:
+    kratix.io/backstage-group: group:default/payments
+spec:
+  size: small
+```
+
+### When a request is refused
+
+The request is refused, with a message naming the Group, when:
+
+- nobody is signed in to Backstage;
+- no Group was picked;
+- the signed-in user is not a member of the Group;
+- the namespace comes from the Group's name, and that name is not a valid Kubernetes namespace
+  name;
+- a resource with the same name already exists in that namespace and records a different Group.
+
+If the portal [takes the namespace from an annotation](#take-the-namespace-from-a-group-annotation),
+the request is also refused when:
+
+- the Group does not have the annotation, or its value is empty. The message names the Group and
+  the annotation;
+- the annotation's value is not a valid Kubernetes namespace name. The message names the value.
+
+A valid namespace name uses only lowercase letters, numbers and hyphens, starts and ends with a
+letter or number, and is at most 63 characters long. Nothing is changed to fit: a Group
+called `Payments`, or an annotation value of `Payments`, is refused, not sent to `payments`.
+
+## Who can pick a Group
+
+A user can pick a Group when that Group lists them in `spec.members`. Backstage records this as a
+`hasMember` relation on the Group. Only direct membership counts: being a member of a child Group
+is not enough.
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: payments
+  namespace: default
+spec:
+  type: team
+  children: []
+  members:
+    - alice
+    - bob
+```
+
+With this Group, `alice` and `bob` see `payments` in the Group field, and their requests go to the
+`payments` Kubernetes namespace.
+
+:::warning Groups with the same name share a namespace
+When the namespace comes from the Group's name, only the name is used. Backstage's catalogue
+namespace is ignored. So `group:default/payments` and `group:acme/payments` both send requests to the
+`payments` Kubernetes namespace, and the members of either Group can create and change resources
+there.
+
+If your catalogue has Groups with the same name in different catalogue namespaces, rename one of
+them before you switch this setting on.
+
+If you use an annotation, the same applies to any two Groups whose annotations hold the same
+value: their members share that namespace.
+:::
+
+## The namespace must already exist
+
+The Kubernetes namespace is not created for you, and Backstage does not check that it exists
+before submitting. If it does not exist, the request fails and the developer sees a failed
+request. Create a namespace for each Group before its members start requesting resources.
+
+## Updating and deleting resources
+
+Updating or deleting a resource from the **Manage** tab keeps it in the namespace it already lives
+in. When a developer updates a resource, the form shows the recorded Group and does not let them
+change it.
+
+If the resource records a Group in `kratix.io/backstage-group`, only members of that Group can
+update or delete it through Backstage. This applies to deletes made directly and to deletes raised
+as a pull request under [pull-request mode](./delivery-modes).
+
+Resources with no recorded Group, including those created before you switched the setting on,
+behave as before.
+
+## Portal Patch recipes that hide the namespace
+
+The Portal Patch recipes that hide the namespace, such as
+[`hideNamespaceManifest`](../portal-patch/recipe-reference#hidenamespacemanifest), do not apply to a
+portal that uses `from: group`.
+
+## Related pages
+
+- [Backstage](./intro) covers the rest of a Backstage portal's `config`.
+- [Delivery modes](./delivery-modes) covers `push` versus `pull-request`.
+- [Customising the request template](./customising-the-request-template) covers the rest of the
+  request form.
+- [SKE Backend Plugin](./backend-plugin) lists the plugin's scaffolder actions.
