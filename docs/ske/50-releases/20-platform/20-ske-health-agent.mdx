@@ -17,6 +17,21 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-heal
 
 ## Release Notes
 
+### [v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.15.0/) (2026-09-29)
+
+Released in Helm Chart version [0.32.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.32.0/)
+
+#### Features
+
+* The Health Agent can now validate TLS certificates when it connects to a Git State Store over
+  HTTPS. Set `insecure: "false"` in the agent's state store ConfigMap to turn validation on. It
+  defaults to `"true"`, so existing agents are unchanged. See
+  [Set up access to the State Store](/ske/installing-ske/ske-health-agent#set-up-access-to-the-state-store).
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.14.0/) (2026-09-21)
 
 Released in Helm Chart version [0.31.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.31.0/)
