@@ -24,9 +24,8 @@ spec:
   # A reference the Promise the Health Check should be performed against
   promiseRef:
     name: promise-name
-  # Set by the platform, not by the Pipeline. Kratix stamps the version of the
-  # Promise that produced this Health Definition as it leaves the workflow,
-  # overwriting any value the Pipeline wrote. Absent when the Promise has no
+  # The following field is set by Kratix when writing the HealthDefinition to
+  # the destination. It is absent when the Promise has no
   # kratix.io/promise-version label.
   promiseVersion: v2.0.0
   # The time or interval the check should run against
@@ -58,18 +57,26 @@ spec:
 
 ## Promise version
 
-A Health Definition written by a Configure workflow belongs to one version of the Promise.
-Kratix sets `spec.promiseVersion` to that version on the way out of the workflow, so nothing in the
-Pipeline needs to know it. If the Pipeline sets the field itself, the platform's value wins. When the
-Promise has no `kratix.io/promise-version` label the field is left as the Pipeline wrote it.
+A HealthDefinition created by a Resource Configure workflow belongs to one
+version of the Promise. Kratix sets `spec.promiseVersion` on it before writing
+it to the Destination, overwriting any value the workflow set.
+This does not happen for an unversioned Promise, that is, one without the
+`kratix.io/promise-version` label.
 
-Kratix rewrites the Health Definition document to add the field, so comments and key order inside
-that document are not preserved. Other documents in the same file, and files that contain no Health
-Definition, are shipped as written.
+Kratix also records on the Resource's `status.healthStatus` which Promise
+version it expects health results for, and how many HealthDefinitions the
+Configure workflow wrote. Results for earlier Promise versions are kept. See the
+[health checks guide](/main/guides/resource-health) for more information.
 
-At the same time Kratix resets the Resource's `status.healthStatus` to `state: unknown` for that
-version, so a result from a previous version is not mistaken for the health of the new one. See the
-[Resource status reference](/main/reference/resources/status#health-checks).
+:::warning
+
+When a HealthDefinition is created outside the Resource Configure workflow, for
+example applied straight to a Destination or produced by another controller,
+Kratix does **not** set `spec.promiseVersion` on it. Set it yourself when you
+create the HealthDefinition, so that its results can be matched to a Promise
+version. Every workflow container has the value in `KRATIX_PROMISE_VERSION`.
+
+:::
 
 ## Namespace
 
