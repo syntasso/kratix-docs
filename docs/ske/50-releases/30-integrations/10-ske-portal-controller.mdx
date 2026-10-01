@@ -19,6 +19,35 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.5.0/) (2026-09-29)
+
+Released via the SKE Operator Helm Chart [version 0.95.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.95.0/)
+
+:::warning Backstage Templates now default to a single form page
+
+Generated Backstage Templates now put every `spec` field on one form page by default. Existing
+Backstage connections that don't set `--single-spec-page` switch to the single-page form when you
+upgrade. To keep the multi-step form, add `--single-spec-page=false` to the connection's
+`adapterConfig.generate.args` before upgrading. If you run `ske-portal-adapter` directly in your
+own Promise pipeline, add `--single-spec-page=false` as a container argument instead: the
+`TEMPLATE_SINGLE_SPEC_PAGE` environment variable can't turn the single-page form off. See
+[Portal-wide generate flags](/ske/integrations/portal-controller/installation#portal-wide-generate-flags).
+
+:::
+
+#### Features
+
+* Generated Backstage Templates now link to the result when a task completes: **View in Catalog**
+  first, then **Pull Request** in pull-request mode. The catalogue link goes to the pending entity
+  until the real one exists.
+* Generated Templates now name each step after its outcome and the resource kind, for example
+  "Submitting your Jenkins request". Push-mode Templates now also record whether each run is a
+  create or an update, as pull-request mode already did.
+
+#### Maintenance
+
+* Base image updates. Bump dependencies.
+
 ### [v0.4.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.2/) (2026-09-22)
 
 :::warning Requires SKE v0.59.0
