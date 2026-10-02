@@ -268,7 +268,7 @@ in its step below.
    state indefinitely. Fix the issue so that the Job completes, or delete the
    Job.
 
-   If the delete Workflow failed, you re-run it once the issue is
+   If the delete Workflow failed, you can re-run it once the issue is
    fixed by triggering a
    [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation).
 
@@ -378,7 +378,7 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    waits on an external system, keeps the Promise in a `Terminating` state
    indefinitely. Fix the issue so that the Job completes, or delete the Job.
 
-   If the delete Workflow failed, you re-run it once the issue is
+   If the delete Workflow failed, you can re-run it once the issue is
    fixed by triggering a
    [manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation).
 
