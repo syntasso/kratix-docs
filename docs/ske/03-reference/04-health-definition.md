@@ -24,9 +24,9 @@ spec:
   # A reference the Promise the Health Check should be performed against
   promiseRef:
     name: promise-name
-  # The following field is set by Kratix when writing the HealthDefinition to
-  # the destination. It is absent when the Promise has no
-  # kratix.io/promise-version label.
+  # Set by Kratix when it writes the HealthDefinition to the Destination. For
+  # a Promise without the kratix.io/promise-version label Kratix does not set
+  # it, and any value the Pipeline wrote stays.
   promiseVersion: v2.0.0
   # The time or interval the check should run against
   # This can follow Cron syntax or macros such as @hourly
