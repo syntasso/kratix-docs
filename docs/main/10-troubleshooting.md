@@ -378,14 +378,14 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    waits on an external system, keeps the Promise in a `Terminating` state
    indefinitely. Fix the issue so that the Job completes, or delete the Job.
 
-   If the delete Workflow failed, you can trigger it to re-run once the issue is
+   If the delete Workflow failed, you re-run it once the issue is
    fixed by triggering a
    [manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation).
 
    :::warning
 
    Do not remove the `kratix.io/delete-workflows` finalizer while a workflow Job
-   for the Promise is still running. Kratix would then delete the Promise's
+   for the Promise is still running. Kratix will delete the Promise's
    Works, and the running Job could write a new Work that Kratix never cleans
    up. Stop or delete the running Job first, and only then remove the
    finalizer.
