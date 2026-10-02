@@ -268,14 +268,14 @@ in its step below.
    state indefinitely. Fix the issue so that the Job completes, or delete the
    Job.
 
-   If the delete Workflow failed, you can trigger it to re-run once the issue is
+   If the delete Workflow failed, you re-run it once the issue is
    fixed by triggering a
    [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation).
 
    :::warning
 
    Do not remove the `kratix.io/delete-workflows` finalizer while a workflow Job
-   for the resource request is still running. Kratix would then delete the
+   for the resource request is still running. Kratix will delete the
    resource request's Works, and the running Job could write a new Work that
    Kratix never cleans up. Stop or delete the running Job first, and only then
    remove the finalizer.
