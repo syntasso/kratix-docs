@@ -137,11 +137,34 @@ changes to `EntityPage.tsx` are needed. This is also the case if you are using S
 
 The plugin registers the following extensions via its `alpha` entry point:
 
-- **Promise Overview** — displays the Overview tab for Promise entities
-- **Resource Overview** — displays the Overview tab for Resource entities
+- **Promise Status** — displays the Status tab for Promise entities
+- **Resource Status** — displays the Status tab for Resource entities
 - **Resource Manage** — displays the Manage tab for Resource entities
 
 To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
+
+Then add the plugin's `scaffolderModuleResourceRequestCopy` module to your app's `features` in
+`packages/app/src/App.tsx`:
+
+```ts
+import { scaffolderModuleResourceRequestCopy } from '@syntasso/plugin-ske-frontend/alpha';
+
+const app = createApp({
+  features: [scaffolderModuleResourceRequestCopy /* , ... */],
+});
+```
+
+This makes the scaffolder task page describe a request as creating, updating or deleting the
+resource. Without it the page shows the Template's own step names, which are the same for a create
+and an update. Backstage cannot register the module for you because it replaces the scaffolder
+plugin's API. See [`scaffolderModuleResourceRequestCopy`](./frontend-plugin#resource-request-copy).
+
+:::note Hosted Backstage
+On a host where you cannot edit the app, such as Roadie or Spotify Portal for Backstage, the module
+cannot be added. The task page then shows the Template's own step names, "Submitting your Postgresql
+request" and "Registering your Postgresql request in the catalog", which do not say whether the run
+creates or updates the resource.
+:::
 
 In `packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
 
@@ -486,3 +509,9 @@ Once Backstage has run a catalogue refresh you should see:
 If entities never appear, check the catalogue repository actually contains
 `catalog-info.yaml` files under the two paths above, and that the GitHub credential can read that
 repository.
+
+
+## Task log detail
+
+Backstage builds each task's logger at `LOG_LEVEL`, defaulting to `info`. The SKE actions log their
+mechanics at `debug`, so set `LOG_LEVEL=debug` on the backend to see them.

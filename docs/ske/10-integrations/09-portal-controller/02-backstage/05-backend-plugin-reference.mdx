@@ -166,10 +166,10 @@ This action produces no output.
 ```yaml
 steps:
   - id: record-request
-    name: Record request
+    name: Registering your Postgresql request in the catalog
     action: ske:record-request
     input:
-      promiseName: jenkins
+      promiseName: postgresql
       name: ${{ parameters.objname }}
       namespace: ${{ parameters.objnamespace }}
       action: ${{ parameters.prAction }}
@@ -177,7 +177,7 @@ steps:
       requestsRepoUrl: ${{ parameters.repoUrl }}
       manifest: |
         apiVersion: marketplace.kratix.io/v1alpha1
-        kind: Jenkins
+        kind: Postgresql
         metadata:
           name: ${{ parameters.objname }}
           namespace: ${{ parameters.objnamespace }}
@@ -185,21 +185,23 @@ steps:
 ```
 
 In push mode there is no pull request and, with `ske.mode: kubernetes`, no repository either. Omit
-both keys rather than sending them empty, and record the action as a literal:
+both keys rather than sending them empty. The action still comes from the hidden `prAction`
+parameter, which the generated Template declares in both modes so an update from the **Manage** tab
+is recorded as one:
 
 ```yaml
 steps:
   - id: record-request
-    name: Record request
+    name: Registering your Postgresql request in the catalog
     action: ske:record-request
     input:
-      promiseName: jenkins
+      promiseName: postgresql
       name: ${{ parameters.objname }}
       namespace: ${{ parameters.objnamespace }}
-      action: Request
+      action: ${{ parameters.prAction }}
       manifest: |
         apiVersion: marketplace.kratix.io/v1alpha1
-        kind: Jenkins
+        kind: Postgresql
         metadata:
           name: ${{ parameters.objname }}
           namespace: ${{ parameters.objnamespace }}
