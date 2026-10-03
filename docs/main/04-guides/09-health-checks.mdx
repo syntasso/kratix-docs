@@ -17,7 +17,7 @@ import PartialGuidesPreRequisites from '@site/docs/_partials/_generic_prereqs_gu
 
 ## The Health Status
 
-Within the resource `status`, Kratix understands the `healthStatus` field. In this field, Promise writers can describe the health of the resource. The field has the following format:
+Within the resource `status`, Kratix maintains the `healthStatus` field. In this field, Kratix records the health of the resource as reported by its Health Records; workflows cannot write it from `status.yaml`. The field has the following format:
 
 ```yaml
 status:
@@ -40,7 +40,23 @@ status:
         namespace: default
 ```
 
-The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`.
+The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`. For a versioned Promise it also carries `expectedPromiseVersion` and `healthDefinitions`: the Promise version the last Configure workflow ran for, and how many Health Definitions that workflow wrote (`0` when it wrote none). A Configure workflow changes neither `state` nor `healthRecords`.
+
+For example, after a resource of a Promise labelled `kratix.io/promise-version: v2.0.0` has run a Configure workflow that wrote one Health Definition, and before any Health Record for that version has arrived:
+
+```yaml
+status:
+  healthStatus:
+    state: healthy
+    expectedPromiseVersion: v2.0.0
+    healthDefinitions: 1
+    healthRecords:
+    - state: healthy
+      lastRun: 1531958400
+      source:
+        name: healthrecord-example-record-1
+        namespace: default
+```
 
 The `healthStatus.state` subfield can have the following values:
 
