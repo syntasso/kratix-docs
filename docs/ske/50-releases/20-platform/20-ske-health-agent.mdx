@@ -17,6 +17,21 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-heal
 
 ## Release Notes
 
+### [v0.15.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.15.1/) (2026-10-05)
+
+Released in Helm Chart version [0.33.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.33.0/)
+
+#### Bug Fixes
+
+* A resource with more than one HealthDefinition now runs every health check. Before, only the
+  first check ran and the others failed with "already owned by another HealthDefinition". Each
+  check now has its own CronJob, permissions, HealthState and health record, named after its
+  HealthDefinition.
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.15.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent/v0.15.0/) (2026-09-29)
 
 Released in Helm Chart version [0.32.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#k8s-health-agent-helm-chart/0.32.0/)
