@@ -273,8 +273,11 @@ data:
     acceptingConnection: true
 ```
 
-Eventually the `status` of the corresponding request is updated with the information in
-the Health Record.
+Eventually the `status.healthStatus` of the corresponding request is updated
+with the information in the Health Record. For a Resource of a versioned
+Promise, the status also says which version it expects records for and carries
+a `HealthChecksSucceeded` condition. Here the Resource expects two records at
+`v2.0.0` and one has arrived:
 
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
@@ -284,9 +287,75 @@ metadata:
   namespace: default
 # ...
 status:
-  healthRecord:
-    state: ready
-    lastRun: 1531958400
-    details:
-      acceptingConnections: true
+  healthStatus:
+    state: healthy
+    expectedPromiseVersion: v2.0.0
+    healthDefinitions: 1
+    expectedRecords: 2
+    healthRecords:
+      - source:
+          name: dev-psql-health-worker-1
+          namespace: default
+        state: healthy
+        lastRun: 1531958400
+        details:
+          acceptingConnections: true
+        promiseVersion: v2.0.0
+      - source:
+          name: dev-psql-health-worker-2
+          namespace: default
+        state: healthy
+        lastRun: 1531958000
+        promiseVersion: v1.0.0
+  conditions:
+    - type: HealthChecksSucceeded
+      status: "Unknown"
+      reason: WaitingForRecords
+      message: 1 of 2 records have reported at v2.0.0
+      lastTransitionTime: "2026-09-24T10:15:00Z"
+```
+
+### The HealthChecksSucceeded condition
+
+Kratix sets the `HealthChecksSucceeded` condition on Resources of versioned
+Promises. It judges only the Health Records whose `promiseVersion` equals
+`status.healthStatus.expectedPromiseVersion`.
+
+| Status | Reason | When |
+|---|---|---|
+| True | `AllRecordsHealthy` | Every expected record has reported at the expected version, and all of them are healthy or ready. |
+| True | `NoHealthChecks` | `healthDefinitions` is `0`. This version of the Promise ships no health check. |
+| False | `Unhealthy` | At least one record at the expected version is unhealthy. Kratix does not wait for the rest. |
+| False | `Degraded` | Every expected record has reported, none is unhealthy, and at least one is degraded. |
+| Unknown | `WaitingForRecords` | Fewer records than expected have reported at the expected version, and none of them is unhealthy. |
+
+`state` is the worst state of every record whatever its version, so it is not
+version-aware.
+
+`expectedRecords` is counted per Work at the expected version: the Health
+Definitions in that Work multiplied by the destinations it was placed on.
+
+Records with another version, or with no version, are ignored by the condition
+and still count in `state`. Only records in the Resource's namespace count
+toward the condition.
+
+A Resource with no `expectedPromiseVersion`, that is a Resource of an
+unversioned Promise, has no `HealthChecksSucceeded` condition.
+
+Until the health agent copies `promiseVersion` onto the records it writes, a
+versioned Resource whose pipeline ships a Health Definition shows
+`HealthChecksSucceeded: Unknown` with reason `WaitingForRecords`. When
+`healthDefinitions` is above `0` but no destination has received the Work yet,
+the condition is `Unknown` with the message
+`health checks for <version> have not been placed on a destination yet`.
+
+The Resource's ResourceBinding carries a copy of `state`,
+`expectedPromiseVersion`, `expectedRecords` and the condition in its own
+`status`, and no `healthRecords`.
+
+To wait for the version a Resource is running to pass its health checks, wait
+on the condition rather than on `state`:
+
+```bash
+kubectl wait <kind>/<name> --for=condition=HealthChecksSucceeded
 ```
