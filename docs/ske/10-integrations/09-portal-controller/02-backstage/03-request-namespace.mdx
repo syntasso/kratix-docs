@@ -20,12 +20,10 @@ The setting applies to every namespaced Promise on the portal. Cluster-scoped Pr
 
 ## Requirements
 
-{/* TODO(release): confirm the three versions below when the releases are cut. */}
-
 - `@syntasso/plugin-ske-backend` `v0.24.0` or later, and `@syntasso/plugin-ske-frontend` `v0.22.0`
   or later. Install the backend plugin before you change the setting: an older one cannot handle the
   new request form.
-- Portal Controller `v0.5.0` or later.
+- Portal Controller `v0.6.1` or later.
 
 :::note
 Kratix does not create namespaces. Create each one before developers request resources into it,
@@ -43,7 +41,7 @@ metadata:
   name: portal-controller
 spec:
   type: portal-controller
-  version: v0.5.0
+  version: v0.6.1
   portals:
     - name: prod
       type: backstage

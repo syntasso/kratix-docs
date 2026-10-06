@@ -19,6 +19,35 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.6.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.6.1/) (2026-10-06)
+
+Released via the SKE Operator Helm Chart [version 0.97.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.97.0/)
+
+#### Features
+
+* A Backstage portal can now choose the namespace of a resource request for the developer, using
+  the new `requestNamespace` setting:
+  * `from: group`: the developer picks one of their Backstage Groups, and the request goes to the
+    namespace named after it.
+  * `from: group` with an `annotation`: the namespace is read from that annotation on the Group.
+  * `from: fixed`: every request goes to one namespace. Use this instead of the `hideNamespace`
+    portal-patch recipes.
+
+  These settings need [`@syntasso/plugin-ske-backend` v0.24.0 and `@syntasso/plugin-ske-frontend`
+  v0.22.0](./backstage) or later. See
+  [Choosing the request namespace](/ske/integrations/portal-controller/backstage/request-namespace).
+* A resource requested for a Backstage Group is now owned by that Group in the catalogue, so it
+  shows on the Group's page. An explicit `ske.backstage.component/owner` annotation still takes
+  precedence.
+* Cortex requests now appear straight away as a `<name> request (pending)` entity, owned by the
+  person who asked for it. The end of the workflow links to the entity. Before, nothing appeared
+  until the platform had built the resource. Deleting a request that was never built also deletes
+  its entity.
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.5.0/) (2026-09-29)
 
 Released via the SKE Operator Helm Chart [version 0.95.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.95.0/)
