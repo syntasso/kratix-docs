@@ -318,35 +318,36 @@ status:
 ### The HealthChecksSucceeded condition
 
 Kratix sets the `HealthChecksSucceeded` condition on Resources of versioned
-Promises. It judges only the Health Records whose `promiseVersion` equals
+Promises. It considers only the Health Records whose `promiseVersion` equals
 `status.healthStatus.expectedPromiseVersion`.
 
-| Status | Reason | When |
-|---|---|---|
-| True | `AllRecordsHealthy` | Every expected record has reported at the expected version, and all of them are healthy or ready. |
-| True | `NoHealthChecks` | `healthDefinitions` is `0`. This version of the Promise ships no health check. |
-| False | `Unhealthy` | At least one record at the expected version is unhealthy. Kratix does not wait for the rest. |
-| False | `Degraded` | Every expected record has reported, none is unhealthy, and at least one is degraded. |
+| Status  | Reason              | When                                                                                              |
+| ------- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| True    | `AllRecordsHealthy` | Every expected record has reported at the expected version, and all of them are healthy or ready. |
+| True    | `NoHealthChecks`    | `healthDefinitions` is `0`. This version of the Promise ships no health check.                    |
+| False   | `Unhealthy`         | At least one record at the expected version is unhealthy.                                         |
+| False   | `Degraded`          | Every expected record has reported, none is unhealthy, and at least one is degraded.              |
 | Unknown | `WaitingForRecords` | Fewer records than expected have reported at the expected version, and none of them is unhealthy. |
 
-`state` is the worst state of every record whatever its version, so it is not
-version-aware.
+`state` is the worst state across all records received, regardless of version.
 
-`expectedRecords` is counted per Work at the expected version: the Health
-Definitions in that Work multiplied by the destinations it was placed on.
+`expectedRecords` is the number of Health Definitions created by the Promise,
+multiplied by the number of Destinations they were placed on.
 
 Records with another version, or with no version, are ignored by the condition
 and still count in `state`. Only records in the Resource's namespace count
-toward the condition.
+towards the condition.
 
 A Resource with no `expectedPromiseVersion`, that is a Resource of an
 unversioned Promise, has no `HealthChecksSucceeded` condition.
 
-Until the health agent copies `promiseVersion` onto the records it writes, a
-versioned Resource whose pipeline ships a Health Definition shows
-`HealthChecksSucceeded: Unknown` with reason `WaitingForRecords`. When
-`healthDefinitions` is above `0` but no destination has received the Work yet,
-the condition is `Unknown` with the message
+For a versioned Promise, the `HealthChecksSucceeded` condition is `Unknown`
+with reason `WaitingForRecords` until the Health Agent returns Health Records
+containing the expected Promise version.
+
+When the Promise created one or more Health Definitions (`healthDefinitions` is
+more than `0`) but none has been placed on a Destination, the
+`HealthChecksSucceeded` condition is `Unknown` with the message
 `health checks for <version> have not been placed on a destination yet`.
 
 The Resource's ResourceBinding carries a copy of `state`,
