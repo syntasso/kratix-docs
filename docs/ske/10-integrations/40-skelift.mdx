@@ -121,18 +121,32 @@ The `cloud-to-kratix-promise` skill runs a fixed sequence:
    before drafting anything, so you can narrow the scope first.
 3. **Clarify** — asks you about each grouping it's unsure of, batched into a single set of questions about how the resources behave in practice. Drafting does not
    start until you answer, or tell it to use its own judgement.
-4. **Build** — passes each approved capability to `kratix-build-promise`, which
-   writes the Promise itself: an API schema and working pipeline code. It then
-   drafts the Resource Requests for what is already running.
+4. **Build** — passes each capability you chose to `kratix-build-promise` to
+   draft its API schema, pipeline code, Promise, and generated example Resource
+   Request. It also drafts Resource Requests for what is already running. The
+   builder stops before live installation or validation.
 5. **Review** — checks every draft against Syntasso's platform doctrine, looking
    for capabilities that only automate a task rather than owning a service
    through its lifecycle. Each finding is recorded in `review-findings.yaml`.
-6. **Gate** — `kratix skelift review` fails if any critical or high finding is
-   unresolved, and `kratix skelift check` validates the structure of the
-   generated Promises and examples. The review step records findings; these
-   commands are what enforce them.
-7. **Apply, only after approval** — you see the drafts, the review, and the gate
-   results first. Nothing reaches the platform until you say so.
+6. **Gate** — run both commands offline. `kratix skelift review` fails if any
+   critical or high finding is unresolved, and `kratix skelift check` validates
+   the structure of the generated Promises and examples. The review step records
+   findings; these commands are what enforce them.
+7. **Approve and apply** — review the drafts and both gate results, then approve
+   each live action and its target before the agent performs it.
+
+Live actions include delivering pipeline images, installing a Promise, applying
+the builder's generated example Resource Request, and applying a Resource
+Request for an existing instance. Approving one does not approve the others.
+Approval must identify the Kubernetes context, API server, and cluster identity
+for cluster writes, and the registry and image reference for image delivery.
+The agent checks the target again before each write and stops if it differs
+from what you approved.
+
+Sandbox validation is a live action too. If you want it, separately approve
+the sandbox target and the exact actions it requires, including any generated
+example submission. Drafting and both gates can finish without installing a
+Promise, submitting a request, or changing a cloud account or cluster.
 
 ## Usage
 
@@ -149,8 +163,8 @@ groupings it is unsure of. Each run produces:
 
 | Output | Contents |
 |---|---|
-| `promises/` | One generated Promise per approved capability |
-| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile` |
+| `promises/` | One generated Promise per capability you chose to draft |
+| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile`, and a draft `example-resource.yaml` |
 | `resource-requests/` | Drafted Resource Requests for the live instances, not applied |
 | `review-findings.yaml` | Every review finding, including explicit pass notes |
 
