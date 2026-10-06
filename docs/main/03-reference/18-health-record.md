@@ -33,6 +33,11 @@ data:
   promiseVersion: v2.0.0
 ```
 
-A record counts toward the resource's `HealthChecksSucceeded` condition only when its `promiseVersion` equals the resource's `status.healthStatus.expectedPromiseVersion`. A record without a `promiseVersion` still counts toward `status.healthStatus.state`. Only records in the resource's namespace count toward the condition.
+Any record counts towards `status.healthStatus.state`, regardless of the
+presence of a `promiseVersion` field.
+
+Only records in the resource's namespace whose `promiseVersion` equals
+`status.healthStatus.expectedPromiseVersion` count towards the resource's
+`HealthChecksSucceeded` condition.
 
 Check the [Surfacing health information guide](/main/guides/resource-health) for more information about how to use this CRD.
