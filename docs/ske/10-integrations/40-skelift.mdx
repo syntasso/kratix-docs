@@ -138,10 +138,11 @@ The `cloud-to-kratix-promise` skill runs a fixed sequence:
 Live actions include delivering pipeline images, installing a Promise, applying
 the builder's generated example Resource Request, and applying a Resource
 Request for an existing instance. Approving one does not approve the others.
-Approval must identify the Kubernetes context, API server, and cluster identity
-for cluster writes, and the registry and image reference for image delivery.
-The agent checks the target again before each write and stops if it differs
-from what you approved.
+Approval must identify the kubeconfig, Kubernetes context, API server, and
+cluster identity for cluster writes, and the registry and image reference for
+image delivery. Each Kubernetes write must explicitly use the approved
+kubeconfig and context. The agent checks the target again before each write
+and stops if it differs from what you approved.
 
 Sandbox validation is a live action too. If you want it, separately approve
 the sandbox target and the exact actions it requires, including any generated
