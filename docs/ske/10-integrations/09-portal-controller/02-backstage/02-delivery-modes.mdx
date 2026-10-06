@@ -33,10 +33,15 @@ approved request, and is covered in [Configure Backstage](./configure-backstage)
 ## Push mode
 
 The generated Template asks for the resource name, namespace, and the Promise's own `spec` fields,
-then runs two steps:
+then runs two steps. For a Promise whose kind is `Postgresql` they are named:
 
-1. **Configure resource**, applying the request to the platform.
-2. **Record request**, telling the Backstage backend a request has been submitted.
+1. **Submitting your Postgresql request**, applying the request to the platform.
+2. **Registering your Postgresql request in the catalog**, telling the Backstage backend a request has
+   been submitted.
+
+The Template also carries a hidden `prAction` parameter, `Request` by default. The **Manage** tab
+sets it to `Update` when it re-runs the Template for an existing resource, so the recorded request
+says which it was.
 
 There is nothing for the developer to choose beyond the form itself, and no repository is
 involved. How the request is written, directly through the Kubernetes API as the signed-in user or
@@ -49,11 +54,16 @@ platform catches up. See [What a developer sees while waiting](#what-a-developer
 ## Pull-request mode
 
 The generated Template gains a **Repository & Credentials** page asking which repository the
-request should be raised against, and then runs three steps:
+request should be raised against, and then runs three steps. For a Promise whose kind is `Postgresql`
+they are named:
 
-1. **Generate resource request**, writing the request manifest.
-2. **Pull Request**, opening a pull request against the chosen repository.
-3. **Record request**, telling the Backstage backend that a request is now awaiting approval.
+1. **Preparing your Postgresql request**, writing the request manifest.
+2. **Opening a pull request for review**, against the chosen repository.
+3. **Registering your Postgresql request in the catalog**, telling the Backstage backend that a request
+   is now awaiting approval.
+
+The hidden `prAction` parameter is `Request`, `Update` or `Delete` here, because the **Manage** tab
+runs this same Template for updates and deletions.
 
 The request manifest lands in the repository at:
 
@@ -93,6 +103,24 @@ Deletion only routes through review for resources that were themselves requested
 pull-request mode. A resource created some other way, by `kubectl` or under push mode, is deleted
 immediately.
 
+## What a developer sees on the task page
+
+The step names above are what the Template carries, and Backstage shows them as written. A Template
+serves creates and updates alike, so those names cannot say which one is running.
+
+The frontend plugin's [`scaffolderModuleResourceRequestCopy`](./frontend-plugin#resource-request-copy)
+module, which the install steps add to your app, fills that gap. The task page reads the run's
+`prAction`, the resource kind and the name the developer typed, and shows:
+
+| Step | Create | Update | Delete (pull-request mode) |
+|---|---|---|---|
+| Push: submit | Creating your dev-postgres Postgresql request | Updating dev-postgres Postgresql request | |
+| Pull request: prepare | Drafting your request | Drafting your changes | Drafting the deletion, shown skipped |
+| Pull request: open | Opening a PR to create dev-postgres Postgresql | Opening a PR to update dev-postgres Postgresql | Opening a PR to delete dev-postgres Postgresql |
+| Both: register | Registering your request in the catalog | Registering your update in the catalog | Registering your deletion in the catalog |
+
+Tasks from any other Template are shown exactly as Backstage would show them.
+
 ## What a developer sees while waiting
 
 A resource takes time to reach the catalogue: the platform has to create and reconcile it, the
@@ -109,10 +137,18 @@ How long it stays is whatever those three steps take. Under `push` with `ske.mod
 that can be seconds. A mode that commits to Git adds your GitOps agent's sync interval, and
 Git-based catalogue discovery adds its own polling interval.
 
-:::note
-There is no link to the pull request on the scaffolder's completion page. Developers find their
-pull request through the pending request entity in the catalogue.
-:::
+## Where a completed task leads
+
+When the run finishes, the task page includes links to the catalogue item and open pull requests:
+
+| Mode | Links on the completed task |
+|---|---|
+| `push` | **View in Catalog** |
+| `pull-request` | **View in Catalog**, then **Pull Request** |
+
+**View in Catalog** goes to the resource's own entity when the platform has already published one,
+and to the pending request otherwise. A create therefore lands on the pending request, since the
+resource does not exist yet; an update lands on the resource.
 
 ## Customizations and delivery modes
 
