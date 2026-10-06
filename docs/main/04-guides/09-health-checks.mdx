@@ -42,6 +42,8 @@ status:
 
 The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`. For a versioned Promise it also carries `expectedPromiseVersion` and `healthDefinitions`: the Promise version the last Configure workflow ran for, and how many Health Definitions that workflow wrote (`0` when it wrote none). A Configure workflow changes neither `state` nor `healthRecords`.
 
+To know whether the version a resource is running has passed its checks, read the `HealthChecksSucceeded` condition in `status.conditions`, not `state`: `state` is the worst of every record whatever its version, while the condition judges only the records whose `promiseVersion` equals `expectedPromiseVersion`. Until the health agent copies `promiseVersion` onto the records it writes, a versioned resource whose pipeline ships a Health Definition shows `HealthChecksSucceeded: Unknown` with reason `WaitingForRecords`. See [The HealthChecksSucceeded condition](/main/reference/resources/status#the-healthcheckssucceeded-condition) for the full table.
+
 For example, after a resource of a Promise labelled `kratix.io/promise-version: v2.0.0` has run a Configure workflow that wrote one Health Definition, and before any Health Record for that version has arrived:
 
 ```yaml
@@ -87,7 +89,7 @@ The `details` field is an optional field that can be used to provide additional 
 
 ## The HealthRecord CRD
 
-Promise writers can use `/kratix/metadata/status.yaml` to populate the `healthRecord` status field. Alternatively, they can write a HealthRecord CustomResource and schedule it to the Platform cluster in their Pipelines.
+Health is written only through HealthRecords; `/kratix/metadata/status.yaml` cannot populate `healthStatus`. Promise writers can write a HealthRecord CustomResource and schedule it to the Platform cluster in their Pipelines.
 
 A HealthRecord details the result of a Health check. When a Health Record exists for a given Resource, Kratix will update the referenced resource status to reflect the data in the HealthRecord. It has the following format:
 
@@ -119,6 +121,12 @@ You can have external systems generating the HealthRecord CustomResource and, vi
 
 :::
 
+:::tip
+
+A HealthDefinition or HealthRecord created outside the Configure workflow must carry the promise version to count toward the `HealthChecksSucceeded` condition: `spec.promiseVersion` on the HealthDefinition, `data.promiseVersion` on the record. The platform never waits for it: `expectedRecords` only counts what the pipeline shipped. Only records in the resource's namespace count toward the condition.
+
+:::
+
 ## Writing a HealthRecord in a Workflow
 
 Now that you understand the `healthRecord` status and the HealthRecord CRD, let's see how to use them in a Workflow. For that, you will update the Redis Promise you can find in the Marketplace. Start by downloading the Promise YAML to your local machine:
@@ -130,7 +138,7 @@ curl -Lo redis-promise.yaml https://raw.githubusercontent.com/syntasso/kratix-ma
 You are going to update the promise as follows:
 
 * The first workflow in `resource.configure` will instantiate the Redis Promise. You will update it to also generate the HealthRecord.
-* The second workflow will wait for the resource status `healthRecord.state` to be equal to `healthy`.
+* The second workflow will wait for the resource status `healthStatus.state` to be equal to `healthy`.
 
 ### The HealthRecord generator workflow
 
@@ -231,7 +239,7 @@ namespace="$(yq '.metadata.namespace // "default"' /kratix/input/object.yaml)"
 resourceName="$(yq '.metadata.name' /kratix/input/object.yaml)"
 
 while true; do
-  state="$(kubectl get redis ${resourceName} --namespace ${namespace} -o jsonpath='{.status.healthRecord.state}')"
+  state="$(kubectl get redis ${resourceName} --namespace ${namespace} -o jsonpath='{.status.healthStatus.state}')"
   if [[ ${state} == "healthy" ]]; then 
     break
   fi
@@ -241,6 +249,8 @@ done
 
 echo "Resource is healthy"
 ```
+
+For versioned Promises, `kubectl wait --for=condition=HealthChecksSucceeded` is the stricter check, because `state` also counts records from earlier versions.
 
 This script is available in the `ghcr.io/kratix-docs/redis-health-checks:v0.1.0` image in the `wait-healthy` binary.
 

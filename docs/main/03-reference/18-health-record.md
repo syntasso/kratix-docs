@@ -29,6 +29,15 @@ data:
   # Optional: any additional details
   details:
     example: data
+  # Optional: the promise version stamped on the HealthDefinition that produced the record
+  promiseVersion: v2.0.0
 ```
+
+Any record counts towards `status.healthStatus.state`, regardless of the
+presence of a `promiseVersion` field.
+
+Only records in the resource's namespace whose `promiseVersion` equals
+`status.healthStatus.expectedPromiseVersion` count towards the resource's
+`HealthChecksSucceeded` condition.
 
 Check the [Surfacing health information guide](/main/guides/resource-health) for more information about how to use this CRD.
