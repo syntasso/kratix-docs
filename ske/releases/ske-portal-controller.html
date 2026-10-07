@@ -18,8 +18,8 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.8e9f7c17.js" defer="defer"></script>
-<script src="/assets/js/main.c39422ca.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.866755a4.js" defer="defer"></script>
+<script src="/assets/js/main.e496cc49.js" defer="defer"></script>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KNBP6C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -35,6 +35,40 @@
 <p>The release manifest is available at:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/</span><br></div></code></pre></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="release-notes">Release Notes<a href="#release-notes" class="hash-link" aria-label="Direct link to Release Notes" title="Direct link to Release Notes" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v061-2026-10-06"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.6.1/" target="_blank" rel="noopener noreferrer" class="">v0.6.1</a> (2026-10-06)<a href="#v061-2026-10-06" class="hash-link" aria-label="Direct link to v061-2026-10-06" title="Direct link to v061-2026-10-06" translate="no">​</a></h3>
+<p>Released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.97.0/" target="_blank" rel="noopener noreferrer" class="">version 0.97.0</a></p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features">Features<a href="#features" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
+<ul>
+<li class="">
+<p>A Backstage portal can now choose the namespace of a resource request for the developer, using
+the new <code>requestNamespace</code> setting:</p>
+<ul>
+<li class=""><code>from: group</code>: the developer picks one of their Backstage Groups, and the request goes to the
+namespace named after it.</li>
+<li class=""><code>from: group</code> with an <code>annotation</code>: the namespace is read from that annotation on the Group.</li>
+<li class=""><code>from: fixed</code>: every request goes to one namespace. Use this instead of the <code>hideNamespace</code>
+portal-patch recipes.</li>
+</ul>
+<p>These settings need <a class="" href="/ske/releases/backstage"><code>@syntasso/plugin-ske-backend</code> v0.24.0 and <code>@syntasso/plugin-ske-frontend</code>
+v0.22.0</a> or later. See
+<a class="" href="/ske/integrations/portal-controller/backstage/request-namespace">Choosing the request namespace</a>.</p>
+</li>
+<li class="">
+<p>A resource requested for a Backstage Group is now owned by that Group in the catalogue, so it
+shows on the Group&#x27;s page. An explicit <code>ske.backstage.component/owner</code> annotation still takes
+precedence.</p>
+</li>
+<li class="">
+<p>Cortex requests now appear straight away as a <code>&lt;name&gt; request (pending)</code> entity, owned by the
+person who asked for it. The end of the workflow links to the entity. Before, nothing appeared
+until the platform had built the resource. Deleting a request that was never built also deletes
+its entity.</p>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance">Maintenance<a href="#maintenance" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
+<ul>
+<li class="">Base image updates.</li>
+</ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v050-2026-09-29"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.5.0/" target="_blank" rel="noopener noreferrer" class="">v0.5.0</a> (2026-09-29)<a href="#v050-2026-09-29" class="hash-link" aria-label="Direct link to v050-2026-09-29" title="Direct link to v050-2026-09-29" translate="no">​</a></h3>
 <p>Released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.95.0/" target="_blank" rel="noopener noreferrer" class="">version 0.95.0</a></p>
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Backstage Templates now default to a single form page</div><div class="admonitionContent_BuS1"><p>Generated Backstage Templates now put every <code>spec</code> field on one form page by default. Existing
@@ -44,7 +78,7 @@ upgrade. To keep the multi-step form, add <code>--single-spec-page=false</code> 
 own Promise pipeline, add <code>--single-spec-page=false</code> as a container argument instead: the
 <code>TEMPLATE_SINGLE_SPEC_PAGE</code> environment variable can&#x27;t turn the single-page form off. See
 <a class="" href="/ske/integrations/portal-controller/installation#portal-wide-generate-flags">Portal-wide generate flags</a>.</p></div></div>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features">Features<a href="#features" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-1">Features<a href="#features-1" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
 <li class="">Generated Backstage Templates now link to the result when a task completes: <strong>View in Catalog</strong>
 first, then <strong>Pull Request</strong> in pull-request mode. The catalogue link goes to the pending entity
@@ -53,7 +87,7 @@ until the real one exists.</li>
 &quot;Submitting your Jenkins request&quot;. Push-mode Templates now also record whether each run is a
 create or an update, as pull-request mode already did.</li>
 </ul>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance">Maintenance<a href="#maintenance" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance-1">Maintenance<a href="#maintenance-1" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
 <ul>
 <li class="">Base image updates. Bump dependencies.</li>
 </ul>
@@ -61,7 +95,7 @@ create or an update, as pull-request mode already did.</li>
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Requires SKE v0.59.0</div><div class="admonitionContent_BuS1"><p>SKE <code>v0.59.0</code> removed the workflow counters from Promise and resource request status, and this
 version tracks that change. On earlier Portal Controller versions, resource requests stay
 unreconciled once SKE is upgraded.</p></div></div>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance-1">Maintenance<a href="#maintenance-1" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="maintenance-2">Maintenance<a href="#maintenance-2" class="hash-link" aria-label="Direct link to Maintenance" title="Direct link to Maintenance" translate="no">​</a></h4>
 <ul>
 <li class="">Base image updates. Bump dependencies.</li>
 </ul>
@@ -75,7 +109,7 @@ everything it created — including what earlier versions left behind.</li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v040-2026-08-27"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.4.0/" target="_blank" rel="noopener noreferrer" class="">v0.4.0</a> (2026-08-27)<a href="#v040-2026-08-27" class="hash-link" aria-label="Direct link to v040-2026-08-27" title="Direct link to v040-2026-08-27" translate="no">​</a></h3>
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Requires SKE Operator v0.34.0</div><div class="admonitionContent_BuS1"><p>Upgrade the SKE Operator to <code>v0.34.0</code> first.</p></div></div>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-1">Features<a href="#features-1" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-2">Features<a href="#features-2" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
 <li class="">
 <p><strong>The Portal Controller no longer needs the <code>skeintegrations</code> CRD.</strong> It reads its connections from a
@@ -100,7 +134,7 @@ one is rejected up front rather than failing later.</p>
 </li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v030-2026-08-18"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.3.0/" target="_blank" rel="noopener noreferrer" class="">v0.3.0</a> (2026-08-18)<a href="#v030-2026-08-18" class="hash-link" aria-label="Direct link to v030-2026-08-18" title="Direct link to v030-2026-08-18" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-2">Features<a href="#features-2" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-3">Features<a href="#features-3" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
 <li class="">
 <p><strong>Portal Sync condition is now filtered out from the generated Entity.</strong>: similar to other Kratix-owned
@@ -139,7 +173,7 @@ you can reshape the generated entity and workflows at both the Promise and the R
 <code>kratix.io/cortex-fixed-namespace</code> annotation, and the Backstage single-page form. Both are now
 <code>adapterConfig.generate.args</code> flags on the portal. Where you need them per Promise, the
 <code>hideNamespaceManifest</code> and <code>singleSpecPage</code> Portal Patch recipes do that job.</p>
-<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-3">Features<a href="#features-3" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features-4">Features<a href="#features-4" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
 <li class="">
 <p><strong>One integration, many portals.</strong> Declare every portal your platform exposes on a single <code>SKEIntegration</code> of <code>type: portal-controller</code>. Portals of the same type can coexist,
@@ -175,6 +209,6 @@ lines of declarative recipe rather than a hand-written script. See <a class="" h
 <ul>
 <li class="">Portal Patch recipes that target the <code>ske-configure-resource</code> step, including <code>hideNamespaceManifest</code>, fail under <code>pull-request</code> delivery mode, because that step only exists in
 <code>push</code> mode. A recipe that matches nothing aborts the sync, so no entity ships.</li>
-</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/syntasso/kratix-docs/tree/main/docs/ske/50-releases/30-integrations/10-ske-portal-controller.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/category/integrations"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Integrations</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/ske/releases/portal-patch"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Portal Patch</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#release-notes" class="table-of-contents__link toc-highlight">Release Notes</a><ul><li><a href="#v050-2026-09-29" class="table-of-contents__link toc-highlight">v0.5.0 (2026-09-29)</a></li><li><a href="#v042-2026-09-22" class="table-of-contents__link toc-highlight">v0.4.2 (2026-09-22)</a></li><li><a href="#v041-2026-09-07" class="table-of-contents__link toc-highlight">v0.4.1 (2026-09-07)</a></li><li><a href="#v040-2026-08-27" class="table-of-contents__link toc-highlight">v0.4.0 (2026-08-27)</a></li><li><a href="#v030-2026-08-18" class="table-of-contents__link toc-highlight">v0.3.0 (2026-08-18)</a></li><li><a href="#v020-2026-07-30" class="table-of-contents__link toc-highlight">v0.2.0 (2026-07-30)</a></li></ul></li></ul></div></div></div></div></main></div></div></div><img id="ske-scarf-pixel" style="height:1px;width:1px" referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f09f95ff-0179-40f1-a33c-826b0e29c3de"><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/">Getting Started</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://kratix.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Kratix<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/syntasso/kratix" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://syntasso.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Syntasso<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77" target="_blank" rel="noopener noreferrer" class="footer__link-item">Privacy Policy<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Syntasso Limited. Built with Docusaurus.</div></div></div></footer></div>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/syntasso/kratix-docs/tree/main/docs/ske/50-releases/30-integrations/10-ske-portal-controller.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/category/integrations"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Integrations</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/ske/releases/portal-patch"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Portal Patch</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#release-notes" class="table-of-contents__link toc-highlight">Release Notes</a><ul><li><a href="#v061-2026-10-06" class="table-of-contents__link toc-highlight">v0.6.1 (2026-10-06)</a></li><li><a href="#v050-2026-09-29" class="table-of-contents__link toc-highlight">v0.5.0 (2026-09-29)</a></li><li><a href="#v042-2026-09-22" class="table-of-contents__link toc-highlight">v0.4.2 (2026-09-22)</a></li><li><a href="#v041-2026-09-07" class="table-of-contents__link toc-highlight">v0.4.1 (2026-09-07)</a></li><li><a href="#v040-2026-08-27" class="table-of-contents__link toc-highlight">v0.4.0 (2026-08-27)</a></li><li><a href="#v030-2026-08-18" class="table-of-contents__link toc-highlight">v0.3.0 (2026-08-18)</a></li><li><a href="#v020-2026-07-30" class="table-of-contents__link toc-highlight">v0.2.0 (2026-07-30)</a></li></ul></li></ul></div></div></div></div></main></div></div></div><img id="ske-scarf-pixel" style="height:1px;width:1px" referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f09f95ff-0179-40f1-a33c-826b0e29c3de"><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/">Getting Started</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://kratix.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Kratix<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/syntasso/kratix" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://syntasso.io" target="_blank" rel="noopener noreferrer" class="footer__link-item">Syntasso<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=904a9e3b-575b-4156-8377-ed6ec8829d77" target="_blank" rel="noopener noreferrer" class="footer__link-item">Privacy Policy<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Syntasso Limited. Built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>
