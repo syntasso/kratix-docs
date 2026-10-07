@@ -30,6 +30,7 @@ See [Configure Backstage](./configure-backstage) for full installation and confi
 | `ske:write-manifest` | Writes a manifest to the scaffolder workspace, for use by later steps in the same Template |
 | `ske:publish-catalog` | Publishes a catalog entity file from the workspace to the catalog git repository |
 | `ske:record-request` | Records a submitted request so Backstage can show it as pending before it is applied to the platform |
+| `ske:resolve-namespace` | Decides the namespace a request goes to, from the developer's Backstage Group or a fixed value, and refuses it if the developer is not allowed. Used when a portal sets [`requestNamespace`](./request-namespace) to `group` or `fixed`. From `v0.24.0`. |
 
 ### `ske:configure-resource`
 
@@ -166,10 +167,10 @@ This action produces no output.
 ```yaml
 steps:
   - id: record-request
-    name: Record request
+    name: Registering your Postgresql request in the catalog
     action: ske:record-request
     input:
-      promiseName: jenkins
+      promiseName: postgresql
       name: ${{ parameters.objname }}
       namespace: ${{ parameters.objnamespace }}
       action: ${{ parameters.prAction }}
@@ -177,7 +178,7 @@ steps:
       requestsRepoUrl: ${{ parameters.repoUrl }}
       manifest: |
         apiVersion: marketplace.kratix.io/v1alpha1
-        kind: Jenkins
+        kind: Postgresql
         metadata:
           name: ${{ parameters.objname }}
           namespace: ${{ parameters.objnamespace }}
@@ -185,21 +186,23 @@ steps:
 ```
 
 In push mode there is no pull request and, with `ske.mode: kubernetes`, no repository either. Omit
-both keys rather than sending them empty, and record the action as a literal:
+both keys rather than sending them empty. The action still comes from the hidden `prAction`
+parameter, which the generated Template declares in both modes so an update from the **Manage** tab
+is recorded as one:
 
 ```yaml
 steps:
   - id: record-request
-    name: Record request
+    name: Registering your Postgresql request in the catalog
     action: ske:record-request
     input:
-      promiseName: jenkins
+      promiseName: postgresql
       name: ${{ parameters.objname }}
       namespace: ${{ parameters.objnamespace }}
-      action: Request
+      action: ${{ parameters.prAction }}
       manifest: |
         apiVersion: marketplace.kratix.io/v1alpha1
-        kind: Jenkins
+        kind: Postgresql
         metadata:
           name: ${{ parameters.objname }}
           namespace: ${{ parameters.objnamespace }}

@@ -5,6 +5,11 @@ sidebar_label: Backstage Plugins
 slug: /ske/releases/backstage
 ---
 
+```mdx-code-block
+import PromiseStatus from "/img/docs/ske/backstage/promise-status.png"
+import ResourceStatus from "/img/docs/ske/backstage/resource-status.png"
+```
+
 ## Overview
 
 The SKE Backstage Frontend plugin extends Backstage so it can be used to view
@@ -23,6 +28,60 @@ The plugins are available as NPM packages at:
 Check the release notes below for information on each available version.
 
 ## Release Notes
+
+### [ske-backend v0.24.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.24.0/); [ske-frontend v0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.22.0/) (2026-10-06)
+
+#### Features
+
+* **Choose the request namespace for the developer.** The new `ske:resolve-namespace` action picks
+a request's namespace from the developer's Backstage Group, from an annotation on that Group, or
+from one fixed value. It refuses the request if the developer is not allowed to use that namespace.
+Updates and deletes keep the resource's Group, and someone outside the Group sees that they cannot
+change the resource. Needs [Portal Controller v0.6.1](./ske-portal-controller) or later. See
+[Choosing the request namespace](/ske/integrations/portal-controller/backstage/request-namespace).
+
+* **Revamped the Resource Kratix tab (now called Status).** It gives the resource's overall status in one word and displays details such as resource status, health checks, and provisioning steps. When a health check decides the status, the banner says **Unhealthy** or **Degraded**, so it names which kind of problem the resource has. Health checks are titled by their display name.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={ResourceStatus}
+    alt="The Status tab of a Redis resource: an Unhealthy banner saying 1 of 2 health checks are not passing, the Details card, the two checks with one of them unhealthy, and the folded Steps card"
+  />
+  <figcaption>The Status tab of a resource with one failing health check</figcaption>
+</figure>
+
+* **Revamped the Promise Kratix tab (now called Status).** It says in one word whether the platform can fulfil requests for the Promise, lists the workflows it ran to get there, and lists every request made against it with the team it belongs to and its current state.
+
+<figure className="diagram">
+  <img
+    className="fullwidth"
+    src={PromiseStatus}
+    alt="The Status tab of a redis Promise: an Available banner, the Promise it is part of, the Details card, the Workflows card, and a table of eight resource requests with mixed states"
+  />
+  <figcaption>The Status tab of a Promise, with requests in several states</figcaption>
+</figure>
+
+:::note Request states need the cluster read
+
+The states in the resource requests table come from the platform cluster through the SKE Backend plugin, one namespace at a time as the signed-in user. A namespace a user may not list still shows its requests, with their state reading **Unknown**, and `ske.mode: gitops` cannot supply states at all.
+
+:::
+
+* **Request progress says whether it is creating or updating.** See
+[What a developer sees on the task page](/ske/integrations/portal-controller/backstage/delivery-modes#what-a-developer-sees-on-the-task-page).
+
+* **A completed task links to the request and its change.** See
+[Where a completed task leads](/ske/integrations/portal-controller/backstage/delivery-modes#where-a-completed-task-leads).
+
+* **The Manage tab hides its actions while a deletion is waiting for review.**
+
+* Compatible with Backstage v1.55.0.
+
+#### Fixes
+
+* The Manage tab now shows the app's own custom form fields.
+* A deleted resource's pending entry no longer comes back in the catalogue.
 
 ### [ske-frontend v0.21.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.21.1/) (2026-09-07)
 

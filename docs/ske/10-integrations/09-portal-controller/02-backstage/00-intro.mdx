@@ -16,13 +16,14 @@ write, which is what `config` describes.
 
 ## Configuration
 
-A Backstage portal takes exactly three `config` keys, all optional:
+A Backstage portal takes exactly four `config` keys, all optional:
 
 | Key | Meaning | Default |
 |---|---|---|
 | `mode` | The [delivery mode](./delivery-modes), `push` or `pull-request` | `push` |
 | `destination` | Where entities are written, either adopting an existing Destination or defining one | none |
 | `stateStore` | The state store backing an owned Destination | none |
+| `requestNamespace` | Where a request's namespace comes from: typed by the developer, the developer's Backstage Group, or one fixed namespace. See [Request namespace](./request-namespace) | `from: form` |
 
 ### Owning a Destination
 
@@ -161,6 +162,8 @@ it is not configurable.
 - [Configure Backstage](./configure-backstage) covers the plugins and catalog discovery you set up
   on the Backstage side.
 - [Delivery modes](./delivery-modes) covers `push` versus `pull-request`.
+- [Request namespace](./request-namespace) covers choosing a request's namespace for the
+  developer instead of asking them to type it.
 - [Customising the request template](./customising-the-request-template) covers how your Promise
   API becomes the form your developers fill in, and how to change what the controller produced.
 - [Migrating from the Backstage Controller](./migrating-from-backstage) covers moving an existing
