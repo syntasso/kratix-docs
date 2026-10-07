@@ -244,10 +244,7 @@ in its step below.
    in two cases:
 
    - The delete Workflow is failing or has not finished.
-   - Another workflow Job for the resource request, such as a configure Job, is
-     still running. Kratix waits for running Jobs even when the Promise has no
-     delete Workflow, so that a running configure Job cannot write a new Work
-     after Kratix has cleaned up the existing ones.
+   - There's a workflow Job for the resource request in progress. 
 
    List the workflow Jobs and Pods for the resource request:
 
