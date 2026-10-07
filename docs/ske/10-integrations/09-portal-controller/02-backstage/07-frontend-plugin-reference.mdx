@@ -75,9 +75,9 @@ Resource entities can use either `kratix.io/type: resource` or
 
 The Promise page includes a **Status** tab, which displays:
 
-- a banner giving the Promise's overall state in one word with the version
-  installed and how long it has been able to fulfil requests - the Promise this
-  one is part of, when another Promise requires it
+- a banner giving the Promise's overall state in one word, with the version
+  installed and how long it has been able to fulfil requests
+- the Promise this one is part of, when another Promise requires it
 - **Details**: the Promise's name, the API resource it serves and its API group
 - **Workflows**: one group per workflow, each with its own steps
 - **Resource requests**: every request made against the Promise
@@ -85,7 +85,7 @@ The Promise page includes a **Status** tab, which displays:
 :::note
 
 **`ske.mode: gitops` cannot supply states.** Live status is only available when
-*`ske.mode` is set to `kubernetes` or `hybrid`.
+`ske.mode` is set to `kubernetes` or `hybrid`.
 
 :::
 
@@ -110,17 +110,14 @@ deletion workflows.
 
 :::
 
-Two things follow for an operator:
-
-
 ### Resource Status
 
 The Resource page includes a **Status** tab, which displays:
 
 - a banner giving the resource's overall status in one word, read from Kratix's
   `Reconciled` condition, or from the health checks once the platform has
-  delivered — **Unhealthy** and **Degraded** are the checks' own words, so the
-  banner names which kind of unwell rather than only that something is
+  delivered. The health checks can set it to **Unhealthy** or **Degraded**, so
+  the banner says which kind of problem the resource has, not only that it has one
 - **Details**: the instance name, namespace, kind and the Promise it came from,
   plus everything the resource reports about itself, and the whole manifest
   behind **View source**
