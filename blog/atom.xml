@@ -2,11 +2,211 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.kratix.io/blog</id>
     <title>Kratix Blog</title>
-    <updated>2026-07-30T00:00:00.000Z</updated>
+    <updated>2026-10-07T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://docs.kratix.io/blog"/>
     <subtitle>Kratix Blog</subtitle>
     <icon>https://docs.kratix.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Rebuilding Our Backstage Integration for Platform Adoption]]></title>
+        <id>https://docs.kratix.io/blog/out-of-the-box-backstage</id>
+        <link href="https://docs.kratix.io/blog/out-of-the-box-backstage"/>
+        <updated>2026-10-07T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[SKE now generates a clearer, more informative Backstage experience from your Kratix Promises, so platform users can find, request and track services without reading YAML.]]></summary>
+        <content type="html"><![CDATA[<p>We at Syntasso are very proud of the SKE Backstage integration we built. You
+apply a Promise, and a Component and a Template automagically appear in your
+Backstage instance. You can send requests to the platform via GitOps or
+directly via the Kubernetes API. Changes to the Promise regenerate the
+Template. You can use an array of CRD properties to control the validation
+applied to the form, and you can run custom containers to customise what the
+platform generates.</p>
+<p>It is great.</p>
+<p>Except, it kinda looks like this:</p>
+<p><img decoding="async" loading="lazy" alt="The original Resource page in Backstage, showing the resource status as raw YAML" src="https://docs.kratix.io/assets/images/old-resource-page-eafdbe42e258ca5537ae7b916142226c.png" width="1646" height="1126" class="img_ev3q"></p>
+<p>Which is enough to get you started, but it won't necessarily <em>wow</em> the
+platform users. It solved the immediate problem for the platform engineer
+(<em>how do I expose this service on Backstage?</em>), but it was quite simple on the
+visual front. Apparently raw YAML is not everyone's cup of tea… not sure why.
+it better.</p>
+<p>In this post, we will explore why the interface matters and how it can drive
+adoption of your platform. We'll look at what we had before, what we have
+learned from our customers, and how we used that learning to improve the
+out-of-the-box experience with Backstage. We will then look at what we have
+just released to make it <em>even</em> better.</p>
+<!-- -->
+<p><strong>TL;DR:</strong> Syntasso Kratix Enterprise (SKE) automatically generates Backstage
+Software Templates and catalog entities from your Kratix Promises. We have
+redesigned this out-of-the-box Backstage experience. Request forms are clearer,
+users pick a Backstage Group instead of a Kubernetes Namespace, and they get
+immediate "Pending" feedback after submitting. New Promise and Resource pages
+show health, status and provisioning progress at a glance, so platform users
+can find, request and track services without reading YAML.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="where-we-started-backstage-software-templates-generated-from-kratix-promises">Where we started: Backstage Software Templates generated from Kratix Promises<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#where-we-started-backstage-software-templates-generated-from-kratix-promises" class="hash-link" aria-label="Direct link to Where we started: Backstage Software Templates generated from Kratix Promises" title="Direct link to Where we started: Backstage Software Templates generated from Kratix Promises" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="why-the-interface-matters-for-platform-adoption">Why the interface matters for platform adoption<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#why-the-interface-matters-for-platform-adoption" class="hash-link" aria-label="Direct link to Why the interface matters for platform adoption" title="Direct link to Why the interface matters for platform adoption" translate="no">​</a></h2>
+<p>A problem lots of platform teams face in their organisations is adoption: they
+build a nice, self-contained, fully managed platform, full of amazing
+services, and… no one uses it. Often it's not a lack of functionality. We see
+this repeatedly with our customers, and some of the most commonly raised
+barriers to adoption are:</p>
+<ul>
+<li class="">Developers don't know what's available in the platform.</li>
+<li class="">Developers don't know how to consume and monitor what they requested from
+the platform.</li>
+<li class="">Inertia is strong, and change is hard.</li>
+</ul>
+<p>This is where portals like <a href="https://backstage.io/" target="_blank" rel="noopener noreferrer" class="">Backstage</a> and
+<a href="https://www.cortex.io/" target="_blank" rel="noopener noreferrer" class="">Cortex</a> really help. A platform can be technically
+excellent and still fail to gain adoption if it asks users to work in
+unfamiliar ways. A portal like Backstage turns those capabilities into
+discoverable, contextual artefacts: services, owners, environment lifecycles,
+request forms and documentation, all in one central place. Users can go
+through a wizard-like experience to request what they need, and quickly
+understand when things go wrong.</p>
+<blockquote>
+<p><em>What are you talking about? Developers want clear APIs, CLIs, and ways to
+use things with AI. GUIs are not it.</em></p>
+</blockquote>
+<p>Hear me out, I'm right there with you. Your users will only use your platform
+if they can integrate it with their existing workflows, and that often means
+making it programmable and accessible via APIs. They will need CLI tools, and
+MCP servers so their agents can consume the services. That's all true.</p>
+<p>But as much as I love writing YAML, and as much as I find <code>kubectl</code> very
+simple to use, they may not be the best tools to get people started.</p>
+<blockquote>
+<p><em>Ah, but we have a GitOps flow where you can open a PR to a repository and…</em></p>
+</blockquote>
+<p>Sure. I'm certain it's great. But it adds more cognitive load for the platform
+user than clicking buttons, especially when they have many other things on
+their mind and just want access to the service they need. GUIs are familiar,
+and
+<a href="https://www.nngroup.com/articles/ten-usability-heuristics/" target="_blank" rel="noopener noreferrer" class="">recognition rather than recall</a>
+is an important part of making systems more accessible.</p>
+<p>Portals do not replace APIs, CLIs or GitOps. They complement them. A portal can
+provide the easiest path into the platform, while more experienced users and
+automated systems continue to use the interfaces that best fit their
+workflows.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-our-original-backstage-integration-looked-like-and-where-developers-got-stuck">What our original Backstage integration looked like (and where developers got stuck)<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#what-our-original-backstage-integration-looked-like-and-where-developers-got-stuck" class="hash-link" aria-label="Direct link to What our original Backstage integration looked like (and where developers got stuck)" title="Direct link to What our original Backstage integration looked like (and where developers got stuck)" translate="no">​</a></h2>
+<p>Of the three barriers above, our previous integration solved only service
+discovery: a Promise is installed, the Backstage Template is generated, and
+users can find the services in the Catalog. Users can see both a Component for
+the Promise and a Template to create an instance of that Promise:</p>
+<p><img decoding="async" loading="lazy" alt="The original Promise Component page in Backstage" src="https://docs.kratix.io/assets/images/old-promise-page-5d248e2768033b683b7b36543787caeb.png" width="1646" height="1126" class="img_ev3q"></p>
+<p><img decoding="async" loading="lazy" alt="The original Template generated from a Promise" src="https://docs.kratix.io/assets/images/old-template-570407512c3e8e5a71abf80f19b896cc.png" width="1646" height="1126" class="img_ev3q"></p>
+<p>They can select the service they need, fill in the form, and create the
+service:</p>
+<p><img decoding="async" loading="lazy" alt="The original request form, asking the user for a Kubernetes Namespace" src="https://docs.kratix.io/assets/images/old-request-form-31b79fc3ec68b139a999d2b17d2a6453.png" width="1646" height="1126" class="img_ev3q"></p>
+<p>Once the request is fulfilled, the user sees a Component for their service,
+and can expand it to explore its status:</p>
+<p><img decoding="async" loading="lazy" alt="The original Resource page, showing the resource status as raw YAML" src="https://docs.kratix.io/assets/images/old-resource-page-eafdbe42e258ca5537ae7b916142226c.png" width="1646" height="1126" class="img_ev3q"></p>
+<p>From the developer's point of view, the sharp edges show up quickly:</p>
+<ul>
+<li class="">What is a Namespace? What value should I write in there?</li>
+<li class="">The stepper on the Template uses Kratix-specific terms I don't understand.
+And what about these log lines?</li>
+<li class="">I clicked save. Where's my resource?</li>
+</ul>
+<p>On the Resource page, things get even more confusing:</p>
+<ul>
+<li class="">Where can I see detailed information about my resource?</li>
+<li class="">What did I even request again?</li>
+<li class="">What is its status right now? Is it ready?</li>
+<li class="">Wow, that's a lot of YAML.</li>
+</ul>
+<p>Still better than a terminal (maybe?). In our defence, a Backstage expert
+could make it nicer using all the information that is <del>buried</del> in there,
+and could
+<a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/customization">customise the generated entities</a>.
+However, platform teams are already responsible for so much, and we wanted to
+make things <strong>much</strong> better.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-out-of-the-box-backstage-experience-in-ske">The out-of-the-box Backstage experience in SKE<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#the-out-of-the-box-backstage-experience-in-ske" class="hash-link" aria-label="Direct link to The out-of-the-box Backstage experience in SKE" title="Direct link to The out-of-the-box Backstage experience in SKE" translate="no">​</a></h2>
+<p>We named the epic "Out-of-the-box Backstage". We wanted platform engineers and
+platform users to get a user-ready experience from our integration, with
+minimal configuration. Ideally, they install the
+<a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/intro">Portal Controller</a>, configure the
+<a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/backstage/intro">SKE Backstage plugins</a>,
+and get something that is not only beautiful, but also clear and informative.</p>
+<p>On the Template, we focused on:</p>
+<ul>
+<li class="">Making the language clearer, using terms developers already know.</li>
+<li class="">Providing better error messages, and showing log lines meant for the person
+reading them.</li>
+<li class="">Pointing the user to the resource they just created.</li>
+<li class="">Offering an alternative to the Namespace field, using terms closer to what a
+Backstage user knows. The Portal Controller can now
+<a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/backstage/request-namespace">map the Backstage Groups a user belongs to onto Kubernetes Namespaces</a>,
+either by group name or by a group annotation.</li>
+</ul>
+<p>These small changes have already made a big difference to the developer
+experience: no more guessing what fields mean, no more confusing output, and a
+clear pointer to where to go next.</p>
+<p><img decoding="async" loading="lazy" alt="The new request form, where the user picks a Backstage Group" src="https://docs.kratix.io/assets/images/new-request-form-509837b9882df55314083d5e1c73a2f8.png" width="1535" height="877" class="img_ev3q"></p>
+<p><img decoding="async" loading="lazy" alt="The new Template output, with clear log lines and a link to the new resource" src="https://docs.kratix.io/assets/images/new-template-output-fd6951f868fb297d68fc0a9a8056f76f.png" width="1662" height="1006" class="img_ev3q"></p>
+<p>There is a delay between the user submitting a request and the integration
+generating the Component for it. To give the user immediate feedback, we now
+create a "Pending" catalog entity for the resource straight away:</p>
+<p><img decoding="async" loading="lazy" alt="A Pending catalog entity, shown while the resource is being created" src="https://docs.kratix.io/assets/images/pending-entity-3f6dd463659360fa1f43e5f03a576cc8.png" width="1646" height="1126" class="img_ev3q"></p>
+<p>The big changes are in the Component pages. Both the Promise and Resource pages
+received a major revamp. From the Promise page, we wanted the portal user to be
+able to see:</p>
+<ul>
+<li class="">Is the Promise currently available?</li>
+<li class="">What is the status and version of the Promise?</li>
+<li class="">Is this a Compound Promise?</li>
+<li class="">How many instances of this Promise are there? Who owns them? At a glance,
+are the resources healthy?</li>
+</ul>
+<p>You can see the changes in the screenshot below:</p>
+<p><img decoding="async" loading="lazy" alt="The new Promise page, showing availability, version, and a summary of its resources and their health" src="https://docs.kratix.io/assets/images/new-promise-page-3a85b4b98cebb48fb11861e5e83563f9.png" width="1643" height="1124" class="img_ev3q"></p>
+<p>From there, you can navigate to the Resource itself. For the Resource page, we
+focused on answering these questions:</p>
+<ul>
+<li class="">At a glance, what's the state of my resource?</li>
+<li class="">What information is available to me about my resource?</li>
+<li class="">Is my resource healthy? If not, what is failing, and why?</li>
+<li class="">What's the status of the resource provisioning (or update)? If a stage
+failed, which one?</li>
+<li class="">What was my original request?</li>
+</ul>
+<p>The resulting changes are all captured in the screenshot below:</p>
+<p><img decoding="async" loading="lazy" alt="The new Resource page, showing status, health, workflow progress and the original request" src="https://docs.kratix.io/assets/images/new-resource-page-5b0b33713896f89019b016ded92eed1e.png" width="1690" height="1288" class="img_ev3q"></p>
+<p>As (I hope) you can see from the screenshots above, the out-of-the-box SKE
+Backstage integration is now much better. It gives your users a more
+compelling experience by tackling the discoverability and usability barriers
+to adoption we discussed earlier.</p>
+<p>Of course, you can still
+<a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/customization">customise how SKE generates the Backstage entities</a>
+and hand-craft your Backstage experience to suit your organisation, but now you
+have a much better head start.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="see-the-new-backstage-integration-in-action">See the new Backstage integration in action<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#see-the-new-backstage-integration-in-action" class="hash-link" aria-label="Direct link to See the new Backstage integration in action" title="Direct link to See the new Backstage integration in action" translate="no">​</a></h2>
+<p>Your platform can be technically excellent and still go unused if developers
+can't find what's on offer, request it confidently, and see what happened
+next. With SKE, every Promise you apply becomes a polished, self-service
+experience in Backstage: clear forms, instant feedback, and health and status
+at a glance, all generated for you. Your platform team doesn't have to
+hand-craft a single page.</p>
+<p>Ready to make your platform the easy choice for developers?</p>
+<ul>
+<li class=""><a href="https://calendly.com/hello-syntasso/book-time-with-syntasso" target="_blank" rel="noopener noreferrer" class=""><strong>Book a demo</strong></a>
+to see the new Backstage experience running on a live platform, and talk
+through how SKE can drive adoption in your organisation.</li>
+<li class=""><a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/intro"><strong>Read the Portal Controller docs</strong></a>
+to get set up, or to
+<a class="" href="https://docs.kratix.io/ske/integrations/portal-controller/customization">customise the generated entities</a>
+for your organisation.</li>
+<li class=""><a href="https://kratixworkspace.slack.com/" target="_blank" rel="noopener noreferrer" class=""><strong>Join the Kratix community on Slack</strong></a>
+to tell us what you think. Do you see other barriers to adoption? Would you
+rather ship only CLIs? We're curious to hear from you, and your feedback
+shapes what we build next.</li>
+</ul>]]></content>
+        <author>
+            <name>Derik Evangelista</name>
+            <uri>https://github.com/kirederik</uri>
+        </author>
+        <category label="kratix" term="kratix"/>
+        <category label="SKE" term="SKE"/>
+        <category label="backstage" term="backstage"/>
+        <category label="product update" term="product update"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Manage Files in Dynamically Registered Git Repositories]]></title>
         <id>https://docs.kratix.io/blog/manage-files-in-dynamically-registered-git-repositories</id>
