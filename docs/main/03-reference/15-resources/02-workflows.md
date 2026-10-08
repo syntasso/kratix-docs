@@ -183,8 +183,10 @@ reconciliation, the controller will ensure that all the Workflows for a given re
 ### Pipeline Reconciliation
 
 If a new reconciliation is triggered while a Pipeline is actively running (for
-example due to a Resource or Promise update), Kratix waits for the current Job to
-reach a terminal state before restarting the configure workflow from the beginning.
+example due to a Resource or Promise update, or a
+[manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation)),
+Kratix waits for the current Job to finish, whether it succeeds or fails, before
+restarting the configure workflow from the beginning.
 
 ## Delete Workflows
 
