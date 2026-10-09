@@ -20,6 +20,16 @@ const leaves = items => items.flatMap(item => item.type === 'category' ? [...(it
 const groups = items => items.flatMap(item => item.type === 'category' ? [item, ...groups(item.items)] : []);
 const ids = leaves(sidebars.skeSidebar);
 
+test('Every Enterprise category title links to a unique card landing page', () => {
+  const categories = groups(sidebars.skeSidebar);
+  for (const category of categories) {
+    assert.equal(category.link?.type, 'generated-index', category.label);
+    assert.ok(category.link.slug?.startsWith('/category/'), category.label);
+  }
+  const slugs = categories.map(category => category.link.slug);
+  assert.equal(new Set(slugs).size, slugs.length, 'Category landing pages must not share routes');
+});
+
 test('Each approved leaf resolves to its canonical document in journey order', () => {
   assert.deepEqual(ids, require('./fixtures/enterprise-sidebar-ids.json'));
 });
@@ -42,7 +52,7 @@ test('Optional walkthroughs and compatibility pages are outside the sidebar', ()
 });
 test('Published generated category URLs remain explicit', () => {
   const slugs = groups(sidebars.skeSidebar).map(group => group.link?.slug);
-  for (const slug of ['/category/command-reference-1', '/category/platform', '/category/integrations', '/category/pipeline-stages', '/category/deprecated']) assert.ok(slugs.includes(slug), slug);
+  for (const slug of ['/category/build-and-evolve-promises', '/category/command-reference-1', '/category/platform', '/category/integrations', '/category/pipeline-stages', '/category/deprecated']) assert.ok(slugs.includes(slug), slug);
 });
 test('Sidebar IDs resolve to built Docusaurus document metadata and existing sources', () => {
   const directory = path.join(__dirname, '../.docusaurus/docusaurus-plugin-content-docs/default');
