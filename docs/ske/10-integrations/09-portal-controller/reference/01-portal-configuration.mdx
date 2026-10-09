@@ -1,0 +1,217 @@
+---
+title: Portal configuration and bindings
+description: Portal Controller fields, label resolution, credentials and status conditions
+slug: /ske/integrations/portal-controller/reference/portal-configuration
+sidebar_label: Portal configuration and bindings
+---
+
+Portal configuration declares the Backstage or Cortex instances available to a platform.
+Binding labels select which instance receives a Promise and its Resource requests. This
+reference describes Portal Controller `v0.6.1`; use the [Backstage](../backstage/intro) or
+[Cortex](../cortex/intro) guide for a complete integration procedure.
+
+## Configuration resource
+
+The SKE Operator manages the controller through one cluster-scoped `SKEIntegration` of
+type `portal-controller`. This example publishes to an **existing** Destination named
+`backstage-catalogue`, which must already have a working Git or bucket StateStore:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.6.1
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        destination:
+          name: backstage-catalogue
+```
+
+Only one `SKEIntegration` of this type may exist on a platform. Add entries to the existing
+resource, rather than creating another. An empty `portals: []` installs the controller
+without publishing anything. See the [SKE Operator API](../../../reference/ske-operator#skeintegration-crd)
+for deployment settings and readiness.
+
+### Portal fields
+
+| Field in `spec.portals[]` | Type | Requirement and behaviour |
+|---|---|---|
+| `name` | string | Required; unique within the type. Used by instance-suffixed labels. |
+| `type` | string | Required; `backstage` or `cortex` for the integrations documented here. |
+| `url` | string | Required for Cortex's API base URL; unused by Backstage. |
+| `secretRef.name` | string | Required for Cortex; names a Secret in `kratix-platform-system`. Unused by Backstage. |
+| `config` | object | Portal-specific settings; values can be strings or structured objects. |
+| `adapterConfig` | object | Optional image, pull-secret, generate and exporter overrides; see [Adapter reference](./adapter). |
+
+### Backstage settings
+
+| Key in `config` | Behaviour |
+|---|---|
+| `destination.name` | Adopt an existing Destination and its StateStore. Do not also set `destination.spec`. |
+| `destination.spec.path` | Create a controller-owned Destination at this path. Requires `stateStore`. |
+| `stateStore.kind` | `GitStateStore` or `BucketStateStore`; required when defining a Destination. |
+| `stateStore.name` | Reference an existing StateStore. Mutually exclusive with `stateStore.spec`. |
+| `stateStore.spec` | Create a StateStore from this spec. Mutually exclusive with `stateStore.name`. |
+| `mode` | `push` (default) or `pull-request`. Selects request approval, not catalogue publication or the backend's `ske.mode`. Pull requests are GitHub-only. |
+| `requestNamespace` | Namespace policy for generated requests; defaults to `from: form`. See [Request namespace](../backstage/request-namespace). |
+
+When `destination` is absent, output selects existing Destinations labelled
+`environment: backstage`; you must provide matching storage yourself. When `destination.name`
+is set, `stateStore` is ignored because the Destination already specifies its store.
+The [Backstage guide](../backstage/intro#configuration) includes owned, referenced and adopted
+storage examples. Catalogue files are written to storage in both request delivery modes.
+
+### Cortex settings
+
+| Key in `config` | Behaviour |
+|---|---|
+| `repositoryName` | Required; repository receiving Resource request manifests. |
+| `provider` | Required; `github` or `gitlab`. |
+| `integrationAlias` | Required; alias of the Git integration configured in Cortex. |
+| `branch` | Request branch; defaults to `main`. |
+| `path` | Request directory; defaults to `kratix-resource-requests`. |
+
+Requests use `<path>/<promise>/<namespace>-<name>.yaml`. This repository holds requests,
+not published Cortex entity definitions. See the [Cortex guide](../cortex/intro) for API
+permissions and GitOps prerequisites.
+
+## Configuration ownership
+
+The controller reads `ske-portal-config` in `kratix-platform-system`, under the
+`connections.yaml` key. The value is a YAML list with the same entry fields as
+`SKEIntegration.spec.portals`.
+
+- **Operator-managed:** edit `SKEIntegration.spec.portals`. The operator writes the ConfigMap;
+  manual edits are not the source of truth.
+- **Standalone:** maintain the ConfigMap yourself. See
+  [standalone installation](../installation#installing-without-the-ske-operator).
+
+For a controller installed without the operator, the existing-Destination example becomes:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-portal-config
+  namespace: kratix-platform-system
+data:
+  connections.yaml: |
+    - name: prod
+      type: backstage
+      config:
+        destination:
+          name: backstage-catalogue
+```
+
+Changing a portal's configuration reruns its setup, not setup for unrelated instances.
+Changes to shared [Job configuration](../customization/job-customization) can rerun setup
+across instances. Secret contents are not part of the configuration fingerprint; rotating
+a token is not a guarantee that setup reruns.
+
+:::warning Removing configuration performs cleanup
+Removing an instance removes its controller-managed setup workloads and owned objects.
+Deleting this ConfigMap is not a way to pause synchronisation. Distinguish adopted storage
+from controller-owned storage when planning a change.
+:::
+
+## Credential Secret handling
+
+Create Cortex's Secret in `kratix-platform-system` before configuring its portal, with the
+credential under `token`. This example contains a placeholder, not a usable token:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cortex-token
+  namespace: kratix-platform-system
+type: Opaque
+stringData:
+  token: <YOUR_CORTEX_API_TOKEN>
+```
+
+Do not commit a real token to Git. Use your platform's Secret management process.
+The operator checks that the Secret exists, not that its token works. Credentials are
+injected into Cortex API-facing workloads through Secret key references, not into generate
+or configure stages or a shared volume. Backstage publication does not call the Backstage API.
+
+## Binding labels
+
+These fragments show only `metadata.labels`, not complete Promises or requests:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-backstage: "true"
+```
+
+An unsuffixed label resolves only when exactly one instance of that type exists.
+With multiple instances, name one explicitly:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-backstage.prod: "true"
+```
+
+On a **Promise**, the label's presence opts in; even the string `"false"` opts in. Removing
+the label opts out and can trigger cleanup of previously published output.
+
+### Opting a single Resource out
+
+Requests inherit their Promise's binding. Set the **same key**, including any instance
+suffix, to the string `"false"` on a request to skip it:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-backstage.prod: "false"
+```
+
+A skipped request generates no entity and reports no portal condition. Opting out is not
+a guarantee that previously published entities will be retained or removed.
+
+### Binding a PortalCustomization
+
+`kratix.io/portal-customization: <NAME>` opts in using the resource's `spec.portalType`.
+`kratix.io/portal-customization.prod: <NAME>` selects instance `prod`.
+A Promise can reference only one `PortalCustomization`; the suffix names a portal instance,
+not another customisation. See [PortalCustomization](../customization) for the schema and examples.
+
+## Binding status
+
+The Promise's `PortalBindingReady` condition reports label resolution:
+
+| Reason | Meaning |
+|---|---|
+| `BindingResolved` | The binding resolved to one instance. |
+| `AmbiguousPortalInstance` | More than one instance of the type exists and none was named. |
+| `PortalConnectionNotFound` | No configured instance matches the binding. |
+| `PortalConfigNotFound` | The configuration ConfigMap is missing. |
+| `CustomizationNotFound` | The named `PortalCustomization` does not exist. |
+| `AmbiguousCustomization` | More than one customisation label is present. |
+
+Invalid `connections.yaml` is different from a missing ConfigMap: the controller records
+a `PortalConfigInvalid` warning event on the ConfigMap.
+
+Each sync reports `BackstagePortalSynced` or `CortexPortalSynced`:
+
+| Reason | Meaning |
+|---|---|
+| `EntitySynced` | The sync pipeline completed publication. Check ingestion and provisioning separately. |
+| `SyncInProgress` | The sync Job is running. |
+| `GenerateOrWriteFailed` | The sync Job failed. |
+| `PromiseHasNoAPI` | The Promise has no `spec.api` to render. |
+
+On success, `kratix.io/portal-<type>-entity-url` on the Promise points to its entity.
+
+## Related docs
+
+- [How it works](../intro)
+- [Install and upgrade](../installation)
+- [Adapter reference](./adapter)
