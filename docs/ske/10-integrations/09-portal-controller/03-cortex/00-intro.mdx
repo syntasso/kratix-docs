@@ -25,9 +25,7 @@ Before configuring the portal:
    alias for `config.integrationAlias` below.
 3. Obtain a Cortex API credential with permission to manage the entities, entity
    types, relationships and workflows used by this integration, and to write Resource
-   status. A [personal token](https://docs.cortex.io/configure/settings/api-keys/personal-tokens)
-   inherits its user's permissions; a read-only token is insufficient. Store the
-   credential in the Kubernetes Secret shown below, not in Git.
+   status. Store the credential in the Kubernetes Secret shown below.
 4. Configure a [platform GitOps agent](/category/installing-gitops-agent) to apply
    Resource requests from the chosen repository, branch and path. Without it, Cortex
    can commit a request but Kratix will not receive it.
@@ -84,32 +82,18 @@ Requests are committed to `<path>/<promise>/<namespace>-<name>.yaml`.
 
 From Portal Controller `v0.6.1`, the generated create workflow registers a Cortex
 entity titled `<name> request (pending)`, owned by the requester, before committing
-the Resource request to Git. When the workflow completes, its result includes a
-link to that entity.
-
-The platform GitOps agent must then apply the request. The Portal Controller's first
-Resource sync replaces the pending entity definition with the generated Resource
-definition, and the status exporter publishes the Resource's platform status.
-
-A pending entity is not proof of a successful Git commit or successful provisioning:
-the commit step can still fail after the entity was created. Check the workflow
-result, request file and platform status separately.
-
+the Resource request to Git. When the workflow completes, the controller will replace 
+the pending entity definition with the generated Resource definition.
 ## What gets deployed
 
 Alongside the usual `generate → configure → writer` pipeline, a Cortex portal runs:
 
 - A one-time, portal-scoped **setup Job** that idempotently ensures the shared Cortex relationship
   type and entity type this integration depends on exist. Editing that portal's connection
-  configuration reruns its setup, without recreating setup Jobs for unrelated portals.
-  Changes to the shared [Job configuration](../customization/job-customization) can
-  rerun setup across portals.
+  configuration reruns its setup.
 - A long-lived **status exporter**, a Deployment and Service running one replica as the
   `ske-portal-exporter` Service Account, which pushes resource status changes to the Cortex API as
-  they happen rather than waiting for the next sync. Its Kubernetes owner is the
-  `ske-portal-config` ConfigMap, which the SKE Operator manages from the `SKEIntegration`
-  in an operator-managed installation. The controller removes the exporter when its
-  portal connection is removed.
+  they happen.The controller removes the exporter when its portal connection is removed.
 
 ### Tuning the exporter
 
