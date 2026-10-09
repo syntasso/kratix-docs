@@ -195,8 +195,10 @@ may be greater than the configured.
 ### Pipeline Reconciliation
 
 If a new reconciliation is triggered while a Pipeline is actively running (for
-example due to a Promise update), Kratix waits for the current Job to reach a
-terminal state before restarting the configure workflow from the beginning.
+example due to a Promise update or a
+[manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation)),
+Kratix waits for the current Job to finish, whether it succeeds or fails, before
+restarting the configure workflow from the beginning.
 
 ## Delete Workflows
 
