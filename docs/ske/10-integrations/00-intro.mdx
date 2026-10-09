@@ -1,33 +1,20 @@
 ---
-title: SKE Integrations Introduction
-description: An overview of the integrations available in Syntasso Kratix Enterprise, including Backstage, Cortex, Terraform Enterprise, Port, and SKE Lift.
-sidebar_label: Introduction
+title: SKE integrations
+description: Choose a developer portal, connect platform tools or build Promises with SKE Lift.
+sidebar_label: Integrations overview
 ---
 
-In this section, you will find information about the different integrations and
-Aspects available for SKE.
+SKE integrations connect your platform to developer portals and infrastructure tools.
+Choose the guide for the outcome you need:
 
-Aspects are a set of pre-built pipeline images that you can integrate with
-your existing Promises. These images are designed to support key use-cases of
-Kratix Promises, and integrate seamlessly with different tools.
+- [Portal integrations](./portal-integrations/intro): publish Promises and request forms
+  to Backstage, Cortex or Port. Backstage and Cortex use the shared Portal Controller;
+  Port uses the separate Port Controller and is a Preview feature.
+- [Terraform Enterprise and HCP Terraform](./tfe): use the Terraform State Finder
+  pipeline image to connect Promise workflows to Terraform workspaces.
+- [MCP Server (Preview)](./mcp): expose platform capabilities to MCP clients.
+- [SKE Lift (Preview)](./skelift): turn existing cloud resources into governed Promises
+  with agent skills and CLI plugins.
 
-The documentation is divided into the following subsections:
-
-- [Terraform Enterprise](./tfe) describes the SKE TF State Finder
-  Aspect. This integrates Kratix Promises with
-  [Hashicorp Cloud Platform](https://www.hashicorp.com/cloud) (both Terraform Cloud and
-  Terraform Enterprise).
-- [Backstage](./portal-controller/backstage/intro) contains documentation on how to
-  configure your Backstage instance with the [SKE plugin](./portal-controller/backstage/configure-backstage), as well as how to
-  configure your Promises to auto populate the Backstage catalog using the [Portal Controller](./portal-controller/installation#bind-a-promise-to-a-portal).
-- [Cortex](./portal-controller/cortex/intro) documents how to configure Cortex with the
-  [SKE Integration](/ske/reference/ske-operator#skeintegration-crd), as well as how to
-  configure your Promises to auto-populate the Cortex catalog with Entities and Workflows for
-  managing the lifecycle of Resource Requests via the [Portal Controller](./portal-controller/intro).
-- [Portal Controller](./portal-controller/intro) is the unified integration for syncing Promises and Resources
-  into a developer portal such as Backstage or Cortex
-- [Port](./port) describes how to deploy and configure the SKE Port Controller, which
-  keeps Port configuration aligned with your platform APIs. Port is unrelated to the
-  [Portal Controller](./portal-controller/intro) above, despite the similar name.
-- [SKE Lift](./skelift) describes how to install SKE Lift, the agent skills and CLI
-  plugins that turn an existing cloud estate into governed Kratix Promises.
+Check [supported versions and compatibility](/ske/releases/compatibility) before
+installing or upgrading a component.

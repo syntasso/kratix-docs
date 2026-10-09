@@ -1,7 +1,7 @@
 ---
 description: Documentation for the Health Source Custom Resource
 title: Health Source
-sidebar_label: Health Source
+sidebar_label: HealthSource
 id: healthsource
 ---
 

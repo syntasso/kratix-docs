@@ -1,7 +1,7 @@
 ---
 description: Documentation for the SKE UpgradePlan Custom Resource
 title: Upgrade Plans
-sidebar_label: Upgrade Plans
+sidebar_label: UpgradePlan
 ---
 
 # Upgrade Plans

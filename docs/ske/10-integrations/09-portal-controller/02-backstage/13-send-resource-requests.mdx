@@ -1,0 +1,411 @@
+---
+title: Send resource requests to Kratix
+description: Configure request transport, approval and namespace policy, then create, update and delete resources from Backstage
+sidebar_label: Send resource requests to Kratix
+slug: send-resource-requests
+keywords: [backstage, requests, kubernetes, gitops, hybrid, approval, namespace]
+---
+
+Connect the SKE backend plugin to your platform, choose approval and namespace policy, then
+verify a request from submission to reconciliation. Complete [Configure Backstage](./configure-backstage)
+first so a Promise Component and its Template are visible.
+
+Catalogue storage holds generated Backstage entities. Request storage holds Kubernetes manifests.
+They may use different repositories; catalogue discovery never applies resource requests.
+
+## Configure backend access
+
+Set the backend-wide `ske.mode` in Backstage's `app-config.yaml`:
+
+| Mode | Read resource state | Submit in push mode | Choose when |
+|---|---|---|---|
+| `kubernetes` (default) | Kubernetes API | Kubernetes API | Backstage can reach the platform |
+| `gitops` | Request manifests in Git | Commit to Git | Backstage cannot reach the platform |
+| `hybrid` | Kubernetes API | Commit to Git | Backstage can read the platform and changes must use Git |
+
+Kubernetes API reads in `kubernetes` and `hybrid` need network access, trusted TLS and Kubernetes
+permissions. Pure `gitops` reads request files, which normally have no live status. Its Promise
+page lists catalogue requests with state **Unknown** because listing live requests is unsupported.
+
+Approval is a separate per-portal choice: `config.mode: pull-request` opens a GitHub pull request
+instead of using the push transport. It can submit a request with any backend mode. However,
+its manifests use `kratix-requests/<promise>/<namespace>/<name>.yaml`; pure `gitops` reads
+`<ske.scm.path>/<apiVersion>/<kind-lowercase>/<namespace>/<name>.yaml`.
+If the manifest exists only at the pull-request path, that backend cannot read it for status,
+an update form or existing-resource Group checks. Pending pull-request metadata can still be
+shown, and a GitOps agent can still apply the merged file. Choose `kubernetes` or `hybrid`
+when reviewed requests need live reads.
+
+### Kubernetes API mode
+
+Backstage needs access to the platform API endpoint. Configure a cluster and select it by name:
+
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    - type: config
+      clusters:
+        - name: kratix-platform
+          url: https://<PLATFORM_API_HOST>
+          authProvider: serviceAccount
+          serviceAccountToken: ${PLATFORM_SERVICE_ACCOUNT_TOKEN}
+          skipTLSVerify: false
+ske:
+  mode: kubernetes
+  kubernetes:
+    platformName: kratix-platform
+```
+
+Provide the cluster CA with `caData` or `caFile` if it is not publicly trusted. Do not disable
+TLS verification in production. Without `ske.kubernetes.platformName`, the plugin loads the
+backend process's default Kubernetes configuration, including in-cluster credentials.
+
+Grant the configured identity only the required permissions: read Promises, get and list request
+resources, and create, patch and delete those resources in permitted namespaces. The Promise page
+lists one namespace at a time; cluster-scoped requests need cluster-scoped permissions.
+
+A service account is a shared identity. To apply user-specific Kubernetes RBAC, configure
+[OIDC authentication](#oidc-authentication).
+
+### GitOps mode
+
+Provide a writable request repository and credentials in `app-config.yaml`:
+
+```yaml
+ske:
+  mode: gitops
+  scm:
+    repoUrl: https://github.com/<ORGANISATION>/<REQUESTS_REPOSITORY>
+    branch: main
+    path: requests
+    type: github
+    token: ${REQUESTS_GIT_TOKEN}
+```
+
+`branch` defaults to `main` and `path` to an empty string. Authentication uses basic auth:
+`type` selects a username for `github`, `gitlab`, `bitbucket_cloud` or `azure`; an explicit
+`username` overrides it. Set `token` to the password or access token. For GitHub, a configured
+GitHub App can supply a short-lived token when `ske.scm.token` is omitted.
+
+The credential must read and write the repository. Backstage needs network access to the Git
+service, and the platform's GitOps agent needs independent read credentials and Kubernetes RBAC.
+
+The released Git writer requires `metadata.namespace`. Push submissions for cluster-scoped
+Promises therefore need Kubernetes API mode. Pull-request mode can write cluster-scoped manifests.
+
+### Hybrid mode
+
+Use the Kubernetes configuration above, the same `ske.scm` block as GitOps mode, and:
+
+```yaml
+ske:
+  mode: hybrid
+  kubernetes:
+    platformName: kratix-platform
+  scm:
+    repoUrl: https://github.com/<ORGANISATION>/<REQUESTS_REPOSITORY>
+    branch: main
+    path: requests
+    type: github
+    token: ${REQUESTS_GIT_TOKEN}
+```
+
+Reads use the configured Kubernetes identity. Creates, updates and deletes in push mode change Git.
+The GitOps agent applies them using its own identity. Hybrid mode does not bypass Kubernetes RBAC.
+
+## Connect the platform to the Git repository
+
+For Git writes, configure Flux or Argo CD to watch the repository, branch and path receiving
+request manifests. Push with `gitops` or `hybrid` uses `ske.scm`; pull-request mode uses the
+repository selected in the form, its target branch (default `main`) and `kratix-requests`.
+
+Do this for every repository developers may choose. A merged pull request alone does not create
+a Kubernetes resource.
+
+### Flux
+
+Save this as `backstage-flux.yaml` for the push-mode `ske.scm` example:
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: backstage-requests
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/<ORGANISATION>/<REQUESTS_REPOSITORY>
+  ref:
+    branch: main
+  secretRef:
+    name: requests-git-credentials
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: backstage-requests
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: backstage-requests
+  path: ./requests
+  prune: true
+```
+
+Create the `requests-git-credentials` Secret in `flux-system` with credentials for that
+repository before applying this file. For reviewed requests, change `path` to
+`./kratix-requests` and match the chosen repository and target branch.
+
+### Argo CD
+
+Alternatively, save this as `backstage-argo.yaml`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backstage-requests
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/<ORGANISATION>/<REQUESTS_REPOSITORY>
+    targetRevision: main
+    path: requests
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+Configure repository credentials in Argo CD first. For reviewed requests, change `path` to
+`kratix-requests` and match the chosen repository and target branch. Allow the request kinds
+and target namespaces in the Argo CD project.
+
+:::warning GitOps pruning enables deletion
+These examples apply request manifests and delete resources when their files are removed.
+Use a dedicated request path and review the resources it contains before enabling pruning.
+:::
+
+Apply the file for your chosen tool to the platform cluster:
+
+```bash
+kubectl apply -f backstage-flux.yaml
+# Or, for Argo CD:
+kubectl apply -f backstage-argo.yaml
+```
+
+Verify the source and reconciliation object report ready/synchronised before submitting requests.
+
+## Choose namespace policy
+
+Set `config.requestNamespace` on the existing Backstage portal in your `SKEIntegration`.
+This applies to namespaced Promises; cluster-scoped Promises have no namespace field.
+Create the target Kubernetes namespaces first. Kratix does not create them.
+
+:::warning Trust identity and Group sources
+Group checks trust the signed-in Backstage identity and catalogue `Group` membership. Accept
+Groups only from sources the platform team controls. A developer able to register a Group with
+arbitrary members or namespace annotations can grant themselves access through this policy.
+Restrict catalogue locations and Group ingestion. These checks do not replace Kubernetes RBAC,
+Git permissions or approval policy.
+:::
+
+| Policy | Configuration | Form |
+|---|---|---|
+| Developer chooses (default) | `{from: form}` | Name and Namespace |
+| Group's name | `{from: group}` | Name and Group |
+| Group annotation | `{from: group, annotation: example.com/kubernetes-namespace}` | Name and Group |
+| Fixed namespace | `{from: fixed, namespace: platform-team}` | Name |
+
+For example, edit your existing portal entry, keeping its URL and storage configuration:
+
+```yaml
+# Fragment of SKEIntegration.spec.portals; storage fields are omitted.
+- name: prod
+  type: backstage
+  config:
+    mode: push
+    requestNamespace:
+      from: group
+      annotation: example.com/kubernetes-namespace
+```
+
+Apply the edited `SKEIntegration` manifest. For a standalone controller, edit the same portal
+entry in the `ske-portal-config` ConfigMap and apply it as in the publication guide. The controller
+regenerates bound Templates; wait for catalogue discovery before using the new policy.
+
+A platform-controlled Group can provide its namespace like this:
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: payments
+  annotations:
+    example.com/kubernetes-namespace: payments
+spec:
+  type: team
+  children: []
+  members: [alice]
+```
+
+Only direct members can select the Group. A missing annotation is refused; the Group name is
+not a fallback. Namespace names must contain lowercase letters, digits and hyphens, start and
+end with a letter or digit, and be at most 63 characters.
+
+Group requests record `kratix.io/backstage-group` on the resource and use that Group as its
+catalogue owner. Templates generated with `from: group` or `from: fixed` run
+`ske:resolve-namespace`: creation cannot take over another Group's resource, and update/delete
+runs keep the existing namespace and check membership of its recorded Group. The backend
+delete route also checks the recorded Group. Resources without one have no Group check.
+
+:::warning Namespace policy is not a permanent access boundary
+Changing to `from: form` regenerates Templates without `ske:resolve-namespace`, so Template
+updates no longer enforce recorded Group membership. The Manage tab's membership check is
+not backend enforcement. Keep Kubernetes RBAC, Git permissions and review controls in place
+when changing policy.
+:::
+
+## Choose approval policy
+
+Set `config.mode` on the portal entry above. This choice applies to every bound Promise.
+
+### Push mode
+
+`push` is the default. The Template submits through `ske:configure-resource`, then records
+the request with `ske:record-request`. Kubernetes mode applies immediately; GitOps and hybrid
+commit the manifest for the GitOps agent to apply.
+
+### Pull-request mode
+
+Set `mode: pull-request` to require review. The generated Template asks for a GitHub repository,
+writes the request manifest, opens a pull request with `publish:github:pull-request`, and records
+it with `ske:record-request`.
+
+Install and register the GitHub scaffolder action module in the backend:
+
+```bash
+yarn add @backstage/plugin-scaffolder-backend-module-github --cwd packages/backend
+```
+
+```ts
+backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
+```
+
+Configure the GitHub integration in `app-config.yaml`:
+
+```yaml
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+```
+
+Permit the credential to write repository contents and pull requests, and read pull-request
+state. A GitHub App may supply these credentials instead. Catalogue discovery also needs
+read access to its own repository.
+
+The generated repository picker accepts `github.com` only. Other Git providers can use push
+mode with the Git backend; they cannot use this generated approval flow.
+
+Namespaced manifests land at `kratix-requests/<promise>/<namespace>/<name>.yaml`.
+Cluster-scoped manifests omit the namespace segment. The target branch defaults to `main`;
+the hidden `targetBranch` parameter can be customised for another branch.
+
+Request and update branches are `backstage/<promise>/<name>`, with an optional `branchSuffix`.
+Re-running the same branch reuses its pull request. Delete uses a separate
+`backstage/<promise>/<name>-delete` branch.
+
+## Create, update and delete a resource
+
+1. Open a Promise's **Create** link or its Template on the Backstage **Create** page.
+2. Enter the name, namespace or Group, and the Promise's specification. In reviewed mode,
+   select a repository watched by the platform's GitOps agent.
+3. Submit and follow **View in Catalog**. For reviewed requests, follow **Pull Request** and
+   obtain approval and merge.
+4. Verify the request exists on the platform and its workflow completes:
+
+   ```bash
+   kubectl get <RESOURCE_KIND> <RESOURCE_NAME> -n <NAMESPACE> -o yaml
+   ```
+
+   For a cluster-scoped request, omit `-n <NAMESPACE>`.
+
+A pending Component describes a submitted request before its resource entity appears.
+Reviewed requests show approval state; after merge, provisioning still depends on GitOps and
+Kratix. Push requests wait for the platform to create the resource. Submission and pending
+visibility are not proof of reconciliation.
+
+The resource lane publishes the real Component after the resource exists; catalogue discovery
+then imports it and the SKE pending provider withdraws the matching pending entity. Publication
+and withdrawal are event-driven; `ske.pendingRequests.refreshSeconds` (default 60) is a backstop.
+A closed unmerged pull request is removed by the reap sweep, default 900 seconds.
+
+Open the Resource's **Manage** tab to update its specification. Name and namespace remain locked.
+Reviewed updates open a pull request; push updates use the configured backend transport.
+Verify the changed specification and completed workflow on the platform.
+
+:::warning Deleting a resource
+Deletion removes the resource request and runs the Promise's delete workflow, which may remove
+the provisioned infrastructure. Review the resource and any open changes before confirming.
+:::
+
+Use **Delete** on the Manage tab. A resource originally requested through pull-request mode
+raises a deletion pull request and remains until merge and GitOps pruning. Other resources
+use the backend delete route: Kubernetes deletion or Git file removal. An imported resource's
+deletion is not automatically routed through review because the portal now uses reviewed mode.
+
+Deletion is shown on the existing resource, without a separate pending Component. Verify the
+request is absent from the platform and its catalogue entity disappears after publication cleanup
+and discovery refresh.
+
+## OIDC authentication
+
+Use this when Kubernetes must authorise each developer's own identity. Configure the API server
+to trust the OIDC issuer, client and username/group claims. Use a trusted Backstage sign-in
+resolver that maps the authenticated user to the correct catalogue identity.
+
+The SKE backend extracts the provider access token from the Backstage token's `tok` claim:
+
+```ts
+return ctx.issueToken({
+  claims: {
+    sub: userRef,
+    ent: [userRef],
+    tok: info.result.session.accessToken,
+  },
+});
+```
+
+Set the selected cluster's `authProvider: oidc` and
+`oidcTokenProvider: <OIDC_PROVIDER_NAME>` instead of service account authentication. Retain
+the cluster URL, trusted CA and `ske.kubernetes.platformName` configuration above.
+The platform must accept the forwarded token and grant its identity the required RBAC.
+In hybrid mode this identity authorises reads; the GitOps agent authorises applied writes.
+
+See the [Kubernetes OIDC configuration](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens)
+and [Backstage OIDC resolver guide](https://backstage.io/docs/auth/oidc) for provider setup.
+
+## Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| Request action missing | SKE backend 0.24.0 is installed and registered; reviewed mode also has the GitHub scaffolder module |
+| API access denied | Network, CA, selected platform name and the configured identity's RBAC |
+| Merged request never appears | GitOps repository, target branch, request path, credentials and reconciliation status |
+| Pending request remains | Resource identity, recorded namespace, entity publication and discovery |
+| Group request refused | Signed-in identity, direct membership, namespace annotation and existing resource's recorded Group |
+| GitOps resource shows no live state | Pure GitOps reads manifests rather than the platform; use hybrid for live reads |
+| Task detail missing | Set backend `LOG_LEVEL=debug` temporarily to inspect action logs |
+
+Continue with [customising entities and request templates](./customising-the-request-template).

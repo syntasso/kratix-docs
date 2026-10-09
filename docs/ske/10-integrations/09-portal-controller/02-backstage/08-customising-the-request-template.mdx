@@ -1,7 +1,7 @@
 ---
 title: Customising the request template
 description: How a Promise's API shapes the Backstage request template, and how to change it further with a PortalCustomization
-sidebar_label: Customising the request template
+sidebar_label: Customise entities and request templates
 slug: customising-the-request-template
 keywords: [portal, customization, backstage, template, form, schema, ske]
 ---
@@ -22,7 +22,7 @@ import FormValidationMessage from "/img/docs/ske/backstage/request-template-vali
 import FormWidget from "/img/docs/ske/backstage/request-template-widget.png"
 ```
 
-The Portal Controller turns a Promise's API into a Backstage `Template`—the request template a
+The Portal Controller turns a Promise's API into a Backstage `Template`, the request template a
 developer fills in to ask for a resource. Most of what you want that template to do, you write
 into the CRD in `spec.api`.
 
@@ -71,6 +71,10 @@ spec:
 ```
 
 ## Behaviour that comes from your API
+
+Edit the schema in your Promise file, apply it with `kubectl apply -f postgresql-promise.yaml`,
+then inspect the regenerated Template in Backstage. Browser validation improves the form;
+Kubernetes validation remains the authority for requests submitted through any client.
 
 Everything in this section is a change to the Promise itself. No `PortalCustomization` is
 involved: the generator reads these keywords from the CRD and the request template carries them
@@ -322,10 +326,80 @@ Each example below is a complete `PortalCustomization`. The change itself is a
 [Portal Patch](../portal-patch/intro) recipe, one entry under `args`, applied to the documents
 the generator wrote. A Promise binds to a single `PortalCustomization`, so to make more than one
 of these changes, add each recipe as another `args` entry rather than creating a second resource.
-[Customization](../customization) covers binding a Promise to a customization.
+Bind and apply the profile as described below.
 
 Put every recipe here in `spec.promise.configure`. The request template is generated once per
 Promise, not once per request.
+
+### Apply and verify a customisation
+
+Save one of the complete profiles below as `backstage-customisation.yaml`. Apply it, then bind
+your existing Promise:
+
+```bash
+kubectl apply -f backstage-customisation.yaml
+kubectl label promise postgresql \
+  kratix.io/portal-customization=postgresql-request-template --overwrite
+```
+
+For a named instance such as `prod`, use
+`kratix.io/portal-customization.prod=postgresql-request-template` instead. Keep one
+customisation binding per Promise. The binding also opts the Promise into that Backstage
+portal; a separate portal label is not required.
+
+Check the profile and Promise:
+
+```bash
+kubectl get portalcustomization postgresql-request-template -o yaml
+kubectl get promise postgresql -o yaml
+```
+
+Expect `Accepted: True` on the profile and `PortalBindingReady: True` on the Promise. These
+conditions validate the profile and binding, not successful publication. Check the sync Job
+completed, inspect the patched `catalog-info.yaml` in the catalogue storage, and refresh its
+Backstage entity. Open the create form and an existing resource's Manage tab to verify both.
+
+To change generated Components as well as Templates, add recipes to the same profile. For
+example, this complete profile sets the owner of the Promise and its resource Components:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: backstage-team-owner
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
+          args:
+            - |
+              target:
+                kind: Component
+              patch:
+                spec:
+                  owner: group:default/platform-team
+  resource:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
+          args:
+            - |
+              target:
+                kind: Component
+              patch:
+                spec:
+                  owner: group:default/platform-team
+```
+
+Apply it and bind with `kratix.io/portal-customization=backstage-team-owner` in place of the
+previous profile. Ensure `group:default/platform-team` exists in the Backstage catalogue.
+The `promise` lane changes Promise documents; the `resource` lane runs for each resource.
+An owner recipe replaces generated ownership, including a Group selected by namespace policy,
+but does not change the resource's recorded Group or its access checks.
 
 ### Add a description to the template
 
@@ -345,7 +419,7 @@ spec:
     configure:
       containers:
         - name: portal-patch
-          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
           args:
             - |
               target:
@@ -397,7 +471,7 @@ spec:
     configure:
       containers:
         - name: portal-patch
-          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
           args:
             - |
               target:
@@ -445,7 +519,7 @@ spec:
     configure:
       containers:
         - name: portal-patch
-          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
           args:
             - |
               target:
@@ -543,7 +617,7 @@ spec:
     configure:
       containers:
         - name: portal-patch
-          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
           args:
             - |
               target:
@@ -588,7 +662,7 @@ spec:
     configure:
       containers:
         - name: portal-patch
-          image: ghcr.io/syntasso/portal-patch:v0.8.0
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
           args:
             - |
               target:
@@ -622,6 +696,61 @@ all rather than reporting an error.
 To narrow one dropdown by what was chosen in another, the SKE frontend ships a
 [`ScopedEntityPicker`](./frontend-plugin#scopedentitypicker) that you select the same way, with
 `ui:field`.
+
+## Delivery mode and namespace recipes
+
+Prefer the portal's `config.requestNamespace` when selecting a fixed or Group-based namespace.
+It generates matching submission and tracking fields in both delivery modes.
+
+:::warning Preserve submission and tracking together
+A recipe targeting the `ske-configure-resource` step works only in push mode. That step is
+absent from pull-request Templates, so a required selector fails and stops publication.
+
+If you use `hideNamespaceManifest` in push mode, also patch the `record-request` manifest and
+its `input.namespace`. Otherwise tracking keeps a removed form parameter, and the pending
+request cannot match the resource entity. Keep namespace policy, manifest and tracking aligned.
+:::
+
+For example, add both of these recipes to the same container's `args`, alongside the recipe
+that hides the namespace field and patches submission:
+
+```yaml
+# Fragment: two additional Portal Patch args entries for push mode.
+- |
+  target:
+    kind: Template
+    list:
+      path: spec.steps
+      key: id
+      value: record-request
+  op: hideNamespaceManifest
+  field: input.manifest
+  defaultNamespace: platform-team
+- |
+  target:
+    kind: Template
+    list:
+      path: spec.steps
+      key: id
+      value: record-request
+  patch:
+    input:
+      namespace: platform-team
+```
+
+Keep the generated lifecycle step IDs and hidden `prAction` parameter unchanged. The frontend
+uses them to recognise update and delete runs. Recipes changing owners, tags or form layout
+can work in either delivery mode.
+
+## Extend the Backstage UI
+
+A `PortalCustomization` edits generated YAML; it does not install frontend components.
+Use the [frontend plugin API](./frontend-plugin) to compose entity pages and register field
+extensions. A custom field must work on both the create form and the Manage tab.
+On the new frontend system, the plugin discovers registered form fields. Legacy apps must pass
+their custom fields to `KratixResourceEntityPage` or `KratixManageTab` and register them on the
+scaffolder route. See [custom field wiring](./frontend-plugin#kratixmanagetab) and
+[ScopedEntityPicker](./frontend-plugin#scopedentitypicker).
 
 ## Related pages
 

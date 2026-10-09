@@ -1,21 +1,76 @@
 ---
 title: Backup and restore
-description: Backing up and restoring your SKE instance
+description: Plan and verify recovery of SKE configuration, platform objects and external state.
 ---
 
-Backing up and restoring your SKE instance is a critical part of ensuring the availability and durability of your data. It also provides a safety net for when you need to recover from a disaster.
+An SKE recovery plan must cover the platform cluster and the external systems it uses.
+Cluster backups alone do not capture Git repositories, buckets or resources provisioned by
+Promise workflows. Define your recovery objectives and rehearse your provider's restore
+procedure in an isolated environment.
 
-The backup and restore procedure will be different depending on where your Platform cluster is running. Below is the documentation for the major providers:
+## Prerequisites
 
-* [Amazon EKS](https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/)
-* [Google GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/concepts/backup-for-gke)
-* [Microsoft AKS](https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-backup)
-* [RedHat OpenShift](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/backup_and_restore/control-plane-backup-and-restore)
+- A backup tool supported by your cluster provider and access to its recovery documentation.
+- An inventory of installed component versions, configuration and external dependencies.
+- Secure recovery access to credentials and encryption keys.
+- An isolated target environment for a restore rehearsal.
 
-When restoring from a backup, keep in mind that the ordering of how the SKE objects are applied is important (the same applies for Flux and Cert Manager). The controller pods will not successfully start in the absence of their CRDs. Similarly, the resource requests will not successfully apply in the absence of the corresponding Promises.
+Provider guidance includes [Amazon EKS](https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/),
+[Google GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/concepts/backup-for-gke),
+[Microsoft AKS](https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-backup)
+and [OpenShift](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/backup_and_restore/control-plane-backup-and-restore).
 
-For Velero-based backups, the right order can be enforced with the `--include-resources` flag (for example, `--include-resources=customresourcedefinitions`). Check the [Velero Resource Filtering](https://velero.io/docs/main/resource-filtering) docs for more detailed explanation.
+## Inventory what to protect
 
-For GKE, it is possible to define pairs of resources that must be restored in a given order. Check [the GKE docs](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order) for more details.
+1. Record the Operator, SKE and optional component versions, Helm values or manifests,
+   `Kratix`, `SKEIntegration` and `PortalCustomization` resources, and customised ConfigMaps such as `kratix`
+   and portal configuration.
+2. Include Promises, resource requests, Destinations, StateStores, `HealthDefinition`,
+   `HealthSource`, and Promise upgrade objects where used. Retain the CRDs required to read them.
+3. Protect referenced Secrets: registry pull credentials, release-storage credentials,
+   StateStore credentials, portal credentials and custom TLS certificates. Include
+   cert-manager configuration if it manages certificates.
+4. Back up or retain the external Git and bucket contents used for workload output,
+   resource request input, portal catalogue output and health records. Record paths and ownership.
+5. Follow each Promise's recovery requirements for provisioned infrastructure and application data.
+   A resource request describes desired state; it is not a backup of the resulting service's data.
 
-Ordering cannot be enforced by the Velero-backed Azure restore. Instead the restore needs to be applied more than once.
+## Plan restore dependency order
+
+:::warning Reconciliation can change external systems
+Restored controllers and GitOps agents can resume applying desired state. Before a rehearsal,
+isolate the target from production stores and services and review credentials and endpoints.
+Coordinate recovery of the platform and provisioned resources before resuming reconciliation.
+:::
+
+Use your backup tool's ordering controls to restore dependencies before their consumers:
+
+1. Restore namespaces and the CRDs needed by cert-manager, GitOps agents, the Operator and SKE.
+2. Restore their required configuration and Secrets, then install the matching component versions
+   using your recorded installation method. Verify controllers and webhooks are ready.
+3. Restore StateStores, Destinations and optional integration configuration with their dependencies available.
+4. Restore Promises before their resource requests, because each Promise supplies its request CRD.
+   Restore health and upgrade objects after their referenced resources exist.
+5. Resume external publication and request ingestion according to the recovery plan, checking each
+   store and Destination before opening developer access.
+
+See [Velero resource filtering](https://velero.io/docs/main/resource-filtering) and
+[GKE restore ordering](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order)
+for tool-specific controls. Confirm your provider's ordering behaviour during the rehearsal.
+
+## Verify recovery
+
+Compare restored versions, objects and configuration against the inventory. Confirm controller
+readiness, Promise availability, resource request status and Destination GitOps reconciliation.
+Check health record delivery and portal publication where enabled. Validate the provisioned
+service and its data using its own recovery checks.
+
+Record the observed recovery time, missing dependencies and corrective steps. Keep the plan
+with your operational runbooks and repeat the rehearsal when topology or dependencies change.
+
+## Troubleshooting and next steps
+
+Missing resource kinds indicate CRDs or Promises have not been restored yet. Certificate and
+authentication failures often indicate a missing Secret or a reference to the previous environment.
+Use [Troubleshoot SKE](/ske/operations/troubleshooting) to inspect readiness and events;
+contact [Syntasso support](/ske/support) for unresolved SKE recovery issues.

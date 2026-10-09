@@ -1,16 +1,17 @@
 ---
 title: Migrating from the Cortex Controller
 description: Migrating from the standalone Cortex Controller to the Portal Controller
-sidebar_label: Migrating from Cortex
+sidebar_label: Migrate from the Cortex Controller
+sidebar_position: 5
 slug: migrating-from-cortex
 keywords: [portal, cortex, migration, ske, controller]
 ---
 
 The standalone Cortex Controller integration (`SKEIntegration type: cortex`) is deprecated in favour of the Portal Controller, using a `type: portal-controller` integration with a
-`portals[]` entry of `type: cortex`. Both can run side by side for at least two releases, distinct label spaces mean a Promise labelled only `kratix.io/cortex: "true"` keeps going
+`portals[]` entry of `type: cortex`. Distinct label spaces mean a Promise labelled only `kratix.io/cortex: "true"` keeps going
 to the Cortex Controller, while `kratix.io/portal-cortex: "true"` opts into the Portal Controller.
 
-This guide maps every `cortex-config` ConfigMap field onto `portals[].config`, using the same key names, and covers the Promise label change.
+This guide maps every `cortex-config` ConfigMap field onto `portals[].config`, using the same key names, and covers the Promise label change. Confirm the current [Portal Controller requirements](../installation#requirements) before switching, then use [Generate entities](./generate-entities) and [Send resource requests](./send-resource-requests) to verify publication and GitOps delivery.
 
 ## At a glance
 
@@ -88,7 +89,7 @@ metadata:
   name: portal-controller
 spec:
   type: portal-controller
-  version: v0.2.0
+  version: v0.6.1
   portals:
     - name: prod
       type: cortex
@@ -148,7 +149,7 @@ The Cortex Controller's per-Promise annotations are not read by the Portal Contr
 
 The Cortex `generate` stage writes its documents to `/kratix/output`:
 
-```
+```text
 entity-type.yaml       # the Promise's Cortex entity type
 promise-entity.yaml    # the Promise entity
 workflow-create.yaml   # the Create workflow

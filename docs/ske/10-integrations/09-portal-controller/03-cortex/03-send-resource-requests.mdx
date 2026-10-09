@@ -1,0 +1,107 @@
+---
+title: Send resource requests from Cortex
+description: Configure Git delivery and verify Cortex create, update and delete requests on the platform
+sidebar_label: Send resource requests to Kratix
+slug: send-resource-requests
+sidebar_position: 3
+---
+
+Cortex workflows commit resource request manifests to Git. A platform GitOps agent applies those manifests to the cluster where Kratix runs. Kratix then reconciles the request, publishes the resource entity and exports status back to Cortex.
+
+## Prerequisites
+
+- Complete [Generate entities](./generate-entities), including the Cortex API Secret and Promise binding.
+- A GitHub or GitLab repository and branch that Cortex can read and write.
+- A [platform GitOps agent](/category/installing-gitops-agent) configured to apply requests to the platform cluster.
+- The namespace you intend to request resources in must exist on the platform cluster.
+
+## 1. Configure Git access in Cortex
+
+Configure Cortex's [GitHub integration](https://docs.cortex.io/ingesting-data-into-cortex/integrations/github) or [GitLab integration](https://docs.cortex.io/ingesting-data-into-cortex/integrations/gitlab). Follow the provider's current authentication instructions and allow the generated workflows to read, create, update and delete files in your selected repository.
+
+Record the integration alias in Cortex. Set `integrationAlias` to this alias, rather than a Git username or a Kubernetes Secret name. Git credentials remain in the Cortex integration; the Portal Controller's `cortex-token` Secret is for the Cortex API.
+
+## 2. Set the request repository, branch and path
+
+Edit the Cortex portal entry in your existing `SKEIntegration`. This fragment shows only `config`; preserve the rest of the integration.
+
+```yaml
+config:
+  repositoryName: <GIT_ORGANISATION>/<GIT_REPOSITORY>
+  provider: github
+  integrationAlias: <CORTEX_GIT_INTEGRATION_ALIAS>
+  branch: main
+  path: kratix-resource-requests
+```
+
+Set `provider` to `gitlab` for GitLab. `repositoryName`, `provider` and `integrationAlias` are required. If omitted, `branch` defaults to `main` and `path` to `kratix-resource-requests`.
+
+```bash
+kubectl apply -f cortex-integration.yaml
+```
+
+The generated workflows use these values to commit directly to the configured branch. For a Promise named `kafka`, a request named `payments` in namespace `team-a` is stored at:
+
+```text
+kratix-resource-requests/kafka/team-a-payments.yaml
+```
+
+## 3. Configure platform GitOps
+
+Configure your GitOps agent to watch the same repository, branch and path. Give the agent repository credentials and access to apply the Promise's resource API in the platform cluster.
+
+Enable the agent's deletion reconciliation, such as Flux's `prune` setting, if removing a manifest from Git should delete the Kubernetes request. Follow the [GitOps installation guides](/category/installing-gitops-agent) for your agent's configuration.
+
+## 4. Create a resource request
+
+In Cortex, run `Create <PROMISE_NAME> request`. Enter a name, namespace and the specification fields from the Promise API.
+
+The workflow first registers `<name> request (pending)` in Cortex, owned by the requester. It then commits the manifest to Git. Registration uses create-only behaviour: an entity with the same tag stops the workflow before it overwrites the request file.
+
+After GitOps applies the manifest, Kratix reconciles the request. The resource sync pipeline updates the entity definition and clears its pending marker. The exporter subsequently writes resource status to Cortex custom data under `status`.
+
+## 5. Update a resource request
+
+Select the resource entity in Cortex and run `Update <PROMISE_NAME> request`. Review the pre-filled fields and submit the changes. The workflow updates the manifest in Git; GitOps applies the new specification and Kratix reconciles it.
+
+Wait for the Kubernetes request and Cortex entity to reflect the new specification before assessing the resulting resource status.
+
+## 6. Delete a resource request
+
+:::warning
+The Delete workflow removes the resource request manifest from Git. With GitOps deletion reconciliation enabled, this deletes the Kubernetes request and starts the Promise's resource deletion workflow. Confirm the selected resource before running it.
+:::
+
+Select the resource entity and run `Delete <PROMISE_NAME> request`. After deleting the file, the workflow deletes a still-pending entity immediately. For an applied request, it records `Deleting` in Cortex custom data under `request`; platform reconciliation later removes the resource entity.
+
+## Verify reconciliation
+
+Check each stage in order:
+
+1. Inspect the Cortex workflow run. Confirm its Git action succeeded.
+2. Inspect the configured branch for the manifest at `<path>/<promise>/<namespace>-<name>.yaml`, or its removal after deletion.
+3. Inspect your GitOps agent's reconciliation status and events.
+4. Inspect the Kubernetes request, replacing the API resource and identity placeholders:
+
+   ```bash
+   kubectl get <RESOURCE_TYPE> <RESOURCE_NAME> -n <NAMESPACE> -o yaml
+   ```
+
+5. Inspect the resource sync Job and Cortex entity. The request's `status.portal` can include `entityURL` and `lastSyncedAt`; provisioning status depends on the Promise.
+6. Check that the exporter reflects subsequent Kubernetes status changes in Cortex custom data under `status`.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Git action fails | Check the Cortex integration alias, repository access, branch existence and branch protection rules. |
+| Pending entity remains after a Git failure | Registration happens before the commit. Inspect the failed action and repository before deciding how to recover. An existing pending tag blocks another Create run with that identity. |
+| Commit exists but request is absent from Kubernetes | Check the GitOps repository, branch, path, credentials, namespace and API validation errors. |
+| Request exists but entity remains pending | Inspect the resource sync Job and writer logs. |
+| Delete succeeds in Git but request remains | Check GitOps deletion reconciliation and Kubernetes finalisers or resource delete workflow failures. |
+
+See [Portal Controller troubleshooting](../troubleshooting) for shared reconciliation checks.
+
+## Next steps
+
+[Customise entities and workflows](./cortex-examples) to adjust names, metadata and completion messages.

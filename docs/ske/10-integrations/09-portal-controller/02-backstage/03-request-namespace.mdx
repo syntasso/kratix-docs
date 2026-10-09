@@ -6,6 +6,8 @@ slug: request-namespace
 keywords: [portal, backstage, namespace, group, team, requestNamespace, request form]
 ---
 
+For the complete setup and request lifecycle, see [Send resource requests](./send-resource-requests#choose-namespace-policy).
+
 By default, the request form asks the developer to type the Kubernetes namespace their resource goes
 into. A Backstage portal's `config.requestNamespace` setting lets you choose it for them instead:
 
@@ -108,10 +110,17 @@ message saying why, when:
 - the namespace would not be a valid namespace name, or the Group lacks the annotation;
 - a resource with that name already exists in the namespace and belongs to another Group.
 
-Updating or deleting from the **Manage** tab keeps the resource in the namespace it already lives in,
-whatever the setting says now, and only members of its recorded Group can do it. Resources with no
-recorded Group, such as ones created before you changed the setting, behave as before. Groups that
-share a namespace, by name or by annotation value, can create and change each other's resources in it.
+The **Manage** tab keeps the resource's existing namespace. Templates generated with
+`from: group` or `from: fixed` run `ske:resolve-namespace`, which checks recorded Group
+membership on updates and deletes, including for Groups sharing a namespace. The backend
+delete route also checks the recorded Group. Resources without one have no Group check.
+
+:::warning Namespace policy is not a permanent access boundary
+Changing to `from: form` regenerates Templates without `ske:resolve-namespace`, so Template
+updates no longer enforce recorded Group membership. The Manage tab's membership check is
+not backend enforcement. Keep Kubernetes RBAC, Git permissions and review controls in place
+when changing policy.
+:::
 
 :::warning Only accept Groups from sources you trust
 
