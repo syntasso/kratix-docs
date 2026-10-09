@@ -1,0 +1,119 @@
+---
+title: Customise Cortex entities and workflows
+description: Apply Portal Patch to generated Cortex workflows and resource entities
+keywords: [portal, customization, cortex, workflow, ske]
+slug: "/ske/integrations/portal-controller/cortex/cortex-examples"
+sidebar_label: "Customise entities and workflows"
+sidebar_position: 4
+---
+
+Use a `PortalCustomization` to edit generated Cortex documents between the generate and writer stages. This guide changes a Create workflow's name and completion message, and adds a group to resource entities using [Portal Patch](/ske/integrations/portal-controller/portal-patch/recipe-reference).
+
+## Example Promise
+
+Start with an installed Promise named `kafka`, published through the `prod` Cortex portal using [Generate entities](/ske/integrations/portal-controller/cortex/generate-entities). The examples do not install Kafka or change its API. To use another Promise, replace `kafka` in the binding command and choose an appropriate workflow name.
+
+## 1. Define the customisation
+
+Save the following as `kafka-cortex-customization.yaml`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: kafka-cortex
+spec:
+  portalType: cortex
+  promise:
+    configure:
+      containers:
+        - name: patch-workflows
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
+          args:
+            - |
+              target:
+                file: workflow-create.yaml
+              patch:
+                name: Create Production Kafka Cluster
+                runResponseTemplate: Request committed to Git. Waiting for platform reconciliation.
+            - |
+              target:
+                file: workflow-update.yaml
+              patch:
+                runResponseTemplate: Update committed to Git. Waiting for platform reconciliation.
+  resource:
+    configure:
+      containers:
+        - name: patch-resource-entity
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
+          args:
+            - |
+              target:
+                file: resource-entity.yaml
+              patch:
+                info:
+                  x-cortex-groups:
+                    - kratix-resources
+                    - production
+```
+
+The promise configure lane edits the workflows once per Promise sync. The resource configure lane edits each resource entity. The group list replaces the generated list, so this example retains `kratix-resources` explicitly.
+
+Portal Patch is versioned separately from the Portal Controller. Pin its image version in each container.
+
+## 2. Apply and bind the customisation
+
+```bash
+kubectl apply -f kafka-cortex-customization.yaml
+kubectl label promise kafka kratix.io/portal-customization.prod=kafka-cortex --overwrite
+```
+
+The `.prod` suffix selects the Cortex portal named `prod`. The customisation binding opts the Promise into that portal type. Use one customisation per Promise and combine its changes in that resource. See [Binding a Promise](/ske/integrations/portal-controller/customization#binding-a-promise-to-a-portalcustomization).
+
+## 3. Verify the result
+
+```bash
+kubectl get portalcustomization kafka-cortex -o yaml
+kubectl get promise kafka -o yaml
+kubectl get jobs,pods -n kratix-platform-system
+```
+
+Check the customisation's `Accepted` condition, the Promise's `PortalBindingReady` condition and the sync Job's completion. In Cortex, confirm the Create workflow is named **Create Production Kafka Cluster**. Run Create or Update and confirm its completion message says the request is waiting for platform reconciliation.
+
+After a Kafka resource request is reconciled, inspect its entity and confirm both `kratix-resources` and `production` groups are present. `Accepted: True` validates the customisation's structure; the sync Job confirms whether its recipes succeeded.
+
+## Change the name of a workflow
+
+The generated defaults are `Create kafka request`, `Update kafka request` and `Delete kafka request`. Target the corresponding `workflow-create.yaml`, `workflow-update.yaml` or `workflow-delete.yaml` file and patch its `name`, as in the complete example above.
+
+## Reorder fields in a Cortex workflow
+
+Input fields live inside the `user-input` action's `schema.inputs` list. Portal Patch can select nested list items by key and insert new items beside an anchor. A plain array patch replaces the entire array; it does not reorder the existing items automatically.
+
+For arbitrary reordering, use a configure container that reads the generated workflow and sorts its inputs. Preserve the identity input keys `objname` and `objnamespace`, and all generated field definitions. See the [adapter file contract](/ske/integrations/portal-controller/reference/adapter#generated-documents) and [custom configure containers](/ske/integrations/portal-controller/customization#worked-example-setting-owner-and-tags-without-portal-patch).
+
+## Show request details before deletion
+
+The generated Delete workflow deletes the Git file and then either removes a pending entity or marks an applied request as deleting. To add a confirmation form, use a custom configure container to edit `workflow-delete.yaml` according to Cortex's [Workflow blocks documentation](https://docs.cortex.io/streamline/workflows/blocks).
+
+Preserve the generated Git actions and the pending/applied branch when changing the workflow. Test the confirmation form and both deletion paths in your Cortex workspace before exposing the workflow to developers.
+
+## Change the message shown after a workflow runs
+
+Patch `runResponseTemplate` on the workflow file, as in the complete example above. A workflow completes after the Git operation; describe that result separately from platform provisioning. The Delete workflow's generated completion message is `Request deleted`.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Configure Job fails | Inspect the Portal Patch container's logs. Missing files, missing selectors and ambiguous selectors fail the recipe batch before the writer runs. |
+| Workflow name remains unchanged | Check the customisation binding and the latest Promise sync Job. |
+| Resource groups are missing | Check the resource configure lane and the resource sync Job. Promise configure containers do not edit resource entities. |
+
+## Advanced use cases
+
+Use the [recipe reference](/ske/integrations/portal-controller/portal-patch/recipe-reference) for nested selectors, insertion and entity-picker projection. Use your own configure container for transformations the recipe grammar does not express, and validate the resulting workflow against Cortex's current API.
+
+## Next steps
+
+[Send resource requests](/ske/integrations/portal-controller/cortex/send-resource-requests) to verify the complete GitOps journey.

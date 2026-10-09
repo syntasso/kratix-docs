@@ -1,8 +1,0 @@
-{
-  "label": "Air-Gapped Installation",
-  "position": 4,
-  "link": {
-    "type": "doc",
-    "id": "ske/integrations/backstage/air-gapped-installation/intro"
-  }
-}

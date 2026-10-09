@@ -1,0 +1,106 @@
+---
+title: How the Portal Controller works
+description: How Promises become portal entities and developer requests return to the platform
+keywords: [portal, internal developer portal, idp, backstage, cortex]
+slug: "/ske/integrations/portal-controller/intro"
+sidebar_label: "How it works"
+sidebar_position: 1
+---
+
+The Portal Controller publishes Promises and Resource requests to Backstage or Cortex.
+It generates catalogue entries and request forms from the Promise API.
+
+To set up an integration, start with [Backstage](/ske/integrations/portal-controller/backstage/intro) or [Cortex](/ske/integrations/portal-controller/cortex/intro).
+
+:::info Port integration
+[Port](/ske/integrations/port) uses the separate Port Controller.
+:::
+
+## What the integration provides
+
+- Multiple Backstage and Cortex instances on one platform.
+- Labels selecting which Promises to publish.
+- Request forms derived from Promise APIs.
+- Document customisation through `PortalCustomization`.
+
+## Architecture
+
+Declare portal instances in one `SKEIntegration` of `spec.type: portal-controller`.
+Each entry has a type, `backstage` or `cortex`, and instance-specific settings.
+The SKE Operator writes `ske-portal-config`, which the controller reads. Without the operator,
+maintain this ConfigMap directly.
+
+A Promise opts into a portal with a label. Resource requests inherit its binding unless
+individually opted out. This fragment shows only the label, not a complete Promise:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-backstage: "true"
+```
+
+With multiple instances of one type, name the instance in the label.
+See [configuration and bindings](/ske/integrations/portal-controller/reference/portal-configuration).
+
+### From the platform to the portal
+
+Each sync runs three stages:
+
+```text
+generate  →  [configure …]  →  writer
+```
+
+- **Generate** creates Components and Templates for Backstage, or entities and workflows for Cortex.
+- **Configure** optionally edits these documents using `PortalCustomization` containers.
+  [Portal Patch](/ske/integrations/portal-controller/portal-patch/recipe-reference) provides declarative recipes.
+- **Writer** publishes the documents.
+
+**Backstage:** writes through a Kratix Destination backed by Git or bucket storage.
+Backstage must discover those files; the controller does not call its API.
+
+**Cortex:** writes through the Cortex API and runs a status exporter.
+
+Both run setup Jobs. Backstage setup prepares or adopts storage; Cortex setup ensures
+shared entity and relationship types exist.
+
+## Where developer requests go
+
+Publication and request delivery are separate. Catalogue storage need not be the request repository.
+
+For Backstage, `config.mode` selects request approval:
+
+- **`push`** (default): submit without a pull request.
+- **`pull-request`**: propose a GitHub pull request for review and merge.
+
+The backend's `ske.mode` selects Kubernetes API access or Git delivery.
+Git delivery requires a GitOps agent, even in push mode.
+Follow [Send resource requests to Kratix](/ske/integrations/portal-controller/backstage/send-resource-requests)
+to configure access, permissions and request delivery.
+
+For Cortex, workflows commit requests through its GitHub or GitLab integration.
+A GitOps agent applies them. The pending entity precedes the commit:
+check the workflow result, request file and platform status separately.
+Follow [Send Cortex resource requests](/ske/integrations/portal-controller/cortex/send-resource-requests)
+to configure the Git integration and verify reconciliation.
+
+### Changing or removing publication
+
+`PortalCustomization` changes documents, not Promise APIs or plugin UI.
+Configure containers do not run during deletion.
+
+:::warning Opting out is not a pause
+Removing opt-in labels can clean up published output. Removing portal configuration
+also removes managed setup workloads and owned storage objects.
+:::
+
+## Next steps
+
+- [Install and upgrade](/ske/integrations/portal-controller/installation) the shared controller, or check an existing installation.
+- Look up [portal configuration and bindings](/ske/integrations/portal-controller/reference/portal-configuration) and
+  the [adapter output contract](/ske/integrations/portal-controller/reference/adapter).
+- [Configure sync and setup Jobs](/ske/integrations/portal-controller/customization/job-customization) for cluster policies.
+- Set up [Backstage](/ske/integrations/portal-controller/backstage/intro) or [Cortex](/ske/integrations/portal-controller/cortex/intro).
+- [Customise documents](/ske/integrations/portal-controller/customization) using [Portal Patch recipes](/ske/integrations/portal-controller/portal-patch/recipe-reference).
+- [Migrating from Backstage](/ske/integrations/portal-controller/backstage/migrating-from-backstage) and
+  [Migrating from Cortex](/ske/integrations/portal-controller/cortex/migrating-from-cortex) cover moving an existing integration
+  across.

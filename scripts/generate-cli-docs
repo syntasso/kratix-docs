@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require "fileutils"
+require "json"
 
 def header?(sections, line)
   section = sections.find { |key, value| line.start_with?(value) }
@@ -57,16 +58,28 @@ def section(doc_dir, name, cmd, code: false, slice: 1)
 end
 
 
-def header(cmd)
+def header(cmd, stable_url: nil, position: nil)
+  front_matter = if stable_url
+    <<~EOF
+    ---
+    slug: #{stable_url.to_json}
+    sidebar_label: #{cmd[:name].sub("kratix-test", "kratix test").to_json}
+    sidebar_position: #{position}
+    ---
+
+    EOF
+  else
+    ""
+  end
   <<~EOF
-  # #{cmd[:name]}
+  #{front_matter}# #{cmd[:name]}
   #{cmd[:short]}
   EOF
 end
 
-def gen_doc(doc_dir, cmd)
+def gen_doc(doc_dir, cmd, stable_url: nil, position: nil)
   <<~EOF
-  #{header(cmd)}
+  #{header(cmd, stable_url: stable_url, position: position)}
   #{section(doc_dir, :description, cmd)}
   #{section(doc_dir, :usage, cmd, code: true)}
   #{section(doc_dir, :examples, cmd, code: true, slice: 2)}
@@ -77,7 +90,7 @@ def gen_doc(doc_dir, cmd)
 end
 
 
-def run(command, doc_dir, ref_path)
+def run(command, doc_dir, ref_path, stable_urls: false)
   cmds = []
   count = 0
   sections = {
@@ -152,12 +165,15 @@ def run(command, doc_dir, ref_path)
   cmds.each_with_index do |cmd, i|
     name = cmd[:name].split.join("-").downcase.gsub(/[^a-z0-9-]/, "")
     puts "Writing #{name}..."
-    doc = gen_doc(ref_path,cmd)
+    stable_url = stable_urls ? "#{ref_path}/#{name}" : nil
+    doc = gen_doc(ref_path, cmd, stable_url: stable_url, position: i + 1)
     filepath = File.join(doc_dir, "#{"%02d" % i}_#{name}.md")
     # FileUtils.mkdir_p(File.dirname(filepath)) unless File.directory?(File.dirname(filepath))
     File.write(filepath, doc)
   end
 end
 
-run("kratix", "docs/main/06-kratix-cli/20-reference", "/main/kratix-cli/reference")
-run("kratix-test", "docs/ske/02-promise-testing-framework/reference", "/ske/promise-testing-framework/reference")
+if $PROGRAM_NAME == __FILE__
+  run("kratix", "docs/main/06-kratix-cli/20-reference", "/main/kratix-cli/reference")
+  run("kratix-test", "docs/ske/reference/promise-testing-cli", "/ske/promise-testing-framework/reference", stable_urls: true)
+end

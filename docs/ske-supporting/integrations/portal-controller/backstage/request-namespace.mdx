@@ -1,0 +1,134 @@
+---
+title: Choosing the request namespace
+description: Choose the Kubernetes namespace of a resource request for the developer, from their Backstage Group or a fixed value
+keywords: [portal, backstage, namespace, group, team, requestNamespace, request form]
+slug: "/ske/integrations/portal-controller/backstage/request-namespace"
+displayed_sidebar: skeSidebar
+---
+
+For the complete setup and request lifecycle, see [Send resource requests](/ske/integrations/portal-controller/backstage/send-resource-requests#choose-namespace-policy).
+
+By default, the request form asks the developer to type the Kubernetes namespace their resource goes
+into. A Backstage portal's `config.requestNamespace` setting lets you choose it for them instead:
+
+| `requestNamespace` | The request goes to | The form asks for |
+|---|---|---|
+| `{from: form}` (default) | the namespace the developer types | Name, Namespace |
+| `{from: group}` | the namespace named after the Group the developer picks | Name, Group |
+| `{from: group, annotation: <key>}` | the namespace in that annotation on the picked Group | Name, Group |
+| `{from: fixed, namespace: <name>}` | that one namespace | Name |
+
+The setting applies to every namespaced Promise on the portal. Cluster-scoped Promises are unaffected.
+
+## Requirements
+
+- `@syntasso/plugin-ske-backend` `v0.24.0` or later, and `@syntasso/plugin-ske-frontend` `v0.22.0`
+  or later. Install the backend plugin before you change the setting: an older one cannot handle the
+  new request form.
+- Portal Controller `v0.6.1` or later.
+
+:::note
+Kratix does not create namespaces. Create each one before developers request resources into it,
+otherwise the request fails when it is applied.
+:::
+
+## Configuration
+
+Set `requestNamespace` in the `config` of a `type: backstage` entry in `portals[]`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.6.1
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        # highlight-start
+        requestNamespace:
+          from: group
+        # highlight-end
+```
+
+An invalid value stops the portal's Promise-level sync pipeline, with a message naming the portal and
+the value. The portal's request forms stay as they were until you fix it.
+
+### From the Group's name
+
+With `from: group`, the Group field lists the Groups the developer is a direct member of
+(`spec.members` of the Group). The request goes to the namespace with the Group's name, so the name
+must be a valid namespace name: lowercase letters, numbers and hyphens, at most 63 characters.
+
+```yaml
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: payments
+spec:
+  type: team
+  children: []
+  members:
+    - alice
+```
+
+### From an annotation on the Group
+
+If your Group names don't match your namespaces, name an annotation to read instead:
+
+```yaml
+requestNamespace:
+  from: group
+  annotation: acme.io/k8s-namespace
+```
+
+A Group with `acme.io/k8s-namespace: payments` then sends its requests to `payments`, whatever the
+Group is called. A Group without the annotation is refused; its name is not used instead.
+
+Groups imported by an organisation provider, such as GitHub, LDAP or Microsoft Entra ID, usually need
+a small catalog processor to add the annotation.
+
+### One namespace for every request
+
+```yaml
+requestNamespace:
+  from: fixed
+  namespace: platform-team
+```
+
+## Who can request and change a resource
+
+Each request records its Group in the resource's `kratix.io/backstage-group` annotation, and the
+Group becomes the owner of the resource in the Backstage catalogue. A request is refused, with a
+message saying why, when:
+
+- nobody is signed in (Group modes only);
+- the developer is not a member of the picked Group;
+- the namespace would not be a valid namespace name, or the Group lacks the annotation;
+- a resource with that name already exists in the namespace and belongs to another Group.
+
+The **Manage** tab keeps the resource's existing namespace. Templates generated with
+`from: group` or `from: fixed` run `ske:resolve-namespace`, which checks recorded Group
+membership on updates and deletes, including for Groups sharing a namespace. The backend
+delete route also checks the recorded Group. Resources without one have no Group check.
+
+:::warning Namespace policy is not a permanent access boundary
+Changing to `from: form` regenerates Templates without `ske:resolve-namespace`, so Template
+updates no longer enforce recorded Group membership. The Manage tab's membership check is
+not backend enforcement. Keep Kubernetes RBAC, Git permissions and review controls in place
+when changing policy.
+:::
+
+:::warning Only accept Groups from sources you trust
+
+The Group check trusts the Backstage catalogue. If users can register their own catalogue locations,
+they can create a Group named after any namespace, or with any namespace in its annotation, list
+themselves as members, and then create and change resources in that namespace. Make sure Groups
+reach the catalogue only from sources the platform team controls, such as an organisation provider
+or catalogue locations only the platform team can change. Backstage's `catalog.rules` setting can
+limit which locations may add `Group` entities.
+
+:::
