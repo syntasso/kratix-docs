@@ -25,8 +25,8 @@ Kratix is usually deployed via the SKE Operator. The SKE Operator provides full 
 
 The SKE Operator can also deploy the Portal Controller, which is an optional component that can be used to integrate your Platform with a developer portal such as Backstage or
 Cortex. The Portal Controller will automatically generate the portal entities when Promises or resources are created or updated. To install the Portal Controller, follow the
-instructions in the [Portal Controller documentation](/ske/integrations/portal-controller/installation). To populate the catalogue, SKE uses a Git Repository or, for Cortex, the
-Cortex API directly.
+instructions in the [Portal Controller documentation](/ske/integrations/portal-controller/installation). For Backstage, the controller writes catalogue documents through a Destination
+backed by a Git or bucket StateStore, which Backstage must discover. For Cortex, it calls the Cortex API directly.
 
 :::info
 

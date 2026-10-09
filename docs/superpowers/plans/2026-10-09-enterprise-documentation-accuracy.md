@@ -43,10 +43,10 @@ Only Tasks 1 and 2 below are the first executable milestone. Later milestones re
 
 ### Milestone 1: Correctness before navigation
 
-- [ ] Verify current examples, requirements, setup scope, binding conditions and ownership against released source and release records.
-- [ ] Fix supported-version references and upgrade warnings without rewriting unrelated release history.
-- [ ] Remove the current Cortex prerequisite's dependence on deprecated controller setup.
-- [ ] Correct Git-only architecture wording and restore the distinction between destination resources and backing storage.
+- [x] Verify current examples, requirements, setup scope, binding conditions and ownership against released source and release records.
+- [x] Fix supported-version references and upgrade warnings without rewriting unrelated release history.
+- [x] Remove the current Cortex prerequisite's dependence on deprecated controller setup.
+- [x] Correct Git-only architecture wording and restore the distinction between destination resources and backing storage.
 - [ ] Build and review this first patch. Record remaining runtime questions rather than guessing.
 
 ### Milestone 2: Establish canonical controller pages
@@ -153,12 +153,12 @@ Paths below are relative to `docs/ske`. Source repositories are read-only eviden
 
 **Interfaces:** Consumes released component tags and the existing release records. Produces a coherent version vocabulary and primary `v0.6.1` controller examples for Task 2 and the later guides. Published IDs/routes remain unchanged.
 
-- [ ] **Step 1: Establish evidence before edits.** Compare existing requirements and erroneous references with controller tags `v0.3.0`, `v0.4.0` and `v0.6.1`, the SKE `v0.59.0` note, Operator `v0.34.0` and plugin release records. Record findings in the ledger.
-- [ ] **Step 2: Correct requirements.** Clearly state the version profile described by current examples; explain the ConfigMap transition, status compatibility and plugin-first upgrade order. Link to existing component release pages.
-- [ ] **Step 3: Align examples and plugin instructions.** Update the three primary SKEIntegration examples to `v0.6.1`. Align current plugin requirements with backend `v0.24.0` and frontend `v0.22.0`; make old/new frontend instructions conditional. Do not blanket-replace historical versions.
-- [ ] **Step 4: Correct the two release references.** Operator ConfigMap transition refers to Portal Controller `v0.4.0`, not `v0.8.0`; plugin push pending-request generation refers to `v0.3.0`, not `v0.11.0`.
-- [ ] **Step 5: Verify the complete site.** Run `rtk proxy mise exec node@22.23.2 -- yarn build`. Expected: exit 0 and generated static files; no broken Markdown links, MDX errors or invalid front matter.
-- [ ] **Step 6: Review and record.** Compare every changed version claim with the evidence; inspect the rendered requirements and upgrade warning. Commit this coherent correction if Git writes are permitted, then record the build and outcome in the ledger.
+- [x] **Step 1: Establish evidence before edits.** Compare existing requirements and erroneous references with controller tags `v0.3.0`, `v0.4.0` and `v0.6.1`, the SKE `v0.59.0` note, Operator `v0.34.0` and plugin release records. Record findings in the ledger.
+- [x] **Step 2: Correct requirements.** Clearly state the version profile described by current examples; explain the ConfigMap transition, status compatibility and plugin-first upgrade order. Link to existing component release pages.
+- [x] **Step 3: Align examples and plugin instructions.** Update the three primary SKEIntegration examples to `v0.6.1`. Align current plugin requirements with backend `v0.24.0` and frontend `v0.22.0`; make old/new frontend instructions conditional. Do not blanket-replace historical versions.
+- [x] **Step 4: Correct the two release references.** Operator ConfigMap transition refers to Portal Controller `v0.4.0`, not `v0.8.0`; plugin push pending-request generation refers to `v0.3.0`, not `v0.11.0`.
+- [x] **Step 5: Verify the complete site.** Run `rtk proxy mise exec node@22.23.2 -- yarn build`. Expected: exit 0 and generated static files; no broken Markdown links, MDX errors or invalid front matter.
+- [x] **Step 6: Review and record.** Compare every changed version claim with the evidence; inspect the rendered requirements and upgrade warning. Commit this coherent correction if Git writes are permitted, then record the build and outcome in the ledger.
 
 ### Task 2: Correct current portal behaviour and active prerequisites
 
@@ -171,6 +171,6 @@ Paths below are relative to `docs/ske`. Source repositories are read-only eviden
 - [ ] **Step 3: Correct Cortex setup and ownership.** Explain that changing one portal affects its setup only, while workload template changes can affect all Jobs. Name the actual generated ConfigMap ownership and retain the portal-removal lifecycle description.
 - [ ] **Step 4: Make prerequisites current.** Replace the deprecated setup cross-link with a short current workspace/Git preparation section linking primary Cortex integration/token docs and current platform GitOps guides. Do not copy deprecated controller installation commands.
 - [ ] **Step 5: Document durable pending behaviour.** Describe the pending request entity and workflow result link from `v0.6.1`, without promising provisioning success or immediate reconciliation.
-- [ ] **Step 6: Correct binding diagnostics.** Use the released missing/invalid configuration condition and explain the configuration object it refers to, including the operatorless route.
+- [ ] **Step 6: Correct binding diagnostics.** Distinguish the released missing-configuration condition from the invalid-configuration warning event and explain the configuration object each refers to, including the operatorless route.
 - [ ] **Step 7: Verify and review.** Run the full build; inspect rendered current Cortex and architecture pages. Expected: exit 0, no broken links, source-consistent behaviour and no deprecated prerequisite on the current Cortex route.
 - [ ] **Step 8: Record the initial milestone.** Commit the coherent corrections if permitted, update the ledger and task checkboxes, and obtain a fresh review of this milestone. Later programme milestones remain unchecked.

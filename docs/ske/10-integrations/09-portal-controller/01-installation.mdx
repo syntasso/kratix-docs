@@ -152,7 +152,7 @@ A Promise reports how its binding resolved on the `PortalBindingReady` condition
 | `BindingResolved` | The label resolved to exactly one portal |
 | `AmbiguousPortalInstance` | More than one portal of the type exists and no instance was named |
 | `PortalConnectionNotFound` | The named instance does not match a configured portal |
-| `PortalIntegrationNotFound` | No `portal-controller` `SKEIntegration` is installed |
+| `PortalConfigNotFound` | The `ske-portal-config` ConfigMap is missing from `kratix-platform-system` |
 | `CustomizationNotFound` | The named `PortalCustomization` does not exist |
 | `AmbiguousCustomization` | More than one `PortalCustomization` label is present |
 
@@ -266,8 +266,23 @@ data:
 Each entry takes the fields described in [Connect a portal](#connect-a-portal), and credential Secrets
 work the same as a SKE operator managed Portal Controller.
 
-Editing a connection reruns setup for that connection only. When the controller cannot find the portal configuration
-ConfigMap or when the configurations cannot be parsed successfully by the controller, a warning event is published.
+Editing a connection reruns setup for that connection only. Changes to the shared
+Job configuration can also rerun setup; see [Job customisation](./customization/job-customization).
+
+If `ske-portal-config` is missing, opted-in Promises report
+`PortalBindingReady: False` with reason `PortalConfigNotFound`. For an operator-managed
+installation, check that the operator meets the [requirements](#requirements) and
+has reconciled the `SKEIntegration`. For a standalone installation, create the ConfigMap above.
+
+If `connections.yaml` cannot be parsed, the controller publishes a
+`PortalConfigInvalid` warning event on the ConfigMap. Inspect it with:
+
+```bash
+kubectl describe configmap ske-portal-config --namespace kratix-platform-system
+```
+
+Correct the connection configuration in `SKEIntegration.spec.portals` if operator-managed,
+or in the ConfigMap if standalone. Invalid configuration is not reported as `PortalConfigNotFound`.
 
 :::warning
 If the SKE Operator manages your platform, you are not expected to create or edit this ConfigMap.
