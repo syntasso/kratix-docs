@@ -18,7 +18,7 @@ This page covers the Backstage side. Configure the portal itself first, see
 
 ## Prerequisites
 
-- **Backstage app running v1.40 or above**: The SKE plugins are tested up to v1.50.4. If you do not have a Backstage app, refer to the [Backstage official
+- **Backstage app running v1.40 or above**: The current SKE plugin release documents compatibility with v1.55.0. See the [plugin releases](/ske/releases/backstage) for the compatibility statement for your version. If you do not have a Backstage app, refer to the [Backstage official
 documentation](https://backstage.io/docs/getting-started) for instructions on how to create a Backstage app.
 
 - **Node.js 22+**: Starting from Backstage v1.50, Node.js 22 or higher is required due to native module dependencies. Ensure your build environment and Docker images use Node 22+.
@@ -84,8 +84,8 @@ Make sure that the `~/.npmrc` file is in the home directory of the user that is 
 Two packages, one for each half of Backstage:
 
 ```bash
-yarn add @syntasso/plugin-ske-backend --cwd packages/backend
-yarn add @syntasso/plugin-ske-frontend @backstage/plugin-permission-react --cwd packages/app
+yarn add @syntasso/plugin-ske-backend@0.24.0 --cwd packages/backend
+yarn add @syntasso/plugin-ske-frontend@0.22.0 @backstage/plugin-permission-react --cwd packages/app
 ```
 
 :::note Peer dependencies (`v0.21.1` and later)
@@ -97,17 +97,17 @@ declared as **peer dependencies**, so your app must provide them. Most already s
 with a standard Backstage app; the one that usually does not is
 `@backstage/plugin-permission-react`, which is why it is added explicitly above.
 
-Yarn does not fail the install over a missing peer — it prints a warning
+Yarn does not fail the install over a missing peer; it prints a warning
 (`YN0002: … doesn't provide @backstage/plugin-permission-react`) and `yarn install`
 still completes, so it is easy to miss until the app fails to build against the absent
 package.
 :::
 
 :::important
-`@syntasso/plugin-ske-backend` must be at least `v0.21.0`, and `@syntasso/plugin-ske-frontend` at
-least `v0.18.0`. Earlier backend versions do not provide the action that
-[pull-request mode](./delivery-modes) uses to record a request, so a submission opens the pull
-request and then fails.
+These instructions use `@syntasso/plugin-ske-backend` `v0.24.0` and
+`@syntasso/plugin-ske-frontend` `v0.22.0`, matching the current
+[Portal Controller requirements](../installation#requirements). Install or upgrade
+the plugins before the controller so generated Templates do not call missing actions.
 :::
 
 :::warning Spotify Portal for Backstage
@@ -132,7 +132,12 @@ Backstage replica, use PostgreSQL rather than SQLite.
 
 ### Frontend {#update-the-entitypage}
 
-If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered — no
+Choose the instructions for your app's frontend system. Do not apply the legacy
+`EntityPage.tsx` changes to a new-frontend app.
+
+#### New frontend system
+
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (default since Backstage v1.49.0), the plugin is automatically discovered; no
 changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for Backstage.
 
 The plugin registers the following extensions via its `alpha` entry point:
@@ -166,7 +171,10 @@ request" and "Registering your Postgresql request in the catalog", which do not 
 creates or updates the resource.
 :::
 
-In `packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
+#### Legacy frontend system
+
+If your app uses the legacy frontend system, in
+`packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
 
 ```tsx
 import {
