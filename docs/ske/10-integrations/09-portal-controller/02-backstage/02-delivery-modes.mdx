@@ -117,8 +117,8 @@ withdrawn once the real resource entity appears.
 
 | Mode | Banner | Links |
 |---|---|---|
-| `push` | Submitted. waiting for the platform to create this resource. | None; nothing was opened |
-| `pull-request` | Waiting for approval. this resource will be provisioned when the pull request is merged. | The pull request awaiting approval |
+| `push` | Submitted. Waiting for the platform to create this resource. | None; nothing was opened |
+| `pull-request` | Waiting for approval. This resource will be provisioned when the pull request is merged. | The pull request awaiting approval |
 
 The recorded request appears and is withdrawn through events; `ske.pendingRequests.refreshSeconds`
 is a backstop. How long the real entity takes to arrive depends on those three steps. Under `push` with `ske.mode: kubernetes`
