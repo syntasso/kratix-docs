@@ -116,7 +116,7 @@ request". Tasks from other Templates are shown as Backstage shows them.
 
 ## What a developer sees while waiting
 
-A resource takes time to reach the catalogue: the platform has to create and reconcile it, the
+A resource takes time to reach the catalog: the platform has to create and reconcile it, the
 portal has to generate its entity, and Backstage has to discover it. Both modes fill that gap the
 same way, with a **pending request** entity published as soon as the request is recorded and
 withdrawn once the real resource entity appears.
@@ -128,11 +128,11 @@ withdrawn once the real resource entity appears.
 
 How long it stays is whatever those three steps take. Under `push` with `ske.mode: kubernetes`
 that can be seconds. A mode that commits to Git adds your GitOps agent's sync interval, and
-Git-based catalogue discovery adds its own polling interval.
+Git-based catalog discovery adds its own polling interval.
 
 ## Where a completed task leads
 
-When the run finishes, the task page includes links to the catalogue item and open pull requests:
+When the run finishes, the task page includes links to the catalog item and open pull requests:
 
 | Mode | Links on the completed task |
 |---|---|
@@ -161,7 +161,7 @@ to the `objnamespace` parameter the same recipe set deletes.
 
 Nothing fails at sync time. The recorded namespace resolves to nothing, so the request no longer
 matches the resource entity the platform ships, and the pending request is never withdrawn from the
-catalogue.
+catalog.
 
 Patch the record step as well:
 
