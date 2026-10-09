@@ -10,10 +10,10 @@ into a developer portal, such as Backstage or Cortex. It replaces the standalone
 [Backstage Controller](../backstage/intro) and [Cortex Controller](../cortex/intro), which are
 both deprecated in favour of this controller.
 
-:::info Portal vs Port
-"Portal" (this section) is Syntasso's unified catalogue-sync layer for developer portals such as
-Backstage and Cortex. It is unrelated to [Port](../port) (port.io), a different third-party
-integration documented elsewhere in this section.
+:::info Port integration
+[Port](../port) (port.io) is another developer portal supported by SKE. Its integration
+currently uses the separate Port Controller, not the Portal Controller. Do not use
+Portal Controller configuration fields to configure Port.
 :::
 
 ## What the integration provides
@@ -45,7 +45,7 @@ metadata:
 
 When the Promise syncs, the controller runs a pipeline made up of three stages:
 
-```
+```text
 generate  →  [configure …]  →  writer
 ```
 
@@ -56,9 +56,9 @@ generate  →  [configure …]  →  writer
   [Portal Patch](./portal-patch/intro) here rather than writing their own container.
 - **writer** ships the finished documents to the portal.
 
-How the writer delivers depends on the portal type. A Backstage portal writes the documents to a
-Kratix Destination, a Git repository that Backstage then discovers through its catalog providers,
-so the controller never calls Backstage itself. A Cortex portal calls the Cortex API directly,
+How the writer delivers depends on the portal type. A Backstage portal writes the documents
+through a Kratix Destination backed by a Git or bucket StateStore. Backstage must be configured
+to discover those documents; the controller never calls Backstage itself. A Cortex portal calls the Cortex API directly,
 and additionally runs a one-time setup Job and a long-lived status exporter. See
 [Backstage](./backstage/intro) and [Cortex](./cortex/intro) for the detail of each.
 
@@ -67,12 +67,15 @@ and additionally runs a one-time setup Job and a long-lived status exporter. See
 For a Backstage portal you also choose a **delivery mode**, which decides what happens when a
 developer submits the generated form:
 
-- **push**, the default, applies the request to the platform straight away.
+- **push**, the default, submits the request without opening a pull request for approval.
 - **pull-request** raises the request as a pull request against a Git repository, so a human
   reviews and merges it before anything is created. This is currently GitHub only.
 
-See [Delivery modes](./backstage/delivery-modes) for how each mode works and how to choose
-between them.
+Delivery mode is separate from the Backstage backend's `ske.mode`, which chooses
+whether requests reach the Kubernetes API directly or are written to Git. Git-based
+requests still need a GitOps agent to apply them to the platform, even in push mode.
+See [Delivery modes](./backstage/delivery-modes) and
+[backend configuration](./backstage/configure-backstage#configuring-the-backend-plugin).
 
 ## Next steps
 
