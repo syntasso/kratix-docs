@@ -103,13 +103,6 @@ still completes, so it is easy to miss until the app fails to build against the 
 package.
 :::
 
-:::important
-`@syntasso/plugin-ske-backend` must be at least `v0.21.0`, and `@syntasso/plugin-ske-frontend` at
-least `v0.18.0`. Earlier backend versions do not provide the action that
-[pull-request mode](./delivery-modes) uses to record a request, so a submission opens the pull
-request and then fails.
-:::
-
 :::warning Spotify Portal for Backstage
 If you are using Spotify Portal for Backstage, publish the plugins to your cloud instance before
 completing the install — see the [Spotify Portal installation guide](./air-gapped-plugins).
@@ -125,7 +118,7 @@ backend.add(import('@syntasso/plugin-ske-backend'));
 ```
 
 That single line registers the scaffolder actions the generated Templates use, the routes the
-frontend calls, and the catalogue provider that surfaces pending requests.
+frontend calls, and the catalog provider that surfaces pending requests.
 
 The plugin creates one database table and runs its migrations at startup. If you run more than one
 Backstage replica, use PostgreSQL rather than SQLite.
@@ -443,21 +436,21 @@ integrations:
 
 The credential needs:
 
-- **Contents: read** on the catalogue repository the Portal Controller writes to.
+- **Contents: read** on the catalog repository the Portal Controller writes to.
 - **Pull requests: write** on the repositories developers raise requests against, for
   [pull-request mode](./delivery-modes).
 - **Contents: write** on the requests repository, if you use `ske.mode: gitops` or `hybrid`.
 
 :::warning
-Backstage never writes the catalogue repository, Kratix does, using the state store's own
+Backstage never writes the catalog repository, Kratix does, using the state store's own
 credential. But Backstage does read it. A token scoped only to the request repositories gives you
-working submissions and a silently empty catalogue.
+working submissions and a silently empty catalog.
 :::
 
 ## Discover the generated entities
 
 The Portal Controller writes Promise entities and Resource entities into two separate trees, so
-configure one catalogue provider for each:
+configure one catalog provider for each:
 
 ```yaml
 catalog:
@@ -495,18 +488,18 @@ Fill the paths in from your portal's configuration:
 Two narrow providers rather than one glob over the whole prefix, because `catalogPath` takes a
 single glob and a wider one would ingest anything else that lands under it.
 
-The default catalogue rules already permit `Component` and `Template`, so no `catalog.rules` change
+The default catalog rules already permit `Component` and `Template`, so no `catalog.rules` change
 is needed.
 
 ## Verify
 
-Once Backstage has run a catalogue refresh you should see:
+Once Backstage has run a catalog refresh you should see:
 
 - A `Component` for each Promise bound to the portal, with a matching scaffolder Template on the
   **Create** page.
 - A `Component` for each Resource request, with **Manage** available on it.
 
-If entities never appear, check the catalogue repository actually contains
+If entities never appear, check the catalog repository actually contains
 `catalog-info.yaml` files under the two paths above, and that the GitHub credential can read that
 repository.
 

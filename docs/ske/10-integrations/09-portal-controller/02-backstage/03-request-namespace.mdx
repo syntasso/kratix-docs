@@ -14,15 +14,15 @@ into. A Backstage portal's `config.requestNamespace` setting lets you choose it 
 | `{from: form}` (default) | the namespace the developer types | Name, Namespace |
 | `{from: group}` | the namespace named after the Group the developer picks | Name, Group |
 | `{from: group, annotation: <key>}` | the namespace in that annotation on the picked Group | Name, Group |
-| `{from: fixed, namespace: <name>}` | that one namespace | Name |
+| `{from: fixed, namespace: <name>}` | the defined namespace | Name |
 
 The setting applies to every namespaced Promise on the portal. Cluster-scoped Promises are unaffected.
 
 ## Requirements
 
-- `@syntasso/plugin-ske-backend` `v0.24.0` or later, and `@syntasso/plugin-ske-frontend` `v0.22.0`
-  or later. Install the backend plugin before you change the setting: an older one cannot handle the
-  new request form.
+- `@syntasso/plugin-ske-backend` `v0.24.0` or later. Upgrade the backend plugin before you set
+  `requestNamespace`. Earlier versions of the backend plugin cannot handle the new request form.
+- `@syntasso/plugin-ske-frontend` `v0.22.0` or later.
 - Portal Controller `v0.6.1` or later.
 
 :::note
@@ -52,14 +52,18 @@ spec:
         # highlight-end
 ```
 
-An invalid value stops the portal's Promise-level sync pipeline, with a message naming the portal and
-the value. The portal's request forms stay as they were until you fix it.
+If `requestNamespace` is invalid, the portal's request forms are not updated. They keep their
+current fields until you correct the value. The Promise-level sync pipeline for the portal
+fails with a message that names the portal and the invalid value.
 
 ### From the Group's name
 
 With `from: group`, the Group field lists the Groups the developer is a direct member of
-(`spec.members` of the Group). The request goes to the namespace with the Group's name, so the name
-must be a valid namespace name: lowercase letters, numbers and hyphens, at most 63 characters.
+(`spec.members` of the Group). The request goes to the namespace with the same name as the
+Group, so each Group name must be a valid namespace name. It must:
+
+- use only lowercase letters, numbers and hyphens
+- be at most 63 characters long
 
 ```yaml
 apiVersion: backstage.io/v1alpha1
@@ -86,8 +90,8 @@ requestNamespace:
 A Group with `acme.io/k8s-namespace: payments` then sends its requests to `payments`, whatever the
 Group is called. A Group without the annotation is refused; its name is not used instead.
 
-Groups imported by an organisation provider, such as GitHub, LDAP or Microsoft Entra ID, usually need
-a small catalog processor to add the annotation.
+If you import Groups with an organisation provider, such as GitHub, LDAP or Microsoft Entra ID,
+the imported Groups may not have your annotation. You can add it with a small catalog processor.
 
 ### One namespace for every request
 
@@ -99,27 +103,36 @@ requestNamespace:
 
 ## Who can request and change a resource
 
-Each request records its Group in the resource's `kratix.io/backstage-group` annotation, and the
-Group becomes the owner of the resource in the Backstage catalogue. A request is refused, with a
-message saying why, when:
+Each request records its Group in the resource's `kratix.io/backstage-group` annotation.
+That Group becomes the resource's owner in the Backstage catalog.
+
+A request is refused, with a message saying why, when:
 
 - nobody is signed in (Group modes only);
 - the developer is not a member of the picked Group;
 - the namespace would not be a valid namespace name, or the Group lacks the annotation;
 - a resource with that name already exists in the namespace and belongs to another Group.
 
-Updating or deleting from the **Manage** tab keeps the resource in the namespace it already lives in,
-whatever the setting says now, and only members of its recorded Group can do it. Resources with no
-recorded Group, such as ones created before you changed the setting, behave as before. Groups that
-share a namespace, by name or by annotation value, can create and change each other's resources in it.
+Only members of a resource's recorded Group can update or delete it from the **Manage** tab.
+An update keeps the resource in its current namespace, even if you have since changed
+`requestNamespace`. Resources with no
+recorded Group, such as ones created before you changed the setting, behave as before.
+
+Groups that resolve to the same namespace can create and change each other's resources in it.
+This applies whether the Groups share the namespace through their names or through the same
+annotation value.
 
 :::warning Only accept Groups from sources you trust
 
-The Group check trusts the Backstage catalogue. If users can register their own catalogue locations,
-they can create a Group named after any namespace, or with any namespace in its annotation, list
-themselves as members, and then create and change resources in that namespace. Make sure Groups
-reach the catalogue only from sources the platform team controls, such as an organisation provider
-or catalogue locations only the platform team can change. Backstage's `catalog.rules` setting can
-limit which locations may add `Group` entities.
+The Group check trusts the Backstage catalog. If users can register their own catalog
+locations, they can:
+
+1. Create a Group named after any namespace, or with any namespace in its annotation.
+2. List themselves as members of that Group.
+3. Create and change resources in that namespace.
+
+To prevent this, only let Groups into the catalog from sources the platform team controls,
+such as an organisation provider or catalog locations that only the platform team can change.
+Use Backstage's `catalog.rules` setting to limit which locations can add `Group` entities.
 
 :::
