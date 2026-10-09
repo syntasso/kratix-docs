@@ -82,7 +82,7 @@ kubectl logs job/<SETUP_JOB> --namespace kratix-platform-system --container setu
 
 For Backstage, check mutually exclusive `destination.name`/`destination.spec` and
 `stateStore.name`/`stateStore.spec`, the StateStore kind and whether referenced objects exist.
-See [Backstage configuration errors](./backstage/intro#configuration-errors).
+See [Backstage publication troubleshooting](./backstage/generate-entities#troubleshooting).
 
 For Cortex, check the API URL, credential Secret's presence and required API permissions.
 A Secret's existence does not prove that its token works. Correct the source configuration,
@@ -125,7 +125,7 @@ kubectl logs deployment/ske-portal-controller --namespace kratix-platform-system
 For Backstage, inspect the final StateStore for `catalog-info.yaml`, then check the
 catalogue location or discovery rule covers that path and can authenticate. The controller
 writes files; it does not call Backstage to ingest them. See
-[output paths](./backstage/intro#what-gets-written-where) and
+[output paths](./backstage/generate-entities#what-gets-written-where) and
 [Configure Backstage](./backstage/configure-backstage).
 
 For Cortex, check the entity in the configured instance, the writer's API result and

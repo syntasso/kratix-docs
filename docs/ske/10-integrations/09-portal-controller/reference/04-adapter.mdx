@@ -94,7 +94,7 @@ read the parent object at `/kratix/input/object.yaml` and edit output files in p
 
 Backstage's writer publishes through a Kratix Work and Destination; Cortex's writer calls
 the Cortex API. Intermediate file paths are not the final StateStore paths that Backstage
-discovers. See [Backstage output paths](../backstage/intro#what-gets-written-where).
+discovers. See [Backstage output paths](../backstage/generate-entities#what-gets-written-where).
 
 Do not write a duplicate `/kratix/metadata/destination-selectors.yaml` entry from a configure
 container. The generator already selects the output directory, and the writer rejects
