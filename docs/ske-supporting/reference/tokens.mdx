@@ -1,0 +1,20 @@
+---
+title: Tokens
+description: Find the installation requirements and credentials for SKE images and release assets.
+slug: "/ske/reference/tokens"
+displayed_sidebar: skeSidebar
+---
+
+SKE uses separate credentials for private container images and private GitHub release assets.
+The canonical instructions are in [Requirements and access tokens](/ske/installing-ske/intro).
+
+## Syntasso registry token
+
+Use this credential to pull images from `ghcr.io/syntasso` as `syntasso-pkg`.
+See [registry token usage](/ske/installing-ske/intro#syntasso-registry-token), including
+local authentication and Kubernetes pull Secrets.
+
+## Enterprise releases token
+
+Use this credential as `GH_TOKEN` when downloading private assets from
+`syntasso/enterprise-releases`. See [Enterprise releases token usage](/ske/installing-ske/intro#enterprise-releases-token).

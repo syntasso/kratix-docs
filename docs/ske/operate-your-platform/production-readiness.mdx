@@ -1,0 +1,55 @@
+---
+title: Prepare SKE for production
+description: Review dependencies, credentials, observability and recovery before opening your platform to users.
+slug: "/ske/operations/production-readiness"
+sidebar_label: "Prepare SKE for production"
+sidebar_position: 2
+---
+
+Use this guide to review an installed SKE platform before developers depend on it.
+The result is a verified platform configuration and an operational runbook for your topology.
+
+## Prerequisites
+
+- SKE installed through the [Operator guide](/ske/installing-ske/install-with-operator).
+- An inventory of Destinations, StateStores, GitOps agents and optional integrations.
+- Access to workload status, events and logs, and a representative Promise for verification.
+
+## Review the platform
+
+1. Record explicit component versions and check [compatibility requirements](/ske/releases/compatibility).
+   Review the [platform architecture](/ske/reference/parts-of-a-platform) against your deployment.
+   Confirm worker GitOps agents and any platform GitOps agent required by Compound Promises or request ingestion.
+2. Verify image pull, release-storage and StateStore credentials. Record ownership, expiry and
+   rotation procedures for all referenced Secrets. Keep registry, release-storage and TLS Secrets
+   required by the Operator in `kratix-platform-system`.
+3. Confirm certificate renewal for webhooks and metrics. If cert-manager is disabled, supply the
+   [custom certificates](/ske/installing-ske/install-with-operator#custom-certs), including the
+   Platform Manager certificate where required. Check TLS trust for each external service.
+4. Review [resource requests and limits](/ske/installing-ske/install-with-operator#resources)
+   and scheduling settings against observed workload demand and cluster policies.
+   Check that policies admit workflow Jobs, integration Jobs and their images.
+5. Decide how to collect controller and workflow logs, Kubernetes events, metrics and traces.
+   Configure [Kratix observability](/main/reference/observability) and choose workflow Job retention
+   long enough to investigate failures. Assign owners for alerts and incident response.
+6. Configure [health checks](/ske/guides/healthchecks) where needed. Verify that records return
+   through your selected GitOps or [bucket HealthSource](/ske/reference/healthsource) path.
+7. Rehearse [backup and restore](/ske/installing-ske/backup-and-restore), including external
+   stores and provisioned service data. Record escalation channels from the [support policy](/ske/support).
+
+## Verify the developer journey
+
+Confirm platform Deployments are ready and the Operator reports the intended version.
+Install the representative Promise, submit a request in an authorised namespace and verify
+its workflow, scheduled output, Destination reconciliation and service behaviour.
+Confirm health records arrive if enabled.
+
+For [portal integrations](/ske/integrations/portal-integrations/intro), also verify discovery,
+permissions, request delivery and status with a developer account. Include approval in the check
+if requests require review. Record the evidence and owners in your runbook.
+
+## Troubleshooting and next steps
+
+Use [Troubleshoot SKE](/ske/operations/troubleshooting) when checks fail. Once the review passes,
+open access according to your platform's access policy and use the same representative journey
+after [upgrades](/ske/installing-ske/upgrades).

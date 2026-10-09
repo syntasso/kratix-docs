@@ -1,0 +1,290 @@
+---
+title: Generate Backstage entities
+description: Publish Promise and Resource catalogue files through Git or bucket storage
+keywords: [backstage, promise, catalog, destination, state store]
+slug: "/ske/integrations/portal-controller/backstage/generate-entities"
+sidebar_label: "Generate Backstage entities"
+sidebar_position: 2
+---
+
+Configure the Portal Controller to generate a Component and Template for a Promise.
+This guide ends with `catalog-info.yaml` in your chosen storage. Backstage discovery comes next.
+
+## Prerequisites
+
+- SKE and, for operator-managed installation, the SKE Operator meeting
+  [the controller requirements](/ske/integrations/portal-controller/installation#requirements).
+- `kubectl` access to the platform cluster.
+- An installed Promise with `spec.api`. The commands below use `postgresql`; replace it with your Promise name.
+- An existing Git repository or S3-compatible bucket, accessible from the platform and Backstage.
+- Credentials to write catalogue files. Backstage needs its own read access.
+
+The integration creates Kubernetes storage objects, not the repository or bucket itself.
+Keep catalogue files separate from manifests your GitOps agent applies.
+
+## 1. Install or reuse the controller
+
+Check for an existing installation:
+
+```bash
+kubectl get deployment ske-portal-controller -n kratix-platform-system
+```
+
+With the SKE Operator, also check `kubectl get skeintegrations` for the integration name.
+
+If absent, follow [Install and upgrade](/ske/integrations/portal-controller/installation), then return here.
+Keep its `SKEIntegration` manifest: the next step adds a portal to it.
+
+Without the SKE Operator, use the same `portals` entry in
+[`ske-portal-config`](/ske/integrations/portal-controller/reference/portal-configuration#configuration-ownership), not an `SKEIntegration`.
+Follow the standalone apply instructions below.
+
+## 2. Configure catalogue storage {#configuration}
+
+Choose one ownership model:
+
+| Configuration | Integration owns | You manage |
+| --- | --- | --- |
+| Define Destination and state store | Both Kubernetes objects | Repository or bucket, credentials |
+| Define Destination, reference state store | Destination | State store, backing storage, credentials |
+| Reference Destination | Neither | Destination, state store, backing storage, credentials |
+
+:::warning Preserve existing portal entries
+Edit the existing integration; do not create another. Preserve its name, version, other
+portal entries and deployment settings. Removing an entry deletes its managed storage objects.
+:::
+
+The complete example below uses the integration name `portal-controller` and portal name `prod`.
+For an existing installation, add only its `portals` entry to your manifest.
+
+### Define Destination and state store {#owning-a-destination}
+
+Create the credential Secret in `kratix-platform-system`. Save this as `catalog-credentials.yaml`,
+replacing both placeholders. Use a token with write access to the catalogue repository.
+
+:::warning Protect credentials
+Do not commit the populated Secret manifest. Use your organisation's secret-management workflow.
+:::
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backstage-catalog-repo
+  namespace: kratix-platform-system
+type: Opaque
+stringData:
+  username: "<GITHUB_USERNAME>"
+  password: "<GITHUB_TOKEN>"
+```
+
+```bash
+kubectl apply -f catalog-credentials.yaml
+```
+
+Save the integration as `portal-controller.yaml`. Replace `<GITHUB_ORG>` and `<CATALOG_REPOSITORY>`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.6.1
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        destination:
+          spec:
+            path: backstage/prod
+        stateStore:
+          kind: GitStateStore
+          spec:
+            url: https://github.com/<GITHUB_ORG>/<CATALOG_REPOSITORY>.git
+            branch: main
+            path: gitops
+            authMethod: basicAuth
+            secretRef:
+              name: backstage-catalog-repo
+              namespace: kratix-platform-system
+```
+
+Setup creates a Destination and GitStateStore named `portal-backstage-prod`.
+The catalogue prefix is `gitops/backstage/prod`: state store path, then Destination path.
+Other Git authentication options are in the [GitStateStore reference](/main/reference/statestore/gitstatestore).
+
+<details>
+<summary>Use a bucket instead of Git</summary>
+
+For a bucket, replace only `config.stateStore` in the integration above with this fragment.
+Create the bucket first; replace `<BUCKET_NAME>` and use its endpoint.
+
+```yaml
+stateStore:
+  kind: BucketStateStore
+  spec:
+    bucketName: "<BUCKET_NAME>"
+    endpoint: s3.eu-west-2.amazonaws.com
+    path: gitops
+    authMethod: accessKey
+    secretRef:
+      name: backstage-catalog-bucket
+      namespace: kratix-platform-system
+```
+
+Use this Secret instead of the Git credential Secret:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backstage-catalog-bucket
+  namespace: kratix-platform-system
+type: Opaque
+stringData:
+  accessKeyID: "<ACCESS_KEY_ID>"
+  secretAccessKey: "<SECRET_ACCESS_KEY>"
+```
+
+Save it as `catalog-credentials.yaml` and apply it before the integration.
+The catalogue prefix remains `gitops/backstage/prod`.
+See [BucketStateStore](/main/reference/statestore/bucketstatestore) for other authentication options.
+Backstage needs a discovery provider that supports your bucket service.
+
+</details>
+
+### Reuse a state store {#referencing-an-existing-state-store}
+
+Replace only the `config` block in the complete integration above with this fragment.
+Replace `<STATE_STORE_NAME>`; set `kind` to its actual kind.
+
+```yaml
+config:
+  destination:
+    spec:
+      path: backstage/prod
+  stateStore:
+    kind: GitStateStore
+    name: "<STATE_STORE_NAME>"
+```
+
+Setup creates the Destination `portal-backstage-prod`, leaving the existing state store under
+your management. Its path precedes `backstage/prod` in the output prefix.
+
+### Reuse a Destination {#adopting-an-existing-destination}
+
+Replace only the `config` block in the complete integration above with this fragment:
+
+```yaml
+config:
+  destination:
+    name: "<DESTINATION_NAME>"
+```
+
+Setup creates neither object. The Destination must already exist and reference a working state store.
+Its own path and the state store's path determine the output prefix. Do not include `stateStore` here.
+
+The controller routes using the Destination's labels, not its name. Give it a non-empty label set
+that selects only that Destination. For example, add a unique catalogue label:
+
+```bash
+kubectl label destination <DESTINATION_NAME> backstage-catalog=prod
+kubectl get destinations -l backstage-catalog=prod
+```
+
+The second command must return only your chosen Destination. Preserve the label in its source
+manifest if GitOps manages it. Set it before binding the Promise.
+Without labels, routing falls back to `environment: backstage` and can select different storage.
+
+### Apply the configuration
+
+**With the SKE Operator**, apply your edited integration:
+
+```bash
+kubectl apply -f portal-controller.yaml
+```
+
+**Without the operator**, copy your selected portal entry from `spec.portals` into the
+`data.connections.yaml` list in your existing ConfigMap manifest. There is no `portals:` wrapper
+inside that value. Preserve other entries and save it as `portal-config.yaml`.
+See the [complete ConfigMap shape](/ske/integrations/portal-controller/reference/portal-configuration#configuration-ownership).
+
+```bash
+kubectl apply -f portal-config.yaml
+```
+
+For either installation, inspect setup events:
+
+```bash
+kubectl describe configmap ske-portal-config -n kratix-platform-system
+```
+
+Check for `PortalSetupFailed` events. For an owned Destination, verify it exists:
+
+```bash
+kubectl get destination portal-backstage-prod -o yaml
+```
+
+For a reused Destination, inspect its actual name instead.
+
+## 3. Label your Promise
+
+Bind the Promise to the `prod` instance:
+
+```bash
+kubectl label promise postgresql kratix.io/portal-backstage.prod=true
+```
+
+If the Promise already has a Backstage binding, update that label in its source manifest
+instead of adding a second binding. Keep the label in Git if GitOps manages the Promise.
+
+Check its conditions:
+
+```bash
+kubectl get promise postgresql -o jsonpath='{range .status.conditions[*]}{.type}{"\t"}{.status}{"\t"}{.reason}{"\n"}{end}'
+```
+
+Look for `PortalBindingReady=True` and `BackstagePortalSynced=True` (`EntitySynced`).
+These confirm binding and the sync Job; verify storage separately below.
+
+## 4. Verify generated files {#what-gets-written-where}
+
+Inspect your repository's configured branch or list the bucket objects. For the owned examples,
+find `catalog-info.yaml` under:
+
+```text
+gitops/backstage/prod/dependencies/postgresql/portal-backstage-gen/<id>/catalog-info.yaml
+```
+
+The file contains two YAML documents: a Promise `Component` and its scaffolder `Template`.
+The Template's form comes from the Promise API. Do not edit generated files directly;
+the next sync can replace them.
+
+Resource requests produce their own Components under:
+
+```text
+gitops/backstage/prod/resources/kratix-platform-system/postgresql/<resource-name>/portal-backstage-gen/<id>/catalog-info.yaml
+```
+
+The namespace segment is the Work namespace, not the request namespace.
+With reused storage, substitute its actual prefix. Resource files appear after requests exist;
+they are not required for this first checkpoint.
+
+Record the repository or bucket, branch where applicable, and prefix. Use those same coordinates
+for Backstage discovery in the next guide.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Destination absent | `PortalSetupFailed` events on `ske-portal-config`; storage `name`/`spec` choices and credential references |
+| Binding not ready | Instance name and label; [binding conditions](/ske/integrations/portal-controller/reference/portal-configuration#binding-status) |
+| Sync fails | [Sync Job diagnostics](/ske/integrations/portal-controller/troubleshooting#a-sync-job-fails-or-never-starts); Promise API and image access |
+| Sync succeeds but files absent | Destination readiness, state store credentials, branch and combined path |
+| Files exist but catalogue empty | Backstage discovery provider and its independent read credentials |
+
+## Next steps
+
+[Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage) to discover these files and install the SKE plugins.

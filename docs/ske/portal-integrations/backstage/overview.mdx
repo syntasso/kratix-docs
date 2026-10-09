@@ -1,0 +1,81 @@
+---
+title: Integrate SKE with Backstage
+description: Generate catalogue entities, configure Backstage and send resource requests to Kratix
+keywords: [portal, backstage, ske, controller, destination, state store]
+slug: "/ske/integrations/portal-controller/backstage/intro"
+sidebar_label: "Overview"
+sidebar_position: 1
+---
+
+Publish your Promises in Backstage so developers can discover, request and manage resources.
+
+The integration has two directions:
+
+```text
+Promise API → Portal Controller → Git or bucket → Backstage catalogue and Templates
+Developer request → SKE backend plugin → Kubernetes API or GitOps → Kratix
+```
+
+The Portal Controller generates catalogue files. Backstage reads them; it does not receive
+them through its API. The two SKE plugin packages provide request actions and resource pages.
+
+## Set up the integration
+
+1. [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities). Install or reuse the controller,
+   choose catalogue storage, label a Promise and verify its files.
+2. [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage). Install the plugins and configure discovery.
+   Verify the Promise Component and its Template.
+3. [Send resource requests to Kratix](/ske/integrations/portal-controller/backstage/send-resource-requests).
+   Configure transport, approval and namespaces. Create, update and delete a resource.
+
+Catalogue storage and request storage are separate choices. Git-based requests need a GitOps
+agent to apply them to the platform.
+
+## Customise your integration
+
+- [Customise entities and request templates](/ske/integrations/portal-controller/backstage/customising-the-request-template).
+- Extend the UI with the [frontend plugin API](/ske/integrations/portal-controller/backstage/frontend-plugin).
+- Look up actions and configuration in the [backend plugin API](/ske/integrations/portal-controller/backstage/backend-plugin).
+
+:::info Existing Backstage Controller installation
+Follow [the migration guide](/ske/integrations/portal-controller/backstage/migrating-from-backstage) instead of creating a second integration.
+:::
+
+For local plugin development, use the [development image](/ske/integrations/portal-controller/backstage/development-image).
+To understand generated files and pipeline stages, see the [adapter walkthrough](/ske/integrations/portal-controller/backstage/pipeline-stage).
+
+<details>
+<summary>Storage configuration links</summary>
+
+## Configuration
+
+Follow [the publication guide](/ske/integrations/portal-controller/backstage/generate-entities#configuration) for storage configuration.
+[Request configuration](/ske/integrations/portal-controller/backstage/send-resource-requests) covers approval and namespaces.
+
+### Owning a Destination
+
+[Create the Destination and state store](/ske/integrations/portal-controller/backstage/generate-entities#owning-a-destination) through the integration.
+
+### Referencing an existing state store
+
+[Reuse a state store](/ske/integrations/portal-controller/backstage/generate-entities#referencing-an-existing-state-store) and let the integration own the Destination.
+
+### Adopting an existing Destination
+
+[Reuse a Destination](/ske/integrations/portal-controller/backstage/generate-entities#adopting-an-existing-destination) you already manage.
+
+## Configuration errors
+
+See [publication troubleshooting](/ske/integrations/portal-controller/backstage/generate-entities#troubleshooting) and
+the [configuration reference](/ske/integrations/portal-controller/reference/portal-configuration).
+
+## What gets written where
+
+See [generated file paths](/ske/integrations/portal-controller/backstage/generate-entities#what-gets-written-where).
+
+
+</details>
+
+## Next steps
+
+Start with [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities).

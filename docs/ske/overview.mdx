@@ -1,0 +1,57 @@
+---
+title: Syntasso Kratix Enterprise (SKE)
+description: Install, operate and extend your platform with Syntasso Kratix Enterprise.
+keywords: [ske docs, kratix enterprise]
+slug: "/ske/"
+sidebar_label: "Overview"
+sidebar_position: 1
+---
+
+# Introduction
+
+Syntasso Kratix Enterprise (SKE) is the supported enterprise distribution of Kratix.
+It adds platform lifecycle management, Promise testing and upgrades, resource health checks,
+a GUI and integrations. The [core Kratix documentation](/) covers Promises,
+workflows, Destinations and StateStores shared with open-source Kratix.
+
+## Install SKE
+
+Start with [requirements and access tokens](/ske/installing-ske/intro), then
+[install SKE with the Operator](/ske/installing-ske/install-with-operator).
+There are separate guides for [air-gapped environments](/ske/installing-ske/air-gapped)
+and [migration from open-source Kratix](/ske/installing-ske/migrating-from-kratix).
+
+## Build and evolve Promises
+
+- [Build and test a database Promise](/ske/guides/promise-development).
+- [Test Promise pipelines](/ske/promise-testing-framework/intro).
+- [Create a Promise from a Terraform module](/ske/guides/promise-from-tf-module).
+- [Schedule resources to Terraform workspaces](/ske/guides/scheduling-terraform-workspaces).
+- [Roll out Promise upgrades](/ske/guides/promise-upgrades).
+
+## Operate your platform
+
+Understand the [platform architecture](/ske/reference/parts-of-a-platform) and
+[prepare SKE for production](/ske/operations/production-readiness).
+Use the guides for [upgrades](/ske/installing-ske/upgrades),
+[backup and restore](/ske/installing-ske/backup-and-restore),
+[health checks](/ske/guides/healthchecks) and the [GUI](/ske/guides/ske-gui).
+For diagnostic checks, see [Troubleshoot SKE](/ske/operations/troubleshooting).
+
+## Integrate developer interfaces and tools
+
+Choose a developer portal in [Portal integrations](/ske/integrations/portal-integrations/intro).
+Backstage and Cortex use the shared Portal Controller; Port uses its own controller.
+For infrastructure tooling, see [Terraform Enterprise and HCP Terraform](/ske/integrations/tfe).
+
+:::info Preview features
+[Port](/ske/integrations/port), [MCP Server](/ske/integrations/mcp) and
+[SKE Lift](/ske/integrations/skelift) are Preview features. Review the
+[Preview support policy](/ske/support#preview-features) before adopting them.
+:::
+
+## Look up APIs, releases and support
+
+The [API and CLI index](/ske/reference) links to canonical definitions.
+Check [releases](/ske/releases) and [component compatibility](/ske/releases/compatibility)
+before upgrading. Your [support policy](/ske/support) defines support channels and service levels.
