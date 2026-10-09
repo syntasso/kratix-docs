@@ -58,8 +58,9 @@ generate  →  [configure …]  →  writer
 
 How the writer delivers depends on the portal type. A Backstage portal writes the documents
 through a Kratix Destination backed by a Git or bucket StateStore. Backstage must be configured
-to discover those documents; the controller never calls Backstage itself. A Cortex portal calls the Cortex API directly,
-and additionally runs a one-time setup Job and a long-lived status exporter. See
+to discover those documents; the controller never calls Backstage itself. A Cortex portal calls the Cortex API directly
+and runs a long-lived status exporter. Both portal types run a setup Job when their connection
+is configured. See
 [Backstage](./backstage/intro) and [Cortex](./cortex/intro) for the detail of each.
 
 ## Where developer requests go

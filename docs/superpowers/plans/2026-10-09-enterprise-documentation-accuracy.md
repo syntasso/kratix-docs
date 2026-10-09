@@ -47,7 +47,7 @@ Only Tasks 1 and 2 below are the first executable milestone. Later milestones re
 - [x] Fix supported-version references and upgrade warnings without rewriting unrelated release history.
 - [x] Remove the current Cortex prerequisite's dependence on deprecated controller setup.
 - [x] Correct Git-only architecture wording and restore the distinction between destination resources and backing storage.
-- [ ] Build and review this first patch. Record remaining runtime questions rather than guessing.
+- [x] Build and review this first patch. Record remaining runtime questions rather than guessing.
 
 ### Milestone 2: Establish canonical controller pages
 
@@ -166,11 +166,22 @@ Paths below are relative to `docs/ske`. Source repositories are read-only eviden
 
 **Interfaces:** Consumes Task 1's current release profile. Produces consistent current behaviour and a non-deprecated Cortex prerequisite path; no navigation changes.
 
-- [ ] **Step 1: Read released behaviour.** In the `v0.6.1` controller source, inspect per-portal fingerprints, global workload digests, missing-config condition names, exporter ownership, and pending Cortex entity generation. Check the existing tests protecting sibling setup Jobs. Record what is evidenced versus not runtime-tested here.
-- [ ] **Step 2: Correct architecture and request wording.** Explain Backstage output through a Destination backed by Git or a bucket; distinguish immediate submissions from backend Kubernetes/Git transport. Describe Port as a developer portal with a separate controller.
-- [ ] **Step 3: Correct Cortex setup and ownership.** Explain that changing one portal affects its setup only, while workload template changes can affect all Jobs. Name the actual generated ConfigMap ownership and retain the portal-removal lifecycle description.
-- [ ] **Step 4: Make prerequisites current.** Replace the deprecated setup cross-link with a short current workspace/Git preparation section linking primary Cortex integration/token docs and current platform GitOps guides. Do not copy deprecated controller installation commands.
-- [ ] **Step 5: Document durable pending behaviour.** Describe the pending request entity and workflow result link from `v0.6.1`, without promising provisioning success or immediate reconciliation.
-- [ ] **Step 6: Correct binding diagnostics.** Distinguish the released missing-configuration condition from the invalid-configuration warning event and explain the configuration object each refers to, including the operatorless route.
-- [ ] **Step 7: Verify and review.** Run the full build; inspect rendered current Cortex and architecture pages. Expected: exit 0, no broken links, source-consistent behaviour and no deprecated prerequisite on the current Cortex route.
-- [ ] **Step 8: Record the initial milestone.** Commit the coherent corrections if permitted, update the ledger and task checkboxes, and obtain a fresh review of this milestone. Later programme milestones remain unchecked.
+- [x] **Step 1: Read released behaviour.** In the `v0.6.1` controller source, inspect per-portal fingerprints, global workload digests, missing-config condition names, exporter ownership, and pending Cortex entity generation. Check the existing tests protecting sibling setup Jobs. Record what is evidenced versus not runtime-tested here.
+- [x] **Step 2: Correct architecture and request wording.** Explain Backstage output through a Destination backed by Git or a bucket; distinguish immediate submissions from backend Kubernetes/Git transport. Describe Port as a developer portal with a separate controller.
+- [x] **Step 3: Correct Cortex setup and ownership.** Explain that changing one portal affects its setup only, while workload template changes can affect all Jobs. Name the actual generated ConfigMap ownership and retain the portal-removal lifecycle description.
+- [x] **Step 4: Make prerequisites current.** Replace the deprecated setup cross-link with a short current workspace/Git preparation section linking primary Cortex integration/token docs and current platform GitOps guides. Do not copy deprecated controller installation commands.
+- [x] **Step 5: Document durable pending behaviour.** Describe the pending request entity and workflow result link from `v0.6.1`, without promising provisioning success or immediate reconciliation.
+- [x] **Step 6: Correct binding diagnostics.** Distinguish the released missing-configuration condition from the invalid-configuration warning event and explain the configuration object each refers to, including the operatorless route.
+- [x] **Step 7: Verify and review.** Run the full build; inspect rendered current Cortex and architecture pages. Expected: exit 0, no broken links, source-consistent behaviour and no deprecated prerequisite on the current Cortex route.
+- [x] **Step 8: Record the initial milestone.** Commit the coherent corrections if permitted, update the ledger and task checkboxes, and obtain a fresh review of this milestone. Later programme milestones remain unchecked.
+
+## Initial milestone handover
+
+Milestone 1 is implemented on `codex/enterprise-docs-journeys`. The complete site build
+passes. A fresh review checked the accuracy changes against released source; its two
+retained setup/diagnostic inaccuracies were corrected in the final pass. No sidebar
+changes, deployment smoke tests, GitHub publication or package changes are included.
+
+The missing-configuration condition and invalid-configuration event are documented
+separately, correcting an ambiguity in the original Task 2 brief. Later milestones,
+including complete operatorless installation and bucket discovery, remain open.
