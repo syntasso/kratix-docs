@@ -19,6 +19,21 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.7.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.7.0/) (2026-10-09)
+
+Released via the SKE Operator Helm Chart [version 0.99.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.99.0/)
+
+#### Bug Fixes
+
+* [Cortex](/ske/integrations/portal-controller/cortex/intro) portals now sync Promises that have
+  int-or-string fields (`x-kubernetes-int-or-string`). These fields show as a text input in the
+  generated workflows. Before, the workflows failed to build and nothing was synced.
+* Deleting a Promise synced to Cortex no longer gets stuck.
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.6.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.6.1/) (2026-10-06)
 
 Released via the SKE Operator Helm Chart [version 0.97.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.97.0/)

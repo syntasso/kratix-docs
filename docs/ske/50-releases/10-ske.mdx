@@ -19,6 +19,23 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.61.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.61.0/) (2026-10-09)
+
+#### Fixes
+
+* Deleting a resource whose Promise has no delete workflow now waits for any running workflow
+  Jobs to finish. Before, the delete could leave an orphaned Work behind. A Job that never
+  finishes will now hold the delete. For more information, see
+  [Troubleshooting](/main/troubleshooting#deletion-is-waiting-for-workflow-jobs-to-finish).
+* Resource workflows of different Promise versions now each get their own service account,
+  Roles and bindings. Before, workflows from different versions could revoke each other's
+  permissions when they ran at the same time. For more information, see the
+  [Workflows](/main/reference/workflows#role-based-access-control-rbac) documentation.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.60.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.60.0/) (2026-09-29)
 
 #### Features

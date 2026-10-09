@@ -236,17 +236,12 @@ and try to resolve the issue. If you are able to resolve the issue you can
 manually remove the finalizer from the resource by editing the resource and
 removing the finalizer from the `.metadata.finalizers`. Kratix will then
 continue to delete and work its way through the remaining finalizers.
+Before you remove the `kratix.io/delete-workflows` finalizer, read the warning
+in [Deletion is waiting for workflow Jobs to finish](#deletion-is-waiting-for-workflow-jobs-to-finish).
 
-1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
-   see whether the delete Workflow is failing and fix any issues preventing it from
-   completing.
-
-   ```
-   kubectl get pods --selector kratix.io/resource-name=<resource-request>
-   ```
-
-   Once the issue is fixed, you can trigger the delete Workflow to re-run by triggering a
-   [manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation).
+1. If the `kratix.io/delete-workflows` finalizer is not being removed, Kratix is
+   waiting for a workflow Job for the resource request to finish. See
+   [Deletion is waiting for workflow Jobs to finish](#deletion-is-waiting-for-workflow-jobs-to-finish).
 
 1. If the `kratix.io/work-cleanup` finalizer is not being removed, check to see
    whether the `Work`/`WorkPlacement` resources are failing to be deleted
@@ -309,6 +304,8 @@ and try to resolve the issue. If you are able to resolve the issue you can
 manually remove the finalizer from the resource by editing the resource and
 removing the finalizer from the `.metadata.finalizers`. Kratix will then
 continue to delete and work its way through the remaining finalizers.
+Before you remove the `kratix.io/delete-workflows` finalizer, read the warning
+in [Deletion is waiting for workflow Jobs to finish](#deletion-is-waiting-for-workflow-jobs-to-finish).
 
 When investigating a Promise deletion issue it beneficial to have the logs of the
 Kratix operator open to see if any errors are being logged
@@ -317,16 +314,9 @@ Kratix operator open to see if any errors are being logged
 kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers\.promise"
 ```
 
-1. If the `kratix.io/delete-workflows` finalizer is not being removed, check to
-   see whether the delete Workflow is failing and fix any issues preventing it from
-   completing.
-
-   ```bash
-   kubectl -n kratix-platform-system get pods --selector kratix.io/promise-name=<promise-name> --selector kratix.io/work-action=delete
-   ```
-
-   Once the issue is fixed, you can trigger the delete Workflow to re-run by triggering a
-   [manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation).
+1. If the `kratix.io/delete-workflows` finalizer is not being removed, Kratix is
+   waiting for a workflow Job for the Promise to finish. See
+   [Deletion is waiting for workflow Jobs to finish](#deletion-is-waiting-for-workflow-jobs-to-finish).
 
 1. If the `kratix.io/workflows-cleanup` finalizer is not being removed, check to
    see whether the Workflows are failing to be deleted and manually cleanup any that
@@ -359,6 +349,64 @@ kubectl -n kratix-platform-system logs <pod-name> -c manager | grep "controllers
    ```bash
    kubectl get crd --selector kratix.io/promise-name=<promise-name>
    ```
+
+### Deletion is waiting for workflow Jobs to finish
+
+If a resource request or Promise keeps the `kratix.io/delete-workflows`
+finalizer, Kratix is waiting for one of its workflow Jobs to finish. This
+happens in two cases:
+
+- The delete Workflow is failing or has not finished.
+- There's a workflow Job for the resource request or Promise in progress.
+
+List the workflow Jobs and Pods for the resource request or Promise being
+deleted.
+
+For a resource request:
+
+```bash
+kubectl get jobs,pods --namespace <PIPELINE_NAMESPACE> \
+  --selector kratix.io/resource-name=<resource-request>
+```
+
+`<PIPELINE_NAMESPACE>` is the namespace of the resource request, unless the
+Promise sets
+[`pipelineNamespace`](/main/reference/workflows#workflows-namespace). In that
+case, use the `pipelineNamespace` value, and add
+`kratix.io/resource-namespace=<resource-request-namespace>` to the selector to
+exclude resource requests with the same name in other namespaces.
+
+For a Promise:
+
+```bash
+kubectl get jobs,pods --namespace <PIPELINE_NAMESPACE> \
+  --selector kratix.io/promise-name=<promise-name>,kratix.io/workflow-type=promise
+```
+
+`<PIPELINE_NAMESPACE>` is `kratix-platform-system`, unless the Promise sets
+[`pipelineNamespace`](/main/reference/workflows#workflows-namespace). In that
+case, use the `pipelineNamespace` value.
+
+A Job that never finishes, for example one that cannot pull its image or waits
+on an external system, keeps the resource request or Promise in a `Terminating`
+state indefinitely.
+Fix the issue so that the Job completes, or delete the Job.
+
+If the delete Workflow failed, you can re-run it once the issue is fixed by
+triggering a manual reconciliation for the
+[resource request](/main/reference/resources/reconciliation-labels#manual-reconciliation)
+or the
+[Promise](/main/reference/promises/reconciliation-labels#manual-reconciliation).
+
+:::warning
+
+Do not remove the `kratix.io/delete-workflows` finalizer while a workflow Job
+for the resource request or Promise is still running. Kratix will delete the
+resource request's or Promise's Works, and the running Job could write a new
+Work that Kratix never cleans up. Stop or delete
+the running Job first, and only then remove the finalizer.
+
+:::
 
 ### Workflow Pod isn't appearing
 
