@@ -1,0 +1,416 @@
+---
+title: Configure Backstage
+description: Installing the SKE plugins and configuring Backstage to discover Kratix entities
+keywords: [portal, backstage, plugin, catalog, discovery, ske mode]
+slug: "/ske/integrations/portal-controller/backstage/configure-backstage"
+sidebar_label: "Configure Backstage"
+sidebar_position: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+Install the SKE plugins and configure Backstage to discover the files produced by the
+[publication guide](/ske/integrations/portal-controller/backstage/generate-entities). This guide covers GitHub and AWS S3 discovery.
+
+## Prerequisites
+
+- Generated `catalog-info.yaml` files in a Git repository or bucket, and read credentials for Backstage.
+- Access to edit your Backstage app and its configuration, or a hosted service that supports both SKE plugins and the required discovery provider.
+
+- **Backstage app running v1.40 or above**: The current SKE plugin release documents compatibility with v1.55.0. See the [plugin releases](/ske/releases/backstage) for the compatibility statement for your version. If you do not have a Backstage app, refer to the [Backstage official
+documentation](https://backstage.io/docs/getting-started) for instructions on how to create a Backstage app.
+
+- **Node.js 22+**: Starting from Backstage v1.50, Node.js 22 or higher is required due to native module dependencies. Ensure your build environment and Docker images use Node 22+.
+
+- **`NODE_OPTIONS` environment variable**: Set the following when starting your Backstage app:
+
+  ```bash
+  export NODE_OPTIONS=--no-node-snapshot
+  ```
+
+## Accessing the private npm registry {#local-development}
+
+The SKE plugins are distributed through a private npm registry. Please follow the steps below to enable access to it.
+
+<Tabs> <TabItem value="local" label="For local development">
+
+To access the private npm registry on your local machine, you will need npm config in a local `~/.npmrc` file in your home directory. Create this file if it doesn't already exist,
+and add the following content:
+
+```bash
+# replace <YOUR_TOKEN_HERE> with the provided Syntasso registry token
+@syntasso:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken="<YOUR_TOKEN_HERE>"
+always-auth=true
+```
+
+:::info
+
+For Yarn 3+, use the following command to set a local `.yarnrc.yml` file:
+
+```bash
+yarn config set npmScopes --json '{"syntasso": {"npmAlwaysAuth": true, "npmAuthToken": "<YOUR TOKEN HERE>", "npmRegistryServer": "https://npm.pkg.github.com"}}'
+```
+
+:::
+
+  </TabItem> <TabItem value="docker" label="For Docker">
+
+For Yarn 3+, keep the registry scope in your app's `.yarnrc.yml`:
+
+```yaml
+npmScopes:
+  syntasso:
+    npmAlwaysAuth: true
+    npmRegistryServer: https://npm.pkg.github.com
+    npmAuthToken: ${SYN_REGISTRY_TOKEN}
+```
+
+Provide the token to the dependency-install layer as a BuildKit secret. Adapt the existing
+`RUN yarn install` in your Dockerfile, preserving the app's cache mounts and install arguments:
+
+```dockerfile
+RUN --mount=type=secret,id=syntasso_token,env=SYN_REGISTRY_TOKEN \
+    yarn install --immutable
+```
+
+Build with the token exported in your shell:
+
+```bash
+export SYN_REGISTRY_TOKEN=<YOUR_TOKEN>
+docker build --secret id=syntasso_token,env=SYN_REGISTRY_TOKEN -f packages/backend/Dockerfile .
+```
+
+For Yarn 1, mount your authenticated `.npmrc` at the install layer instead:
+
+```dockerfile
+RUN --mount=type=secret,id=npmrc,target=/app/.npmrc,uid=1000,gid=1000 \
+    yarn install --frozen-lockfile --production --network-timeout 300000
+```
+
+Pass `--secret id=npmrc,src=$HOME/.npmrc` to your existing Docker build command.
+Keep registry tokens out of Docker build arguments and image layers.
+
+  </TabItem> </Tabs>
+
+## Install the plugins
+
+Two packages, one for each half of Backstage:
+
+```bash
+yarn add @syntasso/plugin-ske-backend@0.24.0 --cwd packages/backend
+yarn add @syntasso/plugin-ske-frontend@0.22.0 @backstage/plugin-permission-react --cwd packages/app
+```
+
+The frontend package requires the host app to provide `@backstage/plugin-catalog`,
+`@backstage/plugin-catalog-graph`, `@backstage/plugin-catalog-react`,
+`@backstage/plugin-scaffolder`, `@backstage/plugin-scaffolder-react` and
+`@backstage/plugin-permission-react`. Check peer dependency warnings during installation.
+
+:::important
+These instructions use `@syntasso/plugin-ske-backend` `v0.24.0` and
+`@syntasso/plugin-ske-frontend` `v0.22.0`, matching the current
+[Portal Controller requirements](/ske/integrations/portal-controller/installation#requirements). Install or upgrade
+the plugins before the controller so generated Templates do not call missing actions.
+:::
+
+:::warning Spotify Portal for Backstage
+If you are using Spotify Portal for Backstage, publish the plugins to your cloud instance before
+completing the install. See [hosted and restricted installations](#hosted-and-restricted-installations).
+:::
+
+### Backend
+
+Add the plugin in `packages/backend/src/index.ts`:
+
+```ts
+// SKE plugin
+backend.add(import('@syntasso/plugin-ske-backend'));
+```
+
+That single line registers the scaffolder actions the generated Templates use, the routes the
+frontend calls, and the catalogue provider that surfaces pending requests.
+
+The plugin creates one database table and runs its migrations at startup. If you run more than one
+Backstage replica, use PostgreSQL rather than SQLite.
+
+### Frontend {#update-the-entitypage}
+
+Choose the instructions for your app's frontend system. Do not apply the legacy
+`EntityPage.tsx` changes to a new-frontend app.
+
+#### New frontend system
+
+If your Backstage app uses the [new frontend system](https://backstage.io/docs/frontend-system/) (identified by `createApp` from `@backstage/frontend-defaults`), the plugin is automatically discovered; no
+changes to `EntityPage.tsx` are needed. This is also the case if you are using Spotify Portal for Backstage.
+
+The plugin registers the following extensions via its `alpha` entry point:
+
+- Promise Status: the Status tab for Promise entities.
+- Resource Status and Manage: the Status and Manage tabs for Resource entities.
+- Pending Request Status: approval and provisioning state before a resource exists.
+
+To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
+
+Then add the plugin's `scaffolderModuleResourceRequestCopy` module to your app's `features` in
+`packages/app/src/App.tsx`:
+
+```ts
+import { scaffolderModuleResourceRequestCopy } from '@syntasso/plugin-ske-frontend/alpha';
+
+const app = createApp({
+  features: [scaffolderModuleResourceRequestCopy /* , ... */],
+});
+```
+
+This makes the scaffolder task page describe a request as creating, updating or deleting the
+resource. Without it the page shows the Template's own step names, which are the same for a create
+and an update. Backstage cannot register the module for you because it replaces the scaffolder
+plugin's API. See [`scaffolderModuleResourceRequestCopy`](/ske/integrations/portal-controller/backstage/frontend-plugin#resource-request-copy).
+
+:::note Hosted Backstage
+On a host where you cannot edit the app, such as Roadie or Spotify Portal for Backstage, the module
+cannot be added. The task page then shows the Template's own step names, "Submitting your Postgresql
+request" and "Registering your Postgresql request in the catalog", which do not say whether the run
+creates or updates the resource.
+:::
+
+#### Legacy frontend system
+
+If `App.tsx` imports `createApp` from `@backstage/app-defaults`, your app uses the legacy system. In
+`packages/app/src/components/catalog/EntityPage.tsx`, import the entity pages:
+
+```tsx
+import {
+  KratixPendingRequestEntityPage,
+  KratixPromiseEntityPage,
+  KratixResourceEntityPage,
+  isKratixType,
+} from '@syntasso/plugin-ske-frontend';
+```
+
+Then add three cases to the existing `componentPage` switch, **before** the default case:
+
+```tsx
+<EntitySwitch.Case if={isKratixType('promise')}>
+  <KratixPromiseEntityPage>{entityWarningContent}</KratixPromiseEntityPage>
+</EntitySwitch.Case>
+
+<EntitySwitch.Case if={isKratixType('pending-request')}>
+  <KratixPendingRequestEntityPage>{entityWarningContent}</KratixPendingRequestEntityPage>
+</EntitySwitch.Case>
+
+<EntitySwitch.Case if={isKratixType('resource')}>
+  <KratixResourceEntityPage>
+    {entityWarningContent}
+  </KratixResourceEntityPage>
+</EntitySwitch.Case>
+```
+
+The matcher selects Promise and Resource Components using either the `kratix.io/type`
+annotation or `spec.type`. For example, a Resource can use `kratix.io/type: resource` or
+`spec.type: kratix-resource`.
+
+:::warning
+
+Add `kratix.io/type: promise` to every Promise Component. Although the route matcher
+recognises `spec.type: kratix-promise`, the page also needs the annotation when it loads
+Promise data. Without it, the Promise Overview does not load. It shows a
+missing-annotation message for Resource fields instead of the Promise details.
+
+:::
+
+This gives Promise, Resource and pending request entities their Status pages, and Resources a
+**Manage** tab for updating and deleting the resource. For the full list of entity pages,
+components, annotations, and behaviours, see the
+[SKE Frontend Plugin reference](/ske/integrations/portal-controller/backstage/frontend-plugin).
+
+## Hosted and restricted installations
+
+For a hosted app, use its plugin installer and confirm that it supports both the frontend and
+backend packages, plus your discovery provider. App-level API overrides require access to app
+source; hosted services may not expose it.
+
+For an air-gapped app, download the pinned packages on a connected machine with registry access:
+
+```bash
+npm pack @syntasso/plugin-ske-backend@0.24.0
+npm pack @syntasso/plugin-ske-frontend@0.22.0
+```
+
+Transfer the tarballs and their required dependencies to your internal registry, then install
+from that registry. Keep the package names and versions unchanged. The app build also needs
+access to its Backstage dependencies. For Spotify Portal, see the
+[plugin publishing steps](/ske/integrations/portal-controller/backstage/air-gapped-plugins#spotify-portal-for-backstage).
+
+## Give Backstage access to GitHub
+
+```yaml
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+```
+
+The credential needs:
+
+- **Contents: read** on the catalogue repository the Portal Controller writes to.
+- **Pull requests: write** on the repositories developers raise requests against, for
+  [pull-request mode](/ske/integrations/portal-controller/backstage/send-resource-requests#pull-request-mode).
+- **Contents: write** on the requests repository, if you use `ske.mode: gitops` or `hybrid`.
+
+:::warning
+Backstage never writes the catalogue repository, Kratix does, using the state store's own
+credential. But Backstage does read it. A token scoped only to the request repositories gives you
+working submissions and a silently empty catalogue.
+:::
+
+## Discover the generated entities
+
+Choose the provider matching your catalogue storage. The SKE backend's pending request provider
+is registered by the SKE plugin; it does not discover files from your state store.
+
+### GitHub discovery
+
+Install and register the [GitHub discovery provider](https://backstage.io/docs/integrations/github/discovery/):
+
+```bash
+yarn add @backstage/plugin-catalog-backend-module-github --cwd packages/backend
+```
+
+```ts
+// Keep the existing catalog backend registration.
+backend.add(import('@backstage/plugin-catalog-backend-module-github'));
+```
+
+The Portal Controller writes Promise entities and Resource entities into two separate trees, so
+configure one catalogue provider for each:
+
+```yaml
+catalog:
+  providers:
+    github:
+      platformPromiseCatalog:
+        organization: acme
+        catalogPath: /gitops/backstage/prod/dependencies/**/catalog-info.yaml
+        filters:
+          branch: main
+          repository: '^platform-catalog$'
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+      platformResourceCatalog:
+        organization: acme
+        catalogPath: /gitops/backstage/prod/resources/**/catalog-info.yaml
+        filters:
+          branch: main
+          repository: '^platform-catalog$'
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+```
+
+Fill the paths in from your portal's configuration:
+
+| Placeholder | Comes from |
+|---|---|
+| `gitops/backstage/prod` | The state store's `path`, then the Destination's `path` |
+| `repository` | The repository in the state store's `url` |
+| `branch` | The state store's `branch` |
+| `organization` | Your GitHub organisation |
+
+Two narrow providers rather than one glob over the whole prefix, because `catalogPath` takes a
+single glob and a wider one would ingest anything else that lands under it.
+
+Ensure your catalogue rules permit `Component` and `Template`; both are allowed by the default rules.
+
+### AWS S3 discovery
+
+Install and register the [AWS S3 discovery provider](https://backstage.io/docs/integrations/aws-s3/discovery/):
+
+```bash
+yarn add @backstage/plugin-catalog-backend-module-aws --cwd packages/backend
+```
+
+```ts
+// Keep the existing catalog backend registration.
+backend.add(import('@backstage/plugin-catalog-backend-module-aws'));
+```
+
+Configure the [S3 reader](https://backstage.io/docs/integrations/aws-s3/locations/) and provider
+in `app-config.yaml`. This example uses environment credentials:
+
+```yaml
+integrations:
+  awsS3:
+    - accessKeyId: ${AWS_ACCESS_KEY_ID}
+      secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+catalog:
+  providers:
+    awsS3:
+      platformPromiseCatalog:
+        bucketName: platform-catalog
+        prefix: gitops/backstage/prod/dependencies/
+        region: eu-west-1
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+      platformResourceCatalog:
+        bucketName: platform-catalog
+        prefix: gitops/backstage/prod/resources/
+        region: eu-west-1
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+```
+
+Set the bucket name and region from your `BucketStateStore`. Each prefix combines the state
+store's path with the Destination's path, then `dependencies/` or `resources/`. Permit Backstage
+to list those prefixes and read their objects. For workload or assumed-role credentials, use
+the reader's documented credential configuration.
+
+A Kratix `BucketStateStore` supporting an S3-compatible endpoint does not guarantee that
+Backstage's AWS discovery provider supports that endpoint. Confirm both the reader and
+discovery provider work with your storage, or install a compatible provider.
+
+## Verify
+
+Once Backstage has run a catalogue refresh you should see:
+
+- A `Component` for each Promise bound to the portal, with a matching scaffolder Template on the
+  **Create** page.
+- A `Component` for each Resource request, with **Manage** available on it.
+
+If entities do not appear, check the repository branch or bucket prefixes contain the generated
+files, the provider module is registered, and Backstage can list and read them. A bucket provider
+scans its prefix, so keep unrelated documents outside those prefixes.
+
+Next, [send resource requests to Kratix](/ske/integrations/portal-controller/backstage/send-resource-requests).
+
+
+## Task log detail
+
+Backstage builds each task's logger at `LOG_LEVEL`, defaulting to `info`. The SKE actions log their
+mechanics at `debug`, so set `LOG_LEVEL=debug` on the backend to see them.
+
+<details>
+<summary>Request configuration links</summary>
+
+## Configuring the backend plugin
+
+Continue with [request transport configuration](/ske/integrations/portal-controller/backstage/send-resource-requests#configure-backend-access).
+
+### Configure Backend Access
+
+Choose [Kubernetes API, GitOps or hybrid](/ske/integrations/portal-controller/backstage/send-resource-requests#configure-backend-access).
+
+#### Using OIDC Authentication
+
+Configure [user identity and Kubernetes RBAC](/ske/integrations/portal-controller/backstage/send-resource-requests#oidc-authentication).
+
+### Connect the Platform to the Git Repository
+
+Configure [Flux or Argo CD](/ske/integrations/portal-controller/backstage/send-resource-requests#connect-the-platform-to-the-git-repository).
+
+</details>

@@ -1,0 +1,283 @@
+---
+title: Configuring Cortex
+description: Documentation for how to set up the Cortex workspace and install Cortex SKE integration
+keywords: [cortex, installation, ske, controller]
+slug: "/ske/integrations/cortex/configuring-cortex"
+sidebar_label: "Configure Cortex"
+sidebar_position: 2
+---
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+To integrate SKE with Cortex, you need to set up your Cortex workspace and install the Cortex integration on your Platform cluster.
+
+This document will cover:
+
+- [Configuring the Cortex Workspace](#set-up-the-cortex-workspace)
+- [Creating a Cortex token for Kratix](#create-a-cortex-token-for-ske)
+- [Installing the Cortex integration](#install-the-cortex-integration)
+- [Configuring GitOps for Cortex-generated Resource Requests](#configure-gitops-for-cortex-generated-resource-requests)
+
+## Set up the Cortex Workspace
+
+The Cortex Workflows will create and update Resource Requests for their respective Promises. These requests which will be sent to SKE via GitOps, meaning that the requests will be written to a Git repository that the Platform Cluster will watch and converge upon.
+To enable this GitOps flow from your Workflows, you will need to set up a version control integration in your Cortex workspace.
+
+Follow the [official Cortex documentation](https://docs.cortex.io/ingesting-data-into-cortex/integrations) on integrations to set up the integration with your Git provider. The SKE
+Cortex integration currently only supports Github and GitLab integration, if you require a different version control provider, please contact Syntasso at
+[feedback@syntasso.io](mailto:feedback@syntasso.io?subject=SKECortex%20Feedback).
+
+## Create a Cortex token for SKE
+
+The SKE Cortex integration communicates with Cortex through the Cortex API so you'll need to generate a token for authenticating with your Cortex Workspace. Follow [Cortex's official
+documentation](https://docs.cortex.io/configure/settings/api-keys/personal-tokens) to create a personal access token to access your Cortex workspace. You will need to provide
+this token when installing the SKE Cortex integration.
+
+The SKE Cortex integration will use the access token to authenticate. It will:
+
+* create, update, and delete Workflows
+* create, update, and delete custom Entity Types
+* create, update, and delete Entities
+* create Relationship Types
+
+Please ensure the token is generated with the right permissions.
+
+## Install the Cortex integration {#install-the-cortex-integration}
+
+### Via the SKE Operator Helm Chart
+
+:::important
+
+You will need `v0.58.0` of the SKE Operator Helm Chart
+
+:::
+
+The Cortex Controller is installed by the [SKE Operator](/ske/installing-ske/install-with-operator) and can be deployed via the SKE Operator Helm Chart.
+
+To deploy the Cortex Controller via the SKE Operator Helm Chart, configure the `cortexIntegration` values. Most crucially, you will need to set `cortexIntegration.enabled` to
+`true`.
+
+```yaml
+cortexIntegration:
+  enabled: true
+  version: "latest"
+  config:
+    branch: main # any branch that exists; defaults to main
+    integrationAlias: cortex # needs to match the integrationAlias for your GitOps integration
+    path: test-sub-dir # the directory within the Cortex repo, if not set, it will default to `kratix-resource-requests`
+    provider: github # must be github or gitlab
+    repositoryName: syntasso/cortex-testing # needs to be an existing repo
+    # auth options (choose exactly one):
+    # 1) set both token and url and this chart creates Secret `cortex-credentials`
+    # 2) set secretRef.name to an existing Secret in kratix-platform-system
+    # token/url and secretRef are mutually exclusive.
+    token: ""
+    url: ""
+    # optional existing Secret reference (used only when token/url are not set)
+    # secretRef:
+    #   name: "cortex-credentials"
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+#### Deploying Within Air-gapped Environments
+
+##### Mirror the Cortex Controller image
+
+Mirror the following image using the same version that you set on the Cortex
+integration:
+
+```text
+ghcr.io/syntasso/ske-cortex-controller:<CORTEX_CONTROLLER_VERSION>
+```
+
+The Cortex Controller uses the registry configured by `imageRegistry.host` in
+the SKE Operator Helm chart. If you change the image path in your internal
+registry, set `imageRegistry.cortexControllerImage.name` to the new path.
+
+##### Mirror the Cortex release manifests
+
+Like the SKE distribution, you will need to ensure that the Cortex Controller deployment manifests are available the [SKE Release Storage](/ske/installing-ske/air-gapped#ske-release-storage); the S3-compatible bucket or Git repository that is accessible from the Platform Cluster.
+
+You need to ensure that the manifests are downloaded to the SKE Release Storage and that the directory structure matches the [Syntasso Enterprise Releases page](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/). For instance:
+
+```text
+ske
+  v0.43.0
+    ske-distribution.yaml
+    release-metadata.json
+
+ske-cortex-controller
+  v0.10.1
+    ske-cortex-controller-distribution.yaml
+```
+
+#### Deploy the Cortex Controller
+
+Having updated the Helm values, install the Cortex Controller by running:
+
+```bash
+helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
+  --wait \
+  --values values.yaml
+```
+
+### Via the SKE Integrations CRD
+
+:::warning
+
+You will need `v0.20.0` of the SKE Operator or later
+
+:::
+
+The SKE Operator includes a Custom Resource Definition (CRD) for managing SKE Integrations such as Cortex. Only one instance of a Cortex SKE Integration can be created by the SKE
+Operator in a given cluster.
+
+Before creating the SKE Integration, you will need to create the secret that will be used to connect to Cortex. This will include the personal access token created in the first
+step:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cortex-connection
+  namespace: kratix-platform-system
+type: Opaque
+data:
+  token: "cortex-personal-token"
+  url: "https://api.getcortexapp.com"
+```
+
+If both the SKE Operator and SKE are deployed on your cluster, you can deploy the Cortex Controller by creating a SKE Integration. Create a file named `cortex-integration.yaml`
+with the following contents:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: cortex-integration
+spec:
+  type: cortex
+  version: "<CORTEX_CONTROLLER_VERSION>"
+  cortex:
+    branch: main # any branch that exists; defaults to main
+    integrationAlias: my-alias # needs to match the integrationAlias for your GitOps integration
+    path: test-sub-dir # the directory to be created in the Cortex repository, if not set, it will default to `kratix-resource-requests`
+    provider: github # must be github
+    repositoryName: syntasso/cortex-testing # needs to be an existing repo
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+:::tip
+
+For the latest available versions, see the [Cortex Controller releases](/ske/releases/cortex-controller) page.
+
+:::
+
+Apply the file with kubectl:
+
+```yaml
+kubectl apply --filename cortex-integration.yaml
+```
+
+The operator will then install the Cortex Controller and the desired configurations.
+
+## Configure GitOps for Cortex-Generated Resource Requests
+
+When the Cortex Workflows run, they will create resource requests for a given promise and write these to a Git Repository. To ensure these requests are created on the Platform Cluster where SKE is installed, GitOps tooling must be configured on the cluster to watch and converge upon the files written to this repository.
+
+Please refer to the appropriate documentation to use [ArgoCD](/main/guides/installing-argocd), [FluxCD](/main/guides/installing-fluxcd), or your preferred [GitOps
+Agent](/main/guides/custom-gitops-agent).
+
+<details>
+  <summary>You can see two examples of how to configure the GitOps repository using ArgoCD and FluxCD below.</summary>
+
+  <Tabs className="boxedTabs" groupId="GitOps">
+  <TabItem value="ArgoCD" label="ArgoCD Application">
+
+  ```yaml
+  apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: kratix-cortex-resources
+    namespace: argocd
+  spec:
+    project: default
+    source:
+      repoURL: https://github.com/${ORGANIZATION}/${CORTEX_REPOSITORY}
+      targetRevision: HEAD
+      path: .
+      directory:
+        recurse: true
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: default
+    syncPolicy:
+      automated:
+        selfHeal: true
+        prune: true
+  ```
+
+  </TabItem>
+
+  <TabItem value="FluxCD" label="Flux Kustomization">
+
+  ```yaml
+  ---
+  apiVersion: kustomize.toolkit.fluxcd.io/v1
+  kind: Kustomization
+  metadata:
+    name: cortex-testing
+    namespace: flux-system
+  spec:
+    prune: true
+    interval: 10s
+    path: .
+    sourceRef:
+      kind: GitRepository
+      name: kratix-cortex-resources
+  ---
+  apiVersion: source.toolkit.fluxcd.io/v1
+  kind: GitRepository
+  metadata:
+    name: kratix-cortex-resources
+    namespace: flux-system
+  spec:
+    interval: 5s
+    url: https://github.com/${ORGANIZATION}/${CORTEX_REPOSITORY}
+    ref:
+      branch: main
+    secretRef:
+      name: cortex-git-credentials
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: cortex-git-credentials
+    namespace: flux-system
+  data:
+    identity: $SSH_PRIVATE_KEY_BASE64
+    identity.pub: $SSH_PUBLIC_KEY_BASE64
+    known_hosts: $KNOWN_HOSTS_BASE64
+  ```
+
+  </TabItem>
+  </Tabs>
+</details>

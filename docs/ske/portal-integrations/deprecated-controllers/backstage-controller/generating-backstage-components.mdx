@@ -1,0 +1,239 @@
+---
+title: Generating Backstage Components
+description: Documentation for how to use the Backstage Controller to generate Backstage Components
+slug: "/ske/integrations/backstage/installation/generating-backstage-components"
+sidebar_label: "Generate Backstage Components"
+sidebar_position: 5
+---
+
+The Backstage Controller generates Backstage components and templates for Promises and Resource Requests.
+
+## Prerequisites
+
+- **SKE Operator**: Installed at v0.28.0 or later. If you haven't installed the Operator, please refer to the [SKE installation guide](/ske/installing-ske/install-with-operator).
+- **SKE Backstage**: The generated Backstage Templates reference an action from the `ske-backend` Backstage plugin, this action is
+used to create a Resource Request. The generated Components are also used by the `ske-frontend` Backstage plugin to display
+Promise and Resource metadata. See [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage) for installation instructions.
+- **Backstage Destination**: You must have a Destination created with the `environment: backstage` label. See the
+[Entity State Store docs](/ske/integrations/backstage/installation/creating-entity-state-store#configure-a-destination-for-backstage) for more information
+for setup instructions.
+
+## Installing the Backstage Controller
+
+### Via the SKE Operator Helm Chart
+
+The Backstage Controller is installed by the [SKE Operator](/ske/installing-ske/install-with-operator) and can be deployed via the SKE Operator Helm Chart.
+
+To deploy the Backstage Controller via the SKE Operator Helm Chart, configure the `backstageIntegration` values. Most crucially, you will need to set `backstageIntegration.enabled` to `true`.
+
+You can use the `deploymentConfig.resources` to configure the resource allocations for the Backstage Controller deployment.
+
+```yaml
+backstageIntegration:
+  enabled: true
+  version: "latest"
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+:::info
+
+If you are deploying the Backstage Controller in an air-gapped or network-restricted environment, you must mirror the controller images and release manifests before proceeding. See the [Air-Gapped Installation](/ske/integrations/backstage/air-gapped-installation/intro#ske-backstage-controller) guide for details.
+
+:::
+
+#### Deploy the Backstage Controller
+
+Having updated the Helm values, install the Backstage Controller by running:
+
+```
+helm install ske-operator syntasso/ske-operator \
+  --namespace kratix-platform-system \
+  --wait \
+  --values values.yaml
+```
+
+### Via the SKE Integrations CRD
+
+The SKE Operator includes a Custom Resource Definition (CRD) for managing SKE Integrations such as Backstage. Only one instance of a Backstage SKE Integration can be created by the SKE Operator in a given cluster.
+
+If both the SKE Operator and SKE are deployed on your cluster, you can deploy the Backstage Controller by creating a SKE Integration. Create a file named `backstage-integration.yaml` with the following contents:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: backstage-integration
+spec:
+  type: backstage
+  version: "<BACKSTAGE_CONTROLLER_VERSION>"
+  deploymentConfig:
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+```
+
+:::tip
+
+For the latest available versions, see the [Backstage Controller releases](/ske/releases/backstage-controller) page.
+
+:::
+
+Apply the file with kubectl:
+
+```yaml
+kubectl apply --filename backstage-integration.yaml
+```
+
+The SKE Operator will then install the Backstage Controller and the desired configuration.
+
+## How does it work?
+
+The SKE Backstage Controller creates a Workflow that automatically generates the Backstage components and
+templates for your Promise. This Workflow runs in addition to the Configure Workflow for your Promises and Requests.
+
+### Promise Configure
+
+In a Promise Configure workflow, two Backstage manifests will be generated:
+
+- **Promise Component:** A Backstage Component representing the Promise.
+- **Promise Template:** A Backstage Template representing the Promise API (i.e. the CRD
+  for Resources created from this Promise).
+
+### Resource Configure
+
+In a Resource Configure workflow, a single Backstage manifest will be generated:
+
+- **Resource Component:** A Backstage Component representing the Resource.
+
+See the [Entity YAML format](/ske/integrations/portal-controller/backstage/entity-yaml-format) for examples of these manifests
+
+### Labelling Promises for automatic file generation
+
+To generate Backstage Components and Template for your Promise, as well as Components for requests for that Promise,
+label your Promise with `kratix.io/backstage: true`.
+
+```bash
+kubectl label promises PROMISE_NAME kratix.io/backstage=true
+```
+
+Or add the label to the Promise spec:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: my-promise
+  labels:
+    kratix.io/backstage: "true"
+```
+
+## Customizing Backstage Components {#customize-backstage-components}
+
+You can customize the automatically generated Backstage Components and Templates by creating a `BackstageEntityCustomization`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: BackstageEntityCustomization
+metadata:
+  name: my-customization
+spec:
+  entityGenerationOptions:
+    promise:
+      component: # options for the generated Promise Component
+        name: my-name # Value for metadata.name
+        title: my-title # Value for metadata.title
+        description: my-description # Value for metadata.description
+        tags: tag1,tag2 # Values for metadata.tags
+        type: my-type # Value for spec.type
+        lifecycle: my-lifeCycle # Value for spec.lifecycle
+        owner: my-owner # Value for spec.owner
+        system: my-system # Value for spec.system
+        subComponentOf: parent-resource # Value for spec.subcomponentOf
+        providesAPIs: api1,api2 # Values for spec.providesAPIs
+        consumesAPIs: api3,api4 # Values for spec.consumesAPIs
+        dependsOn: dependency1,dependency2 # Values for spec.dependsOn
+      template: # options for the generated Promise Template
+        hideNamespace: false # Whether to hide the namespace field
+        defaultNamespace: default # Default namespace to use
+        namespaceFieldTitle: Namespace # Title for the namespace field
+        namespaceFieldDescription: "Your team's namespace" # Description for the namespace field
+        singleSpecPage: false # Whether to generate a single spec page for the template
+        title: my-title # Value for metadata.title
+        description: my-description # Value for metadata.description
+        tags: tag1,tag2 # Values for metadata.tags
+        type: my-type # Value for spec.type
+        lifecycle: my-lifeCycle # Value for spec.lifecycle
+        owner: my-owner # Value for spec.owner
+    resource:
+      component:
+        name: my-name # Value for metadata.name
+        title: my-title # Value for metadata.title
+        description: my-description # Value for metadata.description
+        tags: tag1,tag2 # Values for metadata.tags
+        type: my-type # Value for spec.type
+        lifecycle: my-lifeCycle # Value for spec.lifecycle
+        owner: my-owner # Value for spec.owner
+        system: my-system # Value for spec.system
+        subComponentOf: parent-resource # Value for spec.subcomponentOf
+        providesAPIs: api1,api2 # Values for spec.providesAPIs
+        consumesAPIs: api3,api4 # Values for spec.consumesAPIs
+        dependsOn: dependency1,dependency2 # Values for spec.dependsOn
+  destinationSelectors: # optional
+  - matchLabels:
+      environment: backstage
+  containers: # optional
+    - name: add-backstage-group
+      image: ghcr.io/syntasso/run-customization:v0.0.1
+```
+
+Once you have created the `BackstageEntityCustomization`, you can label your
+Promise with `kratix.io/backstage-customization: my-customization` to apply the
+customization to the Promise and its Resource Requests:
+
+```bash
+kubectl label promises PROMISE_NAME kratix.io/backstage-customization=my-customization
+```
+
+:::tip
+
+Backstage Customizations are cluster-wide resources, ensure you create them with
+unique names
+
+:::
+
+
+
+
+### Custom containers
+
+The containers defined in the customization will run after the `backstage-gen` container which generates the
+Components and Templates. They can be used to modify the existing `catalog-info.yaml` file created by the
+`ske-backstage-generator` or generate new files. The customization applies to Promises labelled with
+`kratix.io/backstage-customization: <customization-name>` and their Resource Requests.
+
+:::info
+
+If you want to a particular Resource Request to _not_ have a Backstage Component
+generated, you can label the Resource Request with `kratix.io/backstage: "false"`.
+
+:::
+
+If you want to edit the Entities or generate different files based on whether the Workflow is running for a
+Promise or Resource Request, the container can query the `KRATIX_WORKFLOW_TYPE` environment variable.
+For Promises, this is equal to `promise-backstage-gen` and for resources, `resource-backstage-gen`.
+
+### Destination Selectors
+
+By default, Destination selectors defined in the customization will apply to all generated Backstage components.
+You can use these to make sure that generated components are only scheduled to your Backstage destinations.
