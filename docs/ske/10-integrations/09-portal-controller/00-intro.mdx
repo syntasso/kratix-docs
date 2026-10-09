@@ -1,12 +1,18 @@
 ---
-title: Introduction
-description: Introduction to the SKE Portal Controller
-sidebar_label: Overview
+title: How the Portal Controller works
+description: How Promises become portal entities and developer requests return to the platform
+sidebar_label: How it works
 keywords: [portal, internal developer portal, idp, backstage, cortex]
 ---
 
-The Portal Controller is a single integration that syncs Kratix Promises and Resource requests
-into a developer portal, such as Backstage or Cortex. It replaces the standalone
+The Portal Controller publishes Kratix Promises and Resource requests to Backstage or Cortex.
+It generates catalogue entries and request forms from the Promise API and keeps entities
+in sync with the platform. Receiving a developer's request is a separate part of the integration.
+
+If you are setting up an integration, start with [Backstage](./backstage/intro) or
+[Cortex](./cortex/intro). This page explains the shared model behind those journeys.
+
+The Portal Controller replaces the standalone
 [Backstage Controller](../backstage/intro) and [Cortex Controller](../cortex/intro), which are
 both deprecated in favour of this controller.
 
@@ -22,19 +28,20 @@ The Portal Controller enables platform teams to:
 - Connect the platform to one or more developer portals from a single `SKEIntegration`
 - Publish Kratix Promises and Resources as entities in Backstage or Cortex
 - Opt Promises and Resources into a portal with a label, rather than a dedicated CRD per portal
-- Route developer requests through review, by raising them as pull requests instead of applying
-  them directly
 - Shape the generated entities per Promise with a `PortalCustomization`
 - Migrate from the standalone Backstage or Cortex controllers at your own pace, since both
   continue to work alongside the Portal Controller
 
 ## Architecture
 
-A platform team declares every portal the platform exposes on one `SKEIntegration`
+A platform administrator declares every portal the platform exposes on one `SKEIntegration`
 of `spec.type: portal-controller`. Each portal has a **portal type**, `backstage` or `cortex`, and
-its own configuration.
+its own configuration. The SKE Operator writes these entries into the `ske-portal-config`
+ConfigMap read by the controller. Without the operator, the administrator maintains that
+ConfigMap directly.
 
-A Promise (or Resource request) opts into a portal with a label:
+A Promise opts into a portal with a label. Resource requests inherit its binding unless
+individually opted out. This fragment shows only the label, not a complete Promise:
 
 ```yaml
 metadata:
@@ -42,7 +49,13 @@ metadata:
     kratix.io/portal-backstage: "true"
 ```
 
-When the Promise syncs, the controller runs a pipeline made up of three stages:
+With more than one instance of a type, the label must name the instance. The
+[configuration and binding reference](./reference/portal-configuration) defines labels and
+resolution rules.
+
+### From the platform to the portal
+
+When the Promise or a Resource syncs, the controller runs a pipeline made up of three stages:
 
 ```text
 generate  →  [configure …]  →  writer
@@ -59,10 +72,15 @@ How the writer delivers depends on the portal type. A Backstage portal writes th
 through a Kratix Destination backed by a Git or bucket StateStore. Backstage must be configured
 to discover those documents; the controller never calls Backstage itself. A Cortex portal calls the Cortex API directly
 and runs a long-lived status exporter. Both portal types run a setup Job when their connection
-is configured. See
+is configured. Backstage setup prepares or adopts catalogue storage; Cortex setup ensures
+the shared entity and relationship types exist. A successful sync does not prove that
+Backstage has ingested the file or that a developer's request has been provisioned. See
 [Backstage](./backstage/intro) and [Cortex](./cortex/intro) for the detail of each.
 
 ## Where developer requests go
+
+Publishing an entity makes a Promise available to developers; it does not configure the
+route back to Kratix. Catalogue output storage and the request repository are separate concerns.
 
 For a Backstage portal you also choose a **delivery mode**, which decides what happens when a
 developer submits the generated form:
@@ -77,10 +95,29 @@ requests still need a GitOps agent to apply them to the platform, even in push m
 See [Delivery modes](./backstage/delivery-modes) and
 [backend configuration](./backstage/configure-backstage#configuring-the-backend-plugin).
 
+For Cortex, the generated workflows commit requests through Cortex's GitHub or GitLab
+integration. A platform GitOps agent applies those manifests. The create workflow first
+registers a pending Cortex entity; that entity alone proves neither a successful Git commit
+nor successful provisioning. Check the workflow result, request file and platform status.
+
+### Changing or removing publication
+
+A `PortalCustomization` changes generated documents, not the Promise API itself or the
+Backstage plugins' React components. Its configure containers run between generate and
+writer; they do not run during deletion.
+
+:::warning Opting out is not a pause
+Removing a Promise's last portal opt-in label can trigger cleanup of published output.
+Removing a configured portal also removes controller-managed setup workloads and owned
+storage objects. Review the portal-specific lifecycle before changing bindings or removing
+configuration; do not use removal to temporarily stop synchronisation.
+:::
+
 ## Next steps
 
-- [Installation](./installation) walks through installing the Portal Controller and connecting
-  it to a portal.
+- [Install and upgrade](./installation) the shared controller, or check an existing installation.
+- Look up [portal configuration and bindings](./reference/portal-configuration) and
+  the [adapter output contract](./reference/adapter).
 - [Job customization](./customization/job-customization) covers making the Jobs the controller
   creates follow your cluster's rules, if you have an admission policy, node placement or resource
   quotas to satisfy.
