@@ -1,5 +1,9 @@
 {
   "label": "Backstage",
   "position": 2,
-  "collapsed": true
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "ske/integrations/portal-controller/backstage/intro"
+  }
 }
