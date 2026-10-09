@@ -1,42 +1,56 @@
 ---
-title: Syntasso Kratix Enterprise (SKE) Introduction
-description: Syntasso Kratix Enterprise is the supported, enterprise-ready distribution of Kratix, with a GUI, integrations, and dedicated support.
+title: Syntasso Kratix Enterprise (SKE)
+description: Install, operate and extend your platform with Syntasso Kratix Enterprise.
 keywords: [ske docs, kratix enterprise]
-sidebar_label: Introduction
+sidebar_label: Overview
 slug: ./
 ---
 
 # Introduction
 
-[Syntasso](https://syntasso.io) offers an enterprise-grade version of Kratix
-called [Syntasso Kratix Enterprise (SKE)](https://syntasso.io/pricing). SKE
-enhances Kratix with additional features, strengthened security, and dedicated
-support tailored specifically for enterprise environments. 
+Syntasso Kratix Enterprise (SKE) is the supported enterprise distribution of Kratix.
+It adds platform lifecycle management, Promise testing and upgrades, resource health checks,
+a GUI and integrations. The [core Kratix documentation](/) covers Promises,
+workflows, Destinations and StateStores shared with open-source Kratix.
 
-- Enterprise-grade, business-hours support
-- Long-lived, at-scale testing
-- Fully supported [Backstage](https://backstage.io/) integration
-- Fully supported [Terraform Enterprise & HCP Terraform](https://www.terraform.io/) integration
-- Secure software base images
-- Secure software supply chain validation
-- A package of core Promises, with support (under development)
-- Key enterprise integrations (under development)
+## Install SKE
 
-:::info
+Start with [requirements and access tokens](/ske/installing-ske/intro), then
+[install SKE with the Operator](/ske/installing-ske/install-with-operator).
+There are separate guides for [air-gapped environments](/ske/installing-ske/air-gapped)
+and [migration from open-source Kratix](/ske/installing-ske/migrating-from-kratix).
 
-For detailed information and pricing, visit the [pricing page](https://syntasso.io/pricing).
-Interested in seeing SKE in action? Schedule a [demo
-here](https://syntasso.io/#contact-us).
+## Build and evolve Promises
 
+- [Build and test a database Promise](/ske/guides/promise-development).
+- [Test Promise pipelines](/ske/promise-testing-framework/intro).
+- [Create a Promise from a Terraform module](/ske/guides/promise-from-tf-module).
+- [Schedule resources to Terraform workspaces](/ske/guides/scheduling-terraform-workspaces).
+- [Roll out Promise upgrades](/ske/guides/promise-upgrades).
+
+## Operate your platform
+
+Understand the [platform architecture](/ske/reference/parts-of-a-platform) and
+[prepare SKE for production](/ske/operations/production-readiness).
+Use the guides for [upgrades](/ske/installing-ske/upgrades),
+[backup and restore](/ske/installing-ske/backup-and-restore),
+[health checks](/ske/guides/healthchecks) and the [GUI](/ske/guides/ske-gui).
+For diagnostic checks, see [Troubleshoot SKE](/ske/operations/troubleshooting).
+
+## Integrate developer interfaces and tools
+
+Choose a developer portal in [Portal integrations](/ske/integrations/portal-integrations/intro).
+Backstage and Cortex use the shared Portal Controller; Port uses its own controller.
+For infrastructure tooling, see [Terraform Enterprise and HCP Terraform](/ske/integrations/tfe).
+
+:::info Preview features
+[Port](/ske/integrations/port), [MCP Server](/ske/integrations/mcp) and
+[SKE Lift](/ske/integrations/skelift) are Preview features. Review the
+[Preview support policy](/ske/support#preview-features) before adopting them.
 :::
 
-The documentation is divided into the following sections:
+## Look up APIs, releases and support
 
-- In [Installing SKE](/ske/installing-ske/intro), you will find information
-  about installing and configuring your platform with the Enterprise edition of
-  Kratix
-- In [Reference](/category/reference-1), you will find information about the SKE-only CRDs.
-- In [Guides](/category/guides-1), you will find different guides on how to use SKE features in your Platform.
-- In [Integrations](/ske/integrations/intro), you will find information about the different integrations you can set up with SKE.
-- In [Releases](./ske/releases), you will find information about the current and past releases of SKE packages.
-- In [Support Policy](./ske/support), you will find information about the SKE support policy
+The [API and CLI index](/ske/reference) links to canonical definitions.
+Check [releases](/ske/releases) and [component compatibility](/ske/releases/compatibility)
+before upgrading. Your [support policy](/ske/support) defines support channels and service levels.

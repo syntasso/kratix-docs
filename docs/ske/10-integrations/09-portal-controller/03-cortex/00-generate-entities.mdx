@@ -1,0 +1,121 @@
+---
+title: Generate Cortex entities and workflows
+description: Publish a Promise and its resource requests to Cortex with the Portal Controller
+sidebar_label: Generate Cortex entities and workflows
+slug: generate-entities
+sidebar_position: 2
+---
+
+This guide publishes an existing Promise to Cortex and generates its create, update and delete workflows. Resource requests appear as entities when the platform reconciles them.
+
+## Prerequisites
+
+- SKE v0.59.0 or later and SKE Operator v0.34.0 or later, with the [Portal Controller requirements](../installation#requirements) satisfied.
+- An installed Promise with an API, and permission to update its labels.
+- A Cortex workspace and API token. The adapter uses the Cortex API to manage entity types, relationships, entities and workflows, and to write custom data. Choose a token suitable for those operations under your workspace's access controls.
+- An existing GitHub or GitLab repository and a Cortex Git integration alias. Follow [Send resource requests](./send-resource-requests) to configure repository access and platform GitOps before running the generated workflows.
+
+The Cortex API token and the credentials configured in Cortex for Git access are separate. The platform GitOps agent also needs its own repository credentials.
+
+## 1. Store the Cortex API token
+
+Save this as `cortex-token.yaml`, replacing the token placeholder. Keep this file out of version control.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cortex-token
+  namespace: kratix-platform-system
+type: Opaque
+stringData:
+  token: <YOUR_CORTEX_API_TOKEN>
+```
+
+```bash
+kubectl apply -f cortex-token.yaml
+```
+
+The Secret must be in `kratix-platform-system` and contain the `token` key. See [Credential Secret handling](../installation#credential-secret-handling) for how the controller uses it.
+
+## 2. Configure the Cortex portal
+
+Save the following as `cortex-integration.yaml`. Replace the repository and alias with the values configured in Cortex. Use your Cortex API URL if it differs from the example.
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: v0.6.1
+  portals:
+    - name: prod
+      type: cortex
+      url: https://api.getcortexapp.com
+      secretRef:
+        name: cortex-token
+      config:
+        repositoryName: <GIT_ORGANISATION>/<GIT_REPOSITORY>
+        provider: github
+        integrationAlias: <CORTEX_GIT_INTEGRATION_ALIAS>
+        branch: main
+        path: kratix-resource-requests
+```
+
+For GitLab, set `provider: gitlab` and use the GitLab project path and integration alias. All these `config` values are strings.
+
+If you already have a Portal Controller integration, add this entry to its existing `spec.portals` list. Preserve its other entries. Otherwise, [install the Portal Controller](../installation) using this integration.
+
+```bash
+kubectl apply -f cortex-integration.yaml
+```
+
+The portal's setup Job ensures the shared Promise entity type and the relationship type used to link resource entities to their Promise exist in Cortex. The controller also deploys the Cortex status exporter. It does not require you to create these shared types manually.
+
+## 3. Bind a Promise to Cortex
+
+Label your existing Promise, replacing the placeholder with its Kubernetes name:
+
+```bash
+kubectl label promise <PROMISE_NAME> kratix.io/portal-cortex.prod=true --overwrite
+```
+
+The `.prod` suffix selects the portal named `prod`. Use `kratix.io/portal-cortex: "true"` when the Promise should target every configured Cortex portal. See [Portal bindings](/ske/integrations/portal-controller/reference/portal-configuration#binding-labels) for label behaviour.
+
+## Verify the generated entities and workflows
+
+Inspect the integration and Promise:
+
+```bash
+kubectl get skeintegration portal-controller -o yaml
+kubectl get promise <PROMISE_NAME> -o yaml
+kubectl get jobs,deployments,pods -n kratix-platform-system
+```
+
+Check the Promise's `PortalBindingReady` condition and the portal sync Job's completion. In Cortex, confirm:
+
+- A Promise entity with tag `promise-<PROMISE_NAME>` exists.
+- A resource entity type named after the Promise exists.
+- `Create <PROMISE_NAME> request`, `Update <PROMISE_NAME> request` and `Delete <PROMISE_NAME> request` workflows exist.
+- After a resource request is applied, its entity has tag `<PROMISE_NAME>-<RESOURCE_NAME>-<NAMESPACE>`, its specification, and a relationship to the Promise.
+- The exporter Deployment is available. After the resource's status changes, Cortex custom data under `status` reflects that status.
+
+Entity publication, GitOps reconciliation and status export are separate operations. A completed workflow run alone does not confirm that the platform has provisioned the resource.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Setup or writer Job fails | Inspect its logs for API authentication or access errors. Check the portal URL, Secret name, namespace and `token` key. |
+| Promise has no workflows | Check the binding label, `PortalBindingReady`, the Promise API and the sync Job logs. |
+| Resource entity exists but status is missing | Check the resource status in Kubernetes, exporter availability and exporter logs. The exporter does not create missing entities. |
+| Workflow exists but the request never reaches Kubernetes | Follow the repository and GitOps checks in [Send resource requests](./send-resource-requests#verify-reconciliation). |
+
+For log inspection and shared controller failures, see [Troubleshooting](../troubleshooting).
+
+## Next steps
+
+- [Send resource requests](./send-resource-requests) through the generated workflows.
+- [Customise entities and workflows](./cortex-examples) using Portal Patch.

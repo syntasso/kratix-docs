@@ -2,12 +2,22 @@
 title: Cortex
 description: Configuring a Cortex portal on the SKE Portal Controller
 sidebar_label: Overview
+sidebar_position: 1
 slug: intro
 keywords: [portal, cortex, ske, controller, workflow, exporter]
 ---
 
 A Cortex portal publishes Promises and Resources as Cortex entities, and generates Cortex
 workflows so developers can request, update and delete Resources from Cortex.
+
+The journey runs in both directions:
+
+1. A platform engineer binds a Promise to Cortex. The Portal Controller publishes its entity, resource entity type and workflows.
+2. A developer runs a Cortex workflow. Cortex commits a resource request to Git.
+3. The platform GitOps agent applies the request to the cluster, and Kratix reconciles it.
+4. Resource sync publishes the entity definition; the Cortex exporter sends subsequent status updates back to Cortex.
+
+Start with [Generate entities](./generate-entities), then [Send resource requests](./send-resource-requests). Use [Customise entities and workflows](./cortex-examples) to adjust the generated documents.
 
 Unlike Backstage, the Portal Controller calls the Cortex API directly. A Cortex portal
 therefore needs a URL and a credential. Both portal types run a setup Job, but Cortex
@@ -23,9 +33,9 @@ Before configuring the portal:
    or [GitLab](https://docs.cortex.io/ingesting-data-into-cortex/integrations/gitlab)
    integration with permission to read and write files in that repository. Record its
    alias for `config.integrationAlias` below.
-3. Obtain a Cortex API credential with permission to manage the entities, entity
-   types, relationships and workflows used by this integration, and to write Resource
-   status. Store the credential in the Kubernetes Secret shown below.
+3. Obtain a Cortex API credential suitable for the adapter's entity, entity type, relationship,
+   workflow and custom-data API operations under your workspace's access controls.
+   Store the credential in the Kubernetes Secret shown below.
 4. Configure a [platform GitOps agent](/category/installing-gitops-agent) to apply
    Resource requests from the chosen repository, branch and path. Without it, Cortex
    can commit a request but Kratix will not receive it.
@@ -81,8 +91,10 @@ Requests are committed to `<path>/<promise>/<namespace>-<name>.yaml`.
 ## What happens when a developer creates a request
 
 The create workflow registers `<name> request (pending)`, owned by the requester, then
-commits the request to Git. Once GitOps applies the request, the controller replaces
-the pending entity with the Resource definition.
+commits the request to Git. Once GitOps applies the request, resource sync replaces
+the pending definition with the Resource definition. The exporter writes later status changes
+to Cortex custom data under `status`. See [Send resource requests](./send-resource-requests)
+for create, update, deletion and reconciliation checks.
 
 ## What gets deployed
 
@@ -184,6 +196,8 @@ group, and hold their Kubernetes identity in custom metadata.
 
 ## Next steps
 
-- [Cortex examples](./cortex-examples) shows ways to customise the generated documents.
+- [Generate entities](./generate-entities) publishes a Promise and verifies the Cortex setup.
+- [Send resource requests](./send-resource-requests) configures Git delivery and platform GitOps.
+- [Customise entities and workflows](./cortex-examples) changes generated documents with Portal Patch.
 - [Migrating from the Cortex Controller](./migrating-from-cortex) covers moving an existing
   integration across.

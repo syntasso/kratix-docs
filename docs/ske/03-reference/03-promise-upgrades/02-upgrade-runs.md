@@ -1,7 +1,7 @@
 ---
 description: Documentation for the SKE UpgradeRun Custom Resource
 title: Upgrade Runs
-sidebar_label: Upgrade Runs
+sidebar_label: UpgradeRun
 ---
 
 # Upgrade Runs

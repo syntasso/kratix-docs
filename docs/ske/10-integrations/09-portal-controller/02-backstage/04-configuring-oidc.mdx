@@ -5,7 +5,10 @@ sidebar_label: Configuring OIDC Authentication
 slug: configuring-oidc
 ---
 
-When using the SKE backend plugin in [Kubernetes API mode](./configure-backstage#configure-backend-access), you can configure Backstage to authenticate with the platform cluster using an OIDC provider of you choice. This allows you to enforce fine-grained access control on the cluster based on the identity of the logged-in Backstage user.
+For the complete transport, namespace and request setup, see [Send resource requests](./send-resource-requests#oidc-authentication).
+
+When using the SKE backend plugin in [Kubernetes API mode](./configure-backstage#configure-backend-access), you can configure Backstage to authenticate with the platform cluster using an OIDC provider of your choice. Use a trusted sign-in resolver and catalogue identity sources. OIDC forwarding does not replace Kubernetes RBAC.
+This allows you to enforce fine-grained access control on the cluster based on the identity of the logged-in Backstage user.
 
 ## How it works
 
@@ -21,7 +24,7 @@ For this to work, three things must be configured:
 
 Your platform cluster's API server must be configured to trust your OIDC provider. The required flags are:
 
-```
+```text
 --oidc-issuer-url=<your-provider-issuer-url>
 --oidc-client-id=<your-client-id>
 --oidc-username-claim=<claim to use as username, e.g. email>
@@ -65,7 +68,7 @@ kubernetes:
           name: kratix-platform
           authProvider: oidc
           oidcTokenProvider: <your-provider-name>  # e.g. keycloak, okta, auth0
-          skipTLSVerify: true
+          skipTLSVerify: false
 ```
 
 Then tell the SKE plugin which cluster is the platform cluster:
@@ -78,4 +81,4 @@ ske:
 
 ## Worked example
 
-For a step-by-step walkthrough using Keycloak as the OIDC provider, see the [Kratix, Backstage, and OIDC blog post](/blog/backstage-and-keycloak). Note that the blog post uses a hosted Keycloak instance and a local KinD cluster — it is intended as a guide for understanding the integration, not a production deployment pattern.
+For a step-by-step walkthrough using Keycloak as the OIDC provider, see the [Kratix, Backstage, and OIDC blog post](/blog/backstage-and-keycloak). Note that the blog post uses a hosted Keycloak instance and a local KinD cluster. it is intended as a guide for understanding the integration, not a production deployment pattern.

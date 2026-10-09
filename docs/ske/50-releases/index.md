@@ -5,6 +5,10 @@ title: Releases
 In this section you will find release information and notes for the packages
 available with your SKE license.
 
+Review [Supported versions and compatibility](/ske/releases/compatibility) for declared
+component requirements and upgrade planning. Support scope and Preview features are described
+in the [support policy](/ske/support).
+
 Different packages will have different distribution methods, so please refer to
 the specific package documentation for more information.
 

@@ -72,12 +72,14 @@ For Backstage, `config.mode` selects request approval:
 
 The backend's `ske.mode` selects Kubernetes API access or Git delivery.
 Git delivery requires a GitOps agent, even in push mode.
-See [Delivery modes](./backstage/delivery-modes) and
-[backend configuration](./backstage/configure-backstage#configuring-the-backend-plugin).
+Follow [Send resource requests to Kratix](./backstage/send-resource-requests)
+to configure access, permissions and request delivery.
 
 For Cortex, workflows commit requests through its GitHub or GitLab integration.
 A GitOps agent applies them. The pending entity precedes the commit:
 check the workflow result, request file and platform status separately.
+Follow [Send Cortex resource requests](./cortex/send-resource-requests)
+to configure the Git integration and verify reconciliation.
 
 ### Changing or removing publication
 
