@@ -1,0 +1,148 @@
+---
+title: Troubleshoot portal sync
+description: Diagnose controller deployment, binding, setup, publication and request delivery failures
+sidebar_label: Troubleshoot portal sync
+slug: troubleshooting
+---
+
+Start at the stage that failed: controller deployment, binding, setup, publication,
+portal ingestion or request delivery. These are separate checks; successful publication
+does not prove that a request reached Kratix.
+
+The commands below are read-only. Replace placeholders with affected object names.
+Review logs and manifests before sharing them: custom containers and provider errors may
+include sensitive information. Do not print credential Secret data.
+
+## The controller is not ready
+
+For an operator-managed installation, inspect readiness and events:
+
+```bash
+kubectl describe skeintegration <INTEGRATION_NAME>
+kubectl get deployment ske-portal-controller --namespace kratix-platform-system
+kubectl get pods --namespace kratix-platform-system \
+  --selector app.kubernetes.io/name=ske-portal-controller
+kubectl describe pod <CONTROLLER_POD> --namespace kratix-platform-system
+```
+
+- `IntegrationDeploymentReady: False`: check the message and operator events. A referenced
+  credential Secret may be missing, or the Deployment may not have available replicas.
+- `ImagePullBackOff`: check registry access and the Deployment's pull Secret references.
+  `adapterConfig.imagePullSecrets` does not configure the controller Deployment.
+- `CreateContainerConfigError` on standalone installations: check
+  `kratix-platform-pipeline-adapter-config` and its `PIPELINE_ADAPTER_IMG` key.
+
+Check [version requirements](./installation#requirements) before changing configuration.
+Standalone installations have no `SKEIntegration` to inspect.
+
+## A Promise does not resolve to a portal
+
+```bash
+kubectl describe promise <PROMISE_NAME>
+```
+
+Read `PortalBindingReady`, its reason and message:
+
+| Reason | What to check |
+|---|---|
+| `AmbiguousPortalInstance` | Add an instance suffix when more than one portal of the type exists. |
+| `PortalConnectionNotFound` | Match the label's type and instance to a configured entry. |
+| `CustomizationNotFound` | Create the named `PortalCustomization`, or correct the reference. |
+| `AmbiguousCustomization` | Keep one customisation label; combine containers in that resource. |
+| `PortalConfigNotFound` | Check the configuration ConfigMap below. |
+
+A Promise label set to `"false"` still opts in. A Resource request set to `"false"` under
+the same binding key is skipped without a portal condition. See
+[binding labels](./reference/portal-configuration#binding-labels).
+
+## Portal configuration is missing or invalid
+
+```bash
+kubectl describe configmap ske-portal-config --namespace kratix-platform-system
+```
+
+- **Missing ConfigMap:** check Operator `v0.34.0` or later has reconciled the integration.
+  Standalone installations must create this ConfigMap.
+- **`PortalConfigInvalid`:** correct `connections.yaml`, a YAML list of portal entries.
+  Invalid content is not reported as `PortalConfigNotFound`.
+
+Edit `SKEIntegration.spec.portals` when operator-managed, or the ConfigMap when standalone.
+Do not fix an operator-managed deployment by editing the generated ConfigMap.
+See [configuration ownership](./reference/portal-configuration#configuration-ownership).
+
+## A setup Job fails
+
+Check `ske-portal-config` events for `PortalSetupFailed`, then locate the affected Job:
+
+```bash
+kubectl get jobs --namespace kratix-platform-system
+kubectl describe job <SETUP_JOB> --namespace kratix-platform-system
+kubectl logs job/<SETUP_JOB> --namespace kratix-platform-system --container setup
+```
+
+For Backstage, check mutually exclusive `destination.name`/`destination.spec` and
+`stateStore.name`/`stateStore.spec`, the StateStore kind and whether referenced objects exist.
+See [Backstage configuration errors](./backstage/intro#configuration-errors).
+
+For Cortex, check the API URL, credential Secret's presence and required API permissions.
+A Secret's existence does not prove that its token works. Correct the source configuration,
+then confirm setup succeeds; do not delete the portal configuration to retry.
+
+## A sync Job fails or never starts
+
+Read `BackstagePortalSynced` or `CortexPortalSynced` on the Promise. `PromiseHasNoAPI`
+means there is no `spec.api` to render. For a running or failed sync, locate its Job and
+inspect the Pods. Jobs can run outside the system namespace when the Promise specifies
+a pipeline namespace:
+
+```bash
+kubectl get jobs --all-namespaces
+kubectl describe job <SYNC_JOB> --namespace <JOB_NAMESPACE>
+kubectl get pods --namespace <JOB_NAMESPACE> --selector job-name=<SYNC_JOB>
+kubectl describe pod <SYNC_POD> --namespace <JOB_NAMESPACE>
+kubectl logs <SYNC_POD> --namespace <JOB_NAMESPACE> --container <FAILED_CONTAINER>
+```
+
+Use init-container statuses to identify the failed stage:
+
+- **Generate:** check the Promise API and [adapter arguments](./reference/adapter#portal-wide-generate-flags).
+- **Configure:** check [PortalCustomization](./customization) and recipe selectors. Portal Patch
+  stops the batch if a selector is missing or ambiguous; the writer does not run afterwards.
+- **Writer:** check Destination/StateStore access for Backstage, or Cortex API access.
+- **No Job:** check `ske-portal-workloads-config` events for `PortalWorkloadConfigInvalid`.
+  Invalid shared settings prevent new sync and setup Jobs; see
+  [Job configuration](./customization/job-customization#when-the-file-is-wrong).
+
+Controller errors can provide further context:
+
+```bash
+kubectl logs deployment/ske-portal-controller --namespace kratix-platform-system \
+  --container manager --tail=200
+```
+
+## Publication succeeds but the entity is not visible
+
+For Backstage, inspect the final StateStore for `catalog-info.yaml`, then check the
+catalogue location or discovery rule covers that path and can authenticate. The controller
+writes files; it does not call Backstage to ingest them. See
+[output paths](./backstage/intro#what-gets-written-where) and
+[Configure Backstage](./backstage/configure-backstage).
+
+For Cortex, check the entity in the configured instance, the writer's API result and
+status exporter logs. The [Cortex guide](./cortex/intro) distinguishes published entities,
+pending requests and platform status.
+
+## A portal request does not reach the platform
+
+For Backstage, check the scaffolder task result and backend `ske.mode`. In Kubernetes
+mode, check API access and namespace permissions. In GitOps/hybrid mode, confirm the manifest
+was committed and your GitOps agent watches that repository, branch and path. Under
+`config.mode: pull-request`, the request requires review and merge before GitOps can apply it.
+
+For Cortex, check the workflow result and Git commit separately. A pending entity is created
+before the commit step, so it can exist even if that step fails. Confirm the GitOps agent
+applied the committed manifest, then inspect the Resource request's platform status.
+
+Once the request exists on the platform, provisioning failures belong to the Promise's
+resource workflow, not catalogue publication. Inspect the request and its workflow Jobs
+rather than changing the portal's publication settings.

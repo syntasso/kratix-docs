@@ -1,18 +1,35 @@
 ---
-title: Job customization
+title: Configure sync and setup Jobs
 description: Configuring the Kubernetes Jobs the Portal Controller creates, with the ske-portal-workloads-config ConfigMap
 keywords: [portal, jobs, workloads, labels, annotations, resources, ske, controller]
 slug: /ske/integrations/portal-controller/customization/job-customization
-sidebar_label: Job customization
+sidebar_label: Configure sync and setup Jobs
 ---
 
 The Portal Controller creates Kubernetes Jobs to do its work. It creates one when a Promise or
-Resource syncs to a portal, and one when a portal connection is first set up.
+Resource syncs to a portal, and one when a portal instance is first set up.
 
 Those Jobs run in your cluster, so they need to comply with your cluster's policies.
 
 These settings cover the controller's Jobs. The long-lived status exporter that Cortex portals run
-is a Deployment rather than a Job, so this ConfigMap does not apply to it.
+is a Deployment rather than a Job, so this ConfigMap does not apply to it. Use the
+[exporter overlay](../reference/adapter#cortex-exporter-overlay) for that Deployment.
+
+## Apply Job settings
+
+You need permission to manage ConfigMaps in `kratix-platform-system` and an installed
+Portal Controller. These settings apply to every portal, not just one Promise.
+
+1. Save the complete ConfigMap below as `portal-workloads.yaml`. Edit the example labels,
+   annotations and node selector for your cluster; remove settings you do not need.
+2. Review the [protected fields](#what-you-cannot-set) before adding container overrides.
+3. Apply the file:
+
+   ```bash
+   kubectl apply --filename portal-workloads.yaml
+   ```
+
+4. [Verify](#verify-job-settings) that new Jobs and their Pods carry the intended settings.
 
 You configure these settings in the `ske-portal-workloads-config` ConfigMap in the `kratix-platform-system` namespace, under the workloads.yaml key:
 
@@ -185,7 +202,7 @@ a warning on the ConfigMap itself. Existing Jobs are left alone.
 kubectl -n kratix-platform-system describe configmap ske-portal-workloads-config
 ```
 
-```
+```text
 Events:
   Type     Reason                       Age    From                     Message
   ----     ------                       ----   ----                     -------
@@ -208,3 +225,23 @@ for the Resource to finish being removed.
 The warning appears on the ConfigMap, not on the Promises whose Jobs were not created. If a Promise
 has stopped syncing to its portal and you cannot see why, check this ConfigMap's events.
 :::
+
+## Verify Job settings
+
+Inspect ConfigMap events first, then a newly created setup or sync Job and one of its Pods.
+Select their names from the list; sync Jobs can run in a Promise's pipeline namespace:
+
+```bash
+kubectl describe configmap ske-portal-workloads-config --namespace kratix-platform-system
+kubectl get jobs --all-namespaces
+kubectl get job <JOB_NAME> --namespace <JOB_NAMESPACE> -o yaml
+kubectl get pods --namespace <JOB_NAMESPACE> --selector job-name=<JOB_NAME>
+kubectl get pod <POD_NAME> --namespace <JOB_NAMESPACE> -o yaml
+```
+
+Check your labels, annotations, node placement and container resources on the new objects.
+If they are missing, confirm the container name and whether it is in `initContainers` or
+`containers`. For `PortalWorkloadConfigInvalid`, correct the field reported by the event.
+Existing Jobs are not a reliable check of a newly applied template.
+
+Return to [Backstage](../backstage/intro) or [Cortex](../cortex/intro) to verify publication.
