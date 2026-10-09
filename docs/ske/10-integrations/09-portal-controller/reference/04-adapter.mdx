@@ -5,16 +5,13 @@ sidebar_label: Adapter reference
 slug: /ske/integrations/portal-controller/reference/adapter
 ---
 
-The adapter generates portal documents and, for Cortex, publishes them and exports status.
-It is bundled in the Portal Controller image. This reference describes `v0.6.1` and is
-useful when inspecting output, writing configure containers or overriding generation settings.
-Normal installation does not require a separate adapter deployment.
+The adapter generates portal documents and handles Cortex publication and status export.
+It is bundled in the controller image; no separate deployment is needed.
 
 ## Image and workload overrides
 
-By default, the adapter uses the controller's image and version. Set `adapterConfig` on a
-portal entry only when you need an override. This is a complete integration configuration
-for an existing Destination named `backstage-catalogue`:
+The adapter uses the controller's image unless overridden with `adapterConfig`.
+This example requires an existing Destination named `backstage-catalogue`:
 
 ```yaml
 apiVersion: platform.syntasso.io/v1alpha1
@@ -111,10 +108,8 @@ modes it works by pushing the generated Resource Request manifest to a Git repos
 Kubernetes API mode it applies the manifest directly via the Kubernetes API. The Template
 allows all Promise API fields to be filled in within Backstage.
 
-In `pull-request` delivery mode, the generated Template proposes a GitHub pull request
-instead. Generated Templates also track requests. The following outline illustrates the
-configure action only; it omits specification fields, tracking steps and namespace policy,
-and is not a complete replacement for the generated Template:
+In `pull-request` mode, the Template proposes a GitHub pull request.
+This push-mode outline omits specification fields, tracking steps and namespace policy:
 
 ```yaml
 apiVersion: scaffolder.backstage.io/v1beta3
@@ -192,7 +187,7 @@ metadata:
 spec:
   lifecycle: production
   owner: kratix-platform
-  type: kratix-promise # Alternatively, you can set this to `kratix-promise` to indicate that this is a Promise
+  type: kratix-promise
   # remainder of the component spec...
 ```
 
@@ -230,7 +225,7 @@ metadata:
     kratix.io/namespace: default # Namespace of the Resource
     kratix.io/backstage-promise-template: jenkins-promise-template # metadata.name of the Backstage Template used to create the resource
 spec:
-  type: kratix-resource # Alternatively, you can set this to `kratix-resource` to indicate that this is a Kratix Resource
+  type: kratix-resource
   lifecycle: production
   owner: kratix-platform
   dependsOn:

@@ -5,40 +5,28 @@ sidebar_label: How it works
 keywords: [portal, internal developer portal, idp, backstage, cortex]
 ---
 
-The Portal Controller publishes Kratix Promises and Resource requests to Backstage or Cortex.
-It generates catalogue entries and request forms from the Promise API and keeps entities
-in sync with the platform. Receiving a developer's request is a separate part of the integration.
+The Portal Controller publishes Promises and Resource requests to Backstage or Cortex.
+It generates catalogue entries and request forms from the Promise API.
 
-If you are setting up an integration, start with [Backstage](./backstage/intro) or
-[Cortex](./cortex/intro). This page explains the shared model behind those journeys.
-
-The Portal Controller replaces the standalone
-[Backstage Controller](../backstage/intro) and [Cortex Controller](../cortex/intro), which are
-both deprecated in favour of this controller.
+To set up an integration, start with [Backstage](./backstage/intro) or [Cortex](./cortex/intro).
 
 :::info Port integration
-[Port](../port) (port.io) is another developer portal supported by SKE. Its integration
-currently uses the separate Port Controller, not the Portal Controller.
+[Port](../port) uses the separate Port Controller.
 :::
 
 ## What the integration provides
 
-The Portal Controller enables platform teams to:
-
-- Connect the platform to one or more developer portals from a single `SKEIntegration`
-- Publish Kratix Promises and Resources as entities in Backstage or Cortex
-- Opt Promises and Resources into a portal with a label, rather than a dedicated CRD per portal
-- Shape the generated entities per Promise with a `PortalCustomization`
-- Migrate from the standalone Backstage or Cortex controllers at your own pace, since both
-  continue to work alongside the Portal Controller
+- Multiple Backstage and Cortex instances on one platform.
+- Labels selecting which Promises to publish.
+- Request forms derived from Promise APIs.
+- Document customisation through `PortalCustomization`.
 
 ## Architecture
 
-A platform administrator declares every portal the platform exposes on one `SKEIntegration`
-of `spec.type: portal-controller`. Each portal has a **portal type**, `backstage` or `cortex`, and
-its own configuration. The SKE Operator writes these entries into the `ske-portal-config`
-ConfigMap read by the controller. Without the operator, the administrator maintains that
-ConfigMap directly.
+Declare portal instances in one `SKEIntegration` of `spec.type: portal-controller`.
+Each entry has a type, `backstage` or `cortex`, and instance-specific settings.
+The SKE Operator writes `ske-portal-config`, which the controller reads. Without the operator,
+maintain this ConfigMap directly.
 
 A Promise opts into a portal with a label. Resource requests inherit its binding unless
 individually opted out. This fragment shows only the label, not a complete Promise:
@@ -49,68 +37,56 @@ metadata:
     kratix.io/portal-backstage: "true"
 ```
 
-With more than one instance of a type, the label must name the instance. The
-[configuration and binding reference](./reference/portal-configuration) defines labels and
-resolution rules.
+With multiple instances of one type, name the instance in the label.
+See [configuration and bindings](./reference/portal-configuration).
 
 ### From the platform to the portal
 
-When the Promise or a Resource syncs, the controller runs a pipeline made up of three stages:
+Each sync runs three stages:
 
 ```text
 generate  →  [configure …]  →  writer
 ```
 
-- **generate** produces the entity documents for the portal, for example a Backstage Component
-  and Template, or a Cortex entity and workflows.
-- **configure** *(optional)* runs zero or more author-supplied containers, declared on a
-  `PortalCustomization`, that edit those documents in place. Most platforms use
-  [Portal Patch](./portal-patch/intro) here rather than writing their own container.
-- **writer** ships the finished documents to the portal.
+- **Generate** creates Components and Templates for Backstage, or entities and workflows for Cortex.
+- **Configure** optionally edits these documents using `PortalCustomization` containers.
+  [Portal Patch](./portal-patch/recipe-reference) provides declarative recipes.
+- **Writer** publishes the documents.
 
-How the writer delivers depends on the portal type. A Backstage portal writes the documents
-through a Kratix Destination backed by a Git or bucket StateStore. Backstage must be configured
-to discover those documents; the controller never calls Backstage itself. A Cortex portal calls the Cortex API directly
-and runs a long-lived status exporter. Both portal types run a setup Job when their connection
-is configured. Backstage setup prepares or adopts catalogue storage; Cortex setup ensures
-the shared entity and relationship types exist. A successful sync does not prove that
-Backstage has ingested the file or that a developer's request has been provisioned. See
-[Backstage](./backstage/intro) and [Cortex](./cortex/intro) for the detail of each.
+**Backstage:** writes through a Kratix Destination backed by Git or bucket storage.
+Backstage must discover those files; the controller does not call its API.
+
+**Cortex:** writes through the Cortex API and runs a status exporter.
+
+Both run setup Jobs. Backstage setup prepares or adopts storage; Cortex setup ensures
+shared entity and relationship types exist.
 
 ## Where developer requests go
 
-Publishing an entity makes a Promise available to developers; it does not configure the
-route back to Kratix. Catalogue output storage and the request repository are separate concerns.
+Publication and request delivery are separate. Catalogue storage need not be the request repository.
 
-For a Backstage portal you also choose a **delivery mode**, which decides what happens when a
-developer submits the generated form:
+For Backstage, `config.mode` selects request approval:
 
-- **push**, the default, submits the request without opening a pull request for approval.
-- **pull-request** raises the request as a pull request against a Git repository, so a human
-  reviews and merges it before anything is created. This is currently GitHub only.
+- **`push`** (default): submit without a pull request.
+- **`pull-request`**: propose a GitHub pull request for review and merge.
 
-Delivery mode is separate from the Backstage backend's `ske.mode`, which chooses
-whether requests reach the Kubernetes API directly or are written to Git. Git-based
-requests still need a GitOps agent to apply them to the platform, even in push mode.
+The backend's `ske.mode` selects Kubernetes API access or Git delivery.
+Git delivery requires a GitOps agent, even in push mode.
 See [Delivery modes](./backstage/delivery-modes) and
 [backend configuration](./backstage/configure-backstage#configuring-the-backend-plugin).
 
-For Cortex, the generated workflows commit requests through Cortex's GitHub or GitLab
-integration. A platform GitOps agent applies those manifests. The create workflow first
-registers a pending Cortex entity; that entity alone proves neither a successful Git commit
-nor successful provisioning. Check the workflow result, request file and platform status.
+For Cortex, workflows commit requests through its GitHub or GitLab integration.
+A GitOps agent applies them. The pending entity precedes the commit:
+check the workflow result, request file and platform status separately.
 
 ### Changing or removing publication
 
-A `PortalCustomization` changes generated documents, not the Promise API itself or the
-Backstage plugins' React components. Its configure containers run between generate and
-writer; they do not run during deletion.
+`PortalCustomization` changes documents, not Promise APIs or plugin UI.
+Configure containers do not run during deletion.
 
 :::warning Opting out is not a pause
-Removing a Promise's last portal opt-in label can trigger cleanup of published output.
-Removing a configured portal also removes controller-managed setup workloads and owned
-storage objects. Review the portal-specific lifecycle before changing bindings or removing
-configuration; do not use removal to temporarily stop synchronisation.
+Removing opt-in labels can clean up published output. Removing portal configuration
+also removes managed setup workloads and owned storage objects.
 :::
 
 ## Next steps
@@ -118,15 +94,9 @@ configuration; do not use removal to temporarily stop synchronisation.
 - [Install and upgrade](./installation) the shared controller, or check an existing installation.
 - Look up [portal configuration and bindings](./reference/portal-configuration) and
   the [adapter output contract](./reference/adapter).
-- [Job customization](./customization/job-customization) covers making the Jobs the controller
-  creates follow your cluster's rules, if you have an admission policy, node placement or resource
-  quotas to satisfy.
-- [Backstage](./backstage/intro) covers configuring a Backstage portal, installing the SKE
-  plugins, and choosing a delivery mode.
-- [Cortex](./cortex/intro) covers configuring a Cortex portal.
-- [Customization](./customization) covers the `PortalCustomization` resource and how to bind a
-  Promise to one.
-- [Portal Patch](./portal-patch/intro) is the declarative way to shape the generated entities.
+- [Configure sync and setup Jobs](./customization/job-customization) for cluster policies.
+- Set up [Backstage](./backstage/intro) or [Cortex](./cortex/intro).
+- [Customise documents](./customization) using [Portal Patch recipes](./portal-patch/recipe-reference).
 - [Migrating from Backstage](./backstage/migrating-from-backstage) and
   [Migrating from Cortex](./cortex/migrating-from-cortex) cover moving an existing integration
   across.

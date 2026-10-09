@@ -6,14 +6,9 @@ slug: /ske/integrations/portal-controller/customization/job-customization
 sidebar_label: Configure sync and setup Jobs
 ---
 
-The Portal Controller creates Kubernetes Jobs to do its work. It creates one when a Promise or
-Resource syncs to a portal, and one when a portal instance is first set up.
-
-Those Jobs run in your cluster, so they need to comply with your cluster's policies.
-
-These settings cover the controller's Jobs. The long-lived status exporter that Cortex portals run
-is a Deployment rather than a Job, so this ConfigMap does not apply to it. Use the
-[exporter overlay](../reference/adapter#cortex-exporter-overlay) for that Deployment.
+Configure the controller's sync and setup Jobs to meet cluster policies.
+For Cortex's status exporter Deployment, use the
+[exporter overlay](../reference/adapter#cortex-exporter-overlay).
 
 ## Apply Job settings
 
@@ -62,23 +57,18 @@ data:
 The controller merges it into each Job it builds: Promise sync Jobs, Resource sync Jobs, and portal
 setup Jobs.
 
-This ConfigMap is the only place these settings live. There is no matching field on the
-`SKEIntegration`. You create it, edit it and delete it yourself, and it applies to every portal
-connection.
+Manage this ConfigMap directly; there is no equivalent `SKEIntegration` field.
+It applies to every portal instance.
 
 :::note
-Kubernetes Jobs cannot be changed after they are created, so the controller replaces them. When you
-edit `workloads.yaml`, the Jobs it affects are recreated with the new configuration. Delete the ConfigMap
-and they go back to the controller's defaults.
+Changes recreate affected Jobs. Deleting the ConfigMap restores defaults.
 :::
 
 ## Labels and annotations reach the pods
 
-Anything under `jobTemplate.metadata` lands on the Job and on the pods it creates, so you declare it
-once. Admission policies usually check pods, so this is normally what you want.
+`jobTemplate.metadata` applies to Jobs and their Pods.
 
-If you want something on the pods only, put it under `jobTemplate.spec.template.metadata`. When the
-same key appears in both places, the pod-level value wins.
+For Pod-only metadata, use `jobTemplate.spec.template.metadata`. Pod-level values win conflicts.
 
 :::info Quote your values
 In YAML, `4711` is a number and `yes` is a boolean, but Kubernetes labels, annotations and
@@ -91,14 +81,12 @@ labels:
   audited: "yes"                 # not yes
 ```
 
-This is the most common mistake. An unquoted value is rejected, and
-[When the file is wrong](#when-the-file-is-wrong) shows where the error appears.
+Unquoted non-string values are rejected. See [configuration errors](#when-the-file-is-wrong).
 :::
 
 ## What you cannot set
 
-Everything in the template is yours except the following. The controller sets these back to its own
-values after merging, because it reads them to find and clean up its own Jobs:
+The controller restores these fields after merging:
 
 | Field | Why the controller keeps it |
 |---|---|
@@ -111,13 +99,11 @@ values after merging, because it reads them to find and clean up its own Jobs:
 Labels such as `app.kubernetes.io/name`, `app.kubernetes.io/component` and
 `app.kubernetes.io/version` are yours to set.
 
-You cannot add a container, but you can change one the controller builds, by naming it. The two
-sections below show the settings platform teams reach for most often.
+Override existing containers by name. You cannot add containers here.
 
 :::info Put your entry in the list the container runs in
-Every container runs in one of two lists, `initContainers` or `containers`, and your entry has to go
-in the same list as the container you are changing. The table above says which list each one is in.
-An entry in the other list matches no container, and is dropped without an error.
+Match the container's list: `initContainers` or `containers`. Entries in the wrong list
+are silently ignored.
 :::
 
 ## Setting resources on a container
