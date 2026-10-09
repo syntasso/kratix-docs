@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.a3e7fe0c.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.c1c6dad1.js" defer="defer"></script>
 <script src="/assets/js/main.bd5531ff.js" defer="defer"></script>
 </head>
 <body>
@@ -45,7 +45,7 @@
 <p>You can find all Kratix-created ConfigMaps by filtering them using the <code>kratix.io/promise-name</code> label.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="serviceaccount">ServiceAccount<a href="#serviceaccount" class="hash-link" aria-label="Direct link to ServiceAccount" title="Direct link to ServiceAccount" translate="no">​</a></h3>
 <p>To run the workflows, Kratix creates a <a href="https://kubernetes.io/docs/concepts/security/service-accounts/" target="_blank" rel="noopener noreferrer" class="">Service Account</a> in the Resource namespace (or in the <code>kratix-platform-system</code> for Promise workflows). This Service Account is used by the Job to run the Workflow. If the <code>spec.rbac.serviceAccount</code> is set in your Workflow, Kratix does not create the Service Account and uses the one you provide.</p>
-<p>The Service Account is created the first time a Resource is requested in a particular namespace, and is deleted when the last Resource is removed from that namespace.</p>
+<p>The Service Account is created the first time a Resource is requested in a particular namespace. It stays when Resources are deleted, and is deleted when the Promise is deleted. For a Promise with a <code>kratix.io/promise-version</code> label, each promise version has its own Service Account for Resource workflows, which is deleted when that version&#x27;s <a class="" href="/main/reference/promises/promise-upgrade/promise-revisions#deleting-a-promise-revision">Promise Revision</a> is deleted.</p>
 <p>You can find all Kratix-created Service Accounts by filtering them using the <code>kratix.io/promise-name</code> label.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rbac-objects">RBAC Objects<a href="#rbac-objects" class="hash-link" aria-label="Direct link to RBAC Objects" title="Direct link to RBAC Objects" translate="no">​</a></h3>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="dynamic-controller-rbac">Dynamic Controller RBAC<a href="#dynamic-controller-rbac" class="hash-link" aria-label="Direct link to Dynamic Controller RBAC" title="Direct link to Dynamic Controller RBAC" translate="no">​</a></h4>
