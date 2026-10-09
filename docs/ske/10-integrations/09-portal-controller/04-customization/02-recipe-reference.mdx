@@ -274,9 +274,15 @@ the recipe succeeds without changing the Template.
 namespace, so the resource always lands in that namespace. Requires `target.list` and `field`, and
 rejects `patch`.
 
-For current generated Templates, prefer
+For generated Templates, use
 [`config.requestNamespace` with `from: fixed`](../backstage/request-namespace#one-namespace-for-every-request).
-It configures both the form and submission behaviour rather than patching a single step.
+It sets the form, submission and request-tracking namespace together.
+
+:::warning Submission manifest only
+This recipe changes only the selected step's manifest. It does not update the form or
+the `record-request` step's manifest. Different namespaces can break request tracking.
+Use `config.requestNamespace` for a consistent namespace policy.
+:::
 
 ```yaml
 target:
@@ -293,9 +299,7 @@ defaultNamespace: platform-team
 `defaultNamespace` must be a valid Kubernetes namespace name, at most 63 characters, and defaults
 to `default` when omitted.
 
-This only removes the namespace from the manifest. To also hide the namespace field on the form,
-pair it with a `merge` recipe that deletes `objnamespace` from the instance metadata page, as shown
-under [`merge`](#merge-default) above.
+For hand-written Templates, keep the form, submission and tracking manifests consistent.
 
 :::warning Push delivery mode only
 This recipe targets the `ske-configure-resource` step, which only exists in `push`
