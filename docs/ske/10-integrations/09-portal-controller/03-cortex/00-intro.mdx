@@ -9,9 +9,9 @@ keywords: [portal, cortex, ske, controller, workflow, exporter]
 A Cortex portal publishes Promises and Resources as Cortex entities, and generates Cortex
 workflows so developers can request, update and delete Resources from Cortex.
 
-Unlike Backstage, the Portal Controller calls the Cortex API directly. That means a Cortex portal
-needs a URL and a credential, and it runs two things Backstage does not: a setup Job and a status
-exporter.
+Unlike Backstage, the Portal Controller calls the Cortex API directly. A Cortex portal
+therefore needs a URL and a credential. Both portal types run a setup Job, but Cortex
+also runs a long-lived status exporter.
 
 ## Prepare your Cortex workspace
 

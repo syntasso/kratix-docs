@@ -123,7 +123,12 @@ Destination's own `path` on the Destination itself.
 ## Configuration errors
 
 `destination` and `stateStore` are validated when the portal's setup Job runs, and a failure is
-reported as a `PortalSetupFailed` event on the `SKEIntegration`:
+reported as a `PortalSetupFailed` event on the `ske-portal-config` ConfigMap in
+`kratix-platform-system`. Use the [ConfigMap inspection command](../installation#installing-without-the-ske-operator)
+to find the event. In an operator-managed installation, correct the configuration in
+`SKEIntegration.spec.portals`, rather than editing the generated ConfigMap.
+
+The following messages identify configuration errors:
 
 | Message | Cause |
 |---|---|
