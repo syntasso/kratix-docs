@@ -60,9 +60,11 @@ They are not order-independent: a rename or removal can change what a later sele
 
 ## The image tag is the grammar version
 
-The image tag selects the available operations and selector grammar, independently of the
-Portal Controller version. `insertBefore` and `insertAfter` require Portal Patch `v0.8.0`
-or later. Do not use `latest`; validate your recipes against the pinned version's generated output.
+Pin the helper image separately from the controller. Do not use `latest`.
+
+:::info Upgrading Portal Patch
+Check release notes and revalidate recipes before changing the image tag.
+:::
 
 ## Recipe schema
 

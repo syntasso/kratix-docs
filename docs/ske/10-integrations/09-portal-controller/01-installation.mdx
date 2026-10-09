@@ -6,9 +6,8 @@ slug: installation
 keywords: [portal, installation, upgrade, ske, controller]
 ---
 
-Install the shared Portal Controller once per platform, then configure Backstage or Cortex
-on that installation. At the end of this guide, the controller Deployment and its
-`PortalCustomization` CRD are ready. Publishing entities is the next step, not proof of installation.
+Install the controller once per platform, then configure Backstage or Cortex.
+This guide verifies the Deployment and `PortalCustomization` CRD.
 
 ## Requirements
 
@@ -28,9 +27,8 @@ Install the Backstage packages in Backstage.
 
 ## Install the Portal Controller
 
-The [SKE Operator](../../installing-ske/install-with-operator) is the normal installation path.
-Use [standalone installation](#installing-without-the-ske-operator) only if the operator
-does not manage this integration.
+Use the [SKE Operator](../../installing-ske/install-with-operator), or
+[install standalone](#installing-without-the-ske-operator) if it does not manage this integration.
 
 ### 1. Check for an existing installation
 
@@ -39,16 +37,19 @@ kubectl get skeintegrations
 kubectl get deployment ske-portal-controller --namespace kratix-platform-system
 ```
 
-Look for an `SKEIntegration` with `spec.type: portal-controller`. Only one may exist on a
-platform. If it already exists, keep its name and `spec.portals` entries; go to
-[verification](#verify-the-installation), or [upgrade](#upgrade-the-controller) if needed.
+Look for `spec.type: portal-controller`. Only one integration of this type is allowed.
+Reuse it: [verify](#verify-the-installation) or [upgrade](#upgrade-the-controller), preserving
+its name and portal entries.
 
-If the Deployment exists without an integration resource, confirm how it is managed before
-installing through the operator. Do not install a second controller over a standalone installation.
+If only the Deployment exists, check how it is managed before installing another controller.
 
 ### 2. Create the integration resource
 
 For a new installation, save this as `portal-controller.yaml`:
+
+:::warning Existing installations
+Do not apply `portals: []` to an existing integration. It removes configured portals.
+:::
 
 ```yaml
 apiVersion: platform.syntasso.io/v1alpha1
@@ -65,9 +66,8 @@ spec:
 kubectl apply --filename portal-controller.yaml
 ```
 
-The operator installs the Deployment, CRD, Service Account and RBAC. `portals: []` deliberately
-installs no portal instances. Configure your chosen portal after verifying the controller.
-Do not apply this empty list to an existing integration: it would remove its portal configuration.
+The operator installs the Deployment, CRD, Service Account and RBAC.
+The empty list configures no portal instances.
 
 ## Verify the installation
 
@@ -91,37 +91,30 @@ kubectl wait --for=condition=Established \
 kubectl get configmap ske-portal-config --namespace kratix-platform-system
 ```
 
-A ready Deployment is not evidence that a portal's setup or publication has succeeded.
-Continue with [Backstage](./backstage/intro) or [Cortex](./cortex/intro), then verify their
-generated output. If these checks fail, use [Troubleshoot portal sync](./troubleshooting).
+Next, configure [Backstage](./backstage/intro) or [Cortex](./cortex/intro) and verify publication.
+For failed installation checks, see [Troubleshoot portal sync](./troubleshooting).
 
 ## Upgrade the controller
 
 :::warning Upgrade prerequisites
-Upgrade the SKE Operator to `v0.34.0` or later before installing Portal Controller `v0.4.0`
-or later. These controller versions read the operator-generated configuration ConfigMap.
+Before upgrading to Portal Controller `v0.4.0` or later, upgrade the SKE Operator to `v0.34.0` or later.
 
-Upgrade the Backstage plugins before the controller. Otherwise new Templates can call
-actions that the installed backend does not provide; a request may be submitted before
-a later Template step fails.
+Upgrade Backstage plugins first. New Templates may require actions absent from older plugins.
 
-When upgrading SKE to `v0.59.0`, upgrade Portal Controller to at least `v0.4.2` at the same
-time. Review [controller releases](/ske/releases/ske-portal-controller),
+SKE `v0.59.0` requires Portal Controller `v0.4.2` or later.
+Review [controller releases](/ske/releases/ske-portal-controller),
 [SKE releases](../../50-releases/10-ske.mdx) and [Backstage plugin releases](/ske/releases/backstage).
 :::
 
-1. Review the release notes for your current and target versions, including plugin and
-   recipe compatibility. Upgrade prerequisite components first.
-2. In the existing integration's source manifest, change **only** `spec.version` to the target
-   released version. Preserve its name, portal entries and deployment settings.
+1. Check release notes and compatibility. Upgrade prerequisites first.
+2. Change **only** `spec.version` in your existing integration manifest.
 3. Apply that manifest through your normal deployment process. For a locally managed file:
 
    ```bash
    kubectl apply --filename portal-controller.yaml
    ```
 
-4. Repeat [installation verification](#verify-the-installation). Then verify an existing
-   Promise's publication and a test request through the portal-specific guide.
+4. [Verify installation](#verify-the-installation), then test publication and request delivery.
 
 For standalone upgrades, repeat the manifest download and Kustomize apply below using the
 target release. Preserve the configuration ConfigMap and your local overlays. Do not apply
@@ -129,13 +122,11 @@ the empty bootstrap ConfigMap again.
 
 ## Installing without the SKE Operator
 
-This path deploys the released controller manifest directly. It does not install SKE or
-its pipeline adapter. Do not use it alongside an operator-managed Portal Controller.
+This path requires SKE and its pipeline adapter. Do not combine it with an operator-managed controller.
 
 ### 1. Check platform dependencies
 
-The SKE installation must already provide the system namespace, pipeline adapter image
-configuration and the `syntasso-registry` pull Secret:
+Check SKE's namespace, pipeline adapter configuration and registry Secret:
 
 ```bash
 kubectl get namespace kratix-platform-system
@@ -147,7 +138,7 @@ kubectl get secret syntasso-registry --namespace kratix-platform-system
 
 The ConfigMap must contain a non-empty `PIPELINE_ADAPTER_IMG`. Restore missing dependencies
 through your [SKE installation](../../installing-ske/intro) process before proceeding.
-The commands above do not print Secret contents.
+These commands do not print credentials.
 
 ### 2. Download and configure the released manifest
 
@@ -160,9 +151,8 @@ curl --fail --location --output ske-portal-controller.yaml \
   https://syntasso-enterprise-releases.s3.eu-west-2.amazonaws.com/ske-portal-controller/v0.6.1/ske-portal-controller.yaml
 ```
 
-The manifest contains the CRD, RBAC, Service Account and controller Deployment. It does
-not create the namespace or configure the Deployment's private-registry pull credentials.
-Save this overlay as `kustomization.yaml` beside the downloaded file:
+The manifest includes the CRD, RBAC, Service Account and Deployment, but no namespace or
+pull credentials. Save this overlay as `kustomization.yaml` beside it:
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -187,8 +177,7 @@ patches:
 
 ### 3. Create the portal configuration
 
-For a **new installation only**, save this as `portal-config.yaml` to bootstrap an empty
-configuration. No entities are published until you add a portal instance:
+For a **new installation**, save this as `portal-config.yaml`. It configures no portal instances:
 
 ```yaml
 apiVersion: v1
@@ -204,8 +193,7 @@ data:
 kubectl apply --filename portal-config.yaml
 ```
 
-If this ConfigMap already exists, preserve its entries instead. When adding a portal,
-use the entry fields and complete examples in the
+If the ConfigMap exists, preserve its entries. Add portal instances using the
 [configuration reference](./reference/portal-configuration#configuration-ownership).
 Create any referenced Cortex credential Secret through your Secret management process first.
 
@@ -241,7 +229,7 @@ See [Adapter reference](./reference/adapter#image-and-workload-overrides).
 
 ## Portal configuration reference
 
-The following links replace the reference material previously bundled into installation.
+Look up fields, bindings and generation settings:
 
 <span id="connect-a-portal" />
 

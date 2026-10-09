@@ -17,15 +17,9 @@ generated documents in place:
 generate  →  configure (this profile's containers, in order)  →  writer
 ```
 
-The lane runs any container image you give it, so you can use your own tooling, an off-the-shelf
-image, or the helper described below.
-
 :::tip
-If you would rather not write a container, [Portal Patch](./portal-patch/recipe-reference) is a helper image
-we ship that applies declarative recipes in this lane, covering setting owners and tags,
-introducing a resource on its request form, removing form fields, adding an item to a generated
-list, and reshaping Cortex workflows. It is entirely optional, and you can mix it with your own
-containers in the same pipeline.
+Use [Portal Patch recipes](./portal-patch/recipe-reference) for declarative edits.
+Use your own containers for computed values or external calls. Both can share a pipeline.
 :::
 
 ## Creating a `PortalCustomization`
@@ -59,8 +53,7 @@ spec:
 | `spec.promise.configure` | Kratix `PipelineSpec`, optional | Runs between generate and writer for Promise documents. |
 | `spec.resource.configure` | Kratix `PipelineSpec`, optional | Runs between generate and writer for each bound Resource request's documents. |
 
-Either lane may be omitted. A profile with only `promise` leaves Resource syncs untouched, and the
-other way round.
+Omitted lanes leave their documents unchanged.
 
 ## The configure lane is a Kratix pipeline
 
@@ -98,20 +91,17 @@ metadata:
     kratix.io/portal-customization: backstage-add-team-owner
 ```
 
-The label alone is enough to opt in. The portal type is derived from the profile's own
-`spec.portalType`, so you do not also need a `kratix.io/portal-<type>` label.
+This label opts in using `spec.portalType`; no additional portal label is needed.
 
 :::important
 A Promise may be bound to **one** `PortalCustomization` only. If more than one
 `kratix.io/portal-customization` label is present, the Promise reports `PortalBindingReady: False`
 with reason `AmbiguousCustomization` and does not sync.
 
-To apply several sets of changes, list multiple containers in one profile rather than binding
-multiple profiles.
+Combine changes in one profile's containers.
 :::
 
-If you have more than one portal of the profile's type, use an instance suffix to say which portal
-the Promise should sync to. The suffix names the **portal**, not a second profile:
+With multiple instances of the type, add the instance name as a suffix:
 
 ```yaml
 metadata:

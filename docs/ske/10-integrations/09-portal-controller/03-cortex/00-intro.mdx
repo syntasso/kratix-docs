@@ -80,10 +80,10 @@ Requests are committed to `<path>/<promise>/<namespace>-<name>.yaml`.
 
 ## What happens when a developer creates a request
 
-From Portal Controller `v0.6.1`, the generated create workflow registers a Cortex
-entity titled `<name> request (pending)`, owned by the requester, before committing
-the Resource request to Git. When the workflow completes, the controller will replace 
-the pending entity definition with the generated Resource definition.
+The create workflow registers `<name> request (pending)`, owned by the requester, then
+commits the request to Git. Once GitOps applies the request, the controller replaces
+the pending entity with the Resource definition.
+
 ## What gets deployed
 
 Alongside the usual `generate → configure → writer` pipeline, a Cortex portal runs:
@@ -93,7 +93,7 @@ Alongside the usual `generate → configure → writer` pipeline, a Cortex porta
   configuration reruns its setup.
 - A long-lived **status exporter**, a Deployment and Service running one replica as the
   `ske-portal-exporter` Service Account, which pushes resource status changes to the Cortex API as
-  they happen.The controller removes the exporter when its portal connection is removed.
+  they happen. The controller removes the exporter when its portal configuration is removed.
 
 ### Tuning the exporter
 

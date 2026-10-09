@@ -5,10 +5,8 @@ slug: /ske/integrations/portal-controller/reference/portal-configuration
 sidebar_label: Portal configuration and bindings
 ---
 
-Portal configuration declares the Backstage or Cortex instances available to a platform.
-Binding labels select which instance receives a Promise and its Resource requests. This
-reference describes Portal Controller `v0.6.1`; use the [Backstage](../backstage/intro) or
-[Cortex](../cortex/intro) guide for a complete integration procedure.
+Configure available portal instances, then select them with binding labels.
+For setup, follow [Backstage](../backstage/intro) or [Cortex](../cortex/intro).
 
 ## Configuration resource
 
@@ -32,10 +30,9 @@ spec:
           name: backstage-catalogue
 ```
 
-Only one `SKEIntegration` of this type may exist on a platform. Add entries to the existing
-resource, rather than creating another. An empty `portals: []` installs the controller
-without publishing anything. See the [SKE Operator API](../../../reference/ske-operator#skeintegration-crd)
-for deployment settings and readiness.
+Use one integration per platform. Add instances to its `portals` list;
+`portals: []` installs without publishing. See the
+[SKE Operator API](../../../reference/ske-operator#skeintegration-crd) for deployment settings.
 
 ### Portal fields
 
@@ -108,10 +105,8 @@ data:
           name: backstage-catalogue
 ```
 
-Changing a portal's configuration reruns its setup, not setup for unrelated instances.
-Changes to shared [Job configuration](../customization/job-customization) can rerun setup
-across instances. Secret contents are not part of the configuration fingerprint; rotating
-a token is not a guarantee that setup reruns.
+Portal changes rerun that instance's setup. Shared [Job settings](../customization/job-customization)
+can rerun setup across instances. Rotating a Secret's contents does not guarantee a setup rerun.
 
 :::warning Removing configuration performs cleanup
 Removing an instance removes its controller-managed setup workloads and owned objects.
@@ -135,10 +130,9 @@ stringData:
   token: <YOUR_CORTEX_API_TOKEN>
 ```
 
-Do not commit a real token to Git. Use your platform's Secret management process.
-The operator checks that the Secret exists, not that its token works. Credentials are
-injected into Cortex API-facing workloads through Secret key references, not into generate
-or configure stages or a shared volume. Backstage publication does not call the Backstage API.
+Manage credentials outside Git. The operator checks Secret existence, not token validity.
+Cortex API-facing workloads use Secret key references; generate/configure receive no token
+injection. Backstage publication needs no API token.
 
 ## Binding labels
 
@@ -150,8 +144,7 @@ metadata:
     kratix.io/portal-backstage: "true"
 ```
 
-An unsuffixed label resolves only when exactly one instance of that type exists.
-With multiple instances, name one explicitly:
+Unsuffixed labels require one instance of the type. Otherwise, name an instance:
 
 ```yaml
 metadata:
@@ -173,15 +166,14 @@ metadata:
     kratix.io/portal-backstage.prod: "false"
 ```
 
-A skipped request generates no entity and reports no portal condition. Opting out is not
-a guarantee that previously published entities will be retained or removed.
+Skipped requests generate no entity or portal condition. Opt-out skips sync; it is not a cleanup policy.
 
 ### Binding a PortalCustomization
 
 `kratix.io/portal-customization: <NAME>` opts in using the resource's `spec.portalType`.
 `kratix.io/portal-customization.prod: <NAME>` selects instance `prod`.
-A Promise can reference only one `PortalCustomization`; the suffix names a portal instance,
-not another customisation. See [PortalCustomization](../customization) for the schema and examples.
+A Promise can reference one `PortalCustomization`. The suffix names the instance.
+See [PortalCustomization](../customization) for its schema.
 
 ## Binding status
 
