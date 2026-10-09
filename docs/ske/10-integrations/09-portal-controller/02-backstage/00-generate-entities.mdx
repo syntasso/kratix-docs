@@ -27,15 +27,17 @@ Keep catalogue files separate from manifests your GitOps agent applies.
 Check for an existing installation:
 
 ```bash
-kubectl get skeintegrations
 kubectl get deployment ske-portal-controller -n kratix-platform-system
 ```
+
+With the SKE Operator, also check `kubectl get skeintegrations` for the integration name.
 
 If absent, follow [Install and upgrade](../installation), then return here.
 Keep its `SKEIntegration` manifest: the next step adds a portal to it.
 
 Without the SKE Operator, use the same `portals` entry in
-[`ske-portal-config`](../installation#installing-without-the-ske-operator), not an `SKEIntegration`.
+[`ske-portal-config`](../reference/portal-configuration#configuration-ownership), not an `SKEIntegration`.
+Follow the standalone apply instructions below.
 
 ## 2. Configure catalogue storage {#configuration}
 
@@ -184,10 +186,38 @@ config:
 Setup creates neither object. The Destination must already exist and reference a working state store.
 Its own path and the state store's path determine the output prefix. Do not include `stateStore` here.
 
+The controller routes using the Destination's labels, not its name. Give it a non-empty label set
+that selects only that Destination. For example, add a unique catalogue label:
+
+```bash
+kubectl label destination <DESTINATION_NAME> backstage-catalog=prod
+kubectl get destinations -l backstage-catalog=prod
+```
+
+The second command must return only your chosen Destination. Preserve the label in its source
+manifest if GitOps manages it. Set it before binding the Promise.
+Without labels, routing falls back to `environment: backstage` and can select different storage.
+
 ### Apply the configuration
+
+**With the SKE Operator**, apply your edited integration:
 
 ```bash
 kubectl apply -f portal-controller.yaml
+```
+
+**Without the operator**, copy your selected portal entry from `spec.portals` into the
+`data.connections.yaml` list in your existing ConfigMap manifest. There is no `portals:` wrapper
+inside that value. Preserve other entries and save it as `portal-config.yaml`.
+See the [complete ConfigMap shape](../reference/portal-configuration#configuration-ownership).
+
+```bash
+kubectl apply -f portal-config.yaml
+```
+
+For either installation, inspect setup events:
+
+```bash
 kubectl describe configmap ske-portal-config -n kratix-platform-system
 ```
 
