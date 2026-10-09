@@ -14,7 +14,7 @@
 const doc = (id, label) => ({ type: "doc", id: `ske/${id}`, label });
 const category = (label, items, slug) => ({
   type: "category", label, items,
-  ...(slug ? { link: { type: "generated-index", slug } } : {}),
+  link: { type: "generated-index", slug },
 });
 const portalDoc = (id, label) => doc(`integrations/portal-controller/${id}`, label);
 
@@ -31,7 +31,7 @@ const sidebars = {
       doc("installing-ske/install-with-operator", "Install SKE with the Operator"),
       doc("installing-ske/air-gapped", "Air-gapped installation"),
       doc("installing-ske/migrating-from-kratix", "Migrate from open-source Kratix"),
-    ]),
+    ], "/category/enterprise-install-ske"),
     category("Build and evolve Promises", [
       doc("guides/promise-development", "Build and test a database Promise"),
       doc("promise-testing-framework/intro", "Test Promise pipelines"),
@@ -50,10 +50,10 @@ const sidebars = {
         doc("guides/healthchecks", "Add health checks to a Promise"),
         doc("guides/healthchecks-nonk8s", "Check non-Kubernetes resources"),
         doc("guides/health-records-from-a-bucket", "Migrate health records to a bucket"),
-      ]),
-      category("SKE GUI", [doc("installing-ske/ske-gui", "Install the GUI"), doc("guides/ske-gui", "Use the GUI")]),
+      ], "/category/enterprise-health-checks"),
+      category("SKE GUI", [doc("installing-ske/ske-gui", "Install the GUI"), doc("guides/ske-gui", "Use the GUI")], "/category/enterprise-ske-gui"),
       doc("operations/troubleshooting", "Troubleshoot SKE"),
-    ]),
+    ], "/category/enterprise-operate-your-platform"),
     category("Portal integrations", [
       doc("integrations/portal-integrations", "Overview"),
       category("Backstage", [
@@ -65,14 +65,14 @@ const sidebars = {
         portalDoc("backstage/frontend-plugin-reference", "Frontend plugin API"),
         portalDoc("backstage/backend-plugin-reference", "Backend plugin API"),
         portalDoc("backstage/migrating-from-backstage", "Migrate from the Backstage Controller"),
-      ]),
+      ], "/category/enterprise-backstage"),
       category("Cortex", [
         portalDoc("cortex/intro", "Overview"),
         portalDoc("cortex/generate-entities", "Generate Cortex entities and workflows"),
         portalDoc("cortex/send-resource-requests", "Send resource requests to Kratix"),
         portalDoc("cortex/examples", "Customise entities and workflows"),
         portalDoc("cortex/migrating-from-cortex", "Migrate from the Cortex Controller"),
-      ]),
+      ], "/category/enterprise-cortex"),
       doc("integrations/port", "Port (Preview)"),
       category("Portal Controller", [
         portalDoc("intro", "How it works"),
@@ -84,8 +84,8 @@ const sidebars = {
           portalDoc("customization/intro", "PortalCustomization"),
           portalDoc("customization/recipe-reference", "Portal Patch recipes"),
           portalDoc("reference/adapter", "Adapter reference"),
-        ]),
-      ]),
+        ], "/category/enterprise-portal-controller-reference"),
+      ], "/category/enterprise-portal-controller"),
       category("Deprecated controllers", [
         category("Backstage Controller", [
           doc("integrations/backstage/intro", "Overview"),
@@ -94,20 +94,20 @@ const sidebars = {
           doc("integrations/backstage/installation/backstage", "Configure catalogue ingestion"),
           doc("integrations/backstage/installation/generating-backstage-components", "Generate Backstage Components"),
           doc("integrations/backstage/air-gapped-installation/intro", "Air-gapped installation"),
-        ]),
+        ], "/category/enterprise-backstage-controller"),
         category("Backstage generator", [
           doc("integrations/backstage/reference/index", "Overview"),
           doc("integrations/backstage/reference/generator", "SKE Backstage Generator"),
           doc("integrations/backstage/reference/generator-promise", "SKE Component Promise"),
-        ]),
+        ], "/category/enterprise-backstage-generator"),
         category("Cortex Controller", [
           doc("integrations/cortex/intro", "Overview"),
           doc("integrations/cortex/installation", "Configure Cortex"),
           doc("integrations/cortex/generating-cortex-components", "Use the Cortex integration"),
-        ]),
-      ]),
-    ]),
-    category("Tool integrations", [doc("integrations/tfe", "Terraform Enterprise and HCP Terraform"), doc("integrations/mcp", "MCP Server (Preview)")]),
+        ], "/category/enterprise-cortex-controller"),
+      ], "/category/enterprise-deprecated-controllers"),
+    ], "/category/enterprise-portal-integrations"),
+    category("Tool integrations", [doc("integrations/tfe", "Terraform Enterprise and HCP Terraform"), doc("integrations/mcp", "MCP Server (Preview)")], "/category/enterprise-tool-integrations"),
     category("Reference", [
       doc("reference/index", "API and CLI index"),
       doc("reference/ske-operator", "SKE Operator API"),
@@ -120,7 +120,7 @@ const sidebars = {
         doc("promise-testing-framework/reference/kratix-test-pipeline", "kratix test pipeline"),
         doc("promise-testing-framework/reference/kratix-test-stage", "kratix test stage"),
       ], "/category/command-reference-1"),
-    ]),
+    ], "/category/enterprise-reference"),
     category("Releases and support", [
       doc("releases/index", "Release index"),
       doc("releases/compatibility", "Supported versions and compatibility"),
@@ -145,7 +145,7 @@ const sidebars = {
         doc("releases/deprecated/cortex-controller", "Cortex Controller"),
       ], "/category/deprecated"),
       doc("support", "Support policy"),
-    ]),
+    ], "/category/enterprise-releases-and-support"),
   ],
 
   // But you can create a sidebar manually
