@@ -6,13 +6,18 @@ slug: air-gapped-plugins
 keywords: [portal, backstage, plugin, air-gapped, spotify portal, npm registry]
 ---
 
-In air-gapped or network-restricted environments, your Backstage may not be able to reach the public npm registry to install SKE plugins directly. You must first publish the plugins to an internal registry accessible from your Backstage instance, then follow the standard [installation and configuration steps](./configure-backstage).
+In air-gapped or network-restricted environments, your Backstage may not be able to reach the public npm registry to install SKE plugins directly. If so, you will need to install the plugins in two steps:
+
+1. Publish the plugins to an internal registry that your Backstage instance can reach.
+2. Follow the standard [installation and configuration steps](./configure-backstage).
 
 ### Spotify Portal for Backstage
 
-If you are using Spotify Portal for Backstage, you will need to publish the plugins to your internal Portal Cloud instance.
+When using Spotify Portal for Backstage, publish the plugins to your Portal instance.
 
-Contact Spotify to request a token for publishing plugins to your cloud instance. Once you have a token, download the frontend plugin by running:
+Before you start, contact Spotify to request a token that lets you publish plugins to your Portal instance.
+
+Download the frontend plugin:
 
 ```bash
 npm pack @syntasso/plugin-ske-frontend
@@ -45,4 +50,4 @@ npm publish syntasso-plugin-ske-frontend-<version>.tgz --registry https://<compa
 npm publish syntasso-plugin-ske-backend-<version>.tgz --registry https://<company>.spotifyportal.com/api/plugin-installer/registry/npm
 ```
 
-Passing `--registry` directly ensures the tarball is published to your Portal instance regardless of any registry configuration inside the plugin's own `package.json`.
+The `--registry` flag makes npm publish to your Portal instance, even if the plugin's `package.json` names a different registry.
