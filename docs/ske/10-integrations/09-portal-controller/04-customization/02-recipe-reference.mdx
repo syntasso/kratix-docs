@@ -1,10 +1,70 @@
 ---
-title: Recipe reference
-description: The complete Portal Patch recipe grammar
+title: Portal Patch recipes
+description: Run Portal Patch, select generated documents and apply versioned declarative recipes
 keywords: [portal, portal-patch, recipe, reference, target, patch]
 slug: /ske/integrations/portal-controller/portal-patch/recipe-reference
-sidebar_label: Recipe reference
+sidebar_label: Portal Patch recipes
 ---
+
+Portal Patch is an optional configure-stage image that edits the adapter's generated documents
+using declarative recipes. It is independently versioned from the controller. This reference
+uses `ghcr.io/syntasso/portal-patch:v0.8.2`; pin a released tag and review
+[release notes](/ske/releases/portal-patch) before changing it.
+
+## How it runs
+
+Declare Portal Patch in a `PortalCustomization` configure lane. This complete resource changes
+the Promise Component's owner; it requires an installed Portal Controller and a configured
+Backstage instance:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: PortalCustomization
+metadata:
+  name: standard-ownership
+spec:
+  portalType: backstage
+  promise:
+    configure:
+      containers:
+        - name: portal-patch
+          image: ghcr.io/syntasso/portal-patch:v0.8.2
+          args:
+            - |
+              target:
+                kind: Component
+              patch:
+                spec:
+                  owner: platform-team
+```
+
+Apply the resource, then add this label to the Promise's manifest. This fragment shows the
+binding only; use an instance suffix if more than one Backstage instance is configured:
+
+```yaml
+metadata:
+  labels:
+    kratix.io/portal-customization: standard-ownership
+```
+
+The label opts the Promise in without a separate `portal-backstage` label. Verify the Promise's
+binding and sync conditions, then inspect the published Component's `spec.owner`. Resource
+Components remain unchanged because this example declares no resource lane.
+See [PortalCustomization](../customization) for the full pipeline and binding contract.
+
+## Recipes are container arguments
+
+Each argument is one complete recipe. There are no recipe flags or configuration file.
+Recipes for a file apply in argument order, against the result of the previous recipe.
+They are not order-independent: a rename or removal can change what a later selector matches.
+
+## The image tag is the grammar version
+
+The image tag selects the available operations and selector grammar, independently of the
+Portal Controller version. `insertBefore` and `insertAfter` require Portal Patch `v0.8.0`
+or later. Do not use `latest`; validate your recipes against the pinned version's generated output.
+
+## Recipe schema
 
 A recipe is a single YAML document passed as one container argument. Every recipe selects a
 **target** and then applies an **operation** to it.
@@ -17,7 +77,7 @@ target:
     key: title
     value: Size
 op: merge              # optional, defaults to merge
-patch:                 # required for merge, forbidden for every other op
+patch:                 # required for merge, insertBefore and insertAfter
   spec:
     owner: platform-team
 ```
@@ -184,6 +244,10 @@ patch:
     message: a resource was requested
 ```
 
+This insertion example assumes your Backstage backend registers a `ske:notify` action.
+Choose an action your backend provides; inserting an unknown action does not install it.
+The inserted item must not duplicate the anchor selector's key and value.
+
 ### `singleSpecPage`
 
 **Backstage only.** Collapses a Template's per-property specification pages into one page titled
@@ -191,7 +255,7 @@ patch:
 
 :::note
 A single page is the default, so this recipe only matters on a portal that set
-[`--single-spec-page=false`](../installation#portal-wide-generate-flags).
+[`--single-spec-page=false`](../reference/adapter#portal-wide-generate-flags).
 :::
 
 ```yaml
@@ -200,15 +264,19 @@ target:
 op: singleSpecPage
 ```
 
-The first page, which carries the instance metadata fields, is left untouched. Every remaining
-page is merged into a single page. If the Template has one page or fewer, the recipe does nothing
-and succeeds.
+Only pages with a `properties.spec` wrapper are combined. Metadata, repository selection
+and other non-specification pages are preserved in order. If no specification page exists,
+the recipe succeeds without changing the Template.
 
 ### `hideNamespaceManifest`
 
 **Backstage only.** Replaces the namespace placeholder in a generated step's manifest with a fixed
 namespace, so the resource always lands in that namespace. Requires `target.list` and `field`, and
 rejects `patch`.
+
+For current generated Templates, prefer
+[`config.requestNamespace` with `from: fixed`](../backstage/request-namespace#one-namespace-for-every-request).
+It configures both the form and submission behaviour rather than patching a single step.
 
 ```yaml
 target:
@@ -268,9 +336,20 @@ nested property `spec.database.name` is `database-name`; the identity fields are
 `sourceAction`, `outputKey` and `attribute` may only contain letters, digits, hyphens and
 underscores.
 
+## Failure behaviour
+
+Recipe parsing, selection and application errors abort the batch before files are written.
+Portal Patch exits non-zero, and the failed configure init container prevents the writer
+from running. A missing `catalog-info.yaml` is the one exception: recipes for that file
+are logged and skipped. Other missing files are errors.
+
+This guarantee concerns recipe failures, not a filesystem transaction: an I/O error while
+writing results also fails the container but can occur after another file has been written.
+The writer still does not run after that failure.
+
 ## Errors
 
-Every failure exits non-zero, writes one line naming the recipe to stderr, and writes no files.
+Recipe failures exit non-zero, report the offending target or operation on stderr, and write no files.
 The common ones:
 
 | Message | Cause |
@@ -287,8 +366,15 @@ The common ones:
 | `unknown op "X"` | Misspelled operation |
 | `field "F" has no ... placeholder` | The field exists but does not contain the expected placeholder |
 
-Recipes are all-or-nothing. If any recipe in the batch fails, the files are left exactly as the
+Recipe application is all-or-nothing. If any recipe in the batch fails, the files are left exactly as the
 generate stage wrote them.
+
+## Choosing between a recipe and your own container
+
+Use recipes for known fields and list items: owners, tags, titles, links, form fields and
+workflow inputs. Use a container script when values depend on the parent object, an external
+service or new files. Both approaches use the same configure lane and can be composed in order.
+See the [script example](../customization#worked-example-setting-owner-and-tags-without-portal-patch).
 
 ## Which operations apply to which portal
 
