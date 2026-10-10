@@ -651,6 +651,7 @@ Kratix will set the following environment variables for all containers in the wo
 | `KRATIX_OBJECT_NAMESPACE` | The namespace of the object in `/kratix/input/object.yaml`. |
 | `KRATIX_CRD_PLURAL`       | The plural for the API defined in the Promise. |
 | `KRATIX_CLUSTER_SCOPED`   | A boolean for if the Promise API is cluster scoped. |
+| `KRATIX_PROMISE_VERSION`  | The version of the Promise being applied. |
 
 By checking the `KRATIX_WORKFLOW_ACTION` and `KRATIX_WORKFLOW_TYPE` environment variables,
 a container is able to discover the **context** in which it's being invoked (e.g. "I'm

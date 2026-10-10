@@ -24,6 +24,10 @@ spec:
   # A reference the Promise the Health Check should be performed against
   promiseRef:
     name: promise-name
+  # Set by Kratix when it writes the HealthDefinition to the Destination. For
+  # a Promise without the kratix.io/promise-version label Kratix does not set
+  # it, and any value the Pipeline wrote stays.
+  promiseVersion: v2.0.0
   # The time or interval the check should run against
   # This can follow Cron syntax or macros such as @hourly
   schedule: "* * * * *"
@@ -50,6 +54,29 @@ spec:
         - image: ghcr.io/myorg/health-check
           name: health
 ```
+
+## Promise version
+
+A HealthDefinition created by a Resource Configure workflow belongs to one
+version of the Promise. Kratix sets `spec.promiseVersion` on it before writing
+it to the Destination, overwriting any value the workflow set.
+This does not happen for an unversioned Promise, that is, one without the
+`kratix.io/promise-version` label.
+
+Kratix also records on the Resource's `status.healthStatus` which Promise
+version it expects health results for, and how many HealthDefinitions the
+Configure workflow wrote. Results for earlier Promise versions are kept. See the
+[health checks guide](/main/guides/resource-health) for more information.
+
+:::warning
+
+When a HealthDefinition is created outside the Resource Configure workflow, for
+example applied straight to a Destination or produced by another controller,
+Kratix does **not** set `spec.promiseVersion` on it. Set it yourself when you
+create the HealthDefinition, so that its results can be matched to a Promise
+version. Every workflow container has the value in `KRATIX_PROMISE_VERSION`.
+
+:::
 
 ## Namespace
 
