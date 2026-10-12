@@ -76,7 +76,46 @@ Kratix does **not** set `spec.promiseVersion` on it. Set it yourself when you
 create the HealthDefinition, so that its results can be matched to a Promise
 version. Every workflow container has the value in `KRATIX_PROMISE_VERSION`.
 
+A HealthDefinition without `spec.promiseVersion` still produces health records.
+They show in the Resource's `status.healthStatus` and count towards `state`,
+but they never move the `HealthChecksSucceeded` condition.
+
+A HealthDefinition you stamp yourself counts towards the condition only when the
+Configure workflow for that Promise version also wrote at least one
+HealthDefinition and it has reached a Destination. When the Configure workflow
+wrote none, the condition is `True` with reason `NoHealthChecks` whatever your
+HealthDefinition reports. When it did write one:
+
+- An unhealthy result at the expected version makes the condition `False` with
+  reason `Unhealthy`.
+- The platform never waits for it. `expectedRecords` counts only the
+  HealthDefinitions the Configure workflow wrote and the Destinations they
+  reached. If your HealthDefinition is removed, the Health Agent deletes its
+  record and nothing stalls. If your check stops running, its last record
+  stays: a record that stopped at unhealthy keeps the condition `False` until
+  the record is deleted.
+- The platform counts records at the expected version; it does not match them
+  to the HealthDefinitions it expects. A healthy record from a HealthDefinition
+  you stamped yourself can therefore take the place of one the Configure
+  workflow shipped, and the condition can become `True` before that check has
+  reported.
+
 :::
+
+### How the SKE Health Agent carries the version
+
+The SKE Health Agent copies `spec.promiseVersion` onto the HealthState it
+writes on the Destination (`data.promiseVersion`), and from there onto the
+HealthRecord it writes to the state store. The version on a result is the
+version of the HealthDefinition the check run was built from. A run that
+started before the HealthDefinition changed reports the old version, including
+when the run fails. A HealthDefinition without `spec.promiseVersion` produces
+results without one. When a run fails and its Job has already been cleaned up,
+the unhealthy result has no version either.
+
+A check reports for a new version only after its first run under that version,
+and a version change does not trigger a run. The check's `schedule` therefore
+sets how long a Resource waits at `WaitingForRecords` after an upgrade.
 
 ## Namespace
 

@@ -19,6 +19,25 @@ The Agent will:
 
 * Schedule the execution of Health Check Workflows from the Destination
 * Persist the data from a health check into a state store
+* Copy the HealthDefinition's `spec.promiseVersion`, when it has one, onto the health
+  results of the checks it runs, so the Platform can tell which Promise version a
+  result is for
+
+:::note
+
+Only results that carry the Promise version count towards a Resource's
+`HealthChecksSucceeded` condition. For a versioned Promise, Kratix sets
+`spec.promiseVersion` on the HealthDefinitions a Resource Configure workflow writes.
+A HealthDefinition applied by hand, shipped as a dependency, or created by another
+Promise or a composition counts only if you set `spec.promiseVersion` on it
+yourself; a pipeline that produces one some other way can use
+`KRATIX_PROMISE_VERSION`. Even then it counts only when the Configure workflow also
+shipped a HealthDefinition for that version. The Platform never waits for such a
+HealthDefinition, but an unhealthy result from it fails the condition, and a
+healthy one can stand in for a result the Platform is waiting for. See
+[Promise version](/ske/reference/healthdefinition#promise-version).
+
+:::
 
 ## Requirements
 
