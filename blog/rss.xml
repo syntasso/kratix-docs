@@ -42,7 +42,6 @@ users pick a Backstage Group instead of a Kubernetes Namespace, and they get
 immediate "Pending" feedback after submitting. New Promise and Resource pages
 show health, status and provisioning progress at a glance, so platform users
 can find, request and track services without reading YAML.</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="where-we-started-backstage-software-templates-generated-from-kratix-promises">Where we started: Backstage Software Templates generated from Kratix Promises<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#where-we-started-backstage-software-templates-generated-from-kratix-promises" class="hash-link" aria-label="Direct link to Where we started: Backstage Software Templates generated from Kratix Promises" title="Direct link to Where we started: Backstage Software Templates generated from Kratix Promises" translate="no">​</a></h2>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="why-the-interface-matters-for-platform-adoption">Why the interface matters for platform adoption<a href="https://docs.kratix.io/blog/out-of-the-box-backstage#why-the-interface-matters-for-platform-adoption" class="hash-link" aria-label="Direct link to Why the interface matters for platform adoption" title="Direct link to Why the interface matters for platform adoption" translate="no">​</a></h2>
 <p>A problem lots of platform teams face in their organisations is adoption: they
 build a nice, self-contained, fully managed platform, full of amazing
