@@ -274,10 +274,9 @@ data:
 ```
 
 Eventually the `status.healthStatus` of the corresponding request is updated
-with the information in the Health Record. For a Resource of a versioned
-Promise, the status also says which version it expects records for and carries
-a `HealthChecksSucceeded` condition. Here the Resource expects two records at
-`v2.0.0` and one has arrived:
+with the information in the Health Record.
+
+Here the Resource expects two records at `v2.0.0` and one has arrived:
 
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
@@ -307,6 +306,21 @@ status:
         state: healthy
         lastRun: 1531958000
         promiseVersion: v1.0.0
+```
+
+* `state` is the worst state across all records received, regardless of version.
+* `expectedPromiseVersion` is teh Promise version that Kratix currently expects health results for on the resource.
+* `expectedRecords` is the number of Health Definitions created by the Promise,
+multiplied by the number of Destinations they were placed on.
+* `healthRecords` is a list of the heath records that have run against the request.
+
+### The HealthChecksSucceeded condition
+
+For a Resource of a versioned Promise, Kratix sets the `HealthChecksSucceeded` condition detailing how many
+records have reported and whether they had passed. The condition considers only the Health Records whose 
+`promiseVersion` equals `status.healthStatus.expectedPromiseVersion`.
+
+```yaml
   conditions:
     - type: HealthChecksSucceeded
       status: "Unknown"
@@ -315,11 +329,7 @@ status:
       lastTransitionTime: "2026-09-24T10:15:00Z"
 ```
 
-### The HealthChecksSucceeded condition
-
-Kratix sets the `HealthChecksSucceeded` condition on Resources of versioned
-Promises. It considers only the Health Records whose `promiseVersion` equals
-`status.healthStatus.expectedPromiseVersion`.
+The below table illustrates the statuses the condition can report and why.
 
 | Status  | Reason              | When                                                                                              |
 | ------- | ------------------- | ------------------------------------------------------------------------------------------------- |
@@ -329,33 +339,34 @@ Promises. It considers only the Health Records whose `promiseVersion` equals
 | False   | `Degraded`          | Every expected record has reported, none is unhealthy, and at least one is degraded.              |
 | Unknown | `WaitingForRecords` | Fewer records than expected have reported at the expected version, and none of them is unhealthy. |
 
-`state` is the worst state across all records received, regardless of version.
+A Resource of an unversioned Promise has no expectedPromiseVersion and no HealthChecksSucceeded condition.
 
-`expectedRecords` is the number of Health Definitions created by the Promise,
-multiplied by the number of Destinations they were placed on.
+The condition ignores a Health Record if:
 
-Records with another version, or with no version, are ignored by the condition
-and still count in `state`. Only records in the Resource's namespace count
-towards the condition.
-
-A Resource with no `expectedPromiseVersion`, that is a Resource of an
-unversioned Promise, has no `HealthChecksSucceeded` condition.
+* its version does not match expectedPromiseVersion
+* it has no version
+* it is in a different namespace from the Resource
 
 For a versioned Promise, the `HealthChecksSucceeded` condition is `Unknown`
-with reason `WaitingForRecords` until the Health Agent returns Health Records
+with the reason `WaitingForRecords` until the Health Agent returns Health Records
 containing the expected Promise version.
 
-When the Promise created one or more Health Definitions (`healthDefinitions` is
-more than `0`) but none has been placed on a Destination, the
-`HealthChecksSucceeded` condition is `Unknown` with the message
-`health checks for <version> have not been placed on a destination yet`.
+The `HealthChecksSucceeded` condition is `Unknown` when the Promise created Health Definitions but Kratix has not yet placed any of them on a Destination. In this case, `healthDefinitions` is more than 0, and the condition's message is:
 
-The Resource's ResourceBinding carries a copy of `state`,
-`expectedPromiseVersion`, `expectedRecords` and the condition in its own
-`status`, and no `healthRecords`.
+```text
+health checks for <version> have not been placed on a destination yet
+```
 
-To wait for the version a Resource is running to pass its health checks, wait
-on the condition rather than on `state`:
+The Resource's `ResourceBinding` copies the following fields into its own status:
+
+* state
+* expectedPromiseVersion
+* expectedRecords
+* the HealthChecksSucceeded condition
+
+It does not copy healthRecords.
+
+To wait until a Resource's current version passes its health checks, wait on the HealthChecksSucceeded condition, not on state `state`:
 
 ```bash
 kubectl wait <kind>/<name> --for=condition=HealthChecksSucceeded
