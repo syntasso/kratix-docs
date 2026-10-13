@@ -1,6 +1,6 @@
 ---
 title: Generate Backstage entities
-description: Publish Promise and Resource catalogue files through Git or bucket storage
+description: Publish Promise and Resource catalog files through Git or bucket storage
 keywords: [backstage, promise, catalog, destination, state store]
 slug: "/ske/integrations/portal-controller/backstage/generate-entities"
 sidebar_label: "Generate Backstage entities"
@@ -17,10 +17,10 @@ This guide ends with `catalog-info.yaml` in your chosen storage. Backstage disco
 - `kubectl` access to the platform cluster.
 - An installed Promise with `spec.api`. The commands below use `postgresql`; replace it with your Promise name.
 - An existing Git repository or S3-compatible bucket, accessible from the platform and Backstage.
-- Credentials to write catalogue files. Backstage needs its own read access.
+- Credentials to write catalog files. Backstage needs its own read access.
 
 The integration creates Kubernetes storage objects, not the repository or bucket itself.
-Keep catalogue files separate from manifests your GitOps agent applies.
+Keep catalog files separate from manifests your GitOps agent applies.
 
 ## 1. Install or reuse the controller
 
@@ -39,7 +39,7 @@ Without the SKE Operator, use the same `portals` entry in
 [`ske-portal-config`](/ske/integrations/portal-controller/reference/portal-configuration#configuration-ownership), not an `SKEIntegration`.
 Follow the standalone apply instructions below.
 
-## 2. Configure catalogue storage {#configuration}
+## 2. Configure catalog storage {#configuration}
 
 Choose one ownership model:
 
@@ -60,7 +60,7 @@ For an existing installation, add only its `portals` entry to your manifest.
 ### Define Destination and state store {#owning-a-destination}
 
 Create the credential Secret in `kratix-platform-system`. Save this as `catalog-credentials.yaml`,
-replacing both placeholders. Use a token with write access to the catalogue repository.
+replacing both placeholders. Use a token with write access to the catalog repository.
 
 :::warning Protect credentials
 Do not commit the populated Secret manifest. Use your organisation's secret-management workflow.
@@ -112,7 +112,7 @@ spec:
 ```
 
 Setup creates a Destination and GitStateStore named `portal-backstage-prod`.
-The catalogue prefix is `gitops/backstage/prod`: state store path, then Destination path.
+The catalog prefix is `gitops/backstage/prod`: state store path, then Destination path.
 Other Git authentication options are in the [GitStateStore reference](/main/reference/statestore/gitstatestore).
 
 <details>
@@ -149,7 +149,7 @@ stringData:
 ```
 
 Save it as `catalog-credentials.yaml` and apply it before the integration.
-The catalogue prefix remains `gitops/backstage/prod`.
+The catalog prefix remains `gitops/backstage/prod`.
 See [BucketStateStore](/main/reference/statestore/bucketstatestore) for other authentication options.
 Backstage needs a discovery provider that supports your bucket service.
 
@@ -187,7 +187,7 @@ Setup creates neither object. The Destination must already exist and reference a
 Its own path and the state store's path determine the output prefix. Do not include `stateStore` here.
 
 The controller routes using the Destination's labels, not its name. Give it a non-empty label set
-that selects only that Destination. For example, add a unique catalogue label:
+that selects only that Destination. For example, add a unique catalog label:
 
 ```bash
 kubectl label destination <DESTINATION_NAME> backstage-catalog=prod
@@ -283,7 +283,7 @@ for Backstage discovery in the next guide.
 | Binding not ready | Instance name and label; [binding conditions](/ske/integrations/portal-controller/reference/portal-configuration#binding-status) |
 | Sync fails | [Sync Job diagnostics](/ske/integrations/portal-controller/troubleshooting#a-sync-job-fails-or-never-starts); Promise API and image access |
 | Sync succeeds but files absent | Destination readiness, state store credentials, branch and combined path |
-| Files exist but catalogue empty | Backstage discovery provider and its independent read credentials |
+| Files exist but catalog empty | Backstage discovery provider and its independent read credentials |
 
 ## Next steps
 
