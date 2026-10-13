@@ -46,6 +46,13 @@ test('Enterprise introduces platform architecture before installation', () => {
   ]);
 });
 
+test('Enterprise keeps platform operations after installation and before Promise authoring', () => {
+  assert.deepEqual(generate(docs).slice(0, 5).map(item => item.label), [
+    'Overview', 'Platform architecture', 'Install SKE',
+    'Operate your platform', 'Build and evolve Promises',
+  ]);
+});
+
 test('Enterprise category directories follow the numbered repository convention', () => {
   for (const directory of Object.keys(categoriesMetadata)) {
     assert.match(path.basename(directory), /^\d{2}-/, directory);
