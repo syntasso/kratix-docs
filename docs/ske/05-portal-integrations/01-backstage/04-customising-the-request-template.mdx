@@ -698,50 +698,17 @@ To narrow one dropdown by what was chosen in another, the SKE frontend ships a
 [`ScopedEntityPicker`](/ske/integrations/portal-controller/backstage/frontend-plugin#scopedentitypicker) that you select the same way, with
 `ui:field`.
 
-## Delivery mode and namespace recipes
+<span id="delivery-mode-and-namespace-recipes" />
 
-Prefer the portal's `config.requestNamespace` when selecting a fixed or Group-based namespace.
-It generates matching submission and tracking fields in both delivery modes.
+:::warning Namespace and request tracking
+Use [`config.requestNamespace`](/ske/integrations/portal-controller/backstage/request-namespace)
+to keep the form, submission and tracking namespace aligned in both delivery modes.
+Manual namespace patches can break request tracking; patches targeting steps absent from a
+Template stop publication. See the [`hideNamespaceManifest` reference](/ske/integrations/portal-controller/portal-patch/recipe-reference#hidenamespacemanifest).
 
-:::warning Preserve submission and tracking together
-A recipe targeting the `ske-configure-resource` step works only in push mode. That step is
-absent from pull-request Templates, so a required selector fails and stops publication.
-
-If you use `hideNamespaceManifest` in push mode, also patch the `record-request` manifest and
-its `input.namespace`. Otherwise tracking keeps a removed form parameter, and the pending
-request cannot match the resource entity. Keep namespace policy, manifest and tracking aligned.
+Keep generated lifecycle step IDs and the hidden `prAction` parameter unchanged;
+the frontend uses them to recognise update and delete runs.
 :::
-
-For example, add both of these recipes to the same container's `args`, alongside the recipe
-that hides the namespace field and patches submission:
-
-```yaml
-# Fragment: two additional Portal Patch args entries for push mode.
-- |
-  target:
-    kind: Template
-    list:
-      path: spec.steps
-      key: id
-      value: record-request
-  op: hideNamespaceManifest
-  field: input.manifest
-  defaultNamespace: platform-team
-- |
-  target:
-    kind: Template
-    list:
-      path: spec.steps
-      key: id
-      value: record-request
-  patch:
-    input:
-      namespace: platform-team
-```
-
-Keep the generated lifecycle step IDs and hidden `prAction` parameter unchanged. The frontend
-uses them to recognise update and delete runs. Recipes changing owners, tags or form layout
-can work in either delivery mode.
 
 ## Extend the Backstage UI
 

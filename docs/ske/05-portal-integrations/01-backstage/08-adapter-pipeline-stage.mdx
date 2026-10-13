@@ -3,19 +3,17 @@ title: Running the adapter as a pipeline stage
 description: Generating Backstage entities from a Promise's own pipeline, instead of the Portal Controller
 keywords: [portal, backstage, generator, pipeline, adapter, stage]
 slug: "/ske/integrations/portal-controller/backstage/pipeline-stage"
-displayed_sidebar: skeSidebar
+sidebar_label: "Run the adapter as a pipeline stage"
+sidebar_position: 9
 ---
 
-The Portal Controller generates Backstage entities for you: install it with a `backstage` portal,
-label a Promise with `kratix.io/portal-backstage`, and the entities appear. **That is the
-recommended path, and most platforms should use it.** See [Installation](/ske/integrations/portal-controller/installation).
+Run the portal adapter in a Promise's Configure Workflows to generate Backstage entities
+without deploying the Portal Controller. The adapter is the entrypoint of the
+`ghcr.io/syntasso/ske-portal-controller` image.
 
-This page is for platforms that already wire the generator into each Promise's pipeline by hand
-and want to carry on doing so. The generator now ships as the **portal adapter**, the entrypoint
-of the `ghcr.io/syntasso/ske-portal-controller` image, which is the same binary that used to ship
-in the Backstage Controller image. Swapping the image keeps that setup working.
+For controller-managed generation, follow [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities) instead.
 
-:::warning Supported for continuity, not feature parity
+:::warning Controller features are not included
 Running the adapter yourself gives you the `generate` stage and nothing else. You do **not** get:
 
 - A portal-owned Destination and state store. You must create a Destination labelled

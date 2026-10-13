@@ -4,6 +4,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
+test('Backstage customisation links to namespace policy instead of partial recipes', () => {
+  const page = read('docs/ske/05-portal-integrations/01-backstage/04-customising-the-request-template.mdx');
+  assert.doesNotMatch(page, /^## Delivery mode and namespace recipes/m);
+  assert.match(page, /id="delivery-mode-and-namespace-recipes"/);
+  assert.match(page, /\]\(\/ske\/integrations\/portal-controller\/backstage\/request-namespace\)/);
+  assert.doesNotMatch(page, /op: hideNamespaceManifest/);
+});
+
 const cases = [
   ['docs/ske/05-portal-integrations/01-backstage/02-configure-backstage.mdx',
     ['configuring-the-backend-plugin', 'configure-backend-access', 'using-oidc-authentication', 'connect-the-platform-to-the-git-repository']],
