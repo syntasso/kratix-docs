@@ -386,31 +386,14 @@ If entities do not appear, check the repository branch or bucket prefixes contai
 files, the provider module is registered, and Backstage can list and read them. A bucket provider
 scans its prefix, so keep unrelated documents outside those prefixes.
 
-Next, [send resource requests to Kratix](/ske/integrations/portal-controller/backstage/send-resource-requests).
+<span id="configuring-the-backend-plugin" />
+<span id="configure-backend-access" />
+<span id="using-oidc-authentication" />
+<span id="connect-the-platform-to-the-git-repository" />
 
+Next, [send resource requests to Kratix](/ske/integrations/portal-controller/backstage/send-resource-requests).
 
 ## Task log detail
 
 Backstage builds each task's logger at `LOG_LEVEL`, defaulting to `info`. The SKE actions log their
 mechanics at `debug`, so set `LOG_LEVEL=debug` on the backend to see them.
-
-<details>
-<summary>Request configuration links</summary>
-
-## Configuring the backend plugin
-
-Continue with [request transport configuration](/ske/integrations/portal-controller/backstage/send-resource-requests#configure-backend-access).
-
-### Configure Backend Access
-
-Choose [Kubernetes API, GitOps or hybrid](/ske/integrations/portal-controller/backstage/send-resource-requests#configure-backend-access).
-
-#### Using OIDC Authentication
-
-Configure [user identity and Kubernetes RBAC](/ske/integrations/portal-controller/backstage/send-resource-requests#oidc-authentication).
-
-### Connect the Platform to the Git Repository
-
-Configure [Flux or Argo CD](/ske/integrations/portal-controller/backstage/send-resource-requests#connect-the-platform-to-the-git-repository).
-
-</details>
