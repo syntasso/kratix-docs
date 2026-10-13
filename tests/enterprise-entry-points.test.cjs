@@ -4,6 +4,18 @@ const fs = require('node:fs');
 const path = require('node:path');
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
+test('Overview retains enterprise security and long-lived testing benefits', () => {
+  const page = read('docs/ske/00-overview.mdx');
+  assert.match(page, /Secure software base images/);
+  assert.match(page, /software supply chain validation/);
+  assert.match(page, /soak testing/);
+});
+
+test('Operate excludes the unrequested production-readiness guide', () => {
+  assert.doesNotMatch(read('docs/ske/00-overview.mdx'), /production-readiness/);
+  assert.ok(!fs.existsSync(path.join(__dirname, '..', 'docs/ske/03-operate-your-platform/00-production-readiness.mdx')));
+});
+
 test('Enterprise entry pages link to pricing and requesting access', () => {
   for (const file of ['docs/ske/00-overview.mdx', 'docs/ske/02-install-ske/00-overview.mdx']) {
     assert.match(read(file), /https:\/\/www\.syntasso\.io\/pricing/, file);
