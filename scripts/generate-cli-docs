@@ -175,5 +175,5 @@ end
 
 if $PROGRAM_NAME == __FILE__
   run("kratix", "docs/main/06-kratix-cli/20-reference", "/main/kratix-cli/reference")
-  run("kratix-test", "docs/ske/06-reference/06-promise-testing-cli", "/ske/promise-testing-framework/reference", stable_urls: true)
+  run("kratix-test", "docs/ske/07-reference/06-promise-testing-cli", "/ske/promise-testing-framework/reference", stable_urls: true)
 end

@@ -40,6 +40,12 @@ test('Enterprise discovers pages from its folder structure', () => {
   ]);
 });
 
+test('Enterprise introduces platform architecture before installation', () => {
+  assert.deepEqual(generate(docs).slice(0, 3).map(item => item.label), [
+    'Overview', 'Platform architecture', 'Install SKE',
+  ]);
+});
+
 test('Enterprise category directories follow the numbered repository convention', () => {
   for (const directory of Object.keys(categoriesMetadata)) {
     assert.match(path.basename(directory), /^\d{2}-/, directory);
