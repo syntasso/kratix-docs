@@ -49,14 +49,13 @@ The Enterprise releases token provides access to private assets in
 Use it as `GH_TOKEN` when [installing the Promise Testing CLI](/ske/promise-testing-framework/intro#installing-the-testing-framework).
 Do not use it as `skeLicense`.
 
-## Configure workload delivery
+<span id="configure-workload-delivery" />
 
-To provision resources, configure a [Destination](/main/reference/destinations/intro)
-backed by a [StateStore](/main/reference/statestore/intro).
-
-For Kubernetes Destinations, install a [GitOps agent](/category/installing-gitops-agent)
-to apply the workloads. Follow [Adding a new Destination](/main/guides/new-destination)
-to register a worker cluster.
+:::note Workload storage
+To use Kratix, you'll need a Git repository or S3-compatible bucket for generated workloads.
+You'll connect this storage through a [StateStore](/main/reference/statestore/intro) and
+[Destination](/main/reference/destinations/intro) after installing SKE.
+:::
 
 ## Optional components {#additional-components}
 

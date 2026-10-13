@@ -23,3 +23,11 @@ test('Prerequisites links to upgrades without a standalone upgrade section', () 
   assert.match(page, /\]\(\/ske\/installing-ske\/upgrades\)/);
   assert.match(page, /id="upgrading-and-removing-ske"/);
 });
+
+test('Prerequisites presents workload storage as planning, not a configuration step', () => {
+  const page = read('docs/ske/01-install-ske/00-overview.mdx');
+  assert.doesNotMatch(page, /^## Configure workload delivery/m);
+  assert.match(page, /:::note Workload storage/);
+  assert.match(page, /Git repository or S3-compatible bucket/);
+  assert.match(page, /after installing SKE/);
+});
