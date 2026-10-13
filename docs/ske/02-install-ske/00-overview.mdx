@@ -6,8 +6,10 @@ sidebar_label: "Prerequisites"
 sidebar_position: 1
 ---
 
-Before [installing SKE with the Operator](/ske/installing-ske/install-with-operator),
-check the prerequisites and obtain your access tokens.
+Before installing SKE, prepare your cluster and obtain your access tokens.
+If you don't have an SKE licence, [request a trial or discuss pricing](https://www.syntasso.io/pricing).
+
+<span id="configure-workload-delivery" />
 
 ## Installation prerequisites {#installing-ske}
 
@@ -15,18 +17,21 @@ You need:
 
 - A Kubernetes platform cluster and permission to install CRDs, controllers and webhooks.
 - `kubectl`, and Helm if you choose the Helm installation method.
-- An SKE licence and registry credentials supplied by Syntasso.
+- An SKE licence token supplied by Syntasso. See [Get access](#get-access) below.
 - Access to the image registry and release storage, or [mirrors for an air-gapped installation](/ske/installing-ske/air-gapped).
 - [cert-manager](https://cert-manager.io/docs/installation/), or
   [custom certificates](/ske/installing-ske/install-with-operator#custom-certs) for SKE's webhooks.
+- A Git repository or S3-compatible bucket to store generated workloads for GitOps delivery.
+  You'll configure a [StateStore](/main/reference/statestore/intro),
+  [Destination](/main/reference/destinations/intro) and, for Kubernetes workloads, a
+  [GitOps agent](/category/installing-gitops-agent) after installing SKE.
 
 SKE and the Operator run in `kratix-platform-system`. Referenced registry, release-storage
 and TLS Secrets must be in that namespace.
 
 ## Get access
 
-Syntasso supplies two tokens with your SKE licence. To obtain them,
-[request a trial or discuss pricing](https://www.syntasso.io/pricing).
+Syntasso supplies two tokens with your SKE licence.
 Existing customers can use their [Syntasso support channels](/ske/support#support-channels).
 
 The registry token pulls container images; the releases token downloads private release assets.
@@ -48,14 +53,6 @@ The Enterprise releases token provides access to private assets in
 `syntasso/enterprise-releases`. It commonly starts with `github_pat_`.
 Use it as `GH_TOKEN` when [installing the Promise Testing CLI](/ske/promise-testing-framework/intro#installing-the-testing-framework).
 Do not use it as `skeLicense`.
-
-<span id="configure-workload-delivery" />
-
-:::note Workload storage
-To use Kratix, you'll need a Git repository or S3-compatible bucket for generated workloads.
-You'll connect this storage through a [StateStore](/main/reference/statestore/intro) and
-[Destination](/main/reference/destinations/intro) after installing SKE.
-:::
 
 ## Optional components {#additional-components}
 
