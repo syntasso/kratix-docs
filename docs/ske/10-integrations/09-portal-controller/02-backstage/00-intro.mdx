@@ -6,10 +6,11 @@ slug: intro
 keywords: [portal, backstage, ske, controller, destination, state store]
 ---
 
-A Backstage portal publishes Promises and Resources as Backstage catalog entities. Unlike Cortex,
-the Portal Controller never calls Backstage. It writes the generated `catalog-info.yaml` files to a
-Kratix Destination, which is a Git repository or bucket, and Backstage discovers them through its
-own catalog providers.
+A Backstage portal publishes Promises and Resources as Backstage catalog entities.
+
+The Portal Controller does not call Backstage directly. It writes `catalog-info.yaml`
+files to a Kratix Destination (a Git repository or bucket). Backstage then reads those files
+through its own catalog providers.
 
 That means a Backstage portal needs no `url` and no `secretRef`. What it does need is somewhere to
 write, which is what `config` describes.
@@ -23,13 +24,13 @@ A Backstage portal takes exactly four `config` keys, all optional:
 | `mode` | The [delivery mode](./delivery-modes), `push` or `pull-request` | `push` |
 | `destination` | Where entities are written, either adopting an existing Destination or defining one | none |
 | `stateStore` | The state store backing an owned Destination | none |
-| `requestNamespace` | Where a request's namespace comes from: typed by the developer, the developer's Backstage Group, or one fixed namespace. See [Request namespace](./request-namespace) | `from: form` |
+| `requestNamespace` | Where a request's namespace comes from: `form`, `group` or `fixed`. See [Request namespace](./request-namespace) | `from: form` |
 
 ### Owning a Destination
 
-The simplest setup is to let the integration create and own its Destination and state store. Give
-`destination.spec.path`, which is where inside the store the entities live, and a `stateStore`
-block describing the store to create:
+The simplest setup is to let the integration create and own its Destination and state store. Configure the following:
+- `destination.spec.path`: where the entities live inside the store
+- `stateStore`: a block describing the store to create
 
 ```yaml
 apiVersion: platform.syntasso.io/v1alpha1
@@ -61,8 +62,8 @@ spec:
 The integration creates both objects, named `portal-backstage-prod` after the portal type and
 name, and owns them. Removing the portal removes them.
 
-`stateStore.kind` is required and must be `GitStateStore` or `BucketStateStore`. There is no
-default, because the two are distinct kinds and guessing would silently target the wrong one.
+`stateStore.kind` is required and must be `GitStateStore` or `BucketStateStore`. It has no
+default, so the integration never creates the wrong type of store without telling you.
 
 <details>
 <summary>Using a bucket instead of Git</summary>
@@ -87,13 +88,15 @@ config:
 
 </details>
 
-You must create the credential Secret the state store references yourself. The `spec` block is
-passed through to the Kratix state store unchanged, so it takes the same fields as any
-`GitStateStore` or `BucketStateStore`.
+The integration does not create the credential Secret the state store references. Create it
+yourself, using the name and namespace in `stateStore.spec.secretRef`.
+
+The integration copies the `spec` block to the Kratix state store unchanged. It accepts the same
+fields as any `GitStateStore` or `BucketStateStore`.
 
 ### Referencing an existing state store
 
-If you already manage state stores, name one instead of defining it. The integration still owns
+If you already manage state stores, name an existing one instead of defining it. The integration still owns
 the Destination, but not the store:
 
 ```yaml
@@ -122,8 +125,9 @@ Destination's own `path` on the Destination itself.
 
 ## Configuration errors
 
-`destination` and `stateStore` are validated when the portal's setup Job runs, and a failure is
-reported as a `PortalSetupFailed` event on the `SKEIntegration`:
+The portal's setup Job validates `destination`, `stateStore` and `mode` when it runs. If a check fails,
+look for a `PortalSetupFailed` event on the `SKEIntegration`. The event contains one of these
+messages:
 
 | Message | Cause |
 |---|---|
@@ -152,9 +156,9 @@ You need both paths when configuring Backstage's catalog discovery, which is cov
 [Configure Backstage](./configure-backstage).
 
 :::note
-The namespace segment in the resources path is always `kratix-platform-system`, regardless of
-where the Resource request lives. It is the namespace of the Kratix `Work`, not of the request, and
-it is not configurable.
+The namespace segment in the resources path is always `kratix-platform-system`, even if the
+resource request is in a different namespace. This is because the path uses the namespace of
+the Kratix `Work`, not the request. You cannot change it.
 :::
 
 ## Next steps

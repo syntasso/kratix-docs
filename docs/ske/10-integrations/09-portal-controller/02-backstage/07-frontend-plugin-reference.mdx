@@ -756,10 +756,10 @@ A `catalogFilter` with no references in it behaves exactly like `EntityPicker`.
 
 #### Behaviour when the referenced field changes
 
-- The picker re-queries the catalogue whenever the resolved filter changes, and
+- The picker re-queries the catalog whenever the resolved filter changes, and
   offers the new scope's entities.
 - A selection already made is **kept** if it is in the new scope, and **cleared**
-  if the catalogue read for the new scope comes back without it. Values are
+  if the catalog read for the new scope comes back without it. Values are
   compared as entity references, honouring `defaultKind` and `defaultNamespace`
   and ignoring case, so `payments-api` and
   `component:default/payments-api` are the same selection.
