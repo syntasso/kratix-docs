@@ -228,39 +228,24 @@ ConfigMap must also name a reachable image.
 Adapter pull-secret overrides are separate from controller Deployment pull credentials.
 See [Adapter reference](/ske/integrations/portal-controller/reference/adapter#image-and-workload-overrides).
 
-## Portal configuration reference
-
-Look up fields, bindings and generation settings:
-
+<span id="portal-configuration-reference" />
 <span id="connect-a-portal" />
-
-### Portal fields and credentials {#credential-secret-handling}
-
-For instance fields and API credentials, see [portal fields](/ske/integrations/portal-controller/reference/portal-configuration#portal-fields)
-and [credential Secret handling](/ske/integrations/portal-controller/reference/portal-configuration#credential-secret-handling).
-
-### Binding labels and status {#bind-a-promise-to-a-portal}
-
+<span id="credential-secret-handling" />
+<span id="bind-a-promise-to-a-portal" />
 <span id="opting-a-single-resource-out" />
 <span id="binding-status" />
-
-For opt-in, opt-out and diagnostics, see [binding labels](/ske/integrations/portal-controller/reference/portal-configuration#binding-labels)
-and [binding status](/ske/integrations/portal-controller/reference/portal-configuration#binding-status).
-
 <span id="adapter-image-resolution" />
 <span id="other-adapterconfig-fields" />
-
-### Adapter generation settings {#portal-wide-generate-flags}
-
-For generation options, see [image overrides](/ske/integrations/portal-controller/reference/adapter#image-and-workload-overrides)
-and [portal-wide flags](/ske/integrations/portal-controller/reference/adapter#portal-wide-generate-flags).
-
+<span id="portal-wide-generate-flags" />
 <span id="making-the-controllers-jobs-follow-your-clusters-rules" />
-
-For cluster policy settings, see [Configure sync and setup Jobs](/ske/integrations/portal-controller/customization/job-customization).
 
 ## Next steps
 
 Follow [Backstage](/ske/integrations/portal-controller/backstage/intro) or [Cortex](/ske/integrations/portal-controller/cortex/intro) to configure publication,
 then verify the portal-to-platform request path. Use [Troubleshoot portal sync](/ske/integrations/portal-controller/troubleshooting)
 if deployment, setup or generation fails.
+
+Use the [portal configuration reference](/ske/integrations/portal-controller/reference/portal-configuration)
+for fields and bindings, the [Adapter reference](/ske/integrations/portal-controller/reference/adapter)
+for generation settings, and [Configure sync and setup Jobs](/ske/integrations/portal-controller/customization/job-customization)
+for cluster policies.

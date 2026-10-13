@@ -21,6 +21,13 @@ them through its API. The two SKE plugin packages provide request actions and re
 
 ## Set up the integration
 
+<span id="configuration" />
+<span id="owning-a-destination" />
+<span id="referencing-an-existing-state-store" />
+<span id="adopting-an-existing-destination" />
+<span id="configuration-errors" />
+<span id="what-gets-written-where" />
+
 1. [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities). Install or reuse the controller,
    choose catalog storage, label a Promise and verify its files.
 2. [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage). Install the plugins and configure discovery.
@@ -43,38 +50,6 @@ Follow [the migration guide](/ske/integrations/portal-controller/backstage/migra
 
 For local plugin development, use the [development image](/ske/integrations/portal-controller/backstage/development-image).
 To understand generated files and pipeline stages, see the [adapter walkthrough](/ske/integrations/portal-controller/backstage/pipeline-stage).
-
-<details>
-<summary>Storage configuration links</summary>
-
-## Configuration
-
-Follow [the publication guide](/ske/integrations/portal-controller/backstage/generate-entities#configuration) for storage configuration.
-[Request configuration](/ske/integrations/portal-controller/backstage/send-resource-requests) covers approval and namespaces.
-
-### Owning a Destination
-
-[Create the Destination and state store](/ske/integrations/portal-controller/backstage/generate-entities#owning-a-destination) through the integration.
-
-### Referencing an existing state store
-
-[Reuse a state store](/ske/integrations/portal-controller/backstage/generate-entities#referencing-an-existing-state-store) and let the integration own the Destination.
-
-### Adopting an existing Destination
-
-[Reuse a Destination](/ske/integrations/portal-controller/backstage/generate-entities#adopting-an-existing-destination) you already manage.
-
-## Configuration errors
-
-See [publication troubleshooting](/ske/integrations/portal-controller/backstage/generate-entities#troubleshooting) and
-the [configuration reference](/ske/integrations/portal-controller/reference/portal-configuration).
-
-## What gets written where
-
-See [generated file paths](/ske/integrations/portal-controller/backstage/generate-entities#what-gets-written-where).
-
-
-</details>
 
 ## Next steps
 

@@ -139,7 +139,7 @@ op: singleSpecPage
 
 One page is now the default, so `singleSpecPage: true` needs nothing carried over. To keep the
 old per-property layout, set
-[`--single-spec-page=false`](/ske/integrations/portal-controller/installation#portal-wide-generate-flags) on the portal, and use
+[`--single-spec-page=false`](/ske/integrations/portal-controller/reference/adapter#portal-wide-generate-flags) on the portal, and use
 the recipe above for any Promise you still want on one page.
 
 #### `hideNamespace` and `defaultNamespace`
@@ -207,7 +207,7 @@ field for it, and setting the Promise's own `spec.destinationSelectors` has no e
 generate stage does not read it.
 
 Most platforms no longer need this. A Backstage portal now names its own Destination through
-[`config.destination`](/ske/integrations/portal-controller/backstage/intro#owning-a-destination), which is the supported way to control where
+[`config.destination`](/ske/integrations/portal-controller/backstage/generate-entities#owning-a-destination), which is the supported way to control where
 entities land.
 
 If you still need per-Promise routing, a configure container can rewrite

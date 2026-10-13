@@ -76,7 +76,7 @@ upgrade. To keep the multi-step form, add `--single-spec-page=false` to the conn
 `adapterConfig.generate.args` before upgrading. If you run `ske-portal-adapter` directly in your
 own Promise pipeline, add `--single-spec-page=false` as a container argument instead: the
 `TEMPLATE_SINGLE_SPEC_PAGE` environment variable can't turn the single-page form off. See
-[Portal-wide generate flags](/ske/integrations/portal-controller/installation#portal-wide-generate-flags).
+[Portal-wide generate flags](/ske/integrations/portal-controller/reference/adapter#portal-wide-generate-flags).
 
 :::
 
@@ -206,7 +206,7 @@ Two things become portal-wide rather than per-Promise: the Cortex fixed namespac
 so a staging and a production Backstage are two entries rather than two installations. See [Installation](/ske/integrations/portal-controller/installation).
 
 * **Opt in with a label.** A Promise or Resource request joins a portal by carrying `kratix.io/portal-<type>`, instead of needing a dedicated resource per portal. A single
-Resource can opt back out without affecting its Promise. See [Bind a Promise to a portal](/ske/integrations/portal-controller/installation#bind-a-promise-to-a-portal).
+Resource can opt back out without affecting its Promise. See [Bind a Promise to a portal](/ske/integrations/portal-controller/reference/portal-configuration#binding-labels).
 
 * **Request review with pull-request delivery.** Backstage portals can run in `pull-request` mode, where submitting the generated form raises a pull request against a Git
 repository instead of applying the request directly. Nothing reaches the platform until a human merges it, and updates and deletions go through the same review. Currently GitHub
