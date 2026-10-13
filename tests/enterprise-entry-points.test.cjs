@@ -27,7 +27,17 @@ test('Prerequisites links to upgrades without a standalone upgrade section', () 
 test('Prerequisites presents workload storage as planning, not a configuration step', () => {
   const page = read('docs/ske/02-install-ske/00-overview.mdx');
   assert.doesNotMatch(page, /^## Configure workload delivery/m);
-  assert.match(page, /:::note Workload storage/);
+  assert.doesNotMatch(page, /:::note Workload storage/);
   assert.match(page, /Git repository or S3-compatible bucket/);
+  const prerequisites = page.split('## Installation prerequisites')[1].split('## Get access')[0];
+  assert.match(prerequisites, /^- A Git repository or S3-compatible bucket/m);
+  assert.match(prerequisites, /GitOps/);
   assert.match(page, /after installing SKE/);
+});
+
+test('Prerequisites directs readers to request a token without opening the installation guide', () => {
+  const intro = read('docs/ske/02-install-ske/00-overview.mdx').split('## Installation prerequisites')[0];
+  assert.match(intro, /request a trial/);
+  assert.match(intro, /https:\/\/www\.syntasso\.io\/pricing/);
+  assert.doesNotMatch(intro, /\/ske\/installing-ske\/install-with-operator/);
 });
