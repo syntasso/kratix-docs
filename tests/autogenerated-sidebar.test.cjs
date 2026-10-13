@@ -53,6 +53,13 @@ test('Enterprise keeps platform operations after installation and before Promise
   ]);
 });
 
+test('Backstage exposes the direct pipeline-stage guide in its sidebar', () => {
+  const backstage = walk(generate(docs)).find(item => item.type === 'category' && item.label === 'Backstage');
+  const guide = docs.find(doc => doc.permalink === '/ske/integrations/portal-controller/backstage/pipeline-stage');
+  assert.ok(guide, 'Run yarn build before these tests');
+  assert.ok(backstage.items.some(item => item.type === 'doc' && item.id === guide.id));
+});
+
 test('Enterprise category directories follow the numbered repository convention', () => {
   for (const directory of Object.keys(categoriesMetadata)) {
     assert.match(path.basename(directory), /^\d{2}-/, directory);
