@@ -16,3 +16,10 @@ test('Prerequisites explain the two token uses and link to certificate installat
   assert.match(page, /`GH_TOKEN`/);
   assert.match(page, /https:\/\/cert-manager\.io\/docs\/installation\//);
 });
+
+test('Prerequisites links to upgrades without a standalone upgrade section', () => {
+  const page = read('docs/ske/01-install-ske/00-overview.mdx');
+  assert.doesNotMatch(page, /^## Upgrading and removing SKE/m);
+  assert.match(page, /\]\(\/ske\/installing-ske\/upgrades\)/);
+  assert.match(page, /id="upgrading-and-removing-ske"/);
+});
