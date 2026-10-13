@@ -15,13 +15,13 @@ Cortex workflows commit resource request manifests to Git. A platform GitOps age
 - A [platform GitOps agent](/category/installing-gitops-agent) configured to apply requests to the platform cluster.
 - The namespace you intend to request resources in must exist on the platform cluster.
 
-## 1. Configure Git access in Cortex
+## Configure Git access in Cortex {#1-configure-git-access-in-cortex}
 
 Configure Cortex's [GitHub integration](https://docs.cortex.io/ingesting-data-into-cortex/integrations/github) or [GitLab integration](https://docs.cortex.io/ingesting-data-into-cortex/integrations/gitlab). Follow the provider's current authentication instructions and allow the generated workflows to read, create, update and delete files in your selected repository.
 
 Record the integration alias in Cortex. Set `integrationAlias` to this alias, rather than a Git username or a Kubernetes Secret name. Git credentials remain in the Cortex integration; the Portal Controller's `cortex-token` Secret is for the Cortex API.
 
-## 2. Set the request repository, branch and path
+## Set the request repository, branch and path {#2-set-the-request-repository-branch-and-path}
 
 Edit the Cortex portal entry in your existing `SKEIntegration`. This fragment shows only `config`; preserve the rest of the integration.
 
@@ -46,13 +46,13 @@ The generated workflows use these values to commit directly to the configured br
 kratix-resource-requests/kafka/team-a-payments.yaml
 ```
 
-## 3. Configure platform GitOps
+## Configure platform GitOps {#3-configure-platform-gitops}
 
 Configure your GitOps agent to watch the same repository, branch and path. Give the agent repository credentials and access to apply the Promise's resource API in the platform cluster.
 
 Enable the agent's deletion reconciliation, such as Flux's `prune` setting, if removing a manifest from Git should delete the Kubernetes request. Follow the [GitOps installation guides](/category/installing-gitops-agent) for your agent's configuration.
 
-## 4. Create a resource request
+## Create a resource request {#4-create-a-resource-request}
 
 In Cortex, run `Create <PROMISE_NAME> request`. Enter a name, namespace and the specification fields from the Promise API.
 
@@ -60,13 +60,13 @@ The workflow first registers `<name> request (pending)` in Cortex, owned by the 
 
 After GitOps applies the manifest, Kratix reconciles the request. The resource sync pipeline updates the entity definition and clears its pending marker. The exporter subsequently writes resource status to Cortex custom data under `status`.
 
-## 5. Update a resource request
+## Update a resource request {#5-update-a-resource-request}
 
 Select the resource entity in Cortex and run `Update <PROMISE_NAME> request`. Review the pre-filled fields and submit the changes. The workflow updates the manifest in Git; GitOps applies the new specification and Kratix reconciles it.
 
 Wait for the Kubernetes request and Cortex entity to reflect the new specification before assessing the resulting resource status.
 
-## 6. Delete a resource request
+## Delete a resource request {#6-delete-a-resource-request}
 
 :::warning
 The Delete workflow removes the resource request manifest from Git. With GitOps deletion reconciliation enabled, this deletes the Kubernetes request and starts the Promise's resource deletion workflow. Confirm the selected resource before running it.

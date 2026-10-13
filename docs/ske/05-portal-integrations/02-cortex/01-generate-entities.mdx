@@ -17,7 +17,7 @@ This guide publishes an existing Promise to Cortex and generates its create, upd
 
 The Cortex API token and the credentials configured in Cortex for Git access are separate. The platform GitOps agent also needs its own repository credentials.
 
-## 1. Store the Cortex API token
+## Store the Cortex API token {#1-store-the-cortex-api-token}
 
 Save this as `cortex-token.yaml`, replacing the token placeholder. Keep this file out of version control.
 
@@ -38,7 +38,7 @@ kubectl apply -f cortex-token.yaml
 
 The Secret must be in `kratix-platform-system` and contain the `token` key. See [Credential Secret handling](/ske/integrations/portal-controller/reference/portal-configuration#credential-secret-handling) for how the controller uses it.
 
-## 2. Configure the Cortex portal
+## Configure the Cortex portal {#2-configure-the-cortex-portal}
 
 Save the following as `cortex-integration.yaml`. Replace the repository and alias with the values configured in Cortex. Use your Cortex API URL if it differs from the example.
 
@@ -74,7 +74,7 @@ kubectl apply -f cortex-integration.yaml
 
 The portal's setup Job ensures the shared Promise entity type and the relationship type used to link resource entities to their Promise exist in Cortex. The controller also deploys the Cortex status exporter. It does not require you to create these shared types manually.
 
-## 3. Bind a Promise to Cortex
+## Bind a Promise to Cortex {#3-bind-a-promise-to-cortex}
 
 Label your existing Promise, replacing the placeholder with its Kubernetes name:
 

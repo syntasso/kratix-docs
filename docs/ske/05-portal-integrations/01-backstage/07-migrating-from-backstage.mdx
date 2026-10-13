@@ -28,7 +28,7 @@ silently dropped. Read [Customization](/ske/integrations/portal-controller/custo
 The API group also changes. `BackstageEntityCustomization` was
 `platform.kratix.io/v1alpha1`; `PortalCustomization` is `platform.syntasso.io/v1alpha1`.
 
-## 1. `spec.containers[]` becomes a configure lane
+## `spec.containers[]` becomes a configure lane {#1-speccontainers-becomes-a-configure-lane}
 
 Both use the standard Kratix pipeline container shape, so the entries move across as-is. The only
 decision is which lane, and containers now sit under `configure`:
@@ -59,7 +59,7 @@ A Promise may bind to only one `PortalCustomization`. If you previously had seve
 with multiple containers.
 :::
 
-## 2. `entityGenerationOptions` becomes Portal Patch recipes
+## `entityGenerationOptions` becomes Portal Patch recipes {#2-entitygenerationoptions-becomes-portal-patch-recipes}
 
 `entityGenerationOptions` was a typed bag of fields read while generating the document. There is no
 equivalent typed field, because the Portal Controller's generate stage is not configurable
@@ -200,7 +200,7 @@ patch:
       description: The namespace your team owns
 ```
 
-## 3. `spec.destinationSelectors[]` has no direct equivalent
+## `spec.destinationSelectors[]` has no direct equivalent {#3-specdestinationselectors-has-no-direct-equivalent}
 
 `destinationSelectors` steered where generated entities shipped. There is no `PortalCustomization`
 field for it, and setting the Promise's own `spec.destinationSelectors` has no effect, since the
@@ -240,7 +240,7 @@ spec:
 
 Portal Patch never touches destination selectors, so this remains a job for your own container.
 
-## 4. Worked example
+## Worked example {#4-worked-example}
 
 **Before**, typed options set the Component's owner and tags at generation time:
 
@@ -292,7 +292,7 @@ metadata:
     kratix.io/portal-customization: cicd-backstage-customization
 ```
 
-## 5. Migration checklist
+## Migration checklist {#5-migration-checklist}
 
 1. Install the Portal Controller and connect a `backstage` portal, see
    [Installation](/ske/integrations/portal-controller/installation) and [Backstage](/ske/integrations/portal-controller/backstage/intro).
