@@ -2,6 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const path = require('node:path');
+const fs = require('node:fs');
+
+test('Enterprise CLI generation targets the existing numbered reference directory', () => {
+  const script = fs.readFileSync(path.join(__dirname, '../scripts/generate-cli-docs'), 'utf8');
+  const directory = script.match(/run\("kratix-test", "([^"]+)"/)[1];
+  assert.ok(fs.existsSync(path.join(__dirname, '..', directory)), directory);
+});
 
 test('Generated Enterprise CLI pages retain published URLs and sidebar labels', () => {
   const output = execFileSync('ruby', ['-e', `

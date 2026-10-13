@@ -40,6 +40,12 @@ test('Enterprise discovers pages from its folder structure', () => {
   ]);
 });
 
+test('Enterprise category directories follow the numbered repository convention', () => {
+  for (const directory of Object.keys(categoriesMetadata)) {
+    assert.match(path.basename(directory), /^\d{2}-/, directory);
+  }
+});
+
 test('Every Enterprise folder has a unique card landing page', () => {
   const categories = walk(generate(docs)).filter(item => item.type === 'category');
   assert.ok(categories.length > 0, 'Run yarn build before these tests');
