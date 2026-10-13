@@ -4,6 +4,20 @@ const fs = require('node:fs');
 const path = require('node:path');
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
+test('Backstage Overview renders its integration flows as a diagram', () => {
+  const page = read('docs/ske/05-portal-integrations/01-backstage/00-overview.mdx');
+  assert.match(page, /```mermaid\nflowchart/);
+  assert.match(page, /Publishing/);
+  assert.match(page, /Requesting/);
+  assert.doesNotMatch(page, /```text/);
+});
+
+test('Backstage migration covers the controller before optional customisation', () => {
+  const page = read('docs/ske/05-portal-integrations/01-backstage/07-migrating-from-backstage.mdx');
+  assert.ok(page.indexOf('## Migration checklist') < page.indexOf('## Customisation changes'));
+  assert.match(page, /If you use `BackstageEntityCustomization`/);
+});
+
 test('Backstage customisation links to namespace policy instead of partial recipes', () => {
   const page = read('docs/ske/05-portal-integrations/01-backstage/04-customising-the-request-template.mdx');
   assert.doesNotMatch(page, /^## Delivery mode and namespace recipes/m);
