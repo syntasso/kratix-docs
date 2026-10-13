@@ -108,21 +108,8 @@ to the revision's spec snapshot.
 ## Deleting a Promise Revision
 
 Deleting a Promise Revision never deletes Resource Requests or Resource Bindings. If Resource Bindings still use
-the revision's version, Kratix allows the deletion and warns you:
-
-```
-Warning: PromiseRevision "redis-v1-0-0" is still used by 2 ResourceBinding(s) on version v1.0.0. It will stay until they move to another version or are deleted; their resources are not deleted.
-```
-
-A Resource Binding uses a version when its `spec.version` is that version, or when its Resource last ran at that
-version (`status.lastAppliedVersion`), for example while an upgrade to a newer version has not finished.
-
-The revision stays, marked for deletion, until no Resource Binding uses its version. Until then, Resources on that
-version keep reconciling and can still be deleted. To let the revision go, move each Resource Binding to another
-version, or delete the Resources.
-
-Once no Resource Binding uses the version, Kratix deletes the service accounts, Roles, ClusterRoles and bindings
-that the Resource workflows of that version ran with, and then removes the revision.
+the revision's version, Kratix will accept the deletion and emit a warning. The revision will be only be removed
+when no Resource Binding uses its version. 
 
 :::info
 
