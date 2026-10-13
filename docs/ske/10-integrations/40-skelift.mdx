@@ -131,17 +131,27 @@ The `cloud-to-kratix-promise` skill runs a fixed sequence:
 6. **Gate** — run both commands offline. `kratix skelift review` fails if any
    critical or high finding is unresolved, and `kratix skelift check` validates
    the structure of the generated Promises and examples. The review step records
-   findings; these commands are what enforce them.
+   findings; the commands check the drafts and findings, not the agent's permissions.
 7. **Approve and apply** — review the drafts and both gate results, then approve
    each live action and its target before the agent performs it.
+
+:::warning Control write access
+The approval steps and target checks are instructions to the agent. They do not
+prevent an agent with write credentials from using another tool to change a
+cluster, registry, or cloud account. For a stronger boundary, use read-only
+access while drafting and checking, then route approved writes through your
+own process with credentials limited to the named action and target. Keep
+those write credentials in that process, not in the agent's environment.
+:::
 
 Live actions include delivering pipeline images, installing a Promise, applying
 the builder's generated example Resource Request, and applying a Resource
 Request for an existing instance. Each needs separate approval. For a cluster
 write, name the kubeconfig, Kubernetes context, API server, and cluster identity
 you approve. For image delivery, name the registry and image reference. The
-agent explicitly uses the approved kubeconfig and context for each Kubernetes write,
-checks the target again before that write, and stops if it has changed.
+skill instructs the agent to use the approved kubeconfig and context for each
+Kubernetes write, check the target again before that write, and stop if it has
+changed.
 
 Sandbox validation is a live action too. If you want it, separately approve
 the sandbox target and the exact actions it requires, including any generated
