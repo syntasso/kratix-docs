@@ -11,9 +11,24 @@ Publish your Promises in Backstage so developers can discover, request and manag
 
 The integration has two directions:
 
-```text
-Promise API → Portal Controller → Git or bucket → Backstage catalog and Templates
-Developer request → SKE backend plugin → Kubernetes API or GitOps → Kratix
+```mermaid
+flowchart LR
+  subgraph Publishing["Publishing Promises"]
+    direction LR
+    promise["Promise API"] --> controller["Portal Controller"]
+    controller --> storage["Git repository or bucket"]
+    storage --> catalog["Backstage catalogue and Templates"]
+  end
+```
+
+```mermaid
+flowchart LR
+  subgraph Requesting["Requesting resources"]
+    direction LR
+    request["Developer request in Backstage"] --> backend["SKE backend plugin"]
+    backend --> delivery["Kubernetes API or GitOps"]
+    delivery --> kratix["Kratix"]
+  end
 ```
 
 The Portal Controller generates catalog files. Backstage reads them; it does not receive

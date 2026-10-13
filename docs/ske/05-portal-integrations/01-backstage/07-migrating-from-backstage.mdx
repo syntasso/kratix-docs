@@ -1,21 +1,37 @@
 ---
 title: Migrating from the Backstage Controller
-description: Migrating from BackstageEntityCustomization to PortalCustomization
+description: Move from the Backstage Controller to the Portal Controller, including optional customisation changes
 keywords: [portal, backstage, migration, ske, controller]
 slug: "/ske/integrations/portal-controller/backstage/migrating-from-backstage"
 sidebar_label: "Migrate from the Backstage Controller"
 sidebar_position: 8
 ---
 
-`BackstageEntityCustomization`, owned by the Backstage Controller, is replaced by
-`PortalCustomization`, owned by the Portal Controller. The Backstage Controller is deprecated, but
-continues to work, so you can migrate at your own pace.
+Move an existing Backstage integration to the Portal Controller. Start with the controller
+and catalogue configuration; customisation changes are only needed if you use
+`BackstageEntityCustomization`.
 
-This guide maps every field of `BackstageEntityCustomizationSpec` to its equivalent, so nothing is
-silently dropped. Read [Customization](/ske/integrations/portal-controller/customization) and the
-[Portal Patch recipe reference](/ske/integrations/portal-controller/portal-patch/recipe-reference) first.
+## Migration checklist {#5-migration-checklist}
 
-## At a glance
+1. Install the Portal Controller and connect a `backstage` portal. Follow
+   [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities)
+   for installation and storage configuration.
+2. Configure Backstage's catalogue discovery for the new paths. See
+   [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage).
+   The Portal Controller writes to a different layout from the Backstage Controller.
+3. If you use `BackstageEntityCustomization`, [convert your customisations](#at-a-glance)
+   to `PortalCustomization`, merging any that applied to the same Promise.
+4. Add the `kratix.io/portal-backstage` label to each Promise you want synced.
+5. Confirm entities appear in Backstage, then remove the old `SKEIntegration` of `type: backstage`
+   and its `BackstageEntityCustomization` objects, if any.
+
+## Customisation changes at a glance {#at-a-glance}
+
+If you don't use `BackstageEntityCustomization`, no customisation migration is needed.
+Otherwise, the sections below map its fields to `PortalCustomization`. See
+[PortalCustomization](/ske/integrations/portal-controller/customization) for the resource schema
+and [Portal Patch recipes](/ske/integrations/portal-controller/portal-patch/recipe-reference)
+for the patch syntax.
 
 | `BackstageEntityCustomizationSpec` field | Equivalent | Nature of the change |
 |---|---|---|
@@ -291,16 +307,3 @@ metadata:
   labels:
     kratix.io/portal-customization: cicd-backstage-customization
 ```
-
-## Migration checklist {#5-migration-checklist}
-
-1. Install the Portal Controller and connect a `backstage` portal, see
-   [Installation](/ske/integrations/portal-controller/installation) and [Backstage](/ske/integrations/portal-controller/backstage/intro).
-2. Configure Backstage's catalog discovery for the new paths, see
-   [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage). The Portal Controller writes to a different layout
-   from the Backstage Controller.
-3. Convert each `BackstageEntityCustomization` to a `PortalCustomization`, merging any that applied
-   to the same Promise.
-4. Move the `kratix.io/portal-backstage` label onto each Promise you want synced.
-5. Confirm entities appear in Backstage, then remove the old `SKEIntegration` of `type: backstage`
-   and its `BackstageEntityCustomization` objects.
