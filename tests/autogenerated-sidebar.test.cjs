@@ -46,6 +46,19 @@ test('Enterprise category directories follow the numbered repository convention'
   }
 });
 
+test('Enterprise document files follow the numbered repository convention', () => {
+  function check(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name.startsWith('_')) continue;
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) check(file);
+      else if (/\.mdx?$/.test(entry.name)) assert.match(entry.name, /^\d{2}[-_]/, file);
+    }
+  }
+  check(path.join(root, 'docs/ske'));
+  check(path.join(root, 'docs/ske-supporting'));
+});
+
 test('Every Enterprise folder has a unique card landing page', () => {
   const categories = walk(generate(docs)).filter(item => item.type === 'category');
   assert.ok(categories.length > 0, 'Run yarn build before these tests');
