@@ -22,7 +22,7 @@ This guide ends with `catalog-info.yaml` in your chosen storage. Backstage disco
 The integration creates Kubernetes storage objects, not the repository or bucket itself.
 Keep catalog files separate from manifests your GitOps agent applies.
 
-## 1. Install or reuse the controller
+## Install or reuse the controller {#1-install-or-reuse-the-controller}
 
 Check for an existing installation:
 
@@ -39,7 +39,7 @@ Without the SKE Operator, use the same `portals` entry in
 [`ske-portal-config`](/ske/integrations/portal-controller/reference/portal-configuration#configuration-ownership), not an `SKEIntegration`.
 Follow the standalone apply instructions below.
 
-## 2. Configure catalog storage {#configuration}
+## Configure catalog storage {#configuration}
 
 Choose one ownership model:
 
@@ -229,7 +229,7 @@ kubectl get destination portal-backstage-prod -o yaml
 
 For a reused Destination, inspect its actual name instead.
 
-## 3. Label your Promise
+## Label your Promise {#3-label-your-promise}
 
 Bind the Promise to the `prod` instance:
 
@@ -249,7 +249,7 @@ kubectl get promise postgresql -o jsonpath='{range .status.conditions[*]}{.type}
 Look for `PortalBindingReady=True` and `BackstagePortalSynced=True` (`EntitySynced`).
 These confirm binding and the sync Job; verify storage separately below.
 
-## 4. Verify generated files {#what-gets-written-where}
+## Verify generated files {#what-gets-written-where}
 
 Inspect your repository's configured branch or list the bucket objects. For the owned examples,
 find `catalog-info.yaml` under:

@@ -90,7 +90,7 @@ bucket:
 
 | | Where it lives | What it is | Access |
 | --- | --- | --- | --- |
-| **State Store** (`health-state-store-config`) | Destination | How the health agent is told where to **write** records. Step 1 changes what it points at, never its role, and it may be Git or a bucket. | write |
+| **State Store** (`health-state-store-config`) | Destination | How the health agent is told where to **write** records. [Point the agent at a bucket](#point-the-agent) changes what it points at, never its role, and it may be Git or a bucket. | write |
 | The **bucket** | Neither | The storage itself. Both sides name it, and it is the only thing they share. | — |
 | **`HealthSource`** | Platform | A new object telling the SKE Platform Manager where to **read** records from. | read |
 
@@ -155,7 +155,7 @@ You will need:
   :::note
 
   If that returns `NotFound`, upgrade SKE first. Nothing else in this guide will
-  work without it, and Step 2 is where you would find out.
+  work without it: you cannot [create a HealthSource](#create-the-source).
 
   :::
 
@@ -221,7 +221,7 @@ it will then be acting on missing data.
 Running both paths at once is supported. That overlap is what makes this safe,
 and [what you see during it](#the-overlap-window) is described below.
 
-## Step 1: Point the Destination's agent at a bucket {#point-the-agent}
+## Point the Destination's agent at a bucket {#point-the-agent}
 
 On the **Destination**, the agent's `health-state-store-config` ConfigMap in the
 `k8s-health-agent-system` namespace decides where records are written. Set it to
@@ -306,7 +306,7 @@ authors the ConfigMap, and let it travel down the same path it always does.
 The agent writes one file per resource, named after the Promise, namespace,
 resource and Destination — inside a `health/` directory it creates below `path`.
 So with the example above the objects land under `health/worker-1/health/`.
-Nothing to correct for: the `HealthSource` in Step 2 reads its prefix
+Nothing to correct for: the [HealthSource you create next](#create-the-source) reads its prefix
 recursively, so both sides keep naming the same `path`.
 
 :::warning Set `destinationName` if Destinations share a prefix
@@ -329,9 +329,9 @@ That is safe, and it is why the next steps are short. It is also the reason not
 to leave the overlap window open for long: because [the worse state
 wins](#the-overlap-window), a frozen record that last reported `unhealthy` will
 keep the resource reading `unhealthy` even after the new path reports it
-healthy. Move on to Step 2 rather than leaving a Destination here.
+healthy. [Create a HealthSource](#create-the-source) next rather than leaving a Destination here.
 
-## Step 2: Create a HealthSource on the Platform {#create-the-source}
+## Create a HealthSource on the Platform {#create-the-source}
 
 On the **Platform**, a [`HealthSource`](/ske/reference/healthsource) names one
 place to read records from: one bucket, one prefix, one credential of its own.
@@ -417,7 +417,7 @@ object every time one of them changes.
 
 :::
 
-## Step 3: Check the new path is working {#check-it-works}
+## Check the new path is working {#check-it-works}
 
 Do not skip this step. It is the whole reason the order above is safe.
 Everything here runs against the **Platform** cluster, and only reads.
@@ -497,11 +497,11 @@ This is what makes the overlap safe: while both paths report, the resource
 cannot appear healthier than the worst thing either path knows about. It fails
 towards caution.
 
-It cuts the other way too, and this is the one thing to watch. From Step 1
-onwards the old record is **frozen** (the agent no longer updates it), so it
+It cuts the other way too, and this is the one thing to watch. Once the agent
+writes to the bucket, the old record is **frozen** (the agent no longer updates it), so it
 reports whatever it last saw, forever. If that last value was `unhealthy`, the
 resource keeps reading `unhealthy` however healthy the new path says it is,
-until Step 4 removes the old record. Compare `lastRun` between the two records
+until you [remove the GitOps sync](#remove-the-sync) and its old record. Compare `lastRun` between the two records
 in `status.healthStatus.healthRecords` to tell a live disagreement from a stale
 one:
 
@@ -511,7 +511,7 @@ kubectl get <resource> <name> -n <namespace> \
 ```
 
 The record whose `lastRun` is advancing is the new path. The one that has
-stopped is the old one, and it goes in Step 4.
+stopped is the old one, and it goes when you [remove the GitOps sync](#remove-the-sync).
 
 :::info The Git record goes when its sync goes
 
@@ -521,13 +521,13 @@ label it sets itself, so it cannot touch a record it did not apply.
 
 That is deliberate, and it is what makes running both paths safe. It has a
 consequence, though: the old records do not disappear on their own. They go when
-the GitOps sync that maintains them goes, in Step 4.
+you [remove the GitOps sync](#remove-the-sync) that maintains them.
 
 :::
 
-## Step 4: Remove the GitOps sync {#remove-the-sync}
+## Remove the GitOps sync {#remove-the-sync}
 
-Only once Step 3 looks right. Removing the sync while it still has `prune: true`
+First [verify the new path](#check-it-works). Removing the sync while it still has `prune: true`
 and still owns those records is what deletes them, which is exactly what you
 want. It is also exactly what you do not want if the new path is not yet
 working.
@@ -661,15 +661,15 @@ them as part of this migration.
 
 **Record files in the old State Store**: The Git repository (or bucket) you
 migrated away from still holds the files the agent used to write there. Nothing
-carries them onto the Platform any more, and the agent stopped touching them in
-Step 1, so they affect nothing. Delete them whenever convenient — on Git, one
+carries them onto the Platform any more, and the agent stopped touching them when
+you pointed it at the bucket, so they affect nothing. Delete them whenever convenient — on Git, one
 last commit removing the `health/` directory closes the book.
 
 That Destination is now migrated.
 
 ## Migrating a fleet {#fleet}
 
-Steps 1 to 4 cover one Destination, and that is the unit of this migration.
+This procedure covers one Destination, and that is the unit of this migration.
 There is no fleet-wide switch: each Destination needs its own `HealthSource` and
 its own credential, which is the same property that stops one Destination's
 credential reaching another's records.
@@ -684,8 +684,8 @@ than doing them in bulk:
    agent writes. You want to meet those once, not across the fleet at the same
    time.
 2. **Then go one Destination at a time.** Nothing is shared between them, so a
-   Destination that goes wrong is contained, and Step 4 is still the last thing
-   you do for each.
+   Destination that goes wrong is contained. [Remove the GitOps sync](#remove-the-sync)
+   last for each Destination.
 
 To see how far along you are, list the sources and check each is `Ready`:
 
@@ -720,13 +720,13 @@ At every step, the way back is short:
 
 | After | To undo |
 | --- | --- |
-| Step 1 | Point the agent's ConfigMap back at the old State Store. |
-| Step 2 | `kubectl delete healthsource <name>`. Every record it applied is garbage collected with it, because each one is owned by the source. |
-| Step 3 | Nothing to undo: it only reads. |
-| Step 4 | Restore the GitOps `Application` or `Kustomization` you removed. It re-applies the records from the State Store. |
+| [Point the agent at a bucket](#point-the-agent) | Point the agent's ConfigMap back at the old State Store. |
+| [Create a HealthSource](#create-the-source) | `kubectl delete healthsource <name>`. Every record it applied is garbage collected with it, because each one is owned by the source. |
+| [Verify the new path](#check-it-works) | Nothing to undo: it only reads. |
+| [Remove the GitOps sync](#remove-the-sync) | Restore the GitOps `Application` or `Kustomization` you removed. It re-applies the records from the State Store. |
 
-Because the GitOps sync is untouched until Step 4, undoing Steps 1 to 3 leaves
-you exactly where you started, with health still flowing.
+Until you remove the GitOps sync, you can undo the bucket configuration and
+HealthSource creation with health still flowing through the original sync.
 
 ## Troubleshooting {#troubleshooting}
 

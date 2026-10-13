@@ -31,7 +31,7 @@ Install the Backstage packages in Backstage.
 Use the [SKE Operator](/ske/installing-ske/install-with-operator), or
 [install standalone](#installing-without-the-ske-operator) if it does not manage this integration.
 
-### 1. Check for an existing installation
+### Check for an existing installation {#1-check-for-an-existing-installation}
 
 ```bash
 kubectl get skeintegrations
@@ -44,7 +44,7 @@ its name and portal entries.
 
 If only the Deployment exists, check how it is managed before installing another controller.
 
-### 2. Create the integration resource
+### Create the integration resource {#2-create-the-integration-resource}
 
 For a new installation, save this as `portal-controller.yaml`:
 
@@ -125,7 +125,7 @@ the empty bootstrap ConfigMap again.
 
 This path requires SKE and its pipeline adapter. Do not combine it with an operator-managed controller.
 
-### 1. Check platform dependencies
+### Check platform dependencies {#1-check-platform-dependencies}
 
 Check SKE's namespace, pipeline adapter configuration and registry Secret:
 
@@ -141,7 +141,7 @@ The ConfigMap must contain a non-empty `PIPELINE_ADAPTER_IMG`. Restore missing d
 through your [SKE installation](/ske/installing-ske/intro) process before proceeding.
 These commands do not print credentials.
 
-### 2. Download and configure the released manifest
+### Download and configure the released manifest {#2-download-and-configure-the-released-manifest}
 
 In a new local directory for this installation, download the manifest:
 
@@ -176,7 +176,7 @@ patches:
               - name: syntasso-registry
 ```
 
-### 3. Create the portal configuration
+### Create the portal configuration {#3-create-the-portal-configuration}
 
 For a **new installation**, save this as `portal-config.yaml`. It configures no portal instances:
 
@@ -198,7 +198,7 @@ If the ConfigMap exists, preserve its entries. Add portal instances using the
 [configuration reference](/ske/integrations/portal-controller/reference/portal-configuration#configuration-ownership).
 Create any referenced Cortex credential Secret through your Secret management process first.
 
-### 4. Deploy and verify
+### Deploy and verify {#4-deploy-and-verify}
 
 ```bash
 kubectl apply --kustomize .

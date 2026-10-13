@@ -13,7 +13,7 @@ Use a `PortalCustomization` to edit generated Cortex documents between the gener
 
 Start with an installed Promise named `kafka`, published through the `prod` Cortex portal using [Generate entities](/ske/integrations/portal-controller/cortex/generate-entities). The examples do not install Kafka or change its API. To use another Promise, replace `kafka` in the binding command and choose an appropriate workflow name.
 
-## 1. Define the customisation
+## Define the customisation {#1-define-the-customisation}
 
 Save the following as `kafka-cortex-customization.yaml`:
 
@@ -61,7 +61,7 @@ The promise configure lane edits the workflows once per Promise sync. The resour
 
 Portal Patch is versioned separately from the Portal Controller. Pin its image version in each container.
 
-## 2. Apply and bind the customisation
+## Apply and bind the customisation {#2-apply-and-bind-the-customisation}
 
 ```bash
 kubectl apply -f kafka-cortex-customization.yaml
@@ -70,7 +70,7 @@ kubectl label promise kafka kratix.io/portal-customization.prod=kafka-cortex --o
 
 The `.prod` suffix selects the Cortex portal named `prod`. The customisation binding opts the Promise into that portal type. Use one customisation per Promise and combine its changes in that resource. See [Binding a Promise](/ske/integrations/portal-controller/customization#binding-a-promise-to-a-portalcustomization).
 
-## 3. Verify the result
+## Verify the result {#3-verify-the-result}
 
 ```bash
 kubectl get portalcustomization kafka-cortex -o yaml
