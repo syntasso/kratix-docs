@@ -6,15 +6,15 @@ sidebar_label: "Backup and restore"
 sidebar_position: 3
 ---
 
-An SKE recovery plan must cover the platform cluster and the external systems it uses.
-Cluster backups alone do not capture Git repositories, buckets or resources provisioned by
-Promise workflows. Define your recovery objectives and rehearse your provider's restore
-procedure in an isolated environment.
+Backing up the platform cluster is only part of recovering SKE. You also need to protect
+the Git repositories, buckets and services that your Promises use or provision.
+Decide how much data you can afford to lose and how quickly you need to restore the platform.
+Then test your provider's restore procedure in an isolated environment.
 
 ## Prerequisites
 
 - A backup tool supported by your cluster provider and access to its recovery documentation.
-- An inventory of installed component versions, configuration and external dependencies.
+- A record of installed component versions, configuration and external dependencies.
 - Secure recovery access to credentials and encryption keys.
 - An isolated target environment for a restore rehearsal.
 
@@ -24,6 +24,9 @@ Provider guidance includes [Amazon EKS](https://aws.amazon.com/blogs/containers/
 and [OpenShift](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/backup_and_restore/control-plane-backup-and-restore).
 
 ## Inventory what to protect
+
+Use this list to identify what your backups must cover. Some items need separate backups
+outside the platform cluster.
 
 1. Record the Operator, SKE and optional component versions, Helm values or manifests,
    `Kratix`, `SKEIntegration` and `PortalCustomization` resources, and customised ConfigMaps such as `kratix`
@@ -46,7 +49,8 @@ isolate the target from production stores and services and review credentials an
 Coordinate recovery of the platform and provisioned resources before resuming reconciliation.
 :::
 
-Use your backup tool's ordering controls to restore dependencies before their consumers:
+Restore each dependency before the components that use it. Use your backup tool's ordering
+controls to follow this sequence:
 
 1. Restore namespaces and the CRDs needed by cert-manager, GitOps agents, the Operator and SKE.
 2. Restore their required configuration and Secrets, then install the matching component versions
@@ -54,8 +58,9 @@ Use your backup tool's ordering controls to restore dependencies before their co
 3. Restore StateStores, Destinations and optional integration configuration with their dependencies available.
 4. Restore Promises before their resource requests, because each Promise supplies its request CRD.
    Restore health and upgrade objects after their referenced resources exist.
-5. Resume external publication and request ingestion according to the recovery plan, checking each
-   store and Destination before opening developer access.
+5. Check that workflows can write to the restored StateStores and that Destination GitOps agents
+   can apply the output. If you use a portal, check catalogue updates and request submission too.
+   Follow your recovery plan when re-enabling these components, before giving developers access.
 
 See [Velero resource filtering](https://velero.io/docs/main/resource-filtering) and
 [GKE restore ordering](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/restore-order)
@@ -63,13 +68,14 @@ for tool-specific controls. Confirm your provider's ordering behaviour during th
 
 ## Verify recovery
 
-Compare restored versions, objects and configuration against the inventory. Confirm controller
-readiness, Promise availability, resource request status and Destination GitOps reconciliation.
-Check health record delivery and portal publication where enabled. Validate the provisioned
-service and its data using its own recovery checks.
+Compare restored versions, objects and configuration against your records. Check that controllers
+are ready, Promises are available and resource requests have the expected status.
+For Kubernetes workloads, confirm the Destination GitOps agents apply the restored output.
+If you use health checks or a portal, check that health status and catalogue entries update.
+Test each provisioned service and its data using that service's recovery checks.
 
-Record the observed recovery time, missing dependencies and corrective steps. Keep the plan
-with your operational runbooks and repeat the rehearsal when topology or dependencies change.
+Record how long recovery took, what was missing and how you fixed it. Keep these steps in your
+recovery plan and repeat the test when your platform configuration or dependencies change.
 
 ## Troubleshooting and next steps
 
