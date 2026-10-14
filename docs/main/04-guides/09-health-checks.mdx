@@ -121,9 +121,15 @@ You can have external systems generating the HealthRecord CustomResource and, vi
 
 :::
 
+:::note
+
+Kratix only reads a HealthRecord that is in the same namespace as the resource it reports on. A record in any other namespace is ignored: it does not appear in the resource's status, and it does not change `state` or the `HealthChecksSucceeded` condition.
+
+:::
+
 :::tip
 
-A HealthDefinition or HealthRecord created outside the Configure workflow must carry the promise version to count toward the `HealthChecksSucceeded` condition: `spec.promiseVersion` on the HealthDefinition, `data.promiseVersion` on the record. The platform never waits for it: `expectedRecords` only counts what the pipeline shipped. Only records in the resource's namespace count toward the condition.
+A HealthDefinition or HealthRecord created outside the Configure workflow must carry the promise version to count toward the `HealthChecksSucceeded` condition: `spec.promiseVersion` on the HealthDefinition, `data.promiseVersion` on the record. The platform never waits for it: `expectedRecords` only counts what the pipeline shipped.
 
 :::
 

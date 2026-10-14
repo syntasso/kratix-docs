@@ -261,7 +261,9 @@ apiVersion: platform.kratix.io/v1alpha1
 kind: HealthRecord
 metadata:
   name: dev-postgresql-health
+  namespace: default
 data:
+  promiseVersion: v2.0.0
   promiseRef:
     name: postgresql
   resourceRef:
@@ -274,9 +276,7 @@ data:
 ```
 
 Eventually the `status.healthStatus` of the corresponding request is updated
-with the information in the Health Record.
-
-Here the Resource expects two records at `v2.0.0` and one has arrived:
+with the information in the Health Record:
 
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
@@ -290,38 +290,39 @@ status:
     state: healthy
     expectedPromiseVersion: v2.0.0
     healthDefinitions: 1
-    expectedRecords: 2
+    expectedRecords: 1
     healthRecords:
       - source:
-          name: dev-postgresql-health-worker-1
+          name: dev-postgresql-health
           namespace: default
         state: healthy
         lastRun: 1531958400
         details:
           acceptingConnections: true
         promiseVersion: v2.0.0
-      - source:
-          name: dev-postgresql-health-worker-2
-          namespace: default
-        state: healthy
-        lastRun: 1531958000
-        promiseVersion: v1.0.0
 ```
 
+If more than one `HealthRecord` for a single resource exists, they will each appear
+as an individual record under `status.healthStatus.healthRecords`.
+
+Kratix only reads Health Records in the same namespace as the Resource. A
+record in any other namespace is ignored, even if its `resourceRef` names the
+Resource.
+
+In the `status.healthStatus`:
+
 * `state` is the worst state across all records received, regardless of version.
-* `expectedPromiseVersion` is teh Promise version that Kratix currently expects
+* `expectedPromiseVersion` is the Promise version that Kratix currently expects
   health results for on the resource.
-* `expectedRecords` is the number of Health Definitions created by the Promise,
-multiplied by the number of Destinations they were placed on.
-* `healthRecords` is a list of the heath records that have run against the
-  request.
+* `expectedRecords` is the number of HealthDefinitions created by the Promise.
+* `healthRecords` is a list of the heath records for the resource.
 
 ### The HealthChecksSucceeded condition
 
 For a Resource of a versioned Promise, Kratix sets the `HealthChecksSucceeded`
 condition detailing how many records have reported and whether they had passed.
-The condition considers only the Health Records whose
-`promiseVersion` equals `status.healthStatus.expectedPromiseVersion`.
+The condition considers only the Health Records whose `promiseVersion` equals 
+`status.healthStatus.expectedPromiseVersion`. 
 
 ```yaml
   conditions:
@@ -344,34 +345,6 @@ The below table illustrates the statuses the condition can report and why.
 
 A Resource of an unversioned Promise has no expectedPromiseVersion and no
 HealthChecksSucceeded condition.
-
-The condition ignores a Health Record if:
-
-* its version does not match expectedPromiseVersion
-* it has no version
-* it is in a different namespace from the Resource
-
-For a versioned Promise, the `HealthChecksSucceeded` condition is `Unknown`
-with the reason `WaitingForRecords` until the Health Agent returns Health Records
-containing the expected Promise version.
-
-The `HealthChecksSucceeded` condition is `Unknown` when the Promise created
-Health Definitions but Kratix has not yet placed any of them on a Destination.
-In this case, `healthDefinitions` is more than 0, and the condition's message is:
-
-```text
-health checks for <version> have not been placed on a destination yet
-```
-
-The Resource's `ResourceBinding` copies the following fields into its own
-status:
-
-* state
-* expectedPromiseVersion
-* expectedRecords
-* the HealthChecksSucceeded condition
-
-It does not copy healthRecords.
 
 To wait until a Resource's current version passes its health checks, wait on
 the HealthChecksSucceeded condition, not on state `state`:
