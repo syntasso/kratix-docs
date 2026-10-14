@@ -123,18 +123,36 @@ The `cloud-to-kratix-promise` skill runs a fixed sequence:
    before drafting anything, so you can narrow the scope first.
 3. **Clarify** — asks you about each grouping it's unsure of, batched into a single set of questions about how the resources behave in practice. Drafting does not
    start until you answer, or tell it to use its own judgement.
-4. **Build** — passes each approved capability to `kratix-build-promise`, which
-   writes the Promise itself: an API schema and working pipeline code. It then
-   drafts the Resource Requests for what is already running.
+4. **Build** — passes each capability you chose to `kratix-build-promise` to
+   draft its API schema, pipeline code, Promise, and generated example Resource
+   Request. It also drafts Resource Requests for what is already running. The
+   builder stops before live installation and validation.
 5. **Review** — checks every draft against Syntasso's platform doctrine, looking
    for capabilities that only automate a task rather than owning a service
    through its lifecycle. Each finding is recorded in `review-findings.yaml`.
-6. **Gate** — `kratix skelift review` fails if any critical or high finding is
-   unresolved, and `kratix skelift check` validates the structure of the
-   generated Promises and examples. The review step records findings; these
-   commands are what enforce them.
-7. **Apply, only after approval** — you see the drafts, the review, and the gate
-   results first. Nothing reaches the platform until you say so.
+6. **Gate** — run both SKE Lift commands offline: `kratix skelift review` fails
+   if any critical or high finding is unresolved, and `kratix skelift check` validates
+   the structure of the generated Promises and examples. The review step records
+   findings; the commands check the drafts and findings, not the agent's permissions.
+7. **Approve and apply** — review the drafts and both gate results, then approve
+   each live action and its target before the agent performs it.
+
+:::warning Control write access
+The approval steps and target checks are advisory instructions to the agent.
+They do not prevent an agent with write credentials from using another tool to change a
+cluster, registry, or cloud account. For a stronger boundary, use read-only
+access while drafting and checking, then route approved writes through your
+own process with credentials limited to the named action and target. Keep
+those write credentials in that process, not in the agent's environment.
+:::
+
+Live actions include:
+
+- Delivering pipeline images.
+- Installing a Promise.
+- Applying the builder's generated example Resource Request.
+- Applying a Resource Request for an existing instance.
+- Running live validation steps in a sandbox, including example submission.
 
 ## Usage
 
@@ -151,8 +169,8 @@ groupings it is unsure of. Each run produces:
 
 | Output | Contents |
 |---|---|
-| `promises/` | One generated Promise per approved capability |
-| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile` |
+| `promises/` | One generated Promise per capability you chose to draft |
+| `<capability>-promise/` | The full build output: `promise.yaml`, pipeline code, `Makefile`, and a draft `example-resource.yaml` |
 | `resource-requests/` | Drafted Resource Requests for the live instances, not applied |
 | `review-findings.yaml` | Every review finding, including explicit pass notes |
 
@@ -185,4 +203,4 @@ Markdown. See your agent's documentation for how it discovers skills.
 
 - [SKE tokens](/ske/reference/tokens) — which token to use and why
 - [Kratix CLI](/main/kratix-cli/intro) — installing and using the CLI
-- [MCP Server](/ske/integrations/mcp) — exposing your platform to AI agents at request time
+- [MCP Server](./mcp) — exposing your platform to AI agents at request time
