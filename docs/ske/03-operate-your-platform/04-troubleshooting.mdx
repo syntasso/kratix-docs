@@ -1,0 +1,84 @@
+---
+title: Troubleshoot SKE
+description: Locate platform, dependency and integration failures and collect useful support evidence.
+slug: "/ske/operations/troubleshooting"
+sidebar_label: "Troubleshoot SKE"
+sidebar_position: 5
+---
+
+Start with the affected resource, then check the components it depends on. A running controller
+or a completed workflow does not mean the provisioned service is working. The sections below
+help you find which stage has failed.
+
+## Collect platform evidence
+
+With read access to the platform cluster, inspect versions, conditions and events:
+
+```bash
+kubectl get kratix -o yaml
+kubectl get skeintegrations -o yaml
+kubectl get deployments,pods -n kratix-platform-system
+kubectl get events -n kratix-platform-system --sort-by=.metadata.creationTimestamp
+```
+
+Use the names returned above to inspect an affected Pod:
+
+```bash
+kubectl describe pod <POD_NAME> -n kratix-platform-system
+kubectl logs <POD_NAME> -n kratix-platform-system --all-containers
+```
+
+## Installation or upgrade is not ready
+
+| Symptom | Check | Next action |
+| --- | --- | --- |
+| `ImagePullBackOff` | Image name, tag, registry connectivity and pull Secret | Correct the registry reference or credentials using the installation guide |
+| `RegistrySecretNotFound` | Referenced Secret exists in `kratix-platform-system` | Restore or correct the Secret reference |
+| Webhook certificate errors | cert-manager readiness, certificate expiry and configured TLS Secret names | Follow [custom certificate requirements](/ske/installing-ske/install-with-operator#custom-certs) |
+| Upgrade stops | `Kratix` status, events, current and desired versions, workload readiness | Check [upgrade rules](/ske/installing-ske/upgrades) and [release requirements](/ske/releases/compatibility) |
+| Integration not ready | `SKEIntegration.status.conditions`, deployment availability and credentials | Use the [Operator status reference](/ske/reference/ske-operator#status) and the integration guide |
+
+Confirm the condition or deployment becomes ready after correcting the dependency.
+For an upgrade, verify the installed version matches the intended version.
+
+## Request does not reach a working service
+
+Follow the request from the platform to the provisioned service:
+
+1. Check that the Promise is available, then inspect the resource request's status conditions for errors.
+2. If a workflow failed, inspect its Job and Pod logs in the request namespace.
+3. If the workflow completed, check that its generated files reached the StateStore under the
+   target Destination's path.
+4. For Kubernetes workloads, check the worker GitOps agent's status and logs. Confirm it applied
+   the generated files, then inspect the resulting resources for errors.
+5. Test the provisioned service. A successful workflow does not guarantee that the service is healthy.
+
+For portal requests, first check that submission succeeded and any required approval was granted.
+If the portal writes requests to Git, confirm the request file exists and the platform GitOps
+agent applied it. If it uses the Kubernetes API, confirm the request exists on the platform cluster.
+Then follow the checks above. Use [portal sync troubleshooting](/ske/integrations/portal-controller/troubleshooting)
+when catalogue entries do not update, and the [portal guides](/ske/integrations/portal-integrations/intro)
+for request submission configuration.
+
+## Health is missing or unexpected
+
+Check that the Health Agent is running on the Destination and inspect the health check workflow's
+Job and Pod logs. If the check completed, look for its `HealthRecord` in the StateStore.
+
+Next, check how the record reaches the platform cluster:
+
+- If you use a GitOps agent, check its status and logs and confirm it applied the `HealthRecord`.
+- If you use a bucket [`HealthSource`](/ske/reference/healthsource), inspect its status conditions
+  and the Platform Manager logs for errors reading the record.
+
+See [Health Agent requirements](/ske/installing-ske/ske-health-agent#requirements) for the
+risks of using both methods for the same records. After correcting the issue, confirm that a new
+record reaches the platform cluster and the resource request's health status updates.
+
+## Escalate unresolved failures
+
+Use the channels in your [support agreement](/ske/support). Include component versions,
+the failure time and timezone, affected resource kinds and conditions, relevant events and logs,
+recent configuration changes and the steps needed to reproduce the issue.
+Remove tokens, Secret contents and customer data before sharing evidence.
+After resolving the issue, repeat the failed request or health check and record the fix.

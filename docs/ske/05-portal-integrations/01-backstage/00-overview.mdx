@@ -1,0 +1,72 @@
+---
+title: Integrate SKE with Backstage
+description: Generate catalog entities, configure Backstage and send resource requests to Kratix
+keywords: [portal, backstage, ske, controller, destination, state store]
+slug: "/ske/integrations/portal-controller/backstage/intro"
+sidebar_label: "Overview"
+sidebar_position: 1
+---
+
+Publish your Promises in Backstage so developers can discover, request and manage resources.
+
+The integration has two directions:
+
+```mermaid
+flowchart LR
+  subgraph Publishing["Publishing Promises"]
+    direction LR
+    promise["Promise API"] --> controller["Portal Controller"]
+    controller --> storage["Git repository or bucket"]
+    storage --> catalog["Backstage catalogue and Templates"]
+  end
+```
+
+```mermaid
+flowchart LR
+  subgraph Requesting["Requesting resources"]
+    direction LR
+    request["Developer request in Backstage"] --> backend["SKE backend plugin"]
+    backend --> delivery["Kubernetes API or GitOps"]
+    delivery --> kratix["Kratix"]
+  end
+```
+
+The Portal Controller generates catalog files. Backstage reads them; it does not receive
+them through its API. The two SKE plugin packages provide request actions and resource pages.
+
+## Set up the integration
+
+<span id="configuration" />
+<span id="owning-a-destination" />
+<span id="referencing-an-existing-state-store" />
+<span id="adopting-an-existing-destination" />
+<span id="configuration-errors" />
+<span id="what-gets-written-where" />
+
+1. [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities). Install or reuse the controller,
+   choose catalog storage, label a Promise and verify its files.
+2. [Configure Backstage](/ske/integrations/portal-controller/backstage/configure-backstage). Install the plugins and configure discovery.
+   Verify the Promise Component and its Template.
+3. [Send resource requests to Kratix](/ske/integrations/portal-controller/backstage/send-resource-requests).
+   Configure transport, approval and namespaces. Create, update and delete a resource.
+
+Catalog storage and request storage are separate choices. Git-based requests need a GitOps
+agent to apply them to the platform.
+
+## Customise your integration
+
+- [Customise entities and request templates](/ske/integrations/portal-controller/backstage/customising-the-request-template).
+- Extend the UI with the [frontend plugin API](/ske/integrations/portal-controller/backstage/frontend-plugin).
+- Look up actions and configuration in the [backend plugin API](/ske/integrations/portal-controller/backstage/backend-plugin).
+
+:::info Existing Backstage Controller installation
+Follow [the migration guide](/ske/integrations/portal-controller/backstage/migrating-from-backstage) instead of creating a second integration.
+:::
+
+For local plugin development, you can use the [development image](/ske/integrations/portal-controller/backstage/development-image).
+To generate entities directly from Promise workflows without deploying the controller,
+see [Run the adapter as a pipeline stage](/ske/integrations/portal-controller/backstage/pipeline-stage).
+
+## Next steps
+
+Start with [Generate Backstage entities](/ske/integrations/portal-controller/backstage/generate-entities).

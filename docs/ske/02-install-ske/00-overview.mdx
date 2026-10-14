@@ -1,0 +1,71 @@
+---
+title: Prerequisites
+description: Prepare your cluster and credentials before installing Syntasso Kratix Enterprise.
+slug: "/ske/installing-ske/intro"
+sidebar_label: "Prerequisites"
+sidebar_position: 1
+---
+
+Before installing SKE, prepare your cluster and obtain your access tokens.
+If you don't have an SKE licence, [request a trial or discuss pricing](https://www.syntasso.io/pricing).
+
+<span id="configure-workload-delivery" />
+
+## Installation prerequisites {#installing-ske}
+
+You need:
+
+- A Kubernetes platform cluster and permission to install CRDs, controllers and webhooks.
+- `kubectl`, and Helm if you choose the Helm installation method.
+- An SKE licence token supplied by Syntasso. See [Get access](#get-access) below.
+- Access to the image registry and release storage, or [mirrors for an air-gapped installation](/ske/installing-ske/air-gapped).
+- [cert-manager](https://cert-manager.io/docs/installation/), or
+  [custom certificates](/ske/installing-ske/install-with-operator#custom-certs) for SKE's webhooks.
+- A Git repository or S3-compatible bucket to store generated workloads for GitOps delivery.
+  You'll configure a [StateStore](/main/reference/statestore/intro),
+  [Destination](/main/reference/destinations/intro) and, for Kubernetes workloads, a
+  [GitOps agent](/category/installing-gitops-agent) after installing SKE.
+
+SKE and the Operator run in `kratix-platform-system`. Referenced registry, release-storage
+and TLS Secrets must be in that namespace.
+
+## Get access
+
+Syntasso supplies two tokens with your SKE licence.
+Existing customers can use their [Syntasso support channels](/ske/support#support-channels).
+
+The registry token pulls container images; the releases token downloads private release assets.
+They are not interchangeable.
+
+### Syntasso registry token
+
+This is your SKE licence token. Use it as `skeLicense` in the
+[Helm installation](/ske/installing-ske/install-with-operator#the-ske-license), or to create
+an image pull Secret. It pulls private images from `ghcr.io/syntasso` as `syntasso-pkg`
+and commonly starts with `ghp_`.
+
+Keep credentials in your approved secret-management system. Avoid committing tokens or
+Helm values containing credentials to source control.
+
+### Enterprise releases token
+
+The Enterprise releases token provides access to private assets in
+`syntasso/enterprise-releases`. It commonly starts with `github_pat_`.
+Use it as `GH_TOKEN` when [installing the Promise Testing CLI](/ske/promise-testing-framework/intro#installing-the-testing-framework).
+Do not use it as `skeLicense`.
+
+## Optional components {#additional-components}
+
+- [SKE Health Agent](/ske/installing-ske/ske-health-agent): run health checks on resources in Kubernetes Destinations.
+- [SKE GUI](/ske/installing-ske/ske-gui): view Promises, resource requests and platform health in a web interface.
+- [Portal integrations](/ske/integrations/portal-integrations/intro): let developers discover Promises and request resources through Backstage, Cortex or Port.
+- A platform [GitOps agent](/category/installing-gitops-agent): required if you use [Compound Promises](/main/guides/compound-promises).
+
+## Next steps
+
+Install via the Operator's [Helm chart](/ske/installing-ske/install-with-operator#via-helm-chart) or
+[manifests](/ske/installing-ske/install-with-operator#via-manifests).
+
+<span id="upgrading-and-removing-ske" />
+
+For an existing installation, see [Upgrade SKE](/ske/installing-ske/upgrades).

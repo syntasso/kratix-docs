@@ -77,6 +77,14 @@ const config = {
             {
                 redirects: [
                     {
+                        from: "/category/guides-1",
+                        to: "/category/build-and-evolve-promises",
+                    },
+                    {
+                        from: "/category/reference-1",
+                        to: "/ske/reference",
+                    },
+                    {
                         from: "/ske/installing-ske/preconfigured-install",
                         to: "/ske/installing-ske/install-with-operator",
                     },
