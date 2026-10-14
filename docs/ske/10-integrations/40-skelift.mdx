@@ -152,14 +152,6 @@ Live actions include:
 - Applying a Resource Request for an existing instance.
 - Running live validation steps in a sandbox, including example submission.
 
-Approve each action separately. For sandbox validation, name the sandbox target
-and the exact steps you approve. For a cluster write, name the kubeconfig,
-Kubernetes context, API server, and cluster identity. For image delivery, name
-the route (registry or kind cluster) and exact image reference. The skill
-instructs the agent to use the approved kubeconfig and context for each
-Kubernetes write, check the target again before that write, and stop if it has
-changed.
-
 ## Usage
 
 Once the skills are installed, start your agent and point it at a cloud account:
