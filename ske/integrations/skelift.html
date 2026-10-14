@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.9db6074a.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.de8bfb71.js" defer="defer"></script>
 <script src="/assets/js/main.bd5531ff.js" defer="defer"></script>
 </head>
 <body>
@@ -86,26 +86,41 @@ which of them are reusable patterns and which are one-offs. It does this
 before drafting anything, so you can narrow the scope first.</li>
 <li class=""><strong>Clarify</strong> — asks you about each grouping it&#x27;s unsure of, batched into a single set of questions about how the resources behave in practice. Drafting does not
 start until you answer, or tell it to use its own judgement.</li>
-<li class=""><strong>Build</strong> — passes each approved capability to <code>kratix-build-promise</code>, which
-writes the Promise itself: an API schema and working pipeline code. It then
-drafts the Resource Requests for what is already running.</li>
+<li class=""><strong>Build</strong> — passes each capability you chose to <code>kratix-build-promise</code> to
+draft its API schema, pipeline code, Promise, and generated example Resource
+Request. It also drafts Resource Requests for what is already running. The
+builder stops before live installation and validation.</li>
 <li class=""><strong>Review</strong> — checks every draft against Syntasso&#x27;s platform doctrine, looking
 for capabilities that only automate a task rather than owning a service
 through its lifecycle. Each finding is recorded in <code>review-findings.yaml</code>.</li>
-<li class=""><strong>Gate</strong> — <code>kratix skelift review</code> fails if any critical or high finding is
-unresolved, and <code>kratix skelift check</code> validates the structure of the
-generated Promises and examples. The review step records findings; these
-commands are what enforce them.</li>
-<li class=""><strong>Apply, only after approval</strong> — you see the drafts, the review, and the gate
-results first. Nothing reaches the platform until you say so.</li>
+<li class=""><strong>Gate</strong> — run both SKE Lift commands offline: <code>kratix skelift review</code> fails
+if any critical or high finding is unresolved, and <code>kratix skelift check</code> validates
+the structure of the generated Promises and examples. The review step records
+findings; the commands check the drafts and findings, not the agent&#x27;s permissions.</li>
+<li class=""><strong>Approve and apply</strong> — review the drafts and both gate results, then approve
+each live action and its target before the agent performs it.</li>
 </ol>
+<div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Control write access</div><div class="admonitionContent_BuS1"><p>The approval steps and target checks are advisory instructions to the agent.
+They do not prevent an agent with write credentials from using another tool to change a
+cluster, registry, or cloud account. For a stronger boundary, use read-only
+access while drafting and checking, then route approved writes through your
+own process with credentials limited to the named action and target. Keep
+those write credentials in that process, not in the agent&#x27;s environment.</p></div></div>
+<p>Live actions include:</p>
+<ul>
+<li class="">Delivering pipeline images.</li>
+<li class="">Installing a Promise.</li>
+<li class="">Applying the builder&#x27;s generated example Resource Request.</li>
+<li class="">Applying a Resource Request for an existing instance.</li>
+<li class="">Running live validation steps in a sandbox, including example submission.</li>
+</ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="usage">Usage<a href="#usage" class="hash-link" aria-label="Direct link to Usage" title="Direct link to Usage" translate="no">​</a></h2>
 <p>Once the skills are installed, start your agent and point it at a cloud account:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">What&#x27;s running in my AWS account? Turn the repeated patterns into</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">Kratix Promises and Resource Requests.</span><br></div></code></pre></div></div>
 <p>The agent confirms which account and tooling it found before it inventories
 anything, then asks a short batch of questions about scope and about any
 groupings it is unsure of. Each run produces:</p>
-<table><thead><tr><th>Output</th><th>Contents</th></tr></thead><tbody><tr><td><code>promises/</code></td><td>One generated Promise per approved capability</td></tr><tr><td><code>&lt;capability&gt;-promise/</code></td><td>The full build output: <code>promise.yaml</code>, pipeline code, <code>Makefile</code></td></tr><tr><td><code>resource-requests/</code></td><td>Drafted Resource Requests for the live instances, not applied</td></tr><tr><td><code>review-findings.yaml</code></td><td>Every review finding, including explicit pass notes</td></tr></tbody></table>
+<table><thead><tr><th>Output</th><th>Contents</th></tr></thead><tbody><tr><td><code>promises/</code></td><td>One generated Promise per capability you chose to draft</td></tr><tr><td><code>&lt;capability&gt;-promise/</code></td><td>The full build output: <code>promise.yaml</code>, pipeline code, <code>Makefile</code>, and a draft <code>example-resource.yaml</code></td></tr><tr><td><code>resource-requests/</code></td><td>Drafted Resource Requests for the live instances, not applied</td></tr><tr><td><code>review-findings.yaml</code></td><td>Every review finding, including explicit pass notes</td></tr></tbody></table>
 <p>Run the gates before applying anything:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kratix skelift review --review-file review-findings.yaml</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">kratix skelift check --promise-dir promises --example-dir resource-requests</span><br></div></code></pre></div></div>
 <p>Both exit non-zero on failure, so you can run them in CI as well as alongside
