@@ -124,39 +124,41 @@ The `cloud-to-kratix-promise` skill runs a fixed sequence:
 4. **Build** — passes each capability you chose to `kratix-build-promise` to
    draft its API schema, pipeline code, Promise, and generated example Resource
    Request. It also drafts Resource Requests for what is already running. The
-   builder stops before live installation or validation.
+   builder stops before live installation and validation.
 5. **Review** — checks every draft against Syntasso's platform doctrine, looking
    for capabilities that only automate a task rather than owning a service
    through its lifecycle. Each finding is recorded in `review-findings.yaml`.
-6. **Gate** — run both commands offline. `kratix skelift review` fails if any
-   critical or high finding is unresolved, and `kratix skelift check` validates
+6. **Gate** — run both SKE Lift commands offline: `kratix skelift review` fails
+   if any critical or high finding is unresolved, and `kratix skelift check` validates
    the structure of the generated Promises and examples. The review step records
    findings; the commands check the drafts and findings, not the agent's permissions.
 7. **Approve and apply** — review the drafts and both gate results, then approve
    each live action and its target before the agent performs it.
 
 :::warning Control write access
-The approval steps and target checks are instructions to the agent. They do not
-prevent an agent with write credentials from using another tool to change a
+The approval steps and target checks are advisory instructions to the agent.
+They do not prevent an agent with write credentials from using another tool to change a
 cluster, registry, or cloud account. For a stronger boundary, use read-only
 access while drafting and checking, then route approved writes through your
 own process with credentials limited to the named action and target. Keep
 those write credentials in that process, not in the agent's environment.
 :::
 
-Live actions include delivering pipeline images, installing a Promise, applying
-the builder's generated example Resource Request, and applying a Resource
-Request for an existing instance. Each needs separate approval. For a cluster
-write, name the kubeconfig, Kubernetes context, API server, and cluster identity
-you approve. For image delivery, name the registry and image reference. The
-skill instructs the agent to use the approved kubeconfig and context for each
+Live actions include:
+
+- Delivering pipeline images.
+- Installing a Promise.
+- Applying the builder's generated example Resource Request.
+- Applying a Resource Request for an existing instance.
+- Running live validation steps in a sandbox, including example submission.
+
+Approve each action separately. For sandbox validation, name the sandbox target
+and the exact steps you approve. For a cluster write, name the kubeconfig,
+Kubernetes context, API server, and cluster identity. For image delivery, name
+the route (registry or kind cluster) and exact image reference. The skill
+instructs the agent to use the approved kubeconfig and context for each
 Kubernetes write, check the target again before that write, and stop if it has
 changed.
-
-Sandbox validation is a live action too. If you want it, separately approve
-the sandbox target and the exact actions it requires, including any generated
-example submission. Drafting and both gates can finish without installing a
-Promise, submitting a request, or changing a cloud account or cluster.
 
 ## Usage
 
