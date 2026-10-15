@@ -95,6 +95,8 @@ spec:
   jobOptions:
     # Number of times Kubernetes retries a failing workflow Job before marking it failed.
     backoffLimit: 4
+    # Number of seconds Kubernetes retains the Job after it finishes.
+    ttlSecondsAfterFinished: 600
   nodeSelector: # Optional; node labels for scheduling the pipeline Job Pod
     disk: ssd
   tolerations: # Optional; tolerations for scheduling on tainted nodes
@@ -152,13 +154,17 @@ the future.
 ### Job Lifecycle
 
 Kratix runs each Pipeline as a [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/).
-You can control how many completed Jobs are kept and how many times a failing Job
-is retried via the [`kratix` ConfigMap](/main/reference/kratix-config/config):
+You can configure these Jobs with the [`kratix` ConfigMap](/main/reference/kratix-config/config)
+or in each Pipeline:
 
-* `numberOfJobsToKeep` sets the maximum number of successful pipeline Jobs to retain.
-* `backoffLimit` determines how many times Kubernetes retries a failing Job before
-  marking it failed. Kratix does not set a default value for this field; if omitted,
-  Kubernetes uses its own Job default.
+* `numberOfJobsToKeep` in the ConfigMap sets the maximum number of successful
+  Pipeline Jobs to retain.
+* `defaultBackoffLimit` in the ConfigMap sets the default retry limit. A Pipeline
+  can override it with `spec.jobOptions.backoffLimit`.
+* `defaultTTLSecondsAfterFinished` in the ConfigMap sets how long Kubernetes
+  retains a finished Job and its Pods. A Pipeline can override it with
+  `spec.jobOptions.ttlSecondsAfterFinished`. The minimum is 120 seconds, and values below it will write a warning to the controller logs and cause Kratix to use 120 seconds. If no TTL is set, Kubernetes does not
+  automatically delete the Job.
 
 You can also control the [restart
 policy](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy)
@@ -337,10 +343,17 @@ boundary, so Kratix also creates a `ClusterRole` and `ClusterRoleBinding` contai
 first rule above, named with the requesting namespace appended, following this format: 
 `<promise name>-resource-configure-<pipeline name>-<namespace>`.
 
+**Resource workflows of a versioned Promise** get a separate set of these objects for each promise version. This keeps the permissions of one version's pipelines apart from another's. Their names end in a five-character hash of the promise version, for example`env-resource-configure-instance-3f9a1`. 
+
 Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
-them are deleted when the Promise is deleted. Supplying a
-[custom service account](#custom-service-account) changes the service account name only.
-The Role and binding names are still derived from the pipeline.
+them are deleted when the Promise is deleted. The objects of Resource workflows also carry
+`kratix.io/promise-version: <version>`, set to `not-set` when the Promise has no version. A
+version's objects are deleted when its
+[Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions#deleting-a-promise-revision)
+is deleted.
+
+Supplying a [custom service account](#custom-service-account) changes the service account
+name only. The Role and binding names are still derived from the pipeline.
 
 :::note
 
@@ -462,6 +475,11 @@ spec:
   the resource request is made
 - `env-promise-configure-tf-workspace` would be created in the
   `kratix-platform-system` namespace
+
+If the Promise has a `kratix.io/promise-version` label, each promise version gets its own
+Resource workflow service account, named with the version hash described in
+[Default Permissions](#default-permissions), for example
+`env-resource-delete-slack-notify-3f9a1`.
 
 #### Custom Service Account
 You can provide a custom service account for the pipeline by providing the `.rbac.serviceAccount` field in the pipeline spec.

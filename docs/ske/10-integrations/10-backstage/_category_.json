@@ -1,8 +1,0 @@
-{
-  "label": "Backstage Controller (deprecated)",
-  "position": 10,
-  "link": {
-    "type": "doc",
-    "id": "ske/integrations/backstage/intro"
-  }
-}

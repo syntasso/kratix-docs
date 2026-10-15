@@ -1,0 +1,53 @@
+---
+title: Air-Gapped Plugin Installation
+description: Publishing the SKE Backstage plugins to an internal registry for air-gapped or network-restricted environments.
+keywords: [portal, backstage, plugin, air-gapped, spotify portal, npm registry]
+slug: "/ske/integrations/portal-controller/backstage/air-gapped-plugins"
+displayed_sidebar: skeSidebar
+---
+
+In air-gapped or network-restricted environments, your Backstage may not be able to reach the public npm registry to install SKE plugins directly. If so, you will need to install the plugins in two steps:
+
+1. Publish the plugins to an internal registry that your Backstage instance can reach.
+2. Follow the standard [installation and configuration steps](/ske/integrations/portal-controller/backstage/configure-backstage).
+
+### Spotify Portal for Backstage
+
+When using Spotify Portal for Backstage, publish the plugins to your Portal instance.
+
+Before you start, contact Spotify to request a token that lets you publish plugins to your Portal instance.
+
+Download the frontend plugin:
+
+```bash
+npm pack @syntasso/plugin-ske-frontend@0.22.0
+```
+
+This downloads the specified version of the plugin as a `.tgz` file in the current directory.
+
+Repeat for the backend plugin:
+
+```bash
+npm pack @syntasso/plugin-ske-backend@0.24.0
+```
+
+Set the token you received from Spotify in your environment:
+
+```bash
+export PORTAL_PUBLISHING_TOKEN=<PORTAL_PUBLISHING_TOKEN>
+```
+
+Configure npm to authenticate against your Portal registry:
+
+```bash
+npm config set //<COMPANY>.spotifyportal.com/api/plugin-installer/registry/:_authToken=$PORTAL_PUBLISHING_TOKEN
+```
+
+Publish each plugin to your Portal instance, replacing `<VERSION>` with the version printed by `npm pack`:
+
+```bash
+npm publish syntasso-plugin-ske-frontend-<VERSION>.tgz --registry https://<COMPANY>.spotifyportal.com/api/plugin-installer/registry/npm
+npm publish syntasso-plugin-ske-backend-<VERSION>.tgz --registry https://<COMPANY>.spotifyportal.com/api/plugin-installer/registry/npm
+```
+
+The `--registry` flag makes npm publish to your Portal instance, even if the plugin's `package.json` names a different registry.

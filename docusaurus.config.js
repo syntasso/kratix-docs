@@ -77,6 +77,14 @@ const config = {
             {
                 redirects: [
                     {
+                        from: "/category/guides-1",
+                        to: "/category/build-and-evolve-promises",
+                    },
+                    {
+                        from: "/category/reference-1",
+                        to: "/ske/reference",
+                    },
+                    {
                         from: "/ske/installing-ske/preconfigured-install",
                         to: "/ske/installing-ske/install-with-operator",
                     },
@@ -87,6 +95,10 @@ const config = {
                     {
                         from: "/ske/integrations/backstage/installation/plugins",
                         to: "/ske/integrations/portal-controller/backstage/configure-backstage",
+                    },
+                    {
+                        from: "/ske/integrations/portal-controller/backstage/backstage-customization-examples",
+                        to: "/ske/integrations/portal-controller/backstage/customising-the-request-template",
                     },
                     {
                         from: "/main/learn-more/status-conditions-events/promise-status-events",
