@@ -336,7 +336,7 @@ rolloutGroups:
 
 | Value | A resource counts as upgraded when |
 |-------|------------------------------------|
-| `pipeline` (the default) | Its Resource Configure workflow has run at the target version (`lastAppliedVersion` equals the target version). |
+| `pipeline` (the default) | Its Resource Configure workflow has run at the target version. |
 | `healthCheck` | Its Resource Configure workflow has run at the target version **and** it has passed its health checks at the target version. |
 
 Any other value is rejected.
@@ -399,14 +399,10 @@ The clock for a resource starts at the latest of:
 The clock does not run while the Resource Configure workflow is re-running at the target version. Because the clock is
 derived from these timestamps, it survives a restart of the platform manager.
 
-If a resource is still waiting when `healthTimeout` has elapsed, it fails in the same way as a resource that failed its
-health checks: the group and the run fail, with run reason `HealthTimeoutExceeded` and a message that names the timeout.
-
 :::warning
 
 - A `healthTimeout` shorter than the interval at which the health check runs will always fail.
-- [Suspending the Upgrade Run](./upgrade-runs#suspending-an-upgrade-run) does not pause the clock for resources that
-  are already waiting.
+- [Suspending the Upgrade Run](./upgrade-runs#suspending-an-upgrade-run) does not pause the clock for resources that are already waiting.
 
 :::
 

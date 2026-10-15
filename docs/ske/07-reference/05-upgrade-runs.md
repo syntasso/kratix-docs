@@ -106,12 +106,20 @@ When an UpgradeRun starts, it:
 
 When a run processes a rollout group, each snapshotted resource is evaluated against its current live state. Because the run re-checks bindings on every reconcile cycle, resources can change between when the snapshot was taken and when their group is reached.
 
-| Outcome | When it applies |
-|---------|-----------------|
-| **Succeeded** | In a group that does not set [`successCriteria: healthCheck`](./upgrade-plans#success-criteria): the binding's `lastAppliedVersion` equals the target version; the upgrade was applied. This includes resources that were already applied at the target version by the time their group was reached. In a `healthCheck` group: the binding has reached the target version and its `HealthChecksSucceeded` condition is `True` at the target version. |
-| **Skipped** | The binding no longer exists (resource was deleted), or the resource was upgraded to a different version externally. |
-| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`) during the current run. The failure is part of the current run when the condition's `lastTransitionTime` is at or after the Upgrade Run's `creationTimestamp`. In a `healthCheck` group, a resource also fails when its `HealthChecksSucceeded` condition is `False` with reason `Unhealthy` at the target version, or when it has not passed its health checks within the group's [`healthTimeout`](./upgrade-plans#health-timeout). |
-| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. If the binding is already at the target `spec.version` and the only upgrade failure was recorded before this Upgrade Run was created, the run treats that failure as the result of an earlier run. It sets `kratix.io/manual-reconciliation: "true"` on the Resource Binding to request a retry, then requeues and waits. In a `healthCheck` group, a resource whose binding has reached the target version also stays Pending while it waits to pass its health checks; it is counted in the group's `awaitingHealth`. |
+In every group, a resource's outcome first depends on its Resource Configure workflow (the **Pipelines** column). In a
+group with [`successCriteria: healthCheck`](./upgrade-plans#success-criteria), a resource whose workflow has run at the
+target version is then judged on its health checks (the **Health checks** column).
+
+| Outcome | Pipelines | Health checks |
+|---------|-----------|---------------|
+| **Succeeded** | The binding's `lastAppliedVersion` equals the target version. This includes resources that were already applied at the target version by the time their group was reached. | The binding's `HealthChecksSucceeded` condition is `True` at the target version. |
+| **Skipped** | The binding no longer exists (resource was deleted), or the resource was upgraded to a different version externally. | Not applicable. |
+| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`) during the current run. The failure is part of the current run when the condition's `lastTransitionTime` is at or after the Upgrade Run's `creationTimestamp`. | The binding's `HealthChecksSucceeded` condition is `False` with reason `Unhealthy` at the target version. A resource that has not passed its health checks within the group's [`healthTimeout`](./upgrade-plans#health-timeout) also fails. |
+| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. | The binding has reached the target version and is waiting to pass its health checks. It is counted in the group's `awaitingHealth`. |
+
+If the binding is already at the target `spec.version` and the only upgrade failure was recorded before this Upgrade Run
+was created, the run treats that failure as the result of an earlier run. The resource stays **Pending**: the run sets
+`kratix.io/manual-reconciliation: "true"` on the Resource Binding to request a retry, then requeues and waits.
 
 Skipped resources count towards group completion and do not block the run from advancing to the next group. Upgrade
 failures recorded before the Upgrade Run was created do not fail the current run. When a resource fails, subsequent
