@@ -401,8 +401,8 @@ derived from these timestamps, it survives a restart of the platform manager.
 
 :::warning
 
-- A `healthTimeout` shorter than the interval at which the health check runs will always fail.
-- [Suspending the Upgrade Run](./upgrade-runs#suspending-an-upgrade-run) does not pause the clock for resources that are already waiting.
+A `healthTimeout` shorter than the interval at which the health check runs will always fail, and
+[suspending the Upgrade Run](./upgrade-runs#suspending-an-upgrade-run) does not pause it.
 
 :::
 
