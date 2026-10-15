@@ -94,6 +94,17 @@ spec:
 
 In this example, `pipeline-a` will run first, followed by `pipeline-b`.
 
+#### Waiting for the previous Pipeline's output
+
+Kratix starts the next Pipeline only once the previous Pipeline's output has been
+written to its Destinations. The previous Pipeline's Work must be `Ready` at its
+current generation, meaning every WorkPlacement has been written to its State Store.
+
+While the next Pipeline waits, its entry in `status.kratix.workflows.pipelines`
+stays `Pending` and has a `message` naming the previous Pipeline and its Work.
+
+See [Promise Status and Events](/main/reference/promises/promise-status-events#waiting-for-a-pipelines-output) for example statuses.
+
 ### Pipeline Failures
 
 A Pipeline fails if any of its `containers` return a non-zero exit code.
