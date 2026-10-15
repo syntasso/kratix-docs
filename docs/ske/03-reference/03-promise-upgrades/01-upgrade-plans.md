@@ -378,7 +378,7 @@ Check the following before you set `successCriteria: healthCheck` on a group:
 ### Health Timeout
 
 The optional `healthTimeout` field sets how long a resource in a `healthCheck` group may wait to pass its health checks.
-It is a duration, such as `15m`, and must be greater than `0s`. It is only read when `successCriteria` is `healthCheck`.
+It is a duration, such as `15m`, and must be greater than `0s`. It is only read when `successCriteria` is `healthCheck`; setting it on any other group is accepted with a warning that it will be ignored.
 If omitted, it defaults to `30m`.
 
 ```yaml
