@@ -155,7 +155,8 @@ spec:
         matchLabels:
           env: dev
       maxConcurrent: 5
-      # Optional. Wait for each resource to pass its health checks at the target version.
+      # Optional. pipeline (the default) or healthCheck, which waits for each resource
+      # to pass its health checks at the target version.
       successCriteria: healthCheck
       # Optional. Only read when successCriteria is healthCheck. Defaults to 30m.
       healthTimeout: 15m
@@ -318,7 +319,7 @@ start together.
 
 ### Success Criteria
 
-The optional `successCriteria` field decides when a resource in the group counts as upgraded.
+The optional `successCriteria` field decides when a resource in the group counts as upgraded. It defaults to `pipeline`.
 
 ```yaml
 rolloutGroups:
@@ -333,7 +334,7 @@ rolloutGroups:
 
 | Value | A resource counts as upgraded when |
 |-------|------------------------------------|
-| Unset, `default`, or `pipeline` | Its Resource Configure workflow has run at the target version (`lastAppliedVersion` equals the target version). |
+| `pipeline` (the default) | Its Resource Configure workflow has run at the target version (`lastAppliedVersion` equals the target version). |
 | `healthCheck` | Its Resource Configure workflow has run at the target version **and** it has passed its health checks at the target version. |
 
 Any other value is rejected.
