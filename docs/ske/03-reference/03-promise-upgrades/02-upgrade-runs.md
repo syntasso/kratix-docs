@@ -54,6 +54,9 @@ spec:
 Setting `suspend` back to `false` resumes execution. This allows you to temporarily halt an upgrade without deleting the
 run.
 
+Suspending a run does not pause the [health timeout](./upgrade-plans#health-timeout) of resources that are already
+waiting to pass their health checks.
+
 ## Previewing an upgrade before it runs
 
 You can review exactly which resources an Upgrade Run will touch before any of them are upgraded by creating the run
@@ -95,7 +98,7 @@ When an UpgradeRun starts, it:
 
 1. **Takes a snapshot** of all Resource Bindings for the Promise that are on an eligible `from` version. The snapshot records each resource's version at the moment the run begins. This baseline is used throughout the run to detect drift.
 2. **Waits for the target PromiseRevision to exist** before the snapshot is finalised. If the target [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) is not yet available, the run requeues until it appears.
-3. **Processes rollout groups in plan order.** For each group, it patches the `spec.version` on each matching Resource Binding to the target version and waits for Kratix to apply the upgrade. Only once every resource in the current group is accounted for does the run move to the next group.
+3. **Processes rollout groups in plan order.** For each group, it patches the `spec.version` on each matching Resource Binding to the target version and waits for Kratix to apply the upgrade. In a group with [`successCriteria: healthCheck`](./upgrade-plans#success-criteria), it also waits for each resource to pass its health checks at the target version. Only once every resource in the current group is accounted for does the run move to the next group.
 
 ## Resource Outcomes
 
@@ -103,12 +106,20 @@ When a run processes a rollout group, each snapshotted resource is evaluated aga
 
 | Outcome | When it applies |
 |---------|-----------------|
-| **Succeeded** | The binding's `lastAppliedVersion` equals the target version; the upgrade was applied. This includes resources that were already applied at the target version by the time their group was reached. |
+| **Succeeded** | In a group that does not set [`successCriteria: healthCheck`](./upgrade-plans#success-criteria): the binding's `lastAppliedVersion` equals the target version; the upgrade was applied. This includes resources that were already applied at the target version by the time their group was reached. In a `healthCheck` group: the binding has reached the target version and its `HealthChecksSucceeded` condition is `True` at the target version. |
 | **Skipped** | The binding no longer exists (resource was deleted), or the resource was upgraded to a different version externally. |
-| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`) during the current run. The failure is part of the current run when the condition's `lastTransitionTime` is at or after the Upgrade Run's `creationTimestamp`. The entire run stops immediately. |
-| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. If the binding is already at the target `spec.version` and the only upgrade failure was recorded before this Upgrade Run was created, the run treats that failure as the result of an earlier run. It sets `kratix.io/manual-reconciliation: "true"` on the Resource Binding to request a retry, then requeues and waits. |
+| **Failed** | Kratix reported an upgrade failure on the binding (`UpgradeSucceeded=False`) during the current run. The failure is part of the current run when the condition's `lastTransitionTime` is at or after the Upgrade Run's `creationTimestamp`. In a `healthCheck` group, a resource also fails when its `HealthChecksSucceeded` condition is `False` with reason `Unhealthy` at the target version, or when it has not passed its health checks within the group's [`healthTimeout`](./upgrade-plans#health-timeout). |
+| **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. If the binding is already at the target `spec.version` and the only upgrade failure was recorded before this Upgrade Run was created, the run treats that failure as the result of an earlier run. It sets `kratix.io/manual-reconciliation: "true"` on the Resource Binding to request a retry, then requeues and waits. In a `healthCheck` group, a resource whose binding has reached the target version also stays Pending while it waits to pass its health checks; it is counted in the group's `awaitingHealth`. |
 
-Skipped resources count towards group completion and do not block the run from advancing to the next group. A single failed resource stops the run entirely. Subsequent groups are not processed. Upgrade failures recorded before the Upgrade Run was created do not fail the current run.
+Skipped resources count towards group completion and do not block the run from advancing to the next group. Upgrade
+failures recorded before the Upgrade Run was created do not fail the current run. When a resource fails, subsequent
+groups are not processed, and how the current group ends depends on the kind of failure:
+
+- **Resource Configure workflow failure** (`UpgradeSucceeded=False`): the rest of the group finishes, then the run fails
+  with reason `ResourceUpgradeFailed`.
+- **Health check failure or health timeout** (`healthCheck` groups only): the group and the run fail in the same
+  reconcile, with reason `HealthCheckFailed` or `HealthTimeoutExceeded`. No further resource is started. Resources
+  already in flight are left where they are, and there is no rollback.
 
 ### Identifying a failed resource
 
@@ -188,12 +199,22 @@ Events:
 
 The `Events` section at the end of the output identifies the resource that caused the group to fail.
 
+In a group with [`successCriteria: healthCheck`](./upgrade-plans#success-criteria), a resource that fails its health
+checks or exceeds its health timeout is reported with one of these `Warning` events instead:
+
+| Reason | Message |
+|--------|---------|
+| `HealthCheckFailed` | `Resource <namespace>/<name> failed its health checks at <version>: <condition message>` |
+| `HealthTimeoutExceeded` | `Resource <namespace>/<name> did not pass its health checks at <version> within <duration>` |
+
 ### Drift Detection
 
 The snapshot records each resource's version at run start. If, by the time the run processes a resource, its version has been changed externally, the resource is **Skipped** rather than overwritten:
 
 - A resource upgraded to a version *other than the target* (e.g. `v3.0.0` when the target is `v2.0.0`) is skipped.
-- A resource with `lastAppliedVersion` already at the target version is counted as **Succeeded** immediately; no patch is issued.
+- A resource with `lastAppliedVersion` already at the target version is not patched. In a group that does not set
+  `successCriteria: healthCheck`, it is counted as **Succeeded** immediately. In a `healthCheck` group, it is judged on
+  its health checks at the target version, like any other resource that has reached the target version.
 - A resource with `spec.version` already at the target version, but with `lastAppliedVersion` still behind, remains **Pending**. If its only upgrade failure was recorded before the current run was created, the run adds the [manual reconciliation label](/main/reference/resources/reconciliation-labels#requesting-reconciliation-via-a-resource-binding) to the Resource Binding so Kratix retries the Resource Configure workflow.
 
 ## PromiseRevision Gate
@@ -254,7 +275,7 @@ The `state` field reflects the overall execution state of the run:
 | `Pending` | Run is active but rollout has not started. Counts as active on the parent plan (`phase: Running`). The controller typically leaves this empty until the snapshot is created, then sets `InProgress`. |
 | `InProgress` | Snapshot created, rollout underway |
 | `Completed` | All rollout groups finished successfully |
-| `Failed` | A resource reported an upgrade failure, or the target PromiseRevision was deleted mid-run |
+| `Failed` | A resource reported an upgrade failure, a resource in a `healthCheck` group failed its health checks or exceeded its health timeout, or the target PromiseRevision was deleted mid-run |
 | `Cancelled` | The run was deleted while still in progress |
 
 Once a run reaches `Completed`, `Failed`, or `Cancelled` it is terminal. It will not be reconciled further. The controller sets `finishedAt` at that point.
@@ -309,6 +330,7 @@ Each entry in `groups` summarises the upgrade progress of a single rollout group
 | `succeeded` | Number of resources successfully upgraded |
 | `failed` | Number of resources that failed to upgrade |
 | `skipped` | Number of resources that were skipped |
+| `awaitingHealth` | In a group with [`successCriteria: healthCheck`](./upgrade-plans#success-criteria), the number of resources that have reached the target version and are waiting to pass their health checks |
 
 ### Conditions
 
@@ -317,7 +339,7 @@ The Upgrade Run reports its state via standard Kubernetes conditions:
 | Condition | Description |
 |-----------|-------------|
 | `PlanResolved` | `True` when the referenced Upgrade Plan exists; `False` with reason `PlanNotFound` when absent |
-| `RunSucceeded` | `True` with reason `RunCompleted` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource fails, `PromiseRevisionNotFound` when the target revision is deleted mid-run, or `RunCancelled` when the run is deleted in progress |
+| `RunSucceeded` | `True` with reason `RunCompleted` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource's Resource Configure workflow fails, `HealthCheckFailed` when a resource in a `healthCheck` group fails its health checks, `HealthTimeoutExceeded` when a resource in a `healthCheck` group does not pass its health checks within `healthTimeout`, `PromiseRevisionNotFound` when the target revision is deleted mid-run, or `RunCancelled` when the run is deleted in progress |
 
 ## Manually Creating an Upgrade Run
 

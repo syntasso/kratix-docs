@@ -144,7 +144,8 @@ a new one in its place. See [superseded runs](./upgrade-runs#superseded-runs).
 ## Rollout Groups
 
 Rollout groups define ordered sets of resources to upgrade. Groups are processed sequentially and each group must complete
-before the next begins.
+before the next begins. Each group can also choose what counts as a successful upgrade for its resources; see
+[Success Criteria](#success-criteria).
 
 ```yaml
 spec:
@@ -154,6 +155,11 @@ spec:
         matchLabels:
           env: dev
       maxConcurrent: 5
+      # Optional. pipeline (the default) or healthCheck, which waits for each resource
+      # to pass its health checks at the target version.
+      successCriteria: healthCheck
+      # Optional. Only read when successCriteria is healthCheck. Defaults to 30m.
+      healthTimeout: 15m
       resourceUpgradeWindows:
         - kind: allow
           schedule: "0 22 * * *"
@@ -310,6 +316,97 @@ maxConcurrent: "25%"   # At most 25% of resources in the group at a time
 A percentage accepts `"1%"` to `"100%"`. It is calculated against the number of resources in the group and rounded down
 to a whole number, but is always at least one resource. If `maxConcurrent` is omitted, all resources in the group may
 start together.
+
+### Success Criteria
+
+The optional `successCriteria` field decides when a resource in the group counts as upgraded. It defaults to `pipeline`.
+
+```yaml
+rolloutGroups:
+  - name: canary
+    selectors:
+      matchLabels:
+        env: dev
+    maxConcurrent: 1
+    successCriteria: healthCheck
+    healthTimeout: 15m
+```
+
+| Value | A resource counts as upgraded when |
+|-------|------------------------------------|
+| `pipeline` (the default) | Its Resource Configure workflow has run at the target version (`lastAppliedVersion` equals the target version). |
+| `healthCheck` | Its Resource Configure workflow has run at the target version **and** it has passed its health checks at the target version. |
+
+Any other value is rejected.
+
+#### How a `healthCheck` group judges a resource
+
+In a group with `successCriteria: healthCheck`, once a resource's Resource Binding has reached the target version, the
+Upgrade Run judges it from the Resource Binding's `HealthChecksSucceeded` condition. It reads the condition only when the
+binding's `status.healthStatus.expectedPromiseVersion` equals the target version. See
+[The HealthChecksSucceeded condition](/main/reference/resources/status#the-healthcheckssucceeded-condition) for how
+Kratix sets the condition.
+
+| `HealthChecksSucceeded` | Outcome for the resource |
+|-------------------------|--------------------------|
+| `True` (reason `AllRecordsHealthy` or `NoHealthChecks`) | **Succeeded** |
+| `False` with reason `Unhealthy` | **Failed**. The group and the run fail in the same reconcile, with run reason `HealthCheckFailed`. |
+| `False` with reason `Degraded`, `Unknown`, missing, or describing an earlier version | **Still waiting** |
+
+A resource that is still waiting holds its [`maxConcurrent`](#max-concurrent) slot, so it stops another resource in the
+group from starting. It is counted in the rollout group's
+[`awaitingHealth`](./upgrade-runs#rollout-group-status) field on the Upgrade Run.
+
+When a resource fails its health checks, or does not pass them within the [health timeout](#health-timeout), no further
+resource is started. Resources that are already in flight are left where they are, and there is no rollback.
+
+:::warning
+
+Check the following before you set `successCriteria: healthCheck` on a group:
+
+- **Every Destination the group reaches needs a health agent.** A Destination without one never reports, so its
+  resources wait until `healthTimeout`, then the first of them fails and the run fails with it. Leave groups that reach
+  such Destinations on the default.
+- **HealthDefinitions must carry the Promise version.** The platform stamps the version on HealthDefinitions produced by
+  the Resource Configure workflow. Unversioned records do not count.
+- **The target version needs a Resource Configure workflow.** If the Promise at the target version has no Resource
+  Configure workflow, the binding keeps the previous expected version, so its resources time out in a `healthCheck`
+  group.
+
+:::
+
+### Health Timeout
+
+The optional `healthTimeout` field sets how long a resource in a `healthCheck` group may wait to pass its health checks.
+It is a duration, such as `15m`, and must be greater than `0s`. It is only read when `successCriteria` is `healthCheck`; setting it on any other group is accepted with a warning that it will be ignored.
+If omitted, it defaults to `30m`.
+
+```yaml
+successCriteria: healthCheck
+healthTimeout: 15m
+```
+
+The clock for a resource starts at the latest of:
+
+- the `lastTransitionTime` of the Resource Binding's `UpgradeSucceeded` condition, which is when the binding reached the
+  target version;
+- the `lastTransitionTime` of its `HealthChecksSucceeded` condition, so a resource that passed and later degrades gets a
+  full `healthTimeout` from when it degraded; and
+- the Upgrade Run's creation time.
+
+The clock does not run while the Resource Configure workflow is re-running at the target version. Because the clock is
+derived from these timestamps, it survives a restart of the platform manager.
+
+If a resource is still waiting when `healthTimeout` has elapsed, it fails in the same way as a resource that failed its
+health checks: the group and the run fail, with run reason `HealthTimeoutExceeded` and a message that names the timeout.
+
+:::warning
+
+- A `healthTimeout` shorter than the interval at which the health check runs will always fail.
+- [Suspending the Upgrade Run](./upgrade-runs#suspending-an-upgrade-run) does not pause the clock for resources that
+  are already waiting.
+
+:::
 
 ### Resource Upgrade Windows
 
