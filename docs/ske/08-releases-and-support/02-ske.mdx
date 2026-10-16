@@ -25,9 +25,11 @@ Check the release notes below for information on each available version.
 
 #### Features
 
-* Health checks now record which Promise version they belong to. Every workflow container gets a
-  `KRATIX_PROMISE_VERSION` environment variable, and Kratix sets `spec.promiseVersion` on every
-  HealthDefinition a workflow outputs, replacing any value the workflow set itself.
+* Every workflow container now gets a `KRATIX_PROMISE_VERSION` environment variable, set to the
+  version of the Promise the resource is bound to. It is empty when the Promise has no
+  `kratix.io/promise-version` label.
+* Health checks now record which Promise version they belong to. Kratix sets `spec.promiseVersion`
+  on every HealthDefinition a workflow outputs, replacing any value the workflow set itself.
 * Resources now report whether every health check expected at their current Promise version has
   passed, through a new `HealthChecksSucceeded` status condition. Health records also carry
   `data.promiseVersion`.
