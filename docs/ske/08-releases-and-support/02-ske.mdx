@@ -21,6 +21,34 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.62.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.62.0/) (2026-10-16)
+
+#### Features
+
+* Health checks now record which Promise version they belong to. Every workflow container gets a
+  `KRATIX_PROMISE_VERSION` environment variable, and Kratix sets `spec.promiseVersion` on every
+  HealthDefinition a workflow outputs, replacing any value the workflow set itself.
+* Resources now report whether every health check expected at their current Promise version has
+  passed, through a new `HealthChecksSucceeded` status condition. Health records also carry
+  `data.promiseVersion`.
+
+#### Fixes
+
+* Resource workflows of different Promise versions no longer share one destination selectors
+  ConfigMap. Before, a workflow of one version could schedule its Work with another version's
+  `destinationSelectors`, sending it to the wrong Destinations without any error.
+* Upgrading a Promise that renames a resource configure pipeline no longer breaks the workflow
+  Job that is already running. The renamed pipeline starts once that Job finishes.
+
+#### Security Fixes
+
+* Updated `golang.org/x/net` to v0.60.0 to fix five Go security advisories (GO-2026-6603,
+  GO-2026-6610, GO-2026-6611, GO-2026-6612 and GO-2026-6617).
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.61.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.61.0/) (2026-10-09)
 
 #### Fixes
