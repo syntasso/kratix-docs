@@ -108,7 +108,7 @@ When a run processes a rollout group, each snapshotted resource is evaluated aga
 
 In every group, a resource's outcome first depends on its Resource Configure workflow (the **Pipelines** column). In a
 group with [`successCriteria: healthCheck`](./upgrade-plans#success-criteria), a resource whose workflow has run at the
-target version is then judged on its health checks (the **Health checks** column).
+target version is then evaluated on its health checks (the **Health checks** column).
 
 | Outcome | Pipelines | Health checks |
 |---------|-----------|---------------|
@@ -118,8 +118,7 @@ target version is then judged on its health checks (the **Health checks** column
 | **Pending** | The binding has been patched to the target version but Kratix has not yet applied it. | The binding has reached the target version and is waiting to pass its health checks. It is counted in the group's `awaitingHealth`. |
 
 If the binding is already at the target `spec.version` and the only upgrade failure was recorded before this Upgrade Run
-was created, the run treats that failure as the result of an earlier run. The resource stays **Pending**: the run sets
-`kratix.io/manual-reconciliation: "true"` on the Resource Binding to request a retry, then requeues and waits.
+was created, the run treats that failure as the result of an earlier run. The resource stays **Pending** and Kratix tries to reconcile the resource again.
 
 Skipped resources count towards group completion and do not block the run from advancing to the next group. Upgrade
 failures recorded before the Upgrade Run was created do not fail the current run. When a resource fails, subsequent
@@ -223,7 +222,7 @@ The snapshot records each resource's version at run start. If, by the time the r
 
 - A resource upgraded to a version *other than the target* (e.g. `v3.0.0` when the target is `v2.0.0`) is skipped.
 - A resource with `lastAppliedVersion` already at the target version is not patched. In a group that does not set
-  `successCriteria: healthCheck`, it is counted as **Succeeded** immediately. In a `healthCheck` group, it is judged on
+  `successCriteria: healthCheck`, it is counted as **Succeeded** immediately. In a `healthCheck` group, it is evaluated on
   its health checks at the target version, like any other resource that has reached the target version.
 - A resource with `spec.version` already at the target version, but with `lastAppliedVersion` still behind, remains **Pending**. If its only upgrade failure was recorded before the current run was created, the run adds the [manual reconciliation label](/main/reference/resources/reconciliation-labels#requesting-reconciliation-via-a-resource-binding) to the Resource Binding so Kratix retries the Resource Configure workflow.
 
@@ -340,16 +339,22 @@ Each entry in `groups` summarises the upgrade progress of a single rollout group
 | `succeeded` | Number of resources successfully upgraded |
 | `failed` | Number of resources that failed to upgrade |
 | `skipped` | Number of resources that were skipped |
-| `awaitingHealth` | In a group with [`successCriteria: healthCheck`](./upgrade-plans#success-criteria), the number of resources that have reached the target version and are waiting to pass their health checks |
+| `awaitingHealth` | Number of resources that have reached the target version and are waiting to pass their health checks ([`successCriteria: healthCheck`](./upgrade-plans#success-criteria) groups only) |
 
 ### Conditions
 
 The Upgrade Run reports its state via standard Kubernetes conditions:
 
-| Condition | Description |
-|-----------|-------------|
-| `PlanResolved` | `True` when the referenced Upgrade Plan exists; `False` with reason `PlanNotFound` when absent |
-| `RunSucceeded` | `True` with reason `RunCompleted` when all rollout groups complete successfully; `False` with reason `ResourceUpgradeFailed` when a resource's Resource Configure workflow fails, `HealthCheckFailed` when a resource in a `healthCheck` group fails its health checks, `HealthTimeoutExceeded` when a resource in a `healthCheck` group does not pass its health checks within `healthTimeout`, `PromiseRevisionNotFound` when the target revision is deleted mid-run, or `RunCancelled` when the run is deleted in progress |
+| Condition | Status | Reason | Description |
+|-----------|--------|--------|-------------|
+| `PlanResolved` | `True` | | The referenced Upgrade Plan exists |
+| `PlanResolved` | `False` | `PlanNotFound` | The referenced Upgrade Plan does not exist |
+| `RunSucceeded` | `True` | `RunCompleted` | All rollout groups completed successfully |
+| `RunSucceeded` | `False` | `ResourceUpgradeFailed` | A resource's Resource Configure workflow failed |
+| `RunSucceeded` | `False` | `HealthCheckFailed` | A resource in a `healthCheck` group failed its health checks |
+| `RunSucceeded` | `False` | `HealthTimeoutExceeded` | A resource in a `healthCheck` group did not pass its health checks within `healthTimeout` |
+| `RunSucceeded` | `False` | `PromiseRevisionNotFound` | The target revision was deleted mid-run |
+| `RunSucceeded` | `False` | `RunCancelled` | The run was deleted while in progress |
 
 ## Manually Creating an Upgrade Run
 

@@ -337,23 +337,26 @@ rolloutGroups:
 | Value | A resource counts as upgraded when |
 |-------|------------------------------------|
 | `pipeline` (the default) | Its Resource Configure workflow has run at the target version. |
-| `healthCheck` | Its Resource Configure workflow has run at the target version **and** it has passed its health checks at the target version. |
+| `healthCheck` | Its Resource Configure workflow has run at the target version **AND** it has passed its health checks at the target version. |
 
 Any other value is rejected.
 
 #### How a `healthCheck` group judges a resource
 
 In a group with `successCriteria: healthCheck`, once a resource's Resource Binding has reached the target version, the
-Upgrade Run judges it from the Resource Binding's `HealthChecksSucceeded` condition. It reads the condition only when the
+Upgrade Run determines it from the Resource Binding's `HealthChecksSucceeded` condition. It reads the condition only when the
 binding's `status.healthStatus.expectedPromiseVersion` equals the target version. See
 [The HealthChecksSucceeded condition](/main/reference/resources/status#the-healthcheckssucceeded-condition) for how
 Kratix sets the condition.
 
-| `HealthChecksSucceeded` | Outcome for the resource |
-|-------------------------|--------------------------|
-| `True` (reason `AllRecordsHealthy` or `NoHealthChecks`) | **Succeeded** |
-| `False` with reason `Unhealthy` | **Failed**. The group and the run fail in the same reconcile, with run reason `HealthCheckFailed`. |
-| `False` with reason `Degraded`, `Unknown`, missing, or describing an earlier version | **Still waiting** |
+| `HealthChecksSucceeded` | Reason | Outcome for the resource |
+|-------------------------|--------|--------------------------|
+| `True` | `AllRecordsHealthy` | **Succeeded** |
+| `True` | `NoHealthChecks` | **Succeeded** |
+| `False` | `Unhealthy` | **Failed**. The group and the run fail in the same reconcile, with run reason `HealthCheckFailed`. |
+| `False` | `Degraded` | **Still waiting** |
+| `Unknown` | `WaitingForRecords` | **Still waiting** |
+| Missing, or describing an earlier version | Any | **Still waiting** |
 
 A resource that is still waiting holds its [`maxConcurrent`](#max-concurrent) slot, so it stops another resource in the
 group from starting. It is counted in the rollout group's
@@ -361,8 +364,6 @@ group from starting. It is counted in the rollout group's
 
 When a resource fails its health checks, or does not pass them within the [health timeout](#health-timeout), no further
 resource is started. Resources that are already in flight are left where they are, and there is no rollback.
-
-:::warning
 
 Check the following before you set `successCriteria: healthCheck` on a group:
 
@@ -375,29 +376,15 @@ Check the following before you set `successCriteria: healthCheck` on a group:
   Configure workflow, the binding keeps the previous expected version, so its resources time out in a `healthCheck`
   group.
 
-:::
-
 ### Health Timeout
 
 The optional `healthTimeout` field sets how long a resource in a `healthCheck` group may wait to pass its health checks.
-It is a duration, such as `15m`, and must be greater than `0s`. It is only read when `successCriteria` is `healthCheck`; setting it on any other group is accepted with a warning that it will be ignored.
-If omitted, it defaults to `30m`.
+It is a duration, such as `15m`, and must be greater than `0s`. It is only read when `successCriteria` is `healthCheck`. If omitted, it defaults to `30m`.
 
 ```yaml
 successCriteria: healthCheck
 healthTimeout: 15m
 ```
-
-The clock for a resource starts at the latest of:
-
-- the `lastTransitionTime` of the Resource Binding's `UpgradeSucceeded` condition, which is when the binding reached the
-  target version;
-- the `lastTransitionTime` of its `HealthChecksSucceeded` condition, so a resource that passed and later degrades gets a
-  full `healthTimeout` from when it degraded; and
-- the Upgrade Run's creation time.
-
-The clock does not run while the Resource Configure workflow is re-running at the target version. Because the clock is
-derived from these timestamps, it survives a restart of the platform manager.
 
 :::warning
 

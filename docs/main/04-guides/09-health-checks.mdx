@@ -17,12 +17,15 @@ import PartialGuidesPreRequisites from '@site/docs/_partials/_generic_prereqs_gu
 
 ## The Health Status
 
-Within the resource `status`, Kratix maintains the `healthStatus` field. In this field, Kratix records the health of the resource as reported by its Health Records; workflows cannot write it from `status.yaml`. The field has the following format:
+Within the resource `status`, Kratix maintains the `healthStatus` field. In this field, Kratix records the health of the resource as reported by its Health Records. `healthStatus` is a protected key, which means that workflows cannot write it from `status.yaml`. The field has the following format:
 
 ```yaml
 status:
   healthStatus:
     state: healthy
+    expectedPromiseVersion: v2.0.0
+    healthDefinitions: 2
+    expectedRecords: 2
     healthRecords:
     - state: healthy
       lastRun: 1531958400
@@ -31,6 +34,7 @@ status:
       source:
         name: healthrecord-example-record-1
         namespace: default
+      promiseVersion: v2.0.0
     - state: healthy
       lastRun: 1531958500
       details:
@@ -38,11 +42,14 @@ status:
       source:
         name: healthrecord-example-record-2
         namespace: default
+      promiseVersion: v2.0.0
 ```
 
-The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`. For a versioned Promise it also carries `expectedPromiseVersion` and `healthDefinitions`: the Promise version the last Configure workflow ran for, and how many Health Definitions that workflow wrote (`0` when it wrote none). A Configure workflow changes neither `state` nor `healthRecords`.
+The `healthStatus` field contains a `state` subfield and a list of `healthRecords`. The `state` subfield indicates the overall health of the resource and is calculated from the state of each of the `healthRecords`. For a versioned Promise it also carries `expectedPromiseVersion` (the Promise version the last Configure workflow ran for) and `healthDefinitions` (how many Health Definitions that workflow wrote). A Configure workflow changes neither `state` nor `healthRecords`.
 
-To know whether the version a resource is running has passed its checks, read the `HealthChecksSucceeded` condition in `status.conditions`, not `state`: `state` is the worst of every record whatever its version, while the condition judges only the records whose `promiseVersion` equals `expectedPromiseVersion`. The SKE Health Agent copies `spec.promiseVersion` from the Health Definition onto the records it writes. A record written by an older agent has no `promiseVersion`, so a versioned resource whose pipeline ships a Health Definition shows `HealthChecksSucceeded: Unknown` with reason `WaitingForRecords` until its Destination runs an agent that copies it and the check has run since. See [The HealthChecksSucceeded condition](/main/reference/resources/status#the-healthcheckssucceeded-condition) for the full table.
+To know whether the version a resource is running has passed its checks, read the `HealthChecksSucceeded` condition in `status.conditions`, not `state`: `state` is the worst of every record whatever its version, while the condition judges only the records whose `promiseVersion` equals `expectedPromiseVersion`.
+
+The SKE Health Agent adds `spec.promiseVersion` from the Health Definition onto the records it writes. A record written by an older agent has no `promiseVersion`, so a versioned resource whose pipeline ships a Health Definition shows `HealthChecksSucceeded: Unknown` with reason `WaitingForRecords` until its Destination runs an agent that copies it and the check has run since. Check [the HealthChecksSucceeded condition reference docs](/main/reference/resources/status#the-healthcheckssucceeded-condition) for the full table.
 
 For example, after a resource of a Promise labelled `kratix.io/promise-version: v2.0.0` has run a Configure workflow that wrote one Health Definition, and before any Health Record for that version has arrived:
 
@@ -121,17 +128,9 @@ You can have external systems generating the HealthRecord CustomResource and, vi
 
 :::
 
-:::note
-
 Kratix only reads a HealthRecord that is in the same namespace as the resource it reports on. A record in any other namespace is ignored: it does not appear in the resource's status, and it does not change `state` or the `HealthChecksSucceeded` condition.
 
-:::
-
-:::tip
-
 A HealthDefinition or HealthRecord created outside the Configure workflow must carry the promise version to count toward the `HealthChecksSucceeded` condition: `spec.promiseVersion` on the HealthDefinition, `data.promiseVersion` on the record. The platform never waits for it: `expectedRecords` only counts what the pipeline shipped.
-
-:::
 
 ## Writing a HealthRecord in a Workflow
 
@@ -185,11 +184,7 @@ kubectl apply --filename health-record.yaml
 
 This script is available in the `ghcr.io/kratix-docs/redis-health-checks:v0.1.0` image as `generate-hr`.
 
-:::tip
-
 For simplicity, we will not execute any real check to verify the health status of the Redis instance. Instead, we will simply generate a HealthRecord with an `unhealthy` state (we will later update it to `healthy` to illustrate the concept). In your use case, you may want to run some actual verification steps to assert the status of the created resource.
-
-:::
 
 Since this workflow is using `kubectl` to apply the HealthRecord, you must ensure that the right RBAC settings are defined in the promise.
 
@@ -255,8 +250,6 @@ done
 
 echo "Resource is healthy"
 ```
-
-For versioned Promises, `kubectl wait --for=condition=HealthChecksSucceeded` is the stricter check, because `state` also counts records from earlier versions.
 
 This script is available in the `ghcr.io/kratix-docs/redis-health-checks:v0.1.0` image in the `wait-healthy` binary.
 

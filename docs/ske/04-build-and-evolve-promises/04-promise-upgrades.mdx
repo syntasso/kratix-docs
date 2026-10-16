@@ -153,7 +153,7 @@ rolloutGroups:
     # highlight-end
 ```
 
-If the canary resource reports unhealthy at `v2.0.0`, or has not passed its health checks within 15 minutes, the run
+If the canary resource reports unhealthy at `v2.0.0`, or has not passed its health checks within the configured 15 minutes timeout, the run
 fails with reason `HealthCheckFailed` or `HealthTimeoutExceeded` and `staging` is never started. If `healthTimeout` is
 omitted, it defaults to 30 minutes.
 
