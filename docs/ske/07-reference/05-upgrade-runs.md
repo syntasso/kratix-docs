@@ -347,7 +347,7 @@ The Upgrade Run reports its state via standard Kubernetes conditions:
 
 | Condition | Status | Reason | Description |
 |-----------|--------|--------|-------------|
-| `PlanResolved` | `True` | | The referenced Upgrade Plan exists |
+| `PlanResolved` | `True` | *absent* | The referenced Upgrade Plan exists |
 | `PlanResolved` | `False` | `PlanNotFound` | The referenced Upgrade Plan does not exist |
 | `RunSucceeded` | `True` | `RunCompleted` | All rollout groups completed successfully |
 | `RunSucceeded` | `False` | `ResourceUpgradeFailed` | A resource's Resource Configure workflow failed |

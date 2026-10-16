@@ -341,7 +341,7 @@ rolloutGroups:
 
 Any other value is rejected.
 
-#### How a `healthCheck` group judges a resource
+#### How a `healthCheck` group evaluates a resource
 
 In a group with `successCriteria: healthCheck`, once a resource's Resource Binding has reached the target version, the
 Upgrade Run determines it from the Resource Binding's `HealthChecksSucceeded` condition. It reads the condition only when the
