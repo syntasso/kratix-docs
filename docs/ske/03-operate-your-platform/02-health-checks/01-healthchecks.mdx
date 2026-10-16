@@ -444,11 +444,7 @@ Once it completes, you should now see the Health check results in your Redis res
 kubectl --context $PLATFORM get redis.marketplace.kratix.io example -oyaml
 ```
 
-:::tip
-
 It may take a couple of minutes for the Resource status to update
-
-:::
 
 Towards the end, under `status`, you should see the following:
 
@@ -468,3 +464,11 @@ status:
 ```
 
 That's it! You've successfully implemented a Resource Health Check!
+
+:::tip
+
+When you upgrade resources to a new Promise version with an Upgrade Plan, a rollout group can wait for each resource to
+pass these health checks at the new version before the upgrade moves on. See
+[Success Criteria](/ske/reference/promise-upgrades/upgrade-plans#success-criteria).
+
+:::
