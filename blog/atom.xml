@@ -2,11 +2,107 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.kratix.io/blog</id>
     <title>Kratix Blog</title>
-    <updated>2026-10-07T00:00:00.000Z</updated>
+    <updated>2026-10-19T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://docs.kratix.io/blog"/>
     <subtitle>Kratix Blog</subtitle>
     <icon>https://docs.kratix.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[When GitOps explodes in your face]]></title>
+        <id>https://docs.kratix.io/blog/when-gitops-explodes</id>
+        <link href="https://docs.kratix.io/blog/when-gitops-explodes"/>
+        <updated>2026-10-19T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[In this blog, we will cover how our health checks turned a GitOps repository into a commit firehose, why switching to buckets was not enough, and how the new Health Source in SKE puts the Platform back in control.]]></summary>
+        <content type="html"><![CDATA[<p>We love GitOps.</p>
+<p>Kratix, a framework for building platforms on top of Kubernetes, has GitOps at its core, and it's a fundamental part of our recommended <a href="https://docs.kratix.io/ske/reference/parts-of-a-platform" target="_blank" rel="noopener noreferrer" class="">platform architecture</a>. It’s what allows Kratix to schedule workloads to any type of Destination, what enables Compound Promises, and a central piece of the <a href="https://notes.kodekloud.com/docs/Certified-Kubernetes-Administrator-CKA/Core-Concepts/Imperative-vs-Declarative/page" target="_blank" rel="noopener noreferrer" class="">declare-and-converge</a> philosophy we follow.</p>
+<p>But what happens when hundreds of commits are pushed in a short period? Or when customers want to know "who did that?", but the answer is buried under thousands of automated commits? Or even when you can't commit to the repository at all?</p>
+<p>In this blog, we will cover how our health checks turned a GitOps repository into a commit firehose, why switching to buckets was not enough, and how the new Health Source in SKE puts the Platform back in control.</p>
+<!-- -->
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="why-gitops-is-great">Why GitOps is great<a href="https://docs.kratix.io/blog/when-gitops-explodes#why-gitops-is-great" class="hash-link" aria-label="Direct link to Why GitOps is great" title="Direct link to Why GitOps is great" translate="no">​</a></h2>
+<p>First, what do we mean by GitOps? We roughly use the <a href="https://about.gitlab.com/topics/gitops/#what-is-git-ops" target="_blank" rel="noopener noreferrer" class="">GitLab definition</a>:</p>
+<blockquote>
+<p>GitOps is an operational framework that applies DevOps practices like version control, collaboration, and CI/CD to infrastructure automation, ensuring consistent, repeatable deployments.</p>
+</blockquote>
+<p>In more practical terms, it usually means having systems pass information through a store, which is often a Git repository. In a platform backed by Kratix, we rely heavily on the presence of those repositories to schedule and communicate information between clusters and different systems.</p>
+<p>And to be fair that is one of the reasons our users love Kratix. It can do multi-cluster orchestration without the need to give the platform cluster direct access to the clusters running business Workloads. Furthermore, it is what enables Kratix to schedule any type of workload to any type of worker cluster, be they Kubernetes clusters, Ansible Towers, Terraform Workspaces, or just Jimmy’s machine executing a clone-apply-loop on a particular remote directory.</p>
+<p>Beyond these benefits, GitOps enables Platform teams to:</p>
+<ul>
+<li class="">Have an audit trail of who did what and when (a.k.a. <code>git blame</code> with no shame)</li>
+<li class="">Keep a history of the changes for each individual resource, and an easy way to roll back a change that breaks</li>
+<li class="">Have a safe backup of what’s in the Platform; if it disappears overnight, all one needs to do is point a new cluster at the repository and the system will converge back to a healthy state</li>
+</ul>
+<p>When the time came to design a health check system for Kratix, we needed a way for an external system to report back to the Platform about the state of a resource running <em>anywhere</em>. This can be a Deployment running on a Kubernetes destination, a database running in a Cloud Provider, or a VM wired up in an internal server. The constraint: the same way the Platform should not have direct access to the Destination, the Destination should not have direct access to the Platform.</p>
+<p>The choice seemed obvious: we solved Platform → Destination with GitOps, so we could solve Destination → Platform the same way. The Destination runs the SKE Health Agent, and it is configured to write the health check records to a repository. The Platform is listening to that repository, and Kratix can react to the records as they are written.</p>
+<p>Easy. Known. Shipped.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="a-week-later">A week later…<a href="https://docs.kratix.io/blog/when-gitops-explodes#a-week-later" class="hash-link" aria-label="Direct link to A week later…" title="Direct link to A week later…" translate="no">​</a></h2>
+<p><img decoding="async" loading="lazy" alt="GitHub commit log filled with &amp;#39;Update from: HealthRecord&amp;#39; commits" src="https://docs.kratix.io/assets/images/health-record-commits-683429aee647d79343edece550b896d1.png" width="1600" height="1012" class="img_ev3q"></p>
+<p>55,181 commits.</p>
+<p>Fifty-five thousand one hundred and eighty-one commits. <a href="https://www.youtube.com/watch?v=cAixSVlYKKk" target="_blank" rel="noopener noreferrer" class="">In seven days</a>.</p>
+<p>That’s what we saw in our soak-test environment after enabling health checks on a handful of resources, each running every other minute. At this rate of commits, we started observing:</p>
+<ul>
+<li class="">An increase in conflicts: both the health agent and SKE are capable of recovering from weird git states, but it’s better when they don’t have to</li>
+<li class="">An increase in latency: more conflicts and a larger repository both contribute to an increase in the time it takes for a file to be written to that repository</li>
+<li class="">The commit log was no longer useful: of course, file-level <code>git log</code> was still fine, but we lost the ability to take a quick glance and find out what changed in the last hour, since we had several pages of just health updates</li>
+<li class="">Larger impact from misconfiguration: we had a Terraform workspace listening to the same repository and, albeit on a different directory, it was still running “terraform plan” for every health check being pushed. The plan queue was at 700 when we spotted the misconfiguration.</li>
+</ul>
+<p>A lot of the problems above can be circumvented by <em>not</em> using Git as the health store, and our solution actually catered for that: you can use an S3-compatible bucket. The health agent writes to the bucket, your GitOps agent reads from the bucket… 🤝🏽</p>
+<p>Except it doesn’t work if you are using ArgoCD, since it does not support reading from buckets. <a href="https://github.com/argoproj/argo-cd/issues/12509" target="_blank" rel="noopener noreferrer" class="">And it might never do</a>. So… what can we do?</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="introducing-health-source">Introducing Health Source<a href="https://docs.kratix.io/blog/when-gitops-explodes#introducing-health-source" class="hash-link" aria-label="Direct link to Introducing Health Source" title="Direct link to Introducing Health Source" translate="no">​</a></h2>
+<p>Well, what if we applied the resources ourselves? And that’s exactly what you can do <a href="https://docs.kratix.io/ske/releases/ske#v0590-2026-09-21" target="_blank" rel="noopener noreferrer" class="">from SKE v0.59.0 onwards</a>, through a new type of State Store: a Health Source.</p>
+<p>This new resource lets the SKE Platform Manager reconcile resources from a backing state store into the platform cluster. The SKE Health Agent already ships a writer (i.e. a piece of software that can write to both Git and buckets). The SKE Platform Manager now ships with an external store reconciler, responsible for reading the health records from the backing state store and applying them to the platform cluster.</p>
+<p>What is supported as a Health Source, you may ask. If you guessed S3-compatible buckets (and Azure Blob Storage), you have been paying attention! Buckets are a great fit for this use case: simple to read and write, cheap to run and operate, and will not grow unbounded (unless you enable versioning…).</p>
+<p>On the Platform, pointing SKE at the bucket the Health Agent writes to is a few lines of YAML:</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">apiVersion</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> platform.syntasso.io/v1alpha1</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">kind</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> HealthSource</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">metadata</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">name</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> worker</span><span class="token punctuation" style="color:#393A34">-</span><span class="token number" style="color:#36acaa">1</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token key atrule" style="color:#00a4db">spec</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">bucket</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">endpoint</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> s3.&lt;AWS_REGION</span><span class="token punctuation" style="color:#393A34">&gt;</span><span class="token plain">.amazonaws.com</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">bucketName</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> &lt;BUCKET_NAME</span><span class="token punctuation" style="color:#393A34">&gt;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">authMethod</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> accessKey</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">secretRef</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token key atrule" style="color:#00a4db">name</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> health</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">store</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">reader</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token key atrule" style="color:#00a4db">namespace</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> default</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">path</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> health</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">pollInterval</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> 10m</span><br></div></code></pre></div></div>
+<p>The Platform Manager polls the bucket and applies whatever health records it finds under <code>health/</code>. Give it a read-only credential: the Destination is the only one that needs to write.</p>
+<blockquote>
+<p>Ah, but I am using Flux and that supports S3…</p>
+</blockquote>
+<p>Excellent! No need to migrate or change it. You can continue to use Flux as your GitOps agent. In fact, we are not discontinuing writing to Git either: you can continue to write to Git if the issues we raised do not apply to you.</p>
+<p>So which one should you pick?</p>
+<ul>
+<li class=""><strong>You use ArgoCD</strong>, or any GitOps agent that cannot read from buckets: write to a bucket and use a Health Source.</li>
+<li class=""><strong>You run frequent checks across many resources</strong>, <strong>or the repository is shared with other automation</strong>: move health records to a bucket, and read them with a Health Source or your existing Flux setup.</li>
+<li class=""><strong>You have a handful of checks on a relaxed interval</strong> and like having health history in Git: keep writing to Git.</li>
+</ul>
+<p>Whichever you choose, choose one per set of records. Running a GitOps sync and a Health Source against the same records is only meant for migrations, and the <a href="https://docs.kratix.io/ske/guides/health-records-from-a-bucket" target="_blank" rel="noopener noreferrer" class="">migration guide</a> shows how to switch without a gap in health.</p>
+<p>We migrated our environment to use this new feature, and things are sane again. We can actually check the git history. Commits are still under 56k. Reconciliation is faster. Life is good.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="looking-forward">Looking forward<a href="https://docs.kratix.io/blog/when-gitops-explodes#looking-forward" class="hash-link" aria-label="Direct link to Looking forward" title="Direct link to Looking forward" translate="no">​</a></h2>
+<p>But that’s only the beginning. What we really defined in SKE was a contract between the SKE Health Agent and the SKE Platform Manager. The agent writes, the manager reads. Taking control of when and how health records are applied not only addresses the issues we raised, but also allows us to do much more:</p>
+<ul>
+<li class="">Decide when to drop or ignore records:<!-- -->
+<ul>
+<li class="">As our CEO would say, the only certainty in distributed systems is that we can’t be certain. Things will break, the records in the Health Source might be dropped, overwritten, corrupted. The Platform Manager can now decide what to do when that invariably happens</li>
+</ul>
+</li>
+<li class="">Keep our own system of records<!-- -->
+<ul>
+<li class="">How has the health of a particular resource changed over time? What’s the uptime of a resource or promise? How long does it take for a resource to report healthy?</li>
+</ul>
+</li>
+<li class="">Expand the capabilities:<!-- -->
+<ul>
+<li class="">We can decorate, annotate, label, change the resources as they hit the platform. We could use that extra information within our integrations.</li>
+</ul>
+</li>
+<li class="">Beyond simple storage: although it is our initial implementation, the contract opens up the possibility to bring new technologies.<!-- -->
+<ul>
+<li class="">What would it look like to have health checks delivered via Kafka or Redis? Can we integrate with observability tools to make our customers’ lives better?</li>
+</ul>
+</li>
+</ul>
+<p>Our creativity and our AI token allowance are really the limit! We would love to hear from you what the evolution of our health checks could look like, and what feature you would like to see next. Drop us a comment below, or come and chat with us in the <a href="https://docs.kratix.io/main/community" target="_blank" rel="noopener noreferrer" class="">Kratix Slack</a>.</p>
+<p>And as always, if you want to try this out, <a href="https://www.syntasso.io/pricing" target="_blank" rel="noopener noreferrer" class="">request your SKE token</a>, head to the <a href="https://docs.kratix.io/ske/installing-ske/ske-health-agent#features" target="_blank" rel="noopener noreferrer" class="">Health Agent</a> documentation and give it a go!</p>]]></content>
+        <author>
+            <name>Derik Evangelista</name>
+            <uri>https://github.com/kirederik</uri>
+        </author>
+        <category label="kratix" term="kratix"/>
+        <category label="SKE" term="SKE"/>
+        <category label="gitops" term="gitops"/>
+        <category label="healthcheck" term="healthcheck"/>
+        <category label="product update" term="product update"/>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Rebuilding Our Backstage Integration for Platform Adoption]]></title>
         <id>https://docs.kratix.io/blog/out-of-the-box-backstage</id>
