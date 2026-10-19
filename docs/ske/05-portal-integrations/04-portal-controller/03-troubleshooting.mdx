@@ -114,6 +114,19 @@ Use init-container statuses to identify the failed stage:
   Invalid shared settings prevent new sync and setup Jobs; see
   [Job configuration](/ske/integrations/portal-controller/customization/job-customization#when-the-file-is-wrong).
 
+Once you have fixed the cause, rerun the sync for that one Promise or resource request by
+labelling it:
+
+```bash
+kubectl label promise <PROMISE> portal.kratix.io/manual-reconciliation=true
+kubectl label <KIND> <REQUEST> --namespace <NAMESPACE> portal.kratix.io/manual-reconciliation=true
+```
+
+The controller starts a new sync Job and removes the label. Kratix's own workflows do not
+rerun, and Kratix's own `kratix.io/manual-reconciliation` label is left for Kratix. If a sync
+Job is still running, the new one starts when it finishes. Labelling a Promise reruns only the
+Promise's sync, not its resource requests.
+
 Controller errors can provide further context:
 
 ```bash
