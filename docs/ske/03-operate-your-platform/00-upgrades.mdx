@@ -143,6 +143,10 @@ spec:
 
 The SKE Operator will perform pre-upgrade checks as part of the upgrade flow.
 
+The checks run when you change `.spec.version`. Other edits to the Kratix resource, such as
+changing `deploymentConfig`, do not run them, so you can still make those edits while SKE is not
+ready.
+
 To skip these checks, you can add the `ske.syntasso.io/skip-all-upgrade-checks`
 label when updating your `.spec.version`:
 

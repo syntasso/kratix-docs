@@ -35,6 +35,7 @@ kubectl logs <POD_NAME> -n kratix-platform-system --all-containers
 | `ImagePullBackOff` | Image name, tag, registry connectivity and pull Secret | Correct the registry reference or credentials using the installation guide |
 | `RegistrySecretNotFound` | Referenced Secret exists in `kratix-platform-system` | Restore or correct the Secret reference |
 | Webhook certificate errors | cert-manager readiness, certificate expiry and configured TLS Secret names | Follow [custom certificate requirements](/ske/installing-ske/install-with-operator#custom-certs) |
+| Kratix pods `Pending`, Kratix reports `NotAllReplicasAvailable` | `FailedScheduling` events in `kratix-platform-system`, and the `replicas` and spreading rules on the Kratix resource | Follow [If Kratix is not ready after a change](/ske/operations/high-availability#if-kratix-is-not-ready-after-a-change) |
 | Upgrade stops | `Kratix` status, events, current and desired versions, workload readiness | Check [upgrade rules](/ske/installing-ske/upgrades) and [release requirements](/ske/releases/compatibility) |
 | Integration not ready | `SKEIntegration.status.conditions`, deployment availability and credentials | Use the [Operator status reference](/ske/reference/ske-operator#status) and the integration guide |
 
