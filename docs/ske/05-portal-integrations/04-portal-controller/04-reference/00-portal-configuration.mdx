@@ -212,12 +212,10 @@ portal.kratix.io/manual-reconciliation: "true"
 Adding this label to a Promise or Resource request forces the Portal Controller to rerun that
 object's portal sync outside the normal reconciliation triggers.
 
-- **Only that object's sync reruns.** Labelling a Promise does not rerun the syncs of its
-  Resource requests, and Kratix's own workflows do not run.
+- **Only the labeled object's sync reruns.** Labelling a Promise does not rerun the syncs of its
+  Resource requests.
 - **A running sync finishes first.** If a sync Job is already running, the new one starts when
   it completes.
-- **Kratix's label is separate.** `kratix.io/manual-reconciliation` reruns Kratix's workflows
-  and is left for Kratix to remove. Set both labels to rerun both.
 - **Deletion is unaffected.** While the object is being deleted, the label has no effect.
 
 The label is removed automatically once the Portal Controller schedules the rerun, so it can be
