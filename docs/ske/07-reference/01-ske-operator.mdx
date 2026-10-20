@@ -129,11 +129,11 @@ configures the SKE Platform Manager Deployment. Both take the same fields:
 
 | Field | Description |
 |---|---|
-| `replicas` | Number of pods. Defaults to 1, and must be at least 1. Only one pod reconciles at a time; the others take over if it stops, and every pod serves webhooks. See [Run SKE with more than one replica](/ske/operations/high-availability). |
-| `topologySpreadConstraints` | Standard Kubernetes [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/), copied onto the pods as written. |
-| `resources` | CPU and memory requests and limits for the manager container, applied as written. |
+| `replicas` | Number of pods. Defaults to 1, and must be at least 1. See [Run SKE with more than one replica](/ske/operations/high-availability). |
+| `topologySpreadConstraints` | Standard Kubernetes [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) |
+| `resources` | CPU and memory requests and limits for the manager container. |
 | `nodeSelector` | Only schedule the pods on nodes with these labels. |
-| `affinity` | Standard Kubernetes affinity rules, copied onto the pods as written. |
+| `affinity` | Standard Kubernetes affinity rules. |
 | `tolerations` | Let the pods run on nodes with matching taints. |
 | `volumes` | Extra volumes to add to the pods. |
 | `volumeMounts` | Extra volume mounts for the manager container. |
@@ -141,8 +141,6 @@ configures the SKE Platform Manager Deployment. Both take the same fields:
 When a field is not set, the value in the SKE distribution is kept. The SKE Operator owns these
 Deployments, so changes made to them directly, such as `kubectl scale`, are set back on the next
 reconcile.
-
-`SKEIntegration` resources do not take `replicas` or `topologySpreadConstraints`.
 
 The Kratix resource is the owner of all resources installed as part of the [SKE
 distribution](/ske/releases/ske#overview), and ensures that their state always matches the

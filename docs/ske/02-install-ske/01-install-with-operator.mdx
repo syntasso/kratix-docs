@@ -220,15 +220,14 @@ skeDeployment:
         cpu: null
 ```
 
-
 :::
 
 
 #### Replicas and pod spreading {#replicas}
 
-By default, Kratix and the SKE Platform Manager each run one pod. To run more, and spread them
-across nodes, set `replicas` and `topologySpreadConstraints` under `skeDeployment.deploymentConfig`
-(Kratix) and `skeDeployment.platformManagerDeploymentConfig` (SKE Platform Manager):
+By default, Kratix and the SKE Platform Manager each run with one replica. To run more replicas, 
+and spread them across nodes, set `replicas` and `topologySpreadConstraints` under 
+`skeDeployment.deploymentConfig` (Kratix) and `skeDeployment.platformManagerDeploymentConfig` (SKE Platform Manager):
 
 ```yaml
 skeDeployment:
@@ -258,9 +257,9 @@ skeDeployment:
             app.kubernetes.io/component: ske-platform
 ```
 
-When they are not set, one pod runs with no spread rule. See [Run SKE with more than one
-replica](/ske/operations/high-availability) for what extra replicas give you, why the example sets
-`nodeTaintsPolicy` and `matchLabelKeys`, and an example PodDisruptionBudget.
+See [Run SKE with more than one replica](/ske/operations/high-availability) for what extra 
+replicas give you, why the example sets `nodeTaintsPolicy` and `matchLabelKeys`, 
+and an example PodDisruptionBudget.
 
 #### Custom Certs {#custom-certs}
 

@@ -1,30 +1,28 @@
 ---
-title: Run SKE with more than one replica
+title: High Availability
 description: Run Kratix and the SKE Platform Manager with several pods, spread them across nodes and keep them running during node maintenance.
 slug: "/ske/operations/high-availability"
-sidebar_label: "Run more than one replica"
+sidebar_label: "High Availability"
 sidebar_position: 2.5
 ---
 
 By default, the SKE Operator runs one pod of Kratix and one pod of the SKE Platform Manager.
-When the node running a pod is drained or fails, nothing serves that component until a new pod
-starts somewhere else. Running more than one replica, spread across nodes, keeps a pod available
-while this happens.
+When the node running a pod is drained or fails, nothing serves the platform until a new pod
+starts. Running more than one replica, spread across nodes, keeps SKE available while this happens.
 
 ## What extra replicas give you
 
 Kratix and the SKE Platform Manager use Kubernetes leader election:
 
-- Only one pod at a time does the reconciling: the pod that holds the leader election lease.
-  The other pods wait.
-- If the leader pod stops, another pod takes over once the lease expires, after about 15 to 20
-  seconds. Reconciling pauses during that time.
+- Only one pod is active at a time.
+- If the leader pod stops, another pod takes over after about 15 to 20
+  seconds. Reconciliation pauses during that time.
 - Every pod serves webhooks, including the pods that are not the leader.
 
 :::info Extra replicas do not make SKE faster
 
 Only the leader reconciles, so adding replicas does not make Kratix or the SKE Platform Manager
-reconcile faster. Extra replicas are about staying available, not about throughput.
+reconcile faster.
 
 :::
 
@@ -52,20 +50,14 @@ spreading](/ske/installing-ske/install-with-operator#replicas).
 
 - When `replicas` is not set, one pod runs.
 - `replicas` must be at least 1. The Kratix resource is rejected otherwise.
-- The Kratix resource is ready only when every Kratix pod is available. The SKE Platform Manager's
-  `PlatformManagerDeploymentReady` condition also waits for all of its pods, but it does not
-  change whether the Kratix resource is ready.
+- The Kratix resource is ready only when every Kratix pod is available. 
 - The SKE Operator owns these Deployments. If you change their replica count with `kubectl scale`
   or a HorizontalPodAutoscaler, the operator sets it back on its next reconcile. Set `replicas` on
   the Kratix resource instead.
 
 ## Spread the pods across nodes
 
-Two pods on the same node do not help when that node goes away. Use `topologySpreadConstraints` to
-spread them. The operator copies the list onto the pods as written.
-
-This example puts the Kratix pods on different nodes, and the SKE Platform Manager pods on
-different nodes:
+Use `topologySpreadConstraints` to spread pods across different nodes. For example:
 
 ```yaml
 apiVersion: platform.syntasso.io/v1alpha1
@@ -86,50 +78,16 @@ spec:
         labelSelector:
           matchLabels:
             app.kubernetes.io/component: kratix-manager
-  platformManagerDeploymentConfig:
-    replicas: 2
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
-        nodeTaintsPolicy: Honor
-        matchLabelKeys:
-          - pod-template-hash
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/component: ske-platform
 ```
 
-Keep `nodeTaintsPolicy: Honor` and `matchLabelKeys: [pod-template-hash]`. Without them, a node
-the pods cannot run on (such as a tainted control-plane node) counts as a place to spread to, and
-pods from the previous rollout are counted too. Either one can leave a pod `Pending` or put both
-pods on the same node.
-
 See [Pod topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
-for every field, including `whenUnsatisfiable` and spreading across zones.
-
-### Pod anti-affinity
-
-You can also spread the pods with
-[pod anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity)
-in `affinity`, using the same labels. Use the `preferredDuringSchedulingIgnoredDuringExecution`
-form.
-
-:::warning Required anti-affinity can stop every rollout
-
-A [rollout](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-update-deployment)
-of 2 or 3 replicas starts a new pod before it stops an old one. With
-`requiredDuringSchedulingIgnoredDuringExecution` and only as many nodes as replicas, that pod has
-nowhere to go, so the rollout never finishes and the Kratix resource stays not ready. This includes
-rollouts caused by SKE upgrades.
-
-:::
+for documentation of every available field.
 
 ## Keep pods running during node maintenance
 
 The SKE Operator does not create a
-[PodDisruptionBudget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/). This
-example keeps at least one Kratix pod and one SKE Platform Manager pod running during a drain:
+[PodDisruptionBudget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/). You can
+create one yourself. The example below keeps at least one Kratix pod running:
 
 ```yaml
 apiVersion: policy/v1
@@ -142,17 +100,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: kratix-manager
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: ske-platform-manager
-  namespace: kratix-platform-system
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: ske-platform
+      # use app.kubernetes.io/component: ske-platform for the SKE Platform Manager
 ```
 
 :::warning A PodDisruptionBudget can block a node drain
@@ -162,27 +110,3 @@ Keep `minAvailable` lower than `replicas`, and update the budget when you change
 
 :::
 
-## If Kratix is not ready after a change
-
-If a pod cannot be scheduled, it stays `Pending` and the Kratix resource reports
-`NotAllReplicasAvailable`. To find the reason, check the scheduling events:
-
-```bash
-kubectl get pods -n kratix-platform-system
-kubectl get events -n kratix-platform-system --field-selector reason=FailedScheduling
-```
-
-To fix it, edit `replicas` or the spreading rules on the Kratix resource. The operator's
-[upgrade checks](/ske/installing-ske/upgrades#upgrade-checks) only run when `spec.version` changes,
-so this edit is accepted even though Kratix is not ready.
-
-There is one exception. If `spec.version` is `latest` and a new SKE release has come out since,
-the operator waits for Kratix to be ready before it upgrades. Until then it applies nothing,
-including your fix. To get past this, also set `spec.version` to the installed version in the
-same edit:
-
-```bash
-kubectl get kratixes.platform.syntasso.io <KRATIX_NAME> -o jsonpath='{.status.lastAppliedVersion}'
-```
-
-Set `spec.version` back to `latest` once Kratix is ready again.
