@@ -66,7 +66,7 @@ quick-start that uses a single job to install Kratix with sensible defaults.
   1. Installs [**cert-manager**](https://cert-manager.io/) to manage TLS certificates for
       Kratix webhooks
   1. Deploys the [**Kratix API server and controllers**](https://docs.kratix.io/main/platform-concepts/kratix-resources)
-      in the `kratix-system` namespace
+      in the `kratix-plaform-system` namespace
   1. Deploys [**SeaweedFS**](https://github.com/seaweedfs/seaweedfs), a local S3-compatible bucket for storing
       declarative workloads
   1. Installs and configures [**Flux**](https://fluxcd.io/) to apply changes from the
@@ -85,7 +85,7 @@ This will deploy a job that installs Kratix and its dependencies. To follow alon
 with the installation process, you can watch the logs of the installer job:
 
 ```bash
-kubectl logs -f job/kratix-quick-start-installer -n kratix-platform-system
+kubectl logs -f job/kratix-quick-start-installer -n default
 ```
 
 In less than 5 minutes all dependencies will be installed and the platform controller
@@ -226,8 +226,8 @@ kubectl get postgresql.marketplace.kratix.io example --watch
 Eventually the request will be updated with a user friendly status:
 
 ```yaml
-NAME      STATUS
-dev       1Gi instance v16 deployed successfully without backups
+NAME      MESSAGE                                                  STATUS
+example   1Gi instance v16 deployed successfully without backups   Reconciled
 ```
 
 :::tip
@@ -325,8 +325,8 @@ kubectl get postgresqls.marketplace.kratix.io example --watch
 Once the Workflow runs, the status will show the update was successful:
 
 ```bash
-NAME      STATUS
-example   1Gi instance v16 deployed successfully with backups enabled
+NAME      MESSAGE                                                       STATUS
+example   1Gi instance v16 deployed successfully with backups enabled   Reconciled
 ```
 
 A successful Workflow means that the expectation has been set, but the decoupled GitOps
