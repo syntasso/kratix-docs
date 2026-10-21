@@ -57,7 +57,18 @@ resource is managed by the SKE Operator.
       certSecretName: my-tls-secret # Required if cert-manager is disabled
       metricsServerCertSecretName: my-metrics-secret # Required if cert-manager is disabled
       platformManagerCertSecretName: my-platform-manager-secret # Required if cert-manager is disabled and the SKE version includes the SKE Platform Manager
-    deploymentConfig:
+    deploymentConfig: # Kratix
+      replicas: 2 # Number of Kratix pods; defaults to 1
+      topologySpreadConstraints: # Standard Kubernetes topology spread constraints
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          nodeTaintsPolicy: Honor
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: kratix-manager
       resources:
         limits:
           memory: 500Mi
@@ -107,7 +118,29 @@ resource is managed by the SKE Operator.
       volumeMounts: # Additional volume mounts for the manager container
         - name: my-volume
           mountPath: /etc/config
+    platformManagerDeploymentConfig: # SKE Platform Manager; takes the same fields as deploymentConfig
+      replicas: 2
 ```
+
+### Deployment config fields {#deployment-config}
+
+`spec.deploymentConfig` configures the Kratix Deployment. `spec.platformManagerDeploymentConfig`
+configures the SKE Platform Manager Deployment. Both take the same fields:
+
+| Field | Description |
+|---|---|
+| `replicas` | Number of pods. Defaults to 1, and must be at least 1. See [Run SKE with more than one replica](/ske/operations/high-availability). |
+| `topologySpreadConstraints` | Standard Kubernetes [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) |
+| `resources` | CPU and memory requests and limits for the manager container. |
+| `nodeSelector` | Only schedule the pods on nodes with these labels. |
+| `affinity` | Standard Kubernetes affinity rules. |
+| `tolerations` | Let the pods run on nodes with matching taints. |
+| `volumes` | Extra volumes to add to the pods. |
+| `volumeMounts` | Extra volume mounts for the manager container. |
+
+When a field is not set, the value in the SKE distribution is kept. The SKE Operator owns these
+Deployments, so changes made to them directly, such as `kubectl scale`, are set back on the next
+reconcile.
 
 The Kratix resource is the owner of all resources installed as part of the [SKE
 distribution](/ske/releases/ske#overview), and ensures that their state always matches the
