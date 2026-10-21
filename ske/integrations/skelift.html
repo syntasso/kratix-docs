@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.e83ea460.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.93ebdea2.js" defer="defer"></script>
 <script src="/assets/js/main.d2318e88.js" defer="defer"></script>
 </head>
 <body>
@@ -124,7 +124,11 @@ groupings it is unsure of. Each run produces:</p>
 <p>Run the gates before applying anything:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kratix skelift review --review-file review-findings.yaml</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">kratix skelift check --promise-dir promises --example-dir resource-requests</span><br></div></code></pre></div></div>
 <p>Both exit non-zero on failure, so you can run them in CI as well as alongside
-the agent.</p>
+the agent. <code>kratix skelift check</code> requires at least one Promise in
+<code>--promise-dir</code> and one example Resource Request in <code>--example-dir</code>. It fails
+if either directory is missing or contains no YAML files. Run it from the
+directory containing the generated output, or pass the correct paths for your
+working directory. Confirm the reported counts match the files you generated.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="updating-ske-lift">Updating SKE Lift<a href="#updating-ske-lift" class="hash-link" aria-label="Direct link to Updating SKE Lift" title="Direct link to Updating SKE Lift" translate="no">​</a></h2>
 <p>Run the install command again. Each run installs the current release and
 overwrites what is already at those paths, so it will overwrite any manual edits you&#x27;ve made to the skills.</p>
