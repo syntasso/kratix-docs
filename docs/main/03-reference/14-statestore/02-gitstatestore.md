@@ -37,7 +37,22 @@ spec:
   url: https://github.com/syntasso/kratix-repo
   # Skip TLS verification: optional, defaults to true
   insecure: true
+  # How documents reach the repository: optional, writes to the branch directly when unset
+  delivery:
+    mode: pullRequest
+    config:
+      provider: github
 ```
+
+## Delivery
+
+Without a `delivery` block, Kratix commits to `branch` and pushes. `delivery.mode` names a
+writer that takes the change instead, and `delivery.config` is passed to that writer unchanged.
+
+Kratix itself registers no modes, so a `mode` that no writer has claimed makes the state store
+report an error naming it. Syntasso Kratix Enterprise registers `pullRequest`, which opens a
+pull request against `branch` and delivers the change when someone merges it. See
+[Deliver through pull requests](/ske/operations/pull-request-delivery).
 
 ## Auth
 
