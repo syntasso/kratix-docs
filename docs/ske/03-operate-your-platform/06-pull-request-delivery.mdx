@@ -1,0 +1,93 @@
+---
+title: Deliver through pull requests
+description: Have a Destination open a pull request for every change instead of pushing to its branch, so someone reviews what reaches the cluster.
+slug: "/ske/operations/pull-request-delivery"
+sidebar_label: "Pull request delivery"
+sidebar_position: 2.6
+---
+
+A Destination backed by a `GitStateStore` normally pushes straight to its branch. Whatever a
+Promise's pipeline produces is on the branch seconds later, and whatever reads that branch
+applies it.
+
+Pull request delivery puts a person in between. SKE commits the same files to a branch of its
+own and opens a pull request against the Destination's branch. Nothing reaches the Destination's
+branch until someone merges it.
+
+## What you need
+
+- The repository on GitHub, either github.com or GitHub Enterprise Server.
+- Credentials that can push branches and open pull requests on it: **Contents (read and write)**
+  and **Pull requests (read and write)**. A personal access token, a project token or a GitHub
+  App installation all work, set up the same way as for any other `GitStateStore`. See
+  [GitStateStore](/main/reference/statestore/gitstatestore) for the Secret formats.
+
+## Turn it on
+
+Add a `delivery` block to the `GitStateStore`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: production
+spec:
+  url: https://github.com/acme/platform-state
+  branch: main
+  authMethod: basicAuth
+  secretRef:
+    name: git-credentials
+    namespace: default
+  delivery:
+    mode: pullRequest
+    config:
+      provider: github
+```
+
+Destinations that use this state store deliver through pull requests. Destinations that use a
+state store with no `delivery` block keep pushing, so you can run both side by side.
+
+On GitHub Enterprise Server, SKE calls the API on the same host as the repository
+(`https://<host>/api/v3`). Set `config.apiURL` if your API is somewhere else on that host. It
+has to be the same host, because SKE sends it the state store's credentials.
+
+## What happens on a change
+
+1. A pipeline runs and produces files for the Destination.
+2. SKE commits them to `kratix/<work-placement-name>`, force-pushes that branch and opens a pull
+   request against the Destination's branch.
+3. SKE checks the pull request every 30 seconds.
+4. When someone merges it, the change is delivered and the merge commit becomes the
+   WorkPlacement's `versionID`.
+
+A later change to the same WorkPlacement reuses the same branch and the same open pull request:
+SKE rebuilds the branch from the pipeline's latest output and force-pushes it, so the open pull
+request always shows what the platform currently wants. **Commits you make on that branch
+yourself are lost.** Change the Promise or the request instead.
+
+## What the requester sees
+
+The resource request's `WorksSucceeded` condition reports where the change is:
+
+| Reason | Status | Meaning |
+| --- | --- | --- |
+| `WorksPending` | `Unknown` | A pull request is open and waiting for review. |
+| `WorksSucceeded` | `True` | Every pull request for this request has been merged. |
+| `WorksFailing` | `False` | A pull request was closed without being merged. |
+
+The WorkPlacement carries the detail:
+
+```bash
+kubectl get workplacement <WORKPLACEMENT_NAME> \
+  -o jsonpath='{.status.conditions[?(@.type=="WriteSucceeded")]}'
+```
+
+While the pull request is open its `status` is `Unknown` and its message names the pull request.
+Merging sets it to `True`; closing the pull request without merging sets it to `False` with the
+reason.
+
+## How the Destination becomes ready
+
+A pushing Destination writes two canary files when you register it, to prove it can write. A
+Destination that delivers through pull requests skips them, because that check would open a pull
+request before anyone has asked for a change. It becomes ready once SKE can read the branch.
