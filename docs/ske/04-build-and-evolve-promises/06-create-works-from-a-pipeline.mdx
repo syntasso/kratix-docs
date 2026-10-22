@@ -1,0 +1,196 @@
+---
+title: Creating Works from inside a Pipeline
+description: How to run the SKE work creator in a resource configure Pipeline, so documents are scheduled before the Pipeline ends
+keywords: [work creator, pipeline adapter, works, pipeline, compound promises, scheduling]
+slug: "/ske/guides/create-works-from-a-pipeline"
+sidebar_label: "Create Works from inside a Pipeline"
+sidebar_position: 7
+---
+
+Kratix schedules the documents in `/kratix/output` only after the whole Pipeline has finished.
+Sometimes you need to schedule documents earlier. For example, a compound Promise may need to
+request a sub-resource before its later containers run.
+
+You can do this with the **work creator**. This is the tool Kratix runs at the end of every
+Pipeline. It reads a directory of documents and creates a Work from them. Kratix then schedules
+that Work like any other.
+
+**In this guide, you will**
+
+1. Write documents to a directory that all containers in the Pipeline can read
+1. Add a container that runs the work creator
+1. Check that the Work was created and scheduled
+
+:::info Requires SKE vX.Y.Z or later
+
+The work creator flags in this guide were added in SKE vX.Y.Z.
+
+:::
+
+## Prerequisites
+
+- SKE vX.Y.Z or later
+- A Promise with a resource `configure` workflow
+- A Destination for the documents. The example below uses a Destination with the label
+  `environment: platform`, as set up in the
+  [compound Promises guide](/main/guides/compound-promises)
+
+## How it works
+
+All containers in a Pipeline share the `/kratix/metadata` directory. One container writes
+documents to a folder in there. A later container runs the work creator, which turns that folder
+into a Work.
+
+The work creator labels the Work with the Promise name, resource name, Pipeline name and
+workflow type. It uses these labels to find the same Work the next time the Pipeline runs.
+Kratix uses them to delete the Work when the resource is deleted.
+
+:::warning Choose the workflow type and Pipeline name with care
+
+- `--workflow-type` must start with `resource-`, for example `resource-database`. Do **not**
+  use `resource`. With `resource`, Kratix deletes the Work when the workflow ends, or replaces
+  its documents with the ones in `/kratix/output`.
+- Give each work creator container its own `--pipeline-name`.
+- Do not change either value once resources use it. The work creator would create a new Work,
+  and the old one would stay until the resource is deleted.
+
+:::
+
+## Write the documents
+
+Add a container that writes the documents you want to schedule. Do not write them to
+`/kratix/output`, as Kratix schedules that directory at the end of the Pipeline too.
+
+This example writes a request for a sub-resource, and a `destination-selectors.yaml` that
+sends it to the platform Destination:
+
+```text
+/kratix/metadata/database/
+├── workloads/
+│   └── database.yaml
+└── metadata/
+    └── destination-selectors.yaml
+```
+
+```yaml title="/kratix/metadata/database/metadata/destination-selectors.yaml"
+- matchLabels:
+    environment: platform
+```
+
+The `metadata` folder is optional. The work creator reads two files from it:
+
+- `destination-selectors.yaml`, to decide where the Work is scheduled
+- `workflow-control.yaml`, to [suspend or retry](/main/reference/workflows#workflow-control)
+  instead of creating the Work
+
+## Add the work creator container
+
+Add a container after the one that writes the documents. It uses the SKE Platform image, which
+includes the work creator.
+
+The example below is partial. It shows only the Pipeline, and `<YOUR_IMAGE>` is the image that
+writes the documents.
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: app
+spec:
+  workflows:
+    resource:
+      configure:
+        - apiVersion: platform.kratix.io/v1alpha1
+          kind: Pipeline
+          metadata:
+            name: instance-configure
+          spec:
+            containers:
+              - name: write-database-request
+                image: <YOUR_IMAGE>
+              - name: create-database-work
+                image: ghcr.io/syntasso/ske-platform:<SKE_VERSION>
+                command: ["/bin/pipeline-adapter"]
+                args:
+                  - work-creator
+                  - --workloads-directory=/kratix/metadata/database/workloads
+                  - --metadata-directory=/kratix/metadata/database/metadata
+                  - --workflow-type=resource-database
+                  - --pipeline-name=create-database
+                  - --promise-name=$(KRATIX_PROMISE_NAME)
+                  - --resource-name=$(KRATIX_OBJECT_NAME)
+                  - --namespace=$(KRATIX_OBJECT_NAMESPACE)
+```
+
+Set `<SKE_VERSION>` to the version of SKE you run. Update it each time you upgrade SKE.
+
+The flags are:
+
+| Flag | Required | Description |
+| --- | --- | --- |
+| `--workloads-directory` | Yes | The directory with the documents to schedule. Every file in it, including files in sub-directories, goes into the Work. |
+| `--metadata-directory` | No | The directory with `destination-selectors.yaml` and `workflow-control.yaml`. |
+| `--promise-scheduling-directory` | No | The directory with a `promise-scheduling` file. You do not need this in a Pipeline. |
+| `--workflow-type` | Yes | Your own type that starts with `resource-`. See the warning above. |
+| `--pipeline-name` | Yes | A name for this Work. See the warning above. |
+| `--promise-name` | Yes | The Promise name. Use `$(KRATIX_PROMISE_NAME)`. |
+| `--resource-name` | Yes | The resource name. Use `$(KRATIX_OBJECT_NAME)`. |
+| `--namespace` | Yes | The namespace the Pipeline runs in. See below. |
+| `--resource-namespace` | Sometimes | The resource namespace. Only set it when the Promise sets `pipelineNamespace`. |
+
+### If the Promise sets a Pipeline namespace
+
+The Pipeline can only create Works in the namespace it runs in. By default this is the resource
+namespace, so `--namespace=$(KRATIX_OBJECT_NAMESPACE)` is right.
+
+If the Promise sets `spec.workflows.config.pipelineNamespace`, the Pipeline runs there instead.
+Set `--namespace` to that namespace, and pass the resource namespace separately:
+
+```yaml
+args:
+  - work-creator
+  # ...
+  - --namespace=<PIPELINE_NAMESPACE>
+  - --resource-namespace=$(KRATIX_OBJECT_NAMESPACE)
+```
+
+## Check the Work
+
+After a resource is requested, list the Works with your workflow type:
+
+```bash
+kubectl get works --namespace <NAMESPACE> --selector kratix.io/work-type=resource-database
+```
+
+You should see one Work for each resource. Kratix then schedules it as usual. In the example, the
+sub-resource request appears on the platform cluster. If the sub-Promise's kind is `database`,
+check it with:
+
+```bash
+kubectl get databases --namespace <NAMESPACE>
+```
+
+## What happens later
+
+- **The Pipeline runs again:** the work creator updates the same Work. Files you removed from
+  the folder are removed from the Work.
+- **The resource is deleted:** Kratix deletes this Work along with the resource's other Works.
+- **You remove the work creator container from the Promise:** Kratix does not delete the Work.
+  It stays until the resource is deleted.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `unknown flag: --workloads-directory` | The image is older than SKE vX.Y.Z. | Use the SKE Platform image for your SKE version. |
+| `must provide --workflow-type when using --workloads-directory` | `--workflow-type` is missing. | Set it to your own type that starts with `resource-`. |
+| The Work is created, then disappears when the workflow ends. | `--workflow-type` is `resource`. | Use your own type, for example `resource-database`. |
+| The Work has the documents from `/kratix/output` instead of yours. | `--workflow-type` is `resource` and `--pipeline-name` matches the Pipeline. | Use your own type. |
+| `works.platform.kratix.io is forbidden` | `--namespace` is not the namespace the Pipeline runs in. | See [If the Promise sets a Pipeline namespace](#if-the-promise-sets-a-pipeline-namespace). |
+| Two Works for the same resource where you expected one. | `--workflow-type` or `--pipeline-name` changed. | Change them back, then delete the Work you do not need. |
+
+## Related docs
+
+- [Workflows reference](/main/reference/workflows)
+- [Compound Promises](/main/guides/compound-promises)
+- [Managing multiple Destinations](/main/reference/destinations/multidestination-management)
