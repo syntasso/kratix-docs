@@ -114,6 +114,10 @@ Use init-container statuses to identify the failed stage:
   Invalid shared settings prevent new sync and setup Jobs; see
   [Job configuration](/ske/integrations/portal-controller/customization/job-customization#when-the-file-is-wrong).
 
+Once you have fixed the cause, add the
+[manual reconciliation label](/ske/integrations/portal-controller/reference/portal-configuration#manual-reconciliation)
+to the Promise or Resource request to rerun its sync.
+
 Controller errors can provide further context:
 
 ```bash
