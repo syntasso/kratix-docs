@@ -26,6 +26,22 @@ To see which version of the helm chart corresponds to which version of the SKE-O
 
 ## Release Notes
 
+### [v0.36.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.36.1/) (2026-10-23)
+
+Released in Helm Chart version [0.103.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.103.0/)
+
+#### Bug Fixes
+
+* For a Portal Controller `SKEIntegration`, the operator now checks the portal credential Secrets before it fetches the release. If a Secret is missing, the `SKEIntegration` reports the `CredentialSecretNotFound` reason. See [SKEIntegration status](/ske/reference/ske-operator#status).
+
+#### Security Fixes
+
+* Rebuilt with Go 1.27.3 to fix CVE-2026-111943 in the Go standard library (`crypto/x509`).
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.36.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator/v0.36.0/) (2026-10-20)
 
 Released in Helm Chart version [0.102.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.102.0/)
