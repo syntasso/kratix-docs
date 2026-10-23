@@ -185,7 +185,8 @@ Every `SKEIntegration` reports install health on `.status.conditions`, condition
 | Status | Reason | When |
 |---|---|---|
 | `False` | `NotAllReplicasAvailable` | Set on the first reconcile, and again whenever a previously-ready Deployment stops being available. |
-| `False` | `RegistrySecretNotFound` | A referenced credential Secret (for integration types that require one) has no matching Secret in `kratix-platform-system`. |
+| `False` | `RegistrySecretNotFound` | The image registry pull Secret or the release storage Secret has no matching Secret in `kratix-platform-system`. |
+| `False` | `CredentialSecretNotFound` | Portal Controller only. A Secret named in `spec.portals[].secretRef` has no matching Secret in `kratix-platform-system`. The operator checks this before it fetches the release, so nothing is installed until the Secret exists. |
 | `True` | `AllReplicasAvailable` | The Deployment is available at the current generation and the installed version matches the resolved version. |
 
 `.status.ready` mirrors the condition. `.status.lastAppliedVersion` records the resolved version once ready, so later reconciles can detect a version bump.
