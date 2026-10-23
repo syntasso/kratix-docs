@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.f34ed8d7.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.0beb645a.js" defer="defer"></script>
 <script src="/assets/js/main.d2318e88.js" defer="defer"></script>
 </head>
 <body>
@@ -90,6 +90,9 @@ stops the batch if a selector is missing or ambiguous; the writer does not run a
 Invalid shared settings prevent new sync and setup Jobs; see
 <a class="" href="/ske/integrations/portal-controller/customization/job-customization#when-the-file-is-wrong">Job configuration</a>.</li>
 </ul>
+<p>Once you have fixed the cause, add the
+<a class="" href="/ske/integrations/portal-controller/reference/portal-configuration#manual-reconciliation">manual reconciliation label</a>
+to the Promise or Resource request to rerun its sync.</p>
 <p>Controller errors can provide further context:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kubectl logs deployment/ske-portal-controller </span><span class="token parameter variable" style="color:#36acaa">--namespace</span><span class="token plain"> kratix-platform-system </span><span class="token punctuation" style="color:#393A34">\</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token parameter variable" style="color:#36acaa">--container</span><span class="token plain"> manager </span><span class="token parameter variable" style="color:#36acaa">--tail</span><span class="token operator" style="color:#393A34">=</span><span class="token number" style="color:#36acaa">200</span><br></div></code></pre></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="publication-succeeds-but-the-entity-is-not-visible">Publication succeeds but the entity is not visible<a href="#publication-succeeds-but-the-entity-is-not-visible" class="hash-link" aria-label="Direct link to Publication succeeds but the entity is not visible" title="Direct link to Publication succeeds but the entity is not visible" translate="no">​</a></h2>
