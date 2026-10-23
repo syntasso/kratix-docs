@@ -34,6 +34,7 @@ kubectl logs <POD_NAME> -n kratix-platform-system --all-containers
 | --- | --- | --- |
 | `ImagePullBackOff` | Image name, tag, registry connectivity and pull Secret | Correct the registry reference or credentials using the installation guide |
 | `RegistrySecretNotFound` | Referenced Secret exists in `kratix-platform-system` | Restore or correct the Secret reference |
+| `CredentialSecretNotFound` on a Portal Controller `SKEIntegration` | Each Secret in `spec.portals[].secretRef` exists in `kratix-platform-system` | Create the missing portal credential Secret, or correct its name |
 | Webhook certificate errors | cert-manager readiness, certificate expiry and configured TLS Secret names | Follow [custom certificate requirements](/ske/installing-ske/install-with-operator#custom-certs) |
 | Kratix pods `Pending`, Kratix reports `NotAllReplicasAvailable` | `FailedScheduling` events in `kratix-platform-system`, and the `replicas` and spreading rules on the Kratix resource | Follow [If Kratix pod is Pending with FailedScheduling](#pending-kratix) |
 | Upgrade stops | `Kratix` status, events, current and desired versions, workload readiness | Check [upgrade rules](/ske/installing-ske/upgrades) and [release requirements](/ske/releases/compatibility) |
