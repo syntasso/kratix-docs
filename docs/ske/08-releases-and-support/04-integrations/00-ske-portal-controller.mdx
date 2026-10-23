@@ -20,6 +20,22 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.8.0/) (2026-10-23)
+
+Released via the SKE Operator Helm Chart [version 0.104.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.104.0/)
+
+#### Features
+
+* Rerun a portal sync on demand. Add the `portal.kratix.io/manual-reconciliation: "true"` label to a Promise or Resource request, and the Portal Controller syncs it again. The label removes itself, so you can apply it again later. See [Manual reconciliation](/ske/integrations/portal-controller/reference/portal-configuration#manual-reconciliation).
+
+#### Security Fixes
+
+* Rebuilt with Go 1.27.3 to fix CVE-2026-111943 in the Go standard library (`crypto/x509`).
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.7.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.7.1/) (2026-10-19)
 
 Released via the SKE Operator Helm Chart [version 0.101.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.101.1/)
