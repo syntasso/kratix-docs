@@ -157,6 +157,33 @@ file to the `/kratix/metadata/status.yaml` file.
 
 :::
 
+### Status
+
+A Promise Configure Pipeline can write any top-level field to
+`/kratix/metadata/status.yaml`, the same way a [Resource
+workflow](/main/reference/resources/status) does. For example:
+
+```yaml
+message: Promise configured
+stage: ready
+```
+
+Kratix adds `message` and `stage` to the Promise status.
+
+Kratix owns some status fields. If `status.yaml` sets any of the following, the
+Pipeline fails:
+
+- `kratix`
+- `version`
+- `kind`
+- `apiVersion`
+- `status`
+- `requiredPromises`
+- `requiredBy`
+- `lastAvailableTime`
+- `observedGeneration`
+- `healthStatus`
+
 ### Idempotency
 
 All commands which run in Configure workflows must be idempotent, as there is a guarantee
