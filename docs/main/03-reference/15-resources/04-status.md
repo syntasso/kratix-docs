@@ -8,7 +8,7 @@ import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-fl
 
 # Status
 
-As part of a Configure Pipeline you can optionally send information about the
+As part of a Configure or Delete Pipeline you can optionally send information about the
 Resource back to the resource requester by writing information to
 `/kratix/metadata/status.yaml`.
 
