@@ -184,6 +184,15 @@ The status is always merged, with the last Pipeline prioritised in case of
 conflicts. In this example the `iam` key was updated with the additional
 `password` key, and the `message` key was overwritten.
 
+Nested maps are merged key by key, while lists and other values are replaced.
+To remove a key, set it to `null` in `/kratix/metadata/status.yaml`. For
+example, the following removes `iam.password` and leaves `iam.user` untouched:
+
+```yaml
+iam:
+  password: null
+```
+
 The next time the Configure workflow runs from the beginning, for example if a
 user updated the request, the status set in `/kratix/input/object.yaml` would be
 the same as the final status from the previous run of the Configure workflow.
