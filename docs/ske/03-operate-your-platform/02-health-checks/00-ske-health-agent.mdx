@@ -192,10 +192,10 @@ store. The format depends on the kind of state store you use:
     stateStoreKind: GitStateStore
     url: # address
     branch: # optional (default: main)
-    authMethod: # basicAuth (default)
+    authMethod: # basicAuth or ssh (default: basicAuth)
     secretName: <secret name>
     path: # path within the repository; optional
-    insecure: # "true" or "false" (default: "true"); optional string
+    insecure: # "true" or "false" (default: "true"); optional string; HTTPS only
     destinationName: # optional; see "Running the agent on multiple Destinations"
   ---
   apiVersion: v1
@@ -207,7 +207,14 @@ store. The format depends on the kind of state store you use:
     # for basicAuth
     username: # username
     password: # password / API Token
+    # for ssh
+    sshPrivateKey: # private key, without a passphrase
+    knownHosts: # known_hosts entries for the Git server
   ```
+
+  For `authMethod: ssh`, set `url` to an SSH address that includes the user, for example
+  `git@github.com:<ORG>/<REPO>.git` or `ssh://git@<GIT_HOST>:<PORT>/<ORG>/<REPO>.git`. See
+  the SSH example below.
 
   </TabItem>
 </Tabs>
@@ -289,7 +296,7 @@ The configuration should be created _after_ installing the agent, otherwise the 
 
   </TabItem>
 
-  <TabItem value="git" label="Git repository">
+  <TabItem value="git" label="Git repository (basic auth)">
 
   ```yaml
   apiVersion: v1
@@ -315,6 +322,63 @@ The configuration should be created _after_ installing the agent, otherwise the 
     username: <YOUR_USERNAME>
     password: <YOUR_PASSWORD_OR_API_TOKEN>
   ```
+
+  :::note
+
+  A Git state store needs a GitOps agent on the Platform to pick the records up. The SKE
+  Platform Manager reads buckets only, so the next section does not apply to Git.
+
+  :::
+
+  </TabItem>
+
+  <TabItem value="git-ssh" label="Git repository (SSH)">
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: health-state-store-config
+    namespace: k8s-health-agent-system
+  data:
+    stateStoreKind: GitStateStore
+    url: git@github.com:<ORG>/<REPO>.git
+    branch: main
+    authMethod: ssh
+    secretName: health-store-ssh-credentials
+    path: health
+    destinationName: <DESTINATION_NAME>
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: health-store-ssh-credentials
+    namespace: k8s-health-agent-system
+  stringData:
+    sshPrivateKey: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      <YOUR_PRIVATE_KEY>
+      -----END OPENSSH PRIVATE KEY-----
+    knownHosts: |
+      <KNOWN_HOSTS_ENTRIES_FOR_YOUR_GIT_SERVER>
+  ```
+
+  The Secret needs both keys. If either is missing, the agent writes no health records and
+  logs an error naming the missing key.
+
+  - `sshPrivateKey`: the private half of a key the Git server accepts. The agent commits and
+    pushes health records to `branch`, so the key needs **write** access to the repository.
+    The branch must already exist: the agent clones it and does not create it. On GitHub or
+    GitLab, use a deploy key with write access enabled. Keys protected by a passphrase are not
+    supported.
+  - `knownHosts`: the Git server's host keys, in `known_hosts` format. The agent connects with
+    strict host-key checking, so if the server's key is not listed here, or does not match,
+    the connection fails. There is no setting to skip this check: `insecure` affects TLS for
+    HTTPS URLs only.
+
+  To get the host keys, you can run `ssh-keyscan <GIT_HOST>`. Compare the fingerprints with the
+  ones your Git provider publishes before you trust the output. If the server's host key
+  changes, update `knownHosts`.
 
   :::note
 
