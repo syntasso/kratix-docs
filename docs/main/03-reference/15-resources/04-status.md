@@ -8,11 +8,6 @@ import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-fl
 
 # Status
 
-As part of a Configure or Delete Pipeline you can optionally send information about the
-Resource back to the resource requester by writing information to
-`/kratix/metadata/status.yaml`. The file can contain arbitrary key values, with the
-`message` key being a special key that is communicated back to the user when
-running `kubectl get <resource-request>`. For example if the Pipeline container wrote the
 As part of a Configure Pipeline you can optionally send information about the
 Resource back to the resource requester by writing information to
 `/kratix/metadata/status.yaml`.
@@ -181,7 +176,7 @@ status:
   iam:
     password: <vault-ref>
     user: admin
-  message: User created, next step is to create vault secret for user
+  message: User created and vault secret created
 
 ```
 
