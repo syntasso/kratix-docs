@@ -30,6 +30,18 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.25.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.25.0/); [ske-frontend v0.23.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.23.0/) (2026-10-26)
+
+#### Features
+
+* **Resource entities of any kind are now supported.** If a PortalCustomization changes a resource
+entity's kind, for example from `Component` to `Resource`, the SKE Backend still finds it. Pending
+requests are hidden once their resource exists, and updates link to the right entity.
+
+#### Bug Fixes
+
+* **Opening a pending request after its resource exists now takes you to the resource.**
+
 ### [ske-backend v0.24.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.24.0/); [ske-frontend v0.22.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.22.0/) (2026-10-06)
 
 #### Features
