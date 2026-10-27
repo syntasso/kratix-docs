@@ -145,5 +145,15 @@ kubectl get workplacement <WORKPLACEMENT_NAME> \
 | `WorkloadsWrittenToStateStore` | `True` | The pull request was merged. |
 | `WorkloadsRejected` | `False` | The pull request was closed without being merged. |
 
+Each Work sums up its WorkPlacements the same way. Its `WriteSucceeded` condition is `Unknown`
+with reason `WorkplacementsAwaitingDelivery` while any pull request is open, and `False` with
+`WorkplacementsRejected` once one is closed without being merged. `status.workPlacementStatuses` lists
+every WorkPlacement of the Work with its Destination, write status, message and `deliveryURL`, for
+tools that need to read each one:
+
+```bash
+kubectl get work <WORK_NAME> -o jsonpath='{.status.workPlacementStatuses}'
+```
+
 SKE reads the closing comment once, when it first sees the pull request closed. If the GitHub token
 cannot read comments, the request still shows the rejection, without the quote.
