@@ -24,19 +24,7 @@ Install or update SKE Lift with the Kratix CLI, using your
 echo $ENTERPRISE_RELEASES_TOKEN | kratix plugin add skelift --token-stdin
 ```
 
-Each run installs the current release of both plugins and the skills. To
-download an earlier release of a plugin, set the token as the value of the
-`GH_TOKEN` environment variable and use the `gh` cli:
-
-```
-gh release download $PLUGIN-$VERSION \
-  --repo syntasso/enterprise-releases \
-  --pattern '${PLUGIN}_$ARCH' \
-  --output ${PLUGIN}_$ARCH
-```
-
-`$PLUGIN` is `kratix-skelift-check` or `kratix-skelift-review`. The available
-architectures are `darwin_amd64`, `darwin_arm64` and `linux_amd64`.
+Each run installs the current release of both plugins and the skills.
 
 ## Release Notes
 
