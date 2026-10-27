@@ -75,7 +75,13 @@ Use your existing pipelines when:
 - your organisation already has approved Terraform pipelines, with their own policy checks and approvals
 - you want to put a self-service API in front of those pipelines without replacing them
 
-Kratix does not see the pipeline result, so if you need the outcome in the Resource status, your pipeline has to report it back. A Promise generated with `kratix init tf-module-promise` also works here: point your pipeline at the repository the Destination writes to.
+Kratix does not see the pipeline result. A Promise generated with `kratix init tf-module-promise` also works here: point your pipeline at the repository the Destination writes to.
+
+:::info
+
+If you'd like information from your external pipelines to show up in your Resource requests, you can implement health checks. See [Surfacing health information](/main/guides/resource-health).
+
+:::
 
 <br/>
 
