@@ -143,6 +143,12 @@ You'll find that a `resource.configure` workflow has also been added to the `pro
 The `ghcr.io/syntasso/kratix-cli/terraform-generate:v0.6.0` image takes the inputs provided via the API and uses these to generate a
 Terraform configuration that honours these inputs.
 
+The image only writes Terraform files. It does not run Terraform. Kratix
+schedules the files to your Terraform Destination, and the Terraform workspace
+watching that repository applies them. [Kratix and
+Terraform](/main/how-kratix-complements/terraform) explains this and the
+other ways to run Terraform from a Promise.
+
 ## The Promise Workflow
 
 As the S3 Module has a `terraform` configuration block containing a required Provider, the declaration of this provider must be present in the
