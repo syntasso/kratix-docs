@@ -17,10 +17,16 @@ Requests. It ships as two plugins to the [Kratix CLI](/main/kratix-cli/intro),
 `kratix-skelift-check` and `kratix-skelift-review`, together with a set of agent
 skills. See [SKE Lift](/ske/integrations/skelift) for how to install and use it.
 
-`kratix plugin add skelift` installs the current release of both plugins. To
-download a specific release, set your
-[Syntasso Enterprise Release Token](/ske/reference/tokens#enterprise-releases-token)
-as the value of the `GH_TOKEN` environment variable and use the `gh` cli:
+Install or update SKE Lift with the Kratix CLI, using your
+[Syntasso Enterprise Release Token](/ske/reference/tokens#enterprise-releases-token):
+
+```bash
+echo $ENTERPRISE_RELEASES_TOKEN | kratix plugin add skelift --token-stdin
+```
+
+Each run installs the current release of both plugins and the skills. To
+download an earlier release of a plugin, set the token as the value of the
+`GH_TOKEN` environment variable and use the `gh` cli:
 
 ```
 gh release download $PLUGIN-$VERSION \
