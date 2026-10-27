@@ -1,0 +1,61 @@
+---
+title: SKE Lift (Preview)
+description: Release information about SKE Lift
+slug: "/ske/releases/ske-lift"
+sidebar_label: "SKE Lift (Preview)"
+sidebar_position: 5
+---
+
+:::warning Preview
+This integration is in Preview mode and is not covered by the Syntasso SLA. If you are evaluating or using it, contact Syntasso to discuss applicability and expectations.
+:::
+
+## Overview
+
+SKE Lift turns an existing cloud estate into Kratix Promises and Resource
+Requests. It ships as two plugins to the [Kratix CLI](/main/kratix-cli/intro),
+`kratix-skelift-check` and `kratix-skelift-review`, together with a set of agent
+skills. See [SKE Lift](/ske/integrations/skelift) for how to install and use it.
+
+Install or update SKE Lift with the Kratix CLI, using your
+[Syntasso Enterprise Release Token](/ske/reference/tokens#enterprise-releases-token):
+
+```bash
+echo $ENTERPRISE_RELEASES_TOKEN | kratix plugin add skelift --token-stdin
+```
+
+Each run installs the current release of both plugins and the skills.
+
+## Release Notes
+
+### kratix-skelift-check
+
+#### v0.1.2 (21-10-2026)
+
+##### Fixes
+
+* `kratix skelift check` now fails when the Promise or example directory is missing or has no YAML files, or when an example file has no Resource Request documents
+
+#### v0.1.1 (29-09-2026)
+
+Contains dependency updates.
+
+#### v0.1.0 (20-08-2026)
+
+Initial release.
+
+### kratix-skelift-review
+
+#### v0.1.2 (27-10-2026)
+
+##### Security Fixes
+
+* Rebuilt with Go 1.27.3 to fix CVE-2026-111943 in the Go standard library (`crypto/x509`).
+
+#### v0.1.1 (29-09-2026)
+
+Contains dependency updates.
+
+#### v0.1.0 (20-08-2026)
+
+Initial release.
