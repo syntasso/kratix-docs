@@ -86,22 +86,18 @@ when the request is submitted. A Template cannot set it.
 `userIdentifierQuery` is optional. Without it, requests from that portal
 get no annotations.
 
-When `userIdentifierQuery` is set, the request fails, with a message naming
-the query, when:
+The request will fail when `userIdentifierQuery` is set in the following
+situations:
 
 - the person has no User entity in the catalog, for example a guest
 - the query finds no value, or the value is not text
 - the query does not start with `user.`
 
-Not every sign-in method fills in every property. For example, GitHub
-sign-in does not set `spec.profile.email`. Choose a property that your
-sign-in resolver fills in for every user.
-
 :::info Upgrading the Backstage backend plugin
 
 You can upgrade the backend plugin and the Portal Controller in either order.
-Set `userIdentifierQuery` only after you upgrade the backend plugin. An older
-plugin refuses every request from a Template that passes it.
+However, only set `userIdentifierQuery` after you upgrade the backend plugin.
+An older plugin refuses every request from a Template that passes it.
 
 :::
 
@@ -110,7 +106,7 @@ plugin refuses every request from a Template that passes it.
 :::note
 
 Cortex needs no specific configuration. The create and update workflows that
-the Portal Controller generates always write the annotations, with the email
+the Portal Controller generates always write the annotations, using the email
 address of the person who ran the workflow.
 
 :::
@@ -125,10 +121,11 @@ the old ones, so requests made before the upgrade keep their owner in Cortex.
 
 ## Deletes and usage outside of a portal
 
-- A delete through GitOps removes the request's file from git, so nothing
-  records who deleted it.
-- A request created outside a portal, for example with `kubectl`, has no
-  annotations unless you add them.
+A delete through GitOps removes the request's file from git, so nothing
+records who deleted it.
+
+A request created outside a portal, for example with `kubectl`, has no
+annotations unless you add them.
 
 ## Related
 
