@@ -68,18 +68,9 @@ spec:
 user. It starts with `user.`, which stands for that entity, so
 `user.spec.profile.email` reads the entity's `spec.profile.email`.
 
-:::note Why you set userIdentifierQuery
-
 Every Backstage sign-in provider stores the user's details in a different place
 on the User entity. SKE cannot know where yours keeps them, so
 `userIdentifierQuery` tells it where to look.
-
-:::
-
-| `userIdentifierQuery` | Records |
-|---|---|
-| `user.spec.profile.email` | The email address on the User entity |
-| `user.metadata.name` | The User entity's name |
 
 The SKE backend plugin reads the value from the signed-in user's entity
 when the request is submitted. A Template cannot set it.
