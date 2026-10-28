@@ -7,8 +7,8 @@ sidebar_position: 2.6
 ---
 
 A Destination backed by a `GitStateStore` normally pushes straight to its branch. It's
-poosible to configure SKE to create pull requests instead. On this mode, SKE commits the outputs 
-to a unique branch and opens a pull request against the Destination's target branch.
+possible to configure SKE to create pull requests instead. In this mode, SKE commits the outputs
+to a branch for each WorkPlacement and opens a pull request from it to the Destination's branch.
 
 SKE never merges the pull request itself.
 
@@ -66,20 +66,56 @@ When a workload is scheduled to a PR Destination:
   b. If it's closed without merging, SKE marks the WorkPlacement as failed and
 stop the line.
 
-
-If the requester changes the Promise or the request while a PR is open, SKE closes 
-the existing pull request and opens a new one. If the branch itself is changed,
-SKE will force-push to it.
-
-
 :::warning Don't change the branches yourself
 
-* **Commits you make on the PR branch will be lost.** SKE will force-push on the
-next reconciliation. Change the Promise or the request instead.
-* **Commits you make on the Destination's branch will cause a PR to be opened.** 
-SKE will detect drift and open a new pull request with the changes.
+Do not commit to the `kratix/<work-placement-name>` branches or edit SKE's files on the
+Destination's branch. Change the Promise or the request instead. See
+[Changes made by hand](#changes-made-by-hand).
 
 :::
+
+## Updating a request under review
+
+When a request changes while its pull request is open, what SKE does depends on the files the
+pipeline produces:
+
+- **Different files.** SKE closes the open pull request with a comment saying the request changed,
+  and opens a new one. The request's `STATUS` links the new pull request. Reviews on the old pull
+  request do not carry over.
+- **The same files.** SKE keeps the open pull request and its reviews.
+- **Files the Destination's branch already has.** This happens when the request changes back to
+  what is already merged. SKE closes the open pull request with a comment saying there is nothing
+  left to review, and the request becomes ready.
+
+Each time SKE delivers a WorkPlacement, it closes any open pull request from its
+`kratix/<work-placement-name>` branch into the Destination's branch, including one that a person
+opened from that branch, with one of the two comments above.
+
+Two cases are not handled yet:
+
+- On a Destination with `filepath.mode: aggregatedYAML`, every request on the Destination writes
+  into one shared file. If another request has a pull request that is not merged, changing a request
+  back does not make it ready. SKE opens a pull request instead, and that pull request also carries
+  the other request's change.
+- If you remove `delivery` from the `GitStateStore` while a pull request is open, SKE writes the
+  files straight to the Destination's branch but leaves the pull request open. Close it yourself.
+
+## Changes made by hand
+
+- **Commits on a `kratix/<work-placement-name>` branch are lost** the next time SKE opens a pull
+  request for that WorkPlacement, because SKE replaces the branch. If the pull request is merged
+  with those commits first, they reach the Destination's branch, and at the next delivery SKE opens
+  a pull request to remove them.
+- **Changes to SKE's files on the Destination's branch are reverted through a pull request.** If
+  someone edits or reverts those files directly on the Destination's branch, SKE opens a pull
+  request that puts them back at the next delivery. The edit stays on the branch until that pull
+  request is merged. While it is open, the request's `STATUS` shows `Waiting for approval` again.
+  Closing it without merging marks the request as rejected.
+- **A pull request that no longer merges stays as it is.** If the Destination's branch moves on and
+  the pull request now has conflicts, SKE does not rebuild it yet.
+
+The next delivery happens when the request's pipeline runs again, or at the platform's
+reconciliation interval (every 10 hours by default), whichever comes first.
 
 ## What the requester sees
 
@@ -112,7 +148,8 @@ redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/p
 
 SKE does not open a pull request for the same change again. Running the pipeline again with the same
 output keeps the rejection, and so does a restart of SKE or a Destination that is briefly not ready.
-A new pull request opens once the request or the Promise produces different files. On a Destination
+A new pull request opens once the request or the Promise produces different files (see
+[Updating a request under review](#updating-a-request-under-review)). On a Destination
 with `filepath.mode: aggregatedYAML`, every resource writes into the same file, so the next change
 from any resource on that Destination includes the rejected files again.
 
