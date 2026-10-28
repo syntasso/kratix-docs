@@ -91,6 +91,11 @@ Each time SKE delivers a WorkPlacement, it closes any open pull request from its
 `kratix/<work-placement-name>` branch into the Destination's branch, including one that a person
 opened from that branch, with one of the two comments above.
 
+A pull request SKE closed is out of date, so do not reopen it. If someone reopens or merges it
+anyway, SKE does not count it as delivered or under review. At the next delivery it compares the
+request's files with the Destination's branch again, and opens a new pull request for whatever
+still differs.
+
 Two cases are not handled yet:
 
 - On a Destination with `filepath.mode: aggregatedYAML`, every request on the Destination writes
