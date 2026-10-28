@@ -110,6 +110,12 @@ NAME    MESSAGE              STATUS
 redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/pull/42 with no comment
 ```
 
+SKE does not open a pull request for the same change again. Running the pipeline again with the same
+output keeps the rejection, and so does a restart of SKE or a Destination that is briefly not ready.
+A new pull request opens once the request or the Promise produces different files. On a Destination
+with `filepath.mode: aggregatedYAML`, every resource writes into the same file, so the next change
+from any resource on that Destination includes the rejected files again.
+
 `STATUS` is cut to 120 characters. `kubectl describe` shows the full text in the `Reconciled` and
 `WorksSucceeded` conditions. A request delivered to several Destinations names each Destination in
 `WorksSucceeded`.
