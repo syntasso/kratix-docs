@@ -1,16 +1,16 @@
 ---
 title: Recording resource request ownership
-description: Annotate each resource request made from Backstage with the person who last created or updated it
+description: Annotate each resource request made from Backstage or Cortex with the person who last created or updated it
 keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops]
 slug: "/ske/integrations/portal-controller/audit-and-ownership"
 displayed_sidebar: skeSidebar
 ---
 
-When using GitOps, a request is applied onto Kubernetes through a GitOps tool,
-like ArgoCD, using its own ServiceAccount. This prevents Kubernetes from seeing
-which user actually created this request. SKE relies on three annotations under
-`kratix.io` to keep ownership information. These annotations are written by the
-SKE portal integrations for both Backstage and Cortex.
+When you use GitOps, a GitOps tool such as Argo CD applies each request to
+Kubernetes with its own ServiceAccount, so Kubernetes cannot see which user
+made the change. SKE records that user on the request itself, in three
+`kratix.io` annotations. The SKE portal integrations for Backstage and Cortex
+both write them.
 
 ## Requirements
 
@@ -21,7 +21,7 @@ SKE portal integrations for both Backstage and Cortex.
 
 | Annotation | Value |
 |---|---|
-| `kratix.io/last-changed-by` | The value `userIdentifierQuery` finds on the person's User entity |
+| `kratix.io/last-changed-by` | In Backstage, the value `userIdentifierQuery` finds on the person's User entity. In Cortex, the person's email address |
 | `kratix.io/last-change-action` | `create` or `update` |
 | `kratix.io/last-changed-via` | The portal type: `backstage` or `cortex` |
 
@@ -89,25 +89,27 @@ Not every sign-in method fills in every property. For example, GitHub
 sign-in does not set `spec.profile.email`. Choose a property that your
 sign-in resolver fills in for every user.
 
-::: info Upgrading the Backstage backend plugin
+:::info Upgrading the Backstage backend plugin
 
-You can upgrade the backend plugin and the Portal Controller in either
-order. Set `userIdentifierQuery` only after you upgrade the backend plugin. An
-older plugin refuses every request from a Template that passes it.
+You can upgrade the backend plugin and the Portal Controller in either order.
+Set `userIdentifierQuery` only after you upgrade the backend plugin. An older
+plugin refuses every request from a Template that passes it.
 
 :::
 
 ### Cortex
 
-<!-- TODO: Is there something that needs to be done to turn this on when using Cortex? -->
+Cortex needs no configuration. The create and update workflows that the
+Portal Controller generates always write the annotations, with the email
+address of the person who ran the workflow.
 
-::: info Upgrading from older Portal Controllers
+:::info Upgrading from older Portal Controllers
 
-Cortex used to write `cortex.io/initiated-by` and
-  `cortex.io/initiated-action`. It now writes the `kratix.io` annotations,
-  and for one release it still reads the old ones, so requests made before
-  the upgrade keep their owner in Cortex.
+Cortex used to write `cortex.io/initiated-by` and `cortex.io/initiated-action`.
+It now writes the `kratix.io` annotations, and for one release it still reads
+the old ones, so requests made before the upgrade keep their owner in Cortex.
 
+:::
 
 ## Deletes and usage outside of a portal
 
