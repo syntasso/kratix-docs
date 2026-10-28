@@ -1,0 +1,114 @@
+---
+title: Recording who last changed a resource request
+description: Annotate each resource request made from Backstage with the person who last created or updated it
+keywords: [portal, backstage, annotations, userIdentifierQuery, last-changed-by, gitops]
+slug: "/ske/integrations/portal-controller/backstage/last-change-annotations"
+displayed_sidebar: skeSidebar
+---
+
+When a request goes through GitOps, your GitOps tool applies it, so
+Kubernetes only sees the tool's ServiceAccount. Backstage therefore records
+the person who made the change on the request itself, in three `kratix.io`
+annotations. Cortex writes the same annotations, so you look in one place
+whichever portal made the change.
+
+Every Backstage portal sets `config.userIdentifierQuery`, which chooses the
+value that names the person.
+
+## Requirements
+
+- `@syntasso/plugin-ske-backend` `<RELEASE_VERSION>` or later. Upgrade the
+  backend plugin before the Portal Controller.
+- Portal Controller `<RELEASE_VERSION>` or later.
+
+## The annotations
+
+| Annotation | Value |
+|---|---|
+| `kratix.io/last-changed-by` | The value `userIdentifierQuery` finds on the person's User entity |
+| `kratix.io/last-change-action` | `create` or `update` |
+| `kratix.io/last-changed-via` | The portal type: `backstage` or `cortex` |
+
+```yaml
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: Jenkins
+metadata:
+  name: my-jenkins
+  namespace: default
+  annotations:
+    kratix.io/last-changed-by: alice@example.com
+    kratix.io/last-change-action: update
+    kratix.io/last-changed-via: backstage
+```
+
+Every create or update from a portal replaces all three, so they describe
+the latest change, not the first one.
+
+## Configuration
+
+Set `userIdentifierQuery` in the `config` of each `type: backstage` entry in
+`portals[]`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: <RELEASE_VERSION>
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        # highlight-next-line
+        userIdentifierQuery: user.spec.profile.email
+```
+
+`userIdentifierQuery` is a path into the catalog entity of the signed-in
+user. It starts with `user.`, which stands for that entity, so
+`user.spec.profile.email` reads the entity's `spec.profile.email`.
+
+| `userIdentifierQuery` | Records |
+|---|---|
+| `user.spec.profile.email` | The email address on the User entity |
+| `user.metadata.name` | The User entity's name |
+
+The SKE backend plugin reads the value from the signed-in user's entity
+when the request is submitted. A Template cannot set it.
+
+`userIdentifierQuery` is required. SKE does not accept a Backstage portal
+without it.
+
+## When a request is refused
+
+The request fails, with a message naming the query, when:
+
+- the person has no User entity in the catalog, for example a guest
+- the query finds no value, or the value is not text
+- the query does not start with `user.`
+
+Not every sign-in method fills in every property. For example, GitHub
+sign-in does not set `spec.profile.email`. Choose a property that your
+sign-in resolver fills in for every user.
+
+## Edge cases
+
+- A delete through GitOps removes the request's file from git, so nothing
+  records who deleted it.
+- A request created outside a portal, for example with `kubectl`, has no
+  annotations unless you add them.
+
+## Upgrading
+
+- Add `userIdentifierQuery` to every Backstage portal before you upgrade the
+  Portal Controller.
+- Cortex used to write `cortex.io/initiated-by` and
+  `cortex.io/initiated-action`. It now writes the `kratix.io` annotations,
+  and for one release it still reads the old ones, so requests made before
+  the upgrade keep their owner in Cortex.
+
+## Related
+
+- [Choosing the request namespace](/ske/integrations/portal-controller/backstage/request-namespace)
+- [Delivery modes](/ske/integrations/portal-controller/backstage/delivery-modes)
