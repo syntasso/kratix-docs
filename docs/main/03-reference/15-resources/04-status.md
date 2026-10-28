@@ -10,11 +10,6 @@ import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-fl
 
 As part of a Configure or Delete Pipeline you can optionally send information about the
 Resource back to the resource requester by writing information to
-`/kratix/metadata/status.yaml`. The file can contain arbitrary key values, with the
-`message` key being a special key that is communicated back to the user when
-running `kubectl get <resource-request>`. For example if the Pipeline container wrote the
-As part of a Configure Pipeline you can optionally send information about the
-Resource back to the resource requester by writing information to
 `/kratix/metadata/status.yaml`.
 
 :::info
@@ -181,13 +176,22 @@ status:
   iam:
     password: <vault-ref>
     user: admin
-  message: User created, next step is to create vault secret for user
+  message: User created and vault secret created
 
 ```
 
 The status is always merged, with the last Pipeline prioritised in case of
 conflicts. In this example the `iam` key was updated with the additional
 `password` key, and the `message` key was overwritten.
+
+Nested maps are merged key by key, while lists and other values are replaced.
+To remove a key, set it to `null` in `/kratix/metadata/status.yaml`. For
+example, the following removes `iam.password` and leaves `iam.user` untouched:
+
+```yaml
+iam:
+  password: null
+```
 
 The next time the Configure workflow runs from the beginning, for example if a
 user updated the request, the status set in `/kratix/input/object.yaml` would be
