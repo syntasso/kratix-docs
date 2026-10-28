@@ -12,13 +12,12 @@ the person who made the change on the request itself, in three `kratix.io`
 annotations. Cortex writes the same annotations, so you look in one place
 whichever portal made the change.
 
-Every Backstage portal sets `config.userIdentifierQuery`, which chooses the
-value that names the person.
+To turn this on for a Backstage portal, set `config.userIdentifierQuery`,
+which chooses the value that names the person.
 
 ## Requirements
 
-- `@syntasso/plugin-ske-backend` `<RELEASE_VERSION>` or later. Upgrade the
-  backend plugin before the Portal Controller.
+- `@syntasso/plugin-ske-backend` `<RELEASE_VERSION>` or later.
 - Portal Controller `<RELEASE_VERSION>` or later.
 
 ## The annotations
@@ -77,12 +76,13 @@ user. It starts with `user.`, which stands for that entity, so
 The SKE backend plugin reads the value from the signed-in user's entity
 when the request is submitted. A Template cannot set it.
 
-`userIdentifierQuery` is required. SKE does not accept a Backstage portal
-without it.
+`userIdentifierQuery` is optional. Without it, requests from that portal
+get no annotations.
 
 ## When a request is refused
 
-The request fails, with a message naming the query, when:
+When `userIdentifierQuery` is set, the request fails, with a message naming
+the query, when:
 
 - the person has no User entity in the catalog, for example a guest
 - the query finds no value, or the value is not text
@@ -101,8 +101,10 @@ sign-in resolver fills in for every user.
 
 ## Upgrading
 
-- Add `userIdentifierQuery` to every Backstage portal before you upgrade the
-  Portal Controller.
+- You can upgrade the backend plugin and the Portal Controller in either
+  order.
+- Set `userIdentifierQuery` only after you upgrade the backend plugin. An
+  older plugin refuses every request from a Template that passes it.
 - Cortex used to write `cortex.io/initiated-by` and
   `cortex.io/initiated-action`. It now writes the `kratix.io` annotations,
   and for one release it still reads the old ones, so requests made before
