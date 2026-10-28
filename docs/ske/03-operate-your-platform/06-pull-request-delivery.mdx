@@ -83,23 +83,83 @@ SKE will detect drift and open a new pull request with the changes.
 
 ## What the requester sees
 
-<!-- TODO: make this anne centred -->
+A requester does not need access to the Git repository to know where their change is. The
+`STATUS` column of their resource request says it:
 
-The resource request's `WorksSucceeded` condition reports where the change is:
+```bash
+kubectl get <RESOURCE_KIND> <RESOURCE_NAME>
+```
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval: https://github.com/acme/platform-repo/pull/42
+```
+
+When a reviewer closes the pull request without merging it, the request is marked as failed and
+`STATUS` says why. If the reviewer used **Close with comment**, SKE quotes that comment:
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/pull/42: "not during the freeze"
+```
+
+If they closed it without a comment, `STATUS` says so:
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/pull/42 with no comment
+```
+
+SKE does not open a pull request for the same change again. Running the pipeline again with the same
+output keeps the rejection, and so does a restart of SKE or a Destination that is briefly not ready.
+A new pull request opens once the request or the Promise produces different files. On a Destination
+with `filepath.mode: aggregatedYAML`, every resource writes into the same file, so the next change
+from any resource on that Destination includes the rejected files again.
+
+`STATUS` is cut to 120 characters. `kubectl describe` shows the full text in the `Reconciled` and
+`WorksSucceeded` conditions. A request delivered to several Destinations names each Destination in
+`WorksSucceeded`.
+
+SKE quotes only the comment the person who closed the pull request left as they closed it, up to 500
+characters, on one line. It does not quote review comments, such as a **Request changes** review.
+Anyone who can read the resource request can read the quote and the pull request link, even without
+access to the repository. The same goes for anywhere the request's status is copied to, such as
+Cortex. When a Promise has several configure pipelines, the Promise's own `Reconciled` condition
+shows the text too while a later pipeline waits for an earlier one's pull request.
+
+The `Reconciled` condition's reason tells tools and portals which case they are looking at:
 
 | Reason | Status | Meaning |
 | --- | --- | --- |
-| `WorksPending` | `Unknown` | A pull request is open and waiting for review. |
-| `WorksSucceeded` | `True` | Every pull request for this request has been merged. |
-| `WorksFailing` | `False` | A pull request was closed without being merged. |
+| `WorksAwaitingDelivery` | `Unknown` | A pull request is open and waiting for review. |
+| `WorksRejected` | `False` | A pull request was closed without being merged. |
+| `Reconciled` | `True` | Every pull request for this request has been merged. |
 
-The WorkPlacement carries the detail:
+### What the platform team sees
+
+Each WorkPlacement holds the link to its pull request in `status.deliveryURL`, and its
+`WriteSucceeded` condition says where the delivery is:
 
 ```bash
 kubectl get workplacement <WORKPLACEMENT_NAME> \
-  -o jsonpath='{.status.conditions[?(@.type=="WriteSucceeded")]}'
+  -o jsonpath='{.status.deliveryURL}{"\n"}{.status.conditions[?(@.type=="WriteSucceeded")]}'
 ```
 
-While the pull request is open its `status` is `Unknown` and its message names the pull request.
-Merging sets it to `True`; closing the pull request without merging sets it to `False` with the
-reason.
+| Reason | Status | Meaning |
+| --- | --- | --- |
+| `WorkloadsAwaitingDelivery` | `Unknown` | The pull request is open. |
+| `WorkloadsWrittenToStateStore` | `True` | The pull request was merged. |
+| `WorkloadsRejected` | `False` | The pull request was closed without being merged. |
+
+Each Work sums up its WorkPlacements the same way. Its `WriteSucceeded` condition is `Unknown`
+with reason `WorkplacementsAwaitingDelivery` while any pull request is open, and `False` with
+`WorkplacementsRejected` once one is closed without being merged. `status.workPlacementStatuses` lists
+every WorkPlacement of the Work with its Destination, write status, message and `deliveryURL`, for
+tools that need to read each one:
+
+```bash
+kubectl get work <WORK_NAME> -o jsonpath='{.status.workPlacementStatuses}'
+```
+
+SKE reads the closing comment once, when it first sees the pull request closed. If the GitHub token
+cannot read comments, the request still shows the rejection, without the quote.
