@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.59bcd8d4.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d12fe0c1.js" defer="defer"></script>
 <script src="/assets/js/main.a6507d74.js" defer="defer"></script>
 </head>
 <body>
@@ -42,6 +42,8 @@ When the <code>Ready</code> condition is <code>True</code> and a worker cluster 
 <code>kratix-worker-system</code> namespace and a <code>kratix-info</code> configmap on the target cluster.</p>
 <p>Example:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">$ kubectl describe destinations.platform.kratix.io worker-1</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">Name:         worker-1</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">...</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">Status:</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  Conditions:</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    Last Transition Time:  2025-03-04T15:26:21Z</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    Message:               Test documents written to State Store</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    Reason:                TestDocumentsWritten</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    Status:                True</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    Type:                  Ready</span><br></div></code></pre></div></div>
+<p>While the <code>Ready</code> condition is <code>False</code>, Kratix does not write WorkPlacements to the Destination. See
+<a class="" href="/main/platform-concepts/kratix-resources/work-status-events#destination-not-ready">Destination not ready</a>.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="events">Events<a href="#events" class="hash-link" aria-label="Direct link to Events" title="Direct link to Events" translate="no">​</a></h2>
 <p>Destinations emit the following events:</p>
 <ul>
