@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.d12fe0c1.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.133184ca.js" defer="defer"></script>
 <script src="/assets/js/main.a6507d74.js" defer="defer"></script>
 </head>
 <body>
@@ -151,8 +151,10 @@ Manager may disrupt the regularity of this cadence meaning that the reconciliati
 may be greater than the configured.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="pipeline-reconciliation">Pipeline Reconciliation<a href="#pipeline-reconciliation" class="hash-link" aria-label="Direct link to Pipeline Reconciliation" title="Direct link to Pipeline Reconciliation" translate="no">​</a></h3>
 <p>If a new reconciliation is triggered while a Pipeline is actively running (for
-example due to a Promise update), Kratix waits for the current Job to reach a
-terminal state before restarting the configure workflow from the beginning.</p>
+example due to a Promise update or a
+<a class="" href="/main/reference/promises/reconciliation-labels#manual-reconciliation">manual reconciliation</a>),
+Kratix waits for the current Job to finish, whether it succeeds or fails, before
+restarting the configure workflow from the beginning.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="delete-workflows">Delete Workflows<a href="#delete-workflows" class="hash-link" aria-label="Direct link to Delete Workflows" title="Direct link to Delete Workflows" translate="no">​</a></h2>
 <p>Promise Delete workflows are triggered when a Promise is deleted, and currently only
 support a <strong>single</strong> Pipeline.</p>

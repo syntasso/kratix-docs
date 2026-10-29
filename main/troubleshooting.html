@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.d12fe0c1.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.133184ca.js" defer="defer"></script>
 <script src="/assets/js/main.a6507d74.js" defer="defer"></script>
 </head>
 <body>
@@ -349,6 +349,9 @@ Kratix reruns it at the next reconciliation interval by default. To rerun it
 sooner, trigger a manual reconciliation for the relevant object:
 <a class="" href="/main/reference/promises/reconciliation-labels#manual-reconciliation">Promise</a> or
 <a class="" href="/main/reference/resources/reconciliation-labels#manual-reconciliation">Resource</a>.
+While Kubernetes is still retrying the Job, a manual reconciliation waits until the
+Job has used all its retries (<code>backoffLimit</code>) and failed, then reruns the workflow.
+To rerun straight away, keep the label on and also delete or suspend the failing Job.
 Delete workflows are not retried by periodic reconciliation.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workflow-pod-doesnt-have-kubernetes-api-access">Workflow Pod doesn&#x27;t have Kubernetes API access<a href="#workflow-pod-doesnt-have-kubernetes-api-access" class="hash-link" aria-label="Direct link to Workflow Pod doesn&#x27;t have Kubernetes API access" title="Direct link to Workflow Pod doesn&#x27;t have Kubernetes API access" translate="no">​</a></h3>
 <p>A Workflow is, by default, given limited access to the Kubernetes API. You will

@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.d12fe0c1.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.133184ca.js" defer="defer"></script>
 <script src="/assets/js/main.a6507d74.js" defer="defer"></script>
 </head>
 <body>
@@ -33,16 +33,19 @@
 <div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">kratix.io/manual-reconciliation</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&quot;true&quot;</span><br></div></code></pre></div></div>
 <p>Adding this label to a Resource request forces Kratix to rerun the Resource workflows outside the normal reconciliation triggers.</p>
 <ul>
-<li class=""><strong>Resource Configure workflow</strong> – applying the label reruns the Configure workflow from the beginning, terminating any in-progress run.</li>
-<li class=""><strong>Resource Delete workflow</strong> – after a Resource is marked for deletion, setting the label immediately reruns the Delete workflow.</li>
+<li class=""><strong>Resource Configure workflow</strong> – applying the label reruns the Configure workflow from the beginning. If a Pipeline is running when the label is added, Kratix lets its Job finish, whether it succeeds or fails, and then reruns the workflow from the first Pipeline.</li>
+<li class=""><strong>Resource Delete workflow</strong> – after a Resource is marked for deletion, setting the label reruns the Delete workflow. If the Delete Pipeline is running, Kratix lets its Job finish first.</li>
 </ul>
 <p>The label is removed automatically once Kratix schedules the manual run so it can be applied again later.</p>
+<p>If a Pipeline Job will never finish, for example because its image cannot be pulled, the workflow will not rerun until you end that Job yourself. Keep the label on, then either delete the Job or suspend it:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kubectl delete job </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">job-name</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"> </span><span class="token parameter variable" style="color:#36acaa">--namespace</span><span class="token plain"> </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">namespace</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic"># or</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">kubectl patch job </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">job-name</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"> </span><span class="token parameter variable" style="color:#36acaa">--namespace</span><span class="token plain"> </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">namespace</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"> </span><span class="token parameter variable" style="color:#36acaa">--type</span><span class="token plain"> merge </span><span class="token parameter variable" style="color:#36acaa">-p</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;{&quot;spec&quot;:{&quot;suspend&quot;:true}}&#x27;</span><br></div></code></pre></div></div>
+<p>Kratix then reruns the workflow from the first Pipeline.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="requesting-reconciliation-via-a-resource-binding">Requesting reconciliation via a Resource Binding<a href="#requesting-reconciliation-via-a-resource-binding" class="hash-link" aria-label="Direct link to Requesting reconciliation via a Resource Binding" title="Direct link to Requesting reconciliation via a Resource Binding" translate="no">​</a></h3>
 <p>The <code>kratix.io/manual-reconciliation: &quot;true&quot;</code> label can also be applied to a <a class="" href="/main/reference/promises/promise-upgrade/resource-bindings">Resource Binding</a> to request that Kratix reruns the Resource Configure workflow for the bound Resource Request.</p>
 <p>This is useful when a Resource has already been patched to the desired Promise
 version (its <code>spec.version</code> is at the target) but the pipeline previously failed.
-The label retries the workflow immediately instead of waiting for periodic
-reconciliation.</p>
+The label asks Kratix to retry the workflow now, instead of waiting for periodic
+reconciliation. If a Pipeline Job is still running, Kratix waits for it to finish first.</p>
 <p>When Kratix detects the label on a ResourceBinding it:</p>
 <ol>
 <li class="">Propagates <code>kratix.io/manual-reconciliation: &quot;true&quot;</code> to the Resource Request.</li>
