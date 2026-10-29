@@ -26,6 +26,8 @@ spec:
   # A reference the Promise the Health Check should be performed against
   promiseRef:
     name: promise-name
+  # Automatically set by SKE if the promise includes kratix.io/promise-version
+  promiseVersion: v2.0.0
   # The time or interval the check should run against
   # This can follow Cron syntax or macros such as @hourly
   schedule: "* * * * *"
