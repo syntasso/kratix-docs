@@ -53,6 +53,25 @@ On GitHub Enterprise Server, SKE calls the API on the same host as the repositor
 Configure a Destination to use that `GitStateStore` as usual. Workloads scheduled 
 to that Destination will now be delivered through pull requests.
 
+If the `GitStateStore` already had requests delivered by pushing, SKE delivers each of them again
+through the new mode. It opens a pull request only for a request whose files differ from what the
+Destination's branch has.
+
+## Turn it off
+
+Remove the `delivery` block from the `GitStateStore`. SKE delivers every request on it again,
+writing the files straight to the Destination's branch. That includes a request waiting for
+approval and a request whose pull request a reviewer rejected.
+
+SKE does not close the pull requests that were open. Close them yourself: merging one later can put
+files on the branch that no request asks for, until the next time SKE writes that request. Each
+request that had a pull request open or rejected gets a `DeliveryModeChanged` warning on its
+WorkPlacement, with a link to the pull request it left behind:
+
+```bash
+kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
+```
+
 ## How it works
 
 When a workload is scheduled to a PR Destination:
@@ -96,14 +115,10 @@ anyway, SKE does not count it as delivered or under review. At the next delivery
 request's files with the Destination's branch again, and opens a new pull request for whatever
 still differs.
 
-Two cases are not handled yet:
-
-- On a Destination with `filepath.mode: aggregatedYAML`, every request on the Destination writes
-  into one shared file. If another request has a pull request that is not merged, changing a request
-  back does not make it ready. SKE opens a pull request instead, and that pull request also carries
-  the other request's change.
-- If you remove `delivery` from the `GitStateStore` while a pull request is open, SKE writes the
-  files straight to the Destination's branch but leaves the pull request open. Close it yourself.
+One case is not handled yet: on a Destination with `filepath.mode: aggregatedYAML`, every request on
+the Destination writes into one shared file. If another request has a pull request that is not
+merged, changing a request back does not make it ready. SKE opens a pull request instead, and that
+pull request also carries the other request's change.
 
 ## Changes made by hand
 
