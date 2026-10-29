@@ -1,0 +1,121 @@
+---
+title: Recording resource request ownership
+description: Annotate each resource request made from Backstage or Cortex with the person who last created or updated it
+keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops]
+slug: "/ske/integrations/portal-controller/reference/audit-and-ownership"
+sidebar_label: "Audit and ownership"
+sidebar_position: 2
+---
+
+When you use GitOps, a GitOps tool such as Argo CD applies each request to
+Kubernetes with its own ServiceAccount, so Kubernetes cannot see which user
+made the change. SKE records that user on the request itself, in three
+`kratix.io` annotations. The SKE portal integrations for Backstage and Cortex
+both write them.
+
+## Requirements
+
+- `@syntasso/plugin-ske-backend` `<RELEASE_VERSION>` or later (for Backstage).
+- Portal Controller `<RELEASE_VERSION>` or later.
+
+## Annotations
+
+| Annotation | Value |
+|---|---|
+| `kratix.io/last-changed-by` | In Backstage, the value `userIdentifierQuery` finds on the person's User entity. In Cortex, the person's email address |
+| `kratix.io/last-change-action` | `create` or `update` |
+| `kratix.io/last-changed-via` | The portal type: `backstage` or `cortex` |
+
+```yaml
+apiVersion: marketplace.kratix.io/v1alpha1
+kind: Jenkins
+metadata:
+  name: my-jenkins
+  namespace: default
+  annotations:
+    kratix.io/last-changed-by: alice@example.com
+    kratix.io/last-change-action: update
+    kratix.io/last-changed-via: backstage
+```
+
+Every create or update from a portal replaces all three, so they describe
+the latest change, not the first one.
+
+## Configuration
+
+### Backstage
+
+Set `userIdentifierQuery` in the `config` of each `type: backstage` entry in
+`portals[]`:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: SKEIntegration
+metadata:
+  name: portal-controller
+spec:
+  type: portal-controller
+  version: <RELEASE_VERSION>
+  portals:
+    - name: prod
+      type: backstage
+      config:
+        # highlight-next-line
+        userIdentifierQuery: user.spec.profile.email
+```
+
+`userIdentifierQuery` is a path into the catalog entity of the signed-in
+user. It starts with `user.`, which stands for that entity, so
+`user.spec.profile.email` reads the entity's `spec.profile.email`.
+
+Every Backstage sign-in provider stores the user's details in a different place
+on the User entity. SKE cannot know where yours keeps them, so
+`userIdentifierQuery` tells it where to look.
+
+The SKE backend plugin reads the value from the signed-in user's entity
+when the request is submitted. A Template cannot set it.
+
+`userIdentifierQuery` is optional. Without it, requests from that portal
+get no annotations.
+
+The request will fail when `userIdentifierQuery` is set in the following
+situations:
+
+- the person has no User entity in the catalog, for example a guest
+- the query finds no value, or the value is not text
+- the query does not start with `user.`
+
+:::info Upgrading the Backstage backend plugin
+
+You can upgrade the backend plugin and the Portal Controller in either order.
+However, only set `userIdentifierQuery` after you upgrade the backend plugin.
+An older plugin refuses every request from a Template that passes it.
+
+:::
+
+### Cortex
+
+Cortex needs no specific configuration. The create and update workflows that
+the Portal Controller generates always write the annotations, using the email
+address of the person who ran the workflow.
+
+:::info Upgrading from older Portal Controllers
+
+Cortex used to write `cortex.io/initiated-by` and `cortex.io/initiated-action`.
+It now writes the `kratix.io` annotations, and for one release it still reads
+the old ones, so requests made before the upgrade keep their owner in Cortex.
+
+:::
+
+## Deletes and usage outside of a portal
+
+A delete through GitOps removes the request's file from git, so nothing
+records who deleted it.
+
+A request created outside a portal, for example with `kubectl`, has no
+annotations unless you add them.
+
+## Related
+
+- [Choosing the request namespace](/ske/integrations/portal-controller/backstage/request-namespace)
+- [Delivery modes](/ske/integrations/portal-controller/backstage/delivery-modes)
