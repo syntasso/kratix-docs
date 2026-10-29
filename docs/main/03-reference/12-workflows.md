@@ -348,9 +348,9 @@ first rule above, named with the requesting namespace appended, following this f
 Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
 them are deleted when the Promise is deleted. The objects of Resource workflows also carry
 `kratix.io/promise-version: <version>`, set to `not-set` when the Promise has no version. A
-version's objects are deleted when its
+version's objects are deleted once its
 [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions#deleting-a-promise-revision)
-is deleted.
+is deleted and no Resource uses the version any more.
 
 Supplying a [custom service account](#custom-service-account) changes the service account
 name only. The Role and binding names are still derived from the pipeline.
