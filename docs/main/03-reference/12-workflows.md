@@ -662,9 +662,19 @@ workflows (`promise.configure`, `promise.delete`, `resource.configure`, and
 
 ## Security Context
 
-A Pipeline consists of containers provided in the Promise, and **three** Kratix-specific
-containers. Kratix configures its own containers in the pipeline to run with the
-following [security
+Each Pipeline runs as a Kubernetes Job. Each Pod the Job creates contains the
+containers listed in the Pipeline and up to three Kratix-specific containers:
+
+| Container       | Where it runs in the Pod                          | What it does                                                                                                                                                                                                                                                         | `configure` Pipelines | `delete` Pipelines |
+| --------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------ |
+| `reader`        | First init container                              | Fetches the Promise or resource request that triggered the workflow and writes it to [`/kratix/input/object.yaml`](#objectyaml).                                                                                                                                    | Yes                   | Yes                |
+| `work-writer`   | Last init container, after the Pipeline's containers | Creates or updates the Work from the documents in [`/kratix/output`](#output), using the Promise's scheduling and any `/kratix/metadata/destination-selectors.yaml`. If `/kratix/metadata/workflow-control.yaml` asks to suspend or retry, it leaves the Work unchanged. | Yes                   | No                 |
+| `status-writer` | Main container, after all init containers         | Updates the status of the Promise or resource request from `/kratix/metadata/status.yaml`, applies `/kratix/metadata/workflow-control.yaml`, and marks the workflow as completed after the last Pipeline. See [Metadata](#metadata).                                 | Yes                   | Yes                |
+
+A `delete` Pipeline has no `work-writer`, which is why Kratix ignores files written
+to `/kratix/output` in `delete` Pipelines.
+
+Kratix configures its own containers to run with the following [security
 context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/):
 
 ```yaml
