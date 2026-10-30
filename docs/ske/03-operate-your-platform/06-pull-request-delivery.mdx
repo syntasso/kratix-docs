@@ -61,7 +61,9 @@ Destination's branch has.
 
 Remove the `delivery` block from the `GitStateStore`. SKE delivers every request on it again,
 writing the files straight to the Destination's branch. That includes a request waiting for
-approval and a request whose pull request a reviewer rejected.
+approval and a request whose pull request a reviewer rejected. The exception is a deleted request
+whose removal a reviewer rejected: it stays as it is (see
+[When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal)).
 
 SKE does not close the pull requests that were open. Close them yourself: merging one later can put
 files on the branch that no request asks for, until the next time SKE writes that request. Each
@@ -108,7 +110,7 @@ pipeline produces:
 
 Each time SKE delivers a WorkPlacement, it closes any open pull request from its
 `kratix/<work-placement-name>` branch into the Destination's branch, including one that a person
-opened from that branch, with one of the two comments above.
+opened from that branch, with a comment saying why.
 
 A pull request SKE closed is out of date, so do not reopen it. If someone reopens or merges it
 anyway, SKE does not count it as delivered or under review. At the next delivery it compares the
@@ -136,6 +138,103 @@ pull request also carries the other request's change.
 
 The next delivery happens when the request's pipeline runs again, or at the platform's
 reconciliation interval (every 10 hours by default), whichever comes first.
+
+## Deleting a request
+
+When you delete a resource request, SKE opens a pull request that removes the request's files from
+the Destination's branch. The request, and its Works and WorkPlacements, stay until that pull
+request is merged. Merging it removes them. While it waits, `STATUS` says so:
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval to remove: https://github.com/acme/platform-repo/pull/57
+```
+
+The pull request is titled `Kratix: remove <promise> <namespace>/<name> from <destination>`.
+
+SKE handles each Destination and each pipeline on its own:
+
+- **Nothing to remove.** If none of the request's files are on the branch, for example because its
+  only pull request was closed without merging, SKE opens no pull request and the request is
+  deleted straight away.
+- **A pull request still open.** SKE closes it with the comment `Kratix closed this pull request
+  because these files are being removed from the Destination.` If nothing from that request was
+  ever merged, the request is deleted straight away. Otherwise SKE opens a removal pull request for what
+  was merged.
+
+So a request with one pipeline's files merged and another pipeline's pull request still open gets a
+removal pull request for the first, and the second is closed.
+
+### When a reviewer rejects the removal
+
+If a reviewer closes the removal pull request without merging it, the files stay on the branch and
+the workloads keep running. The request stays, marked as being deleted, and `STATUS` says the
+removal was rejected, followed by the reason in the same form as any other rejection. The text is
+long, so `STATUS` cuts it:
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Removal rejected; the workloads are still on production. Rejected in https://github.com/acme/platform-repo/pull/57: "ke…
+```
+
+While a request is being deleted, `kubectl describe` does not show the full text. The request's
+`Reconciled` condition has the same cut text, and its `WorksSucceeded` condition still shows the state from before the
+delete. The full text is on each WorkPlacement's `WriteSucceeded` condition:
+
+```bash
+kubectl get workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE> \
+  -o jsonpath='{.status.deliveryURL}{"\n"}{.status.conditions[?(@.type=="WriteSucceeded")].message}'
+```
+
+To find the request's WorkPlacements, use the `kubectl get workplacements` command below.
+
+SKE does not open the removal pull request again. The request's delete pipeline has already run by
+the time the removal pull request opens, so whatever it did, such as removing external resources,
+is not undone.
+
+To let the request finish deleting, remove the finalizers from its WorkPlacements. List them with
+the Promise and request names:
+
+```bash
+kubectl get workplacements --all-namespaces \
+  -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,PROMISE:.spec.promiseName,REQUEST:.spec.resourceName \
+  | grep <RESOURCE_NAME>
+```
+
+Then, for each one, remove the `finalizers.workplacement.kratix.io/repo-cleanup` finalizer. On a
+Destination with `filepath.mode: none`, also remove
+`finalizers.workplacement.kratix.io/kratix-dot-files-cleanup`. To remove all of them at once:
+
+```bash
+kubectl patch workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE> \
+  --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+```
+
+Or remove them one by one with `kubectl edit workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE>`.
+The request then finishes deleting. Its files stay on the branch until someone removes them by
+hand.
+
+The same applies if a reviewer reopens and merges a removal pull request after closing it. The files
+go, but the request stays until you remove the finalizers.
+
+### Other cases
+
+- **Deleting a Promise** deletes its requests, so it waits for every removal pull request. One
+  rejected removal keeps the Promise.
+- **Deleting a Destination with `cleanup: all`** opens a removal pull request for each
+  WorkPlacement, and the Destination waits until all are merged. A rejected one keeps the
+  Destination. With `cleanup: none`, the default, SKE deletes the WorkPlacements without removing
+  their files. Any removal pull request still open stays open, so close it yourself.
+- **Removing the `delivery` block** while a removal pull request is open makes SKE remove the files
+  directly. The removal pull request stays open, so close it yourself. A removal that was already
+  rejected stays rejected. Remove the finalizers as described in
+  [When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal).
+- **On a Destination with `filepath.mode: aggregatedYAML`**, every request shares one file. A
+  removal pull request carries that file rebuilt from every other request's current files,
+  including changes still waiting for approval or rejected. Merging it delivers those too. A removal
+  pull request can open even when nothing from the deleted request was merged.
+- **A pipeline that stops outputting a workload group** removes it the same way, through a removal
+  pull request.
 
 ## What the requester sees
 
@@ -174,7 +273,8 @@ with `filepath.mode: aggregatedYAML`, every resource writes into the same file, 
 from any resource on that Destination includes the rejected files again.
 
 `STATUS` is cut to 120 characters. `kubectl describe` shows the full text in the `Reconciled` and
-`WorksSucceeded` conditions. A request delivered to several Destinations names each Destination in
+`WorksSucceeded` conditions, except while the request is being deleted (see
+[When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal)). A request delivered to several Destinations names each Destination in
 `WorksSucceeded`.
 
 SKE quotes only the comment the person who closed the pull request left as they closed it, up to 500
@@ -192,6 +292,8 @@ The `Reconciled` condition's reason tells tools and portals which case they are 
 | `WorksRejected` | `False` | A pull request was closed without being merged. |
 | `Reconciled` | `True` | Every pull request for this request has been merged. |
 
+SKE uses the same reasons while a deleted request waits for its removal pull request.
+
 ### What the platform team sees
 
 Each WorkPlacement holds the link to its pull request in `status.deliveryURL`, and its
@@ -207,6 +309,8 @@ kubectl get workplacement <WORKPLACEMENT_NAME> \
 | `WorkloadsAwaitingDelivery` | `Unknown` | The pull request is open. |
 | `WorkloadsWrittenToStateStore` | `True` | The pull request was merged. |
 | `WorkloadsRejected` | `False` | The pull request was closed without being merged. |
+
+`status.deliveryRemoval` is `true` while the open or rejected pull request is a removal.
 
 Each Work sums up its WorkPlacements the same way. Its `WriteSucceeded` condition is `Unknown`
 with reason `WorkplacementsAwaitingDelivery` while any pull request is open, and `False` with
