@@ -1,7 +1,7 @@
 ---
 title: Recording resource request ownership
 description: Annotate each resource request made from Backstage or Cortex with the person who last created or updated it
-keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops, audit, serviceaccount]
+keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops, audit, attribution, serviceaccount]
 slug: "/ske/integrations/portal-controller/reference/audit-and-ownership"
 sidebar_label: "Audit and ownership"
 sidebar_position: 2
@@ -120,7 +120,7 @@ includes the SKE Platform Manager `<RELEASE_VERSION>` or later.
 ### Configuration
 
 List the ServiceAccounts of your GitOps tool in
-`spec.audit.requireAnnotationsFrom` on the
+`spec.attribution.requireAnnotationsFrom` on the
 [Kratix resource](/ske/reference/ske-operator#kratix-crd):
 
 ```yaml
@@ -130,7 +130,7 @@ metadata:
   name: my-kratix
 spec:
   # highlight-start
-  audit:
+  attribution:
     requireAnnotationsFrom:
       - namespace: argocd
         name: argocd-application-controller
