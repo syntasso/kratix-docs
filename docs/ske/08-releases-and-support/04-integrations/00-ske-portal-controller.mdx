@@ -20,6 +20,22 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.9.0/) (2026-11-02)
+
+Released via the SKE Operator Helm Chart [version 0.106.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.106.0/)
+
+#### Features
+
+* Cortex now records who last changed a resource request in the `kratix.io/last-changed-by`, `kratix.io/last-change-action` and `kratix.io/last-changed-via` annotations, replacing `cortex.io/initiated-by` and `cortex.io/initiated-action`.
+
+#### Bug Fixes
+
+* Fixed duplicate sync Jobs being created for new resource requests.
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.8.0/) (2026-10-23)
 
 Released via the SKE Operator Helm Chart [version 0.104.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.104.0/)
