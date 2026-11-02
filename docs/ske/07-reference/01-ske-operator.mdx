@@ -48,6 +48,10 @@ resource is managed by the SKE Operator.
     version: vX.Y.Z # The desired version of SKE; set to "latest" to always use the latest
     featureFlags:
       dryRun: false # preview feature, see Kratix Config for details
+    audit:
+      requireAnnotationsFrom: # Reject resource requests from these ServiceAccounts that don't set kratix.io/last-changed-by
+        - namespace: argocd
+          name: argocd-application-controller
     tlsConfig:
       certManager:
         disabled: false # Set to true to disable cert-manager integration
@@ -145,6 +149,12 @@ reconcile.
 The Kratix resource is the owner of all resources installed as part of the [SKE
 distribution](/ske/releases/ske#overview), and ensures that their state always matches the
 definition in the distribution manifest.
+
+### Audit fields {#audit}
+
+| Field | Description |
+|---|---|
+| `audit.requireAnnotationsFrom` | ServiceAccounts, by `namespace` and `name`, whose creates and updates of resource requests must set `kratix.io/last-changed-by`. Off when empty. See [Requiring the annotation from a GitOps tool](/ske/integrations/portal-controller/reference/audit-and-ownership#require-last-changed-by). |
 
 ## The SKEIntegration CRD {#skeintegration-crd}
 
