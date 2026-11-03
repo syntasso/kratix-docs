@@ -120,7 +120,7 @@ includes the SKE Platform Manager `<RELEASE_VERSION>` or later.
 ### Configuration
 
 List the ServiceAccounts of your GitOps tool in
-`spec.attribution.requireAnnotationsFrom` on the
+`spec.attribution.requireAnnotationsFrom.serviceAccounts` on the
 [Kratix resource](/ske/reference/ske-operator#kratix-crd):
 
 ```yaml
@@ -132,8 +132,9 @@ spec:
   # highlight-start
   attribution:
     requireAnnotationsFrom:
-      - namespace: argocd
-        name: argocd-application-controller
+      serviceAccounts:
+        - namespace: argocd
+          name: argocd-application-controller
   # highlight-end
 ```
 
@@ -147,6 +148,33 @@ own installation.
 
 Without any ServiceAccounts listed, nothing is checked.
 
+#### Without the SKE Operator
+
+If you install SKE from the SKE distribution manifest instead of with the SKE
+Operator, create the ConfigMap the SKE Operator would write:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-platform-manager-config
+  namespace: kratix-platform-system
+data:
+  config: |
+    attribution:
+      requireAnnotationsFrom:
+        serviceAccounts:
+          - namespace: argocd
+            name: argocd-application-controller
+```
+
+The SKE Platform Manager only reads this ConfigMap when it starts, so restart
+it after you create or change the ConfigMap:
+
+```bash
+kubectl -n kratix-platform-system rollout restart deployment/ske-platform-manager
+```
+
 ### What is checked
 
 The SKE Platform Manager rejects a create or update of a resource request when
@@ -155,13 +183,13 @@ both are true:
 - it comes from one of the listed ServiceAccounts
 - `kratix.io/last-changed-by` is missing or empty
 
-The error says which request is missing the annotation:
+The error says which request needs the annotation, and why:
 
 ```
-admission webhook "last-changed-by.platform.syntasso.io" denied the request:
-Jenkins default/my-jenkins is missing the kratix.io/last-changed-by annotation:
-requests from system:serviceaccount:argocd:argocd-application-controller must
-say who made the change
+admission webhook "attribution.platform.syntasso.io" denied the request:
+Jenkins default/my-jenkins needs the kratix.io/last-changed-by annotation, set
+to the person who made the change. SKE requires it on resource requests applied
+by service account argocd/argocd-application-controller.
 ```
 
 The check does not affect:
