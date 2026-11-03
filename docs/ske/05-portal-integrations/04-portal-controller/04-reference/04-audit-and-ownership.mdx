@@ -1,7 +1,7 @@
 ---
 title: Recording resource request ownership
 description: Annotate each resource request made from Backstage or Cortex with the person who last created or updated it
-keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops]
+keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops, audit, attribution, serviceaccount]
 slug: "/ske/integrations/portal-controller/reference/audit-and-ownership"
 sidebar_label: "Audit and ownership"
 sidebar_position: 2
@@ -106,6 +106,109 @@ It now writes the `kratix.io` annotations, and for one release it still reads
 the old ones, so requests made before the upgrade keep their owner in Cortex.
 
 :::
+
+## Requiring the annotation from a GitOps tool {#require-last-changed-by}
+
+By default, SKE does not check that a request says who made it. You can make
+SKE reject the requests your GitOps tool applies when they don't carry
+`kratix.io/last-changed-by`. Use this when every request in git should come
+from a portal.
+
+This needs SKE Operator `<RELEASE_VERSION>` or later, and an SKE version that
+includes the SKE Platform Manager `<RELEASE_VERSION>` or later.
+
+### Configuration
+
+List the ServiceAccounts of your GitOps tool in
+`spec.attribution.requireAnnotationsFrom.serviceAccounts` on the
+[Kratix resource](/ske/reference/ske-operator#kratix-crd):
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: my-kratix
+spec:
+  # highlight-start
+  attribution:
+    requireAnnotationsFrom:
+      serviceAccounts:
+        - namespace: argocd
+          name: argocd-application-controller
+  # highlight-end
+```
+
+When you change this list, the SKE Operator restarts the SKE Platform Manager
+so it picks up the change.
+
+For example, Argo CD applies resources with the
+`argocd-application-controller` ServiceAccount, and Flux with the
+`kustomize-controller` ServiceAccount. Check the namespace and name in your
+own installation.
+
+Without any ServiceAccounts listed, nothing is checked.
+
+#### Without the SKE Operator
+
+If you install SKE from the SKE distribution manifest instead of with the SKE
+Operator, create the ConfigMap the SKE Operator would write:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-platform-manager-config
+  namespace: kratix-platform-system
+data:
+  config: |
+    attribution:
+      requireAnnotationsFrom:
+        serviceAccounts:
+          - namespace: argocd
+            name: argocd-application-controller
+```
+
+The SKE Platform Manager only reads this ConfigMap when it starts, so restart
+it after you create or change the ConfigMap:
+
+```bash
+kubectl -n kratix-platform-system rollout restart deployment/ske-platform-manager
+```
+
+### What is checked
+
+The SKE Platform Manager rejects a create or update of a resource request when
+both are true:
+
+- it comes from one of the listed ServiceAccounts
+- `kratix.io/last-changed-by` is missing or empty
+
+The error says which request needs the annotation, and why:
+
+```
+admission webhook "attribution.platform.syntasso.io" denied the request:
+Jenkins default/my-jenkins needs the kratix.io/last-changed-by annotation, set
+to the person who made the change. SKE requires it on resource requests applied
+by service account argocd/argocd-application-controller.
+```
+
+The check does not affect:
+
+- requests from any other user or ServiceAccount
+- deletes, because a GitOps delete removes the file from git, so it cannot
+  carry the annotation
+- resources that are not resource requests
+
+### Limitations
+
+- **The check never blocks Kratix.** If the SKE Platform Manager is not
+  running, Kubernetes accepts the request without checking it.
+- **New Promises are not checked straight away.** For a few seconds after you
+  install a Promise, its requests are accepted without the check.
+- **Only the annotation's presence is checked.** SKE does not check that the
+  value is the person who made the change. For example, if someone edits a
+  request's file in git by hand and keeps the old annotation, the request is
+  accepted.
 
 ## Deletes and usage outside of a portal
 
