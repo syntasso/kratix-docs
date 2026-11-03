@@ -21,6 +21,35 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.63.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.63.0/) (2026-10-29)
+
+#### Features
+
+* Upgrade runs can now wait for a resource's health checks before counting it as upgraded. This
+  needs [SKE Health Agent v0.16.0](/ske/releases/ske-health-agent) or later. For more information,
+  see the [Roll out Promise upgrades](/ske/guides/promise-upgrades) guide.
+* Promise workflows can now write custom top-level fields to `status.yaml`.
+* In a configure workflow, the next Pipeline now starts only after the previous Pipeline's output
+  has been written to every Destination.
+* Setting the manual reconciliation label while a workflow Job is running no longer stops that
+  Job. Kratix lets it finish, then reruns the workflow from the first Pipeline.
+* Deleting a Promise Revision no longer deletes the resources on its version. The revision waits
+  until no resource uses the version, then goes.
+
+#### Fixes
+
+* A failed delete workflow is no longer retried on every reconcile. Kratix records the failure
+  once and waits for a manual reconciliation or a pipeline change.
+* Health records in another namespace no longer affect a resource's `state`.
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.62.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.62.0/) (2026-10-16)
 
 #### Features

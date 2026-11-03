@@ -94,6 +94,17 @@ spec:
 
 In this example, `pipeline-a` will run first, followed by `pipeline-b`.
 
+#### Waiting for the previous Pipeline's output
+
+Kratix starts the next Pipeline only once the previous Pipeline's output has been
+written to its Destinations. The previous Pipeline's Work must be `Ready` at its
+current generation, meaning every WorkPlacement has been written to its State Store.
+
+While the next Pipeline waits, its entry in `status.kratix.workflows.pipelines`
+stays `Pending` and has a `message` naming the previous Pipeline and its Work.
+
+See [Promise Status and Events](/main/reference/promises/promise-status-events#waiting-for-a-pipelines-output) for example statuses.
+
 ### Pipeline Failures
 
 A Pipeline fails if any of its `containers` return a non-zero exit code.
@@ -157,6 +168,33 @@ file to the `/kratix/metadata/status.yaml` file.
 
 :::
 
+### Status
+
+A Promise Configure Pipeline can write any top-level field to
+`/kratix/metadata/status.yaml`, the same way a [Resource
+workflow](/main/reference/resources/status) does. For example:
+
+```yaml
+message: Promise configured
+stage: ready
+```
+
+Kratix adds `message` and `stage` to the Promise status.
+
+Kratix owns some status fields. If `status.yaml` sets any of the following, the
+Pipeline fails:
+
+- `kratix`
+- `version`
+- `kind`
+- `apiVersion`
+- `status`
+- `requiredPromises`
+- `requiredBy`
+- `lastAvailableTime`
+- `observedGeneration`
+- `healthStatus`
+
 ### Idempotency
 
 All commands which run in Configure workflows must be idempotent, as there is a guarantee
@@ -195,8 +233,10 @@ may be greater than the configured.
 ### Pipeline Reconciliation
 
 If a new reconciliation is triggered while a Pipeline is actively running (for
-example due to a Promise update), Kratix waits for the current Job to reach a
-terminal state before restarting the configure workflow from the beginning.
+example due to a Promise update or a
+[manual reconciliation](/main/reference/promises/reconciliation-labels#manual-reconciliation)),
+Kratix waits for the current Job to finish, whether it succeeds or fails, before
+restarting the configure workflow from the beginning.
 
 ## Delete Workflows
 

@@ -15,10 +15,20 @@ kratix.io/manual-reconciliation: "true"
 
 Adding this label to a Promise forces Kratix to rerun the Promise workflows outside the normal reconciliation triggers.
 
-- **Promise Configure workflow** – applying the label reruns the Configure workflow from the beginning, terminating any in-progress run.
-- **Promise Delete workflow** – after a Promise is marked for deletion, setting the label immediately reruns the Delete workflow.
+- **Promise Configure workflow** – applying the label reruns the Configure workflow from the beginning. If a Pipeline is running when the label is added, Kratix lets its Job finish, whether it succeeds or fails, and then reruns the workflow from the first Pipeline.
+- **Promise Delete workflow** – after a Promise is marked for deletion, setting the label reruns the Delete workflow. If the Delete Pipeline is running, Kratix lets its Job finish first.
 
 The label is removed automatically once Kratix schedules the manual run so it can be applied again later.
+
+If a Pipeline Job will never finish, for example because its image cannot be pulled, the workflow will not rerun until you end that Job yourself. Keep the label on, then either delete the Job or suspend it:
+
+```bash
+kubectl delete job <job-name> --namespace <namespace>
+# or
+kubectl patch job <job-name> --namespace <namespace> --type merge -p '{"spec":{"suspend":true}}'
+```
+
+Kratix then reruns the workflow from the first Pipeline.
 
 ## Reconciling all Resources
 

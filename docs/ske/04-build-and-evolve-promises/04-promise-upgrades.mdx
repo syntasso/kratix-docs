@@ -134,6 +134,33 @@ group; those selectors are not de-duplicated. Keep selectors mutually exclusive 
 
 :::
 
+#### Waiting for the canary to pass its health checks
+
+By default, a resource counts as upgraded once its Resource Configure workflow has run at `v2.0.0`. If the Promise ships
+[health checks](/ske/guides/healthchecks), you can make the canary group also wait for its resources to pass them at
+`v2.0.0` before `staging` begins:
+
+```yaml
+rolloutGroups:
+  - name: canary
+    selectors:
+      matchLabels:
+        env: dev
+    maxConcurrent: 1
+    # highlight-start
+    successCriteria: healthCheck
+    healthTimeout: 15m
+    # highlight-end
+```
+
+If the canary resource reports unhealthy at `v2.0.0`, or has not passed its health checks within the configured 15 minutes timeout, the run
+fails with reason `HealthCheckFailed` or `HealthTimeoutExceeded` and `staging` is never started. If `healthTimeout` is
+omitted, it defaults to 30 minutes.
+
+Only opt in groups whose Destinations run a health agent. A Destination without one never reports, so its resources wait
+until the timeout and then fail the run. See
+[Success Criteria](/ske/reference/promise-upgrades/upgrade-plans#success-criteria) for the full behaviour and caveats.
+
 ### Scenario 2: Maintenance windows and change freezes
 
 Rollout groups can restrict when upgrades start using **resource upgrade windows**. Each window has a `kind` (`allow` or

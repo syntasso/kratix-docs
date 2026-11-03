@@ -348,9 +348,9 @@ first rule above, named with the requesting namespace appended, following this f
 Each of these objects carries the label `kratix.io/promise-name: <promise-name>`, and all of
 them are deleted when the Promise is deleted. The objects of Resource workflows also carry
 `kratix.io/promise-version: <version>`, set to `not-set` when the Promise has no version. A
-version's objects are deleted when its
+version's objects are deleted once its
 [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions#deleting-a-promise-revision)
-is deleted.
+is deleted and no Resource uses the version any more.
 
 Supplying a [custom service account](#custom-service-account) changes the service account
 name only. The Role and binding names are still derived from the pipeline.
@@ -651,6 +651,7 @@ Kratix will set the following environment variables for all containers in the wo
 | `KRATIX_OBJECT_NAMESPACE` | The namespace of the object in `/kratix/input/object.yaml`. |
 | `KRATIX_CRD_PLURAL`       | The plural for the API defined in the Promise. |
 | `KRATIX_CLUSTER_SCOPED`   | A boolean for if the Promise API is cluster scoped. |
+| `KRATIX_PROMISE_VERSION`  | The version of the Promise being applied. |
 
 By checking the `KRATIX_WORKFLOW_ACTION` and `KRATIX_WORKFLOW_TYPE` environment variables,
 a container is able to discover the **context** in which it's being invoked (e.g. "I'm
@@ -665,11 +666,11 @@ workflows (`promise.configure`, `promise.delete`, `resource.configure`, and
 Each Pipeline runs as a Kubernetes Job. Each Pod the Job creates contains the
 containers listed in the Pipeline and up to three Kratix-specific containers:
 
-| Container       | Where it runs in the Pod                          | What it does                                                                                                                                                                                                                                                         | `configure` Pipelines | `delete` Pipelines |
-| --------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------ |
-| `reader`        | First init container                              | Fetches the Promise or resource request that triggered the workflow and writes it to [`/kratix/input/object.yaml`](#objectyaml).                                                                                                                                    | Yes                   | Yes                |
-| `work-writer`   | Last init container, after the Pipeline's containers | Creates or updates the Work from the documents in [`/kratix/output`](#output), using the Promise's scheduling and any `/kratix/metadata/destination-selectors.yaml`. If `/kratix/metadata/workflow-control.yaml` asks to suspend or retry, it leaves the Work unchanged. | Yes                   | No                 |
-| `status-writer` | Main container, after all init containers         | Updates the status of the Promise or resource request from `/kratix/metadata/status.yaml`, applies `/kratix/metadata/workflow-control.yaml`, and marks the workflow as completed after the last Pipeline. See [Metadata](#metadata).                                 | Yes                   | Yes                |
+| Container       | What it does                                                                                                                                                                                                                                                             | `configure` Pipelines | `delete` Pipelines |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- | ------------------ |
+| `reader`        | Fetches the Promise or resource request that triggered the workflow and writes it to [`/kratix/input/object.yaml`](#objectyaml).                                                                                                                                         | Yes                   | Yes                |
+| `work-writer`   | Creates or updates the Work from the documents in [`/kratix/output`](#output), using the Promise's scheduling and any `/kratix/metadata/destination-selectors.yaml`. If `/kratix/metadata/workflow-control.yaml` asks to suspend or retry, it leaves the Work unchanged. | Yes                   | No                 |
+| `status-writer` | Updates the status of the Promise or resource request from `/kratix/metadata/status.yaml`, applies `/kratix/metadata/workflow-control.yaml`, and marks the workflow as completed after the last Pipeline. See [Metadata](#metadata).                                     | Yes                   | Yes                |
 
 A `delete` Pipeline has no `work-writer`, which is why Kratix ignores files written
 to `/kratix/output` in `delete` Pipelines.

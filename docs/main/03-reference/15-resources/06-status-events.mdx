@@ -84,6 +84,53 @@ Each pipeline can be in one of these phases: `Pending`, `Running`, `Succeeded`, 
 
 For more detail about a failed pipeline, inspect the events on the resource and the logs of the failed pipeline Job.
 
+### Waiting for a Pipeline's output
+
+Kratix starts the next pipeline only once the previous pipeline's output has been written to its Destinations.
+While it waits, the waiting pipeline stays `Pending` with a `message`, and the conditions explain why.
+
+For example, if `pipeline1` is waiting for the output of `pipeline0`:
+
+```yaml
+status:
+  conditions:
+  - lastTransitionTime: "2026-10-15T11:24:53Z"
+    message: Waiting for the output of pipeline "pipeline0" to be written to its Destinations; check Work "<promise>-<resource>-pipeline0-<hash>" for details
+    reason: WaitingForPipelineOutput
+    status: "False"
+    type: ConfigureWorkflowCompleted
+  - lastTransitionTime: "2026-10-15T11:24:53Z"
+    message: Pending
+    reason: WorksPending
+    status: Unknown
+    type: Reconciled
+  kratix:
+    workflows:
+      pipelines:
+        - name: pipeline0
+          phase: Succeeded
+          lastTransitionTime: "2026-10-15T11:24:52Z"
+        - name: pipeline1
+          phase: Pending
+          message: Waiting for the output of pipeline "pipeline0" to be written to its Destinations; check Work "<promise>-<resource>-pipeline0-<hash>" for details
+          lastTransitionTime: "2026-10-15T11:24:46Z"
+```
+
+If the output failed to write, for example because the Destination's State Store is not ready, `Reconciled` is `False` instead:
+
+```yaml
+  - lastTransitionTime: "2026-10-15T11:24:52Z"
+    message: Failing
+    reason: WorksFailing
+    status: "False"
+    type: Reconciled
+```
+
+Kratix also records a `WaitingForPipelineOutput` event on the Resource with the same message.
+
+To find out why the output has not been written, inspect the Work named in the message and its WorkPlacements.
+See [Work, WorkPlacement Status and Events](/main/platform-concepts/kratix-resources/work-status-events).
+
 ## Events
 
 Events note important steps in the Resource lifecycle such as starting a workflow job or encountering errors.
