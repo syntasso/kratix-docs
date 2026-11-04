@@ -141,6 +141,26 @@ status:
       type: Ready
 ```
 
+## Delivering again
+
+To make Kratix deliver a Work's documents again straight away, label the Work with
+`kratix.io/redeliver=true`:
+
+```bash
+kubectl label work <name> kratix.io/redeliver=true
+```
+
+Kratix passes the label on to the Work's WorkPlacements and removes it from the Work. Each
+WorkPlacement then writes its documents to its Destination again, instead of waiting for the next
+reconciliation. You can also label a single WorkPlacement.
+
+Kratix removes the label from a WorkPlacement once the write is accepted. If the write fails, the
+label stays and Kratix tries again.
+
+On a State Store that delivers through a writer that can reject a change, such as a pull request
+that a reviewer closes, the label also makes Kratix deliver the same documents again after a
+rejection.
+
 ## Events
 
 Events on Works and WorkPlacements highlight scheduling progress and any issues writing to Destinations.

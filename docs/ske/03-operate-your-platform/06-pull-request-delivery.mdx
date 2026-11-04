@@ -188,11 +188,13 @@ kubectl get workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE> \
 
 To find the request's WorkPlacements, use the `kubectl get workplacements` command below.
 
-SKE does not open the removal pull request again. The request's delete pipeline has already run by
-the time the removal pull request opens, so whatever it did, such as removing external resources,
-is not undone.
+SKE does not open the removal pull request again on its own. The request's delete pipeline has
+already run by the time the removal pull request opens, so whatever it did, such as removing
+external resources, is not undone.
 
-To let the request finish deleting, remove the finalizers from its WorkPlacements. List them with
+If the reviewer changes their mind, ask SKE for a new removal pull request (see
+[Retrying a rejected change](#retrying-a-rejected-change)). To let the request finish deleting and
+keep its files on the branch, remove the finalizers from its WorkPlacements instead. List them with
 the Promise and request names:
 
 ```bash
@@ -236,6 +238,42 @@ go, but the request stays until you remove the finalizers.
 - **A pipeline that stops outputting a workload group** removes it the same way, through a removal
   pull request.
 
+## Retrying a rejected change
+
+A rejection stays until the request produces different files. Sometimes the files are right and
+the answer changes instead: the requester talks to the reviewer, and it is now a yes. To ask SKE for
+a new pull request with the same files, label the request's Work with `kratix.io/redeliver=true`:
+
+```bash
+kubectl label works -n <NAMESPACE> \
+  -l kratix.io/promise-name=<PROMISE_NAME>,kratix.io/resource-name=<RESOURCE_NAME> \
+  kratix.io/redeliver=true
+```
+
+Kratix passes the label on to the Work's WorkPlacements and removes it from the Work. For each
+WorkPlacement, SKE then:
+
+- **After a rejected pull request**, opens a new pull request. It does not reopen the closed one. The
+  request's `STATUS` goes back to `Waiting for approval` with the new link.
+- **After a rejected removal**, opens a new removal pull request. Merging it deletes the request as
+  usual.
+- **While a pull request is open**, keeps that pull request and its reviews, and opens no other.
+- **When everything is merged**, opens no pull request, unless SKE's files on the branch were edited
+  by hand (see [Changes made by hand](#changes-made-by-hand)).
+
+To retry only one Destination, label that WorkPlacement instead of the Work.
+
+Kratix removes the label from the WorkPlacement once SKE has opened the pull request, or found the
+one already open. If that fails, for example because GitHub is unavailable, the label stays and SKE
+tries again. To see which WorkPlacements are still waiting to be retried:
+
+```bash
+kubectl get workplacements --all-namespaces -l kratix.io/redeliver
+```
+
+If the reviewer rejects the new pull request too, the request is rejected again, and you can retry
+again the same way.
+
 ## What the requester sees
 
 A requester does not need access to the Git repository to know where their change is. The
@@ -265,10 +303,11 @@ NAME    MESSAGE              STATUS
 redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/pull/42 with no comment
 ```
 
-SKE does not open a pull request for the same change again. Running the pipeline again with the same
-output keeps the rejection, and so does a restart of SKE or a Destination that is briefly not ready.
-A new pull request opens once the request or the Promise produces different files (see
-[Updating a request under review](#updating-a-request-under-review)). On a Destination
+SKE does not open a pull request for the same change again on its own. Running the pipeline again
+with the same output keeps the rejection, and so does a restart of SKE or a Destination that is
+briefly not ready. A new pull request opens once the request or the Promise produces different files
+(see [Updating a request under review](#updating-a-request-under-review)), or when you ask for one
+(see [Retrying a rejected change](#retrying-a-rejected-change)). On a Destination
 with `filepath.mode: aggregatedYAML`, every resource writes into the same file, so the next change
 from any resource on that Destination includes the rejected files again.
 
