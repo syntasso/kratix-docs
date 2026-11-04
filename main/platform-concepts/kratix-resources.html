@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.2371059a.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.4655b137.js" defer="defer"></script>
 <script src="/assets/js/main.a6507d74.js" defer="defer"></script>
 </head>
 <body>
@@ -66,7 +66,7 @@
 <p>Once a Job is created, Kubernetes creates an associated <a href="https://kubernetes.io/docs/concepts/workloads/pods/" target="_blank" rel="noopener noreferrer" class="">Pod</a> to execute the containers specified in the Pipeline. If you inspect the Pod, you&#x27;ll see the containers defined in the Promise document, along with a few additional containers injected by Kratix. These includes:</p>
 <ul>
 <li class="">The <code>reader</code>: this container is responsible for injecting the Resource object into the <code>/kratix/input</code> directory.</li>
-<li class="">The <code>work-creator</code>: this container is responsible for creating the Work associated with the Workflow. See more about the Work in the next section.</li>
+<li class="">The <code>work-writer</code>: this container is responsible for creating the Work associated with the Workflow. See more about the Work in the next section.</li>
 <li class="">The <code>status-writer</code>: this container uses the <code>/kratix/metadata/status.yaml</code> file to update status.</li>
 </ul>
 <div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>Apart from the <code>status-writer</code>, all containers are actually set as <code>initContainers</code> to guarantee that they run in the right order.</p></div></div>
@@ -74,7 +74,7 @@
 You can also configure how many times a failing workflow Job is retried by setting <code>backoffLimit</code> in the same ConfigMap. Kratix does not provide a default value for this field.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="output-objects">Output Objects<a href="#output-objects" class="hash-link" aria-label="Direct link to Output Objects" title="Direct link to Output Objects" translate="no">​</a></h2>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="works">Works<a href="#works" class="hash-link" aria-label="Direct link to Works" title="Direct link to Works" translate="no">​</a></h3>
-<p>One of the last containers executed as part of a Workflow is the <code>work-creator</code>. This container is responsible for creating the Work associated with the Workflow. A Work is a Kratix Object that represents the output of the Workflow, i.e., it contains the documents that containers in the Pipeline persist into <code>/kratix/output</code> as part of its execution. The Work is created in the same namespace as the Resource (or in the <code>kratix-platform-system</code> namespace for Promise workflows).</p>
+<p>One of the last containers executed as part of a configure Workflow is the <code>work-writer</code>. This container is responsible for creating the Work associated with the Workflow. A Work is a Kratix Object that represents the output of the Workflow, i.e., it contains the documents that containers in the Pipeline persist into <code>/kratix/output</code> as part of its execution. The Work is created in the same namespace as the Resource (or in the <code>kratix-platform-system</code> namespace for Promise workflows).</p>
 <p>The Work Object contains a similar set of labels as to the Job.</p>
 <p>Once a Work is created, Kratix runs its scheduler. The scheduler examines the Work Object and determines which <a class="" href="/main/reference/destinations/intro">Destination</a> should receive which parts of the Work, since a single Work can contain multiple documents that can be scheduled to multiple destinations. Once a suitable Destination is found, Kratix creates a WorkPlacement object to associate the Work with that Destination.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workplacement">WorkPlacement<a href="#workplacement" class="hash-link" aria-label="Direct link to WorkPlacement" title="Direct link to WorkPlacement" translate="no">​</a></h3>
