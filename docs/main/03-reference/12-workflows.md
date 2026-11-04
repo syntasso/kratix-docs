@@ -605,9 +605,7 @@ documents from this directory.
 
 :::note
 
-Files written to `/kratix/output` in `delete` Pipelines will be ignored. `delete`
-Pipelines do not run the [`work-writer` container](#kratix-containers), which is
-the container that turns these files into a Work.
+Files written to `/kratix/output` in `delete` Pipelines will be ignored.
 
 :::
 
@@ -673,8 +671,6 @@ containers listed in the Pipeline and up to three Kratix-specific containers:
 | `reader`        | Fetches the Promise or resource request that triggered the workflow and writes it to [`/kratix/input/object.yaml`](#objectyaml).                                                                                                                                         | Yes                   | Yes                |
 | `work-writer`   | Creates or updates the Work from the documents in [`/kratix/output`](#output), using the Promise's scheduling and any `/kratix/metadata/destination-selectors.yaml`. If `/kratix/metadata/workflow-control.yaml` asks to suspend or retry, it leaves the Work unchanged. | Yes                   | No                 |
 | `status-writer` | Updates the status of the Promise or resource request from `/kratix/metadata/status.yaml`, applies `/kratix/metadata/workflow-control.yaml`, and marks the workflow as completed after the last Pipeline. See [Metadata](#metadata).                                     | Yes                   | Yes                |
-
-A `delete` Pipeline has no `work-writer`.
 
 ## Security Context
 
