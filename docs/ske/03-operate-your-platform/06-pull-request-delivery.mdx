@@ -53,6 +53,14 @@ On GitHub Enterprise Server, SKE calls the API on the same host as the repositor
 Configure a Destination to use that `GitStateStore` as usual. Workloads scheduled 
 to that Destination will now be delivered through pull requests.
 
+A Destination with `filepath.mode: aggregatedYAML` cannot use a `GitStateStore` that has a
+`delivery` block. Kratix refuses to create or update either the Destination or the
+`GitStateStore` if the change would put them together, with an error such as:
+
+```text
+filepath.mode aggregatedYAML cannot be used with a state store that has a delivery mode (GitStateStore/production has delivery.mode "pullRequest"); see https://docs.kratix.io/main/reference/destinations/intro
+```
+
 If the `GitStateStore` already had requests delivered by pushing, SKE delivers each of them again
 through the new mode. It opens a pull request only for a request whose files differ from what the
 Destination's branch has.
@@ -117,15 +125,11 @@ anyway, SKE does not count it as delivered or under review. At the next delivery
 request's files with the Destination's branch again, and opens a new pull request for whatever
 still differs.
 
-One case is not handled yet: on a Destination with `filepath.mode: aggregatedYAML`, every request on
-the Destination writes into one shared file. If another request has a pull request that is not
-merged, changing a request back does not make it ready. SKE opens a pull request instead, and that
-pull request also carries the other request's change.
-
 ## Changes made by hand
 
 - **Commits on a `kratix/<work-placement-name>` branch are lost** the next time SKE opens a pull
-  request for that WorkPlacement, because SKE replaces the branch. If the pull request is merged
+  request for that WorkPlacement, or rebuilds its pull request after a conflict (see
+  [Conflicts](#conflicts)), because SKE replaces the branch. If the pull request is merged
   with those commits first, they reach the Destination's branch, and at the next delivery SKE opens
   a pull request to remove them.
 - **Changes to SKE's files on the Destination's branch are reverted through a pull request.** If
@@ -133,11 +137,46 @@ pull request also carries the other request's change.
   request that puts them back at the next delivery. The edit stays on the branch until that pull
   request is merged. While it is open, the request's `STATUS` shows `Waiting for approval` again.
   Closing it without merging marks the request as rejected.
-- **A pull request that no longer merges stays as it is.** If the Destination's branch moves on and
-  the pull request now has conflicts, SKE does not rebuild it yet.
+- **A pull request with conflicts is rebuilt by SKE.** See [Conflicts](#conflicts).
 
 The next delivery happens when the request's pipeline runs again, or at the platform's
 reconciliation interval (every 10 hours by default), whichever comes first.
+
+## Conflicts
+
+When the Destination's branch changes after SKE opened a pull request, the pull request can end up
+with merge conflicts, and GitHub shows "This branch has conflicts that must be resolved". SKE
+rebuilds that pull request: it takes the latest commit on the Destination's branch, writes the
+request's current files on top of it, and force-pushes the same `kratix/<work-placement-name>`
+branch. The pull request keeps its number and link, so the request's `STATUS` still shows the same
+link.
+
+SKE looks for conflicts each time it checks the open pull requests, every 30 seconds by default (the
+`checkInterval` in the `delivery` block, see [Turn it on](#turn-it-on)).
+
+SKE rebuilds a pull request only when it has conflicts. It leaves the pull request alone when:
+
+- **It is only behind the Destination's branch.** Use GitHub's **Update branch** button.
+- **Reviews or required checks are missing.**
+- **Checks fail.**
+
+Whether a rebuild dismisses the approvals a pull request already has depends on the repository's
+branch protection setting "Dismiss stale pull request approvals when new commits are pushed". SKE
+does not control it. See GitHub's
+[About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging).
+
+A rebuild replaces the branch, so any commits someone added to it are lost. That includes a fix
+made with GitHub's **Resolve conflicts** button.
+
+If, once rebuilt, the pull request would not change anything on the Destination's branch, SKE closes
+it with a comment saying there is nothing left to review, and the request becomes ready.
+
+Removal pull requests, opened when you [delete a request](#deleting-a-request), are rebuilt the
+same way.
+
+If you remove the `delivery` block while SKE is rebuilding a pull request, that pull request stays
+open, like any other pull request that was open when you
+[turned pull request delivery off](#turn-it-off). Close it yourself.
 
 ## Deleting a request
 
@@ -231,10 +270,6 @@ go, but the request stays until you remove the finalizers.
   directly. The removal pull request stays open, so close it yourself. A removal that was already
   rejected stays rejected. Remove the finalizers as described in
   [When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal).
-- **On a Destination with `filepath.mode: aggregatedYAML`**, every request shares one file. A
-  removal pull request carries that file rebuilt from every other request's current files,
-  including changes still waiting for approval or rejected. Merging it delivers those too. A removal
-  pull request can open even when nothing from the deleted request was merged.
 - **A pipeline that stops outputting a workload group** removes it the same way, through a removal
   pull request.
 
@@ -307,9 +342,7 @@ SKE does not open a pull request for the same change again on its own. Running t
 with the same output keeps the rejection, and so does a restart of SKE or a Destination that is
 briefly not ready. A new pull request opens once the request or the Promise produces different files
 (see [Updating a request under review](#updating-a-request-under-review)), or when you ask for one
-(see [Retrying a rejected change](#retrying-a-rejected-change)). On a Destination
-with `filepath.mode: aggregatedYAML`, every resource writes into the same file, so the next change
-from any resource on that Destination includes the rejected files again.
+(see [Retrying a rejected change](#retrying-a-rejected-change)).
 
 `STATUS` is cut to 120 characters. `kubectl describe` shows the full text in the `Reconciled` and
 `WorksSucceeded` conditions, except while the request is being deleted (see
