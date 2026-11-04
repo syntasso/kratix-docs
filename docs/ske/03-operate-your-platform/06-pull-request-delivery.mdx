@@ -165,14 +165,21 @@ branch protection setting "Dismiss stale pull request approvals when new commits
 does not control it. See GitHub's
 [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging).
 
-A rebuild replaces the branch, so any commits someone added to it are lost. That includes a fix
-made with GitHub's **Resolve conflicts** button.
+A rebuild replaces the branch, so any commits someone added to it are lost. If you fix the conflicts
+yourself with GitHub's **Resolve conflicts** button, the pull request no longer has conflicts, so SKE
+leaves it alone and your version is what gets merged. If that version differs from the request's
+files, SKE opens a pull request to put them back at the next delivery.
 
 If, once rebuilt, the pull request would not change anything on the Destination's branch, SKE closes
 it with a comment saying there is nothing left to review, and the request becomes ready.
 
 Removal pull requests, opened when you [delete a request](#deleting-a-request), are rebuilt the
-same way.
+same way. If the Destination's branch no longer has the files, SKE closes the removal pull request
+with a comment saying there is nothing left to remove, and the request finishes deleting.
+
+If the `GitStateStore`'s `branch` has changed since SKE opened a pull request, SKE does not rebuild
+it when it has conflicts. It closes it with a comment saying the Destination's branch changed, and
+opens a new one against the new branch.
 
 If you remove the `delivery` block while SKE is rebuilding a pull request, that pull request stays
 open, like any other pull request that was open when you
