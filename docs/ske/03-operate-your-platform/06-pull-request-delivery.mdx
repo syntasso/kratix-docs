@@ -116,9 +116,12 @@ pipeline produces:
   what is already merged. SKE closes the open pull request with a comment saying there is nothing
   left to review, and the request becomes ready.
 
-Each time SKE delivers a WorkPlacement, it closes any open pull request from its
-`kratix/<work-placement-name>` branch into the Destination's branch, including one that a person
-opened from that branch, with a comment saying why.
+SKE recognises its own pull request by a hidden comment in the pull request's description that
+records the files it proposes. Each time SKE delivers a WorkPlacement, it keeps an open pull request
+from its `kratix/<work-placement-name>` branch whose hidden comment matches the files, and closes
+any other open pull request from that branch, with a comment saying why. That includes one a person
+opened from that branch, one whose hidden comment was edited away, and one into a branch the
+`GitStateStore` no longer uses.
 
 A pull request SKE closed is out of date, so do not reopen it. If someone reopens or merges it
 anyway, SKE does not count it as delivered or under review. At the next delivery it compares the
@@ -295,8 +298,9 @@ kubectl label works -n <NAMESPACE> \
 Kratix passes the label on to the Work's WorkPlacements and removes it from the Work. For each
 WorkPlacement, SKE then:
 
-- **After a rejected pull request**, opens a new pull request. It does not reopen the closed one. The
-  request's `STATUS` goes back to `Waiting for approval` with the new link.
+- **After a rejected pull request**, opens a new pull request. It does not reopen the closed one,
+  but if a reviewer already reopened it and it proposes the same files, SKE uses that one. The
+  request's `STATUS` goes back to `Waiting for approval` with the link.
 - **After a rejected removal**, opens a new removal pull request. Merging it deletes the request as
   usual.
 - **While a pull request is open**, keeps that pull request and its reviews, and opens no other.
