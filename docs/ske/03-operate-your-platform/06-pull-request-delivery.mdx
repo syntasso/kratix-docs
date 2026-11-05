@@ -58,7 +58,7 @@ A Destination with `filepath.mode: aggregatedYAML` cannot use a `GitStateStore` 
 `GitStateStore` if the change would put them together, with an error such as:
 
 ```text
-filepath.mode aggregatedYAML cannot be used with a state store that has a delivery mode (GitStateStore/production has delivery.mode "pullRequest"); see https://docs.kratix.io/main/reference/destinations/intro
+filepath.mode aggregatedYAML cannot be used with a state store that has a delivery mode (GitStateStore/production has delivery.mode "pullRequest")
 ```
 
 If the `GitStateStore` already had requests delivered by pushing, SKE delivers each of them again
