@@ -113,8 +113,8 @@ pipeline produces:
   request do not carry over.
 - **The same files.** SKE keeps the open pull request and its reviews.
 - **Files the Destination's branch already has.** This happens when the request changes back to
-  what is already merged. SKE closes the open pull request with a comment saying there is nothing
-  left to review, and the request becomes ready.
+  what is already merged. SKE closes the open pull request with a comment saying the request
+  changed, opens no new one, and the request becomes ready.
 
 SKE recognises its own pull request by a hidden comment in the pull request's description that
 records the files it proposes. Each time SKE delivers a WorkPlacement, it keeps an open pull request
