@@ -1,0 +1,105 @@
+---
+title: Deliver through pull requests
+description: Have a Destination open a pull request for every change instead of pushing to its branch, so someone reviews what reaches the cluster.
+slug: "/ske/operations/pull-request-delivery"
+sidebar_label: "Pull request delivery"
+sidebar_position: 2.6
+---
+
+A Destination backed by a `GitStateStore` normally pushes straight to its branch. It's
+poosible to configure SKE to create pull requests instead. On this mode, SKE commits the outputs 
+to a unique branch and opens a pull request against the Destination's target branch.
+
+SKE never merges the pull request itself.
+
+:::warning
+
+Only Github and GitHub Enterprise Server are supported for pull request
+delivery. Other Git providers will be supported in the future.
+
+:::
+
+## What you need
+
+- The repository on GitHub, either github.com or GitHub Enterprise Server.
+- Credentials that can push branches and open pull requests on it.
+
+## Turn it on
+
+Add a `delivery` block to the `GitStateStore`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: production
+spec:
+  url: https://github.com/acme/platform-state
+  branch: main
+  authMethod: basicAuth
+  secretRef:
+    name: git-credentials
+    namespace: default
+  delivery:
+    mode: pullRequest
+    config:
+      provider: github
+      checkInterval: 30s # How often SKE checks the pull request. Default is 30s.
+```
+
+On GitHub Enterprise Server, SKE calls the API on the same host as the repository
+(`https://<host>/api/v3`). Set `config.apiURL` to override.
+
+Configure a Destination to use that `GitStateStore` as usual. Workloads scheduled 
+to that Destination will now be delivered through pull requests.
+
+## How it works
+
+When a workload is scheduled to a PR Destination:
+
+1. SKE creates a `kratix/<work-placement-name>` branch. SKE will force-push to
+   that branch if it already exists.
+2. SKE opens a pull request from that branch to the Destination's branch. The PR
+   link is stored in the WorkPlacement's status.
+3. Every configured interval (30s by default), SKE checks the pull request's status. 
+  a. If merged, SKE marks the WorkPlacement as succeeded and kicks off the next pipeline.
+  b. If it's closed without merging, SKE marks the WorkPlacement as failed and
+stop the line.
+
+
+If the requester changes the Promise or the request while a PR is open, SKE closes 
+the existing pull request and opens a new one. If the branch itself is changed,
+SKE will force-push to it.
+
+
+:::warning Don't change the branches yourself
+
+* **Commits you make on the PR branch will be lost.** SKE will force-push on the
+next reconciliation. Change the Promise or the request instead.
+* **Commits you make on the Destination's branch will cause a PR to be opened.** 
+SKE will detect drift and open a new pull request with the changes.
+
+:::
+
+## What the requester sees
+
+<!-- TODO: make this anne centred -->
+
+The resource request's `WorksSucceeded` condition reports where the change is:
+
+| Reason | Status | Meaning |
+| --- | --- | --- |
+| `WorksPending` | `Unknown` | A pull request is open and waiting for review. |
+| `WorksSucceeded` | `True` | Every pull request for this request has been merged. |
+| `WorksFailing` | `False` | A pull request was closed without being merged. |
+
+The WorkPlacement carries the detail:
+
+```bash
+kubectl get workplacement <WORKPLACEMENT_NAME> \
+  -o jsonpath='{.status.conditions[?(@.type=="WriteSucceeded")]}'
+```
+
+While the pull request is open its `status` is `Unknown` and its message names the pull request.
+Merging sets it to `True`; closing the pull request without merging sets it to `False` with the
+reason.
