@@ -12,17 +12,13 @@ to a branch for each WorkPlacement and opens a pull request from it to the Desti
 
 SKE never merges the pull request itself.
 
-:::warning
-
-Only Github and GitHub Enterprise Server are supported for pull request
-delivery. Other Git providers will be supported in the future.
-
-:::
+Pull request delivery works with GitHub (github.com or GitHub Enterprise Server) and Azure DevOps.
 
 ## What you need
 
-- The repository on GitHub, either github.com or GitHub Enterprise Server.
-- Credentials that can push branches and open pull requests on it.
+- The repository on GitHub or Azure DevOps.
+- Credentials that can push branches and open pull requests on it. For Azure DevOps, see
+  [Azure DevOps](#azure-devops).
 
 ## Turn it on
 
@@ -49,6 +45,59 @@ spec:
 
 On GitHub Enterprise Server, SKE calls the API on the same host as the repository
 (`https://<host>/api/v3`). Set `config.apiURL` to override.
+
+### Azure DevOps
+
+Set `provider: azureDevOps` and use an `https` URL with `authMethod: basicAuth`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: production
+spec:
+  url: https://dev.azure.com/acme/platform/_git/platform-state
+  branch: main
+  authMethod: basicAuth
+  secretRef:
+    name: git-credentials
+    namespace: default
+  delivery:
+    mode: pullRequest
+    config:
+      provider: azureDevOps
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-credentials
+  namespace: default
+stringData:
+  username: kratix # any non-empty value
+  password: <PERSONAL_ACCESS_TOKEN>
+```
+
+SKE accepts these URLs:
+
+- `https://dev.azure.com/<organisation>/<project>/_git/<repository>`
+- `https://<organisation>.visualstudio.com/<project>/_git/<repository>`
+
+`config.apiURL` applies to GitHub only. On Azure DevOps, SKE works out the API address from the
+repository URL.
+
+SKE signs in to Azure DevOps with a personal access token only. A `GitStateStore` that uses `ssh`
+cannot deliver through pull requests on Azure DevOps.
+
+The token needs the **Code (Read & write)** scope. That covers pushing branches, and opening,
+abandoning and commenting on pull requests. The account needs the **Contribute**, **Create branch**
+and **Contribute to pull requests** permissions on the repository, which the project's Contributors
+group has by default. It also needs permission to force-push the
+`kratix/<work-placement-name>` branches. Azure DevOps gives that to whoever creates a branch, so
+SKE has it unless a branch permission takes it away. Without it, SKE cannot
+[rebuild a pull request with conflicts](#conflicts).
+
+Azure DevOps uses its own words: a pull request is **completed** when it is merged, and
+**abandoned** when it is closed without merging. The rest of this page says merged and closed.
 
 Configure a Destination to use that `GitStateStore` as usual. Workloads scheduled 
 to that Destination will now be delivered through pull requests.
@@ -148,28 +197,36 @@ reconciliation interval (every 10 hours by default), whichever comes first.
 ## Conflicts
 
 When the Destination's branch changes after SKE opened a pull request, the pull request can end up
-with merge conflicts, and GitHub shows "This branch has conflicts that must be resolved". SKE
+with merge conflicts, which GitHub and Azure DevOps both show on the pull request. SKE
 rebuilds that pull request: it takes the latest commit on the Destination's branch, writes the
 request's current files on top of it, and force-pushes the same `kratix/<work-placement-name>`
 branch. The pull request keeps its number and link, so the request's `STATUS` still shows the same
 link.
 
 SKE looks for conflicts each time it checks the open pull requests, every 30 seconds by default (the
-`checkInterval` in the `delivery` block, see [Turn it on](#turn-it-on)).
+`checkInterval` in the `delivery` block, see [Turn it on](#turn-it-on)). Azure DevOps does not check
+a pull request for conflicts again when only the Destination's branch moves, so SKE asks it to, the
+same as its **Restart merge** action, and acts on the result at its next check.
 
 SKE rebuilds a pull request only when it has conflicts. It leaves the pull request alone when:
 
-- **It is only behind the Destination's branch.** Use GitHub's **Update branch** button.
+- **It is only behind the Destination's branch.** On GitHub, use the **Update branch** button.
 - **Reviews or required checks are missing.**
 - **Checks fail.**
 
 Whether a rebuild dismisses the approvals a pull request already has depends on the repository's
-branch protection setting "Dismiss stale pull request approvals when new commits are pushed". SKE
-does not control it. See GitHub's
-[About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging).
+settings, which SKE does not control:
+
+- On GitHub, the branch protection setting "Dismiss stale pull request approvals when new commits
+  are pushed". See GitHub's
+  [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging).
+- On Azure DevOps, the branch policy options under "When new changes are pushed". **Reset all
+  approval votes** clears approvals but keeps votes to reject or wait. **Reset all code reviewer
+  votes** clears every vote. See Microsoft's
+  [Branch policies and settings](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies).
 
 A rebuild replaces the branch, so any commits someone added to it are lost. If you fix the conflicts
-yourself with GitHub's **Resolve conflicts** button, the pull request no longer has conflicts, so SKE
+yourself, for example with GitHub's **Resolve conflicts** button, the pull request no longer has conflicts, so SKE
 leaves it alone and your version is what gets merged. If that version differs from the request's
 files, SKE opens a pull request to put them back at the next delivery.
 
@@ -310,7 +367,7 @@ WorkPlacement, SKE then:
 To retry only one Destination, label that WorkPlacement instead of the Work.
 
 Kratix removes the label from the WorkPlacement once SKE has opened the pull request, or found the
-one already open. If that fails, for example because GitHub is unavailable, the label stays and SKE
+one already open. If that fails, for example because GitHub or Azure DevOps is unavailable, the label stays and SKE
 tries again. To see which WorkPlacements are still waiting to be retried:
 
 ```bash
@@ -335,7 +392,9 @@ redis   Redis provisioned    Waiting for approval: https://github.com/acme/platf
 ```
 
 When a reviewer closes the pull request without merging it, the request is marked as failed and
-`STATUS` says why. If the reviewer used **Close with comment**, SKE quotes that comment:
+`STATUS` says why. If the reviewer used **Close with comment** on GitHub, SKE quotes that comment.
+Azure DevOps has no such button: the reviewer comments on the pull request and abandons it, in
+either order, within a minute of each other. SKE quotes their latest comment from that minute:
 
 ```text
 NAME    MESSAGE              STATUS
@@ -361,7 +420,8 @@ briefly not ready. A new pull request opens once the request or the Promise prod
 `WorksSucceeded`.
 
 SKE quotes only the comment the person who closed the pull request left as they closed it, up to 500
-characters, on one line. It does not quote review comments, such as a **Request changes** review.
+characters, on one line. On GitHub, it does not quote review comments, such as a **Request changes**
+review. On Azure DevOps, any comment that person wrote within a minute of the close can be quoted.
 Anyone who can read the resource request can read the quote and the pull request link, even without
 access to the repository. The same goes for anywhere the request's status is copied to, such as
 Cortex. When a Promise has several configure pipelines, the Promise's own `Reconciled` condition
@@ -405,5 +465,5 @@ tools that need to read each one:
 kubectl get work <WORK_NAME> -o jsonpath='{.status.workPlacementStatuses}'
 ```
 
-SKE reads the closing comment once, when it first sees the pull request closed. If the GitHub token
+SKE reads the closing comment once, when it first sees the pull request closed. If the token
 cannot read comments, the request still shows the rejection, without the quote.
