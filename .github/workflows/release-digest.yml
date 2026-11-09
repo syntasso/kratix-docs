@@ -1,0 +1,54 @@
+name: Release digest
+
+# Plans the next SKE release digest email from the release-notes pages and
+# writes it to the job outputs. It does not create or send anything yet.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/ske/08-releases-and-support/**
+      - scripts/release-digest/**
+      - .github/workflows/release-digest.yml
+  pull_request:
+    paths:
+      - scripts/release-digest/**
+      - .github/workflows/release-digest.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: scripts/release-digest/go.mod
+          cache-dependency-path: scripts/release-digest/go.sum
+      - name: Run tests
+        working-directory: scripts/release-digest
+        run: go run github.com/onsi/ginkgo/v2/ginkgo -r
+
+  plan:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      has_releases: ${{ steps.plan.outputs.has_releases }}
+      release_ids: ${{ steps.plan.outputs.release_ids }}
+      subject: ${{ steps.plan.outputs.subject }}
+      html: ${{ steps.plan.outputs.html }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: scripts/release-digest/go.mod
+          cache-dependency-path: scripts/release-digest/go.sum
+      - name: Build
+        run: go -C scripts/release-digest build -o "$RUNNER_TEMP/release-digest" ./cmd/release-digest
+      - name: Plan the digest email
+        id: plan
+        run: '"$RUNNER_TEMP/release-digest"'
