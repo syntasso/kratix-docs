@@ -108,7 +108,9 @@ slug: "/ske/releases/portal-patch"
 		command := exec.Command(binary, "-docs", docsDir, "-record", recordPath,
 			"-create-draft", "-layout", layoutPath, "-hubspot-api", hubspot.URL,
 			"-slack-api", slackAPI.URL, "-slack-channel", "C0123")
+		// GITHUB_ACTIONS is cleared so the specs behave the same in CI and locally.
 		command.Env = append(os.Environ(), append([]string{
+			"GITHUB_ACTIONS=",
 			"GITHUB_OUTPUT=" + filepath.Join(workDir, "output"),
 			"GITHUB_STEP_SUMMARY=" + filepath.Join(workDir, "summary"),
 			"HUBSPOT_ACCESS_TOKEN=test-token",

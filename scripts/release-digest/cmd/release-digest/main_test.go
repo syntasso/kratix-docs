@@ -48,7 +48,9 @@ slug: "/ske/releases/portal-patch"
 	start := func(record string, args []string, env ...string) *gexec.Session {
 		Expect(os.WriteFile(recordPath, []byte(record), 0o644)).To(Succeed())
 		command := exec.Command(binary, append([]string{"-docs", docsDir, "-record", recordPath}, args...)...)
-		command.Env = append(os.Environ(), append([]string{"GITHUB_OUTPUT=" + outputPath, "GITHUB_STEP_SUMMARY=" + summaryPath}, env...)...)
+		// GITHUB_ACTIONS is cleared so the specs behave the same in CI and locally;
+		// a spec that wants GitHub's behaviour sets it.
+		command.Env = append(os.Environ(), append([]string{"GITHUB_ACTIONS=", "GITHUB_OUTPUT=" + outputPath, "GITHUB_STEP_SUMMARY=" + summaryPath}, env...)...)
 		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
 		return session
