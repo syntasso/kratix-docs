@@ -133,7 +133,8 @@ jobs:
           retention-days: 7
 
   record:
-    name: Commit the release record to ${{ github.ref_name }}
+    # A plain name: GitHub does not fill in expressions in the name of a skipped job.
+    name: Commit the release record
     needs: plan
     if: needs.plan.outputs.record_changed == 'true'
     runs-on: ubuntu-latest
@@ -150,7 +151,7 @@ jobs:
         with:
           name: release-record
           path: scripts/release-digest
-      - name: Commit and push the release record
+      - name: Commit and push the release record to ${{ github.ref_name }}
         env:
           EMAIL_ID: ${{ needs.plan.outputs.email_id }}
           DRAFT_ACTION: ${{ needs.plan.outputs.draft_action }}
