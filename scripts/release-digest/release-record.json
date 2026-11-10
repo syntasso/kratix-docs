@@ -1,25 +1,4 @@
 {
   "goLive": "2026-11-09",
-  "releases": [
-    {
-      "id": "ske-portal-controller@0.10.3",
-      "digestEmailId": "511951193336"
-    },
-    {
-      "id": "backstage@ske-backend-0.26.0+ske-frontend-0.23.1",
-      "digestEmailId": "511951193336"
-    },
-    {
-      "id": "portal-patch@0.8.6",
-      "digestEmailId": "511951193336"
-    },
-    {
-      "id": "ske-health-agent@0.16.6",
-      "digestEmailId": "511951193336"
-    },
-    {
-      "id": "tfstate-finder@0.13.5",
-      "digestEmailId": "511951193336"
-    }
-  ]
+  "releases": []
 }
