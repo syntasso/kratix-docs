@@ -211,3 +211,97 @@ var _ = Describe("LoadLayout", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 })
+
+var _ = Describe("Client.EmailStatus", func() {
+	var (
+		fake   *fakeHubSpot
+		client hubspot.Client
+	)
+
+	BeforeEach(func() {
+		fake = &fakeHubSpot{responses: map[string]func() (int, string){}}
+		server := httptest.NewServer(fake)
+		DeferCleanup(server.Close)
+		client = hubspot.Client{BaseURL: server.URL, Token: "test-token", HTTP: server.Client()}
+	})
+
+	It("returns the email's state and publish date", func() {
+		fake.responses["GET /marketing/v3/emails/511778652367"] = func() (int, string) {
+			return 200, `{"id": "511778652367", "state": "SCHEDULED", "publishDate": "2026-11-11T09:30:00Z"}`
+		}
+
+		status, err := client.EmailStatus(context.Background(), "511778652367")
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(status).To(Equal(hubspot.EmailStatus{State: "SCHEDULED", PublishDate: "2026-11-11T09:30:00Z"}))
+		Expect(fake.requests[0].Authorization).To(Equal("Bearer test-token"))
+	})
+
+	It("reports an email that no longer exists as deleted", func() {
+		status, err := client.EmailStatus(context.Background(), "404404")
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(status).To(Equal(hubspot.EmailStatus{Deleted: true}))
+	})
+
+	It("returns HubSpot's error for any other failure", func() {
+		fake.responses["GET /marketing/v3/emails/1"] = func() (int, string) {
+			return 403, `{"category": "MISSING_SCOPES", "message": "no"}`
+		}
+
+		_, err := client.EmailStatus(context.Background(), "1")
+
+		Expect(err).To(MatchError(And(ContainSubstring("email 1"), ContainSubstring("MISSING_SCOPES"))))
+	})
+})
+
+var _ = Describe("Client.UpdateDraft", func() {
+	var (
+		fake   *fakeHubSpot
+		client hubspot.Client
+		layout hubspot.Layout
+	)
+
+	BeforeEach(func() {
+		fake = &fakeHubSpot{responses: map[string]func() (int, string){
+			"PATCH /marketing/v3/emails/511778652367/draft": func() (int, string) { return 200, `{}` },
+		}}
+		server := httptest.NewServer(fake)
+		DeferCleanup(server.Close)
+		client = hubspot.Client{BaseURL: server.URL, Token: "test-token", HTTP: server.Client()}
+
+		path := filepath.Join(GinkgoT().TempDir(), "email-layout.json")
+		Expect(os.WriteFile(path, []byte(layoutJSON), 0o644)).To(Succeed())
+		var err error
+		layout, err = hubspot.LoadLayout(path)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("replaces the draft's subject and whole body, without creating an email", func() {
+		err := client.UpdateDraft(context.Background(), "511778652367", hubspot.Draft{
+			Name: "ignored", Subject: "SKE release updates: Portal Patch, SKE GUI", Layout: layout, HTML: "<h2>Both</h2>",
+		})
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(fake.requests).To(HaveLen(1))
+		patch := fake.requests[0]
+		Expect(patch.Method).To(Equal("PATCH"))
+		Expect(patch.Path).To(Equal("/marketing/v3/emails/511778652367/draft"))
+		Expect(patch.Body["subject"]).To(Equal("SKE release updates: Portal Patch, SKE GUI"))
+		Expect(patch.Body).NotTo(HaveKey("name"))
+		widgets := patch.Body["content"].(map[string]any)["widgets"].(map[string]any)
+		Expect(widgets).To(HaveKey("logo"))
+		body := widgets["module-0-0-0"].(map[string]any)["body"].(map[string]any)
+		Expect(body["html"]).To(Equal("<h2>Both</h2>"))
+	})
+
+	It("returns HubSpot's error", func() {
+		fake.responses["PATCH /marketing/v3/emails/511778652367/draft"] = func() (int, string) {
+			return 400, `{"category": "VALIDATION_ERROR", "message": "bad"}`
+		}
+
+		err := client.UpdateDraft(context.Background(), "511778652367", hubspot.Draft{Layout: layout})
+
+		Expect(err).To(MatchError(And(ContainSubstring("updating email 511778652367"), ContainSubstring("VALIDATION_ERROR"))))
+	})
+})
