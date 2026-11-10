@@ -2,9 +2,11 @@ name: Release digest
 
 # Plans the next SKE release digest email from the release-notes pages and
 # writes it to the job outputs. A manual run with create_draft ticked also
-# creates the email as a HubSpot draft, or regenerates the pending one, and
-# commits the updated release record to the branch it ran on. Nothing is ever
-# published or sent.
+# creates the email as a HubSpot draft, or regenerates the pending one; posts
+# or updates its Slack message and schedules a ping for when the two business
+# hour hold ends (with SLACK_BOT_TOKEN and the SLACK_DIGEST_CHANNEL variable);
+# and commits the updated release record to the branch it ran on. Nothing is
+# ever published or sent.
 
 on:
   push:
@@ -104,16 +106,18 @@ jobs:
           cache-dependency-path: scripts/release-digest/go.sum
       - name: Build the release digest command
         run: go -C scripts/release-digest build -o "$RUNNER_TEMP/release-digest" ./cmd/release-digest
-      - name: Plan the digest${{ inputs.create_draft == true && ', then create or update the HubSpot draft' || ' (HubSpot is not contacted)' }}
+      - name: Plan the digest${{ inputs.create_draft == true && ', then update the HubSpot draft and the Slack message' || ' (HubSpot and Slack are not contacted)' }}
         id: plan
         env:
           CREATE_DRAFT: ${{ inputs.create_draft == true }}
-          # Only a manual run that asks for a draft gets the token.
+          # Only a manual run that asks for a draft gets the tokens.
           HUBSPOT_ACCESS_TOKEN: ${{ inputs.create_draft == true && secrets.HUBSPOT_ACCESS_TOKEN || '' }}
+          SLACK_BOT_TOKEN: ${{ inputs.create_draft == true && secrets.SLACK_BOT_TOKEN || '' }}
+          SLACK_DIGEST_CHANNEL: ${{ vars.SLACK_DIGEST_CHANNEL }}
         run: |
           args=()
           if [ "$CREATE_DRAFT" = "true" ]; then
-            echo "This run plans the digest and creates or updates the HubSpot draft."
+            echo "This run plans the digest, creates or updates the HubSpot draft, and posts or updates the Slack message and hold-end ping."
             args+=(-create-draft)
           else
             echo "This run only plans the digest. Run the workflow by hand with create_draft ticked to create or update the HubSpot draft."
@@ -153,7 +157,13 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         # Pushes made with GITHUB_TOKEN do not start new workflow runs.
         run: |
-          echo "The plan job $DRAFT_ACTION HubSpot draft email $EMAIL_ID and changed the release record."
+          if [ -n "$EMAIL_ID" ]; then
+            echo "The plan job $DRAFT_ACTION HubSpot draft email $EMAIL_ID and changed the release record."
+            message="chore(release-digest): record digest email $EMAIL_ID"
+          else
+            echo "The plan job changed the release record (for example, it cancelled the ping for a digest that has been sent)."
+            message="chore(release-digest): update the release record"
+          fi
           echo "Committing scripts/release-digest/release-record.json to $BRANCH:"
           echo
           git config user.name "github-actions[bot]"
@@ -164,12 +174,12 @@ jobs:
             exit 0
           fi
           git --no-pager diff --cached
-          git commit -q -m "chore(release-digest): record digest email $EMAIL_ID"
+          git commit -q -m "$message"
           for attempt in 1 2 3; do
             if git push -q origin "HEAD:$BRANCH"; then
               echo
               echo "Pushed $(git rev-parse --short HEAD) to $BRANCH."
-              echo "::notice title=Release record::Committed $(git rev-parse --short HEAD) to $BRANCH, recording email $EMAIL_ID."
+              echo "::notice title=Release record::Committed $(git rev-parse --short HEAD) to $BRANCH: $message"
               exit 0
             fi
             echo "Push attempt $attempt was rejected because $BRANCH moved. Rebasing and trying again."
