@@ -19,12 +19,14 @@ import (
 
 	digest "github.com/syntasso/kratix-docs/scripts/release-digest"
 	"github.com/syntasso/kratix-docs/scripts/release-digest/hubspot"
+	"github.com/syntasso/kratix-docs/scripts/release-digest/slack"
 )
 
 type options struct {
 	docsDir, recordPath, layoutPath, hubspotAPI string
 	createDraft                                 bool
 	token                                       string
+	slackAPI, slackChannel, slackToken          string
 }
 
 func main() {
@@ -34,8 +36,11 @@ func main() {
 	flag.BoolVar(&o.createDraft, "create-draft", false, "create the planned email as a HubSpot draft (needs HUBSPOT_ACCESS_TOKEN)")
 	flag.StringVar(&o.layoutPath, "layout", "scripts/release-digest/email-layout.json", "HubSpot email layout JSON file")
 	flag.StringVar(&o.hubspotAPI, "hubspot-api", hubspot.DefaultBaseURL, "HubSpot API base URL")
+	flag.StringVar(&o.slackAPI, "slack-api", slack.DefaultBaseURL, "Slack Web API base URL")
+	flag.StringVar(&o.slackChannel, "slack-channel", os.Getenv("SLACK_DIGEST_CHANNEL"), "Slack channel ID for digest messages (defaults to SLACK_DIGEST_CHANNEL)")
 	flag.Parse()
 	o.token = os.Getenv("HUBSPOT_ACCESS_TOKEN")
+	o.slackToken = os.Getenv("SLACK_BOT_TOKEN")
 
 	if err := run(o); err != nil {
 		log.Fatal(err)
@@ -73,16 +78,17 @@ func run(o options) error {
 	// Without -create-draft, HubSpot is not asked about recorded emails, so any
 	// release with a recorded email counts as sent.
 	plan := digest.Plan{Releases: digest.SelectPending(record, releases)}
+	states := map[string]digest.EmailState{}
+	london, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		return err
+	}
+	now := time.Now().In(london)
 	if o.createDraft {
-		london, err := time.LoadLocation("Europe/London")
-		if err != nil {
+		if states, err = emailStates(ctx, client, record); err != nil {
 			return err
 		}
-		states, err := emailStates(ctx, client, record)
-		if err != nil {
-			return err
-		}
-		plan = digest.PlanDigest(record, releases, states, time.Now().In(london))
+		plan = digest.PlanDigest(record, releases, states, now)
 	} else {
 		say("HubSpot: not contacted. A release with a recorded email counts as sent. " +
 			"Run with -create-draft (create_draft in the workflow) to create or update the draft.")
@@ -108,6 +114,7 @@ func run(o options) error {
 	}
 
 	result := draftResult{}
+	newReleases := false
 	if o.createDraft && len(pending) > 0 {
 		draft := hubspot.Draft{
 			Name:    "SKE release digest " + time.Now().UTC().Format("2006-01-02"),
@@ -134,11 +141,8 @@ func run(o options) error {
 		for _, r := range pending {
 			ids = append(ids, r.ID)
 		}
-		result.recordChanged = record.Assign(ids, result.emailID)
-		if result.recordChanged {
-			if err := os.WriteFile(o.recordPath, digest.MarshalRecord(record), 0o644); err != nil {
-				return fmt.Errorf("writing release record: %w", err)
-			}
+		newReleases = record.Assign(ids, result.emailID)
+		if newReleases {
 			say("Release record: %s recorded against email %s", count(len(ids), "release"), result.emailID)
 		} else {
 			say("Release record: unchanged")
@@ -146,16 +150,49 @@ func run(o options) error {
 		say("Earliest send date: %s (%s)", ukDate(plan.SendNotBefore), plan.SendNotBeforeReason)
 		notice("%s HubSpot draft email %s with %s. Send it no earlier than %s.",
 			capitalise(result.action), result.emailID, count(len(pending), "release"), ukDate(plan.SendNotBefore))
-		if _, err := fmt.Fprintf(outputs, "email_id=%s\ndraft_action=%s\nrecord_changed=%t\nsend_not_before=%s\n",
-			result.emailID, result.action, result.recordChanged, result.sendNotBefore); err != nil {
-			return fmt.Errorf("writing outputs: %w", err)
-		}
 	}
 
 	if o.createDraft && len(pending) == 0 {
 		say("HubSpot: no draft to create or update")
 		say("Release record: unchanged")
 		notice("Nothing to send: every release since %s is already in a scheduled or sent digest.", ukDate(record.GoLive))
+	}
+
+	result.recordChanged = newReleases
+	if o.createDraft {
+		if o.slackToken == "" || o.slackChannel == "" {
+			say("Slack: skipped, because SLACK_BOT_TOKEN or the channel is not set")
+		} else {
+			step := slackStep{
+				client:  slack.Client{BaseURL: o.slackAPI, Token: o.slackToken, HTTP: &http.Client{Timeout: 30 * time.Second}},
+				channel: o.slackChannel,
+				now:     now,
+			}
+			if step.run(ctx, &record, states, result, plan, email, newReleases) {
+				result.recordChanged = true
+			}
+		}
+		if len(record.Digests) == 0 {
+			record.Digests = nil
+		}
+	}
+
+	if result.recordChanged {
+		if err := os.WriteFile(o.recordPath, digest.MarshalRecord(record), 0o644); err != nil {
+			return fmt.Errorf("writing release record: %w", err)
+		}
+		say("Release record: saved")
+	}
+	if o.createDraft {
+		if result.emailID != "" {
+			if _, err := fmt.Fprintf(outputs, "email_id=%s\ndraft_action=%s\nsend_not_before=%s\n",
+				result.emailID, result.action, result.sendNotBefore); err != nil {
+				return fmt.Errorf("writing outputs: %w", err)
+			}
+		}
+		if _, err := fmt.Fprintf(outputs, "record_changed=%t\n", result.recordChanged); err != nil {
+			return fmt.Errorf("writing outputs: %w", err)
+		}
 	}
 
 	summary, closeSummary, err := appendTo(os.Getenv("GITHUB_STEP_SUMMARY"))
@@ -295,8 +332,22 @@ func ukDateTime(rfc3339 string) string {
 	if err != nil {
 		return rfc3339
 	}
+	return ukTime(moment)
+}
+
+// ukTime shows a time as DD/MM/YYYY HH:MM in UK time.
+func ukTime(moment time.Time) string {
 	if london, err := time.LoadLocation("Europe/London"); err == nil {
 		moment = moment.In(london)
 	}
 	return moment.Format("02/01/2006 15:04") + " UK time"
+}
+
+// warn writes a warning to the run's log, and to the GitHub run page.
+func warn(format string, args ...any) {
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		fmt.Fprintf(os.Stderr, "::warning title=Release digest::"+format+"\n", args...)
+		return
+	}
+	say("Warning: "+format, args...)
 }
