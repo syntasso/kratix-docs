@@ -3,23 +3,23 @@
   "releases": [
     {
       "id": "ske-portal-controller@0.10.3",
-      "digestEmailId": "511980276925"
+      "digestEmailId": "511980281018"
     },
     {
       "id": "backstage@ske-backend-0.26.0+ske-frontend-0.23.1",
-      "digestEmailId": "511980276925"
+      "digestEmailId": "511980281018"
     },
     {
       "id": "portal-patch@0.8.6",
-      "digestEmailId": "511980276925"
+      "digestEmailId": "511980281018"
     },
     {
       "id": "ske-health-agent@0.16.6",
-      "digestEmailId": "511980276925"
+      "digestEmailId": "511980281018"
     },
     {
       "id": "tfstate-finder@0.13.5",
-      "digestEmailId": "511980276925"
+      "digestEmailId": "511980281018"
     }
   ]
 }
