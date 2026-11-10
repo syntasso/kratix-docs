@@ -1,8 +1,7 @@
 name: Release digest
 
 # Plans the next SKE release digest email from the release-notes pages and
-# writes it to the job outputs. A manual run with create_draft ticked also
-# creates the email as a HubSpot draft. Nothing is ever published or sent.
+# writes it to the job outputs. It does not create or send anything yet.
 
 on:
   push:
@@ -16,11 +15,6 @@ on:
       - scripts/release-digest/**
       - .github/workflows/release-digest.yml
   workflow_dispatch:
-    inputs:
-      create_draft:
-        description: Also create the planned email as a HubSpot draft
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -47,7 +41,6 @@ jobs:
       release_ids: ${{ steps.plan.outputs.release_ids }}
       subject: ${{ steps.plan.outputs.subject }}
       html: ${{ steps.plan.outputs.html }}
-      email_id: ${{ steps.plan.outputs.email_id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -58,13 +51,4 @@ jobs:
         run: go -C scripts/release-digest build -o "$RUNNER_TEMP/release-digest" ./cmd/release-digest
       - name: Plan the digest email
         id: plan
-        env:
-          CREATE_DRAFT: ${{ inputs.create_draft == true }}
-          # Only a manual run that asks for a draft gets the token.
-          HUBSPOT_ACCESS_TOKEN: ${{ inputs.create_draft == true && secrets.HUBSPOT_ACCESS_TOKEN || '' }}
-        run: |
-          args=()
-          if [ "$CREATE_DRAFT" = "true" ]; then
-            args+=(-create-draft)
-          fi
-          "$RUNNER_TEMP/release-digest" "${args[@]}"
+        run: '"$RUNNER_TEMP/release-digest"'
