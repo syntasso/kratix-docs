@@ -91,9 +91,9 @@ func run(o options) error {
 	if len(pending) == 0 {
 		say("Digest: nothing to send")
 	} else {
-		say("Digest: %s on or after %s:", count(len(pending), "release"), record.GoLive)
+		say("Digest: %s on or after %s:", count(len(pending), "release"), ukDate(record.GoLive))
 		for _, r := range pending {
-			say("  - %s (%s)", r.ID, r.Date)
+			say("  - %s (%s)", r.ID, ukDate(r.Date))
 		}
 	}
 	email := digest.RenderEmail(pending)
@@ -143,9 +143,9 @@ func run(o options) error {
 		} else {
 			say("Release record: unchanged")
 		}
-		say("Earliest send date: %s (%s)", plan.SendNotBefore, plan.SendNotBeforeReason)
+		say("Earliest send date: %s (%s)", ukDate(plan.SendNotBefore), plan.SendNotBeforeReason)
 		notice("%s HubSpot draft email %s with %s. Send it no earlier than %s.",
-			capitalise(result.action), result.emailID, count(len(pending), "release"), plan.SendNotBefore)
+			capitalise(result.action), result.emailID, count(len(pending), "release"), ukDate(plan.SendNotBefore))
 		if _, err := fmt.Fprintf(outputs, "email_id=%s\ndraft_action=%s\nrecord_changed=%t\nsend_not_before=%s\n",
 			result.emailID, result.action, result.recordChanged, result.sendNotBefore); err != nil {
 			return fmt.Errorf("writing outputs: %w", err)
@@ -155,7 +155,7 @@ func run(o options) error {
 	if o.createDraft && len(pending) == 0 {
 		say("HubSpot: no draft to create or update")
 		say("Release record: unchanged")
-		notice("Nothing to send: every release since %s is already in a scheduled or sent digest.", record.GoLive)
+		notice("Nothing to send: every release since %s is already in a scheduled or sent digest.", ukDate(record.GoLive))
 	}
 
 	summary, closeSummary, err := appendTo(os.Getenv("GITHUB_STEP_SUMMARY"))
@@ -194,7 +194,7 @@ func emailStates(ctx context.Context, client hubspot.Client, record digest.Recor
 		case status.State == "DRAFT":
 			say("HubSpot: email %s is DRAFT: the pending draft", id)
 		case status.PublishDate != "":
-			say("HubSpot: email %s is %s (%s): its releases stay out of the digest", id, status.State, status.PublishDate)
+			say("HubSpot: email %s is %s (%s): its releases stay out of the digest", id, status.State, ukDateTime(status.PublishDate))
 		default:
 			say("HubSpot: email %s is %s: its releases stay out of the digest", id, status.State)
 		}
@@ -217,7 +217,7 @@ func appendTo(path string) (io.Writer, func(), error) {
 
 func writeSummary(w io.Writer, record digest.Record, pending []digest.Release, email digest.Email, result draftResult) error {
 	if len(pending) == 0 {
-		_, err := fmt.Fprintf(w, "## Release digest\n\nNo releases on or after %s are waiting for a digest email.\n", record.GoLive)
+		_, err := fmt.Fprintf(w, "## Release digest\n\nNo releases on or after %s are waiting for a digest email.\n", ukDate(record.GoLive))
 		return err
 	}
 	created := ""
@@ -227,10 +227,10 @@ func writeSummary(w io.Writer, record digest.Record, pending []digest.Release, e
 			verb = "Updated"
 		}
 		created = fmt.Sprintf("%s HubSpot draft email %s. It has not been sent. Send it no earlier than %s.\n\n",
-			verb, result.emailID, result.sendNotBefore)
+			verb, result.emailID, ukDate(result.sendNotBefore))
 	}
-	_, err := fmt.Fprintf(w, "## Release digest: planned email\n\n%s**Subject:** %s\n\n%d release(s) on or after %s.\n\n---\n\n%s\n",
-		created, email.Subject, len(pending), record.GoLive, email.HTML)
+	_, err := fmt.Fprintf(w, "## Release digest: planned email\n\n%s**Subject:** %s\n\n%s on or after %s.\n\n---\n\n%s\n",
+		created, email.Subject, count(len(pending), "release"), ukDate(record.GoLive), email.HTML)
 	return err
 }
 
@@ -258,11 +258,11 @@ func sayRecord(record digest.Record) {
 		}
 	}
 	if recorded == 0 {
-		say("Release record: go-live %s, no releases recorded yet", record.GoLive)
+		say("Release record: go-live %s, no releases recorded yet", ukDate(record.GoLive))
 		return
 	}
 	say("Release record: go-live %s, %s recorded against %s",
-		record.GoLive, count(recorded, "release"), count(len(emails), "email"))
+		ukDate(record.GoLive), count(recorded, "release"), count(len(emails), "email"))
 }
 
 func count(n int, noun string) string {
@@ -277,4 +277,26 @@ func capitalise(word string) string {
 		return word
 	}
 	return strings.ToUpper(word[:1]) + word[1:]
+}
+
+// ukDate shows a YYYY-MM-DD date as DD/MM/YYYY for people to read. Outputs
+// and the release record keep YYYY-MM-DD.
+func ukDate(iso string) string {
+	date, err := time.Parse("2006-01-02", iso)
+	if err != nil {
+		return iso
+	}
+	return date.Format("02/01/2006")
+}
+
+// ukDateTime shows an RFC 3339 time as DD/MM/YYYY HH:MM in UK time.
+func ukDateTime(rfc3339 string) string {
+	moment, err := time.Parse(time.RFC3339, rfc3339)
+	if err != nil {
+		return rfc3339
+	}
+	if london, err := time.LoadLocation("Europe/London"); err == nil {
+		moment = moment.In(london)
+	}
+	return moment.Format("02/01/2006 15:04") + " UK time"
 }
