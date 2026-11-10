@@ -38,18 +38,46 @@ concurrency:
 
 jobs:
   test:
+    name: Test the release digest tool
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Check out the code
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: scripts/release-digest/go.mod
           cache-dependency-path: scripts/release-digest/go.sum
-      - name: Run tests
+      - name: Run the specs
         working-directory: scripts/release-digest
-        run: go run github.com/onsi/ginkgo/v2/ginkgo -r
+        run: go run github.com/onsi/ginkgo/v2/ginkgo -r --json-report=ginkgo-report.json --output-dir="$RUNNER_TEMP"
+      # One line per spec in the log, and the same list on the run's summary page.
+      - name: List each spec and its result
+        if: always()
+        run: |
+          report="$RUNNER_TEMP/ginkgo-report.json"
+          if [ ! -f "$report" ]; then
+            echo "No spec report was written. The specs did not run; see the step above."
+            exit 0
+          fi
+          lines=$(jq -r '.[] | .SuiteDescription as $suite | .SpecReports[]?
+            | select(.LeafNodeType == "It")
+            | "\(if .State == "passed" then "PASS" else (.State | ascii_upcase) end)  \($suite) › \(((.ContainerHierarchyTexts // []) + [.LeafNodeText]) | join(" › "))"' "$report" | sort -k2)
+          passed=$(grep -c '^PASS' <<<"$lines" || true)
+          total=$(grep -c . <<<"$lines" || true)
+          echo "$passed of $total specs passed."
+          echo
+          echo "$lines"
+          {
+            echo "## Release digest specs: $passed of $total passed"
+            echo
+            echo '```'
+            echo "$lines"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   plan:
+    name: Plan the digest email
     needs: test
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -65,16 +93,18 @@ jobs:
     steps:
       # The branch's latest commit, not the one that started the run, so the
       # record includes the previous run's commit.
-      - uses: actions/checkout@v4
+      - name: Check out the latest ${{ github.ref_name }}
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
-      - uses: actions/setup-go@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: scripts/release-digest/go.mod
           cache-dependency-path: scripts/release-digest/go.sum
-      - name: Build
+      - name: Build the release digest command
         run: go -C scripts/release-digest build -o "$RUNNER_TEMP/release-digest" ./cmd/release-digest
-      - name: Plan the digest email
+      - name: Plan the digest${{ inputs.create_draft == true && ', then create or update the HubSpot draft' || ' (HubSpot is not contacted)' }}
         id: plan
         env:
           CREATE_DRAFT: ${{ inputs.create_draft == true }}
@@ -83,10 +113,14 @@ jobs:
         run: |
           args=()
           if [ "$CREATE_DRAFT" = "true" ]; then
+            echo "This run plans the digest and creates or updates the HubSpot draft."
             args+=(-create-draft)
+          else
+            echo "This run only plans the digest. Run the workflow by hand with create_draft ticked to create or update the HubSpot draft."
           fi
+          echo
           "$RUNNER_TEMP/release-digest" "${args[@]}"
-      - name: Keep the updated release record
+      - name: Hand the updated release record to the next job
         if: steps.plan.outputs.record_changed == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -95,6 +129,7 @@ jobs:
           retention-days: 7
 
   record:
+    name: Commit the release record to ${{ github.ref_name }}
     needs: plan
     if: needs.plan.outputs.record_changed == 'true'
     runs-on: ubuntu-latest
@@ -102,32 +137,43 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the latest ${{ github.ref_name }}
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
-      - uses: actions/download-artifact@v4
+      - name: Fetch the updated release record from the plan job
+        uses: actions/download-artifact@v4
         with:
           name: release-record
           path: scripts/release-digest
-      - name: Commit the release record
+      - name: Commit and push the release record
         env:
           EMAIL_ID: ${{ needs.plan.outputs.email_id }}
+          DRAFT_ACTION: ${{ needs.plan.outputs.draft_action }}
           BRANCH: ${{ github.ref_name }}
         # Pushes made with GITHUB_TOKEN do not start new workflow runs.
         run: |
+          echo "The plan job $DRAFT_ACTION HubSpot draft email $EMAIL_ID and changed the release record."
+          echo "Committing scripts/release-digest/release-record.json to $BRANCH:"
+          echo
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add scripts/release-digest/release-record.json
           if git diff --cached --quiet; then
-            echo "The release record is already up to date."
+            echo "The release record on $BRANCH is already up to date. Nothing to commit."
             exit 0
           fi
-          git commit -m "chore(release-digest): record digest email $EMAIL_ID"
+          git --no-pager diff --cached
+          git commit -q -m "chore(release-digest): record digest email $EMAIL_ID"
           for attempt in 1 2 3; do
-            if git push origin "HEAD:$BRANCH"; then
+            if git push -q origin "HEAD:$BRANCH"; then
+              echo
+              echo "Pushed $(git rev-parse --short HEAD) to $BRANCH."
+              echo "::notice title=Release record::Committed $(git rev-parse --short HEAD) to $BRANCH, recording email $EMAIL_ID."
               exit 0
             fi
-            git pull --rebase origin "$BRANCH"
+            echo "Push attempt $attempt was rejected because $BRANCH moved. Rebasing and trying again."
+            git pull -q --rebase origin "$BRANCH"
           done
           echo "Could not push the release record after 3 attempts." >&2
           exit 1
