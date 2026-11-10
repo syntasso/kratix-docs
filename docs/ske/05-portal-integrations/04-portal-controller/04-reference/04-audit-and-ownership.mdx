@@ -1,30 +1,36 @@
 ---
 title: Recording resource request ownership
-description: Annotate each resource request made from Backstage or Cortex with the person who last created or updated it
-keywords: [portal, backstage, cortex, annotations, userIdentifierQuery, last-changed-by, gitops, audit, attribution, serviceaccount]
+description: Annotate each resource request with the person who last created or updated it, whether they used kubectl, Backstage, or Cortex
+keywords: [portal, backstage, cortex, kubectl, oidc, annotations, userIdentifierQuery, userInfoField, skipUsernamePrefixes, last-changed-by, gitops, audit, attribution, serviceaccount]
 slug: "/ske/integrations/portal-controller/reference/audit-and-ownership"
 sidebar_label: "Audit and ownership"
 sidebar_position: 2
 ---
 
-When you use GitOps, a GitOps tool such as Argo CD applies each request to
-Kubernetes with its own ServiceAccount, so Kubernetes cannot see which user
-made the change. SKE records that user on the request itself, in three
-`kratix.io` annotations. The SKE portal integrations for Backstage and Cortex
-both write them.
+SKE records the person who last created or updated each resource request on
+the request itself, in three `kratix.io` annotations:
+
+- The SKE Platform Manager writes them when a person changes a request
+  directly through the Kubernetes API, for example with `kubectl`.
+- The SKE portal integrations for Backstage and Cortex write them when a
+  GitOps tool applies the request. Kubernetes only sees the GitOps tool's
+  ServiceAccount, so the portal records the person before the request goes to
+  git.
 
 ## Requirements
 
+- SKE Operator `<RELEASE_VERSION>` or later, and an SKE version that includes
+  the SKE Platform Manager `<RELEASE_VERSION>` or later.
+- Portal Controller `<RELEASE_VERSION>` or later (for Backstage and Cortex).
 - `@syntasso/plugin-ske-backend` `<RELEASE_VERSION>` or later (for Backstage).
-- Portal Controller `<RELEASE_VERSION>` or later.
 
 ## Annotations
 
 | Annotation | Value |
 |---|---|
-| `kratix.io/last-changed-by` | In Backstage, the value `userIdentifierQuery` finds on the person's User entity. In Cortex, the person's email address |
+| `kratix.io/last-changed-by` | For a request made directly, the part of the person's Kubernetes user info that [`userInfoField`](#user-info-field) names. In Backstage, the value `userIdentifierQuery` finds on the person's User entity. In Cortex, the person's email address |
 | `kratix.io/last-change-action` | `create` or `update` |
-| `kratix.io/last-changed-via` | The portal type: `backstage` or `cortex` |
+| `kratix.io/last-changed-via` | For a request made directly, the [field manager](#field-manager) the request sends. From a portal through GitOps, the portal type: `backstage` or `cortex` |
 
 ```yaml
 apiVersion: marketplace.kratix.io/v1alpha1
@@ -38,10 +44,99 @@ metadata:
     kratix.io/last-changed-via: backstage
 ```
 
-Every create or update from a portal replaces all three, so they describe
-the latest change, not the first one.
+Every create or update replaces all three, so they describe the latest change,
+not the first one.
 
-## Configuration
+## Requests made directly {#direct-requests}
+
+The SKE Platform Manager annotates every create and update of a resource
+request made directly through the Kubernetes API. This includes changes made
+with `kubectl`, the SKE MCP server, and Backstage in Kubernetes API mode with
+`authProvider: oidc`.
+
+The SKE Platform Manager replaces any `kratix.io/last-change*` annotations the
+request sends, so nobody can name someone else as the person who made the
+change.
+
+:::info Upgrading the SKE Platform Manager
+
+There is no setting to turn this off. After you upgrade, the SKE Platform
+Manager annotates every request made directly, and records the person's
+`username` until you set `userInfoField`.
+
+:::
+
+### Who is recorded {#user-info-field}
+
+`spec.attribution.userInfoField` on the Kratix resource chooses which part of
+the person's Kubernetes user info goes in `kratix.io/last-changed-by`:
+
+| Value | Records |
+|---|---|
+| `username` (default) | The username the API server gives the person, for example `oidc:alice` |
+| `uid` | The person's user ID |
+| `extra.<KEY>` | The first value of the extra field `<KEY>`, for example `extra.example.com/email` |
+
+When that field is empty for a person, SKE records their username instead.
+
+With OIDC, the API server sets the extra fields from the token's claims, using
+`claimMappings.extra` in its
+[authentication configuration](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens).
+For example, map the `email` claim to the key `example.com/email`, then set
+`userInfoField: extra.example.com/email`.
+
+### How the change was made {#field-manager}
+
+`kratix.io/last-changed-via` is the field manager the request sends:
+
+- `kubectl` sends one on every change, for example `kubectl-client-side-apply`
+  or `kubectl-edit`.
+- Backstage sends `backstage`.
+- The SKE MCP server sends `ske-mcp-server`.
+
+A request without a field manager gets `not-informed`.
+
+### Who is skipped {#skip-username-prefixes}
+
+The SKE Platform Manager does not annotate changes from usernames that start
+with `system:`. This covers Kratix itself and every ServiceAccount, including
+a GitOps tool that runs in the cluster, so the annotations a portal writes for
+a GitOps request are kept.
+
+If a GitOps tool logs in from outside the cluster, for example with a cloud IAM
+role, list the start of its username in `spec.attribution.skipUsernamePrefixes`.
+Otherwise the SKE Platform Manager records the GitOps tool in place of the
+person the portal recorded.
+
+A change from a skipped username keeps the `kratix.io/last-change*`
+annotations it sends.
+
+### Configuration
+
+Both fields are optional:
+
+```yaml
+apiVersion: platform.syntasso.io/v1alpha1
+kind: Kratix
+metadata:
+  name: my-kratix
+spec:
+  # highlight-start
+  attribution:
+    userInfoField: extra.example.com/email
+    skipUsernamePrefixes:
+      - "arn:aws:sts::<ACCOUNT_ID>:assumed-role/flux/"
+  # highlight-end
+```
+
+The Kratix resource rejects any other `userInfoField` value, and an empty
+prefix. When you change `spec.attribution`, the SKE Operator restarts the SKE
+Platform Manager so it picks up the change.
+
+To set these fields when you install SKE without the SKE Operator, see
+[Without the SKE Operator](#without-the-ske-operator).
+
+## Requests from a portal {#portals}
 
 ### Backstage
 
@@ -75,8 +170,8 @@ on the User entity. SKE cannot know where yours keeps them, so
 The SKE backend plugin reads the value from the signed-in user's entity
 when the request is submitted. A Template cannot set it.
 
-`userIdentifierQuery` is optional. Without it, requests from that portal
-get no annotations.
+`userIdentifierQuery` is optional. Without it, the portal does not annotate
+its requests.
 
 The request will fail when `userIdentifierQuery` is set in the following
 situations:
@@ -84,6 +179,12 @@ situations:
 - the person has no User entity in the catalog, for example a guest
 - the query finds no value, or the value is not text
 - the query does not start with `user.`
+
+In Kubernetes API mode with `authProvider: oidc`, Backstage changes the request
+as the signed-in person. The SKE Platform Manager then replaces the annotations,
+as it does for any [request made directly](#direct-requests). With
+`authProvider: serviceAccount`, or in GitOps or hybrid mode, the annotations
+from `userIdentifierQuery` are kept.
 
 :::info Upgrading the Backstage backend plugin
 
@@ -109,13 +210,10 @@ the old ones, so requests made before the upgrade keep their owner in Cortex.
 
 ## Requiring the annotation from a GitOps tool {#require-last-changed-by}
 
-By default, SKE does not check that a request says who made it. You can make
-SKE reject the requests your GitOps tool applies when they don't carry
-`kratix.io/last-changed-by`. Use this when every request in git should come
-from a portal.
-
-This needs SKE Operator `<RELEASE_VERSION>` or later, and an SKE version that
-includes the SKE Platform Manager `<RELEASE_VERSION>` or later.
+By default, SKE does not check that a request applied by a GitOps tool says
+who made it. You can make SKE reject the requests your GitOps tool applies when
+they don't carry `kratix.io/last-changed-by`. Use this when every request in
+git should come from a portal.
 
 ### Configuration
 
@@ -148,41 +246,6 @@ own installation.
 
 Without any ServiceAccounts listed, nothing is checked.
 
-#### Without the SKE Operator
-
-If you install SKE from the SKE distribution manifest instead of with the SKE
-Operator, create the ConfigMap the SKE Operator would write:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ske-platform-manager-config
-  namespace: kratix-platform-system
-data:
-  config: |
-    attribution:
-      requireAnnotationsFrom:
-        serviceAccounts:
-          - namespace: argocd
-            name: argocd-application-controller
-```
-
-The SKE Platform Manager only reads this ConfigMap when it starts, so restart
-it after you create or change the ConfigMap.
-
-:::warning
-
-If the SKE Platform Manager cannot read the `config` key, for example because
-it is not valid YAML, the SKE Platform Manager does not start. Check the
-ConfigMap before you restart it.
-
-:::
-
-```bash
-kubectl -n kratix-platform-system rollout restart deployment/ske-platform-manager
-```
-
 ### What is checked
 
 The SKE Platform Manager rejects a create or update of a resource request when
@@ -207,24 +270,73 @@ The check does not affect:
   carry the annotation
 - resources that are not resource requests
 
-### Limitations
+## Without the SKE Operator {#without-the-ske-operator}
 
-- **The check never blocks Kratix.** If the SKE Platform Manager is not
-  running, Kubernetes accepts the request without checking it.
-- **New Promises are not checked straight away.** For a few seconds after you
-  install a Promise, its requests are accepted without the check.
+If you install SKE from the SKE distribution manifest instead of with the SKE
+Operator, create the ConfigMap the SKE Operator would write. Its `config` key
+takes the same fields as `spec.attribution`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ske-platform-manager-config
+  namespace: kratix-platform-system
+data:
+  config: |
+    attribution:
+      userInfoField: extra.example.com/email
+      skipUsernamePrefixes:
+        - "arn:aws:sts::<ACCOUNT_ID>:assumed-role/flux/"
+      requireAnnotationsFrom:
+        serviceAccounts:
+          - namespace: argocd
+            name: argocd-application-controller
+```
+
+Without the ConfigMap, the SKE Platform Manager records the `username` for
+requests made directly, and checks nothing.
+
+If `userInfoField` is not one of the [supported values](#user-info-field), or
+a prefix is empty, the SKE Platform Manager logs an error and annotates no
+requests. It still runs the check for `requireAnnotationsFrom`.
+
+The SKE Platform Manager only reads this ConfigMap when it starts, so restart
+it after you create or change the ConfigMap.
+
+:::warning
+
+If the SKE Platform Manager cannot read the `config` key, for example because
+it is not valid YAML, the SKE Platform Manager does not start. Check the
+ConfigMap before you restart it.
+
+:::
+
+```bash
+kubectl -n kratix-platform-system rollout restart deployment/ske-platform-manager
+```
+
+## Limitations
+
+- **SKE never blocks a request when the SKE Platform Manager is down.** If the
+  SKE Platform Manager is not running, Kubernetes accepts the request without
+  annotating or checking it.
+- **New Promises are not covered straight away.** For a few seconds after you
+  install a Promise, its requests are accepted without annotations or the
+  check.
 - **Only the annotation's presence is checked.** SKE does not check that the
   value is the person who made the change. For example, if someone edits a
   request's file in git by hand and keeps the old annotation, the request is
   accepted.
-
-## Deletes and usage outside of a portal
-
-A delete through GitOps removes the request's file from git, so nothing
-records who deleted it.
-
-A request created outside a portal, for example with `kubectl`, has no
-annotations unless you add them.
+- **Deletes through GitOps are not recorded.** A delete through GitOps removes
+  the request's file from git, so nothing records who deleted it.
+- **A GitOps tool outside the cluster cannot be required to set the
+  annotation.** `requireAnnotationsFrom` only takes ServiceAccounts.
+- **The SKE MCP server does not pass the person's extra fields.** With OIDC,
+  SKE records `mcp:user:<SUB>` for its requests, even when `userInfoField`
+  names an extra field. With a static token, the SKE MCP server changes
+  requests as the `ske-mcp-server` ServiceAccount, which is skipped, so its
+  requests are not annotated.
 
 ## Related
 
