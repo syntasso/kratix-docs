@@ -138,9 +138,10 @@ slug: "/ske/releases/portal-patch"
 			return []string{"-create-draft", "-layout", layoutPath, "-hubspot-api", hubspot.URL}
 		}
 
-		runDraft := func(record string) {
-			session := start(record, draftArgs(), "HUBSPOT_ACCESS_TOKEN=test-token")
+		runDraft := func(record string, env ...string) *gexec.Session {
+			session := start(record, draftArgs(), append([]string{"HUBSPOT_ACCESS_TOKEN=test-token"}, env...)...)
 			Eventually(session).Should(gexec.Exit(0))
+			return session
 		}
 
 		read := func(path string) string {
@@ -223,6 +224,59 @@ slug: "/ske/releases/portal-patch"
 			}))
 			Expect(read(recordPath)).To(ContainSubstring(`"digestEmailId": "511778652367"`))
 			Expect(read(recordPath)).NotTo(ContainSubstring(`"5"`))
+		})
+
+		Describe("the log", func() {
+			It("explains each stage of creating a draft", func() {
+				session := runDraft(`{"goLive": "2026-11-09", "releases": []}`)
+
+				Expect(session.Err).To(gbytes.Say(`Release notes: read 2 releases from .*docs`))
+				Expect(session.Err).To(gbytes.Say(`Release record: go-live 2026-11-09, no releases recorded yet`))
+				Expect(session.Err).To(gbytes.Say(`Digest: 1 release on or after 2026-11-09`))
+				Expect(session.Err).To(gbytes.Say(`  - portal-patch@0\.8\.6 \(2026-11-09\)`))
+				Expect(session.Err).To(gbytes.Say(`HubSpot: created draft email 511778652367`))
+				Expect(session.Err).To(gbytes.Say(`Release record: 1 release recorded against email 511778652367`))
+				Expect(session.Err).To(gbytes.Say(`Earliest send date: \d{4}-\d{2}-\d{2} \(.+\)`))
+			})
+
+			It("says which recorded emails are pending, sent or deleted", func() {
+				emails["7"] = `{"id": "7", "state": "DRAFT"}`
+				emails["1"] = `{"id": "1", "state": "PUBLISHED", "publishDate": "2026-11-09T10:00:00Z"}`
+
+				session := runDraft(`{"goLive": "2026-11-06", "releases": [
+					{"id": "portal-patch@0.8.6", "digestEmailId": "7"},
+					{"id": "portal-patch@0.8.4", "digestEmailId": "1"},
+					{"id": "portal-patch@0.8.3", "digestEmailId": "5"}]}`)
+
+				Expect(session.Err).To(gbytes.Say(`Release record: go-live 2026-11-06, 3 releases recorded against 3 emails`))
+				Expect(session.Err).To(gbytes.Say(`HubSpot: email 7 is DRAFT: the pending draft`))
+				Expect(session.Err).To(gbytes.Say(`HubSpot: email 1 is PUBLISHED \(2026-11-09T10:00:00Z\): its releases stay out of the digest`))
+				Expect(session.Err).To(gbytes.Say(`HubSpot: email 5 has been deleted: its releases go back into the digest`))
+				Expect(session.Err).To(gbytes.Say(`HubSpot: updated draft email 7`))
+			})
+
+			It("says when there is nothing to send and the record is unchanged", func() {
+				emails["1"] = `{"id": "1", "state": "PUBLISHED", "publishDate": "2026-11-09T10:00:00Z"}`
+
+				session := runDraft(`{"goLive": "2026-11-09", "releases": [{"id": "portal-patch@0.8.6", "digestEmailId": "1"}]}`)
+
+				Expect(session.Err).To(gbytes.Say(`Digest: nothing to send`))
+				Expect(session.Err).To(gbytes.Say(`HubSpot: no draft to create or update`))
+				Expect(session.Err).To(gbytes.Say(`Release record: unchanged`))
+			})
+
+			It("says HubSpot was not contacted without -create-draft", func() {
+				session := start(`{"goLive": "2026-11-09", "releases": []}`, nil)
+				Eventually(session).Should(gexec.Exit(0))
+
+				Expect(session.Err).To(gbytes.Say(`HubSpot: not contacted. A release with a recorded email counts as sent. Run with -create-draft`))
+			})
+
+			It("raises a notice on the GitHub run page", func() {
+				session := runDraft(`{"goLive": "2026-11-09", "releases": []}`, "GITHUB_ACTIONS=true")
+
+				Expect(session.Err).To(gbytes.Say(`::notice title=Release digest::Created HubSpot draft email 511778652367 with 1 release\. Send it no earlier than \d{4}-\d{2}-\d{2}\.`))
+			})
 		})
 
 		It("does not contact HubSpot without -create-draft", func() {

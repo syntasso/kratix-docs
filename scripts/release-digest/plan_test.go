@@ -46,6 +46,7 @@ var _ = Describe("PlanDigest", func() {
 		Expect(ids(plan.Releases)).To(Equal([]string{"a@1.0.0", "b@1.0.0", "c@1.0.0"}))
 		Expect(plan.DraftEmailID).To(BeEmpty())
 		Expect(plan.SendNotBefore).To(Equal("2026-11-10"))
+		Expect(plan.SendNotBeforeReason).To(Equal("no digest has been scheduled or sent today"))
 	})
 
 	It("leaves out releases whose email is scheduled or sent", func() {
@@ -111,7 +112,9 @@ var _ = Describe("PlanDigest", func() {
 		}
 
 		It("holds the digest until the next business day when one is scheduled for today", func() {
-			Expect(plan(sentAt("SCHEDULED", "2026-11-10T15:00:00Z"), tuesday).SendNotBefore).To(Equal("2026-11-11"))
+			p := plan(sentAt("SCHEDULED", "2026-11-10T15:00:00Z"), tuesday)
+			Expect(p.SendNotBefore).To(Equal("2026-11-11"))
+			Expect(p.SendNotBeforeReason).To(Equal("a digest is already scheduled or sent today"))
 		})
 
 		It("holds the digest until the next business day when one was sent today", func() {
@@ -136,7 +139,9 @@ var _ = Describe("PlanDigest", func() {
 
 		It("moves a weekend to Monday", func() {
 			saturday := time.Date(2026, 11, 14, 10, 0, 0, 0, london)
-			Expect(digest.PlanDigest(record(), releases, nil, saturday).SendNotBefore).To(Equal("2026-11-16"))
+			p := digest.PlanDigest(record(), releases, nil, saturday)
+			Expect(p.SendNotBefore).To(Equal("2026-11-16"))
+			Expect(p.SendNotBeforeReason).To(Equal("digests only go out on weekdays"))
 		})
 	})
 })

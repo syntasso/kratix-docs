@@ -21,6 +21,8 @@ type Plan struct {
 	// SendNotBefore is the earliest day, in UK time, the digest may be sent:
 	// at most one digest goes out a day, and only on weekdays.
 	SendNotBefore string
+	// SendNotBeforeReason says why, in words for the run's log.
+	SendNotBeforeReason string
 }
 
 // PlanDigest decides what the digest holds and which email it goes into.
@@ -56,14 +58,17 @@ func PlanDigest(record Record, releases []Release, emails map[string]EmailState,
 	}
 	sortNewestFirst(pending)
 
-	return Plan{Releases: pending, DraftEmailID: draft, SendNotBefore: sendNotBefore(emails, now)}
+	day, reason := sendNotBefore(emails, now)
+	return Plan{Releases: pending, DraftEmailID: draft, SendNotBefore: day, SendNotBeforeReason: reason}
 }
 
 // sendNotBefore is today, or the next weekday if today is a weekend or a
-// digest is already scheduled or sent today, in now's time zone.
-func sendNotBefore(emails map[string]EmailState, now time.Time) string {
+// digest is already scheduled or sent today, in now's time zone. It also
+// says why.
+func sendNotBefore(emails map[string]EmailState, now time.Time) (string, string) {
 	today := now.Format("2006-01-02")
 	day := now
+	reason := "no digest has been scheduled or sent today"
 	for _, e := range emails {
 		if e.Deleted || e.State == "DRAFT" || e.PublishDate == "" {
 			continue
@@ -71,11 +76,17 @@ func sendNotBefore(emails map[string]EmailState, now time.Time) string {
 		published, err := time.Parse(time.RFC3339, e.PublishDate)
 		if err == nil && published.In(now.Location()).Format("2006-01-02") == today {
 			day = day.AddDate(0, 0, 1)
+			reason = "a digest is already scheduled or sent today"
 			break
 		}
 	}
-	for day.Weekday() == time.Saturday || day.Weekday() == time.Sunday {
-		day = day.AddDate(0, 0, 1)
+	if day.Weekday() == time.Saturday || day.Weekday() == time.Sunday {
+		if day.Format("2006-01-02") == today {
+			reason = "digests only go out on weekdays"
+		}
+		for day.Weekday() == time.Saturday || day.Weekday() == time.Sunday {
+			day = day.AddDate(0, 0, 1)
+		}
 	}
-	return day.Format("2006-01-02")
+	return day.Format("2006-01-02"), reason
 }
