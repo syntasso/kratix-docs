@@ -126,6 +126,48 @@ func (c Client) CreateDraft(ctx context.Context, d Draft) (string, error) {
 	return created.ID, nil
 }
 
+// EmailStatus is what CI needs to know about a recorded digest email.
+type EmailStatus struct {
+	// State is HubSpot's state, such as DRAFT, SCHEDULED or PUBLISHED.
+	State string
+	// PublishDate is when the email is or was sent, if it has been scheduled.
+	PublishDate string
+	// Deleted is true when HubSpot no longer has the email.
+	Deleted bool
+}
+
+// EmailStatus reads an email's state. An email HubSpot no longer has is
+// reported as deleted rather than as an error.
+func (c Client) EmailStatus(ctx context.Context, id string) (EmailStatus, error) {
+	var email struct {
+		State       string `json:"state"`
+		PublishDate string `json:"publishDate"`
+	}
+	err := c.do(ctx, http.MethodGet, "/marketing/v3/emails/"+id, nil, &email)
+	var failure *apiError
+	if errors.As(err, &failure) && failure.Status == http.StatusNotFound {
+		return EmailStatus{Deleted: true}, nil
+	}
+	if err != nil {
+		return EmailStatus{}, fmt.Errorf("reading email %s: %w", id, err)
+	}
+	return EmailStatus{State: email.State, PublishDate: email.PublishDate}, nil
+}
+
+// UpdateDraft replaces an existing email's draft subject and whole body. The
+// email's name is left as it is.
+func (c Client) UpdateDraft(ctx context.Context, id string, d Draft) error {
+	content, err := d.Layout.withBody(d.HTML)
+	if err == nil {
+		err = c.do(ctx, http.MethodPatch, "/marketing/v3/emails/"+id+"/draft",
+			map[string]any{"subject": d.Subject, "content": content}, nil)
+	}
+	if err != nil {
+		return fmt.Errorf("updating email %s: %w", id, err)
+	}
+	return nil
+}
+
 func (c Client) do(ctx context.Context, method, path string, body, result any) error {
 	var reader io.Reader
 	if body != nil {
