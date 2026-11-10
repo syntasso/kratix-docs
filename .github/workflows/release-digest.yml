@@ -2,7 +2,9 @@ name: Release digest
 
 # Plans the next SKE release digest email from the release-notes pages and
 # writes it to the job outputs. A manual run with create_draft ticked also
-# creates the email as a HubSpot draft. Nothing is ever published or sent.
+# creates the email as a HubSpot draft, or regenerates the pending one, and
+# commits the updated release record to the branch it ran on. Nothing is ever
+# published or sent.
 
 on:
   push:
@@ -18,12 +20,21 @@ on:
   workflow_dispatch:
     inputs:
       create_draft:
-        description: Also create the planned email as a HubSpot draft
+        description: Also create or update the HubSpot draft, and commit the release record
         type: boolean
         default: false
 
 permissions:
   contents: read
+
+# One run at a time per event type and branch (or pull request), so a manual
+# run's record commit lands before the next manual run reads the record. A
+# newer queued run replaces an older queued one of the same kind, which is
+# fine: each run rebuilds the whole digest. Push runs only plan, so they queue
+# separately and can never replace a waiting manual run.
+concurrency:
+  group: release-digest-${{ github.event_name }}-${{ github.event_name == 'pull_request' && github.event.number || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -48,8 +59,15 @@ jobs:
       subject: ${{ steps.plan.outputs.subject }}
       html: ${{ steps.plan.outputs.html }}
       email_id: ${{ steps.plan.outputs.email_id }}
+      draft_action: ${{ steps.plan.outputs.draft_action }}
+      record_changed: ${{ steps.plan.outputs.record_changed }}
+      send_not_before: ${{ steps.plan.outputs.send_not_before }}
     steps:
+      # The branch's latest commit, not the one that started the run, so the
+      # record includes the previous run's commit.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-go@v5
         with:
           go-version-file: scripts/release-digest/go.mod
@@ -68,3 +86,48 @@ jobs:
             args+=(-create-draft)
           fi
           "$RUNNER_TEMP/release-digest" "${args[@]}"
+      - name: Keep the updated release record
+        if: steps.plan.outputs.record_changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-record
+          path: scripts/release-digest/release-record.json
+          retention-days: 7
+
+  record:
+    needs: plan
+    if: needs.plan.outputs.record_changed == 'true'
+    runs-on: ubuntu-latest
+    # Only this job can push, and only the release record.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-record
+          path: scripts/release-digest
+      - name: Commit the release record
+        env:
+          EMAIL_ID: ${{ needs.plan.outputs.email_id }}
+          BRANCH: ${{ github.ref_name }}
+        # Pushes made with GITHUB_TOKEN do not start new workflow runs.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/release-digest/release-record.json
+          if git diff --cached --quiet; then
+            echo "The release record is already up to date."
+            exit 0
+          fi
+          git commit -m "chore(release-digest): record digest email $EMAIL_ID"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:$BRANCH"; then
+              exit 0
+            fi
+            git pull --rebase origin "$BRANCH"
+          done
+          echo "Could not push the release record after 3 attempts." >&2
+          exit 1
