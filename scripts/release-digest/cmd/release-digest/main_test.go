@@ -60,7 +60,7 @@ slug: "/ske/releases/portal-patch"
 		output, err := os.ReadFile(outputPath)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(output)).To(ContainSubstring("has_releases=true\n"))
-		Expect(string(output)).To(ContainSubstring(`release_ids=["portal-patch@v0.8.6"]`))
+		Expect(string(output)).To(ContainSubstring(`release_ids=["portal-patch@0.8.6"]`))
 		Expect(string(output)).To(ContainSubstring("subject=SKE release updates: Portal Patch\n"))
 		Expect(string(output)).To(ContainSubstring("<h2>Portal Patch v0.8.6</h2>"))
 		Expect(string(output)).NotTo(ContainSubstring("v0.8.5"))
@@ -72,7 +72,7 @@ slug: "/ske/releases/portal-patch"
 	})
 
 	It("reports nothing to send when every release is already in a digest email", func() {
-		run(`{"goLive": "2026-11-09", "releases": [{"id": "portal-patch@v0.8.6", "digestEmailId": "38175169118"}]}`)
+		run(`{"goLive": "2026-11-09", "releases": [{"id": "portal-patch@0.8.6", "digestEmailId": "38175169118"}]}`)
 
 		output, err := os.ReadFile(outputPath)
 		Expect(err).NotTo(HaveOccurred())
