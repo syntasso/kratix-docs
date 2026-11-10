@@ -41,6 +41,8 @@ var (
 	linkPattern          = regexp.MustCompile(`\[([^\]]*)\]\([^)]*\)`)
 	fencePattern         = regexp.MustCompile("^\\s*(```|~~~)")
 	dayFirstPattern      = regexp.MustCompile(`^(\d{2})-(\d{2})-(\d{4})$`)
+	versionPattern       = regexp.MustCompile(`\bv?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)`)
+	nonWordPattern       = regexp.MustCompile(`[^a-z0-9]+`)
 	frontMatterPattern   = regexp.MustCompile(`(?s)^---\n(.*?)\n---`)
 	fieldPattern         = regexp.MustCompile(`^(\w+):\s*(.*)$`)
 )
@@ -111,15 +113,15 @@ func ParseReleasePage(source string) []Release {
 			continue
 		}
 
-		labelParts := []string{}
+		groupNames := []string{}
 		for _, groupLevel := range sortedLevelsBelow(groups, level) {
-			labelParts = append(labelParts, groups[groupLevel])
+			groupNames = append(groupNames, groups[groupLevel])
 		}
-		labelParts = append(labelParts, strings.TrimSpace(linkPattern.ReplaceAllString(title[1], "$1")))
-		label := strings.Join(labelParts, " ")
+		heading := strings.TrimSpace(linkPattern.ReplaceAllString(title[1], "$1"))
+		label := strings.Join(append(append([]string{}, groupNames...), heading), " ")
 
 		releases = append(releases, Release{
-			ID:        fmt.Sprintf("%s@%s", componentKey, label),
+			ID:        releaseID(componentKey, groupNames, heading),
 			Component: component,
 			Label:     label,
 			Date:      isoDate(title[2]),
@@ -209,4 +211,37 @@ func LoadReleases(fsys fs.FS) ([]Release, error) {
 		return nil
 	})
 	return releases, err
+}
+
+// releaseID identifies a release by its component and version, so rewording a
+// heading does not make an emailed release look new. A package name before a
+// version is kept (normalised), because one page can list several packages
+// that share a version number: the SKE Operator and its Helm Chart, or the
+// Backstage frontend and backend. A name that only repeats the page's
+// component is dropped. A heading with no version number falls back to its
+// wording.
+func releaseID(componentKey string, groupNames []string, heading string) string {
+	parts := []string{}
+	for _, segment := range strings.Split(heading, ";") {
+		match := versionPattern.FindStringSubmatchIndex(segment)
+		if match == nil {
+			continue
+		}
+		version := segment[match[2]:match[3]]
+		name := strings.Trim(nonWordPattern.ReplaceAllString(strings.ToLower(segment[:match[0]]), "-"), "-")
+		if name == "" || name == componentKey {
+			parts = append(parts, version)
+		} else {
+			parts = append(parts, name+"-"+version)
+		}
+	}
+
+	if len(parts) == 0 {
+		return fmt.Sprintf("%s@%s", componentKey, heading)
+	}
+	id := strings.Join(parts, "+")
+	if len(groupNames) > 0 {
+		id = strings.Join(groupNames, "-") + "-" + id
+	}
+	return fmt.Sprintf("%s@%s", componentKey, id)
 }
