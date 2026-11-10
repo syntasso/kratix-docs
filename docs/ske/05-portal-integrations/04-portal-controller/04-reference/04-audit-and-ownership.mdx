@@ -169,7 +169,15 @@ data:
 ```
 
 The SKE Platform Manager only reads this ConfigMap when it starts, so restart
-it after you create or change the ConfigMap:
+it after you create or change the ConfigMap.
+
+:::warning
+
+If the SKE Platform Manager cannot read the `config` key, for example because
+it is not valid YAML, the SKE Platform Manager does not start. Check the
+ConfigMap before you restart it.
+
+:::
 
 ```bash
 kubectl -n kratix-platform-system rollout restart deployment/ske-platform-manager
