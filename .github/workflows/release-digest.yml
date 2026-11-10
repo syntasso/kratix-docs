@@ -53,7 +53,7 @@ jobs:
       - name: Run the specs
         working-directory: scripts/release-digest
         run: go run github.com/onsi/ginkgo/v2/ginkgo -r --json-report=ginkgo-report.json --output-dir="$RUNNER_TEMP"
-      # One line per spec in the log, and the same list on the run's summary page.
+      # One line per spec in the log.
       - name: List each spec and its result
         if: always()
         run: |
@@ -70,13 +70,6 @@ jobs:
           echo "$passed of $total specs passed."
           echo
           echo "$lines"
-          {
-            echo "## Release digest specs: $passed of $total passed"
-            echo
-            echo '```'
-            echo "$lines"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
 
   plan:
     name: Plan the digest email
@@ -156,7 +149,8 @@ jobs:
           EMAIL_ID: ${{ needs.plan.outputs.email_id }}
           DRAFT_ACTION: ${{ needs.plan.outputs.draft_action }}
           BRANCH: ${{ github.ref_name }}
-        # Pushes made with GITHUB_TOKEN do not start new workflow runs.
+        # A push made with GITHUB_TOKEN does not run this workflow's jobs. On a pull
+        # request branch GitHub creates a run that waits for approval, and nothing runs.
         run: |
           if [ -n "$EMAIL_ID" ]; then
             echo "The plan job $DRAFT_ACTION HubSpot draft email $EMAIL_ID and changed the release record."
