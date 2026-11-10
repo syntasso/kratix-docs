@@ -316,28 +316,6 @@ ConfigMap before you restart it.
 kubectl -n kratix-platform-system rollout restart deployment/ske-platform-manager
 ```
 
-## Limitations
-
-- **SKE never blocks a request when the SKE Platform Manager is down.** If the
-  SKE Platform Manager is not running, Kubernetes accepts the request without
-  annotating or checking it.
-- **New Promises are not covered straight away.** For a few seconds after you
-  install a Promise, its requests are accepted without annotations or the
-  check.
-- **Only the annotation's presence is checked.** SKE does not check that the
-  value is the person who made the change. For example, if someone edits a
-  request's file in git by hand and keeps the old annotation, the request is
-  accepted.
-- **Deletes through GitOps are not recorded.** A delete through GitOps removes
-  the request's file from git, so nothing records who deleted it.
-- **A GitOps tool outside the cluster cannot be required to set the
-  annotation.** `requireAnnotationsFrom` only takes ServiceAccounts.
-- **The SKE MCP server does not pass the person's extra fields.** With OIDC,
-  SKE records `mcp:user:<SUB>` for its requests, even when `userInfoField`
-  names an extra field. With a static token, the SKE MCP server changes
-  requests as the `ske-mcp-server` ServiceAccount, which is skipped, so its
-  requests are not annotated.
-
 ## Related
 
 - [Recording requesters in the audit log](/ske/operations/audit-log)
