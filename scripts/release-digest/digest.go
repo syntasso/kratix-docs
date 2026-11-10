@@ -55,12 +55,7 @@ func SelectPending(record Record, releases []Release) []Release {
 			pending = append(pending, r)
 		}
 	}
-	sort.SliceStable(pending, func(i, j int) bool {
-		if pending[i].Date != pending[j].Date {
-			return pending[i].Date > pending[j].Date
-		}
-		return pending[i].Component < pending[j].Component
-	})
+	sortNewestFirst(pending)
 	return pending
 }
 
@@ -169,4 +164,14 @@ func renderMarkdown(source string) string {
 		return "<pre>" + html.EscapeString(source) + "</pre>"
 	}
 	return strings.TrimSpace(out.String())
+}
+
+// sortNewestFirst orders releases newest first, then by component.
+func sortNewestFirst(releases []Release) {
+	sort.SliceStable(releases, func(i, j int) bool {
+		if releases[i].Date != releases[j].Date {
+			return releases[i].Date > releases[j].Date
+		}
+		return releases[i].Component < releases[j].Component
+	})
 }
