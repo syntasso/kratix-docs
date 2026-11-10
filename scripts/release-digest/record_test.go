@@ -68,6 +68,41 @@ var _ = Describe("Record", func() {
 `))
 		})
 
+		It("writes each digest's Slack IDs and hold end, keyed by email ID", func() {
+			record := digest.Record{GoLive: "2026-11-09", Digests: map[string]digest.DigestRecord{
+				"511951193336": {
+					SlackChannel:            "C0123456789",
+					SlackMessageTs:          "1772618400.000100",
+					SlackScheduledMessageID: "Q1298393284",
+					HoldEndsAt:              "2026-11-10T13:00:00Z",
+				},
+			}}
+
+			Expect(string(digest.MarshalRecord(record))).To(Equal(`{
+  "goLive": "2026-11-09",
+  "releases": [],
+  "digests": {
+    "511951193336": {
+      "slackChannel": "C0123456789",
+      "slackMessageTs": "1772618400.000100",
+      "slackScheduledMessageId": "Q1298393284",
+      "holdEndsAt": "2026-11-10T13:00:00Z"
+    }
+  }
+}
+`))
+		})
+
+		It("leaves a digest's empty fields out", func() {
+			record := digest.Record{GoLive: "2026-11-09", Digests: map[string]digest.DigestRecord{
+				"1": {HoldEndsAt: "2026-11-10T13:00:00Z"},
+			}}
+
+			Expect(string(digest.MarshalRecord(record))).To(ContainSubstring(`"1": {
+      "holdEndsAt": "2026-11-10T13:00:00Z"
+    }`))
+		})
+
 		It("writes an empty list, not null, when there are no releases", func() {
 			Expect(string(digest.MarshalRecord(digest.Record{GoLive: "2026-11-09"}))).To(Equal(`{
   "goLive": "2026-11-09",
