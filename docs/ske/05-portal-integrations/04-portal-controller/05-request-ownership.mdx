@@ -10,11 +10,12 @@ sidebar_position: 3.5
 When a GitOps tool applies a resource request, Kubernetes only sees the GitOps
 tool's ServiceAccount. So the SKE portal integrations for Backstage and Cortex
 record the person on the request before it goes to git, in the
-[`kratix.io/last-change*` annotations](/ske/operations/audit#annotations).
+[`kratix.io/last-change*` annotations](/ske/operations/audit/requester#annotations).
 
 This page covers how to set up each portal. For the annotations themselves,
 requests made directly with `kubectl`, the audit log, and how to require the
-annotation from your GitOps tool, see [Audit your platform](/ske/operations/audit).
+annotation from your GitOps tool, see
+[Recording who changed a request](/ske/operations/audit/requester).
 
 ## Requirements {#requirements}
 
@@ -65,7 +66,7 @@ situations:
 
 In Kubernetes API mode with `authProvider: oidc`, Backstage changes the request
 as the signed-in person. The SKE Platform Manager then replaces the annotations,
-as it does for any [request made directly](/ske/operations/audit#annotations).
+as it does for any [request made directly](/ske/operations/audit/requester#annotations).
 With `authProvider: serviceAccount`, or in GitOps or hybrid mode, the
 annotations from `userIdentifierQuery` are kept.
 

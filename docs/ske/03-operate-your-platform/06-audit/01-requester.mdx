@@ -1,10 +1,10 @@
 ---
-title: Audit your platform
+title: Recording who changed a request
 description: Find who created, updated or deleted each resource request, on the request itself and in the Kubernetes audit log
 keywords: [audit, audit log, attribution, last-changed-by, userInfoField, skipUsernamePrefixes, requireAnnotationsFrom, gitops, oidc, kubectl]
-slug: "/ske/operations/audit"
-sidebar_label: "Audit your platform"
-sidebar_position: 2.7
+slug: "/ske/operations/audit/requester"
+sidebar_label: "Who changed a request"
+sidebar_position: 2
 ---
 
 SKE records who changes each resource request in two places:
@@ -232,6 +232,11 @@ The Kubernetes API server audit log must be turned on, with a policy that logs
 writes to resource requests at the `Metadata` level or above. The default
 audit policies of managed Kubernetes services, such as AKS, EKS and GKE,
 already do this.
+
+To turn on the audit log, find it, and count the people using your platform,
+see the guide for your cluster:
+
+- [Amazon EKS](/ske/operations/audit/eks)
 
 If you run your own API server, a rule like this one logs every write:
 
