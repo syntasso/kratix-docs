@@ -42,7 +42,7 @@ Creates or updates a **[Resource Request](/main/reference/resources/intro)** —
 | Field | Type | Description |
 |---|---|---|
 | `manifest` | `string` | The [Resource Request](/main/reference/resources/intro) manifest, i.e. an instance of the CRD defined by the target Promise's API |
-| `userIdentifierQuery` | `string` (optional) | Path into the signed-in user's catalog entity whose value goes in `kratix.io/last-changed-by`, for example `user.spec.profile.email`. When set, the action adds the three `kratix.io/last-change*` annotations to the manifest. The Portal Controller sets it in the Templates it generates, from the portal's [`userIdentifierQuery`](/ske/integrations/portal-controller/audit-and-ownership#backstage). From `v0.26.0` |
+| `userIdentifierQuery` | `string` (optional) | Path into the signed-in user's catalog entity whose value goes in `kratix.io/last-changed-by`, for example `user.spec.profile.email`. When set, the action adds the three `kratix.io/last-change*` annotations to the manifest. The Portal Controller sets it in the Templates it generates, from the portal's [`userIdentifierQuery`](/ske/integrations/portal-controller/request-ownership#backstage). From `v0.26.0` |
 | `lastChangeAction` | `string` (optional) | `create` or `update`, written to `kratix.io/last-change-action`. Required when `userIdentifierQuery` is set. From `v0.26.0` |
 
 **Output**
@@ -80,7 +80,7 @@ Writes a file to the **scaffolder workspace** — the temporary working director
 |---|---|---|
 | `manifest` | `string` | The file contents to write — a Resource Request manifest, a Backstage catalog entity file, or any other text the Template needs to stage |
 | `targetPath` | `string` | Relative path *within the scaffolder workspace* to write the file to, e.g. `manifests/my-resource.yaml`. Intermediate directories are created automatically |
-| `userIdentifierQuery` | `string` (optional) | Path into the signed-in user's catalog entity whose value goes in `kratix.io/last-changed-by`, for example `user.spec.profile.email`. When set, the action adds the three `kratix.io/last-change*` annotations to the manifest. The Portal Controller sets it in the Templates it generates, from the portal's [`userIdentifierQuery`](/ske/integrations/portal-controller/audit-and-ownership#backstage). From `v0.26.0` |
+| `userIdentifierQuery` | `string` (optional) | Path into the signed-in user's catalog entity whose value goes in `kratix.io/last-changed-by`, for example `user.spec.profile.email`. When set, the action adds the three `kratix.io/last-change*` annotations to the manifest. The Portal Controller sets it in the Templates it generates, from the portal's [`userIdentifierQuery`](/ske/integrations/portal-controller/request-ownership#backstage). From `v0.26.0` |
 | `lastChangeAction` | `string` (optional) | `create` or `update`, written to `kratix.io/last-change-action`. Required when `userIdentifierQuery` is set. From `v0.26.0` |
 
 **Output**
