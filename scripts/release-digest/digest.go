@@ -20,11 +20,21 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-// Record is the release record: when digests started, and which digest email
-// each release went into.
+// Record is the release record: when digests started, which digest email
+// each release went into, and each digest's Slack message and hold.
 type Record struct {
-	GoLive   string            `json:"goLive"`
-	Releases []RecordedRelease `json:"releases"`
+	GoLive   string                  `json:"goLive"`
+	Releases []RecordedRelease       `json:"releases"`
+	Digests  map[string]DigestRecord `json:"digests,omitempty"`
+}
+
+// DigestRecord is a digest email's Slack message, its scheduled hold-end
+// ping, and when the hold ends (RFC 3339).
+type DigestRecord struct {
+	SlackChannel            string `json:"slackChannel,omitempty"`
+	SlackMessageTs          string `json:"slackMessageTs,omitempty"`
+	SlackScheduledMessageID string `json:"slackScheduledMessageId,omitempty"`
+	HoldEndsAt              string `json:"holdEndsAt,omitempty"`
 }
 
 // RecordedRelease ties one release to the digest email it went into.
