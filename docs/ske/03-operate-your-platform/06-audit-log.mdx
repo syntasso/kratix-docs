@@ -50,9 +50,9 @@ Its value depends on who made the change:
 
 | Who made the change | Value |
 |---|---|
-| A person, for example with `kubectl` | The person's identity, read from [`spec.attribution.userInfoField`](/ske/integrations/portal-controller/reference/audit-and-ownership#user-info-field) |
+| A person, for example with `kubectl` | The person's identity, read from [`spec.attribution.userInfoField`](/ske/integrations/portal-controller/audit-and-ownership#user-info-field) |
 | A GitOps tool listed in `spec.attribution.requireAnnotationsFrom.serviceAccounts` | The `kratix.io/last-changed-by` annotation the portal set on the request |
-| Kratix itself, or a username starting with `system:` or one of [`spec.attribution.skipUsernamePrefixes`](/ske/integrations/portal-controller/reference/audit-and-ownership#skip-username-prefixes) | No annotation |
+| Kratix itself, or a username starting with `system:` or one of [`spec.attribution.skipUsernamePrefixes`](/ske/integrations/portal-controller/audit-and-ownership#skip-username-prefixes) | No annotation |
 
 Kratix's own changes, such as adding finalizers or updating the status, are
 never recorded as a person's change.
@@ -85,4 +85,4 @@ jq -r '.annotations["attribution.platform.syntasso.io/last-changed-by"] // empty
 
 ## Related
 
-- [Recording resource request ownership](/ske/integrations/portal-controller/reference/audit-and-ownership)
+- [Recording resource request ownership](/ske/integrations/portal-controller/audit-and-ownership)

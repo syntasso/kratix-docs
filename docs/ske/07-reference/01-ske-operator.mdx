@@ -50,9 +50,9 @@ resource is managed by the SKE Operator.
       dryRun: false # preview feature, see Kratix Config for details
     attribution:
       userInfoField: username # What kratix.io/last-changed-by records: username, uid, or extra.<KEY>
-      skipUsernamePrefixes: [] # Username prefixes, besides system:, whose changes are not annotated
+      skipUsernamePrefixes: [] # Username prefixes whose changes are not annotated
       requireAnnotationsFrom:
-        serviceAccounts: # Reject resource requests from these ServiceAccounts that don't set kratix.io/last-changed-by
+        serviceAccounts: # Requests under these accounts must have the kratix.io/last-changed-by annotation
           - namespace: argocd
             name: argocd-application-controller
     tlsConfig:
@@ -157,9 +157,9 @@ definition in the distribution manifest.
 
 | Field | Description |
 |---|---|
-| `attribution.userInfoField` | What `kratix.io/last-changed-by` records for a request made directly: `username` (the default), `uid`, or `extra.<KEY>`. See [Who is recorded](/ske/integrations/portal-controller/reference/audit-and-ownership#user-info-field). |
-| `attribution.skipUsernamePrefixes` | Username prefixes whose changes are not annotated. `system:` is always skipped. See [Who is skipped](/ske/integrations/portal-controller/reference/audit-and-ownership#skip-username-prefixes). |
-| `attribution.requireAnnotationsFrom.serviceAccounts` | ServiceAccounts, by `namespace` and `name`, whose creates and updates of resource requests must set `kratix.io/last-changed-by`. Off when empty. See [Requiring the annotation from a GitOps tool](/ske/integrations/portal-controller/reference/audit-and-ownership#require-last-changed-by). |
+| `attribution.userInfoField` | What `kratix.io/last-changed-by` records for a request made directly: `username` (the default), `uid`, or `extra.<KEY>`. See [Who is recorded](/ske/integrations/portal-controller/audit-and-ownership#user-info-field). |
+| `attribution.skipUsernamePrefixes` | Username prefixes whose changes are not annotated. `system:` is always skipped. See [Who is skipped](/ske/integrations/portal-controller/audit-and-ownership#skip-username-prefixes). |
+| `attribution.requireAnnotationsFrom.serviceAccounts` | ServiceAccounts, by `namespace` and `name`, whose creates and updates of resource requests must set `kratix.io/last-changed-by`. Off when empty. See [Requiring the annotation from a GitOps tool](/ske/integrations/portal-controller/audit-and-ownership#require-last-changed-by). |
 
 ## The SKEIntegration CRD {#skeintegration-crd}
 
