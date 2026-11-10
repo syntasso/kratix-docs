@@ -3,6 +3,11 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # The site does not use the release digest tool, so a change to only
+    # these files does not need a deploy.
+    paths-ignore:
+      - scripts/release-digest/**
+      - .github/workflows/release-digest.yml
   workflow_dispatch:
 
 # The push to gh-pages is done with the deploy key, so the token only needs
