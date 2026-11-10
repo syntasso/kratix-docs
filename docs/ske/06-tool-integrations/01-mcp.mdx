@@ -54,6 +54,7 @@ Configure the Deployment with at least:
 | `OIDC_GROUPS_CLAIM` | Token claim containing the caller's groups | `groups` |
 | `IMPERSONATION_USER_PREFIX` | Prefix added to human identities before Kubernetes sees them | `mcp:user:` |
 | `IMPERSONATION_GROUP_PREFIX` | Prefix added to token groups before Kubernetes sees them | Empty |
+| `IMPERSONATION_EMAIL_EXTRA_KEY` | Key under which the server sends the caller's email to Kubernetes. See [Recording who made a request](#recording-who-made-a-request) | Empty |
 
 Your identity provider may require additional configuration, such as an audience mapper or a rule that identifies machine clients correctly.
 
@@ -78,8 +79,10 @@ kubectl apply -f deploy/kubernetes/
 
 Both installation methods give the ServiceAccount permission to impersonate callers. You must separately create Roles and RoleBindings for the Promise request resources those callers may use. The server does not create customer-specific access rules.
 
+If you set `IMPERSONATION_EMAIL_EXTRA_KEY`, the ServiceAccount also needs `impersonate` on `userextras/<KEY>` in the `authentication.k8s.io` API group, or Kubernetes refuses the impersonated requests. The release manifests grant it for `example.com/email`. With the Helm chart, set `rbac.impersonation.emailExtraKey`, which sets both the variable and the rule.
+
 :::info Development mode
-`MCP_AUTH_TOKEN` enables a shared bearer token for local development. It disables OIDC, OAuth scopes and per-caller impersonation, so every Kubernetes operation uses the server's ServiceAccount. Do not use this mode for customer-facing deployments.
+`MCP_AUTH_TOKEN` enables a shared bearer token for local development. It disables OIDC, OAuth scopes and per-caller impersonation, so every Kubernetes operation uses the server's ServiceAccount. The server records the person named in the `X-User-Identity` header, which anyone with the token can set. Do not use this mode for customer-facing deployments.
 :::
 
 ## Connecting users
@@ -138,7 +141,7 @@ When OIDC and impersonation RBAC are enabled, request-resource operations run as
 
 1. **The user authenticates.** The identity provider issues a token containing their identity, groups and OAuth scopes.
 2. **The server verifies and maps the identity.** It validates the token, then derives the Kubernetes username and groups. The server uses its own ServiceAccount credential; it never receives or forwards the user's Kubernetes credentials.
-3. **Kubernetes authorises the operation.** The server sends `Impersonate-User` and `Impersonate-Group` headers. Kubernetes evaluates every RoleBinding and ClusterRoleBinding applying to that effective identity.
+3. **Kubernetes authorises the operation.** The server sends `Impersonate-User` and `Impersonate-Group` headers. With `IMPERSONATION_EMAIL_EXTRA_KEY`, it also sends the caller's email. Kubernetes evaluates every RoleBinding and ClusterRoleBinding applying to that effective identity.
 
 ![Per-caller RBAC flow](/img/ske/mcp/per-caller-rbac.svg)
 
@@ -169,6 +172,14 @@ You can bind RBAC directly to one machine username. Use `IMPERSONATION_CLIENT_GR
 - Creating a request is attempted directly as the caller. A denied write names the verb, resource and namespace.
 - Kubernetes automatically adds groups such as `system:authenticated`; RBAC applying to those groups also affects the caller.
 - Kubernetes Events describing successful submissions are created through the server's ServiceAccount, so the caller cannot suppress them through their own RBAC. Events are operational records rather than a replacement for Kubernetes Audit logging.
+
+## Recording who made a request
+
+SKE [records who made each request](/ske/operations/audit). When the server impersonates the caller, SKE records the impersonated user, `mcp:user:<sub>` by default.
+
+To record the caller's email instead, the same one `kubectl` users get, set `IMPERSONATION_EMAIL_EXTRA_KEY` to the key your API server's OIDC `claimMappings.extra` uses for the email, for example `example.com/email`. Then set SKE's [`userInfoField`](/ske/operations/audit#user-info-field) to `extra.example.com/email`. The server reads the token's `email` claim and leaves it out when `email_verified` is false.
+
+When the server does not impersonate, in development mode or with `IMPERSONATION_ENABLED=false`, it sets `kratix.io/last-changed-by` itself, to the caller's email or token subject. The audit log records that person only if you list the server's ServiceAccount in [`requireAnnotationsFrom`](/ske/operations/audit#require-last-changed-by).
 
 ## Querying your platform
 
