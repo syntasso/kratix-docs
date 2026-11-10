@@ -89,32 +89,43 @@ slug: "/ske/releases/portal-patch"
 		Expect(string(summary)).To(ContainSubstring("No releases on or after 2026-11-09"))
 	})
 
-	Describe("creating the HubSpot draft", func() {
+	Describe("creating or updating the HubSpot draft", func() {
 		var (
 			hubspot    *httptest.Server
 			requests   []string
 			bodies     []map[string]any
+			emails     map[string]string // email ID -> GET response; missing means 404
 			mu         sync.Mutex
 			layoutPath string
 		)
 
 		BeforeEach(func() {
-			requests, bodies = nil, nil
+			requests, bodies, emails = nil, nil, map[string]string{}
 			hubspot = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				raw, _ := io.ReadAll(r.Body)
 				var body map[string]any
 				_ = json.Unmarshal(raw, &body)
 				mu.Lock()
-				requests = append(requests, r.Method+" "+r.URL.Path+" "+r.Header.Get("Authorization"))
+				defer mu.Unlock()
+				requests = append(requests, r.Method+" "+r.URL.Path)
 				bodies = append(bodies, body)
-				mu.Unlock()
-				if r.Method == http.MethodPost {
+				Expect(r.Header.Get("Authorization")).To(Equal("Bearer test-token"))
+
+				switch {
+				case r.Method == http.MethodPost:
 					w.WriteHeader(http.StatusCreated)
 					_, _ = io.WriteString(w, `{"id": "511778652367"}`)
-					return
+				case r.Method == http.MethodGet:
+					response, ok := emails[filepath.Base(r.URL.Path)]
+					if !ok {
+						w.WriteHeader(http.StatusNotFound)
+						_, _ = io.WriteString(w, `{"category": "OBJECT_NOT_FOUND"}`)
+						return
+					}
+					_, _ = io.WriteString(w, response)
+				default:
+					_, _ = io.WriteString(w, `{}`)
 				}
-				w.WriteHeader(http.StatusOK)
-				_, _ = io.WriteString(w, `{}`)
 			}))
 			DeferCleanup(hubspot.Close)
 
@@ -127,37 +138,91 @@ slug: "/ske/releases/portal-patch"
 			return []string{"-create-draft", "-layout", layoutPath, "-hubspot-api", hubspot.URL}
 		}
 
-		It("creates the draft from the layout and writes its ID to the step outputs and summary", func() {
-			session := start(`{"goLive": "2026-11-09", "releases": []}`, draftArgs(), "HUBSPOT_ACCESS_TOKEN=test-token")
+		runDraft := func(record string) {
+			session := start(record, draftArgs(), "HUBSPOT_ACCESS_TOKEN=test-token")
 			Eventually(session).Should(gexec.Exit(0))
+		}
+
+		read := func(path string) string {
+			content, err := os.ReadFile(path)
+			Expect(err).NotTo(HaveOccurred())
+			return string(content)
+		}
+
+		bodyHTML := func(i int) string {
+			widgets := bodies[i]["content"].(map[string]any)["widgets"].(map[string]any)
+			return widgets["module-0-0-0"].(map[string]any)["body"].(map[string]any)["html"].(string)
+		}
+
+		It("creates a draft, records it against its releases, and reports it", func() {
+			runDraft(`{"goLive": "2026-11-09", "releases": []}`)
 
 			Expect(requests).To(Equal([]string{
-				"POST /marketing/v3/emails Bearer test-token",
-				"PATCH /marketing/v3/emails/511778652367/draft Bearer test-token",
+				"POST /marketing/v3/emails",
+				"PATCH /marketing/v3/emails/511778652367/draft",
 			}))
 			Expect(bodies[0]["name"]).To(HavePrefix("SKE release digest "))
 			Expect(bodies[0]["subject"]).To(Equal("SKE release updates: Portal Patch"))
-			widgets := bodies[1]["content"].(map[string]any)["widgets"].(map[string]any)
-			html := widgets["module-0-0-0"].(map[string]any)["body"].(map[string]any)["html"]
-			Expect(html).To(ContainSubstring("<h2>Portal Patch v0.8.6</h2>"))
+			Expect(bodyHTML(1)).To(ContainSubstring("<h2>Portal Patch v0.8.6</h2>"))
 
-			output, err := os.ReadFile(outputPath)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(output)).To(ContainSubstring("email_id=511778652367\n"))
-			summary, err := os.ReadFile(summaryPath)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(summary)).To(ContainSubstring("Created HubSpot draft email 511778652367"))
+			Expect(read(recordPath)).To(Equal(`{
+  "goLive": "2026-11-09",
+  "releases": [
+    {
+      "id": "portal-patch@0.8.6",
+      "digestEmailId": "511778652367"
+    }
+  ]
+}
+`))
+			output := read(outputPath)
+			Expect(output).To(ContainSubstring("email_id=511778652367\n"))
+			Expect(output).To(ContainSubstring("draft_action=created\n"))
+			Expect(output).To(ContainSubstring("record_changed=true\n"))
+			Expect(output).To(MatchRegexp(`send_not_before=\d{4}-\d{2}-\d{2}\n`))
+			Expect(read(summaryPath)).To(ContainSubstring("Created HubSpot draft email 511778652367"))
 		})
 
-		It("does not contact HubSpot when no release is pending", func() {
-			session := start(`{"goLive": "2026-11-09", "releases": [{"id": "portal-patch@0.8.6", "digestEmailId": "1"}]}`,
-				draftArgs(), "HUBSPOT_ACCESS_TOKEN=test-token")
-			Eventually(session).Should(gexec.Exit(0))
+		It("regenerates the pending draft with the new release instead of creating another", func() {
+			emails["7"] = `{"id": "7", "state": "DRAFT"}`
 
-			Expect(requests).To(BeEmpty())
-			output, err := os.ReadFile(outputPath)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(output)).NotTo(ContainSubstring("email_id="))
+			runDraft(`{"goLive": "2026-11-06", "releases": [{"id": "portal-patch@0.8.6", "digestEmailId": "7"}]}`)
+
+			Expect(requests).To(Equal([]string{
+				"GET /marketing/v3/emails/7",
+				"PATCH /marketing/v3/emails/7/draft",
+			}))
+			Expect(bodies[1]["subject"]).To(Equal("SKE release updates: Portal Patch"))
+			Expect(bodyHTML(1)).To(ContainSubstring("<h2>Portal Patch v0.8.6</h2>"))
+			Expect(bodyHTML(1)).To(ContainSubstring("<h2>Portal Patch v0.8.5</h2>"))
+			Expect(read(recordPath)).To(ContainSubstring(`"id": "portal-patch@0.8.5",
+      "digestEmailId": "7"`))
+			Expect(read(outputPath)).To(ContainSubstring("draft_action=updated\n"))
+			Expect(read(summaryPath)).To(ContainSubstring("Updated HubSpot draft email 7"))
+		})
+
+		It("does nothing in HubSpot when every release's email has been sent", func() {
+			emails["1"] = `{"id": "1", "state": "PUBLISHED", "publishDate": "2026-11-09T10:00:00Z"}`
+			record := `{"goLive": "2026-11-09", "releases": [{"id": "portal-patch@0.8.6", "digestEmailId": "1"}]}`
+
+			runDraft(record)
+
+			Expect(requests).To(Equal([]string{"GET /marketing/v3/emails/1"}))
+			Expect(read(recordPath)).To(Equal(record))
+			Expect(read(outputPath)).To(ContainSubstring("has_releases=false\n"))
+			Expect(read(outputPath)).NotTo(ContainSubstring("email_id="))
+		})
+
+		It("puts a release back into a new draft when its email was deleted", func() {
+			runDraft(`{"goLive": "2026-11-09", "releases": [{"id": "portal-patch@0.8.6", "digestEmailId": "5"}]}`)
+
+			Expect(requests).To(Equal([]string{
+				"GET /marketing/v3/emails/5",
+				"POST /marketing/v3/emails",
+				"PATCH /marketing/v3/emails/511778652367/draft",
+			}))
+			Expect(read(recordPath)).To(ContainSubstring(`"digestEmailId": "511778652367"`))
+			Expect(read(recordPath)).NotTo(ContainSubstring(`"5"`))
 		})
 
 		It("does not contact HubSpot without -create-draft", func() {
@@ -166,6 +231,7 @@ slug: "/ske/releases/portal-patch"
 			Eventually(session).Should(gexec.Exit(0))
 
 			Expect(requests).To(BeEmpty())
+			Expect(read(recordPath)).To(Equal(`{"goLive": "2026-11-09", "releases": []}`))
 		})
 
 		It("fails before planning anything when -create-draft has no token", func() {

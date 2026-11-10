@@ -1,11 +1,12 @@
 // Command release-digest plans the next SKE release digest email and writes it
 // to the GitHub Actions step outputs. With -create-draft it also creates the
-// email as a HubSpot draft. It never publishes or sends anything.
+// email as a HubSpot draft, or regenerates the pending one, and records the
+// email against its releases in the release record. It never publishes or
+// sends anything.
 package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -52,13 +53,9 @@ func run(o options) error {
 		}
 	}
 
-	recordJSON, err := os.ReadFile(o.recordPath)
+	record, err := digest.LoadRecord(o.recordPath)
 	if err != nil {
-		return fmt.Errorf("reading release record: %w", err)
-	}
-	var record digest.Record
-	if err := json.Unmarshal(recordJSON, &record); err != nil {
-		return fmt.Errorf("parsing release record: %w", err)
+		return err
 	}
 
 	releases, err := digest.LoadReleases(os.DirFS(o.docsDir))
@@ -66,7 +63,25 @@ func run(o options) error {
 		return fmt.Errorf("reading release notes: %w", err)
 	}
 
-	pending := digest.SelectPending(record, releases)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	client := hubspot.Client{BaseURL: o.hubspotAPI, Token: o.token, HTTP: &http.Client{Timeout: 30 * time.Second}}
+
+	// Without -create-draft, HubSpot is not asked about recorded emails, so any
+	// release with a recorded email counts as sent.
+	plan := digest.Plan{Releases: digest.SelectPending(record, releases)}
+	if o.createDraft {
+		london, err := time.LoadLocation("Europe/London")
+		if err != nil {
+			return err
+		}
+		states, err := emailStates(ctx, client, record)
+		if err != nil {
+			return err
+		}
+		plan = digest.PlanDigest(record, releases, states, time.Now().In(london))
+	}
+	pending := plan.Releases
 	email := digest.RenderEmail(pending)
 
 	outputs, closeOutputs, err := appendTo(os.Getenv("GITHUB_OUTPUT"))
@@ -78,21 +93,40 @@ func run(o options) error {
 		return fmt.Errorf("writing outputs: %w", err)
 	}
 
-	emailID := ""
+	result := draftResult{}
 	if o.createDraft && len(pending) > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		defer cancel()
-		client := hubspot.Client{BaseURL: o.hubspotAPI, Token: o.token, HTTP: &http.Client{Timeout: 30 * time.Second}}
-		emailID, err = client.CreateDraft(ctx, hubspot.Draft{
+		draft := hubspot.Draft{
 			Name:    "SKE release digest " + time.Now().UTC().Format("2006-01-02"),
 			Subject: email.Subject,
 			Layout:  layout,
 			HTML:    email.HTML,
-		})
-		if err != nil {
-			return fmt.Errorf("creating the HubSpot draft: %w", err)
 		}
-		if _, err := fmt.Fprintf(outputs, "email_id=%s\n", emailID); err != nil {
+		if plan.DraftEmailID != "" {
+			if err := client.UpdateDraft(ctx, plan.DraftEmailID, draft); err != nil {
+				return fmt.Errorf("updating the HubSpot draft: %w", err)
+			}
+			result = draftResult{emailID: plan.DraftEmailID, action: "updated"}
+		} else {
+			id, err := client.CreateDraft(ctx, draft)
+			if err != nil {
+				return fmt.Errorf("creating the HubSpot draft: %w", err)
+			}
+			result = draftResult{emailID: id, action: "created"}
+		}
+		result.sendNotBefore = plan.SendNotBefore
+
+		ids := []string{}
+		for _, r := range pending {
+			ids = append(ids, r.ID)
+		}
+		result.recordChanged = record.Assign(ids, result.emailID)
+		if result.recordChanged {
+			if err := os.WriteFile(o.recordPath, digest.MarshalRecord(record), 0o644); err != nil {
+				return fmt.Errorf("writing release record: %w", err)
+			}
+		}
+		if _, err := fmt.Fprintf(outputs, "email_id=%s\ndraft_action=%s\nrecord_changed=%t\nsend_not_before=%s\n",
+			result.emailID, result.action, result.recordChanged, result.sendNotBefore); err != nil {
 			return fmt.Errorf("writing outputs: %w", err)
 		}
 	}
@@ -102,7 +136,33 @@ func run(o options) error {
 		return err
 	}
 	defer closeSummary()
-	return writeSummary(summary, record, pending, email, emailID)
+	return writeSummary(summary, record, pending, email, result)
+}
+
+// draftResult is what a -create-draft run did in HubSpot.
+type draftResult struct {
+	emailID, action, sendNotBefore string
+	recordChanged                  bool
+}
+
+// emailStates asks HubSpot for the state of every email in the record.
+func emailStates(ctx context.Context, client hubspot.Client, record digest.Record) (map[string]digest.EmailState, error) {
+	states := map[string]digest.EmailState{}
+	for _, r := range record.Releases {
+		if r.DigestEmailID == nil || *r.DigestEmailID == "" {
+			continue
+		}
+		id := *r.DigestEmailID
+		if _, done := states[id]; done {
+			continue
+		}
+		status, err := client.EmailStatus(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		states[id] = digest.EmailState{State: status.State, PublishDate: status.PublishDate, Deleted: status.Deleted}
+	}
+	return states, nil
 }
 
 // appendTo opens a GitHub Actions file for appending, or uses stdout when the
@@ -118,14 +178,19 @@ func appendTo(path string) (io.Writer, func(), error) {
 	return f, func() { _ = f.Close() }, nil
 }
 
-func writeSummary(w io.Writer, record digest.Record, pending []digest.Release, email digest.Email, emailID string) error {
+func writeSummary(w io.Writer, record digest.Record, pending []digest.Release, email digest.Email, result draftResult) error {
 	if len(pending) == 0 {
 		_, err := fmt.Fprintf(w, "## Release digest\n\nNo releases on or after %s are waiting for a digest email.\n", record.GoLive)
 		return err
 	}
 	created := ""
-	if emailID != "" {
-		created = fmt.Sprintf("Created HubSpot draft email %s. It has not been sent.\n\n", emailID)
+	if result.emailID != "" {
+		verb := "Created"
+		if result.action == "updated" {
+			verb = "Updated"
+		}
+		created = fmt.Sprintf("%s HubSpot draft email %s. It has not been sent. Send it no earlier than %s.\n\n",
+			verb, result.emailID, result.sendNotBefore)
 	}
 	_, err := fmt.Fprintf(w, "## Release digest: planned email\n\n%s**Subject:** %s\n\n%d release(s) on or after %s.\n\n---\n\n%s\n",
 		created, email.Subject, len(pending), record.GoLive, email.HTML)
