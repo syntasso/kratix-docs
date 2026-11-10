@@ -21,5 +21,13 @@
       "id": "tfstate-finder@0.13.5",
       "digestEmailId": "511980281018"
     }
-  ]
+  ],
+  "digests": {
+    "511980281018": {
+      "slackChannel": "C04BZJ7DB09",
+      "slackMessageTs": "1794330396.622159",
+      "slackScheduledMessageId": "Q0CGG3NFQPQ",
+      "holdEndsAt": "2026-11-11T11:30:00Z"
+    }
+  }
 }
