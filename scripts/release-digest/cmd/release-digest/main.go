@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	digest "github.com/syntasso/kratix-docs/scripts/release-digest"
@@ -62,6 +63,8 @@ func run(o options) error {
 	if err != nil {
 		return fmt.Errorf("reading release notes: %w", err)
 	}
+	say("Release notes: read %s from %s", count(len(releases), "release"), o.docsDir)
+	sayRecord(record)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -80,8 +83,19 @@ func run(o options) error {
 			return err
 		}
 		plan = digest.PlanDigest(record, releases, states, time.Now().In(london))
+	} else {
+		say("HubSpot: not contacted. A release with a recorded email counts as sent. " +
+			"Run with -create-draft (create_draft in the workflow) to create or update the draft.")
 	}
 	pending := plan.Releases
+	if len(pending) == 0 {
+		say("Digest: nothing to send")
+	} else {
+		say("Digest: %s on or after %s:", count(len(pending), "release"), record.GoLive)
+		for _, r := range pending {
+			say("  - %s (%s)", r.ID, r.Date)
+		}
+	}
 	email := digest.RenderEmail(pending)
 
 	outputs, closeOutputs, err := appendTo(os.Getenv("GITHUB_OUTPUT"))
@@ -113,6 +127,7 @@ func run(o options) error {
 			}
 			result = draftResult{emailID: id, action: "created"}
 		}
+		say("HubSpot: %s draft email %s", result.action, result.emailID)
 		result.sendNotBefore = plan.SendNotBefore
 
 		ids := []string{}
@@ -124,11 +139,23 @@ func run(o options) error {
 			if err := os.WriteFile(o.recordPath, digest.MarshalRecord(record), 0o644); err != nil {
 				return fmt.Errorf("writing release record: %w", err)
 			}
+			say("Release record: %s recorded against email %s", count(len(ids), "release"), result.emailID)
+		} else {
+			say("Release record: unchanged")
 		}
+		say("Earliest send date: %s (%s)", plan.SendNotBefore, plan.SendNotBeforeReason)
+		notice("%s HubSpot draft email %s with %s. Send it no earlier than %s.",
+			capitalise(result.action), result.emailID, count(len(pending), "release"), plan.SendNotBefore)
 		if _, err := fmt.Fprintf(outputs, "email_id=%s\ndraft_action=%s\nrecord_changed=%t\nsend_not_before=%s\n",
 			result.emailID, result.action, result.recordChanged, result.sendNotBefore); err != nil {
 			return fmt.Errorf("writing outputs: %w", err)
 		}
+	}
+
+	if o.createDraft && len(pending) == 0 {
+		say("HubSpot: no draft to create or update")
+		say("Release record: unchanged")
+		notice("Nothing to send: every release since %s is already in a scheduled or sent digest.", record.GoLive)
 	}
 
 	summary, closeSummary, err := appendTo(os.Getenv("GITHUB_STEP_SUMMARY"))
@@ -161,6 +188,16 @@ func emailStates(ctx context.Context, client hubspot.Client, record digest.Recor
 			return nil, err
 		}
 		states[id] = digest.EmailState{State: status.State, PublishDate: status.PublishDate, Deleted: status.Deleted}
+		switch {
+		case status.Deleted:
+			say("HubSpot: email %s has been deleted: its releases go back into the digest", id)
+		case status.State == "DRAFT":
+			say("HubSpot: email %s is DRAFT: the pending draft", id)
+		case status.PublishDate != "":
+			say("HubSpot: email %s is %s (%s): its releases stay out of the digest", id, status.State, status.PublishDate)
+		default:
+			say("HubSpot: email %s is %s: its releases stay out of the digest", id, status.State)
+		}
 	}
 	return states, nil
 }
@@ -195,4 +232,49 @@ func writeSummary(w io.Writer, record digest.Record, pending []digest.Release, e
 	_, err := fmt.Fprintf(w, "## Release digest: planned email\n\n%s**Subject:** %s\n\n%d release(s) on or after %s.\n\n---\n\n%s\n",
 		created, email.Subject, len(pending), record.GoLive, email.HTML)
 	return err
+}
+
+// say writes a line to the run's log. It goes to stderr, so that stdout only
+// carries the outputs when running locally.
+func say(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
+}
+
+// notice raises a notice on the GitHub Actions run page.
+func notice(format string, args ...any) {
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		fmt.Fprintf(os.Stderr, "::notice title=Release digest::"+format+"\n", args...)
+	}
+}
+
+// sayRecord describes the release record.
+func sayRecord(record digest.Record) {
+	recorded := 0
+	emails := map[string]bool{}
+	for _, r := range record.Releases {
+		if r.DigestEmailID != nil && *r.DigestEmailID != "" {
+			recorded++
+			emails[*r.DigestEmailID] = true
+		}
+	}
+	if recorded == 0 {
+		say("Release record: go-live %s, no releases recorded yet", record.GoLive)
+		return
+	}
+	say("Release record: go-live %s, %s recorded against %s",
+		record.GoLive, count(recorded, "release"), count(len(emails), "email"))
+}
+
+func count(n int, noun string) string {
+	if n == 1 {
+		return "1 " + noun
+	}
+	return fmt.Sprintf("%d %ss", n, noun)
+}
+
+func capitalise(word string) string {
+	if word == "" {
+		return word
+	}
+	return strings.ToUpper(word[:1]) + word[1:]
 }
