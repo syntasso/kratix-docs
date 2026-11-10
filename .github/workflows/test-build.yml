@@ -2,6 +2,11 @@ name: Test Build
 
 on:
   pull_request:
+    # The site does not use the release digest tool, so a change to only
+    # these files does not need a site build.
+    paths-ignore:
+      - scripts/release-digest/**
+      - .github/workflows/release-digest.yml
   workflow_dispatch:
 
 jobs:
