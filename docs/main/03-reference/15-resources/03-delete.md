@@ -6,7 +6,7 @@ sidebar_label: Deleting
 
 To delete a Resource, run:
 
-```
+```bash
 kubectl delete <Promise CRD> <Resource Name>
 ```
 
@@ -15,19 +15,19 @@ Resource you want to delete.
 
 To find the Promise CRD, run:
 
-```
+```bash
 kubectl get crds
 ```
 
 To find the Resource Name, run:
 
-```
+```bash
 kubectl get <Promise CRD>
 ```
 
 Alternatively you can delete a Resource by providing the Resource definition file:
 
-```
+```bash
 kubectl delete --filename resource-request.yaml
 ```
 
