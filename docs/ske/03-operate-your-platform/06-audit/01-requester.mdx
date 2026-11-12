@@ -184,7 +184,7 @@ To set these fields when you install SKE without the SKE Operator, see
 ## Requiring the annotation from a GitOps tool {#require-last-changed-by}
 
 By default, SKE does not check that a request applied by a GitOps tool says
-who made it. When every request in git should come from a portal, you can make
+who made it. When every request in Git should come from a portal, you can make
 SKE reject any create or update from your GitOps tool that doesn't carry
 `kratix.io/last-changed-by`.
 
@@ -222,7 +222,7 @@ to the user who made the change. SKE requires it on resource requests applied
 by service account argocd/argocd-application-controller.
 ```
 
-Deletes are not checked, because a GitOps delete removes the file from git, so
+Deletes are not checked, because a GitOps delete removes the file from Git, so
 it cannot carry the annotation.
 
 ## The audit log {#audit-log}
@@ -287,7 +287,7 @@ The same goes for any username starting with `system:` or with one of
 
 ### What is not recorded
 
-- **Deletes through GitOps.** The request's file is removed from git, so
+- **Deletes through GitOps.** The request's file is removed from Git, so
   nothing says who removed it.
 - **Changes from a GitOps tool that is not listed** in
   `spec.attribution.requireAnnotationsFrom.serviceAccounts`.
