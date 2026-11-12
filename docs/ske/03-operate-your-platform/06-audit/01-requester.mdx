@@ -96,6 +96,7 @@ For example, to record the user's email, map the `email` claim to the key
 [authentication configuration](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-authentication-configuration):
 
 ```yaml
+apiVersion: apiserver.config.k8s.io/v1
 kind: AuthenticationConfiguration
 jwt:
   - issuer:
