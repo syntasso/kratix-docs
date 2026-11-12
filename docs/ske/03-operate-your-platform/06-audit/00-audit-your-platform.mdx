@@ -1,28 +1,29 @@
 ---
 title: Audit your platform
-description: See who created, updated or deleted each resource request, and count the people using your platform
+description: See who created, updated or deleted each resource request, and count the users of your platform
 keywords: [audit, audit log, attribution, last-changed-by, unique users, eks, cloudwatch]
 slug: "/ske/operations/audit"
 sidebar_label: "Overview"
 sidebar_position: 1
 ---
 
-SKE records the person who changes each resource request, so you can see who
-uses your platform and what they did. It records them in two places:
+SKE records information about the user who changes each resource request, so you
+can see who uses your platform, what they did, and from where they did it.
+It records this information in two places:
 
 - **On the request**, in `kratix.io/last-change*` annotations. These show who
   made the latest change to a request.
 - **In the Kubernetes audit log**, as an audit annotation on every create,
   update and delete. Use it to see the full history of a request, or to count
-  the people using your platform over time.
+  the users of your platform over time.
 
 ## Where to start
 
-- To see what SKE records, and to choose which part of a person's identity it
+- To see what SKE records, and to choose which part of a user's identity it
   records, read
   [Recording who changed a request](/ske/operations/audit/requester).
-- To record people who use a portal such as Backstage or Cortex, read
+- To record users of a portal such as Backstage or Cortex, read
   [Recording ownership from a portal](/ske/integrations/portal-controller/request-ownership).
-- To turn on the audit log, find it, and count the people using your platform,
+- To turn on the audit log, find it, and count the users of your platform,
   read the guide for your cluster:
   - [Amazon EKS](/ske/operations/audit/eks)

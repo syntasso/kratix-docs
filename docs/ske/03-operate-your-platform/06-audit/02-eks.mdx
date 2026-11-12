@@ -1,22 +1,23 @@
 ---
 title: Audit log on Amazon EKS
-description: Turn on the EKS audit log, find who changed resource requests in CloudWatch Logs, count the people using your platform, and build a Grafana dashboard
+description: Turn on the EKS audit log, find who changed resource requests in CloudWatch Logs, count the users of your platform, and build a Grafana dashboard
 keywords: [audit, audit log, eks, aws, cloudwatch, logs insights, grafana, unique users]
 slug: "/ske/operations/audit/eks"
 sidebar_label: "Amazon EKS"
 sidebar_position: 3
 ---
 
-On Amazon EKS, the API server sends its audit log to CloudWatch Logs. This page
-shows how to turn it on, where to find it, and how to count the people using
-your platform, in CloudWatch Logs Insights or in a Grafana dashboard.
+On Amazon EKS, the Kubernetes API server sends its audit log to CloudWatch
+Logs. This page shows how to turn the audit log on, where to find it, and how
+to count the users of your platform, in CloudWatch Logs Insights or in a
+Grafana dashboard.
 
 Each create, update and delete of a resource request carries the
 [audit annotation](/ske/operations/audit/requester#audit-log)
-`attribution.platform.syntasso.io/last-changed-by`, set to the person who made
+`attribution.platform.syntasso.io/last-changed-by`, set to the user who made
 the change.
 
-## Turn on the audit log
+## Turning on the audit log
 
 EKS does not send the audit log anywhere until you turn on the `audit` log type
 for your platform cluster. See
@@ -32,18 +33,20 @@ aws eks update-cluster-config \
 The EKS audit policy already records writes to resource requests, so there is
 nothing else to set up.
 
-## Where the logs are
+## Finding the logs
 
 EKS writes the audit log to the log group `/aws/eks/<CLUSTER_NAME>/cluster`, in
 log streams that start with `kube-apiserver-audit-`. Each line is one audit
-event in JSON, and the person is in
+event in JSON, and the user is in
 `annotations.attribution.platform.syntasso.io/last-changed-by`.
 
-## Keep the logs long enough {#retention}
+## Setting log retention {#retention}
 
-You can only count the people whose changes are still in the log group. To
-count the people who used your platform over the last year, keep a year of
-logs. Check the log group's retention, and change it if you need to:
+You can only see activity and count your platform users if their events are
+still in the log group. To count the users who used your platform over the last
+year, you need to keep a year of logs.
+
+For that, check the log group's retention, and change it if you need to:
 
 ```bash
 aws logs put-retention-policy \
@@ -51,9 +54,16 @@ aws logs put-retention-policy \
   --retention-in-days 365
 ```
 
-CloudWatch charges for the logs it stores, so a longer retention costs more.
+CloudWatch charges for the logs it stores, so a longer retention will cost more.
+Check the [AWS pricing page](https://aws.amazon.com/cloudwatch/pricing/) to find
+out the relevant price for your scenario.
 
-## Count the people using your platform {#unique-users}
+## Counting platform users {#unique-users}
+
+With the audit log turned on, you can count platform users in CloudWatch Logs
+Insights or in Grafana.
+
+### Using CloudWatch
 
 1. Open [CloudWatch Logs Insights](https://console.aws.amazon.com/cloudwatch/home#logsV2:logs-insights).
 1. Select the log group `/aws/eks/<CLUSTER_NAME>/cluster`.
@@ -68,22 +78,20 @@ filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`)
 | stats count_distinct(`annotations.attribution.platform.syntasso.io/last-changed-by`) as users
 ```
 
-The `filter` keeps the changes to resource requests that went through. It drops
-the changes Kubernetes rejected and the dry runs, such as the ones
-`kubectl diff` sends, which also carry the annotation.
+This `filter` keeps the changes to resource requests that succeeded. It drops
+the changes Kubernetes rejected and any dry runs, such as the ones
+`kubectl diff` sends, which also carry the audit annotation.
 
-## More queries
+#### Other useful CloudWatch queries
 
-Each one starts with the same `filter` as the query above.
-
-How many changes each person made:
+How many changes each user made:
 
 ```
 filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`)
   and stage = "ResponseComplete"
   and responseStatus.code < 400
   and requestURI not like /dryRun/
-| stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as person
+| stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as user
 | sort changes desc
 ```
 
@@ -96,13 +104,15 @@ filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`)
   and requestURI not like /dryRun/
   and objectRef.namespace = "<NAMESPACE>"
   and objectRef.name = "<REQUEST_NAME>"
-| fields @timestamp, `annotations.attribution.platform.syntasso.io/last-changed-by` as person, verb, objectRef.resource as type
+| fields @timestamp, `annotations.attribution.platform.syntasso.io/last-changed-by` as user, verb, objectRef.resource as type
 | sort @timestamp desc
 ```
 
-## Grafana dashboard
+## Grafana
 
-Grafana can run the same queries with its CloudWatch data source.
+Grafana can run the same queries through its CloudWatch data source. The
+dashboard below shows the number of unique users, the number of changes, the
+changes each user made, and the most recent changes. To set it up:
 
 1. Give Grafana access to the log group. See
    [Configure the CloudWatch data source](https://grafana.com/docs/grafana/latest/datasources/aws-cloudwatch/configure/)
@@ -111,9 +121,6 @@ Grafana can run the same queries with its CloudWatch data source.
 1. Add the CloudWatch data source in Grafana.
 1. Copy the dashboard below, replace `<REGION>`, `<ACCOUNT_ID>` and
    `<CLUSTER_NAME>`, then import it and choose your CloudWatch data source.
-
-The dashboard shows the number of unique users, the number of changes, the
-changes each person made, and the most recent changes.
 
 <details>
 <summary>Dashboard JSON</summary>
@@ -262,7 +269,7 @@ changes each person made, and the most recent changes.
               "name": "/aws/eks/<CLUSTER_NAME>/cluster"
             }
           ],
-          "expression": "filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`) and stage = \"ResponseComplete\" and responseStatus.code < 400 and requestURI not like /dryRun/\n| stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as person\n| stats avg(changes) as average",
+          "expression": "filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`) and stage = \"ResponseComplete\" and responseStatus.code < 400 and requestURI not like /dryRun/\n| stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as user\n| stats avg(changes) as average",
           "statsGroups": [],
           "id": ""
         }
@@ -308,7 +315,7 @@ changes each person made, and the most recent changes.
               "name": "/aws/eks/<CLUSTER_NAME>/cluster"
             }
           ],
-          "expression": "filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`) and stage = \"ResponseComplete\" and responseStatus.code < 400 and requestURI not like /dryRun/\n| stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as person\n| sort changes desc",
+          "expression": "filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`) and stage = \"ResponseComplete\" and responseStatus.code < 400 and requestURI not like /dryRun/\n| stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as user\n| sort changes desc",
           "statsGroups": [],
           "id": ""
         }
@@ -343,7 +350,7 @@ changes each person made, and the most recent changes.
               "name": "/aws/eks/<CLUSTER_NAME>/cluster"
             }
           ],
-          "expression": "filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`) and stage = \"ResponseComplete\" and responseStatus.code < 400 and requestURI not like /dryRun/\n| fields @timestamp, `annotations.attribution.platform.syntasso.io/last-changed-by` as person, verb, objectRef.resource as type, objectRef.namespace as namespace, objectRef.name as name\n| sort @timestamp desc\n| limit 100",
+          "expression": "filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`) and stage = \"ResponseComplete\" and responseStatus.code < 400 and requestURI not like /dryRun/\n| fields @timestamp, `annotations.attribution.platform.syntasso.io/last-changed-by` as user, verb, objectRef.resource as type, objectRef.namespace as namespace, objectRef.name as name\n| sort @timestamp desc\n| limit 100",
           "statsGroups": [],
           "id": ""
         }
@@ -355,18 +362,20 @@ changes each person made, and the most recent changes.
 
 </details>
 
-## Limits
+## Known limitations
 
 - **Counts only go back as far as your [retention](#retention).**
-- **The person is only as specific as how people log in.** If many people share
-  one IAM role, the audit log records the role's username for all of them,
-  unless you set [`userInfoField`](/ske/operations/audit/requester#user-info-field) to a
-  field that is different for each person. Run `kubectl auth whoami -o yaml` to
-  see which fields your cluster gives you. With IAM Identity Center, for
-  example, `extra.sessionName` is often the person's username.
-- **Some changes have no person.** For example, deletes through GitOps. See
+- **The recorded user is only as specific as the way users log in.** If many
+  users share one IAM role, the audit log records the role's username for all
+  of them, unless you set
+  [`userInfoField`](/ske/operations/audit/requester#user-info-field)
+  to a field that is different for each user. Run
+  `kubectl auth whoami -o yaml` to see which fields your cluster gives you.
+  With IAM Identity Center, for example, `extra.sessionName` is often the
+  user's username.
+- **Some changes have no user.** For example, deletes through GitOps. See
   [What is not recorded](/ske/operations/audit/requester#what-is-not-recorded).
 
-## Related
+## Related material
 
 - [Audit your platform](/ske/operations/audit)
