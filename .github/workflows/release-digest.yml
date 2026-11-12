@@ -1,11 +1,12 @@
 name: Release digest
 
 # Plans the next SKE release digest email from the release-notes pages and
-# writes it to the job outputs. A manual run with create_draft ticked also
-# creates the email as a HubSpot draft, or regenerates the pending one; posts
-# or updates its Slack message and schedules a ping for when the two business
-# hour hold ends (with SLACK_BOT_TOKEN and the SLACK_DIGEST_CHANNEL variable);
-# and commits the updated release record to the branch it ran on. Nothing is
+# writes it to the job outputs. A push to main, or a manual run with
+# create_draft ticked, also creates the email as a HubSpot draft, or
+# regenerates the pending one; posts or updates its Slack message and
+# schedules a ping for when the two business hour hold ends (with
+# SLACK_BOT_TOKEN and the SLACK_DIGEST_CHANNEL variable); and commits the
+# updated release record to the branch it ran on. Nothing is
 # ever published or sent.
 
 on:
@@ -22,20 +23,22 @@ on:
   workflow_dispatch:
     inputs:
       create_draft:
-        description: Also create or update the HubSpot draft, and commit the release record
+        description: Also create or update the HubSpot draft and the Slack message, and commit the release record (pushes to main always do)
         type: boolean
         default: false
 
 permissions:
   contents: read
 
-# One run at a time per event type and branch (or pull request), so a manual
-# run's record commit lands before the next manual run reads the record. A
-# newer queued run replaces an older queued one of the same kind, which is
-# fine: each run rebuilds the whole digest. Push runs only plan, so they queue
-# separately and can never replace a waiting manual run.
+# One writing run at a time per branch, so each run's record commit lands
+# before the next writing run reads the record. Pushes to main and manual runs
+# with create_draft ticked share that queue. A newer queued run replaces an
+# older queued one in the same queue, which is fine: each run rebuilds the
+# whole digest and writes everything the older one would have. Runs that only
+# plan (pull requests, manual runs without create_draft) queue separately, so
+# they can never replace a waiting writing run.
 concurrency:
-  group: release-digest-${{ github.event_name }}-${{ github.event_name == 'pull_request' && github.event.number || github.ref_name }}
+  group: release-digest-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || format('{0}-{1}', github.ref_name, (github.event_name == 'push' || inputs.create_draft == true) && 'write' || 'plan') }}
   cancel-in-progress: false
 
 jobs:
@@ -99,13 +102,13 @@ jobs:
           cache-dependency-path: scripts/release-digest/go.sum
       - name: Build the release digest command
         run: go -C scripts/release-digest build -o "$RUNNER_TEMP/release-digest" ./cmd/release-digest
-      - name: Plan the digest${{ inputs.create_draft == true && ', then update the HubSpot draft and the Slack message' || ' (HubSpot and Slack are not contacted)' }}
+      - name: Plan the digest${{ (github.event_name == 'push' || inputs.create_draft == true) && ', then update the HubSpot draft and the Slack message' || ' (HubSpot and Slack are not contacted)' }}
         id: plan
         env:
-          CREATE_DRAFT: ${{ inputs.create_draft == true }}
-          # Only a manual run that asks for a draft gets the tokens.
-          HUBSPOT_ACCESS_TOKEN: ${{ inputs.create_draft == true && secrets.HUBSPOT_ACCESS_TOKEN || '' }}
-          SLACK_BOT_TOKEN: ${{ inputs.create_draft == true && secrets.SLACK_BOT_TOKEN || '' }}
+          CREATE_DRAFT: ${{ (github.event_name == 'push' || inputs.create_draft == true) }}
+          # Only a push to main, or a manual run that asks for a draft, gets the tokens.
+          HUBSPOT_ACCESS_TOKEN: ${{ (github.event_name == 'push' || inputs.create_draft == true) && secrets.HUBSPOT_ACCESS_TOKEN || '' }}
+          SLACK_BOT_TOKEN: ${{ (github.event_name == 'push' || inputs.create_draft == true) && secrets.SLACK_BOT_TOKEN || '' }}
           SLACK_DIGEST_CHANNEL: ${{ vars.SLACK_DIGEST_CHANNEL }}
         run: |
           args=()
@@ -113,7 +116,7 @@ jobs:
             echo "This run plans the digest, creates or updates the HubSpot draft, and posts or updates the Slack message and hold-end ping."
             args+=(-create-draft)
           else
-            echo "This run only plans the digest. Run the workflow by hand with create_draft ticked to create or update the HubSpot draft."
+            echo "This run only plans the digest. Pushes to main, and manual runs with create_draft ticked, create or update the HubSpot draft."
           fi
           echo
           "$RUNNER_TEMP/release-digest" "${args[@]}"
