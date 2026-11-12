@@ -82,7 +82,7 @@ Both installation methods give the ServiceAccount permission to impersonate call
 If you set `IMPERSONATION_EMAIL_EXTRA_KEY`, the ServiceAccount also needs `impersonate` on `userextras/<KEY>` in the `authentication.k8s.io` API group, or Kubernetes refuses the impersonated requests. The release manifests grant it for `example.com/email`. With the Helm chart, set `rbac.impersonation.emailExtraKey`, which sets both the variable and the rule.
 
 :::info Development mode
-`MCP_AUTH_TOKEN` enables a shared bearer token for local development. It disables OIDC, OAuth scopes and per-caller impersonation, so every Kubernetes operation uses the server's ServiceAccount. The server records the person named in the `X-User-Identity` header, which anyone with the token can set. Do not use this mode for customer-facing deployments.
+`MCP_AUTH_TOKEN` enables a shared bearer token for local development. It disables OIDC, OAuth scopes and per-caller impersonation, so every Kubernetes operation uses the server's ServiceAccount. The server records the user named in the `X-User-Identity` header, which anyone with the token can set. Do not use this mode for customer-facing deployments.
 :::
 
 ## Connecting users
@@ -177,9 +177,9 @@ You can bind RBAC directly to one machine username. Use `IMPERSONATION_CLIENT_GR
 
 SKE [records who made each request](/ske/operations/audit). When the server impersonates the caller, SKE records the impersonated user, `mcp:user:<sub>` by default.
 
-To record the caller's email instead, the same one `kubectl` users get, set `IMPERSONATION_EMAIL_EXTRA_KEY` to the key your API server's OIDC `claimMappings.extra` uses for the email, for example `example.com/email`. Then set SKE's [`userInfoField`](/ske/operations/audit#user-info-field) to `extra.example.com/email`. The server reads the token's `email` claim and leaves it out when `email_verified` is false.
+To record the caller's email instead, the same one `kubectl` users get, set `IMPERSONATION_EMAIL_EXTRA_KEY` to the key your API server's OIDC `claimMappings.extra` uses for the email, for example `example.com/email`. Then set SKE's [`userInfoField`](/ske/operations/audit/requester#user-info-field) to `extra.example.com/email`. The server reads the token's `email` claim and leaves it out when `email_verified` is false.
 
-When the server does not impersonate, in development mode or with `IMPERSONATION_ENABLED=false`, it sets `kratix.io/last-changed-by` itself, to the caller's email or token subject. The audit log records that person only if you list the server's ServiceAccount in [`requireAnnotationsFrom`](/ske/operations/audit#require-last-changed-by).
+When the server does not impersonate, in development mode or with `IMPERSONATION_ENABLED=false`, it sets `kratix.io/last-changed-by` itself, to the caller's email or token subject. The audit log records that user only if you list the server's ServiceAccount in [`requireAnnotationsFrom`](/ske/operations/audit/requester#require-last-changed-by).
 
 ## Querying your platform
 
