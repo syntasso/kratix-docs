@@ -213,6 +213,11 @@ For example, Argo CD applies resources with the
 `kustomize-controller` ServiceAccount. Check the namespace and name in your
 own installation.
 
+Before you list a ServiceAccount, set up your
+[portal](/ske/integrations/portal-controller/request-ownership) to write the
+annotation, and add it to the requests already in Git. Otherwise SKE rejects
+them.
+
 A rejected request fails with an error that says which request needs the
 annotation:
 
@@ -225,6 +230,13 @@ by service account argocd/argocd-application-controller.
 
 Deletes are not checked, because a GitOps delete removes the file from Git, so
 it cannot carry the annotation.
+
+SKE checks only that the annotation is set, so a value left from an earlier
+change passes. SKE lets a request through without checking it:
+
+- While the SKE Platform Manager is unreachable.
+- Just after its Promise is installed, before SKE sets up the check for that
+  Promise.
 
 ## The audit log {#audit-log}
 
