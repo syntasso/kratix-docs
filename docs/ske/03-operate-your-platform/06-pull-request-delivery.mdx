@@ -20,13 +20,17 @@ delivery. Other Git providers will be supported in the future.
 
 ## What you need
 
-- A `GitStateStore` whose repository is on github.com or GitHub Enterprise Server, using
-  `authMethod: basicAuth` with a token as the password, or `authMethod: githubApp` (see
-  [GitStateStore authentication](/main/reference/statestore/gitstatestore#auth)).
-- A token or GitHub App with read and write access to the repository's **Contents** and **Pull
-  requests**. SKE uses them to push branches, open, comment on and close pull requests, and read
-  the comment a reviewer leaves when they close one.
-- A Destination whose `filepath.mode` is not `aggregatedYAML`.
+- A `GitStateStore` on GitHub, authenticating with a token (`basicAuth`) or a GitHub App
+  (`githubApp`). See [GitStateStore authentication](/main/reference/statestore/gitstatestore#auth).
+- Read and write access to the repository's **Contents** and **Pull requests** for that token or
+  GitHub App.
+
+:::warning
+
+A Destination with `filepath.mode: aggregatedYAML` cannot use pull request delivery. Kratix refuses
+to create or update the Destination or the `GitStateStore` if the change would put them together.
+
+:::
 
 ## Turn it on
 
@@ -98,8 +102,8 @@ Promise or the request instead.
 
 ## Retry a rejected change
 
-If a rejected change is now approved, ask SKE for a new pull request with the same files by
-labelling the request's Work:
+To force SKE to recreate a pull request, for example when the previous one was closed without
+being merged, label the request's Work with `kratix.io/redeliver=true`:
 
 ```bash
 kubectl label works -n <NAMESPACE> \
@@ -109,8 +113,8 @@ kubectl label works -n <NAMESPACE> \
 
 ## Delete a request
 
-Deleting a request opens a pull request that removes its files from the Destination's branch. The
-request stays until that pull request is merged:
+Deleting a request also opens a pull request to remove its files from the State Store. The request
+is only removed when that pull request is merged. The request's status shows where it is:
 
 ```text
 NAME    MESSAGE              STATUS
@@ -127,12 +131,7 @@ files, see
 Remove the `delivery` block from the `GitStateStore`. SKE writes every request on it straight to
 the Destination's branch again, including requests waiting for approval or rejected.
 
-SKE does not close the pull requests that were open. Close them yourself, so that nobody merges a
-change SKE no longer tracks. To list them:
-
-```bash
-kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
-```
+SKE does not close the pull requests that were open. You must close them yourself.
 
 ## Related docs
 

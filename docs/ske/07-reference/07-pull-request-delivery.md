@@ -328,12 +328,9 @@ approval and a request whose pull request a reviewer rejected.
   pull request yourself.
 - **Open pull requests are not closed.** Merging one later can put files on the branch that no
   request asks for, until the next time SKE writes that request. Each request that had a pull
-  request open or rejected gets a `DeliveryModeChanged` warning on its WorkPlacement, with a link to
-  the pull request it left behind:
-
-  ```bash
-  kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
-  ```
+  request open or rejected gets a `DeliveryModeChanged` warning event on its WorkPlacement, with a
+  link to the pull request it left behind. Kubernetes deletes events after a while, so do not rely
+  on them to find every open pull request.
 
 ## Related docs
 
