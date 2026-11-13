@@ -21,6 +21,54 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.64.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.64.0/) (TBD)
+
+Kratix changes: [b8f0665...7efee4a](https://github.com/syntasso/kratix/compare/b8f0665fa413e7c178b6419850320720e122aefa...7efee4a5a80e5783a90d8090547d5bc8204801a2)
+
+#### Features
+
+* Destinations backed by a GitHub `GitStateStore` can now deliver through pull requests instead
+  of pushing to their branch. Creates, updates and deletes each go through a pull request, and
+  SKE rebuilds a pull request that has merge conflicts. For more information, see the
+  [Deliver through pull requests](/ske/operations/pull-request-delivery) documentation.
+* Resource requests now say when their delivery is waiting for approval or was rejected. To retry
+  a rejected change, add the `kratix.io/redeliver` label.
+* Resource requests applied by a GitOps tool can now be rejected when they don't say who made
+  them. List the tool's service accounts in the SKE Operator's
+  `spec.attribution.requireAnnotationsFrom`, and their requests must carry the
+  `kratix.io/last-changed-by` annotation. This needs
+  [SKE Operator v0.37.0](/ske/releases/ske-operator) or later.
+* Setting a status key to `null` in a Pipeline now removes that key.
+* The `DeleteWorkflowCompleted` condition now says when the delete workflow is running and when
+  it is done.
+
+#### Fixes
+
+* Pipelines no longer start twice when the Job cache is behind.
+* Nested maps in status written by successive Pipelines are now merged instead of replaced.
+* Pipeline Jobs no longer wait a fixed time after each Job is created.
+* A dry run now waits for its Works to be written before failing.
+* A resource or Promise whose configure workflow was suspended can now be deleted.
+
+#### Security Fixes
+
+* Updated `golang.org/x/net` to v0.62.0 to fix GO-2026-6860 and GO-2026-6866, and
+  `github.com/klauspost/compress` to v1.20.3 to fix GHSA-fpmh-frq8-7rj8.
+* Updated to include latest security updates.
+
+#### Known issues
+
+* This release is built with Go 1.27.3, so image scanners report GO-2026-6859 (CVE-2026-97054)
+  in the Go standard library's `net/http`. We have checked SKE's code paths and the vulnerability
+  cannot be exploited in SKE. The fix, Go 1.27.4, will be in the next release. To take it
+  sooner, install the release candidate
+  [v0.65.0-rc1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.65.0-rc1/).
+
+#### Maintenance
+
+* `git-lfs` is no longer installed in the SKE image.
+* Base image updates and package maintenance.
+
 ### [v0.63.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.63.0/) (2026-10-29)
 
 #### Features
