@@ -27,17 +27,6 @@ Kratix changes: [b8f0665...7efee4a](https://github.com/syntasso/kratix/compare/b
 
 #### Features
 
-* Destinations backed by a GitHub `GitStateStore` can now deliver through pull requests instead
-  of pushing to their branch. Creates, updates and deletes each go through a pull request, and
-  SKE rebuilds a pull request that has merge conflicts. For more information, see the
-  [Deliver through pull requests](/ske/operations/pull-request-delivery) documentation.
-* Resource requests now say when their delivery is waiting for approval or was rejected. To retry
-  a rejected change, add the `kratix.io/redeliver` label.
-* Resource requests applied by a GitOps tool can now be rejected when they don't say who made
-  them. List the tool's service accounts in the SKE Operator's
-  `spec.attribution.requireAnnotationsFrom`, and their requests must carry the
-  `kratix.io/last-changed-by` annotation. This needs
-  [SKE Operator v0.37.0](/ske/releases/ske-operator) or later.
 * Setting a status key to `null` in a Pipeline now removes that key.
 * The `DeleteWorkflowCompleted` condition now says when the delete workflow is running and when
   it is done.
