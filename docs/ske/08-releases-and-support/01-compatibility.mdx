@@ -14,7 +14,7 @@ release records; they are not a matrix of all integration-tested combinations.
 
 | Component or capability | Declared requirement | Release record |
 | --- | --- | --- |
-| Portal Controller `v0.6.1` with Operator management | Operator `v0.34.0` or later; SKE `v0.59.0` or later | [Portal Controller](/ske/releases/ske-portal-controller) |
+| Portal Controller `v0.6.1` with Operator management | Operator `v0.34.0` or later; SKE `v0.60.0` or later | [Portal Controller](/ske/releases/ske-portal-controller) |
 | Backstage request namespace policy | Portal Controller `v0.6.1` or later, backend `v0.24.0` or later and frontend `v0.22.0` or later | [Portal Controller](/ske/releases/ske-portal-controller) and [Backstage plugins](/ske/releases/backstage) |
 | Backend `v0.24.0` and frontend `v0.22.0` | Release notes declare compatibility with Backstage `v1.55.0` | [Backstage plugins](/ske/releases/backstage) |
 | Portal Patch `v0.8.2` | Independently versioned image; pin the recipe grammar version used by your customisation | [Portal Patch](/ske/releases/portal-patch) |
@@ -30,6 +30,11 @@ separate configuration choices. The Portal Controller can also be installed
 SKE `v0.59.0` changes Promise and resource status fields. Its release record requires Portal
 Controller `v0.4.2` or later, or deprecated Backstage Controller `v0.11.1` or later, alongside
 the SKE upgrade. Review the [SKE release notes](/ske/releases/ske) before changing either component.
+:::
+
+:::warning Upgrading to Portal Controller v0.5.0 or Backstage Controller v0.11.2
+Portal Controller `v0.5.0` and deprecated Backstage Controller `v0.11.2`, and later versions of
+each, require SKE `v0.60.0` or later. Upgrade SKE first.
 :::
 
 1. Record installed component and chart versions, configuration, enabled features and customisations.

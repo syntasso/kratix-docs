@@ -132,6 +132,11 @@ Released via the SKE Operator Helm Chart [version 0.97.0](http://syntasso-enterp
 
 Released via the SKE Operator Helm Chart [version 0.95.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.95.0/)
 
+:::warning Requires SKE v0.60.0
+On earlier SKE versions, the Portal Controller reruns its pipeline Jobs endlessly. Upgrade SKE
+first.
+:::
+
 :::warning Backstage Templates now default to a single form page
 
 Generated Backstage Templates now put every `spec` field on one form page by default. Existing
