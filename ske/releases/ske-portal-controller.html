@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.3172e4c5.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.966ac3b3.js" defer="defer"></script>
 <script src="/assets/js/main.b29c2d01.js" defer="defer"></script>
 </head>
 <body>
@@ -141,6 +141,8 @@ its entity.</p>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v050-2026-09-29"><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.5.0/" target="_blank" rel="noopener noreferrer" class="">v0.5.0</a> (2026-09-29)<a href="#v050-2026-09-29" class="hash-link" aria-label="Direct link to v050-2026-09-29" title="Direct link to v050-2026-09-29" translate="no">​</a></h3>
 <p>Released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.95.0/" target="_blank" rel="noopener noreferrer" class="">version 0.95.0</a></p>
+<div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Requires SKE v0.60.0</div><div class="admonitionContent_BuS1"><p>On earlier SKE versions, the Portal Controller reruns its pipeline Jobs endlessly. Upgrade SKE
+first.</p></div></div>
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Backstage Templates now default to a single form page</div><div class="admonitionContent_BuS1"><p>Generated Backstage Templates now put every <code>spec</code> field on one form page by default. Existing
 Backstage connections that don&#x27;t set <code>--single-spec-page</code> switch to the single-page form when you
 upgrade. To keep the multi-step form, add <code>--single-spec-page=false</code> to the connection&#x27;s
