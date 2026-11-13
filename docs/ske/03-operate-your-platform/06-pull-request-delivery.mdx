@@ -124,18 +124,11 @@ redis   Redis provisioned    Waiting for approval to remove: https://github.com/
 If a reviewer closes the removal pull request without merging it, the workloads keep running and
 the request stays. To retry, use the label above. To let the request finish deleting and keep its
 files, see
-[When a removal is rejected](/ske/reference/pull-request-delivery#when-a-removal-is-rejected).
-
-## Turn it off
-
-Remove the `delivery` block from the `GitStateStore`. SKE writes every request on it straight to
-the Destination's branch again, including requests waiting for approval or rejected.
-
-SKE does not close the pull requests that were open. You must close them yourself.
+[Deleting](/ske/reference/pull-request-delivery#deleting).
 
 ## Related docs
 
-- [Pull request delivery reference](/ske/reference/pull-request-delivery): settings, status
-  fields, and what SKE does when requests change, pull requests conflict, or files are changed by
-  hand.
+- [Pull request delivery reference](/ske/reference/pull-request-delivery): configuration,
+  turning the feature off, status fields, and what SKE does when requests change, pull requests
+  conflict, or files are changed by hand.
 - [GitStateStore](/main/reference/statestore/gitstatestore)
