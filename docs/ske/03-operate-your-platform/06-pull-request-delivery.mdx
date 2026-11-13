@@ -6,23 +6,26 @@ sidebar_label: "Pull request delivery"
 sidebar_position: 2.6
 ---
 
-A Destination backed by a `GitStateStore` normally pushes straight to its branch. It's
-possible to configure SKE to create pull requests instead. In this mode, SKE commits the outputs
-to a branch for each WorkPlacement and opens a pull request from it to the Destination's branch.
-
-SKE never merges the pull request itself.
+A Destination backed by a `GitStateStore` normally pushes straight to its branch. With pull request
+delivery, SKE opens a pull request for each change instead, and the change reaches the cluster only
+when someone merges it. SKE never merges the pull request itself.
 
 :::warning
 
-Only Github and GitHub Enterprise Server are supported for pull request
+Only GitHub and GitHub Enterprise Server are supported for pull request
 delivery. Other Git providers will be supported in the future.
 
 :::
 
 ## What you need
 
-- The repository on GitHub, either github.com or GitHub Enterprise Server.
-- Credentials that can push branches and open pull requests on it.
+- A `GitStateStore` whose repository is on github.com or GitHub Enterprise Server, using
+  `authMethod: basicAuth` with a token as the password, or `authMethod: githubApp` (see
+  [GitStateStore authentication](/main/reference/statestore/gitstatestore#auth)).
+- A token or GitHub App with read and write access to the repository's **Contents** and **Pull
+  requests**. SKE uses them to push branches, open, comment on and close pull requests, and read
+  the comment a reviewer leaves when they close one.
+- A Destination whose `filepath.mode` is not `aggregatedYAML`.
 
 ## Turn it on
 
@@ -44,250 +47,58 @@ spec:
     mode: pullRequest
     config:
       provider: github
-      checkInterval: 30s # How often SKE checks the pull request. Default is 30s.
 ```
 
-On GitHub Enterprise Server, SKE calls the API on the same host as the repository
-(`https://<host>/api/v3`). Set `config.apiURL` to override.
+Every Destination that uses this `GitStateStore` now delivers through pull requests. For the
+optional settings, see the [pull request delivery reference](/ske/reference/pull-request-delivery).
 
-Configure a Destination to use that `GitStateStore` as usual. Workloads scheduled 
-to that Destination will now be delivered through pull requests.
+## Check it works
 
-A Destination with `filepath.mode: aggregatedYAML` cannot use a `GitStateStore` that has a
-`delivery` block. Kratix refuses to create or update either the Destination or the
-`GitStateStore` if the change would put them together, with an error such as:
-
-```text
-filepath.mode aggregatedYAML cannot be used with a state store that has a delivery mode (GitStateStore/production has delivery.mode "pullRequest")
-```
-
-If the `GitStateStore` already had requests delivered by pushing, SKE delivers each of them again
-through the new mode. It opens a pull request only for a request whose files differ from what the
-Destination's branch has.
-
-## Turn it off
-
-Remove the `delivery` block from the `GitStateStore`. SKE delivers every request on it again,
-writing the files straight to the Destination's branch. That includes a request waiting for
-approval and a request whose pull request a reviewer rejected. The exception is a deleted request
-whose removal a reviewer rejected: it stays as it is (see
-[When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal)).
-
-SKE does not close the pull requests that were open. Close them yourself: merging one later can put
-files on the branch that no request asks for, until the next time SKE writes that request. Each
-request that had a pull request open or rejected gets a `DeliveryModeChanged` warning on its
-WorkPlacement, with a link to the pull request it left behind:
+Request a resource from a Promise scheduled to one of those Destinations. Its `STATUS` links the
+pull request:
 
 ```bash
-kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
+kubectl get <RESOURCE_KIND> <RESOURCE_NAME> -n <NAMESPACE>
 ```
 
-## How it works
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval: https://github.com/acme/platform-state/pull/42
+```
 
-When a workload is scheduled to a PR Destination:
+Merge the pull request. Within 30 seconds the request is ready and any later pipelines run.
 
-1. SKE creates a `kratix/<work-placement-name>` branch. SKE will force-push to
-   that branch if it already exists.
-2. SKE opens a pull request from that branch to the Destination's branch. The PR
-   link is stored in the WorkPlacement's status.
-3. Every configured interval (30s by default), SKE checks the pull request's status. 
-  a. If merged, SKE marks the WorkPlacement as succeeded and kicks off the next pipeline.
-  b. If it's closed without merging, SKE marks the WorkPlacement as failed and
-stop the line.
+## Review a change
 
-:::warning Don't change the branches yourself
+Each change to a request gets its own pull request, opened from a `kratix/<WORKPLACEMENT_NAME>`
+branch into the Destination's branch.
 
-Do not commit to the `kratix/<work-placement-name>` branches or edit SKE's files on the
-Destination's branch. Change the Promise or the request instead. See
-[Changes made by hand](#changes-made-by-hand).
+- **Merge it** to deliver the change.
+- **Close it without merging** to reject the change. The request fails, and its `STATUS` quotes
+  the comment you left with **Close with comment**:
+
+  ```text
+  NAME    MESSAGE              STATUS
+  redis   Redis provisioned    Rejected in https://github.com/acme/platform-state/pull/42: "not during the freeze"
+  ```
+
+Anyone who can read the request can read that comment, even without access to the repository.
+
+SKE does not open a pull request for the same files again. A new one opens when the request or
+the Promise produces different files, or when you retry.
+
+:::warning Don't change SKE's branches by hand
+
+Do not commit to the `kratix/<WORKPLACEMENT_NAME>` branches or edit SKE's files on the
+Destination's branch. SKE replaces those commits, or opens a pull request to undo them. Change the
+Promise or the request instead.
 
 :::
 
-## Updating a request under review
+## Retry a rejected change
 
-When a request changes while its pull request is open, what SKE does depends on the files the
-pipeline produces:
-
-- **Different files.** SKE closes the open pull request with a comment saying the request changed,
-  and opens a new one. The request's `STATUS` links the new pull request. Reviews on the old pull
-  request do not carry over.
-- **The same files.** SKE keeps the open pull request and its reviews.
-- **Files the Destination's branch already has.** This happens when the request changes back to
-  what is already merged. SKE closes the open pull request with a comment saying the request
-  changed, opens no new one, and the request becomes ready.
-
-SKE recognises its own pull request by a hidden comment in the pull request's description that
-records the files it proposes. Each time SKE delivers a WorkPlacement, it keeps an open pull request
-from its `kratix/<work-placement-name>` branch whose hidden comment matches the files, and closes
-any other open pull request from that branch, with a comment saying why. That includes one a person
-opened from that branch, one whose hidden comment was edited away, and one into a branch the
-`GitStateStore` no longer uses.
-
-A pull request SKE closed is out of date, so do not reopen it. If someone reopens or merges it
-anyway, SKE does not count it as delivered or under review. At the next delivery it compares the
-request's files with the Destination's branch again, and opens a new pull request for whatever
-still differs.
-
-## Changes made by hand
-
-- **Commits on a `kratix/<work-placement-name>` branch are lost** the next time SKE opens a pull
-  request for that WorkPlacement, or rebuilds its pull request after a conflict (see
-  [Conflicts](#conflicts)), because SKE replaces the branch. If the pull request is merged
-  with those commits first, they reach the Destination's branch, and at the next delivery SKE opens
-  a pull request to remove them.
-- **Changes to SKE's files on the Destination's branch are reverted through a pull request.** If
-  someone edits or reverts those files directly on the Destination's branch, SKE opens a pull
-  request that puts them back at the next delivery. The edit stays on the branch until that pull
-  request is merged. While it is open, the request's `STATUS` shows `Waiting for approval` again.
-  Closing it without merging marks the request as rejected.
-- **A pull request with conflicts is rebuilt by SKE.** See [Conflicts](#conflicts).
-
-The next delivery happens when the request's pipeline runs again, or at the platform's
-reconciliation interval (every 10 hours by default), whichever comes first.
-
-## Conflicts
-
-When the Destination's branch changes after SKE opened a pull request, the pull request can end up
-with merge conflicts, and GitHub shows "This branch has conflicts that must be resolved". SKE
-rebuilds that pull request: it takes the latest commit on the Destination's branch, writes the
-request's current files on top of it, and force-pushes the same `kratix/<work-placement-name>`
-branch. The pull request keeps its number and link, so the request's `STATUS` still shows the same
-link.
-
-SKE looks for conflicts each time it checks the open pull requests, every 30 seconds by default (the
-`checkInterval` in the `delivery` block, see [Turn it on](#turn-it-on)).
-
-SKE rebuilds a pull request only when it has conflicts. It leaves the pull request alone when:
-
-- **It is only behind the Destination's branch.** Use GitHub's **Update branch** button.
-- **Reviews or required checks are missing.**
-- **Checks fail.**
-
-Whether a rebuild dismisses the approvals a pull request already has depends on the repository's
-branch protection setting "Dismiss stale pull request approvals when new commits are pushed". SKE
-does not control it. See GitHub's
-[About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging).
-
-A rebuild replaces the branch, so any commits someone added to it are lost. If you fix the conflicts
-yourself with GitHub's **Resolve conflicts** button, the pull request no longer has conflicts, so SKE
-leaves it alone and your version is what gets merged. If that version differs from the request's
-files, SKE opens a pull request to put them back at the next delivery.
-
-If, once rebuilt, the pull request would not change anything on the Destination's branch, SKE closes
-it with a comment saying there is nothing left to review, and the request becomes ready.
-
-Removal pull requests, opened when you [delete a request](#deleting-a-request), are rebuilt the
-same way. If the Destination's branch no longer has the files, SKE closes the removal pull request
-with a comment saying there is nothing left to remove, and the request finishes deleting.
-
-If the `GitStateStore`'s `branch` has changed since SKE opened a pull request, SKE does not rebuild
-it when it has conflicts. It closes it with a comment saying the Destination's branch changed, and
-opens a new one against the new branch.
-
-If you remove the `delivery` block while SKE is rebuilding a pull request, that pull request stays
-open, like any other pull request that was open when you
-[turned pull request delivery off](#turn-it-off). Close it yourself.
-
-## Deleting a request
-
-When you delete a resource request, SKE opens a pull request that removes the request's files from
-the Destination's branch. The request, and its Works and WorkPlacements, stay until that pull
-request is merged. Merging it removes them. While it waits, `STATUS` says so:
-
-```text
-NAME    MESSAGE              STATUS
-redis   Redis provisioned    Waiting for approval to remove: https://github.com/acme/platform-repo/pull/57
-```
-
-The pull request is titled `Kratix: remove <promise> <namespace>/<name> from <destination>`.
-
-SKE handles each Destination and each pipeline on its own:
-
-- **Nothing to remove.** If none of the request's files are on the branch, for example because its
-  only pull request was closed without merging, SKE opens no pull request and the request is
-  deleted straight away.
-- **A pull request still open.** SKE closes it with the comment `Kratix closed this pull request
-  because these files are being removed from the Destination.` If nothing from that request was
-  ever merged, the request is deleted straight away. Otherwise SKE opens a removal pull request for what
-  was merged.
-
-So a request with one pipeline's files merged and another pipeline's pull request still open gets a
-removal pull request for the first, and the second is closed.
-
-### When a reviewer rejects the removal
-
-If a reviewer closes the removal pull request without merging it, the files stay on the branch and
-the workloads keep running. The request stays, marked as being deleted, and `STATUS` says the
-removal was rejected, followed by the reason in the same form as any other rejection. The text is
-long, so `STATUS` cuts it:
-
-```text
-NAME    MESSAGE              STATUS
-redis   Redis provisioned    Removal rejected; the workloads are still on production. Rejected in https://github.com/acme/platform-repo/pull/57: "ke…
-```
-
-While a request is being deleted, `kubectl describe` does not show the full text. The request's
-`Reconciled` condition has the same cut text, and its `WorksSucceeded` condition still shows the state from before the
-delete. The full text is on each WorkPlacement's `WriteSucceeded` condition:
-
-```bash
-kubectl get workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE> \
-  -o jsonpath='{.status.deliveryURL}{"\n"}{.status.conditions[?(@.type=="WriteSucceeded")].message}'
-```
-
-To find the request's WorkPlacements, use the `kubectl get workplacements` command below.
-
-SKE does not open the removal pull request again on its own. The request's delete pipeline has
-already run by the time the removal pull request opens, so whatever it did, such as removing
-external resources, is not undone.
-
-If the reviewer changes their mind, ask SKE for a new removal pull request (see
-[Retrying a rejected change](#retrying-a-rejected-change)). To let the request finish deleting and
-keep its files on the branch, remove the finalizers from its WorkPlacements instead. List them with
-the Promise and request names:
-
-```bash
-kubectl get workplacements --all-namespaces \
-  -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,PROMISE:.spec.promiseName,REQUEST:.spec.resourceName \
-  | grep <RESOURCE_NAME>
-```
-
-Then, for each one, remove the `finalizers.workplacement.kratix.io/repo-cleanup` finalizer. On a
-Destination with `filepath.mode: none`, also remove
-`finalizers.workplacement.kratix.io/kratix-dot-files-cleanup`. To remove all of them at once:
-
-```bash
-kubectl patch workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE> \
-  --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
-```
-
-Or remove them one by one with `kubectl edit workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE>`.
-The request then finishes deleting. Its files stay on the branch until someone removes them by
-hand.
-
-The same applies if a reviewer reopens and merges a removal pull request after closing it. The files
-go, but the request stays until you remove the finalizers.
-
-### Other cases
-
-- **Deleting a Promise** deletes its requests, so it waits for every removal pull request. One
-  rejected removal keeps the Promise.
-- **Deleting a Destination with `cleanup: all`** opens a removal pull request for each
-  WorkPlacement, and the Destination waits until all are merged. A rejected one keeps the
-  Destination. With `cleanup: none`, the default, SKE deletes the WorkPlacements without removing
-  their files. Any removal pull request still open stays open, so close it yourself.
-- **Removing the `delivery` block** while a removal pull request is open makes SKE remove the files
-  directly. The removal pull request stays open, so close it yourself. A removal that was already
-  rejected stays rejected. Remove the finalizers as described in
-  [When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal).
-- **A pipeline that stops outputting a workload group** removes it the same way, through a removal
-  pull request.
-
-## Retrying a rejected change
-
-A rejection stays until the request produces different files. Sometimes the files are right and
-the answer changes instead: the requester talks to the reviewer, and it is now a yes. To ask SKE for
-a new pull request with the same files, label the request's Work with `kratix.io/redeliver=true`:
+If a rejected change is now approved, ask SKE for a new pull request with the same files by
+labelling the request's Work:
 
 ```bash
 kubectl label works -n <NAMESPACE> \
@@ -295,115 +106,36 @@ kubectl label works -n <NAMESPACE> \
   kratix.io/redeliver=true
 ```
 
-Kratix passes the label on to the Work's WorkPlacements and removes it from the Work. For each
-WorkPlacement, SKE then:
+## Delete a request
 
-- **After a rejected pull request**, opens a new pull request. It does not reopen the closed one,
-  but if a reviewer already reopened it and it proposes the same files, SKE uses that one. The
-  request's `STATUS` goes back to `Waiting for approval` with the link.
-- **After a rejected removal**, opens a new removal pull request. Merging it deletes the request as
-  usual.
-- **While a pull request is open**, keeps that pull request and its reviews, and opens no other.
-- **When everything is merged**, opens no pull request, unless SKE's files on the branch were edited
-  by hand (see [Changes made by hand](#changes-made-by-hand)).
-
-To retry only one Destination, label that WorkPlacement instead of the Work.
-
-Kratix removes the label from the WorkPlacement once SKE has opened the pull request, or found the
-one already open. If that fails, for example because GitHub is unavailable, the label stays and SKE
-tries again. To see which WorkPlacements are still waiting to be retried:
-
-```bash
-kubectl get workplacements --all-namespaces -l kratix.io/redeliver
-```
-
-If the reviewer rejects the new pull request too, the request is rejected again, and you can retry
-again the same way.
-
-## What the requester sees
-
-A requester does not need access to the Git repository to know where their change is. The
-`STATUS` column of their resource request says it:
-
-```bash
-kubectl get <RESOURCE_KIND> <RESOURCE_NAME>
-```
+Deleting a request opens a pull request that removes its files from the Destination's branch. The
+request stays until that pull request is merged:
 
 ```text
 NAME    MESSAGE              STATUS
-redis   Redis provisioned    Waiting for approval: https://github.com/acme/platform-repo/pull/42
+redis   Redis provisioned    Waiting for approval to remove: https://github.com/acme/platform-state/pull/57
 ```
 
-When a reviewer closes the pull request without merging it, the request is marked as failed and
-`STATUS` says why. If the reviewer used **Close with comment**, SKE quotes that comment:
+If a reviewer closes the removal pull request without merging it, the workloads keep running and
+the request stays. To retry, use the label above. To let the request finish deleting and keep its
+files, see
+[When a removal is rejected](/ske/reference/pull-request-delivery#when-a-removal-is-rejected).
 
-```text
-NAME    MESSAGE              STATUS
-redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/pull/42: "not during the freeze"
-```
+## Turn it off
 
-If they closed it without a comment, `STATUS` says so:
+Remove the `delivery` block from the `GitStateStore`. SKE writes every request on it straight to
+the Destination's branch again, including requests waiting for approval or rejected.
 
-```text
-NAME    MESSAGE              STATUS
-redis   Redis provisioned    Rejected in https://github.com/acme/platform-repo/pull/42 with no comment
-```
-
-SKE does not open a pull request for the same change again on its own. Running the pipeline again
-with the same output keeps the rejection, and so does a restart of SKE or a Destination that is
-briefly not ready. A new pull request opens once the request or the Promise produces different files
-(see [Updating a request under review](#updating-a-request-under-review)), or when you ask for one
-(see [Retrying a rejected change](#retrying-a-rejected-change)).
-
-`STATUS` is cut to 120 characters. `kubectl describe` shows the full text in the `Reconciled` and
-`WorksSucceeded` conditions, except while the request is being deleted (see
-[When a reviewer rejects the removal](#when-a-reviewer-rejects-the-removal)). A request delivered to several Destinations names each Destination in
-`WorksSucceeded`.
-
-SKE quotes only the comment the person who closed the pull request left as they closed it, up to 500
-characters, on one line. It does not quote review comments, such as a **Request changes** review.
-Anyone who can read the resource request can read the quote and the pull request link, even without
-access to the repository. The same goes for anywhere the request's status is copied to, such as
-Cortex. When a Promise has several configure pipelines, the Promise's own `Reconciled` condition
-shows the text too while a later pipeline waits for an earlier one's pull request.
-
-The `Reconciled` condition's reason tells tools and portals which case they are looking at:
-
-| Reason | Status | Meaning |
-| --- | --- | --- |
-| `WorksAwaitingDelivery` | `Unknown` | A pull request is open and waiting for review. |
-| `WorksRejected` | `False` | A pull request was closed without being merged. |
-| `Reconciled` | `True` | Every pull request for this request has been merged. |
-
-SKE uses the same reasons while a deleted request waits for its removal pull request.
-
-### What the platform team sees
-
-Each WorkPlacement holds the link to its pull request in `status.deliveryURL`, and its
-`WriteSucceeded` condition says where the delivery is:
+SKE does not close the pull requests that were open. Close them yourself, so that nobody merges a
+change SKE no longer tracks. To list them:
 
 ```bash
-kubectl get workplacement <WORKPLACEMENT_NAME> \
-  -o jsonpath='{.status.deliveryURL}{"\n"}{.status.conditions[?(@.type=="WriteSucceeded")]}'
+kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
 ```
 
-| Reason | Status | Meaning |
-| --- | --- | --- |
-| `WorkloadsAwaitingDelivery` | `Unknown` | The pull request is open. |
-| `WorkloadsWrittenToStateStore` | `True` | The pull request was merged. |
-| `WorkloadsRejected` | `False` | The pull request was closed without being merged. |
+## Related docs
 
-`status.deliveryRemoval` is `true` while the open or rejected pull request is a removal.
-
-Each Work sums up its WorkPlacements the same way. Its `WriteSucceeded` condition is `Unknown`
-with reason `WorkplacementsAwaitingDelivery` while any pull request is open, and `False` with
-`WorkplacementsRejected` once one is closed without being merged. `status.workPlacementStatuses` lists
-every WorkPlacement of the Work with its Destination, write status, message and `deliveryURL`, for
-tools that need to read each one:
-
-```bash
-kubectl get work <WORK_NAME> -o jsonpath='{.status.workPlacementStatuses}'
-```
-
-SKE reads the closing comment once, when it first sees the pull request closed. If the GitHub token
-cannot read comments, the request still shows the rejection, without the quote.
+- [Pull request delivery reference](/ske/reference/pull-request-delivery): settings, status
+  fields, and what SKE does when requests change, pull requests conflict, or files are changed by
+  hand.
+- [GitStateStore](/main/reference/statestore/gitstatestore)
