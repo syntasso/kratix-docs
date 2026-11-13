@@ -9,10 +9,10 @@ sidebar_position: 6.5
 
 # Pull request delivery
 
-Pull request delivery is an SKE delivery mode for a `GitStateStore`. Instead of pushing to the
-Destination's branch, SKE opens a pull request for each change and waits for someone to merge or
-close it. To turn it on and use it, see
-[Deliver through pull requests](/ske/operations/pull-request-delivery). This page lists the
+A `GitStateStore`'s delivery mode controls how Kratix writes to it. Pull request delivery is an
+SKE delivery mode: instead of pushing to the Destination's branch, SKE opens a pull request for each
+change and waits for someone to merge or close it. To turn it on and use it, see
+[Set up pull request delivery](/ske/operations/pull-request-delivery). This page lists the
 settings, the status SKE reports, and what SKE does in less common situations.
 
 ## Settings
@@ -50,7 +50,7 @@ A Destination with `filepath.mode: aggregatedYAML` cannot use a `GitStateStore` 
 filepath.mode aggregatedYAML cannot be used with a state store that has a delivery mode (GitStateStore/production has delivery.mode "pullRequest")
 ```
 
-## How a change is delivered
+## How SKE writes a change
 
 For each WorkPlacement whose files differ from the Destination's branch, SKE:
 
@@ -67,7 +67,7 @@ of them again, and opens a pull request only for those whose files differ from t
 branch.
 
 SKE recognises its own pull request by a hidden comment in its description that records the files
-it proposes. Each time it delivers a WorkPlacement, SKE keeps the open pull request from its
+it proposes. Each time it writes a WorkPlacement's files, SKE keeps the open pull request from its
 `kratix/<WORKPLACEMENT_NAME>` branch whose hidden comment matches the files, and closes any other
 open pull request from that branch, with a comment saying why. That includes one a person opened
 from that branch, one whose hidden comment was edited away, and one into a branch the
@@ -88,7 +88,7 @@ The request's `STATUS` column says where its change is, and is cut to 120 charac
 | `Removal rejected; the workloads are still on <DESTINATION>. Rejected in <URL>...` | A reviewer closed the removal pull request without merging it. |
 
 `kubectl describe` shows the full text in the `Reconciled` and `WorksSucceeded` conditions, except
-while the request is being deleted. A request delivered to several Destinations names each
+while the request is being deleted. A request scheduled to several Destinations names each
 Destination in `WorksSucceeded`. When a Promise has several configure pipelines, the Promise's own
 `Reconciled` condition shows the text too while a later pipeline waits for an earlier one's pull
 request.
@@ -117,7 +117,7 @@ such as Cortex.
 
 Each WorkPlacement holds the link to its pull request in `status.deliveryURL`.
 `status.deliveryRemoval` is `true` while the open or rejected pull request is a removal. Its
-`WriteSucceeded` condition says where the delivery is:
+`WriteSucceeded` condition says where the change is:
 
 ```bash
 kubectl get workplacement <WORKPLACEMENT_NAME> -n <NAMESPACE> \
@@ -156,7 +156,7 @@ pipeline produces:
   changed, opens no new one, and the request becomes ready.
 
 A pull request SKE closed is out of date, so do not reopen it. If someone reopens or merges it
-anyway, SKE does not count it as delivered or under review. At the next delivery it compares the
+anyway, SKE does not count it as merged or under review. The next time it writes the request, it compares the
 request's files with the Destination's branch again, and opens a new pull request for whatever
 still differs.
 
@@ -211,7 +211,7 @@ does not control it. See GitHub's
 A rebuild replaces the branch, so any commits someone added to it are lost. If you fix the conflicts
 yourself with GitHub's **Resolve conflicts** button, the pull request no longer has conflicts, so SKE
 leaves it alone and your version is what gets merged. If that version differs from the request's
-files, SKE opens a pull request to put them back at the next delivery.
+files, SKE opens a pull request to put them back the next time it writes the request.
 
 Other cases:
 
@@ -225,21 +225,21 @@ Other cases:
   it. It closes it with a comment saying the Destination's branch changed, and opens a new one
   against the new branch.
 - **The `delivery` block is removed** during a rebuild. The pull request stays open, like any other
-  pull request that was open when delivery was turned off. Close it yourself.
+  pull request that was open when pull request delivery was turned off. Close it yourself.
 
 ## Changes made by hand
 
 - **Commits on a `kratix/<WORKPLACEMENT_NAME>` branch are lost** the next time SKE opens a pull
   request for that WorkPlacement, or rebuilds its pull request after a conflict, because SKE
   replaces the branch. If the pull request is merged with those commits first, they reach the
-  Destination's branch, and at the next delivery SKE opens a pull request to remove them.
+  Destination's branch, and the next time SKE writes the request it opens a pull request to remove them.
 - **Changes to SKE's files on the Destination's branch are reverted through a pull request.** If
   someone edits or reverts those files directly on the Destination's branch, SKE opens a pull
-  request that puts them back at the next delivery. The edit stays on the branch until that pull
+  request that puts them back the next time it writes the request. The edit stays on the branch until that pull
   request is merged. While it is open, the request's `STATUS` shows `Waiting for approval` again.
   Closing it without merging marks the request as rejected.
 
-The next delivery happens when the request's pipeline runs again, or at the platform's
+SKE writes the request again when its pipeline runs again, or at the platform's
 reconciliation interval (every 10 hours by default), whichever comes first.
 
 ## Deletion
@@ -316,10 +316,10 @@ go, but the request stays until you remove the finalizers.
 - **A pipeline that stops outputting a workload group** removes it the same way, through a removal
   pull request.
 
-## Turning delivery off
+## Turning pull request delivery off
 
-When the `delivery` block is removed, SKE delivers every request on the `GitStateStore` again,
-writing the files straight to the Destination's branch. That includes a request waiting for
+When the `delivery` block is removed, SKE writes every request on the `GitStateStore` again,
+straight to the Destination's branch. That includes a request waiting for
 approval and a request whose pull request a reviewer rejected.
 
 - **A rejected removal stays rejected.** Remove the finalizers as described in
@@ -337,6 +337,6 @@ approval and a request whose pull request a reviewer rejected.
 
 ## Related docs
 
-- [Deliver through pull requests](/ske/operations/pull-request-delivery)
+- [Set up pull request delivery](/ske/operations/pull-request-delivery)
 - [GitStateStore](/main/reference/statestore/gitstatestore)
 - [Work status and events](/main/platform-concepts/kratix-resources/work-status-events)

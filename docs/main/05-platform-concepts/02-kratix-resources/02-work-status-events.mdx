@@ -141,9 +141,9 @@ status:
       type: Ready
 ```
 
-## Delivering again
+## Writing a Work again
 
-To make Kratix deliver a Work's documents again straight away, label the Work with
+To make Kratix write a Work's documents again straight away, label the Work with
 `kratix.io/redeliver=true`:
 
 ```bash
@@ -157,8 +157,8 @@ reconciliation. You can also label a single WorkPlacement.
 Kratix removes the label from a WorkPlacement once the write is accepted. If the write fails, the
 label stays and Kratix tries again.
 
-On a State Store that delivers through a writer that can reject a change, such as a pull request
-that a reviewer closes, the label also makes Kratix deliver the same documents again after a
+On a State Store whose writes can be rejected, such as one where each change is a pull request
+that a reviewer can close, the label also makes Kratix write the same documents again after a
 rejection.
 
 ## Events

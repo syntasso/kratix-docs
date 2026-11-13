@@ -1,14 +1,15 @@
 ---
-title: Deliver through pull requests
+title: Set up pull request delivery
 description: Have a Destination open a pull request for every change instead of pushing to its branch, so someone reviews what reaches the cluster.
 slug: "/ske/operations/pull-request-delivery"
 sidebar_label: "Pull request delivery"
 sidebar_position: 2.6
 ---
 
-A Destination backed by a `GitStateStore` normally pushes straight to its branch. With pull request
-delivery, SKE opens a pull request for each change instead, and the change reaches the cluster only
-when someone merges it. SKE never merges the pull request itself.
+A `GitStateStore`'s delivery mode controls how Kratix writes to it. By default, Kratix pushes
+straight to the branch. With pull request delivery, SKE opens a pull request for each change
+instead, and the change reaches the cluster only when someone merges it. SKE never merges the pull
+request itself.
 
 :::warning
 
@@ -49,7 +50,7 @@ spec:
       provider: github
 ```
 
-Every Destination that uses this `GitStateStore` now delivers through pull requests. For the
+SKE now writes to every Destination that uses this `GitStateStore` through pull requests. For the
 optional settings, see the [pull request delivery reference](/ske/reference/pull-request-delivery).
 
 ## Check it works
@@ -73,7 +74,7 @@ Merge the pull request. Within 30 seconds the request is ready and any later pip
 Each change to a request gets its own pull request, opened from a `kratix/<WORKPLACEMENT_NAME>`
 branch into the Destination's branch.
 
-- **Merge it** to deliver the change.
+- **Merge it** to write the change to the Destination's branch.
 - **Close it without merging** to reject the change. The request fails, and its `STATUS` quotes
   the comment you left with **Close with comment**:
 
