@@ -6,24 +6,36 @@ sidebar_label: "Pull request delivery"
 sidebar_position: 2.6
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 A `GitStateStore`'s delivery mode controls how Kratix writes to it. By default, Kratix pushes
 straight to the branch. With pull request delivery, SKE opens a pull request for each change
 instead, and the change reaches the cluster only when someone merges it. SKE never merges the pull
 request itself.
 
-:::warning
-
-Only GitHub and GitHub Enterprise Server are supported for pull request
-delivery. Other Git providers will be supported in the future.
-
-:::
+Pull request delivery works with GitHub (github.com and GitHub Enterprise Server) and Azure DevOps.
 
 ## What you need
+
+<Tabs className="boxedTabs" groupId="gitProvider">
+<TabItem value="github" label="GitHub">
 
 - A `GitStateStore` on GitHub, authenticating with a token (`basicAuth`) or a GitHub App
   (`githubApp`). See [GitStateStore authentication](/main/reference/statestore/gitstatestore#auth).
 - Read and write access to the repository's **Contents** and **Pull requests** for that token or
   GitHub App.
+
+</TabItem>
+<TabItem value="azure" label="Azure DevOps">
+
+- A `GitStateStore` on Azure DevOps, authenticating with a personal access token (`basicAuth`).
+- The **Code (Read & write)** scope on that token.
+- The **Contribute**, **Create branch** and **Contribute to pull requests** permissions on the
+  repository. The project's Contributors group has them by default.
+
+</TabItem>
+</Tabs>
 
 :::warning
 
@@ -35,6 +47,9 @@ to create or update the Destination or the `GitStateStore` if the change would p
 ## Turn it on
 
 Add a `delivery` block to the `GitStateStore`:
+
+<Tabs className="boxedTabs" groupId="gitProvider">
+<TabItem value="github" label="GitHub">
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
@@ -53,6 +68,39 @@ spec:
     config:
       provider: github
 ```
+
+</TabItem>
+<TabItem value="azure" label="Azure DevOps">
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: production
+spec:
+  url: https://dev.azure.com/acme/platform/_git/platform-state
+  branch: main
+  authMethod: basicAuth
+  secretRef:
+    name: git-credentials
+    namespace: default
+  delivery:
+    mode: pullRequest
+    config:
+      provider: azureDevOps
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-credentials
+  namespace: default
+stringData:
+  username: kratix # any value that is not empty
+  password: <PERSONAL_ACCESS_TOKEN>
+```
+
+</TabItem>
+</Tabs>
 
 SKE now writes to every Destination that uses this `GitStateStore` through pull requests. For the
 optional settings, see the [pull request delivery reference](/ske/reference/pull-request-delivery).
@@ -78,9 +126,10 @@ Merge the pull request. Within 30 seconds the request is ready and any later pip
 Each change to a request gets its own pull request, opened from a `kratix/<WORKPLACEMENT_NAME>`
 branch into the Destination's branch.
 
-- **Merge it** to write the change to the Destination's branch.
-- **Close it without merging** to reject the change. The request fails, and its `STATUS` quotes
-  the comment you left with **Close with comment**:
+- **Merge it** (**Complete** on Azure DevOps) to write the change to the Destination's branch.
+- **Close it without merging** (**Abandon** on Azure DevOps) to reject the change. The request
+  fails, and its `STATUS` quotes your closing comment. On GitHub, use **Close with comment**. On
+  Azure DevOps, comment within a minute of abandoning the pull request, before or after:
 
   ```text
   NAME    MESSAGE              STATUS

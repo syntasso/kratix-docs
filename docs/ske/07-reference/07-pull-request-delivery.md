@@ -1,5 +1,5 @@
 ---
-description: Configuration, status fields and behaviour of SKE pull request delivery on a GitStateStore.
+description: Configuration, status fields and behaviour of SKE pull request delivery on a GitStateStore, for GitHub and Azure DevOps.
 title: Pull request delivery
 id: pull-request-delivery
 slug: "/ske/reference/pull-request-delivery"
@@ -33,14 +33,17 @@ spec:
 | Field | Required | Description |
 | --- | --- | --- |
 | `delivery.mode` | Yes | `pullRequest`. |
-| `delivery.config.provider` | Yes | `github`, for github.com and GitHub Enterprise Server. |
+| `delivery.config.provider` | Yes | `github`, for github.com and GitHub Enterprise Server, or `azureDevOps`. |
 | `delivery.config.checkInterval` | No | How often SKE checks each open pull request, as a duration such as `30s` or `2m`. Defaults to `30s`. |
-| `delivery.config.apiURL` | No | The GitHub API address. Defaults to `https://api.github.com` for github.com, and `https://<host>/api/v3` for any other host. Must be on the same host as `spec.url`. |
+| `delivery.config.apiURL` | No | GitHub only. The GitHub API address. Defaults to `https://api.github.com` for github.com, and `https://<host>/api/v3` for any other host. Must be on the same host as `spec.url`. |
 
 Limits:
 
-- `authMethod: ssh` is not supported, because SKE needs a token to call the GitHub API. Use
-  `basicAuth` or `githubApp` instead.
+- `authMethod: ssh` is not supported, because SKE needs a token to call the provider's API. On
+  GitHub, use `basicAuth` or `githubApp`. On Azure DevOps, use `basicAuth` with a personal access
+  token as the `password`, and any `username` that is not empty.
+- On Azure DevOps, `spec.url` must be `https://dev.azure.com/<ORGANISATION>/<PROJECT>/_git/<REPOSITORY>`
+  or `https://<ORGANISATION>.visualstudio.com/<PROJECT>/_git/<REPOSITORY>`.
 - Destinations with `filepath.mode: aggregatedYAML` are not supported.
 
 Turning it on and off:
@@ -65,8 +68,10 @@ shows the full text in the `Reconciled` and `WorksSucceeded` conditions.
 | `Waiting for approval to remove: <URL>` | The request was deleted and its removal pull request is open. |
 | `Removal rejected; the workloads are still on <DESTINATION>. Rejected in <URL>...` | A reviewer closed the removal pull request without merging it. |
 
-SKE quotes the comment the reviewer left when closing the pull request, up to 500 characters. It
-does not quote review comments. Anyone who can read the resource request can read the quote and
+SKE quotes the comment the reviewer left when closing the pull request, up to 500 characters. On
+GitHub, that is the **Close with comment** text; review comments are not quoted. On Azure DevOps,
+it is the latest comment by the person who abandoned the pull request, written within a minute
+before or after they abandoned it. Anyone who can read the resource request can read the quote and
 the link, even without access to the repository.
 
 For tools and portals, the condition reasons are:
@@ -86,7 +91,8 @@ once closed without merging. Each WorkPlacement also holds its pull request's li
 ## How SKE handles pull requests
 
 SKE opens each pull request from a `kratix/<WORKPLACEMENT_NAME>` branch into the Destination's
-branch, and checks it every `checkInterval`.
+branch, and checks it every `checkInterval`. Azure DevOps calls a merged pull request
+**completed**, and one closed without merging **abandoned**.
 
 | When | SKE |
 | --- | --- |
@@ -95,7 +101,7 @@ branch, and checks it every `checkInterval`.
 | The request changes and produces different files | Closes the open pull request and opens a new one. Reviews do not carry over. |
 | The request changes but produces the same files | Keeps the open pull request and its reviews. |
 | The request changes back to what is already merged | Closes the pull request, because it is no longer needed. The request becomes ready. |
-| The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch protection rules, GitHub may dismiss existing approvals. SKE does not touch a pull request that is only behind, has failing checks, or whose conflicts you resolved yourself. |
+| The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch rules, existing approvals may be dismissed: on GitHub, "Dismiss stale pull request approvals when new commits are pushed"; on Azure DevOps, the "When new changes are pushed" policy. On Azure DevOps, SKE needs permission to force-push its branches, which their creator has unless a branch permission removes it. SKE does not touch a pull request that is only behind, has failing checks, or whose conflicts you resolved yourself. |
 | Someone changes a `kratix/<WORKPLACEMENT_NAME>` branch | Overrides the changes. |
 | Someone changes SKE's files on the Destination's branch | Opens a new pull request to put them back. |
 
