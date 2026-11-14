@@ -1,4 +1,38 @@
 {
   "goLive": "2026-11-09",
-  "releases": []
+  "releases": [
+    {
+      "id": "ske-portal-controller@0.10.3",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "backstage@ske-backend-0.26.0+ske-frontend-0.23.1",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "portal-patch@0.8.6",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-health-agent@0.16.6",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "tfstate-finder@0.13.5",
+      "digestEmailId": "513752550591"
+    }
+  ],
+  "digests": {
+    "511980281018": {
+      "slackChannel": "C04BZJ7DB09",
+      "slackMessageTs": "1794330396.622159",
+      "holdEndsAt": "2026-11-11T11:30:00Z"
+    },
+    "513752550591": {
+      "slackChannel": "C04BZJ7DB09",
+      "slackMessageTs": "1794498363.389299",
+      "slackScheduledMessageId": "Q0CH1ENFPBP",
+      "holdEndsAt": "2026-11-13T10:46:01Z"
+    }
+  }
 }

@@ -20,11 +20,21 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-// Record is the release record: when digests started, and which digest email
-// each release went into.
+// Record is the release record: when digests started, which digest email
+// each release went into, and each digest's Slack message and hold.
 type Record struct {
-	GoLive   string            `json:"goLive"`
-	Releases []RecordedRelease `json:"releases"`
+	GoLive   string                  `json:"goLive"`
+	Releases []RecordedRelease       `json:"releases"`
+	Digests  map[string]DigestRecord `json:"digests,omitempty"`
+}
+
+// DigestRecord is a digest email's Slack message, its scheduled hold-end
+// ping, and when the hold ends (RFC 3339).
+type DigestRecord struct {
+	SlackChannel            string `json:"slackChannel,omitempty"`
+	SlackMessageTs          string `json:"slackMessageTs,omitempty"`
+	SlackScheduledMessageID string `json:"slackScheduledMessageId,omitempty"`
+	HoldEndsAt              string `json:"holdEndsAt,omitempty"`
 }
 
 // RecordedRelease ties one release to the digest email it went into.
@@ -55,12 +65,7 @@ func SelectPending(record Record, releases []Release) []Release {
 			pending = append(pending, r)
 		}
 	}
-	sort.SliceStable(pending, func(i, j int) bool {
-		if pending[i].Date != pending[j].Date {
-			return pending[i].Date > pending[j].Date
-		}
-		return pending[i].Component < pending[j].Component
-	})
+	sortNewestFirst(pending)
 	return pending
 }
 
@@ -169,4 +174,14 @@ func renderMarkdown(source string) string {
 		return "<pre>" + html.EscapeString(source) + "</pre>"
 	}
 	return strings.TrimSpace(out.String())
+}
+
+// sortNewestFirst orders releases newest first, then by component.
+func sortNewestFirst(releases []Release) {
+	sort.SliceStable(releases, func(i, j int) bool {
+		if releases[i].Date != releases[j].Date {
+			return releases[i].Date > releases[j].Date
+		}
+		return releases[i].Component < releases[j].Component
+	})
 }
