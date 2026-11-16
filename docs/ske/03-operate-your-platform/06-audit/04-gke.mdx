@@ -1,0 +1,482 @@
+---
+title: Audit log on Google GKE
+description: Find who changed resource requests in the GKE audit log, count the users of your platform with Observability analytics, and build a Grafana dashboard
+keywords: [audit, audit log, gke, google cloud, cloud logging, observability analytics, log analytics, bigquery, grafana, unique users]
+slug: "/ske/operations/audit/gke"
+sidebar_label: "Google GKE"
+sidebar_position: 5
+---
+
+On Google GKE, the Kubernetes API server sends its audit log to
+[Cloud Logging](https://cloud.google.com/logging/docs/overview).
+This page shows where to find the audit log, and how to count the users of
+your platform, in Observability analytics or in a Grafana dashboard.
+
+Each create, update and delete of a resource request carries the
+[audit annotation](/ske/operations/audit/requester#audit-log)
+`attribution.platform.syntasso.io/last-changed-by`, set to the user who made
+the change.
+
+## Turning on the audit log
+
+GKE always writes creates, updates and deletes to the Admin Activity audit log,
+so there is nothing to turn on. See
+[GKE audit logging](https://cloud.google.com/kubernetes-engine/docs/how-to/audit-logging)
+in the GKE documentation.
+
+## Finding the logs
+
+GKE writes the Admin Activity audit log to the
+[`_Required` log bucket](https://cloud.google.com/logging/docs/store-log-entries#required-bucket)
+of your project, with the log ID `cloudaudit.googleapis.com/activity`. Each
+entry is one audit event. GKE turns each audit annotation into a label on the
+entry, so the user is in the label
+`attribution.platform.syntasso.io/last-changed-by`.
+
+```mdx-code-block
+import AuditEvent from "./gke-logs-explorer-audit-event.png"
+import AuditEventDark from "./gke-logs-explorer-audit-event-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={AuditEvent} alt="One audit log entry in Logs Explorer, with the user in its labels" />
+  <img className="large dark-only" src={AuditEventDark} alt="One audit log entry in Logs Explorer, with the user in its labels" />
+
+  <figcaption>The user in the labels of one audit log entry</figcaption>
+</figure>
+
+## Log retention {#retention}
+
+You can only see activity and count your platform users if their events are
+still in the bucket. The `_Required` bucket keeps logs for 400 days at no
+charge, and you can't change its retention.
+
+To count the users over more than 400 days, route a copy of the audit log to a
+[log bucket](https://cloud.google.com/logging/docs/buckets) with a longer
+retention. See
+[Routing and storage overview](https://cloud.google.com/logging/docs/routing/overview)
+in the Cloud Logging documentation. Cloud Logging charges for the logs it
+stores in other buckets. Check the
+[Google Cloud Observability pricing page](https://cloud.google.com/products/observability/pricing)
+to find out the relevant price for your scenario.
+
+## Counting platform users {#unique-users}
+
+Logs Explorer can filter log entries, but it can't count them. To count your
+platform users, use
+[Observability analytics](https://cloud.google.com/logging/docs/log-analytics),
+which runs SQL on a log bucket, or Grafana.
+
+### Turning on Observability analytics
+
+:::warning
+
+You can't undo this upgrade. After the upgrade, entries written before it can
+take several days to become available to SQL.
+
+:::
+
+Upgrade the `_Required` bucket to use Observability analytics:
+
+```bash
+gcloud logging buckets update _Required \
+  --project <PROJECT_ID> \
+  --location global \
+  --enable-analytics
+```
+
+In the Google Cloud console, the **Logs storage** page shows **Open** for the
+`_Required` bucket once the upgrade is done:
+
+```mdx-code-block
+import LogStorage from "./gke-log-storage.png"
+import LogStorageDark from "./gke-log-storage-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={LogStorage} alt="The Logs storage page, with Observability analytics available for the _Required bucket" />
+  <img className="large dark-only" src={LogStorageDark} alt="The Logs storage page, with Observability analytics available for the _Required bucket" />
+
+  <figcaption>The _Required bucket upgraded to Observability analytics</figcaption>
+</figure>
+
+### Using Observability analytics
+
+1. In the Google Cloud console, go to **Logging** > **Observability
+   analytics**.
+1. Choose the time range to count over.
+1. Run this query:
+
+```sql
+SELECT COUNT(DISTINCT user) AS users
+FROM (
+  SELECT
+    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user
+  FROM `<PROJECT_ID>.global._Required._AllLogs`
+  WHERE log_id = 'cloudaudit.googleapis.com/activity'
+    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'
+    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0
+    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL
+)
+WHERE user IS NOT NULL
+```
+
+This `WHERE` keeps the changes to resource requests in your cluster that
+succeeded. The `_Required` bucket holds the audit log of every cluster in the
+project, so the query filters on the cluster name. It drops the changes
+Kubernetes rejected, which have a status code, and any dry runs, such as the
+ones `kubectl diff` sends, which GKE labels with `command.gke.io/dryRun`.
+
+```mdx-code-block
+import UniqueUsers from "./gke-log-analytics-unique-users.png"
+import UniqueUsersDark from "./gke-log-analytics-unique-users-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={UniqueUsers} alt="The unique users query in Observability analytics, returning 3 users" />
+  <img className="large dark-only" src={UniqueUsersDark} alt="The unique users query in Observability analytics, returning 3 users" />
+
+  <figcaption>Counting platform users in Observability analytics</figcaption>
+</figure>
+
+#### Other useful Observability analytics queries
+
+How many changes each user made:
+
+```sql
+SELECT user, COUNT(*) AS changes
+FROM (
+  SELECT
+    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user
+  FROM `<PROJECT_ID>.global._Required._AllLogs`
+  WHERE log_id = 'cloudaudit.googleapis.com/activity'
+    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'
+    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0
+    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL
+)
+WHERE user IS NOT NULL
+GROUP BY user
+ORDER BY changes DESC
+```
+
+```mdx-code-block
+import ChangesPerUser from "./gke-log-analytics-changes-per-user.png"
+import ChangesPerUserDark from "./gke-log-analytics-changes-per-user-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={ChangesPerUser} alt="The changes per user query in Observability analytics, returning one row for each user" />
+  <img className="large dark-only" src={ChangesPerUserDark} alt="The changes per user query in Observability analytics, returning one row for each user" />
+
+  <figcaption>Changes per user in Observability analytics</figcaption>
+</figure>
+
+Who created, updated and deleted a request:
+
+```sql
+SELECT timestamp, user, verb, type
+FROM (
+  SELECT
+    timestamp,
+    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user,
+    REGEXP_EXTRACT(proto_payload.audit_log.method_name, r'[^.]+$') AS verb,
+    REGEXP_EXTRACT(proto_payload.audit_log.resource_name, r'([^/]+)/[^/]+$') AS type,
+    proto_payload.audit_log.resource_name AS resource_name
+  FROM `<PROJECT_ID>.global._Required._AllLogs`
+  WHERE log_id = 'cloudaudit.googleapis.com/activity'
+    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'
+    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0
+    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL
+)
+WHERE user IS NOT NULL
+  AND REGEXP_CONTAINS(resource_name, r'/namespaces/<NAMESPACE>/[^/]+/<REQUEST_NAME>$')
+ORDER BY timestamp DESC
+```
+
+`verb` is the last part of the entry's method name, which is the Kubernetes
+API verb. It depends on how the tool sends the change. Most tools, such as
+`kubectl apply`, `kubectl edit`, Flux and Argo CD, send changes to an existing
+request as `patch`. Tools that send the whole request, such as
+`kubectl replace`, show as `update`.
+
+```mdx-code-block
+import RequestHistory from "./gke-log-analytics-request-history.png"
+import RequestHistoryDark from "./gke-log-analytics-request-history-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={RequestHistory} alt="The history query in Observability analytics, showing who created, changed and deleted my-cache" />
+  <img className="large dark-only" src={RequestHistoryDark} alt="The history query in Observability analytics, showing who created, changed and deleted my-cache" />
+
+  <figcaption>Who created, changed and deleted a request in Observability analytics</figcaption>
+</figure>
+
+## Grafana
+
+Grafana can run the same queries through its Google BigQuery data source, on a
+BigQuery dataset linked to the `_Required` bucket. The dashboard below shows
+the number of unique users, the number of changes, the changes each user made,
+and the most recent changes. To set it up:
+
+1. Link the `_Required` bucket to a BigQuery dataset. See
+   [Query a linked BigQuery dataset](https://cloud.google.com/logging/docs/analyze/query-linked-dataset)
+   in the Cloud Logging documentation. For example, with the gcloud CLI:
+
+   ```bash
+   gcloud logging links create <DATASET> \
+     --project <PROJECT_ID> \
+     --bucket _Required \
+     --location global
+   ```
+
+1. Give Grafana access to the dataset. See
+   [Configure the Google BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/)
+   in the Grafana documentation. The identity Grafana uses needs the
+   **BigQuery Job User** role on the project and read access to `<DATASET>`.
+   The data source tests its connection and lists projects through the Cloud
+   Resource Manager API, so turn that API on in the project.
+1. Install the Google BigQuery data source plugin, which is not built into
+   Grafana, and add the data source.
+1. Copy the dashboard below, replace `<PROJECT_ID>`, `<DATASET>` and
+   `<CLUSTER_NAME>`, then import it and choose your Google BigQuery data
+   source.
+
+Each query in the dashboard filters with `$__timeFilter(timestamp)`, so it
+counts over the dashboard's time range. BigQuery charges for the data each
+query reads, and every panel runs a query each time the dashboard refreshes.
+Check the [BigQuery pricing page](https://cloud.google.com/bigquery/pricing)
+to find out the relevant price for your scenario.
+
+```mdx-code-block
+import GrafanaDashboard from "./gke-grafana-dashboard.png"
+import GrafanaDashboardDark from "./gke-grafana-dashboard-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={GrafanaDashboard} alt="The SKE platform audit dashboard, showing unique users, changes, changes per user, and recent changes" />
+  <img className="large dark-only" src={GrafanaDashboardDark} alt="The SKE platform audit dashboard, showing unique users, changes, changes per user, and recent changes" />
+
+  <figcaption>The SKE platform audit dashboard on GKE</figcaption>
+</figure>
+
+<details>
+<summary>Dashboard JSON</summary>
+
+```json
+{
+  "__inputs": [
+    {
+      "name": "DS_BIGQUERY",
+      "label": "Google BigQuery",
+      "type": "datasource",
+      "pluginId": "grafana-bigquery-datasource",
+      "pluginName": "Google BigQuery"
+    }
+  ],
+  "title": "SKE platform audit",
+  "uid": "ske-platform-audit",
+  "tags": [
+    "ske",
+    "audit"
+  ],
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Unique users",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "${DS_BIGQUERY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "${DS_BIGQUERY}"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT user) AS users\nFROM (\n  SELECT\n    timestamp,\n    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user,\n    REGEXP_EXTRACT(proto_payload.audit_log.method_name, r'[^.]+$') AS verb,\n    proto_payload.audit_log.resource_name AS resource_name\n  FROM `<PROJECT_ID>.<DATASET>._AllLogs`\n  WHERE $__timeFilter(timestamp)\n    AND log_id = 'cloudaudit.googleapis.com/activity'\n    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'\n    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0\n    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL\n)\nWHERE user IS NOT NULL"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Changes to resource requests",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "${DS_BIGQUERY}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "${DS_BIGQUERY}"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS changes\nFROM (\n  SELECT\n    timestamp,\n    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user,\n    REGEXP_EXTRACT(proto_payload.audit_log.method_name, r'[^.]+$') AS verb,\n    proto_payload.audit_log.resource_name AS resource_name\n  FROM `<PROJECT_ID>.<DATASET>._AllLogs`\n  WHERE $__timeFilter(timestamp)\n    AND log_id = 'cloudaudit.googleapis.com/activity'\n    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'\n    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0\n    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL\n)\nWHERE user IS NOT NULL"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Average changes per user",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "${DS_BIGQUERY}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "${DS_BIGQUERY}"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(changes) AS average\nFROM (\nSELECT user, COUNT(*) AS changes\nFROM (\n  SELECT\n    timestamp,\n    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user,\n    REGEXP_EXTRACT(proto_payload.audit_log.method_name, r'[^.]+$') AS verb,\n    proto_payload.audit_log.resource_name AS resource_name\n  FROM `<PROJECT_ID>.<DATASET>._AllLogs`\n  WHERE $__timeFilter(timestamp)\n    AND log_id = 'cloudaudit.googleapis.com/activity'\n    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'\n    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0\n    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL\n)\nWHERE user IS NOT NULL\nGROUP BY user\n)"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Changes per user",
+      "type": "table",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "${DS_BIGQUERY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "${DS_BIGQUERY}"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "rawQuery": true,
+          "rawSql": "SELECT user, COUNT(*) AS changes\nFROM (\n  SELECT\n    timestamp,\n    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user,\n    REGEXP_EXTRACT(proto_payload.audit_log.method_name, r'[^.]+$') AS verb,\n    proto_payload.audit_log.resource_name AS resource_name\n  FROM `<PROJECT_ID>.<DATASET>._AllLogs`\n  WHERE $__timeFilter(timestamp)\n    AND log_id = 'cloudaudit.googleapis.com/activity'\n    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'\n    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0\n    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL\n)\nWHERE user IS NOT NULL\nGROUP BY user\nORDER BY changes DESC"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Recent changes",
+      "type": "table",
+      "datasource": {
+        "type": "grafana-bigquery-datasource",
+        "uid": "${DS_BIGQUERY}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "${DS_BIGQUERY}"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  timestamp,\n  user,\n  verb,\n  REGEXP_EXTRACT(resource_name, r'([^/]+)/[^/]+$') AS type,\n  REGEXP_EXTRACT(resource_name, r'/namespaces/([^/]+)/') AS namespace,\n  REGEXP_EXTRACT(resource_name, r'[^/]+$') AS name\nFROM (\n  SELECT\n    timestamp,\n    JSON_VALUE(labels['attribution.platform.syntasso.io/last-changed-by']) AS user,\n    REGEXP_EXTRACT(proto_payload.audit_log.method_name, r'[^.]+$') AS verb,\n    proto_payload.audit_log.resource_name AS resource_name\n  FROM `<PROJECT_ID>.<DATASET>._AllLogs`\n  WHERE $__timeFilter(timestamp)\n    AND log_id = 'cloudaudit.googleapis.com/activity'\n    AND JSON_VALUE(resource.labels.cluster_name) = '<CLUSTER_NAME>'\n    AND IFNULL(proto_payload.audit_log.status.code, 0) = 0\n    AND JSON_VALUE(labels['command.gke.io/dryRun']) IS NULL\n)\nWHERE user IS NOT NULL\nORDER BY timestamp DESC\nLIMIT 100"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+## Known limitations
+
+- **Counts only go back as far as your [retention](#retention).**
+- **The recorded user is only as specific as the way users log in.** On GKE,
+  users usually log in with their Google account, so the audit log records
+  their email. If many users share one service account, the audit log records
+  that service account for all of them. Run `kubectl auth whoami -o yaml` to
+  see which fields your cluster gives you, and set
+  [`userInfoField`](/ske/operations/audit/requester#user-info-field)
+  to a field that is different for each user.
+- **Some changes have no user.** For example, deletes through GitOps. See
+  [What is not recorded](/ske/operations/audit/requester#what-is-not-recorded).
+
+## Related material
+
+- [Audit your platform](/ske/operations/audit)
