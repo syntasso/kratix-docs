@@ -851,6 +851,24 @@ The plugin checks the entity type and adds the relevant configuration:
 These paths are relative to the catalog entity page, rather than top-level
 Backstage routes. Other catalog entity types are unaffected.
 
+### Catalog filter {#catalog-filter}
+
+The `alpha` entry point also adds a **Requests with open PRs** checkbox to the
+catalog's filter sidebar. It shows how many resources have an open pull request,
+and narrows the catalog to those resources when ticked. A request whose resource
+does not exist yet appears as a pending request entity instead, and the filter
+excludes it.
+
+The filter is enabled by default. Its extension ID is
+`catalog-filter:ske-frontend/in-flight-change`. To turn it off, disable the
+extension in `app-config.yaml`:
+
+```yaml
+app:
+  extensions:
+    - catalog-filter:ske-frontend/in-flight-change: false
+```
+
 ### `scaffolderModuleResourceRequestCopy` {#resource-request-copy}
 
 A module, also exported from `@syntasso/plugin-ske-frontend/alpha`, that makes the scaffolder task

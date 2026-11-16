@@ -150,6 +150,9 @@ The plugin registers the following extensions via its `alpha` entry point:
 - Promise Status: the Status tab for Promise entities.
 - Resource Status and Manage: the Status and Manage tabs for Resource entities.
 - Pending Request Status: approval and provisioning state before a resource exists.
+- Requests with open PRs: a catalog sidebar filter for resources with an open pull request. It is
+  enabled by default; see [Catalog filter](/ske/integrations/portal-controller/backstage/frontend-plugin#catalog-filter)
+  to turn it off.
 
 To verify the plugin is loaded, check your Backstage app configuration. The plugin should appear under `@syntasso/plugin-ske-frontend/alpha` in the resolved plugin list.
 
