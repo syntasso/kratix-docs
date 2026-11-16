@@ -7,10 +7,11 @@ sidebar_label: "Amazon EKS"
 sidebar_position: 3
 ---
 
-On Amazon EKS, the Kubernetes API server sends its audit log to CloudWatch
-Logs. This page shows how to turn the audit log on, where to find it, and how
-to count the users of your platform, in CloudWatch Logs Insights or in a
-Grafana dashboard.
+On Amazon EKS, the Kubernetes API server sends its audit log to
+[CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html).
+This page shows how to turn the audit log on, where to find it, and how to
+count the users of your platform, in CloudWatch Logs Insights or in a Grafana
+dashboard.
 
 Each create, update and delete of a resource request carries the
 [audit annotation](/ske/operations/audit/requester#audit-log)
@@ -33,12 +34,39 @@ aws eks update-cluster-config \
 The EKS audit policy already records writes to resource requests, so there is
 nothing else to set up.
 
+In the EKS console, the same setting is under the cluster's **Control plane
+logs**. Select **Manage** to see that **Audit** is selected:
+
+```mdx-code-block
+import ManageLogging from "./eks-manage-logging.png"
+import ManageLoggingDark from "./eks-manage-logging-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={ManageLogging} alt="The Manage logging page of an EKS cluster, with the Audit log type selected" />
+  <img className="large dark-only" src={ManageLoggingDark} alt="The Manage logging page of an EKS cluster, with the Audit log type selected" />
+
+  <figcaption>The audit log turned on in the EKS console</figcaption>
+</figure>
+
 ## Finding the logs
 
 EKS writes the audit log to the log group `/aws/eks/<CLUSTER_NAME>/cluster`, in
 log streams that start with `kube-apiserver-audit-`. Each line is one audit
 event in JSON, and the user is in
 `annotations.attribution.platform.syntasso.io/last-changed-by`.
+
+```mdx-code-block
+import AuditEvent from "./eks-logs-insights-audit-event.png"
+import AuditEventDark from "./eks-logs-insights-audit-event-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={AuditEvent} alt="One audit event in CloudWatch Logs Insights, with the user in the last-changed-by annotation" />
+  <img className="large dark-only" src={AuditEventDark} alt="One audit event in CloudWatch Logs Insights, with the user in the last-changed-by annotation" />
+
+  <figcaption>The user in the annotations of one audit event</figcaption>
+</figure>
 
 ## Setting log retention {#retention}
 
@@ -82,6 +110,18 @@ This `filter` keeps the changes to resource requests that succeeded. It drops
 the changes Kubernetes rejected and any dry runs, such as the ones
 `kubectl diff` sends, which also carry the audit annotation.
 
+```mdx-code-block
+import UniqueUsers from "./eks-logs-insights-unique-users.png"
+import UniqueUsersDark from "./eks-logs-insights-unique-users-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={UniqueUsers} alt="The unique users query in CloudWatch Logs Insights, returning 3 users" />
+  <img className="large dark-only" src={UniqueUsersDark} alt="The unique users query in CloudWatch Logs Insights, returning 3 users" />
+
+  <figcaption>Counting platform users in CloudWatch Logs Insights</figcaption>
+</figure>
+
 #### Other useful CloudWatch queries
 
 How many changes each user made:
@@ -94,6 +134,18 @@ filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`)
 | stats count(*) as changes by `annotations.attribution.platform.syntasso.io/last-changed-by` as user
 | sort changes desc
 ```
+
+```mdx-code-block
+import ChangesPerUser from "./eks-logs-insights-changes-per-user.png"
+import ChangesPerUserDark from "./eks-logs-insights-changes-per-user-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={ChangesPerUser} alt="The changes per user query in CloudWatch Logs Insights, returning one row for each user" />
+  <img className="large dark-only" src={ChangesPerUserDark} alt="The changes per user query in CloudWatch Logs Insights, returning one row for each user" />
+
+  <figcaption>Changes per user in CloudWatch Logs Insights</figcaption>
+</figure>
 
 Who created, updated and deleted a request:
 
@@ -108,6 +160,23 @@ filter ispresent(`annotations.attribution.platform.syntasso.io/last-changed-by`)
 | sort @timestamp desc
 ```
 
+`verb` is the Kubernetes API verb, which depends on how the tool sends the
+change. Most tools, such as `kubectl apply`, `kubectl edit`, Flux and Argo CD,
+send changes to an existing request as `patch`. Tools that send the whole
+request, such as `kubectl replace`, show as `update`.
+
+```mdx-code-block
+import RequestHistory from "./eks-logs-insights-request-history.png"
+import RequestHistoryDark from "./eks-logs-insights-request-history-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={RequestHistory} alt="The history query in CloudWatch Logs Insights, showing who created, changed and deleted my-cache" />
+  <img className="large dark-only" src={RequestHistoryDark} alt="The history query in CloudWatch Logs Insights, showing who created, changed and deleted my-cache" />
+
+  <figcaption>Who created, changed and deleted a request in CloudWatch Logs Insights</figcaption>
+</figure>
+
 ## Grafana
 
 Grafana can run the same queries through its CloudWatch data source. The
@@ -121,6 +190,18 @@ changes each user made, and the most recent changes. To set it up:
 1. Add the CloudWatch data source in Grafana.
 1. Copy the dashboard below, replace `<REGION>`, `<ACCOUNT_ID>` and
    `<CLUSTER_NAME>`, then import it and choose your CloudWatch data source.
+
+```mdx-code-block
+import GrafanaDashboard from "./eks-grafana-dashboard.png"
+import GrafanaDashboardDark from "./eks-grafana-dashboard-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={GrafanaDashboard} alt="The SKE platform audit dashboard, showing unique users, changes, changes per user, and recent changes" />
+  <img className="large dark-only" src={GrafanaDashboardDark} alt="The SKE platform audit dashboard, showing unique users, changes, changes per user, and recent changes" />
+
+  <figcaption>The SKE platform audit dashboard on EKS</figcaption>
+</figure>
 
 <details>
 <summary>Dashboard JSON</summary>
@@ -354,7 +435,15 @@ changes each user made, and the most recent changes. To set it up:
           "statsGroups": [],
           "id": ""
         }
-      ]
+      ],
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "Time",
+            "desc": true
+          }
+        ]
+      }
     }
   ]
 }
