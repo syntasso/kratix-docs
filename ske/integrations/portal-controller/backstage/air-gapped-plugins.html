@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.4d50e88d.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.eaab46b2.js" defer="defer"></script>
 <script src="/assets/js/main.b29c2d01.js" defer="defer"></script>
 </head>
 <body>
@@ -35,6 +35,11 @@
 </ol>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="spotify-portal-for-backstage">Spotify Portal for Backstage<a href="#spotify-portal-for-backstage" class="hash-link" aria-label="Direct link to Spotify Portal for Backstage" title="Direct link to Spotify Portal for Backstage" translate="no">​</a></h3>
 <p>When using Spotify Portal for Backstage, publish the plugins to your Portal instance.</p>
+<div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Custom plugin publishing</div><div class="admonitionContent_BuS1"><p>Spotify is moving Spotify Portal instances to a new plugin model, in which you publish custom
+plugins from your own Backstage workspace with <code>portal-cli</code>. The steps below are for Spotify&#x27;s
+previous plugin installer. If your instance shows a <strong>Custom Plugins</strong> tab under
+<strong>Admin → Plugin Settings</strong>, they do not apply: contact
+<a class="" href="/ske/support#support-channels">Syntasso support</a> for how to install the SKE plugins.</p></div></div>
 <p>Before you start, contact Spotify to request a token that lets you publish plugins to your Portal instance.</p>
 <p>Download the frontend plugin:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token function" style="color:#d73a49">npm</span><span class="token plain"> pack @syntasso/plugin-ske-frontend@0.22.0</span><br></div></code></pre></div></div>
