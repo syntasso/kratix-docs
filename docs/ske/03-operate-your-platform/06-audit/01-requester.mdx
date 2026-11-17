@@ -17,10 +17,10 @@ SKE records who changes each resource request in two places:
 
 For scenarios where a user changes a request directly, for example with
 `kubectl`, SKE records this information directly from Kubernetes.
-For scenarios where a GitOps tool such as Argo CD or Flux applies the request,
-Kubernetes sees only the GitOps tool's ServiceAccount, so the
+When a GitOps tool such as Argo CD or Flux applies the request, Kubernetes sees
+only the GitOps tool's ServiceAccount. To capture the user, the
 [SKE portal integration](/ske/integrations/portal-controller/request-ownership)
-records the audit information before the request is committed to Git.
+records the audit information before it commits the request to Git.
 
 ## Requirements
 
@@ -59,9 +59,9 @@ that instead.
 
 Who sets them depends on how the request reaches Kubernetes:
 
-- **Made directly** through the Kubernetes API, for example with `kubectl`, the
-  SKE MCP server, or Backstage in Kubernetes API mode with
-  `authProvider: oidc`: SKE sets them on every create and update.
+- **Directly through the Kubernetes API**, for example with `kubectl`,
+  Backstage in Kubernetes API mode with `authProvider: oidc`, or the SKE MCP
+  server: SKE sets them on every create and update.
 - **From a portal using GitOps**: the
   [SKE portal integration](/ske/integrations/portal-controller/request-ownership)
   sets them before the request goes to Git.
@@ -76,7 +76,8 @@ request. Changes include both creating and modifying a request.
 The content of this annotation is configurable based on the information
 Kubernetes exposes about the user making the change. You choose which of the
 Kubernetes fields SKE records by setting `spec.attribution.userInfoField` on
-the Kratix resource to one of these values:
+the [Kratix resource](/ske/reference/ske-operator#kratix-crd) to one of these
+values:
 
 | Value | Records |
 |---|---|
@@ -150,9 +151,9 @@ runs in the cluster. This way, the annotations a portal writes for a GitOps
 request are kept.
 
 If a GitOps tool connects from outside the cluster, for example with a cloud IAM
-role, list the start of its username in `spec.attribution.skipUsernamePrefixes`.
-Otherwise SKE records the GitOps tool in place of the user the portal
-recorded.
+role, detail the start of its username in the
+`spec.attribution.skipUsernamePrefixes` list. Otherwise SKE records the GitOps
+tool in place of the user the portal recorded.
 
 A change from a skipped username keeps the `kratix.io/last-change*`
 annotations it sends.
