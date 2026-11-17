@@ -100,10 +100,9 @@ Without a dry-run Destination, a `DryRun` is accepted but never completes.
 ### Declare dry run support on the Promise
 
 Kratix sets `KRATIX_DRY_RUN=true` in a dry run, and it is up to the pipelines to
-skip anything with side effects. A pipeline that ignores the variable, for
-example one that calls a cloud API directly, makes real changes during a dry run.
+skip anything with side effects.
 
-A Promise says its pipelines are safe to dry run with
+A Promise declares its pipelines are safe to dry run with
 `spec.workflows.config.dryRun.supported`:
 
 ```yaml
