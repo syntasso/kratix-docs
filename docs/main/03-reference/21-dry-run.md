@@ -44,8 +44,7 @@ would create.
 
 ## Prerequisites
 
-Dry Run needs two things that are not present by default. Without either one the
-`DryRun` object is accepted by the API server and then does nothing.
+Dry Run needs three things that are not present by default.
 
 ### Enable the feature flag
 
@@ -69,8 +68,8 @@ data:
 kubectl rollout restart deployment -n kratix-platform-system kratix-platform-controller-manager
 ```
 
-While the flag is off, the controller that reconciles `DryRun` objects is never
-started, and Kratix ignores dry-run labels everywhere else.
+While the flag is off, Kratix rejects every new `DryRun` with `dry run feature is
+not supported`, and ignores dry-run labels everywhere else.
 
 ### Create a dry-run Destination
 
@@ -96,6 +95,39 @@ not desired state, and nothing should apply them to a cluster.
 
 We recommend keeping one dry run destination and do not schedule any normal work to this destination.
 
+Without a dry-run Destination, a `DryRun` is accepted but never completes.
+
+### Declare dry run support on the Promise
+
+Kratix sets `KRATIX_DRY_RUN=true` in a dry run, and it is up to the pipelines to
+skip anything with side effects. A pipeline that ignores the variable, for
+example one that calls a cloud API directly, makes real changes during a dry run.
+
+A Promise says its pipelines are safe to dry run with
+`spec.workflows.config.dryRun.supported`:
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: Promise
+metadata:
+  name: redis
+spec:
+  workflows:
+    config:
+      dryRun:
+        supported: true
+```
+
+Set it to `true` only when every Resource Workflow checks `KRATIX_DRY_RUN` and
+makes no external changes, while still writing its normal output. It defaults to
+`false`.
+
+Kratix rejects a `DryRun` against a Promise version that does not support dry
+runs. Support is part of the Promise spec, so it is recorded per
+[Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions):
+an older version can support dry runs while the latest does not, or the other way
+round.
+
 ## API
 
 ```yaml
@@ -117,34 +149,61 @@ spec:
 | Field | Required | Description |
 | --- | --- | --- |
 | `spec.promiseRef.name` | Yes | The Promise whose Resource Workflows to run. |
+| `spec.promiseRef.version` | No | The Promise version to run. Defaults to `latest`. See [Choosing a Promise version](#choosing-a-promise-version). |
 | `spec.resourceRequestRef.name` | Yes | The live Resource Request to diff against. It does not have to exist; see [Previewing a Resource Request that does not exist yet](#previewing-a-resource-request-that-does-not-exist-yet). |
 | `spec.resourceRequestRef.namespace` | No | Namespace of the live Resource Request. Defaults to the `DryRun`'s own namespace. |
 | `spec.resource` | Yes | The proposed spec, in the shape expected by the Promise's Resource API. This is the `spec` of the Resource Request, not the whole object. |
+
+`spec.promiseRef` cannot be changed after the `DryRun` is created.
 
 ## Behaviour
 
 When you create a `DryRun`, Kratix:
 
-1. Creates an ephemeral Resource Request named
+1. Picks the Promise version to run and records it in `status.promiseVersion`.
+2. Creates a Resource Binding that pins the dry run's Resource Request to that
+version, then creates an ephemeral Resource Request named
 `kratix-dry-run-<dry-run-name>-<hash>`, owned by the `DryRun`, carrying
 `spec.resource` as its spec and labelled `kratix.io/dry-run: "true"`. It appears
 in `kubectl get` output alongside real requests for that Promise.
-2. Runs the Promise's Resource Workflows for that request, with
+3. Runs the Promise's Resource Workflows for that request, with
 `KRATIX_DRY_RUN=true` set in every pipeline container. Pipelines see the live
 Resource Request's name, namespace and labels, combined with the proposed spec,
 so output that derives from request metadata matches what a real run would
 produce.
-3. Labels the resulting Work `kratix.io/dry-run: "true"` and schedules it to the
+4. Labels the resulting Work `kratix.io/dry-run: "true"` and schedules it to the
 dry-run Destination.
-4. Compares the dry-run output against the live Resource Request's current Work,
+5. Compares the dry-run output against the live Resource Request's current Work,
 pipeline by pipeline, and writes the summary to the dry-run Destination as
 `kratix-dry-run-summary.md`.
-5. Sets `Completed` on the `DryRun` status.
+6. Sets `Completed` on the `DryRun` status.
 
 The ephemeral Resource Request is not reconciled onto any real Destination, and
 Kratix will not update the statuses of the real Resource Request.
 
-Deleting the `DryRun` deletes the ephemeral Resource Request with it.
+Deleting the `DryRun` deletes the ephemeral Resource Request and its Resource
+Binding with it.
+
+### Choosing a Promise version
+
+By default a `DryRun` runs against the latest version of the Promise. Set
+`spec.promiseRef.version` to run against another
+[Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions),
+for example to preview a Resource Request that is still on an older version:
+
+```yaml
+spec:
+  promiseRef:
+    name: redis
+    version: v1.0.0
+```
+
+Kratix rejects a `DryRun` whose version does not exist.
+
+`status.promiseVersion` records the exact version the run uses. When
+`spec.promiseRef.version` is `latest`, Kratix resolves it once, when the run
+starts, so upgrading the Promise during a run does not change the version it
+previews.
 
 ### Status
 
@@ -194,6 +253,11 @@ Gate on `ComponentsSucceeded`, not on `Completed`. A compound run whose componen
 failed still writes a partial summary and still reports `Completed: True`,
 because a partial preview is worth reading. `ComponentsSucceeded` is what
 distinguishes "the run finished" from "the preview is complete".
+
+Kratix raises a child `DryRun` only when the component Promise's latest version
+supports dry runs. Otherwise it creates no child: the component appears in
+`status.components` as `Failed`, the summary says why, and `ComponentsSucceeded`
+is `False`.
 
 A compound run waits up to 10 minutes for its components. After that it writes a
 partial summary rather than waiting indefinitely, because a component whose

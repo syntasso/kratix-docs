@@ -145,8 +145,8 @@ startup, so changing one requires restarting the
 
 Set to `true` to enable [Dry Run](/main/reference/dry-run), which previews the
 output of a Resource Request without applying it to a real Destination. While the
-flag is off, Kratix does not start the controller that reconciles `DryRun`
-objects and ignores dry-run labels elsewhere.
+flag is off, Kratix rejects new `DryRun` objects and ignores dry-run labels
+elsewhere.
 
 :::warning
 Dry Run is a preview feature and is not production ready. Its API and behaviour
