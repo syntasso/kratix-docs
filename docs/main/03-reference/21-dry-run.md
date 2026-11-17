@@ -69,7 +69,7 @@ kubectl rollout restart deployment -n kratix-platform-system kratix-platform-con
 ```
 
 While the flag is off, Kratix rejects every new `DryRun` with `dry run feature is
-not supported`, and ignores dry-run labels everywhere else.
+not supported`.
 
 ### Create a dry-run Destination
 
