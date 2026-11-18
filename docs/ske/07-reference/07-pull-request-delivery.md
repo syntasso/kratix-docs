@@ -49,6 +49,22 @@ Required. One of:
 - `azureDevOps`
 - `gitlab`
 
+Each provider expects a particular `spec.url` and credentials on the
+`GitStateStore`:
+
+- **`github`**: authenticate with `basicAuth` or `githubApp`.
+- **`azureDevOps`**: set `spec.url` to
+  `https://dev.azure.com/<ORGANISATION>/<PROJECT>/_git/<REPOSITORY>` or
+  `https://<ORGANISATION>.visualstudio.com/<PROJECT>/_git/<REPOSITORY>`.
+  Authenticate with `basicAuth`, using a personal access token as the
+  `password` and any `username` that is not empty.
+- **`gitlab`**: set `spec.url` to `https://<HOST>/<GROUP>/<PROJECT>`, with any
+  number of subgroups. Authenticate with `basicAuth`, using an access token as
+  the `password` and any `username` that is not empty. The token needs the
+  `api` and `write_repository` scopes, and its user needs at least the
+  Developer role on the project. Deploy tokens do not work, because they cannot
+  call GitLab's API.
+
 #### checkInterval (default: 30s) {#check-interval}
 
 How often SKE checks each open pull request, as a duration such as `30s` or
@@ -67,19 +83,7 @@ as `spec.url`.
 ## Limitations
 
 - `authMethod: ssh` is not supported, because SKE needs a token to call the
-  provider's API. On GitHub, use `basicAuth` or `githubApp`. On Azure DevOps,
-  use `basicAuth` with a personal access token as the `password`, and any
-  `username` that is not empty. On GitLab, use `basicAuth` with an access token
-  as the `password`, and any `username` that is not empty.
-- On Azure DevOps, `spec.url` must be
-  `https://dev.azure.com/<ORGANISATION>/<PROJECT>/_git/<REPOSITORY>` or
-  `https://<ORGANISATION>.visualstudio.com/<PROJECT>/_git/<REPOSITORY>`.
-- On GitLab, `spec.url` must be `https://<HOST>/<GROUP>/<PROJECT>`, with any
-  number of subgroups. The access token needs the `api` and `write_repository`
-  scopes, and its user needs at least the Developer role on the project. Deploy
-  tokens do not work, because they cannot call GitLab's API.
-- SKE is tested with gitlab.com. It accepts a self-managed GitLab, which is not
-  tested.
+  provider's API.
 - Destinations with `filepath.mode: aggregatedYAML` are not supported.
 
 ## Turning it on and off
