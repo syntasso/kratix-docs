@@ -147,7 +147,7 @@ GitLab calls a pull request a **merge request**.
 | The request changes and produces different files | Closes the open pull request and opens a new one. Reviews do not carry over. |
 | The request changes but produces the same files | Keeps the open pull request and its reviews. |
 | The request changes back to what is already merged | Closes the pull request, because it is no longer needed. The request becomes ready. |
-| The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch rules, existing approvals may be dismissed: on GitHub, "Dismiss stale pull request approvals when new commits are pushed"; on Azure DevOps, the "When new changes are pushed" policy; on GitLab, the "Remove all approvals" approval setting. On Azure DevOps, SKE needs permission to force-push its branches, which their creator has unless a branch permission removes it. On GitLab, a protected branch rule that covers `kratix/*` must allow force pushes. SKE does not touch a pull request that is only behind, has failing checks, or whose conflicts you resolved yourself. |
+| The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch rules, existing approvals may be dismissed. See [Rebuilding a pull request](#rebuilding-a-pull-request). |
 | Someone changes a `kratix/<WORKPLACEMENT_NAME>` branch | Overrides the changes. |
 | Someone changes SKE's files on the Destination's branch | Opens a new pull request to put them back. |
 
@@ -155,6 +155,25 @@ To retry a rejected change, label the request's Work with
 `kratix.io/redeliver=true`. After a rejected pull request, SKE opens a new one.
 After a rejected removal, it opens a new removal pull request. Otherwise it does
 nothing, unless the files on the Destination's branch have changed.
+
+### Rebuilding a pull request {#rebuilding-a-pull-request}
+
+SKE rebuilds a pull request only when it has merge conflicts. It does not touch
+a pull request that is only behind, has failing checks, or whose conflicts you
+resolved yourself.
+
+When SKE rebuilds a pull request, it force-pushes the
+`kratix/<WORKPLACEMENT_NAME>` branch. Your branch rules decide whether existing
+approvals stay, and whether SKE can push at all:
+
+- On GitHub, the "Dismiss stale pull request approvals when new commits are
+  pushed" setting dismisses existing approvals.
+- On Azure DevOps, the "When new changes are pushed" policy dismisses existing
+  approvals. SKE needs permission to force-push its branches. The branch's
+  creator has it unless a branch permission removes it.
+- On GitLab, the "Remove all approvals" approval setting dismisses existing
+  approvals. A protected branch rule that covers `kratix/*` must allow force
+  pushes.
 
 ## Deleting
 
