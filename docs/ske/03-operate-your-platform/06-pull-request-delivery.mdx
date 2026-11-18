@@ -9,29 +9,38 @@ sidebar_position: 2.6
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-A `GitStateStore`'s delivery mode controls how Kratix writes to it. By default,
-Kratix pushes straight to the branch. With pull request delivery, SKE opens a
-pull request for each change instead, and the change reaches the cluster only
-when someone merges it. SKE never merges the pull request itself.
+A `GitStateStore`'s delivery mode controls how Kratix writes to the Git
+repository. By default, Kratix pushes straight to the branch. With pull request
+delivery, SKE opens a pull request for each change instead, and the change
+reaches the cluster only after someone merges it. SKE never merges the pull
+request itself.
 
-Pull request delivery works with GitHub (github.com and GitHub Enterprise
-Server), Azure DevOps and GitLab. GitLab calls a pull request a merge request.
+Pull request delivery works with
+[GitHub pull requests](https://docs.github.com/en/pull-requests) (github.com
+and GitHub Enterprise Server),
+[Azure DevOps pull requests](https://learn.microsoft.com/en-us/azure/devops/repos/git/about-pull-requests),
+and [GitLab merge requests](https://docs.gitlab.com/user/project/merge_requests/).
+GitLab calls a pull request a merge request.
 
 ## What you need
 
 <Tabs className="boxedTabs" groupId="gitProvider">
 <TabItem value="github" label="GitHub">
 
-- A `GitStateStore` on GitHub, authenticating with a token (`basicAuth`) or a
-  GitHub App (`githubApp`). See [GitStateStore
-  authentication](/main/reference/statestore/gitstatestore#auth).
+- A `GitStateStore` on GitHub, authenticating with a
+  [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+  (`basicAuth`) or a
+  [GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps)
+  (`githubApp`). See
+  [GitStateStore authentication](/main/reference/statestore/gitstatestore#auth).
 - Read and write access to the repository's **Contents** and **Pull requests**
   for that token or GitHub App.
 
 </TabItem>
 <TabItem value="azure" label="Azure DevOps">
 
-- A `GitStateStore` on Azure DevOps, authenticating with a personal access token
+- A `GitStateStore` on Azure DevOps, authenticating with a
+  [personal access token](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate)
   (`basicAuth`).
 - The **Code (Read & write)** scope on that token.
 - The **Contribute**, **Create branch** and **Contribute to pull requests**
@@ -41,13 +50,18 @@ Server), Azure DevOps and GitLab. GitLab calls a pull request a merge request.
 </TabItem>
 <TabItem value="gitlab" label="GitLab">
 
-- A `GitStateStore` on GitLab with an `https` URL, authenticating with an access
-  token (`basicAuth`).
+- A `GitStateStore` on GitLab with an `https` URL, authenticating with an
+  [access token](https://docs.gitlab.com/security/tokens/) (`basicAuth`).
 - The `api` and `write_repository` scopes on that token.
 - At least the **Developer** role on the project for the token's user.
 
-Use a project access token or a service account's token, so the token can reach
-only the projects SKE writes to. A personal access token also works.
+Use a
+[project access token](https://docs.gitlab.com/user/project/settings/project_access_tokens/)
+or a token for a
+[service account](https://docs.gitlab.com/user/profile/service_accounts/), so
+the token can reach only the projects SKE writes to. A
+[personal access token](https://docs.gitlab.com/user/profile/personal_access_tokens/)
+also works.
 
 GitLab access tokens expire, after 365 days by default. Replace the `password`
 in the Secret before the token expires.
@@ -152,13 +166,36 @@ Request a resource from a Promise scheduled to one of those Destinations. Its
 kubectl get <RESOURCE_KIND> <RESOURCE_NAME> -n <NAMESPACE>
 ```
 
+<Tabs className="boxedTabs" groupId="gitProvider">
+<TabItem value="github" label="GitHub">
+
 ```text
 NAME    MESSAGE              STATUS
 redis   Redis provisioned    Waiting for approval: https://github.com/acme/platform-state/pull/42
 ```
 
-Merge the pull request. Within 30 seconds the request is ready and any later
-pipelines run.
+</TabItem>
+<TabItem value="azure" label="Azure DevOps">
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval: https://dev.azure.com/acme/platform/_git/platform-state/pullrequest/42
+```
+
+</TabItem>
+<TabItem value="gitlab" label="GitLab">
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval: https://gitlab.com/acme/platform-state/-/merge_requests/42
+```
+
+</TabItem>
+</Tabs>
+
+Merge the pull request. Within the
+[`checkInterval`](/ske/reference/pull-request-delivery#check-interval) (default:
+30 seconds), the request is ready and any later pipelines run.
 
 ## Review a change
 
@@ -236,10 +273,32 @@ Deleting a request also opens a pull request to remove its files from the State
 Store. The request is only removed when that pull request is merged. The
 request's status shows the URL of the pull request:
 
+<Tabs className="boxedTabs" groupId="gitProvider">
+<TabItem value="github" label="GitHub">
+
 ```text
 NAME    MESSAGE              STATUS
 redis   Redis provisioned    Waiting for approval to remove: https://github.com/acme/platform-state/pull/57
 ```
+
+</TabItem>
+<TabItem value="azure" label="Azure DevOps">
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval to remove: https://dev.azure.com/acme/platform/_git/platform-state/pullrequest/57
+```
+
+</TabItem>
+<TabItem value="gitlab" label="GitLab">
+
+```text
+NAME    MESSAGE              STATUS
+redis   Redis provisioned    Waiting for approval to remove: https://gitlab.com/acme/platform-state/-/merge_requests/57
+```
+
+</TabItem>
+</Tabs>
 
 If a reviewer closes the removal pull request without merging it, the workloads
 keep running and the request stays on the platform. To retry by opening a new

@@ -31,14 +31,40 @@ spec:
       apiURL: https://github.example.com/api/v3
 ```
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `delivery.mode` | Yes | `pullRequest`. |
-| `delivery.config.provider` | Yes | `github`, for github.com and GitHub Enterprise Server, `azureDevOps`, or `gitlab`. |
-| `delivery.config.checkInterval` | No | How often SKE checks each open pull request, as a duration such as `30s` or `2m`. Defaults to `30s`. |
-| `delivery.config.apiURL` | No | GitHub and GitLab only. The provider's API address. On GitHub, defaults to `https://api.github.com` for github.com, and `https://<host>/api/v3` for any other host. On GitLab, defaults to `https://<host>/api/v4`. Set it when GitLab is installed under a path, for example `https://git.example.com/gitlab/api/v4`. Must be on the same host as `spec.url`. |
+The `delivery` block has the following fields.
 
-Limits:
+### mode
+
+Required. Set it to `pullRequest`.
+
+### config
+
+The settings for the Git server that SKE opens pull requests on.
+
+#### provider
+
+Required. One of:
+
+- `github`, for github.com and GitHub Enterprise Server.
+- `azureDevOps`
+- `gitlab`
+
+#### checkInterval (default: 30s) {#check-interval}
+
+How often SKE checks each open pull request, as a duration such as `30s` or
+`2m`. SKE notices a merged or closed pull request at its next check.
+
+#### apiURL
+
+GitHub and GitLab only. The provider's API address. It must be on the same host
+as `spec.url`.
+
+- On GitHub, it defaults to `https://api.github.com` for github.com, and
+  `https://<host>/api/v3` for any other host.
+- On GitLab, it defaults to `https://<host>/api/v4`. Set it when GitLab is
+  installed under a path, for example `https://git.example.com/gitlab/api/v4`.
+
+## Limitations
 
 - `authMethod: ssh` is not supported, because SKE needs a token to call the
   provider's API. On GitHub, use `basicAuth` or `githubApp`. On Azure DevOps,
@@ -56,7 +82,7 @@ Limits:
   tested.
 - Destinations with `filepath.mode: aggregatedYAML` are not supported.
 
-Turning it on and off:
+## Turning it on and off
 
 - **Adding the `delivery` block** to a `GitStateStore` that already has requests
   opens a pull request only for requests whose files differ from the
@@ -81,13 +107,17 @@ characters. `kubectl describe` shows the full text in the `Reconciled` and
 | `Removal rejected; the workloads are still on <DESTINATION>. Rejected in <URL>...` | A reviewer closed the removal pull request without merging it. |
 
 SKE quotes the comment the reviewer left when closing the pull request, up to
-500 characters. On GitHub, that is the **Close with comment** text; review
-comments are not quoted. On Azure DevOps, it is the latest comment by the person
-who abandoned the pull request, written within a minute before or after they
-abandoned it. On GitLab, it is the latest comment by the person who closed the
-merge request, written within a minute before or after they closed it. Anyone
-who can read the resource request can read the quote and the link, even without
-access to the repository.
+500 characters:
+
+- On GitHub, it quotes the **Close with comment** text. It does not quote review
+  comments.
+- On Azure DevOps, it quotes the latest comment by the person who abandoned the
+  pull request, written within a minute before or after they abandoned it.
+- On GitLab, it quotes the latest comment by the person who closed the merge
+  request, written within a minute before or after they closed it.
+
+Anyone who can read the resource request can read the quote and the link, even
+without access to the repository.
 
 The condition reasons are:
 
@@ -128,20 +158,40 @@ nothing, unless the files on the Destination's branch have changed.
 
 ## Deleting
 
-Deleting a request opens a pull request that removes its files from the
+Deleting a request opens a removal pull request that removes its files from the
 Destination's branch. The request is only removed when that pull request is
-merged. If the request still has an open pull request, SKE closes it. If none of
-the request's files were ever merged, the request is removed straight away.
+merged:
 
-Deleting a Promise waits for the removal pull request of every request, and one
-rejected removal keeps the Promise. Deleting a Destination with `cleanup: all`
-waits for a removal pull request for each of its WorkPlacements. With
-`cleanup: none`, SKE leaves the files on the branch.
+```mermaid
+flowchart TB
+    deleted([Request deleted])
+    everMerged{"Any of its files<br/>ever merged?"}
+    removal["SKE opens a removal<br/>pull request"]
+    review{Reviewer}
+    rejected["Removal rejected:<br/>the request and its workloads stay"]
+    removed([Request removed])
+    filesKept([Request removed,<br/>files stay on the branch])
 
-If a reviewer closes a removal pull request without merging it, the request
-stays and its workloads keep running. To retry, use the `kratix.io/redeliver`
-label. To remove the request and leave its files on the Destination's branch,
-remove the finalizers from its WorkPlacements:
+    deleted --> everMerged
+    everMerged -->|No| removed
+    everMerged -->|Yes| removal
+    removal --> review
+    review -->|Merges it| removed
+    review -->|Closes it without merging| rejected
+    rejected -->|"kratix.io/redeliver label"| removal
+    rejected -->|Finalizers removed| filesKept
+```
+
+- If the request still has an open pull request, SKE closes it before opening
+  the removal pull request.
+- Deleting a Promise waits for the removal pull request of every request. One
+  rejected removal keeps the Promise.
+- Deleting a Destination with `cleanup: all` waits for a removal pull request
+  for each of its WorkPlacements. With `cleanup: none`, SKE leaves the files on
+  the branch.
+
+To remove a request and leave its files on the Destination's branch, remove the
+finalizers from its WorkPlacements:
 
 ```bash
 kubectl get workplacements --all-namespaces \
