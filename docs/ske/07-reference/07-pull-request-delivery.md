@@ -10,7 +10,7 @@ sidebar_position: 6.5
 # Pull request delivery
 
 With pull request delivery, SKE opens a pull request for each change to a `GitStateStore` instead
-of pushing to its branch. To turn it on, see
+of pushing to its branch directly. To enable pull request delivery for a `GitStateStore`, see
 [Set up pull request delivery](/ske/operations/pull-request-delivery).
 
 ## Configuring
@@ -54,8 +54,8 @@ Turning it on and off:
 
 ## Status
 
-The request's `STATUS` column shows where its change is, cut to 120 characters. `kubectl describe`
-shows the full text in the `Reconciled` and `WorksSucceeded` conditions.
+The request's `STATUS` column shows a summary of the change, cut to 120 characters.
+`kubectl describe` shows the full text in the `Reconciled` and `WorksSucceeded` conditions.
 
 | `STATUS` | Meaning |
 | --- | --- |
@@ -69,7 +69,7 @@ SKE quotes the comment the reviewer left when closing the pull request, up to 50
 does not quote review comments. Anyone who can read the resource request can read the quote and
 the link, even without access to the repository.
 
-For tools and portals, the condition reasons are:
+The condition reasons are:
 
 | Resource | Condition | Open | Merged | Closed without merging |
 | --- | --- | --- | --- | --- |
