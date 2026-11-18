@@ -158,13 +158,15 @@ nothing, unless the files on the Destination's branch have changed.
 
 ## Deleting
 
-Deleting a request opens a pull request that removes its files from the
+Deleting a **request** opens a pull request that removes its files from the
 Destination's branch. The request is only removed when that pull request is
 merged. If the request still has an open pull request, SKE closes it. If none of
 the request's files were ever merged, the request is removed straight away.
 
-Deleting a Promise waits for the removal pull request of every request, and one
-rejected removal keeps the Promise. Deleting a Destination with `cleanup: all`
+Deleting a **Promise** waits for the removal pull request of every request, and one
+rejected removal keeps the Promise. 
+
+Deleting a **Destination** with `cleanup: all`
 waits for a removal pull request for each of its WorkPlacements. With
 `cleanup: none`, SKE leaves the files on the branch.
 
