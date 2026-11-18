@@ -163,25 +163,20 @@ Destination's branch. The request is only removed when that pull request is
 merged:
 
 ```mermaid
-flowchart TB
+flowchart LR
     deleted([Request deleted])
-    everMerged{"Any of its files<br/>ever merged?"}
-    removal["SKE opens a removal<br/>pull request"]
-    review{Reviewer}
-    rejected["Removal rejected:<br/>the request and its workloads stay"]
+    removal[Removal pull request]
     removed([Request removed])
-    filesKept([Request removed,<br/>files stay on the branch])
+    rejected[Request and<br/>workloads stay]
 
-    deleted --> everMerged
-    everMerged -->|No| removed
-    everMerged -->|Yes| removal
-    removal --> review
-    review -->|Merges it| removed
-    review -->|Closes it without merging| rejected
+    deleted --> removal
+    removal -->|Merged| removed
+    removal -->|Closed without merging| rejected
     rejected -->|"kratix.io/redeliver label"| removal
-    rejected -->|Finalizers removed| filesKept
 ```
 
+- If none of the request's files were ever merged, SKE removes the request
+  straight away.
 - If the request still has an open pull request, SKE closes it before opening
   the removal pull request.
 - Deleting a Promise waits for the removal pull request of every request. One
