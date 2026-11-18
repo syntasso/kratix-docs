@@ -86,19 +86,12 @@ spec:
   secretRef:
     name: git-credentials
     namespace: default
+  # highlight-start
   delivery:
     mode: pullRequest
     config:
       provider: azureDevOps
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: git-credentials
-  namespace: default
-stringData:
-  username: kratix # any value that is not empty
-  password: <PERSONAL_ACCESS_TOKEN>
+  # highlight-end
 ```
 
 </TabItem>
@@ -128,16 +121,33 @@ Merge the pull request. Within 30 seconds the request is ready and any later pip
 Each change to a request gets its own pull request, opened from a `kratix/<WORKPLACEMENT_NAME>`
 branch into the Destination's branch.
 
-- **Merge it** (**Complete** on Azure DevOps) to write the change to the Destination's branch.
-- **Close it without merging** (**Abandon** on Azure DevOps) to reject the change. The request
-  fails, and if the pull request was closed with a comment, this is quoted in the `STATUS` of the
-  request. On GitHub, use **Close with comment**. On Azure DevOps, comment within a minute of
-  abandoning the pull request, before or after:
+<Tabs className="boxedTabs" groupId="gitProvider">
+<TabItem value="github" label="GitHub">
+
+- **Merge it** to write the change to the Destination's branch.
+- **Close it without merging** to reject the change. The request fails, and if the pull request
+  was closed with **Close with comment**, the comment is quoted in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
   redis   Redis provisioned    Rejected in https://github.com/acme/platform-state/pull/42: "not during the freeze"
   ```
+
+</TabItem>
+<TabItem value="azure" label="Azure DevOps">
+
+- **Complete** it to write the change to the Destination's branch.
+- **Abandon** it to reject the change. The request fails, and if you comment on the pull request
+  within a minute of abandoning it, before or after, the comment is quoted in the `STATUS` of the
+  request:
+
+  ```text
+  NAME    MESSAGE              STATUS
+  redis   Redis provisioned    Rejected in https://dev.azure.com/acme/platform/_git/platform-state/pullrequest/42: "not during the freeze"
+  ```
+
+</TabItem>
+</Tabs>
 
 SKE does not open a pull request for the same files again. A new one opens when the request or
 the Promise produces different files, or when you retry.
