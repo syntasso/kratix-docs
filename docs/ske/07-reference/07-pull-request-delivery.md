@@ -1,5 +1,5 @@
 ---
-description: Configuration, status fields and behaviour of SKE pull request delivery on a GitStateStore, for GitHub and Azure DevOps.
+description: Configuration, status fields and behaviour of SKE pull request delivery on a GitStateStore, for GitHub, Azure DevOps and GitLab.
 title: Pull request delivery
 id: pull-request-delivery
 slug: "/ske/reference/pull-request-delivery"
@@ -33,17 +33,24 @@ spec:
 | Field | Required | Description |
 | --- | --- | --- |
 | `delivery.mode` | Yes | `pullRequest`. |
-| `delivery.config.provider` | Yes | `github`, for github.com and GitHub Enterprise Server, or `azureDevOps`. |
+| `delivery.config.provider` | Yes | `github`, for github.com and GitHub Enterprise Server, `azureDevOps`, or `gitlab`. |
 | `delivery.config.checkInterval` | No | How often SKE checks each open pull request, as a duration such as `30s` or `2m`. Defaults to `30s`. |
-| `delivery.config.apiURL` | No | GitHub only. The GitHub API address. Defaults to `https://api.github.com` for github.com, and `https://<host>/api/v3` for any other host. Must be on the same host as `spec.url`. |
+| `delivery.config.apiURL` | No | GitHub and GitLab only. The provider's API address. On GitHub, defaults to `https://api.github.com` for github.com, and `https://<host>/api/v3` for any other host. On GitLab, defaults to `https://<host>/api/v4`. Set it when GitLab is installed under a path, for example `https://git.example.com/gitlab/api/v4`. Must be on the same host as `spec.url`. |
 
 Limits:
 
 - `authMethod: ssh` is not supported, because SKE needs a token to call the provider's API. On
   GitHub, use `basicAuth` or `githubApp`. On Azure DevOps, use `basicAuth` with a personal access
-  token as the `password`, and any `username` that is not empty.
+  token as the `password`, and any `username` that is not empty. On GitLab, use `basicAuth` with an
+  access token as the `password`, and any `username` that is not empty.
 - On Azure DevOps, `spec.url` must be `https://dev.azure.com/<ORGANISATION>/<PROJECT>/_git/<REPOSITORY>`
   or `https://<ORGANISATION>.visualstudio.com/<PROJECT>/_git/<REPOSITORY>`.
+- On GitLab, `spec.url` must be `https://<HOST>/<GROUP>/<PROJECT>`, with any
+  number of subgroups. The access token needs the `api` and `write_repository`
+  scopes, and its user needs at least the Developer role on the project. Deploy
+  tokens do not work, because they cannot call GitLab's API.
+- SKE is tested with gitlab.com. It accepts a self-managed GitLab, which is
+  not tested.
 - Destinations with `filepath.mode: aggregatedYAML` are not supported.
 
 Turning it on and off:
@@ -69,10 +76,11 @@ shows the full text in the `Reconciled` and `WorksSucceeded` conditions.
 | `Removal rejected; the workloads are still on <DESTINATION>. Rejected in <URL>...` | A reviewer closed the removal pull request without merging it. |
 
 SKE quotes the comment the reviewer left when closing the pull request, up to 500 characters. On
-GitHub, that is the **Close with comment** text; review comments are not quoted. On Azure DevOps,
-it is the latest comment by the person who abandoned the pull request, written within a minute
-before or after they abandoned it. Anyone who can read the resource request can read the quote and
-the link, even without access to the repository.
+GitHub, that is the **Close with comment** text; review comments are not quoted. On Azure DevOps, it
+is the latest comment by the person who abandoned the pull request, written within a minute before
+or after they abandoned it. On GitLab, it is the latest comment by the person who closed the merge
+request, written within a minute before or after they closed it. Anyone who can read the resource
+request can read the quote and the link, even without access to the repository.
 
 For tools and portals, the condition reasons are:
 
@@ -92,7 +100,8 @@ once closed without merging. Each WorkPlacement also holds its pull request's li
 
 SKE opens each pull request from a `kratix/<WORKPLACEMENT_NAME>` branch into the Destination's
 branch, and checks it every `checkInterval`. Azure DevOps calls a merged pull request
-**completed**, and one closed without merging **abandoned**.
+**completed**, and one closed without merging **abandoned**. GitLab calls a pull request a
+**merge request**.
 
 | When | SKE |
 | --- | --- |
@@ -101,7 +110,7 @@ branch, and checks it every `checkInterval`. Azure DevOps calls a merged pull re
 | The request changes and produces different files | Closes the open pull request and opens a new one. Reviews do not carry over. |
 | The request changes but produces the same files | Keeps the open pull request and its reviews. |
 | The request changes back to what is already merged | Closes the pull request, because it is no longer needed. The request becomes ready. |
-| The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch rules, existing approvals may be dismissed: on GitHub, "Dismiss stale pull request approvals when new commits are pushed"; on Azure DevOps, the "When new changes are pushed" policy. On Azure DevOps, SKE needs permission to force-push its branches, which their creator has unless a branch permission removes it. SKE does not touch a pull request that is only behind, has failing checks, or whose conflicts you resolved yourself. |
+| The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch rules, existing approvals may be dismissed: on GitHub, "Dismiss stale pull request approvals when new commits are pushed"; on Azure DevOps, the "When new changes are pushed" policy; on GitLab, the "Remove all approvals" approval setting. On Azure DevOps, SKE needs permission to force-push its branches, which their creator has unless a branch permission removes it. On GitLab, a protected branch rule that covers `kratix/*` must allow force pushes. SKE does not touch a pull request that is only behind, has failing checks, or whose conflicts you resolved yourself. |
 | Someone changes a `kratix/<WORKPLACEMENT_NAME>` branch | Overrides the changes. |
 | Someone changes SKE's files on the Destination's branch | Opens a new pull request to put them back. |
 
