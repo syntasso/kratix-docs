@@ -14,7 +14,8 @@ straight to the branch. With pull request delivery, SKE opens a pull request for
 instead, and the change reaches the cluster only when someone merges it. SKE never merges the pull
 request itself.
 
-Pull request delivery works with GitHub (github.com and GitHub Enterprise Server) and Azure DevOps.
+Pull request delivery works with GitHub (github.com and GitHub Enterprise
+Server), Azure DevOps and GitLab. GitLab calls a pull request a merge request.
 
 ## What you need
 
@@ -33,6 +34,20 @@ Pull request delivery works with GitHub (github.com and GitHub Enterprise Server
 - The **Code (Read & write)** scope on that token.
 - The **Contribute**, **Create branch** and **Contribute to pull requests** permissions on the
   repository. The project's Contributors group has them by default.
+
+</TabItem>
+<TabItem value="gitlab" label="GitLab">
+
+- A `GitStateStore` on GitLab with an `https` URL, authenticating with an
+  access token (`basicAuth`).
+- The `api` and `write_repository` scopes on that token.
+- At least the **Developer** role on the project for the token's user.
+
+Use a project access token or a service account's token, so the token can
+reach only the projects SKE writes to. A personal access token also works.
+
+GitLab access tokens expire, after 365 days by default. Replace the `password`
+in the Secret before the token expires.
 
 </TabItem>
 </Tabs>
@@ -95,6 +110,29 @@ spec:
 ```
 
 </TabItem>
+<TabItem value="gitlab" label="GitLab">
+
+```yaml
+apiVersion: platform.kratix.io/v1alpha1
+kind: GitStateStore
+metadata:
+  name: production
+spec:
+  url: https://gitlab.com/acme/platform-state.git
+  branch: main
+  authMethod: basicAuth
+  secretRef:
+    name: git-credentials
+    namespace: default
+  # highlight-start
+  delivery:
+    mode: pullRequest
+    config:
+      provider: gitlab
+  # highlight-end
+```
+
+</TabItem>
 </Tabs>
 
 SKE now writes to every Destination that uses this `GitStateStore` through pull requests. For the
@@ -144,6 +182,19 @@ branch into the Destination's branch.
   ```text
   NAME    MESSAGE              STATUS
   redis   Redis provisioned    Rejected in https://dev.azure.com/acme/platform/_git/platform-state/pullrequest/42: "not during the freeze"
+  ```
+
+</TabItem>
+<TabItem value="gitlab" label="GitLab">
+
+- **Merge** it to write the change to the Destination's branch.
+- **Close merge request** to reject the change. The request fails, and if you comment on the merge
+  request within a minute of closing it, before or after, the comment is quoted in the `STATUS` of
+  the request:
+
+  ```text
+  NAME    MESSAGE              STATUS
+  redis   Redis provisioned    Rejected in https://gitlab.com/acme/platform-state/-/merge_requests/42: "not during the freeze"
   ```
 
 </TabItem>
