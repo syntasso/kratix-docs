@@ -28,8 +28,8 @@ Kubernetes API reads in `kubernetes` and `hybrid` need network access, trusted T
 permissions. Pure `gitops` reads request files, which normally have no live status. Its Promise
 page lists catalogue requests with state **Unknown** because listing live requests is unsupported.
 
-Approval is a separate per-portal choice: `config.mode: pull-request` opens a GitHub pull request
-instead of using the push transport. It can submit a request with any backend mode. However,
+Approval is a separate per-portal choice: `config.mode: pull-request` opens a GitHub pull request,
+or a GitLab merge request, instead of using the push transport. It can submit a request with any backend mode. However,
 its manifests use `kratix-requests/<promise>/<namespace>/<name>.yaml`; pure `gitops` reads
 `<ske.scm.path>/<apiVersion>/<kind-lowercase>/<namespace>/<name>.yaml`.
 If the manifest exists only at the pull-request path, that backend cannot read it for status,
@@ -289,9 +289,25 @@ commit the manifest for the GitOps agent to apply.
 
 ### Pull-request mode
 
-Set `mode: pull-request` to require review. The generated Template asks for a GitHub repository,
-writes the request manifest, opens a pull request with `publish:github:pull-request`, and records
+Set `mode: pull-request` to require review. The generated Template asks for a repository,
+writes the request manifest, opens a pull request (GitHub) or merge request (GitLab), and records
 it with `ske:record-request`.
+
+GitHub is the default. To use GitLab, set `config.pullRequest` on the portal connection:
+
+```yaml
+config:
+  mode: pull-request
+  pullRequest:
+    provider: gitlab   # github (default) or gitlab
+    host: gitlab.com   # optional: github.com or gitlab.com by default
+```
+
+`pullRequest` is only valid with `mode: pull-request`. `host` is a plain hostname, without a scheme,
+port or path. An unknown `provider` or key fails the Promise's generate stage with an error naming
+the connection.
+
+#### GitHub
 
 Install and register the GitHub scaffolder action module in the backend:
 
@@ -316,16 +332,47 @@ Permit the credential to write repository contents and pull requests, and read p
 state. A GitHub App may supply these credentials instead. Catalogue discovery also needs
 read access to its own repository.
 
-The generated repository picker accepts `github.com` only. Other Git providers can use push
-mode with the Git backend; they cannot use this generated approval flow.
+#### GitLab
+
+The generated Template opens merge requests with `publish:gitlab:merge-request`. Install and
+register the GitLab scaffolder action module in the backend:
+
+```bash
+yarn add @backstage/plugin-scaffolder-backend-module-gitlab --cwd packages/backend
+```
+
+```ts
+backend.add(import('@backstage/plugin-scaffolder-backend-module-gitlab'));
+```
+
+Configure the GitLab integration in `app-config.yaml`:
+
+```yaml
+integrations:
+  gitlab:
+    - host: gitlab.com
+      token: ${GITLAB_TOKEN}
+```
+
+The token needs the `api` scope and at least the Developer role on every requests repository.
+The SKE backend uses the same integration to read merge-request state.
+
+#### Repository and branches
+
+The generated repository picker accepts the connection's one host. Other Git providers can use
+push mode with the Git backend; they cannot use this generated approval flow.
 
 Namespaced manifests land at `kratix-requests/<promise>/<namespace>/<name>.yaml`.
 Cluster-scoped manifests omit the namespace segment. The target branch defaults to `main`;
 the hidden `targetBranch` parameter can be customised for another branch.
 
 Request and update branches are `backstage/<promise>/<name>`, with an optional `branchSuffix`.
-Re-running the same branch reuses its pull request. Delete uses a separate
+On GitHub, re-running the same branch reuses its pull request. Delete uses a separate
 `backstage/<promise>/<name>-delete` branch.
+
+On GitLab, an open merge request cannot be updated, so Update uses its own
+`backstage/<promise>/<name>-update` branch. A second Update fails while the first update merge
+request is still open: merge or close it first.
 
 ## Create, update and delete a resource
 
