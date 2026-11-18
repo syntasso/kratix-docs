@@ -9,10 +9,10 @@ sidebar_position: 2.6
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-A `GitStateStore`'s delivery mode controls how Kratix writes to it. By default, Kratix pushes
-straight to the branch. With pull request delivery, SKE opens a pull request for each change
-instead, and the change reaches the cluster only when someone merges it. SKE never merges the pull
-request itself.
+A `GitStateStore`'s delivery mode controls how Kratix writes to it. By default,
+Kratix pushes straight to the branch. With pull request delivery, SKE opens a
+pull request for each change instead, and the change reaches the cluster only
+when someone merges it. SKE never merges the pull request itself.
 
 Pull request delivery works with GitHub (github.com and GitHub Enterprise
 Server), Azure DevOps and GitLab. GitLab calls a pull request a merge request.
@@ -22,29 +22,32 @@ Server), Azure DevOps and GitLab. GitLab calls a pull request a merge request.
 <Tabs className="boxedTabs" groupId="gitProvider">
 <TabItem value="github" label="GitHub">
 
-- A `GitStateStore` on GitHub, authenticating with a token (`basicAuth`) or a GitHub App
-  (`githubApp`). See [GitStateStore authentication](/main/reference/statestore/gitstatestore#auth).
-- Read and write access to the repository's **Contents** and **Pull requests** for that token or
-  GitHub App.
+- A `GitStateStore` on GitHub, authenticating with a token (`basicAuth`) or a
+  GitHub App (`githubApp`). See [GitStateStore
+  authentication](/main/reference/statestore/gitstatestore#auth).
+- Read and write access to the repository's **Contents** and **Pull requests**
+  for that token or GitHub App.
 
 </TabItem>
 <TabItem value="azure" label="Azure DevOps">
 
-- A `GitStateStore` on Azure DevOps, authenticating with a personal access token (`basicAuth`).
+- A `GitStateStore` on Azure DevOps, authenticating with a personal access token
+  (`basicAuth`).
 - The **Code (Read & write)** scope on that token.
-- The **Contribute**, **Create branch** and **Contribute to pull requests** permissions on the
-  repository. The project's Contributors group has them by default.
+- The **Contribute**, **Create branch** and **Contribute to pull requests**
+  permissions on the repository. The project's Contributors group has them by
+  default.
 
 </TabItem>
 <TabItem value="gitlab" label="GitLab">
 
-- A `GitStateStore` on GitLab with an `https` URL, authenticating with an
-  access token (`basicAuth`).
+- A `GitStateStore` on GitLab with an `https` URL, authenticating with an access
+  token (`basicAuth`).
 - The `api` and `write_repository` scopes on that token.
 - At least the **Developer** role on the project for the token's user.
 
-Use a project access token or a service account's token, so the token can
-reach only the projects SKE writes to. A personal access token also works.
+Use a project access token or a service account's token, so the token can reach
+only the projects SKE writes to. A personal access token also works.
 
 GitLab access tokens expire, after 365 days by default. Replace the `password`
 in the Secret before the token expires.
@@ -54,8 +57,9 @@ in the Secret before the token expires.
 
 :::warning
 
-A Destination with `filepath.mode: aggregatedYAML` cannot use pull request delivery. Kratix refuses
-to create or update the Destination or the `GitStateStore` if the change would put them together.
+A Destination with `filepath.mode: aggregatedYAML` cannot use pull request
+delivery. Kratix refuses to create or update the Destination or the
+`GitStateStore` if the change would put them together.
 
 :::
 
@@ -135,13 +139,14 @@ spec:
 </TabItem>
 </Tabs>
 
-SKE now writes to every Destination that uses this `GitStateStore` through pull requests. For the
-optional settings, see the [pull request delivery reference](/ske/reference/pull-request-delivery).
+SKE now writes to every Destination that uses this `GitStateStore` through pull
+requests. For the optional settings, see the [pull request delivery
+reference](/ske/reference/pull-request-delivery).
 
 ## Check it works
 
-Request a resource from a Promise scheduled to one of those Destinations. Its `STATUS` links the
-pull request:
+Request a resource from a Promise scheduled to one of those Destinations. Its
+`STATUS` links the pull request:
 
 ```bash
 kubectl get <RESOURCE_KIND> <RESOURCE_NAME> -n <NAMESPACE>
@@ -152,19 +157,21 @@ NAME    MESSAGE              STATUS
 redis   Redis provisioned    Waiting for approval: https://github.com/acme/platform-state/pull/42
 ```
 
-Merge the pull request. Within 30 seconds the request is ready and any later pipelines run.
+Merge the pull request. Within 30 seconds the request is ready and any later
+pipelines run.
 
 ## Review a change
 
-Each change to a request gets its own pull request, opened from a `kratix/<WORKPLACEMENT_NAME>`
-branch into the Destination's branch.
+Each change to a request gets its own pull request, opened from a
+`kratix/<WORKPLACEMENT_NAME>` branch into the Destination's branch.
 
 <Tabs className="boxedTabs" groupId="gitProvider">
 <TabItem value="github" label="GitHub">
 
 - **Merge it** to write the change to the Destination's branch.
-- **Close it without merging** to reject the change. The request fails, and if the pull request
-  was closed with **Close with comment**, the comment is quoted in the `STATUS` of the request:
+- **Close it without merging** to reject the change. The request fails, and if
+  the pull request was closed with **Close with comment**, the comment is quoted
+  in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
@@ -175,9 +182,9 @@ branch into the Destination's branch.
 <TabItem value="azure" label="Azure DevOps">
 
 - **Complete** it to write the change to the Destination's branch.
-- **Abandon** it to reject the change. The request fails, and if you comment on the pull request
-  within a minute of abandoning it, before or after, the comment is quoted in the `STATUS` of the
-  request:
+- **Abandon** it to reject the change. The request fails, and if you comment on
+  the pull request within a minute of abandoning it, before or after, the
+  comment is quoted in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
@@ -188,9 +195,9 @@ branch into the Destination's branch.
 <TabItem value="gitlab" label="GitLab">
 
 - **Merge** it to write the change to the Destination's branch.
-- **Close merge request** to reject the change. The request fails, and if you comment on the merge
-  request within a minute of closing it, before or after, the comment is quoted in the `STATUS` of
-  the request:
+- **Close merge request** to reject the change. The request fails, and if you
+  comment on the merge request within a minute of closing it, before or after,
+  the comment is quoted in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
@@ -200,21 +207,22 @@ branch into the Destination's branch.
 </TabItem>
 </Tabs>
 
-SKE does not open a pull request for the same files again. A new one opens when the request or
-the Promise produces different files, or when you retry.
+SKE does not open a pull request for the same files again. A new one opens when
+the request or the Promise produces different files, or when you retry.
 
 :::warning Don't change SKE's branches by hand
 
-Do not commit to the `kratix/<WORKPLACEMENT_NAME>` branches or edit SKE's files on the
-Destination's branch. SKE replaces those commits, or opens a pull request to undo them. Change the
-Promise or the request instead.
+Do not commit to the `kratix/<WORKPLACEMENT_NAME>` branches or edit SKE's files
+on the Destination's branch. SKE replaces those commits, or opens a pull request
+to undo them. Change the Promise or the request instead.
 
 :::
 
 ## Retry a rejected change
 
-To force SKE to recreate a pull request, for example when the previous one was closed without
-being merged, label the request's Work with `kratix.io/redeliver=true`:
+To force SKE to recreate a pull request, for example when the previous one was
+closed without being merged, label the request's Work with
+`kratix.io/redeliver=true`:
 
 ```bash
 kubectl label works -n <NAMESPACE> \
@@ -224,23 +232,23 @@ kubectl label works -n <NAMESPACE> \
 
 ## Delete a request
 
-Deleting a request also opens a pull request to remove its files from the State Store. The request
-is only removed when that pull request is merged. The request's status shows the URL of the pull
-request:
+Deleting a request also opens a pull request to remove its files from the State
+Store. The request is only removed when that pull request is merged. The
+request's status shows the URL of the pull request:
 
 ```text
 NAME    MESSAGE              STATUS
 redis   Redis provisioned    Waiting for approval to remove: https://github.com/acme/platform-state/pull/57
 ```
 
-If a reviewer closes the removal pull request without merging it, the workloads keep running and
-the request stays on the platform. To retry by opening a new pull request, use the label above. To
-let the request finish deleting and keep its files, see
-[Deleting](/ske/reference/pull-request-delivery#deleting).
+If a reviewer closes the removal pull request without merging it, the workloads
+keep running and the request stays on the platform. To retry by opening a new
+pull request, use the label above. To let the request finish deleting and keep
+its files, see [Deleting](/ske/reference/pull-request-delivery#deleting).
 
 ## Related docs
 
-- [Pull request delivery reference](/ske/reference/pull-request-delivery): configuration,
-  turning the feature off, status fields, and what SKE does when requests change, pull requests
-  conflict, or files are changed by hand.
+- [Pull request delivery reference](/ske/reference/pull-request-delivery):
+  configuration, turning the feature off, status fields, and what SKE does when
+  requests change, pull requests conflict, or files are changed by hand.
 - [GitStateStore](/main/reference/statestore/gitstatestore)
