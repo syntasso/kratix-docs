@@ -158,35 +158,20 @@ nothing, unless the files on the Destination's branch have changed.
 
 ## Deleting
 
-Deleting a request opens a removal pull request that removes its files from the
+Deleting a request opens a pull request that removes its files from the
 Destination's branch. The request is only removed when that pull request is
-merged:
+merged. If the request still has an open pull request, SKE closes it. If none of
+the request's files were ever merged, the request is removed straight away.
 
-```mermaid
-flowchart LR
-    deleted([Request deleted])
-    removal[Removal pull request]
-    removed([Request removed])
-    rejected[Request and<br/>workloads stay]
+Deleting a Promise waits for the removal pull request of every request, and one
+rejected removal keeps the Promise. Deleting a Destination with `cleanup: all`
+waits for a removal pull request for each of its WorkPlacements. With
+`cleanup: none`, SKE leaves the files on the branch.
 
-    deleted --> removal
-    removal -->|Merged| removed
-    removal -->|Closed without merging| rejected
-    rejected -->|"kratix.io/redeliver label"| removal
-```
-
-- If none of the request's files were ever merged, SKE removes the request
-  straight away.
-- If the request still has an open pull request, SKE closes it before opening
-  the removal pull request.
-- Deleting a Promise waits for the removal pull request of every request. One
-  rejected removal keeps the Promise.
-- Deleting a Destination with `cleanup: all` waits for a removal pull request
-  for each of its WorkPlacements. With `cleanup: none`, SKE leaves the files on
-  the branch.
-
-To remove a request and leave its files on the Destination's branch, remove the
-finalizers from its WorkPlacements:
+If a reviewer closes a removal pull request without merging it, the request
+stays and its workloads keep running. To retry, use the `kratix.io/redeliver`
+label. To remove the request and leave its files on the Destination's branch,
+remove the finalizers from its WorkPlacements:
 
 ```bash
 kubectl get workplacements --all-namespaces \
