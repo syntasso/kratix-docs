@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.3ce50d2d.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.820b1d17.js" defer="defer"></script>
 <script src="/assets/js/main.b29c2d01.js" defer="defer"></script>
 </head>
 <body>
@@ -39,8 +39,8 @@ They may use different repositories; catalogue discovery never applies resource 
 <p>Kubernetes API reads in <code>kubernetes</code> and <code>hybrid</code> need network access, trusted TLS and Kubernetes
 permissions. Pure <code>gitops</code> reads request files, which normally have no live status. Its Promise
 page lists catalogue requests with state <strong>Unknown</strong> because listing live requests is unsupported.</p>
-<p>Approval is a separate per-portal choice: <code>config.mode: pull-request</code> opens a GitHub pull request
-instead of using the push transport. It can submit a request with any backend mode. However,
+<p>Approval is a separate per-portal choice: <code>config.mode: pull-request</code> opens a GitHub pull request,
+or a GitLab merge request, instead of using the push transport. It can submit a request with any backend mode. However,
 its manifests use <code>kratix-requests/&lt;promise&gt;/&lt;namespace&gt;/&lt;name&gt;.yaml</code>; pure <code>gitops</code> reads
 <code>&lt;ske.scm.path&gt;/&lt;apiVersion&gt;/&lt;kind-lowercase&gt;/&lt;namespace&gt;/&lt;name&gt;.yaml</code>.
 If the manifest exists only at the pull-request path, that backend cannot read it for status,
@@ -133,9 +133,15 @@ when changing policy.</p></div></div>
 the request with <code>ske:record-request</code>. Kubernetes mode applies immediately; GitOps and hybrid
 commit the manifest for the GitOps agent to apply.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="pull-request-mode">Pull-request mode<a href="#pull-request-mode" class="hash-link" aria-label="Direct link to Pull-request mode" title="Direct link to Pull-request mode" translate="no">​</a></h3>
-<p>Set <code>mode: pull-request</code> to require review. The generated Template asks for a GitHub repository,
-writes the request manifest, opens a pull request with <code>publish:github:pull-request</code>, and records
+<p>Set <code>mode: pull-request</code> to require review. The generated Template asks for a repository,
+writes the request manifest, opens a pull request (GitHub) or merge request (GitLab), and records
 it with <code>ske:record-request</code>.</p>
+<p>GitHub is the default. To use GitLab, set <code>config.pullRequest</code> on the portal connection:</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">config</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">mode</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> pull</span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain">request</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">pullRequest</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">provider</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> gitlab   </span><span class="token comment" style="color:#999988;font-style:italic"># github (default) or gitlab</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">host</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> gitlab.com   </span><span class="token comment" style="color:#999988;font-style:italic"># optional: github.com or gitlab.com by default</span><br></div></code></pre></div></div>
+<p><code>pullRequest</code> is only valid with <code>mode: pull-request</code>. <code>host</code> is a plain hostname, without a scheme,
+port or path. An unknown <code>provider</code> or key fails the Promise&#x27;s generate stage with an error naming
+the connection.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="github">GitHub<a href="#github" class="hash-link" aria-label="Direct link to GitHub" title="Direct link to GitHub" translate="no">​</a></h4>
 <p>Install and register the GitHub scaffolder action module in the backend:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token function" style="color:#d73a49">yarn</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">add</span><span class="token plain"> @backstage/plugin-scaffolder-backend-module-github </span><span class="token parameter variable" style="color:#36acaa">--cwd</span><span class="token plain"> packages/backend</span><br></div></code></pre></div></div>
 <div class="language-ts codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-ts codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">backend</span><span class="token punctuation" style="color:#393A34">.</span><span class="token function" style="color:#d73a49">add</span><span class="token punctuation" style="color:#393A34">(</span><span class="token keyword" style="color:#00009f">import</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;@backstage/plugin-scaffolder-backend-module-github&#x27;</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></div></code></pre></div></div>
@@ -144,14 +150,28 @@ it with <code>ske:record-request</code>.</p>
 <p>Permit the credential to write repository contents and pull requests, and read pull-request
 state. A GitHub App may supply these credentials instead. Catalogue discovery also needs
 read access to its own repository.</p>
-<p>The generated repository picker accepts <code>github.com</code> only. Other Git providers can use push
-mode with the Git backend; they cannot use this generated approval flow.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="gitlab">GitLab<a href="#gitlab" class="hash-link" aria-label="Direct link to GitLab" title="Direct link to GitLab" translate="no">​</a></h4>
+<p>The generated Template opens merge requests with <code>publish:gitlab:merge-request</code>. Install and
+register the GitLab scaffolder action module in the backend:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token function" style="color:#d73a49">yarn</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">add</span><span class="token plain"> @backstage/plugin-scaffolder-backend-module-gitlab </span><span class="token parameter variable" style="color:#36acaa">--cwd</span><span class="token plain"> packages/backend</span><br></div></code></pre></div></div>
+<div class="language-ts codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-ts codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">backend</span><span class="token punctuation" style="color:#393A34">.</span><span class="token function" style="color:#d73a49">add</span><span class="token punctuation" style="color:#393A34">(</span><span class="token keyword" style="color:#00009f">import</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;@backstage/plugin-scaffolder-backend-module-gitlab&#x27;</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></div></code></pre></div></div>
+<p>Configure the GitLab integration in <code>app-config.yaml</code>:</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">integrations</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">gitlab</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">-</span><span class="token plain"> </span><span class="token key atrule" style="color:#00a4db">host</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> gitlab.com</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      </span><span class="token key atrule" style="color:#00a4db">token</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> $</span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain">GITLAB_TOKEN</span><span class="token punctuation" style="color:#393A34">}</span><br></div></code></pre></div></div>
+<p>The token needs the <code>api</code> scope and at least the Developer role on every requests repository.
+The SKE backend uses the same integration to read merge-request state.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="repository-and-branches">Repository and branches<a href="#repository-and-branches" class="hash-link" aria-label="Direct link to Repository and branches" title="Direct link to Repository and branches" translate="no">​</a></h4>
+<p>The generated repository picker accepts the connection&#x27;s one host. Other Git providers can use
+push mode with the Git backend; they cannot use this generated approval flow.</p>
 <p>Namespaced manifests land at <code>kratix-requests/&lt;promise&gt;/&lt;namespace&gt;/&lt;name&gt;.yaml</code>.
 Cluster-scoped manifests omit the namespace segment. The target branch defaults to <code>main</code>;
 the hidden <code>targetBranch</code> parameter can be customised for another branch.</p>
 <p>Request and update branches are <code>backstage/&lt;promise&gt;/&lt;name&gt;</code>, with an optional <code>branchSuffix</code>.
-Re-running the same branch reuses its pull request. Delete uses a separate
+On GitHub, re-running the same branch reuses its pull request. Delete uses a separate
 <code>backstage/&lt;promise&gt;/&lt;name&gt;-delete</code> branch.</p>
+<p>On GitLab, an open merge request cannot be updated, so Update uses its own
+<code>backstage/&lt;promise&gt;/&lt;name&gt;-update</code> branch. A second Update fails while the first update merge
+request is still open: merge it, or close it and delete its branch. Closing a merge request
+leaves its branch in place, and the next Update fails until the branch is gone.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="create-update-and-delete-a-resource">Create, update and delete a resource<a href="#create-update-and-delete-a-resource" class="hash-link" aria-label="Direct link to Create, update and delete a resource" title="Direct link to Create, update and delete a resource" translate="no">​</a></h2>
 <ol>
 <li class="">
