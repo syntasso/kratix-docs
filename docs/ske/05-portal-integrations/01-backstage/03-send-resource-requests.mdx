@@ -372,7 +372,8 @@ On GitHub, re-running the same branch reuses its pull request. Delete uses a sep
 
 On GitLab, an open merge request cannot be updated, so Update uses its own
 `backstage/<promise>/<name>-update` branch. A second Update fails while the first update merge
-request is still open: merge or close it first.
+request is still open: merge it, or close it and delete its branch. Closing a merge request
+leaves its branch in place, and the next Update fails until the branch is gone.
 
 ## Create, update and delete a resource
 
