@@ -21,6 +21,71 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.64.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.64.0/) (2026-11-16)
+
+Kratix changes: [b8f0665...7efee4a](https://github.com/syntasso/kratix/compare/b8f0665fa413e7c178b6419850320720e122aefa...7efee4a5a80e5783a90d8090547d5bc8204801a2)
+
+#### Features
+
+* Setting a status key to `null` in a Pipeline now removes that key.
+* The `DeleteWorkflowCompleted` condition now says when the delete workflow is running and when
+  it is done.
+
+#### Fixes
+
+* Pipelines no longer start twice when the Job cache is behind.
+* Nested maps in status written by successive Pipelines are now merged instead of replaced.
+* Pipeline Jobs no longer wait a fixed time after each Job is created.
+* A dry run now waits for its Works to be written before failing.
+* A resource or Promise whose configure workflow was suspended can now be deleted.
+
+#### Security Fixes
+
+* Updated `golang.org/x/net` to v0.62.0 to fix GO-2026-6860 and GO-2026-6866, and
+  `github.com/klauspost/compress` to v1.20.3 to fix GHSA-fpmh-frq8-7rj8.
+* Updated to include latest security updates.
+
+#### Known issues
+
+* This release is built with Go 1.27.3, so image scanners report GO-2026-6859 (CVE-2026-97054)
+  in the Go standard library's `net/http`. We have checked SKE's code paths and the vulnerability
+  cannot be exploited in SKE. The fix, Go 1.27.4, will be in the next release - v0.65.0 - which is soak testing. To consume this change early, you can install the release candidate
+  [v0.65.0-rc1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.65.0-rc1/).
+
+#### Maintenance
+
+* `git-lfs` is no longer installed in the SKE image.
+* Base image updates and package maintenance.
+
+### [v0.63.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.63.0/) (2026-10-29)
+
+#### Features
+
+* Upgrade runs can now wait for a resource's health checks before counting it as upgraded. This
+  needs [SKE Health Agent v0.16.0](/ske/releases/ske-health-agent) or later. For more information,
+  see the [Roll out Promise upgrades](/ske/guides/promise-upgrades) guide.
+* Promise workflows can now write custom top-level fields to `status.yaml`.
+* In a configure workflow, the next Pipeline now starts only after the previous Pipeline's output
+  has been written to every Destination.
+* Setting the manual reconciliation label while a workflow Job is running no longer stops that
+  Job. Kratix lets it finish, then reruns the workflow from the first Pipeline.
+* Deleting a Promise Revision no longer deletes the resources on its version. The revision waits
+  until no resource uses the version, then goes.
+
+#### Fixes
+
+* A failed delete workflow is no longer retried on every reconcile. Kratix records the failure
+  once and waits for a manual reconciliation or a pipeline change.
+* Health records in another namespace no longer affect a resource's `state`.
+
+#### Security Fixes
+
+* Updated to include latest security updates.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.62.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.62.0/) (2026-10-16)
 
 #### Features

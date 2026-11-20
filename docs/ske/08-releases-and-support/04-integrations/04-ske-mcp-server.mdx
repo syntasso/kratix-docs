@@ -26,6 +26,36 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+## [0.2.9](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/v0.2.9/) (2026-11-20)
+
+### Features
+
+* The server can send the caller's email to Kubernetes when it impersonates them. Set `IMPERSONATION_EMAIL_EXTRA_KEY`. Without impersonation, it sets the `kratix.io/last-changed-*` annotations on each request itself.
+* When a request fails validation or names a Promise that does not exist, the server tells the agent what to run next.
+
+### Bug Fixes
+
+* The example spec from `guide_request_workflow` now matches the Promise's schema, so agents no longer have to correct it before submitting a request.
+* Failed tool calls return `isError: true`, and server-side resource failures return error code -32603, as the MCP specification requires.
+
+### Upgrade Notes
+
+* The server no longer sets the `mcp.syntasso.io/requested-by-*` annotations.
+
+### Maintenance
+
+* Base image updates.
+
+## [0.2.8](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/v0.2.8/) (2026-11-05)
+
+### Features
+
+* Requests can now be given a name. `submit_promise_request` and `validate_promise_request` accept an optional `name`. When omitted, a name is generated as before.
+
+### Maintenance
+
+* Base image updates.
+
 ## [0.2.7](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-mcp-server/v0.2.7/) (2026-10-28)
 
 ### Security Fixes

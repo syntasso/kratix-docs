@@ -156,7 +156,7 @@ spec:
 
 And a Workflow that outputs the following files:
 
-```
+```text
 /kratix/output
 ├── document-0.yaml
 ├── some-dir/

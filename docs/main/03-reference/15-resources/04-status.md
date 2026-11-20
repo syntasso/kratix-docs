@@ -10,11 +10,6 @@ import StatusUpdateFlowDiagram from "/img/docs/workshop/part-ii-status-update-fl
 
 As part of a Configure or Delete Pipeline you can optionally send information about the
 Resource back to the resource requester by writing information to
-`/kratix/metadata/status.yaml`. The file can contain arbitrary key values, with the
-`message` key being a special key that is communicated back to the user when
-running `kubectl get <resource-request>`. For example if the Pipeline container wrote the
-As part of a Configure Pipeline you can optionally send information about the
-Resource back to the resource requester by writing information to
 `/kratix/metadata/status.yaml`.
 
 :::info
@@ -181,13 +176,22 @@ status:
   iam:
     password: <vault-ref>
     user: admin
-  message: User created, next step is to create vault secret for user
+  message: User created and vault secret created
 
 ```
 
 The status is always merged, with the last Pipeline prioritised in case of
 conflicts. In this example the `iam` key was updated with the additional
 `password` key, and the `message` key was overwritten.
+
+Nested maps are merged key by key, while lists and other values are replaced.
+To remove a key, set it to `null` in `/kratix/metadata/status.yaml`. For
+example, the following removes `iam.password` and leaves `iam.user` untouched:
+
+```yaml
+iam:
+  password: null
+```
 
 The next time the Configure workflow runs from the beginning, for example if a
 user updated the request, the status set in `/kratix/input/object.yaml` would be
@@ -253,19 +257,21 @@ Health and communicate this to the user via the `status` of the Resource.
 When a [Health Record](../healthrecord) exists for a given Resource, detailing
 the result of a Health Check for that resource, Kratix updates the Resource to
 reflect this result. Let's use the example of a Health Check for Resource
-Requests of a Psql Promise. Following the completion of a Health Check, a
-`HealthRecord` detailing the result is created:
+Requests of a `Postgresql` Promise. Following the completion of a Health Check,
+a `HealthRecord` detailing the result is created:
 
 ```yaml
 apiVersion: platform.kratix.io/v1alpha1
 kind: HealthRecord
 metadata:
-  name: dev-psql-health
+  name: dev-postgresql-health
+  namespace: default
 data:
+  promiseVersion: v2.0.0
   promiseRef:
-    name: psql
+    name: postgresql
   resourceRef:
-    name: dev-psql
+    name: dev-postgresql
     namespace: default
   state: ready
   lastRun: 1531958400
@@ -273,20 +279,80 @@ data:
     acceptingConnection: true
 ```
 
-Eventually the `status` of the corresponding request is updated with the information in
-the Health Record.
+Eventually the `status.healthStatus` of the corresponding request is updated
+with the information in the Health Record:
 
 ```yaml
 apiVersion: example.promise.syntasso.io/v1
-kind: Psql
+kind: postgresql
 metadata:
-  name: dev-psql
+  name: dev-postgresql
   namespace: default
 # ...
 status:
-  healthRecord:
-    state: ready
-    lastRun: 1531958400
-    details:
-      acceptingConnections: true
+  healthStatus:
+    state: healthy
+    expectedPromiseVersion: v2.0.0
+    healthDefinitions: 1
+    expectedRecords: 1
+    healthRecords:
+      - source:
+          name: dev-postgresql-health
+          namespace: default
+        state: healthy
+        lastRun: 1531958400
+        details:
+          acceptingConnections: true
+        promiseVersion: v2.0.0
+```
+
+If more than one `HealthRecord` for a single resource exists, they will each appear
+as an individual record under `status.healthStatus.healthRecords`.
+
+Kratix only reads Health Records in the same namespace as the Resource. A
+record in any other namespace is ignored, even if its `resourceRef` names the
+Resource.
+
+In the `status.healthStatus`:
+
+* `state` is the worst state across all records received, regardless of version.
+* `expectedPromiseVersion` is the Promise version that Kratix currently expects
+  health results for on the resource.
+* `expectedRecords` is the number of HealthDefinitions created by the Promise.
+* `healthRecords` is a list of the heath records for the resource.
+
+### The HealthChecksSucceeded condition
+
+For a Resource of a versioned Promise, Kratix sets the `HealthChecksSucceeded`
+condition detailing how many records have reported and whether they had passed.
+The condition considers only the Health Records whose `promiseVersion` equals 
+`status.healthStatus.expectedPromiseVersion`. 
+
+```yaml
+  conditions:
+    - type: HealthChecksSucceeded
+      status: "Unknown"
+      reason: WaitingForRecords
+      message: 1 of 2 records have reported at v2.0.0
+      lastTransitionTime: "2026-09-24T10:15:00Z"
+```
+
+The below table illustrates the statuses the condition can report and why.
+
+| Status  | Reason              | When                                                                                              |
+| ------- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| True    | `AllRecordsHealthy` | Every expected record has reported at the expected version, and all of them are healthy or ready. |
+| True    | `NoHealthChecks`    | `healthDefinitions` is `0`. This version of the Promise ships no health check.                    |
+| False   | `Unhealthy`         | At least one record at the expected version is unhealthy.                                         |
+| False   | `Degraded`          | Every expected record has reported, none is unhealthy, and at least one is degraded.              |
+| Unknown | `WaitingForRecords` | Fewer records than expected have reported at the expected version, and none of them is unhealthy. |
+
+A Resource of an unversioned Promise has no expectedPromiseVersion and no
+HealthChecksSucceeded condition.
+
+To wait until a Resource's current version passes its health checks, wait on
+the HealthChecksSucceeded condition, not on state `state`:
+
+```bash
+kubectl wait <kind>/<name> --for=condition=HealthChecksSucceeded
 ```

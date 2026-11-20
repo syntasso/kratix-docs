@@ -98,6 +98,17 @@ spec:
 
 In this example, `pipeline-a` will run first, followed by `pipeline-b`.
 
+#### Waiting for the previous Pipeline's output
+
+Kratix starts the next Pipeline only once the previous Pipeline's output has been
+written to its Destinations. The previous Pipeline's Work must be `Ready` at its
+current generation, meaning every WorkPlacement has been written to its State Store.
+
+While the next Pipeline waits, its entry in `status.kratix.workflows.pipelines`
+stays `Pending` and has a `message` naming the previous Pipeline and its Work.
+
+See [Resource Status and Events](/main/reference/resources/resource-status-events#waiting-for-a-pipelines-output) for example statuses.
+
 ### Pipeline Failures
 
 A Pipeline fails if any of its `containers` return a non-zero exit code.
@@ -183,8 +194,10 @@ reconciliation, the controller will ensure that all the Workflows for a given re
 ### Pipeline Reconciliation
 
 If a new reconciliation is triggered while a Pipeline is actively running (for
-example due to a Resource or Promise update), Kratix waits for the current Job to
-reach a terminal state before restarting the configure workflow from the beginning.
+example due to a Resource or Promise update, or a
+[manual reconciliation](/main/reference/resources/reconciliation-labels#manual-reconciliation)),
+Kratix waits for the current Job to finish, whether it succeeds or fails, before
+restarting the configure workflow from the beginning.
 
 ## Delete Workflows
 

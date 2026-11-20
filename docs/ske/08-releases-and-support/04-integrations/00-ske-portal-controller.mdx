@@ -20,6 +20,63 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### v0.11
+
+Latest version: [v0.11.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.11.1/) (2026-11-19), released via the SKE Operator Helm Chart [version 0.118.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.118.0/)
+
+**Note:** This version of the Portal Controller is only compatible with SKE versions `v0.64.0` or above. See [Supported versions and compatibility](/ske/releases/compatibility).
+
+#### Features
+
+* Backstage connections in pull-request mode can open GitLab merge requests. Set `config.pullRequest.provider: gitlab` (and `host` for self-managed GitLab).
+
+Earlier v0.11 versions. Patches only add dependency and base image updates:
+
+* [v0.11.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.11.0/) (2026-11-19), released via the SKE Operator Helm Chart [version 0.117.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.117.0/)
+
+### v0.10
+
+Latest version: [v0.10.8](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.8/) (2026-11-18), released via the SKE Operator Helm Chart [version 0.116.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.116.0/)
+
+**Note:** This version of the Portal Controller is only compatible with SKE versions `v0.64.0` or above. See [Supported versions and compatibility](/ske/releases/compatibility).
+
+#### Bug Fixes
+
+* Resource requests can now be deleted after the controller restarts.
+
+#### Maintenance
+
+* Dependency and base image updates.
+
+Earlier v0.10 versions. Patches only add dependency and base image updates:
+
+* [v0.10.7](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.7/) (2026-11-16), released via the SKE Operator Helm Chart [version 0.115.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.115.0/)
+* [v0.10.6](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.6/) (2026-11-16), released via the SKE Operator Helm Chart [version 0.114.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.114.0/)
+* [v0.10.5](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.5/) (2026-11-13), released via the SKE Operator Helm Chart [version 0.112.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.112.0/)
+* [v0.10.4](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.4/) (2026-11-11), released via the SKE Operator Helm Chart [version 0.111.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.111.0/)
+* [v0.10.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.3/) (2026-11-10), released via the SKE Operator Helm Chart [version 0.110.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.110.0/)
+* [v0.10.2](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.2/) (2026-11-09), released via the SKE Operator Helm Chart [version 0.109.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.109.0/)
+* [v0.10.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.1/) (2026-11-06), released via the SKE Operator Helm Chart [version 0.108.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.108.0/)
+* [v0.10.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.0/) (2026-11-06), released via the SKE Operator Helm Chart [version 0.107.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.107.0/)
+
+### [v0.9.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.9.0/) (2026-11-02)
+
+Released via the SKE Operator Helm Chart [version 0.106.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.106.0/)
+
+**Note:** This version of the Portal Controller is only compatible with SKE versions `v0.64.0` or above. See [Supported versions and compatibility](/ske/releases/compatibility).
+
+#### Features
+
+* Cortex now records who last changed a resource request in the `kratix.io/last-changed-by`, `kratix.io/last-change-action` and `kratix.io/last-changed-via` annotations, replacing `cortex.io/initiated-by` and `cortex.io/initiated-action`.
+
+#### Bug Fixes
+
+* Fixed duplicate sync Jobs being created for new resource requests.
+
+#### Maintenance
+
+* Base image updates.
+
 ### [v0.8.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.8.0/) (2026-10-23)
 
 Released via the SKE Operator Helm Chart [version 0.104.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.104.0/)
@@ -96,6 +153,11 @@ Released via the SKE Operator Helm Chart [version 0.97.0](http://syntasso-enterp
 ### [v0.5.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.5.0/) (2026-09-29)
 
 Released via the SKE Operator Helm Chart [version 0.95.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.95.0/)
+
+:::warning Requires SKE v0.60.0
+On earlier SKE versions, the Portal Controller reruns its pipeline Jobs endlessly. Upgrade SKE
+first.
+:::
 
 :::warning Backstage Templates now default to a single form page
 

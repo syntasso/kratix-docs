@@ -24,7 +24,7 @@ When the `Ready` condition is `True` and a worker cluster is reconciling the Des
 
 Example:
 
-```
+```shell-session
 $ kubectl describe destinations.platform.kratix.io worker-1
 Name:         worker-1
 ...
@@ -37,6 +37,9 @@ Status:
     Type:                  Ready
 ```
 
+While the `Ready` condition is `False`, Kratix does not write WorkPlacements to the Destination. See
+[Destination not ready](/main/platform-concepts/kratix-resources/work-status-events#destination-not-ready).
+
 ## Events
 
 Destinations emit the following events:
@@ -47,6 +50,6 @@ Destinations emit the following events:
 
 Inspect events with:
 
-```
+```bash
 kubectl describe destinations.platform.kratix.io <name>
 ```

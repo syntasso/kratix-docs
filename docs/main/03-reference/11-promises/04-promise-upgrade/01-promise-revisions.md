@@ -107,15 +107,13 @@ to the revision's spec snapshot.
 
 ## Deleting a Promise Revision
 
-Upon initiating the deletion of a Promise Revision, the Resource Requests created from that Promise Revision will be
-deleted alongside their Resource Bindings.
-
-Once no Resource Bindings are left on the revision's version, Kratix also deletes the service accounts, Roles,
-ClusterRoles and bindings that the Resource workflows of that version ran with.
+Deleting a Promise Revision never deletes Resource Requests or Resource Bindings. If Resource Bindings still use
+the revision's version, Kratix will accept the deletion and emit a warning. The revision will be only be removed
+when no Resource Binding uses its version. 
 
 :::info
 
-The Promise Revision with the `latest` label cannot be deleted, as a result, the Resource Requests will not be
-deleted. To delete the `latest` Revision, you should delete the Promise.
+The Promise Revision with the `latest` label cannot be deleted. To delete it, delete the Promise, which deletes all
+of its Resources first.
 
 :::
