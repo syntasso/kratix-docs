@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.4deaa2f3.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.42fab47b.js" defer="defer"></script>
 <script src="/assets/js/main.b29c2d01.js" defer="defer"></script>
 </head>
 <body>
@@ -51,10 +51,10 @@ functionality.</p>
 <p>It&#x27;s also possible to install Promises via a Promise Release. Check the <a class="" href="/main/reference/promises/releases">Promise Release</a> docs for details.</p>
 <p>As a Promise evolves, Kratix snapshots each version as a Promise Revision so you can control how and when existing Resources are upgraded. See <a class="" href="/main/reference/promises/promise-upgrade/intro">Promise Upgrades</a> for details.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="api">API<a href="#api" class="hash-link" aria-label="Direct link to API" title="Direct link to API" translate="no">​</a></h3>
-<p>When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customise their resources using the available API options.
-When the API request is submitted to Kratix, the Promise uses the API options to create the resources as described in the Promise.<br>
-<!-- -->For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.
-Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only. See <a class="" href="/main/platform-concepts/api">API</a> for how this maps to the Promise API.</p>
+<p>When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customise their resources using the available API options.</p>
+<p>When the API request is submitted to Kratix, the Promise uses the API options to create the resources as described in the Promise.<br>
+<!-- -->For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.</p>
+<p>Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only. See <a class="" href="/main/platform-concepts/api">API</a> for how this maps to the Promise API.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dependencies">Dependencies<a href="#dependencies" class="hash-link" aria-label="Direct link to Dependencies" title="Direct link to Dependencies" translate="no">​</a></h3>
 <p>When a Promise is installed, it often needs supporting infrastructure to already be installed on Destinations before any Resource requests can be fulfilled.
 For example, a PostgreSQL Promise might need a Postgres Operator deployed to Destinations before accepting requests to create Postgres databases.</p>
