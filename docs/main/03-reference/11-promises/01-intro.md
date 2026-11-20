@@ -126,7 +126,7 @@ spec:
 ```
 
 :::info
-Learn more about the requiredPromises fields in the [Compound Promise Workshop](../../../workshop/writing-a-promise/compound-promise#defining-promises-as-required-promises).
+Learn more about the requiredPromises fields in the [Compound Promise Reference Documentation](../promises/compound#how-required-promises-are-resolved).
 :::
 
 It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
