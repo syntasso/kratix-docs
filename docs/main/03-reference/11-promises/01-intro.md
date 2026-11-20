@@ -124,19 +124,22 @@ spec:
     - name: required-promise-name
       version: required-promise-version
 ```
+
 :::info
 Learn more about the requiredPromises fields in the [Compound Promise Workshop](../../../workshop/writing-a-promise/compound-promise#defining-promises-as-required-promises).
 :::
-
 
 It's also possible to install Promises via a Promise Release. Check the [Promise Release](../promises/releases) docs for details.
 
 As a Promise evolves, Kratix snapshots each version as a Promise Revision so you can control how and when existing Resources are upgraded. See [Promise Upgrades](./promise-upgrade/intro) for details.
 
 ### API
+
 When a platform engineer installs a Promise, Kratix creates a new API that application developers use to create and customise their resources using the available API options.
+
 When the API request is submitted to Kratix, the Promise uses the API options to create the resources as described in the Promise.  
 For example, if the Promise describes a database, a Jenkins installation, and an update script, calling the Promise from the API will generate a new instance of all of those resources for the user.
+
 Promise APIs are Kubernetes Custom Resource Definitions (CRDs) under the hood. Kratix supports namespace-scoped CRDs only. See [API](/main/platform-concepts/api) for how this maps to the Promise API.
 
 ### Dependencies
@@ -151,13 +154,16 @@ Note that when your Promise prerequisites are lengthy, it can make the Promise d
 In this case, we recommend using [Promise Configure workflow](workflows) to install these prerequisites instead.
 
 ### Workflows
+
 Workflows are the actions that must run in order to fulfil a Promise. They are a chain of containers that execute in sequence to fulfill the promise specifications, including responses to API specifications, notifications, business rules, and custom specifications.
 
 The Promise workflows are run as part of the Promise lifecycle, and the Resource workflows are run as part of the Resource lifecycle. Under both Promise and Resource workflows, Kratix supports two workflow types:
+
 - The `configure` workflows runs when either the Promise or Resource is created, updated or reconciled.
 - The `delete` workflow runs when either the Promise or Resource is deleted.
 
 You can learn more about [Promise Workflows](workflows) and [Resource Workflows](../resources/workflows) in their respective docs.
 
 ### Destination Rules
+
 Destination rules are defined in the `destinationSelectors` section of the Promise spec. These are the rules that all the Promise will follow when determining where resources should go. Learn more about how to use destinationSelectors as part of [multi-destination scheduling](../destinations/multidestination-management#promises). 
