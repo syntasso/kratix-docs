@@ -1,0 +1,482 @@
+---
+title: Audit log on Azure AKS
+description: Send the AKS audit log to Log Analytics, find who changed resource requests, count the users of your platform, and build a Grafana dashboard
+keywords: [audit, audit log, aks, azure, log analytics, kql, grafana, unique users]
+slug: "/ske/operations/audit/aks"
+sidebar_label: "Azure AKS"
+sidebar_position: 4
+---
+
+On Azure AKS, the Kubernetes API server can send its audit log to a
+[Log Analytics workspace](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview).
+This page shows how to turn the audit log on, where to find it, and how to
+count the users of your platform, in Log Analytics or in a Grafana dashboard.
+
+Each create, update and delete of a resource request carries the
+[audit annotation](/ske/operations/audit/requester#audit-log)
+`attribution.platform.syntasso.io/last-changed-by`, set to the user who made
+the change.
+
+## Turning on the audit log
+
+AKS does not send the audit log anywhere until you add a diagnostic setting
+that sends the `kube-audit-admin` category to a Log Analytics workspace. See
+[AKS control plane resource logs](https://learn.microsoft.com/en-us/azure/aks/monitor-aks#aks-control-plane-resource-logs)
+in the AKS documentation. For example, with the Azure CLI:
+
+```bash
+cluster_id=$(az aks show \
+  --resource-group <RESOURCE_GROUP> \
+  --name <CLUSTER_NAME> \
+  --query id --output tsv)
+workspace_id=$(az monitor log-analytics workspace show \
+  --resource-group <RESOURCE_GROUP> \
+  --workspace-name <WORKSPACE_NAME> \
+  --query id --output tsv)
+
+az monitor diagnostic-settings create \
+  --name ske-audit \
+  --resource "$cluster_id" \
+  --workspace "$workspace_id" \
+  --logs '[{"category":"kube-audit-admin","enabled":true}]' \
+  --export-to-resource-specific true
+```
+
+The `kube-audit-admin` category leaves out `get` and `list` events and keeps
+every create, update and delete, so there is nothing else to set up. The
+`kube-audit` category also records every read, so it sends far more logs.
+
+In the Azure portal, the same setting is under the cluster's **Diagnostic
+settings**. The category is called **Kubernetes Audit Admin Logs**, and
+`--export-to-resource-specific true` is the **Resource specific** destination
+table:
+
+```mdx-code-block
+import DiagnosticSetting from "./aks-diagnostic-setting.png"
+import DiagnosticSettingDark from "./aks-diagnostic-setting-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={DiagnosticSetting} alt="A diagnostic setting that sends Kubernetes Audit Admin Logs to a Log Analytics workspace" />
+  <img className="large dark-only" src={DiagnosticSettingDark} alt="A diagnostic setting that sends Kubernetes Audit Admin Logs to a Log Analytics workspace" />
+
+  <figcaption>The diagnostic setting in the Azure portal</figcaption>
+</figure>
+
+## Finding the logs
+
+With the
+[**Resource specific**](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/resource-logs#resource-specific)
+destination table, AKS writes the audit log to the `AKSAuditAdmin` table in
+your workspace. Each row is one audit event, and the user is in
+`Annotations["attribution.platform.syntasso.io/last-changed-by"]`. With the
+**Azure diagnostics** destination table, the logs go to the shared
+`AzureDiagnostics` table instead, and the queries on this page do not work.
+
+```mdx-code-block
+import AuditEvent from "./aks-log-analytics-audit-event.png"
+import AuditEventDark from "./aks-log-analytics-audit-event-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={AuditEvent} alt="One AKSAuditAdmin row in Log Analytics, with the user in its Annotations" />
+  <img className="large dark-only" src={AuditEventDark} alt="One AKSAuditAdmin row in Log Analytics, with the user in its Annotations" />
+
+  <figcaption>The user in the Annotations of one audit event</figcaption>
+</figure>
+
+## Setting log retention {#retention}
+
+You can only see activity and count your platform users if their events are
+still in the workspace. A workspace keeps logs for 30 days by default. To count
+the users who used your platform over the last year, you need to keep a year of
+logs.
+
+For that, check the retention of the `AKSAuditAdmin` table, and change it if
+you need to:
+
+```bash
+az monitor log-analytics workspace table update \
+  --resource-group <RESOURCE_GROUP> \
+  --workspace-name <WORKSPACE_NAME> \
+  --name AKSAuditAdmin \
+  --retention-time 365 \
+  --total-retention-time 365
+```
+
+Log Analytics charges for the logs it takes in, and for keeping them longer
+than 31 days, so a longer retention will cost more. Check the
+[Azure Monitor pricing page](https://azure.microsoft.com/pricing/details/monitor/)
+to find out the relevant price for your scenario.
+
+## Counting platform users {#unique-users}
+
+With the audit log turned on, you can count platform users in Log Analytics or
+in Grafana.
+
+### Using Log Analytics
+
+1. In the Azure portal, open the Log Analytics workspace and select **Logs**.
+1. Choose the time range to count over.
+1. Run this query:
+
+```
+AKSAuditAdmin
+| extend user = tostring(Annotations["attribution.platform.syntasso.io/last-changed-by"])
+| where isnotempty(user)
+    and Stage == "ResponseComplete"
+    and toint(ResponseStatus.code) < 400
+    and RequestUri !contains "dryRun"
+| summarize users = count_distinct(user)
+```
+
+This `where` keeps the changes to resource requests that succeeded. It drops
+the changes Kubernetes rejected and any dry runs, such as the ones
+`kubectl diff` sends, which also carry the audit annotation.
+
+```mdx-code-block
+import UniqueUsers from "./aks-log-analytics-unique-users.png"
+import UniqueUsersDark from "./aks-log-analytics-unique-users-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={UniqueUsers} alt="The unique users query in Log Analytics, returning 4 users" />
+  <img className="large dark-only" src={UniqueUsersDark} alt="The unique users query in Log Analytics, returning 4 users" />
+
+  <figcaption>Counting platform users in Log Analytics</figcaption>
+</figure>
+
+#### Other useful Log Analytics queries
+
+How many changes each user made:
+
+```
+AKSAuditAdmin
+| extend user = tostring(Annotations["attribution.platform.syntasso.io/last-changed-by"])
+| where isnotempty(user)
+    and Stage == "ResponseComplete"
+    and toint(ResponseStatus.code) < 400
+    and RequestUri !contains "dryRun"
+| summarize changes = count() by user
+| sort by changes desc
+```
+
+```mdx-code-block
+import ChangesPerUser from "./aks-log-analytics-changes-per-user.png"
+import ChangesPerUserDark from "./aks-log-analytics-changes-per-user-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={ChangesPerUser} alt="The changes per user query in Log Analytics, returning one row for each user" />
+  <img className="large dark-only" src={ChangesPerUserDark} alt="The changes per user query in Log Analytics, returning one row for each user" />
+
+  <figcaption>Changes per user in Log Analytics</figcaption>
+</figure>
+
+Who created, updated and deleted a request:
+
+```
+AKSAuditAdmin
+| extend user = tostring(Annotations["attribution.platform.syntasso.io/last-changed-by"])
+| where isnotempty(user)
+    and Stage == "ResponseComplete"
+    and toint(ResponseStatus.code) < 400
+    and RequestUri !contains "dryRun"
+    and ObjectRef.namespace == "<NAMESPACE>"
+    and ObjectRef.name == "<REQUEST_NAME>"
+| project TimeGenerated, user, Verb, type = tostring(ObjectRef.resource)
+| sort by TimeGenerated desc
+```
+
+`Verb` is the Kubernetes API verb, which depends on how the tool sends the
+change. Most tools, such as `kubectl apply`, `kubectl edit`, Flux and Argo CD,
+send changes to an existing request as `patch`. Tools that send the whole
+request, such as `kubectl replace`, show as `update`.
+
+```mdx-code-block
+import RequestHistory from "./aks-log-analytics-request-history.png"
+import RequestHistoryDark from "./aks-log-analytics-request-history-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={RequestHistory} alt="The history query in Log Analytics, showing who created, changed and deleted my-cache" />
+  <img className="large dark-only" src={RequestHistoryDark} alt="The history query in Log Analytics, showing who created, changed and deleted my-cache" />
+
+  <figcaption>Who created, changed and deleted a request in Log Analytics</figcaption>
+</figure>
+
+## Grafana
+
+Grafana can run the same queries through its Azure Monitor data source, which
+is built into Grafana. The dashboard below shows the number of unique users,
+the number of changes, the changes each user made, and the most recent changes.
+To set it up:
+
+1. Give Grafana access to the workspace. See
+   [Configure the Azure Monitor data source](https://grafana.com/docs/grafana/latest/datasources/azure-monitor/configure/)
+   in the Grafana documentation. Grafana needs to run Log Analytics queries on
+   `<WORKSPACE_NAME>`, so the identity it uses needs the **Log Analytics
+   Reader** role on that workspace.
+1. Add the Azure Monitor data source in Grafana.
+1. Copy the dashboard below, replace `<SUBSCRIPTION_ID>`, `<RESOURCE_GROUP>`
+   and `<WORKSPACE_NAME>`, then import it and choose your Azure Monitor data
+   source.
+
+Each query in the dashboard filters with `$__timeFilter(TimeGenerated)`, so it
+counts over the dashboard's time range.
+
+```mdx-code-block
+import GrafanaDashboard from "./aks-grafana-dashboard.png"
+import GrafanaDashboardDark from "./aks-grafana-dashboard-dark.png"
+```
+
+<figure className="diagram">
+  <img className="large light-only" src={GrafanaDashboard} alt="The SKE platform audit dashboard, showing unique users, changes, changes per user, and recent changes" />
+  <img className="large dark-only" src={GrafanaDashboardDark} alt="The SKE platform audit dashboard, showing unique users, changes, changes per user, and recent changes" />
+
+  <figcaption>The SKE platform audit dashboard on AKS</figcaption>
+</figure>
+
+<details>
+<summary>Dashboard JSON</summary>
+
+```json
+{
+  "__inputs": [
+    {
+      "name": "DS_AZURE_MONITOR",
+      "label": "Azure Monitor",
+      "type": "datasource",
+      "pluginId": "grafana-azure-monitor-datasource",
+      "pluginName": "Azure Monitor"
+    }
+  ],
+  "title": "SKE platform audit",
+  "uid": "ske-platform-audit",
+  "tags": [
+    "ske",
+    "audit"
+  ],
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Unique users",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_AZURE_MONITOR}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_AZURE_MONITOR}"
+          },
+          "queryType": "Azure Log Analytics",
+          "azureLogAnalytics": {
+            "query": "AKSAuditAdmin\n| where $__timeFilter(TimeGenerated)\n| extend user = tostring(Annotations[\"attribution.platform.syntasso.io/last-changed-by\"])\n| where isnotempty(user)\n    and Stage == \"ResponseComplete\"\n    and toint(ResponseStatus.code) < 400\n    and RequestUri !contains \"dryRun\"\n| summarize users = count_distinct(user)",
+            "resources": [
+              "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE_NAME>"
+            ],
+            "resultFormat": "table"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Changes to resource requests",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_AZURE_MONITOR}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_AZURE_MONITOR}"
+          },
+          "queryType": "Azure Log Analytics",
+          "azureLogAnalytics": {
+            "query": "AKSAuditAdmin\n| where $__timeFilter(TimeGenerated)\n| extend user = tostring(Annotations[\"attribution.platform.syntasso.io/last-changed-by\"])\n| where isnotempty(user)\n    and Stage == \"ResponseComplete\"\n    and toint(ResponseStatus.code) < 400\n    and RequestUri !contains \"dryRun\"\n| summarize changes = count()",
+            "resources": [
+              "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE_NAME>"
+            ],
+            "resultFormat": "table"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Average changes per user",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_AZURE_MONITOR}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_AZURE_MONITOR}"
+          },
+          "queryType": "Azure Log Analytics",
+          "azureLogAnalytics": {
+            "query": "AKSAuditAdmin\n| where $__timeFilter(TimeGenerated)\n| extend user = tostring(Annotations[\"attribution.platform.syntasso.io/last-changed-by\"])\n| where isnotempty(user)\n    and Stage == \"ResponseComplete\"\n    and toint(ResponseStatus.code) < 400\n    and RequestUri !contains \"dryRun\"\n| summarize changes = count() by user\n| summarize average = avg(changes)",
+            "resources": [
+              "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE_NAME>"
+            ],
+            "resultFormat": "table"
+          }
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Changes per user",
+      "type": "table",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_AZURE_MONITOR}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_AZURE_MONITOR}"
+          },
+          "queryType": "Azure Log Analytics",
+          "azureLogAnalytics": {
+            "query": "AKSAuditAdmin\n| where $__timeFilter(TimeGenerated)\n| extend user = tostring(Annotations[\"attribution.platform.syntasso.io/last-changed-by\"])\n| where isnotempty(user)\n    and Stage == \"ResponseComplete\"\n    and toint(ResponseStatus.code) < 400\n    and RequestUri !contains \"dryRun\"\n| summarize changes = count() by user\n| sort by changes desc",
+            "resources": [
+              "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE_NAME>"
+            ],
+            "resultFormat": "table"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Recent changes",
+      "type": "table",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${DS_AZURE_MONITOR}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${DS_AZURE_MONITOR}"
+          },
+          "queryType": "Azure Log Analytics",
+          "azureLogAnalytics": {
+            "query": "AKSAuditAdmin\n| where $__timeFilter(TimeGenerated)\n| extend user = tostring(Annotations[\"attribution.platform.syntasso.io/last-changed-by\"])\n| where isnotempty(user)\n    and Stage == \"ResponseComplete\"\n    and toint(ResponseStatus.code) < 400\n    and RequestUri !contains \"dryRun\"\n| project TimeGenerated, user, Verb, type = tostring(ObjectRef.resource), namespace = tostring(ObjectRef.namespace), name = tostring(ObjectRef.name)\n| sort by TimeGenerated desc\n| take 100",
+            "resources": [
+              "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.OperationalInsights/workspaces/<WORKSPACE_NAME>"
+            ],
+            "resultFormat": "table"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+## Known limitations
+
+- **Counts only go back as far as your [retention](#retention).**
+- **The recorded user is only as specific as the way users log in.** If users
+  share the cluster's local account, the audit log records `masterclient` for
+  all of them. `az aks get-credentials` gives the local account on a cluster
+  without Microsoft Entra ID, and `--admin` gives it on any cluster. With
+  Microsoft Entra ID, each user logs in as themselves, and you can
+  [disable local accounts](https://learn.microsoft.com/en-us/azure/aks/local-accounts).
+  Run `kubectl auth whoami -o yaml` to see which fields your cluster gives you,
+  and set [`userInfoField`](/ske/operations/audit/requester#user-info-field)
+  to a field that is different for each user.
+- **Some changes have no user.** For example, deletes through GitOps. See
+  [What is not recorded](/ske/operations/audit/requester#what-is-not-recorded).
+
+## Related material
+
+- [Audit your platform](/ske/operations/audit)

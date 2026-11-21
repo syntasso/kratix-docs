@@ -118,6 +118,11 @@
   display: none;
 }
 
+[data-theme='light'] .dark-only,
+[data-theme='dark'] .light-only {
+  display: none;
+}
+
 
 figure.diagram {
   text-align: center;
