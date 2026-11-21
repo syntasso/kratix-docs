@@ -205,6 +205,11 @@ path:
 `<filename>` defaults to `aggregated.yaml` and can be overridden with the
 `filepath.filename` field.
 
+`aggregatedYAML` cannot be used with a state store that has a delivery mode,
+such as SKE's [pull request delivery](/ske/operations/pull-request-delivery).
+Kratix refuses to create or update the Destination or the state store if the
+change would put them together.
+
 ### none
 
 Files are written flat, directly into the top-level Destination path, with no
