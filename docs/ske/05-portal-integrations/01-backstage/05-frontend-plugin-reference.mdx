@@ -144,10 +144,10 @@ card appears only for a Promise whose workflow writes HealthRecords.
 The Resource **Manage** tab loads the current instance data before presenting
 update and delete controls.
 
-A resource with `kratix.io/managed-by: unmanaged` has no Manage tab, so its
-page has no update or delete controls. Its Status tab shows the message "This
-resource is not managed through Backstage." A resource with any other value, or
-without the annotation, keeps the Manage tab.
+A resource annotated with `kratix.io/managed-by: unmanaged` has no Manage tab,
+which means that controls for update or delete are not available. Its Status tab
+shows the message "This resource is not managed through Backstage." A Manage tab
+is shown for any other value in this same annotation.
 
 :::info
 
