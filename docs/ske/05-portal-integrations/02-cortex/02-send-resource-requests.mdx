@@ -60,6 +60,23 @@ The workflow first registers `<name> request (pending)` in Cortex, owned by the 
 
 After GitOps applies the manifest, Kratix reconciles the request. The resource sync pipeline updates the entity definition and clears its pending marker. The exporter subsequently writes resource status to Cortex custom data under `status`.
 
+### Field validation
+
+The Create and Update workflows check the form when it is submitted. If a value breaks a rule, the form shows a message under the field and nothing is committed to Git.
+
+Cortex itself checks a field's type, `enum`, `pattern`, `required`, `minimum` and `maximum` for numbers, and the number of items in a list.
+
+The generated workflows also check:
+
+| Rule | Applies to | Message |
+| --- | --- | --- |
+| `minLength` | Top-level `spec` string fields | `must be at least <N> characters` |
+| `maxLength` | Top-level `spec` string fields | `must be <N> characters or fewer` |
+
+An optional field left empty is not checked, so it can be left blank even if it has a `minLength`.
+
+The platform still validates every request when it is applied. A value that breaks a rule not listed above, such as a rule inside a nested object or a CEL rule (`x-kubernetes-validations`), is committed to Git and then rejected by the platform. Look for it under the "Commit exists but request is absent from Kubernetes" row in [Troubleshooting](#troubleshooting).
+
 ## Update a resource request {#5-update-a-resource-request}
 
 Select the resource entity in Cortex and run `Update <PROMISE_NAME> request`. Review the pre-filled fields and submit the changes. The workflow updates the manifest in Git; GitOps applies the new specification and Kratix reconciles it.
