@@ -144,10 +144,24 @@ card appears only for a Promise whose workflow writes HealthRecords.
 The Resource **Manage** tab loads the current instance data before presenting
 update and delete controls.
 
-A resource annotated with `kratix.io/managed-by: unmanaged` has no Manage tab,
-which means that controls for update or delete are not available. Its Status tab
-shows the message "This resource is not managed through Backstage." A Manage tab
-is shown for any other value in this same annotation.
+Every resource has a Manage tab by default, including resources that were not
+requested through Backstage. To keep the Manage tab only for resources requested
+through Backstage, add this to `app-config.yaml`:
+
+```yaml
+ske:
+  manageTab:
+    hideForUnmanaged: true
+```
+
+With this setting on, a resource annotated with `kratix.io/managed-by: unmanaged`
+has no Manage tab, so it can't be updated or deleted from Backstage. Its Status
+tab shows the message "This resource is not managed through Backstage." Resources
+with any other value, or no annotation, keep the Manage tab.
+
+The `ske-portal-adapter` sets `kratix.io/managed-by: unmanaged` on every resource
+that was not requested through a Backstage Template, such as resources created
+with `kubectl` or by a compound Promise.
 
 :::info
 
@@ -309,7 +323,7 @@ list of annotations we can have:
 | `kratix.io/status` | No | Fallback status as JSON. |
 | `kratix.io/promise-summary` | No | Markdown summary for Overview. |
 | `kratix.io/backstage-promise-template` | For updates | Template name. |
-| `kratix.io/managed-by` | No | `unmanaged` hides the Manage tab. |
+| `kratix.io/managed-by` | No | `unmanaged` hides the Manage tab when `ske.manageTab.hideForUnmanaged` is on. |
 
 When `kratix.io/type` is absent, use `spec.type: kratix-resource`. Status
 returned by the backend takes precedence over `kratix.io/status`. The Software
