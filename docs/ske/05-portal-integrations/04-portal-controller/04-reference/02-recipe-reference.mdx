@@ -336,9 +336,20 @@ This turns a placeholder reading `actions.user-input.outputs.app` into
 `actions.user-input.outputs.app.name`. Only the named output is affected, so a similarly-named
 output such as `appVersion` is left alone.
 
+`field` depends on the Cortex connection's `provider`. The `commit-file` action holds the
+resource-request template at `schema.content` for `github`, and at `schema.inputs.content` for
+`gitlab`. The example above is for GitHub. With the wrong path, Portal Patch fails the batch
+with a `not found` error naming the path.
+
 `outputKey` is the key as it appears on the workflow input. A top-level property `app` is `app`; a
 nested property `spec.database.name` is `database-name`; the identity fields are `objname` and
 `objnamespace`.
+
+Projection changes the value committed to Git, not the entity a workflow acts on. Generated
+Update and Delete workflows act on the entity they are started from: Update locks `objname` and
+`objnamespace` to that entity's identity, and Delete reads it from the entity directly. Use
+projection for a spec field that refers to another entity, not to choose which request a day-2
+workflow changes.
 
 `sourceAction`, `outputKey` and `attribute` may only contain letters, digits, hyphens and
 underscores.

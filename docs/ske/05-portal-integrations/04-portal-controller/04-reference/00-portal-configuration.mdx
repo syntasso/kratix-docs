@@ -137,6 +137,10 @@ injection. Backstage publication needs no API token.
 
 ## Binding labels
 
+The key is `kratix.io/portal-<type>`, where `<type>` is the instance's `type`:
+`kratix.io/portal-backstage` or `kratix.io/portal-cortex`. The examples use Backstage; Cortex
+labels work the same way.
+
 These fragments show only `metadata.labels`, not complete Promises or requests:
 
 ```yaml
@@ -169,12 +173,28 @@ metadata:
 
 Skipped requests generate no entity or portal condition. Opt-out skips sync; it is not a cleanup policy.
 
+- **The key must match exactly.** A request labelled `kratix.io/portal-cortex: "false"` is still
+  synced when its Promise uses `kratix.io/portal-cortex.prod`. A mismatched key is ignored.
+- **Published entities stay until the request is deleted.** Opting out a request that was
+  already synced leaves its entity in the portal. Deleting the request still removes it. To
+  remove it sooner, delete it in the portal.
+- **Requests created by pipelines** opt out the same way. A compound Promise can set the label
+  on the sub-requests its pipeline writes, so only the parent request appears in the portal.
+
 ### Binding a PortalCustomization
 
 `kratix.io/portal-customization: <NAME>` opts in using the resource's `spec.portalType`.
 `kratix.io/portal-customization.prod: <NAME>` selects instance `prod`.
 A Promise can reference one `PortalCustomization`. The suffix names the instance.
 See [PortalCustomization](/ske/integrations/portal-controller/customization) for its schema.
+
+This label binds the Promise on its own, even without a `kratix.io/portal-<type>` label:
+
+- **To detach a Promise, remove both labels.** Removing only the `kratix.io/portal-<type>` label
+  leaves it bound through the customisation.
+- **Requests still opt out with the portal-type key.** For a Promise bound only by
+  `kratix.io/portal-customization.prod: <NAME>`, where the customisation's `spec.portalType` is
+  `cortex`, a request opts out with `kratix.io/portal-cortex.prod: "false"`.
 
 ## Binding status
 
