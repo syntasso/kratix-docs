@@ -30,6 +30,26 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [ske-backend v0.27.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.27.1/); [ske-frontend v0.25.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.25.0/) (2026-11-24)
+
+#### Features
+
+* **Optionally hide the Manage tab for resources not requested through Backstage.** Every resource
+still has a Manage tab by default. Set `ske.manageTab.hideForUnmanaged: true` in `app-config.yaml`
+and a resource with `kratix.io/managed-by: unmanaged` has no Manage tab, and its Status tab says it
+is not managed through Backstage. See
+[Resource Manage](/ske/integrations/portal-controller/backstage/frontend-plugin#resource-manage).
+
+#### Bug Fixes
+
+* **The resource Status tab shows the resource's status again in `ske.mode: gitops`.** It had shown
+no status since ske-frontend v0.22.0. It now reads the status from the entity's `kratix.io/status`
+annotation when the SKE Backend returns none.
+
+#### Maintenance
+
+* Bump Backstage from 1.56.3 to 1.57.1.
+
 ### [ske-backend v0.26.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-backend-v0.26.0/); [ske-frontend v0.23.1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#backstage/ske-frontend-v0.23.1/) (2026-11-09)
 
 #### Features
