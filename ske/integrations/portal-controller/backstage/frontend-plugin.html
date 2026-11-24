@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.f7aefbc2.css">
-<script src="/assets/js/runtime~main.3d12801b.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.f319455d.js" defer="defer"></script>
 <script src="/assets/js/main.b29c2d01.js" defer="defer"></script>
 </head>
 <body>
@@ -108,6 +108,17 @@ card appears only for a Promise whose workflow writes HealthRecords.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="resource-manage">Resource Manage<a href="#resource-manage" class="hash-link" aria-label="Direct link to Resource Manage" title="Direct link to Resource Manage" translate="no">​</a></h3>
 <p>The Resource <strong>Manage</strong> tab loads the current instance data before presenting
 update and delete controls.</p>
+<p>Every resource has a Manage tab by default, including resources that were not
+requested through Backstage. To keep the Manage tab only for resources requested
+through Backstage, add this to <code>app-config.yaml</code>:</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token key atrule" style="color:#00a4db">ske</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token key atrule" style="color:#00a4db">manageTab</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token key atrule" style="color:#00a4db">hideForUnmanaged</span><span class="token punctuation" style="color:#393A34">:</span><span class="token plain"> </span><span class="token boolean important" style="color:#36acaa">true</span><br></div></code></pre></div></div>
+<p>With this setting on, a resource annotated with <code>kratix.io/managed-by: unmanaged</code>
+has no Manage tab, so it can&#x27;t be updated or deleted from Backstage. Its Status
+tab shows the message &quot;This resource is not managed through Backstage.&quot; Resources
+with any other value, or no annotation, keep the Manage tab.</p>
+<p>The <code>ske-portal-adapter</code> sets <code>kratix.io/managed-by: unmanaged</code> on every resource
+that was not requested through a Backstage Template, such as resources created
+with <code>kubectl</code> or by a compound Promise.</p>
 <div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>Without <code>kratix.io/backstage-promise-template</code>, the update area shows a missing
 annotation message. Direct deletion remains available.</p></div></div>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="update-a-resource">Update a Resource<a href="#update-a-resource" class="hash-link" aria-label="Direct link to Update a Resource" title="Direct link to Update a Resource" translate="no">​</a></h4>
@@ -170,7 +181,7 @@ invalid value prevents the details card from rendering.</p></div></div>
 catalog entity and what to display on its Status tab. They can also link the
 Manage tab to a Software Template for updates. The following table shows the
 list of annotations we can have:</p>
-<table><thead><tr><th>Annotation</th><th>Required</th><th>Meaning</th></tr></thead><tbody><tr><td><code>kratix.io/type</code></td><td>No</td><td>Selects Resource rendering.</td></tr><tr><td><code>kratix.io/group</code></td><td>Yes</td><td>API group used to find the Resource.</td></tr><tr><td><code>kratix.io/version</code></td><td>Yes</td><td>API version used to find the Resource.</td></tr><tr><td><code>kratix.io/kind</code></td><td>Yes</td><td>Kind used to find the Resource.</td></tr><tr><td><code>kratix.io/name</code></td><td>Yes</td><td>Resource name.</td></tr><tr><td><code>kratix.io/namespace</code></td><td>Yes</td><td>Resource namespace.</td></tr><tr><td><code>kratix.io/promise-name</code></td><td>No</td><td>Promise name displayed by the plugin.</td></tr><tr><td><code>kratix.io/status</code></td><td>No</td><td>Fallback status as JSON.</td></tr><tr><td><code>kratix.io/promise-summary</code></td><td>No</td><td>Markdown summary for Overview.</td></tr><tr><td><code>kratix.io/backstage-promise-template</code></td><td>For updates</td><td>Template name.</td></tr></tbody></table>
+<table><thead><tr><th>Annotation</th><th>Required</th><th>Meaning</th></tr></thead><tbody><tr><td><code>kratix.io/type</code></td><td>No</td><td>Selects Resource rendering.</td></tr><tr><td><code>kratix.io/group</code></td><td>Yes</td><td>API group used to find the Resource.</td></tr><tr><td><code>kratix.io/version</code></td><td>Yes</td><td>API version used to find the Resource.</td></tr><tr><td><code>kratix.io/kind</code></td><td>Yes</td><td>Kind used to find the Resource.</td></tr><tr><td><code>kratix.io/name</code></td><td>Yes</td><td>Resource name.</td></tr><tr><td><code>kratix.io/namespace</code></td><td>Yes</td><td>Resource namespace.</td></tr><tr><td><code>kratix.io/promise-name</code></td><td>No</td><td>Promise name displayed by the plugin.</td></tr><tr><td><code>kratix.io/status</code></td><td>No</td><td>Fallback status as JSON.</td></tr><tr><td><code>kratix.io/promise-summary</code></td><td>No</td><td>Markdown summary for Overview.</td></tr><tr><td><code>kratix.io/backstage-promise-template</code></td><td>For updates</td><td>Template name.</td></tr><tr><td><code>kratix.io/managed-by</code></td><td>No</td><td><code>unmanaged</code> hides the Manage tab when <code>ske.manageTab.hideForUnmanaged</code> is on.</td></tr></tbody></table>
 <p>When <code>kratix.io/type</code> is absent, use <code>spec.type: kratix-resource</code>. Status
 returned by the backend takes precedence over <code>kratix.io/status</code>. The Software
 Template is resolved in the <code>default</code> namespace.</p>
