@@ -219,6 +219,12 @@ Before you list a ServiceAccount, set up your
 annotation, and add it to the requests already in Git. Otherwise SKE rejects
 them.
 
+If your GitOps tool also applies the sub-requests of a
+[Compound Promise](/main/reference/promises/compound), those need the
+annotation too. In the Compound Promise's pipeline, copy the
+`kratix.io/last-change*` annotations from the parent request onto each
+sub-request it writes.
+
 A rejected request fails with an error that says which request needs the
 annotation:
 
