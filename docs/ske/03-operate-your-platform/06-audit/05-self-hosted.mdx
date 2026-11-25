@@ -1,0 +1,588 @@
+---
+title: Audit log on self-hosted Kubernetes
+description: Turn on the Kubernetes audit log on your own API server, keep it in a log system such as Loki, count the users of your platform, and build a Grafana dashboard
+keywords: [audit, audit log, self-hosted, kubeadm, audit policy, loki, logql, grafana, unique users]
+slug: "/ske/operations/audit/self-hosted"
+sidebar_label: "Self-hosted Kubernetes"
+sidebar_position: 6
+---
+
+On a self-hosted cluster, you need to turn on the Kubernetes audit log
+yourself, and configure where it is saved. This page shows how to change the
+API server configuration to write the audit log, and how to count the users of
+your platform from the audit log file, and from
+[Loki](https://grafana.com/docs/loki/latest/) and Grafana. If you keep your
+logs in another log system, the audit events are the same, and only the
+queries change.
+
+Each create, update and delete of a resource request carries the
+[audit annotation](/ske/operations/audit/requester#audit-log)
+`attribution.platform.syntasso.io/last-changed-by`, set to the user who made
+the change.
+
+## Turning on the audit log
+
+The API server writes the audit log when you give it an audit policy and a
+log path. See
+[Auditing](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/)
+in the Kubernetes documentation.
+
+SKE adds the audit annotation to each create, update and delete of a resource
+request, and the `Metadata` level is enough to record it:
+
+```yaml title="audit-policy.yaml"
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+  - RequestReceived
+rules:
+  - level: Metadata
+    verbs: ["create", "update", "patch", "delete"]
+```
+
+The audit annotation is only on the later stages of each request, so leaving
+out the `RequestReceived` stage drops events that never name a user.
+
+To turn the audit log on, start the API server with these flags:
+
+```bash
+--audit-policy-file=/etc/kubernetes/audit-policy.yaml
+--audit-log-path=/var/log/kubernetes/audit/audit.log
+--audit-log-maxage=7
+--audit-log-maxbackup=10
+--audit-log-maxsize=100
+```
+
+If the API server runs as a static Pod, for example on a cluster created with
+kubeadm, also mount the policy file and the log directory into the Pod. See
+[Log backend](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend)
+for an example.
+
+## Finding the logs
+
+The API server writes each audit event as one line of JSON to the
+`--audit-log-path` file on each control plane node. The user is in
+`annotations["attribution.platform.syntasso.io/last-changed-by"]`.
+
+You can count users from the file itself, or send the file to your log system
+with the log shipper you already run, for example to Loki if you use Grafana.
+
+The example Loki queries on this page select the audit log with
+`{job="kube-apiserver-audit"}`. Change the selector to match the labels your
+log shipper sets.
+
+## Setting log retention {#retention}
+
+You can only see activity and count your platform users while their events are
+still in the audit log file or in your log system. To count the users who used
+your platform over the last year, you need to keep a year of logs.
+
+The API server rotates its own file with `--audit-log-maxage`,
+`--audit-log-maxbackup` and `--audit-log-maxsize`. If you count users from the
+file, these flags set how far back you can count. If you send the file to
+Loki, the file only needs to last until your log shipper reads it.
+
+If you use Loki, configure its retention, for example with these settings:
+
+```yaml
+compactor:
+  retention_enabled: true
+  delete_request_store: <OBJECT_STORE>
+limits_config:
+  retention_period: 8760h
+  max_query_length: 8761h
+```
+
+- `retention_period` is how long Loki keeps logs. Loki only deletes logs when
+  `retention_enabled` is `true`, and it then needs `delete_request_store` set
+  to the object store it uses, such as `s3` or `gcs`. See
+  [Log retention](https://grafana.com/docs/loki/latest/operations/storage/retention/)
+  in the Loki documentation.
+- `max_query_length` is the longest time range one query can cover. It is 30
+  days and 1 hour by default, so a count over a longer range fails until you
+  raise it.
+
+Loki stores every log it keeps, so a longer retention costs more storage.
+
+## Counting platform users {#unique-users}
+
+With the audit log turned on, you can count platform users from the audit log
+file or from your log system. This page uses Loki as the example log system,
+because it is a common choice for logs that you view in Grafana.
+
+### From the audit log file
+
+On a control plane node, run this to count the users since `<START_DATE>`,
+for example `2026-11-01`. It reads the current file and the rotated ones, and
+needs [jq](https://jqlang.org/):
+
+```shell-session {10}
+user@control-plane:~$ sudo cat /var/log/kubernetes/audit/audit*.log \
+  | jq -r --arg key attribution.platform.syntasso.io/last-changed-by '
+      select(.annotations[$key] != null
+        and .stage == "ResponseComplete"
+        and .responseStatus.code < 400
+        and (.requestURI | contains("dryRun") | not)
+        and .requestReceivedTimestamp >= "<START_DATE>")
+      | .annotations[$key]' \
+  | sort -u | wc -l
+4
+```
+
+This `select` keeps the changes to resource requests that succeeded. It drops
+the changes Kubernetes rejected and any dry runs, such as the ones
+`kubectl diff` sends, which also carry the audit annotation.
+
+Each control plane node writes its own file. On a cluster with more than one
+control plane node, copy the files from all of them and run the command on
+all the files together, or the count misses users who only reached another
+node.
+
+#### Other useful audit log file commands
+
+How many changes each user made:
+
+```shell-session {10-13}
+user@control-plane:~$ sudo cat /var/log/kubernetes/audit/audit*.log \
+  | jq -r --arg key attribution.platform.syntasso.io/last-changed-by '
+      select(.annotations[$key] != null
+        and .stage == "ResponseComplete"
+        and .responseStatus.code < 400
+        and (.requestURI | contains("dryRun") | not)
+        and .requestReceivedTimestamp >= "<START_DATE>")
+      | .annotations[$key]' \
+  | sort | uniq -c | sort -rn
+      3 alice@example.com
+      2 bob@example.com
+      1 kubernetes-admin
+      1 carol@example.com
+```
+
+Who created, updated and deleted a request:
+
+```shell-session {12-13}
+user@control-plane:~$ sudo cat /var/log/kubernetes/audit/audit*.log \
+  | jq -r --arg key attribution.platform.syntasso.io/last-changed-by '
+      select(.annotations[$key] != null
+        and .stage == "ResponseComplete"
+        and .responseStatus.code < 400
+        and (.requestURI | contains("dryRun") | not)
+        and .objectRef.namespace == "<NAMESPACE>"
+        and .objectRef.name == "<REQUEST_NAME>")
+      | [.requestReceivedTimestamp, .annotations[$key],
+         .verb, .objectRef.resource] | @tsv' \
+  | sort -r
+2026-11-17T09:04:37.366545Z     alice@example.com       patch   redis
+2026-11-17T09:04:31.770364Z     alice@example.com       create  redis
+```
+
+### Using Grafana Explore
+
+Loki has no interface of its own, so you run Loki queries in Grafana,
+through its
+[Loki data source](https://grafana.com/docs/grafana/latest/datasources/loki/).
+
+1. In Grafana, open **Explore** and choose your Loki data source.
+1. Choose the time range to count over.
+1. Select the query name **A**, and rename it to `users`. Grafana names the
+   result column after the query, as `Value #users`.
+1. Set the query type to **Instant**, and run this query:
+
+```
+count(sum by (user) (count_over_time(
+  {job="kube-apiserver-audit"}
+    | json
+      user="annotations[\"attribution.platform.syntasso.io/last-changed-by\"]",
+      stage="stage",
+      code="responseStatus.code",
+      uri="requestURI"
+    | user != "" and stage = "ResponseComplete"
+      and code < 400 and uri !~ ".*dryRun.*"
+  [$__range]
+)))
+```
+
+The `json` step reads the user and the fields the filter needs from each
+event. The filter keeps the changes to resource requests that succeeded. It
+drops the changes Kubernetes rejected and any dry runs, such as the ones
+`kubectl diff` sends, which also carry the audit annotation.
+
+import UniqueUsers from "./self-hosted-grafana-explore-unique-users.png"
+import UniqueUsersDark from "./self-hosted-grafana-explore-unique-users-dark.png"
+
+<figure className="diagram">
+  <img className="large light-only" src={UniqueUsers} alt="The unique users query in Grafana Explore, returning 4 users" />
+  <img className="large dark-only" src={UniqueUsersDark} alt="The unique users query in Grafana Explore, returning 4 users" />
+
+  <figcaption>Counting platform users in Grafana Explore</figcaption>
+</figure>
+
+#### Other useful Loki queries
+
+How many changes each user made, as an **Instant** query named `changes`:
+
+```
+sum by (user) (count_over_time(
+  {job="kube-apiserver-audit"}
+    | json
+      user="annotations[\"attribution.platform.syntasso.io/last-changed-by\"]",
+      stage="stage",
+      code="responseStatus.code",
+      uri="requestURI"
+    | user != "" and stage = "ResponseComplete"
+      and code < 400 and uri !~ ".*dryRun.*"
+  [$__range]
+))
+```
+
+import ChangesPerUser from "./self-hosted-grafana-explore-changes-per-user.png"
+import ChangesPerUserDark from "./self-hosted-grafana-explore-changes-per-user-dark.png"
+
+<figure className="diagram">
+  <img className="large light-only" src={ChangesPerUser} alt="The changes per user query in Grafana Explore, returning one row for each user" />
+  <img className="large dark-only" src={ChangesPerUserDark} alt="The changes per user query in Grafana Explore, returning one row for each user" />
+
+  <figcaption>Changes per user in Grafana Explore</figcaption>
+</figure>
+
+Who created, updated and deleted a request, as a **Range** query. In the
+**Logs** results, select **Table**, then select the `user`, `verb` and `type`
+fields to show them as columns:
+
+```
+{job="kube-apiserver-audit"}
+  | json
+      user="annotations[\"attribution.platform.syntasso.io/last-changed-by\"]",
+      stage="stage",
+      code="responseStatus.code",
+      uri="requestURI",
+      verb="verb",
+      type="objectRef.resource",
+      namespace="objectRef.namespace",
+      name="objectRef.name"
+  | user != "" and stage = "ResponseComplete"
+    and code < 400 and uri !~ ".*dryRun.*"
+  | namespace = "<NAMESPACE>" and name = "<REQUEST_NAME>"
+```
+
+import RequestHistory from "./self-hosted-grafana-explore-request-history.png"
+import RequestHistoryDark from "./self-hosted-grafana-explore-request-history-dark.png"
+
+<figure className="diagram">
+  <img className="large light-only" src={RequestHistory} alt="The request history query in Grafana Explore, listing the create and patch of my-cache by alice@example.com" />
+  <img className="large dark-only" src={RequestHistoryDark} alt="The request history query in Grafana Explore, listing the create and patch of my-cache by alice@example.com" />
+
+  <figcaption>Who created and changed a request in Grafana Explore</figcaption>
+</figure>
+
+`verb` is the Kubernetes API verb, which depends on how the tool sends the
+change. Most tools, such as `kubectl apply`, `kubectl edit`, Flux and Argo CD,
+send changes to an existing request as `patch`. Tools that send the whole
+request, such as `kubectl replace`, show as `update`.
+
+## Grafana
+
+The dashboard below shows the number of unique users, the number of changes,
+the changes each user made, and the most recent changes. To set it up:
+
+1. Copy the dashboard below. If your log shipper sets other labels, change the
+   `{job="kube-apiserver-audit"}` selector in each query to match them.
+1. Import it and choose your Loki data source.
+
+Each query counts over the dashboard's time range, with `$__range`.
+
+import Dashboard from "./self-hosted-grafana-dashboard.png"
+import DashboardDark from "./self-hosted-grafana-dashboard-dark.png"
+
+<figure className="diagram">
+  <img className="large light-only" src={Dashboard} alt="The SKE platform audit dashboard in Grafana, with 4 unique users, 7 changes, the changes per user, and the recent changes" />
+  <img className="large dark-only" src={DashboardDark} alt="The SKE platform audit dashboard in Grafana, with 4 unique users, 7 changes, the changes per user, and the recent changes" />
+
+  <figcaption>The SKE platform audit dashboard on Loki</figcaption>
+</figure>
+
+<details>
+<summary>Dashboard JSON</summary>
+
+```json
+{
+  "__inputs": [
+    {
+      "name": "DS_LOKI",
+      "label": "Loki",
+      "type": "datasource",
+      "pluginId": "loki",
+      "pluginName": "Loki"
+    }
+  ],
+  "title": "SKE platform audit",
+  "uid": "ske-platform-audit",
+  "tags": [
+    "ske",
+    "audit"
+  ],
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Unique users",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "count(sum by (user) (count_over_time({job=\"kube-apiserver-audit\"}\n  | json user=\"annotations[\\\"attribution.platform.syntasso.io/last-changed-by\\\"]\", stage=\"stage\", code=\"responseStatus.code\", uri=\"requestURI\"\n  | user != \"\" and stage = \"ResponseComplete\" and code < 400 and uri !~ \".*dryRun.*\" [$__range])))",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Changes to resource requests",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "sum(count_over_time({job=\"kube-apiserver-audit\"}\n  | json user=\"annotations[\\\"attribution.platform.syntasso.io/last-changed-by\\\"]\", stage=\"stage\", code=\"responseStatus.code\", uri=\"requestURI\"\n  | user != \"\" and stage = \"ResponseComplete\" and code < 400 and uri !~ \".*dryRun.*\" [$__range]))",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Average changes per user",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "avg(sum by (user) (count_over_time({job=\"kube-apiserver-audit\"}\n  | json user=\"annotations[\\\"attribution.platform.syntasso.io/last-changed-by\\\"]\", stage=\"stage\", code=\"responseStatus.code\", uri=\"requestURI\"\n  | user != \"\" and stage = \"ResponseComplete\" and code < 400 and uri !~ \".*dryRun.*\" [$__range])))",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Changes per user",
+      "type": "table",
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "sum by (user) (count_over_time({job=\"kube-apiserver-audit\"}\n  | json user=\"annotations[\\\"attribution.platform.syntasso.io/last-changed-by\\\"]\", stage=\"stage\", code=\"responseStatus.code\", uri=\"requestURI\"\n  | user != \"\" and stage = \"ResponseComplete\" and code < 400 and uri !~ \".*dryRun.*\" [$__range]))",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "changes",
+            "desc": true
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "user",
+                "Value #A"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "changes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Recent changes",
+      "type": "table",
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "{job=\"kube-apiserver-audit\"}\n  | json user=\"annotations[\\\"attribution.platform.syntasso.io/last-changed-by\\\"]\", stage=\"stage\", code=\"responseStatus.code\", uri=\"requestURI\", verb=\"verb\", type=\"objectRef.resource\", namespace=\"objectRef.namespace\", name=\"objectRef.name\"\n  | user != \"\" and stage = \"ResponseComplete\" and code < 400 and uri !~ \".*dryRun.*\"",
+          "queryType": "range",
+          "maxLines": 100
+        }
+      ],
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "Time",
+            "desc": true
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Time",
+                "user",
+                "verb",
+                "type",
+                "namespace",
+                "name"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Time": 0,
+              "user": 1,
+              "verb": 2,
+              "type": 3,
+              "namespace": 4,
+              "name": 5
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+## Known limitations
+
+- **Counts only go back as far as your [retention](#retention)**, and as far
+  as `max_query_length` allows.
+- **The recorded user is only as specific as the way users log in.** If users
+  share one credential, such as the `kubernetes-admin` certificate that
+  kubeadm creates, the audit log records the same user for all of them. Run
+  `kubectl auth whoami -o yaml` to see which fields your cluster gives you,
+  and set [`userInfoField`](/ske/operations/audit/requester#user-info-field)
+  to a field that is different for each user.
+- **Some changes have no user.** For example, deletes through GitOps. See
+  [What is not recorded](/ske/operations/audit/requester#what-is-not-recorded).
+
+## Related material
+
+- [Audit your platform](/ske/operations/audit)
