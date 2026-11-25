@@ -20,6 +20,14 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### v0.13
+
+Latest version: [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.13.0/) (2026-11-25), released via the SKE Operator Helm Chart [version 0.123.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.123.0/)
+
+#### Bug Fixes
+
+* Fixed the portal controller deleting a resource request's own Works when its Promise moved to another portal type or lost its portal label. Kratix then removed what those Works delivered, such as an app's deployment and DNS record, while the request stayed. The controller now deletes only its own portal sync Works.
+
 ### v0.12
 
 Latest version: [v0.12.3](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.12.3/) (2026-11-25), released via the SKE Operator Helm Chart [version 0.122.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.122.0/)
