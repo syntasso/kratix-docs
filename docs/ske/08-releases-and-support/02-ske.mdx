@@ -21,6 +21,38 @@ Check the release notes below for information on each available version.
 
 ## Release Notes
 
+### [v0.65.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.65.0/) (2026-11-25)
+
+Kratix changes: [7efee4a...25bf8c5](https://github.com/syntasso/kratix/compare/7efee4a5a80e5783a90d8090547d5bc8204801a2...25bf8c541709f2bc0e6c2fede2ebdbca43204e5b)
+
+#### Features
+
+* A `GitStateStore` can now deliver changes as pull requests on GitHub, Azure DevOps and GitLab
+  instead of pushing to its branch. For more information, see the
+  [Set up pull request delivery](/ske/operations/pull-request-delivery) documentation.
+* Resource requests now record who last created or updated them, in the `kratix.io/last-changed-by`,
+  `kratix.io/last-change-action` and `kratix.io/last-changed-via` annotations. For more information,
+  see the [Recording who changed a request](/ske/operations/audit/requester) documentation.
+* Every create, update and delete of a resource request now adds the
+  `attribution.platform.syntasso.io/last-changed-by` annotation to the Kubernetes audit log. For more
+  information, see the [Audit your platform](/ske/operations/audit) documentation.
+* A `DryRun` can now run against a specific Promise version, and a Promise can say whether it
+  supports dry runs. For more information, see the [Dry Run](/main/reference/dry-run) documentation.
+
+#### Fixes
+
+* A pipeline that pauses itself to retry later is now always retried. Before, if Kratix updated the
+  request at the same moment, the pipeline could run twice or never be retried.
+
+#### Security Fixes
+
+* Updated Go to 1.27.4 to fix GO-2026-6859 (CVE-2026-97054).
+* Updated to include latest security updates.
+
+#### Maintenance
+
+* Base image updates and package maintenance.
+
 ### [v0.64.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.64.0/) (2026-11-16)
 
 Kratix changes: [b8f0665...7efee4a](https://github.com/syntasso/kratix/compare/b8f0665fa413e7c178b6419850320720e122aefa...7efee4a5a80e5783a90d8090547d5bc8204801a2)
@@ -49,8 +81,7 @@ Kratix changes: [b8f0665...7efee4a](https://github.com/syntasso/kratix/compare/b
 
 * This release is built with Go 1.27.3, so image scanners report GO-2026-6859 (CVE-2026-97054)
   in the Go standard library's `net/http`. We have checked SKE's code paths and the vulnerability
-  cannot be exploited in SKE. The fix, Go 1.27.4, will be in the next release - v0.65.0 - which is soak testing. To consume this change early, you can install the release candidate
-  [v0.65.0-rc1](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske/v0.65.0-rc1/).
+  cannot be exploited in SKE. The fix, Go 1.27.4, is in [v0.65.0](#v0650-2026-11-25).
 
 #### Maintenance
 
