@@ -36,6 +36,8 @@ spec:
   workflows:
     config:
       reconciliationInterval: 30m # Optional. How often workflows re-run.
+      dryRun:
+        supported: true # Optional. Whether the Resource workflows are safe to dry run.
     resource:
       configure:
         - # Pipeline definitions (multiple)
@@ -71,6 +73,13 @@ are rejected. It applies to the Promise's own workflow and to every Resource req
 When unset, Kratix falls back to the platform-wide interval, then to the 10h default.
 
 The interval is read from the [Promise Revision](/main/reference/promises/promise-upgrade/promise-revisions) associated with the Promise. To override it on an existing revision, see [Overriding the reconciliation interval](/main/reference/promises/promise-upgrade/promise-revisions#overriding-the-reconciliation-interval).
+
+## Dry run support
+
+`spec.workflows.config.dryRun.supported` declares that the Promise's Resource
+workflows check `KRATIX_DRY_RUN` and make no external changes during a
+[Dry Run](/main/reference/dry-run). It defaults to `false`, and Kratix rejects a
+Dry Run against a Promise version that does not set it.
 
 ## Pipelines
 
