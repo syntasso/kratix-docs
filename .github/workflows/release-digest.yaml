@@ -16,11 +16,11 @@ on:
     paths:
       - docs/ske/08-releases-and-support/**
       - scripts/release-digest/**
-      - .github/workflows/release-digest.yml
+      - .github/workflows/release-digest.yaml
   pull_request:
     paths:
       - scripts/release-digest/**
-      - .github/workflows/release-digest.yml
+      - .github/workflows/release-digest.yaml
   workflow_dispatch:
     inputs:
       create_draft:

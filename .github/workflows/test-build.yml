@@ -6,7 +6,7 @@ on:
     # these files does not need a site build.
     paths-ignore:
       - scripts/release-digest/**
-      - .github/workflows/release-digest.yml
+      - .github/workflows/release-digest.yaml
   workflow_dispatch:
 
 jobs:
