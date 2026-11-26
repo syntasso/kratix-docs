@@ -72,6 +72,26 @@
     {
       "id": "ske-health-agent@0.16.7",
       "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-portal-controller@0.14.0",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-operator@0.37.2",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-portal-controller@0.13.0",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske@0.65.0",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-health-agent@0.16.9",
+      "digestEmailId": "513752550591"
     }
   ],
   "digests": {
@@ -83,8 +103,8 @@
     "513752550591": {
       "slackChannel": "C04BZJ7DB09",
       "slackMessageTs": "1794498363.389299",
-      "slackScheduledMessageId": "Q0CMBSE7C4U",
-      "holdEndsAt": "2026-11-26T16:21:15Z"
+      "slackScheduledMessageId": "Q0CLTFPKGSK",
+      "holdEndsAt": "2026-11-27T10:51:35Z"
     }
   }
 }
