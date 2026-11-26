@@ -219,6 +219,20 @@ slug: "/ske/releases/portal-patch"
 		Expect(session.Err).To(gbytes.Say(`Slack: email 7 is SCHEDULED, so its hold-end ping is cancelled`))
 	})
 
+	It("cancels the ping and marks the message of a deleted digest that no release refers to any more", func() {
+		// Email 7 is not in emails, so HubSpot answers 404: it has been deleted.
+		session := run(`{"goLive": "2026-11-09", "releases": [],
+			"digests": {"7": {"slackChannel": "C0123", "slackMessageTs": "111.222",
+				"slackScheduledMessageId": "Q-old", "holdEndsAt": "2026-11-10T13:00:00Z"}}}`)
+
+		Expect(methods()[:2]).To(Equal([]string{"chat.deleteScheduledMessage", "chat.update"}))
+		Expect(slackCalls[0].Body["scheduled_message_id"]).To(Equal("Q-old"))
+		Expect(slackCalls[1].Body["ts"]).To(Equal("111.222"))
+		Expect(slackCalls[1].Body["text"]).To(ContainSubstring("deleted"))
+		Expect(saved().Digests["7"].SlackScheduledMessageID).To(BeEmpty())
+		Expect(session.Err).To(gbytes.Say(`Slack: email 7 is deleted, so its hold-end ping is cancelled`))
+	})
+
 	It("carries on when the old ping cannot be cancelled, and says so", func() {
 		emails["7"] = `{"id": "7", "state": "DRAFT"}`
 		slackErrors["chat.deleteScheduledMessage"] = "invalid_scheduled_message_id"
