@@ -1,4 +1,90 @@
 {
   "goLive": "2026-11-09",
-  "releases": []
+  "releases": [
+    {
+      "id": "ske-portal-controller@0.10.3",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "backstage@ske-backend-0.26.0+ske-frontend-0.23.1",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "portal-patch@0.8.6",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-health-agent@0.16.6",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "tfstate-finder@0.13.5",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-portal-controller@0.12.3",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "backstage@ske-backend-0.27.1+ske-frontend-0.25.0",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-operator@0.37.1",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "portal-patch@0.8.8",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-mcp-server@0.2.9",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-health-agent@0.16.8",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "tfstate-finder@0.13.6",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-portal-controller@0.11.1",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-portal-controller@0.10.8",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske@0.64.0",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-operator@0.37.0",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "portal-patch@0.8.7",
+      "digestEmailId": "513752550591"
+    },
+    {
+      "id": "ske-health-agent@0.16.7",
+      "digestEmailId": "513752550591"
+    }
+  ],
+  "digests": {
+    "511980281018": {
+      "slackChannel": "C04BZJ7DB09",
+      "slackMessageTs": "1794330396.622159",
+      "holdEndsAt": "2026-11-11T11:30:00Z"
+    },
+    "513752550591": {
+      "slackChannel": "C04BZJ7DB09",
+      "slackMessageTs": "1794498363.389299",
+      "slackScheduledMessageId": "Q0CMBSE7C4U",
+      "holdEndsAt": "2026-11-26T16:21:15Z"
+    }
+  }
 }
