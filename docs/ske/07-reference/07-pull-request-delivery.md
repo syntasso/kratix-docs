@@ -94,14 +94,7 @@ as `spec.url`.
 - **Removing the `delivery` block** makes SKE write every request straight to
   the Destination's branch again, including requests waiting for approval or
   rejected. A rejected removal stays rejected (see [Deleting](#deleting)). SKE
-  does not close the pull requests that were open. You must close them yourself,
-  because merging one later writes files that may no longer match the request.
-  SKE records a `DeliveryModeChanged` warning event that links each earlier pull
-  request. To find the ones still open, list them:
-
-  ```bash
-  kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
-  ```
+  does not close the pull requests that were open. You must close them yourself.
 
 ## Status
 
