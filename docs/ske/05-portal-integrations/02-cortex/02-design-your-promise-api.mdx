@@ -1,0 +1,131 @@
+---
+title: Designing your Promise API for Cortex
+description: How the schema in a Promise's API becomes the fields, defaults and checks of its Cortex workflows
+keywords: [portal, cortex, workflow, form, schema, validation, ske]
+slug: "/ske/integrations/portal-controller/cortex/design-your-promise-api"
+sidebar_label: "Design your Promise API for Cortex"
+sidebar_position: 3
+---
+
+The Portal Controller turns the `spec` of your Promise's API into the form of the generated
+Create and Update workflows. What you write in the CRD decides which fields the form shows, what
+they are pre-filled with, which ones are required or locked, and which values are rejected
+before anything is committed to Git.
+
+Edit the schema in your Promise and apply it. The controller regenerates the workflows.
+
+The platform still validates every request when it is applied. The form catches mistakes
+earlier, but it does not replace that check.
+
+## Name and namespace
+
+Every Create workflow asks for a name and a namespace, both required. They become the resource
+request's `metadata.name` and `metadata.namespace`, so on submit the form checks that each one:
+
+- uses only lowercase letters, numbers and hyphens, and starts and ends with a letter or number
+- is 63 characters or fewer
+
+The rule is shown under both fields. On the Update workflow both are filled in from the entity
+and cannot be changed.
+
+To change their labels and descriptions, or to fix the namespace and hide its field, see the
+[Cortex overview](/ske/integrations/portal-controller/cortex/intro#fixing-the-namespace).
+
+## Fields
+
+Each property in `spec` becomes one form field, labelled with the property name. Its
+`description` is shown under the field.
+
+| CRD type | Form field |
+| --- | --- |
+| `string` | Text input |
+| `string` with `enum` | Dropdown of the listed values |
+| `integer` | Number input, whole numbers only |
+| `number` | Number input, decimals allowed |
+| `boolean` | Toggle |
+| `object` with `properties` | A nested form with its own fields |
+| `array` of strings, integers, numbers, booleans or objects | A list the requester adds items to |
+| `x-kubernetes-int-or-string` | Text input |
+
+Any other type, or a property with no `type` (for example one using `anyOf`), stops the
+workflows from being generated. The error names the field.
+
+## Required fields
+
+List the property in `required` on the object that holds it. Cortex will not submit the form
+until the field has a value.
+
+```yaml
+spec:
+  type: object
+  required:
+    - size
+  properties:
+    size:
+      type: string
+```
+
+A required `object` must be filled in once. An optional one can be left out.
+
+## Default values
+
+`default` pre-fills the field on the Create workflow. For an `enum`, it selects that option.
+
+```yaml
+size:
+  type: string
+  description: How much CPU and memory the database gets.
+  enum: [small, medium, large]
+  default: small
+```
+
+On the Update workflow, every field is pre-filled with the request's current value instead.
+
+## Immutable fields
+
+Lock a field with a CEL validation rule:
+
+```yaml
+region:
+  type: string
+  x-kubernetes-validations:
+    - rule: self == oldSelf
+      message: region cannot be changed
+```
+
+The field can be set on create and is read-only on update. Only `self == oldSelf` (or
+`oldSelf == self`) is recognised. Other rules, such as the `optionalOldSelf` forms, leave the field
+editable, and the platform rejects the change when it is applied.
+
+## Validation
+
+Cortex checks these itself:
+
+| CRD schema | Check |
+| --- | --- |
+| `required` | The field must have a value |
+| `enum` | Only the listed values can be picked |
+| `pattern` | Strings must match. Cortex shows the pattern itself in the message |
+| `minimum`, `maximum` | Numbers must be in range |
+| `minItems`, `maxItems` | Lists of strings, numbers or booleans must have that many items |
+
+The workflows also check these when the form is submitted, and show the message under the field:
+
+| CRD schema | Applies to | Message |
+| --- | --- | --- |
+| `minLength` | Top-level `spec` string fields | `must be at least <N> characters` |
+| `maxLength` | Top-level `spec` string fields | `must be <N> characters or fewer` |
+
+An optional field left empty is not checked, so it can stay blank even if it has a `minLength`.
+
+Anything else, such as a length rule inside a nested object or a CEL rule, is not checked by the
+form. A value that breaks it is committed to Git and then rejected by the platform. See
+[Troubleshooting](/ske/integrations/portal-controller/cortex/send-resource-requests#troubleshooting)
+on the Send resource requests page.
+
+## Next steps
+
+- [Send resource requests](/ske/integrations/portal-controller/cortex/send-resource-requests)
+  to configure Git delivery and try the workflows.
+- [Customise entities and workflows](/ske/integrations/portal-controller/cortex/cortex-examples)
+  for changes the API cannot express, such as field order or workflow names.
