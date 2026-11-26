@@ -1,12 +1,43 @@
 {
   "goLive": "2026-11-25",
-  "releases": [],
+  "releases": [
+    {
+      "id": "ske-portal-controller@0.14.0",
+      "digestEmailId": "525300101327"
+    },
+    {
+      "id": "ske-operator@0.37.2",
+      "digestEmailId": "525300101327"
+    },
+    {
+      "id": "ske-portal-controller@0.13.0",
+      "digestEmailId": "525300101327"
+    },
+    {
+      "id": "ske-portal-controller@0.12.3",
+      "digestEmailId": "525300101327"
+    },
+    {
+      "id": "ske@0.65.0",
+      "digestEmailId": "525300101327"
+    },
+    {
+      "id": "ske-health-agent@0.16.9",
+      "digestEmailId": "525300101327"
+    }
+  ],
   "digests": {
     "513752550591": {
       "slackChannel": "C04BZJ7DB09",
       "slackMessageTs": "1794498363.389299",
       "slackScheduledMessageId": "Q0CLTFPKGSK",
       "holdEndsAt": "2026-11-27T10:51:35Z"
+    },
+    "525300101327": {
+      "slackChannel": "C04BZJ7DB09",
+      "slackMessageTs": "1795710948.783269",
+      "slackScheduledMessageId": "Q0CM77ZSUT0",
+      "holdEndsAt": "2026-11-27T11:30:00Z"
     }
   }
 }
