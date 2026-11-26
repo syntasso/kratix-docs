@@ -18,9 +18,14 @@ const DefaultBaseURL = "https://api.hubapi.com"
 // bodyBlock is the layout's rich-text block that holds the digest HTML.
 const bodyBlock = "module-0-0-0"
 
-// sender is who every digest email is from. HubSpot's replyTo is the email's
-// "From address".
-var sender = map[string]any{"fromName": "SKE Releases", "replyTo": "releases@syntasso.io"}
+// sender is who every digest email is from, and where replies go. HubSpot's
+// replyTo is the email's "From address"; customReplyTo is its "Reply-to
+// address".
+var sender = map[string]any{
+	"fromName":      "SKE Releases",
+	"replyTo":       "releases@syntasso.io",
+	"customReplyTo": "releases@syntasso.io",
+}
 
 // Layout is the drag-and-drop content a digest email is built from:
 // email-layout.json in this module.
