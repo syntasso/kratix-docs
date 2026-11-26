@@ -12,11 +12,6 @@ Create and Update workflows. What you write in the CRD decides which fields the 
 they are pre-filled with, which ones are required or locked, and which values are rejected
 before anything is committed to Git.
 
-Edit the schema in your Promise and apply it. The controller regenerates the workflows.
-
-The platform still validates every request when it is applied. The form catches mistakes
-earlier, but it does not replace that check.
-
 ## Name and namespace
 
 Every Create workflow asks for a name and a namespace, both required. They become the resource
@@ -52,7 +47,7 @@ workflows from being generated. The error names the field.
 
 ## Required fields
 
-List the property in `required` on the object that holds it. Cortex will not submit the form
+List the property as `required`. Cortex will not submit the form
 until the field has a value.
 
 ```yaml
@@ -65,25 +60,27 @@ spec:
       type: string
 ```
 
-A required `object` must be filled in once. An optional one can be left out.
-
 ## Default values
 
-`default` pre-fills the field on the Create workflow. For an `enum`, it selects that option.
+`default` pre-fills the field on the Create workflow.
 
 ```yaml
+replicas:
+  type: integer
+  description: How many instances to run.
+  default: 3
 size:
   type: string
   description: How much CPU and memory the database gets.
   enum: [small, medium, large]
-  default: small
+  default: small # for an enum, the default option is selected
 ```
 
 On the Update workflow, every field is pre-filled with the request's current value instead.
 
 ## Immutable fields
 
-Lock a field with a CEL validation rule:
+Make a field immutable with a CEL validation rule:
 
 ```yaml
 region:
@@ -94,8 +91,7 @@ region:
 ```
 
 The field can be set on create and is read-only on update. Only `self == oldSelf` (or
-`oldSelf == self`) is recognised. Other rules, such as the `optionalOldSelf` forms, leave the field
-editable, and the platform rejects the change when it is applied.
+`oldSelf == self`) is recognised. Other CEL rules are not supported.
 
 ## Validation
 
