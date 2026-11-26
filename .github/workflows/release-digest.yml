@@ -6,8 +6,9 @@ name: Release digest
 # regenerates the pending one; posts or updates its Slack message and
 # schedules a ping for when the two business hour hold ends (with
 # SLACK_BOT_TOKEN and the SLACK_DIGEST_CHANNEL variable); and commits the
-# updated release record to the branch it ran on. Nothing is
-# ever published or sent.
+# updated release record to the branch it ran on, through a pull request
+# that someone merges. Until it is merged, runs that would write stop before
+# contacting HubSpot or Slack. Nothing is ever published or sent.
 
 on:
   push:
@@ -79,6 +80,11 @@ jobs:
     needs: test
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # pull-requests: read is for the check that no release record pull request
+    # is waiting to be merged.
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       has_releases: ${{ steps.plan.outputs.has_releases }}
       release_ids: ${{ steps.plan.outputs.release_ids }}
@@ -100,6 +106,21 @@ jobs:
         with:
           go-version-file: scripts/release-digest/go.mod
           cache-dependency-path: scripts/release-digest/go.sum
+      # Each writing run's record goes into a pull request that someone merges.
+      # Until it is merged, the record on this branch is out of date, so a run
+      # that would write stops here, before contacting HubSpot or Slack.
+      - name: Check no release record pull request is waiting to be merged
+        if: github.event_name == 'push' || inputs.create_draft == true
+        env:
+          BASE: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          waiting=$(gh pr list --base "$BASE" --head "release-digest/record-$BASE" --state open --json url --jq '.[].url')
+          if [ -n "$waiting" ]; then
+            echo "::error title=Release record::Merge $waiting first. It holds the release record from an earlier run, and this run would work from the out-of-date record on $BASE. Merging it starts a new run."
+            exit 1
+          fi
+          echo "No release record pull request is waiting to be merged into $BASE."
       - name: Build the release digest command
         run: go -C scripts/release-digest build -o "$RUNNER_TEMP/release-digest" ./cmd/release-digest
       - name: Plan the digest${{ (github.event_name == 'push' || inputs.create_draft == true) && ', then update the HubSpot draft and the Slack message' || ' (HubSpot and Slack are not contacted)' }}
@@ -130,13 +151,15 @@ jobs:
 
   record:
     # A plain name: GitHub does not fill in expressions in the name of a skipped job.
-    name: Commit the release record
+    name: Open a pull request for the release record
     needs: plan
     if: needs.plan.outputs.record_changed == 'true'
     runs-on: ubuntu-latest
-    # Only this job can push, and only the release record.
+    # Only this job can write, and only the release record. main only takes
+    # changes through a pull request, and someone merges it.
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Check out the latest ${{ github.ref_name }}
         uses: actions/checkout@v4
@@ -147,13 +170,16 @@ jobs:
         with:
           name: release-record
           path: scripts/release-digest
-      - name: Commit and push the release record to ${{ github.ref_name }}
+      - name: Open a pull request for the release record into ${{ github.ref_name }}
         env:
           EMAIL_ID: ${{ needs.plan.outputs.email_id }}
           DRAFT_ACTION: ${{ needs.plan.outputs.draft_action }}
-          BRANCH: ${{ github.ref_name }}
-        # A push made with GITHUB_TOKEN does not run this workflow's jobs. On a pull
-        # request branch GitHub creates a run that waits for approval, and nothing runs.
+          BASE: ${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+        # The record branch is pushed with GITHUB_TOKEN, so it does not start
+        # this workflow; the pull request gets a run that waits for approval, and
+        # nothing runs. Merging the pull request starts a run on the base branch.
         run: |
           if [ -n "$EMAIL_ID" ]; then
             echo "The plan job $DRAFT_ACTION HubSpot draft email $EMAIL_ID and changed the release record."
@@ -162,26 +188,30 @@ jobs:
             echo "The plan job changed the release record (for example, it cancelled the ping for a digest that has been sent)."
             message="chore(release-digest): update the release record"
           fi
-          echo "Committing scripts/release-digest/release-record.json to $BRANCH:"
-          echo
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add scripts/release-digest/release-record.json
           if git diff --cached --quiet; then
-            echo "The release record on $BRANCH is already up to date. Nothing to commit."
+            echo "The release record on $BASE is already up to date. Nothing to commit."
             exit 0
           fi
+          echo "Committing scripts/release-digest/release-record.json:"
+          echo
           git --no-pager diff --cached
           git commit -q -m "$message"
-          for attempt in 1 2 3; do
-            if git push -q origin "HEAD:$BRANCH"; then
-              echo
-              echo "Pushed $(git rev-parse --short HEAD) to $BRANCH."
-              echo "::notice title=Release record::Committed $(git rev-parse --short HEAD) to $BRANCH: $message"
-              exit 0
-            fi
-            echo "Push attempt $attempt was rejected because $BRANCH moved. Rebasing and trying again."
-            git pull -q --rebase origin "$BRANCH"
-          done
-          echo "Could not push the release record after 3 attempts." >&2
-          exit 1
+
+          # The plan job checked that no record pull request was open, so any
+          # branch left with this name is from a merged or closed one.
+          branch="release-digest/record-$BASE"
+          git push -q --force origin "HEAD:refs/heads/$branch"
+          echo
+          echo "Pushed $(git rev-parse --short HEAD) to $branch."
+
+          url=$(gh pr create --base "$BASE" --head "$branch" --title "$message" --body "$(cat <<BODY
+          [Run $GITHUB_RUN_ID]($RUN_URL) updated the HubSpot draft and the Slack message, and this is the release record it saved.
+
+          Merge this before anything else changes the release notes. Until it is merged, runs on $BASE that would update HubSpot or Slack stop before contacting them. Merging it starts a run that picks up any releases added in the meantime.
+          BODY
+          )")
+          echo "Opened $url."
+          echo "::warning title=Release record::Merge $url. Until it is merged, runs on $BASE that would update HubSpot or Slack stop before contacting them."
