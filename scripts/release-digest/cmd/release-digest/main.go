@@ -32,7 +32,7 @@ type options struct {
 func main() {
 	var o options
 	flag.StringVar(&o.docsDir, "docs", "docs/ske/08-releases-and-support", "directory of SKE release-notes pages")
-	flag.StringVar(&o.recordPath, "record", "scripts/release-digest/release-record.json", "release record JSON file")
+	flag.StringVar(&o.recordPath, "record", "", "release record JSON file (required; CI keeps it on the "+recordBranch+" branch)")
 	flag.BoolVar(&o.createDraft, "create-draft", false, "create the planned email as a HubSpot draft (needs HUBSPOT_ACCESS_TOKEN)")
 	flag.StringVar(&o.layoutPath, "layout", "scripts/release-digest/email-layout.json", "HubSpot email layout JSON file")
 	flag.StringVar(&o.hubspotAPI, "hubspot-api", hubspot.DefaultBaseURL, "HubSpot API base URL")
@@ -47,7 +47,14 @@ func main() {
 	}
 }
 
+// recordBranch is the branch that holds the release record. main only takes
+// changes through a pull request, so the record lives on its own branch.
+const recordBranch = "release-digest/record"
+
 func run(o options) error {
+	if o.recordPath == "" {
+		return errors.New("-record is required: the release record lives in release-record.json on the " + recordBranch + " branch")
+	}
 	var layout hubspot.Layout
 	if o.createDraft {
 		if o.token == "" {

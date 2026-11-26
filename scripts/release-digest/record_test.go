@@ -111,11 +111,13 @@ var _ = Describe("Record", func() {
 `))
 		})
 
-		It("round-trips the committed release record unchanged", func() {
-			committed, err := digest.LoadRecord("release-record.json")
+		// testdata/release-record.json is a copy of a real record, taken when the
+		// record moved to the release-digest/record branch.
+		It("round-trips a real release record unchanged", func() {
+			real, err := digest.LoadRecord("testdata/release-record.json")
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(digest.MarshalRecord(committed)).To(Equal(mustRead("release-record.json")))
+			Expect(digest.MarshalRecord(real)).To(Equal(mustRead("testdata/release-record.json")))
 		})
 	})
 })

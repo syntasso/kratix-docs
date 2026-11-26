@@ -62,6 +62,16 @@ slug: "/ske/releases/portal-patch"
 		return session
 	}
 
+	It("asks for -record, and says where the release record lives, when it is not given", func() {
+		command := exec.Command(binary, "-docs", docsDir)
+		command.Env = append(os.Environ(), "GITHUB_ACTIONS=", "GITHUB_OUTPUT="+outputPath, "GITHUB_STEP_SUMMARY="+summaryPath)
+		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+		Expect(err).NotTo(HaveOccurred())
+
+		Eventually(session).Should(gexec.Exit(1))
+		Expect(session.Err).To(gbytes.Say(`-record is required.*release-digest/record branch`))
+	})
+
 	It("writes the planned email to the step outputs and a preview to the job summary", func() {
 		run(`{"goLive": "2026-11-09", "releases": []}`)
 
