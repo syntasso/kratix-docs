@@ -3,7 +3,7 @@ title: Send resource requests from Cortex
 description: Configure Git delivery and verify Cortex create, update and delete requests on the platform
 slug: "/ske/integrations/portal-controller/cortex/send-resource-requests"
 sidebar_label: "Send resource requests to Kratix"
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 Cortex workflows commit resource request manifests to Git. A platform GitOps agent applies those manifests to the cluster where Kratix runs. Kratix then reconciles the request, publishes the resource entity and exports status back to Cortex.
@@ -59,6 +59,8 @@ In Cortex, run `Create <PROMISE_NAME> request`. Enter a name, namespace and the 
 The workflow first registers `<name> request (pending)` in Cortex, owned by the requester. It then commits the manifest to Git. Registration uses create-only behaviour: an entity with the same tag stops the workflow before it overwrites the request file.
 
 After GitOps applies the manifest, Kratix reconciles the request. The resource sync pipeline updates the entity definition and clears its pending marker. The exporter subsequently writes resource status to Cortex custom data under `status`.
+
+The form checks the values before anything is committed. What it checks comes from the Promise's API: see [Designing your Promise API for Cortex](/ske/integrations/portal-controller/cortex/design-your-promise-api).
 
 ## Update a resource request {#5-update-a-resource-request}
 

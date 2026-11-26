@@ -17,7 +17,7 @@ The journey runs in both directions:
 3. The platform GitOps agent applies the request to the cluster, and Kratix reconciles it.
 4. Resource sync publishes the entity definition; the Cortex exporter sends subsequent status updates back to Cortex.
 
-Start with [Generate entities](/ske/integrations/portal-controller/cortex/generate-entities), then [Send resource requests](/ske/integrations/portal-controller/cortex/send-resource-requests). Use [Customise entities and workflows](/ske/integrations/portal-controller/cortex/cortex-examples) to adjust the generated documents.
+Start with [Generate entities](/ske/integrations/portal-controller/cortex/generate-entities), read [Designing your Promise API for Cortex](/ske/integrations/portal-controller/cortex/design-your-promise-api) to see how your API shapes the workflows, then [Send resource requests](/ske/integrations/portal-controller/cortex/send-resource-requests). Use [Customise entities and workflows](/ske/integrations/portal-controller/cortex/cortex-examples) to adjust the generated documents.
 
 Unlike Backstage, the Portal Controller calls the Cortex API directly. A Cortex portal
 therefore needs a URL and a credential. Both portal types run a setup Job, but Cortex
@@ -197,6 +197,7 @@ group, and hold their Kubernetes identity in custom metadata.
 ## Next steps
 
 - [Generate entities](/ske/integrations/portal-controller/cortex/generate-entities) publishes a Promise and verifies the Cortex setup.
+- [Designing your Promise API for Cortex](/ske/integrations/portal-controller/cortex/design-your-promise-api) explains how the API becomes workflow fields, defaults and checks.
 - [Send resource requests](/ske/integrations/portal-controller/cortex/send-resource-requests) configures Git delivery and platform GitOps.
 - [Customise entities and workflows](/ske/integrations/portal-controller/cortex/cortex-examples) changes generated documents with Portal Patch.
 - [Migrating from the Cortex Controller](/ske/integrations/portal-controller/cortex/migrating-from-cortex) covers moving an existing

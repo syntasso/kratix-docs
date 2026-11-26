@@ -20,6 +20,14 @@ http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-port
 
 ## Release Notes
 
+### v0.14
+
+Latest version: [v0.14.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.14.0/) (2026-11-26), released via the SKE Operator Helm Chart [version 0.125.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.125.0/)
+
+#### Features
+
+* Cortex Create and Update workflows now reject values that break a Promise's `minLength` or `maxLength` on top-level `spec` string fields. The requester sees the reason under the field, and nothing is committed to Git. See [Designing your Promise API for Cortex](/ske/integrations/portal-controller/cortex/design-your-promise-api).
+
 ### v0.13
 
 Latest version: [v0.13.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.13.0/) (2026-11-25), released via the SKE Operator Helm Chart [version 0.123.0](http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.123.0/)
