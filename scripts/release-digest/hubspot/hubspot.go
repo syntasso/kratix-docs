@@ -18,6 +18,10 @@ const DefaultBaseURL = "https://api.hubapi.com"
 // bodyBlock is the layout's rich-text block that holds the digest HTML.
 const bodyBlock = "module-0-0-0"
 
+// sender is who every digest email is from. HubSpot's replyTo is the email's
+// "From address".
+var sender = map[string]any{"fromName": "SKE Releases", "replyTo": "releases@syntasso.io"}
+
 // Layout is the drag-and-drop content a digest email is built from:
 // email-layout.json in this module.
 type Layout struct {
@@ -106,6 +110,7 @@ func (c Client) CreateDraft(ctx context.Context, d Draft) (string, error) {
 		"name":         d.Name,
 		"subject":      d.Subject,
 		"templatePath": d.Layout.templatePath,
+		"from":         sender,
 	}, &created)
 	if err != nil {
 		return "", fmt.Errorf("creating the email: %w", err)
@@ -154,13 +159,13 @@ func (c Client) EmailStatus(ctx context.Context, id string) (EmailStatus, error)
 	return EmailStatus{State: email.State, PublishDate: email.PublishDate}, nil
 }
 
-// UpdateDraft replaces an existing email's draft subject and whole body. The
-// email's name is left as it is.
+// UpdateDraft replaces an existing email's draft sender, subject and whole
+// body. The email's name is left as it is.
 func (c Client) UpdateDraft(ctx context.Context, id string, d Draft) error {
 	content, err := d.Layout.withBody(d.HTML)
 	if err == nil {
 		err = c.do(ctx, http.MethodPatch, "/marketing/v3/emails/"+id+"/draft",
-			map[string]any{"subject": d.Subject, "content": content}, nil)
+			map[string]any{"from": sender, "subject": d.Subject, "content": content}, nil)
 	}
 	if err != nil {
 		return fmt.Errorf("updating email %s: %w", id, err)

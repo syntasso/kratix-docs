@@ -110,6 +110,7 @@ var _ = Describe("Client.CreateDraft", func() {
 			"name":         "SKE release digest 2026-11-10",
 			"subject":      "SKE release updates: Portal Patch",
 			"templatePath": "@hubspot/email/dnd/plain_text.html",
+			"from":         map[string]any{"fromName": "SKE Releases", "replyTo": "releases@syntasso.io"},
 		}))
 	})
 
@@ -289,6 +290,7 @@ var _ = Describe("Client.UpdateDraft", func() {
 		Expect(patch.Path).To(Equal("/marketing/v3/emails/511778652367/draft"))
 		Expect(patch.Body["subject"]).To(Equal("SKE release updates: Portal Patch, SKE GUI"))
 		Expect(patch.Body).NotTo(HaveKey("name"))
+		Expect(patch.Body["from"]).To(Equal(map[string]any{"fromName": "SKE Releases", "replyTo": "releases@syntasso.io"}))
 		widgets := patch.Body["content"].(map[string]any)["widgets"].(map[string]any)
 		Expect(widgets).To(HaveKey("logo"))
 		body := widgets["module-0-0-0"].(map[string]any)["body"].(map[string]any)
