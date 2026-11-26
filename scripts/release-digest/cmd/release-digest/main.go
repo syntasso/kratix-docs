@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -216,14 +217,27 @@ type draftResult struct {
 	recordChanged                  bool
 }
 
-// emailStates asks HubSpot for the state of every email in the record.
+// emailStates asks HubSpot for the state of every email the record's releases
+// point to, and of every digest that still has a hold-end ping scheduled, so a
+// digest that no release points to any more can still have its ping cancelled.
 func emailStates(ctx context.Context, client hubspot.Client, record digest.Record) (map[string]digest.EmailState, error) {
-	states := map[string]digest.EmailState{}
+	ids := []string{}
 	for _, r := range record.Releases {
-		if r.DigestEmailID == nil || *r.DigestEmailID == "" {
-			continue
+		if r.DigestEmailID != nil && *r.DigestEmailID != "" {
+			ids = append(ids, *r.DigestEmailID)
 		}
-		id := *r.DigestEmailID
+	}
+	pinged := []string{}
+	for id, d := range record.Digests {
+		if d.SlackScheduledMessageID != "" {
+			pinged = append(pinged, id)
+		}
+	}
+	sort.Strings(pinged)
+	ids = append(ids, pinged...)
+
+	states := map[string]digest.EmailState{}
+	for _, id := range ids {
 		if _, done := states[id]; done {
 			continue
 		}
