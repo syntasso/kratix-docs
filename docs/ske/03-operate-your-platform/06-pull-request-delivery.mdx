@@ -199,16 +199,18 @@ Merge the pull request. Within the
 
 ## Review a change
 
-Each change to a request gets its own pull request, opened from a
-`kratix/<WORKPLACEMENT_NAME>` branch into the Destination's branch.
+Each change to a request gets its own pull request for each Destination and
+pipeline, opened from a `kratix/<WORKPLACEMENT_NAME>` branch into the
+Destination's branch. Its title starts with `Kratix: deliver` or `Kratix:
+remove`.
 
 <Tabs className="boxedTabs" groupId="gitProvider">
 <TabItem value="github" label="GitHub">
 
 - **Merge it** to write the change to the Destination's branch.
-- **Close it without merging** to reject the change. The request fails, and if
-  the pull request was closed with **Close with comment**, the comment is quoted
-  in the `STATUS` of the request:
+- **Close it without merging** to reject the change. SKE marks the request as
+  rejected, and if the pull request was closed with **Close with comment**, the
+  comment is quoted in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
@@ -219,9 +221,9 @@ Each change to a request gets its own pull request, opened from a
 <TabItem value="azure" label="Azure DevOps">
 
 - **Complete** it to write the change to the Destination's branch.
-- **Abandon** it to reject the change. The request fails, and if you comment on
-  the pull request within a minute of abandoning it, before or after, the
-  comment is quoted in the `STATUS` of the request:
+- **Abandon** it to reject the change. SKE marks the request as rejected, and if
+  you comment on the pull request within a minute of abandoning it, before or
+  after, the comment is quoted in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
@@ -232,9 +234,9 @@ Each change to a request gets its own pull request, opened from a
 <TabItem value="gitlab" label="GitLab">
 
 - **Merge** it to write the change to the Destination's branch.
-- **Close merge request** to reject the change. The request fails, and if you
-  comment on the merge request within a minute of closing it, before or after,
-  the comment is quoted in the `STATUS` of the request:
+- **Close merge request** to reject the change. SKE marks the request as
+  rejected, and if you comment on the merge request within a minute of closing
+  it, before or after, the comment is quoted in the `STATUS` of the request:
 
   ```text
   NAME    MESSAGE              STATUS
@@ -251,7 +253,8 @@ the request or the Promise produces different files, or when you retry.
 
 Do not commit to the `kratix/<WORKPLACEMENT_NAME>` branches or edit SKE's files
 on the Destination's branch. SKE replaces those commits, or opens a pull request
-to undo them. Change the Promise or the request instead.
+to undo them the next time it writes the request. Change the Promise or the
+request instead.
 
 :::
 
@@ -267,11 +270,16 @@ kubectl label works -n <NAMESPACE> \
   kratix.io/redeliver=true
 ```
 
+SKE removes the label once it has acted on it. For what SKE does in each case,
+see the [pull request delivery
+reference](/ske/reference/pull-request-delivery#how-ske-handles-pull-requests).
+
 ## Delete a request
 
 Deleting a request also opens a pull request to remove its files from the State
-Store. The request is only removed when that pull request is merged. The
-request's status shows the URL of the pull request:
+Store, after the Promise's delete workflow finishes. The request is only removed
+when that pull request is merged. The request's status shows the URL of the pull
+request:
 
 <Tabs className="boxedTabs" groupId="gitProvider">
 <TabItem value="github" label="GitHub">

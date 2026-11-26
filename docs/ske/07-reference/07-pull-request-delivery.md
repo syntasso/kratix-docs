@@ -94,13 +94,23 @@ as `spec.url`.
 - **Removing the `delivery` block** makes SKE write every request straight to
   the Destination's branch again, including requests waiting for approval or
   rejected. A rejected removal stays rejected (see [Deleting](#deleting)). SKE
-  does not close the pull requests that were open. You must close them yourself.
+  does not close the pull requests that were open. You must close them yourself,
+  because merging one later writes files that may no longer match the request.
+  SKE records a `DeliveryModeChanged` warning event that links each earlier pull
+  request. To find the ones still open, list them:
+
+  ```bash
+  kubectl get events --all-namespaces --field-selector reason=DeliveryModeChanged
+  ```
 
 ## Status
 
 The request's `STATUS` column shows a summary of the change, cut to 120
-characters. `kubectl describe` shows the full text in the `Reconciled` and
-`WorksSucceeded` conditions.
+characters. A request has one pull request for each Destination and pipeline.
+When it has more than one, `STATUS` names the first and adds `(+N more)`.
+
+The cut can remove the link, or part of it. This happens most on Azure DevOps,
+whose links are long, and for a rejected removal.
 
 | `STATUS` | Meaning |
 | --- | --- |
@@ -144,21 +154,51 @@ Destination's branch, and checks it every `checkInterval`. Azure DevOps calls a
 merged pull request **completed**, and one closed without merging **abandoned**.
 GitLab calls a pull request a **merge request**.
 
+SKE opens one pull request for each Destination and pipeline. Its title is one
+of:
+
+| Title | For |
+| --- | --- |
+| `Kratix: deliver <PROMISE> <NAMESPACE>/<NAME> to <DESTINATION>` | A request's files |
+| `Kratix: remove <PROMISE> <NAMESPACE>/<NAME> from <DESTINATION>` | Removing a request's files |
+| `Kratix: deliver <PROMISE> dependencies to <DESTINATION>` | A Promise's dependencies |
+| `Kratix: remove <PROMISE> dependencies from <DESTINATION>` | Removing a Promise's dependencies |
+
+The title does not name the pipeline, so a request with two pipelines writing to
+the same Destination has two pull requests with the same title. The description
+names the Destination, Promise, request and pipeline.
+
 | When | SKE |
 | --- | --- |
 | The pull request is merged | Marks the change as done, and runs the request's next pipeline. |
 | The pull request is closed without merging | Marks the request as rejected, and does not run its later pipelines. It does not open a pull request for the same files again until you retry. |
 | The request changes and produces different files | Closes the open pull request and opens a new one. Reviews do not carry over. |
 | The request changes but produces the same files | Keeps the open pull request and its reviews. |
-| The request changes back to what is already merged | Closes the pull request, because it is no longer needed. The request becomes ready. |
+| The request changes back to what is already merged | Closes the pull request, because the request changed. The request becomes ready. |
 | The pull request has merge conflicts | Rebuilds it on top of the latest Destination's branch, keeping its number and link. Depending on your branch rules, existing approvals may be dismissed. See [Rebuilding a pull request](#rebuilding-a-pull-request). |
 | Someone changes a `kratix/<WORKPLACEMENT_NAME>` branch | Overrides the changes. |
-| Someone changes SKE's files on the Destination's branch | Opens a new pull request to put them back. |
+| Someone changes SKE's files on the Destination's branch | Opens a new pull request to put them back the next time it writes the request: when the request or its Promise changes, at the [reconciliation interval](/main/reference/kratix-config/config#reconciliationinterval-default-10h) (every 10 hours by default), or when you label the request with `kratix.io/manual-reconciliation=true`. |
 
 To retry a rejected change, label the request's Work with
-`kratix.io/redeliver=true`. After a rejected pull request, SKE opens a new one.
-After a rejected removal, it opens a new removal pull request. Otherwise it does
-nothing, unless the files on the Destination's branch have changed.
+`kratix.io/redeliver=true`. SKE removes the label once it has acted on it. For
+each Destination:
+
+- After a rejected pull request, SKE opens a new one.
+- After a rejected removal, it opens a new removal pull request.
+- If a pull request is already open, it keeps that pull request and its reviews.
+- Otherwise it does nothing, unless the files on the Destination's branch have
+  changed.
+
+### When SKE closes a pull request
+
+SKE never merges a pull request, but it closes one in these cases, and leaves a
+comment that says why:
+
+| Comment | When |
+| --- | --- |
+| `Kratix closed this pull request because the request changed.` | The request changed. If the change produces new files, a second comment links the pull request that replaces it: `Superseded by <URL>`. |
+| `Kratix closed this pull request because these files are being removed from the Destination.` | The request was deleted while the pull request was open. If a removal pull request replaces it, a second comment links it: `Superseded by <URL>`. |
+| `Kratix closed this pull request because the target branch already has these files, so there is nothing left to review.` | The Destination's branch already has the pull request's files, for example because they were merged some other way. |
 
 ### Rebuilding a pull request {#rebuilding-a-pull-request}
 
@@ -181,10 +221,16 @@ approvals stay, and whether SKE can push at all:
 
 ## Deleting
 
-Deleting a **request** opens a pull request that removes its files from the
-Destination's branch. The request is only removed when that pull request is
-merged. If the request still has an open pull request, SKE closes it. If none of
-the request's files were ever merged, the request is removed straight away.
+Deleting a **request** first runs the Promise's delete workflow, if it has one.
+Once that finishes, SKE opens a pull request that removes the request's files
+from the Destination's branch. The request is only removed when that pull
+request is merged. If the request still has an open pull request, SKE closes it.
+If none of the request's files were ever merged, the request is removed as soon
+as its delete workflow finishes.
+
+A rejected removal does not undo the delete workflow. Anything the workflow
+cleaned up outside the cluster stays cleaned up, even though the request's
+workloads keep running.
 
 Deleting a **Promise** waits for the removal pull request of every request, and one
 rejected removal keeps the Promise. 
