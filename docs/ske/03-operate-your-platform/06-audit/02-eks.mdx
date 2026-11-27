@@ -462,8 +462,11 @@ import GrafanaDashboardDark from "./eks-grafana-dashboard-dark.png"
   `kubectl auth whoami -o yaml` to see which fields your cluster gives you.
   With IAM Identity Center, for example, `extra.sessionName` is often the
   user's username.
-- **Some changes have no user.** For example, deletes through GitOps. See
+- **Some changes have no user.** For example, changes made while the SKE
+  Platform Manager is unreachable. See
   [What is not recorded](/ske/operations/audit/requester#what-is-not-recorded).
+- **Deletes through GitOps name the GitOps tool's service account**, not a
+  person, so a count of users includes it.
 
 ## Related material
 
