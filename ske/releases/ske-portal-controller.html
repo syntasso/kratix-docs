@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.3828f343.css">
-<script src="/assets/js/runtime~main.441380c8.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.a56f86f5.js" defer="defer"></script>
 <script src="/assets/js/main.0fddf40f.js" defer="defer"></script>
 </head>
 <body>
@@ -36,10 +36,14 @@
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/</span><br></div></code></pre></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="release-notes">Release Notes<a href="#release-notes" class="hash-link" aria-label="Direct link to Release Notes" title="Direct link to Release Notes" translate="no">​</a></h2>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v014">v0.14<a href="#v014" class="hash-link" aria-label="Direct link to v0.14" title="Direct link to v0.14" translate="no">​</a></h3>
-<p>Latest version: <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.14.0/" target="_blank" rel="noopener noreferrer" class="">v0.14.0</a> (2026-11-26), released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.125.0/" target="_blank" rel="noopener noreferrer" class="">version 0.125.0</a></p>
+<p>Latest version: <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.14.1/" target="_blank" rel="noopener noreferrer" class="">v0.14.1</a> (2026-11-26), released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.126.0/" target="_blank" rel="noopener noreferrer" class="">version 0.126.0</a></p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="features">Features<a href="#features" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h4>
 <ul>
 <li class="">Cortex Create and Update workflows now reject values that break a Promise&#x27;s <code>minLength</code> or <code>maxLength</code> on top-level <code>spec</code> string fields. The requester sees the reason under the field, and nothing is committed to Git. See <a class="" href="/ske/integrations/portal-controller/cortex/design-your-promise-api">Designing your Promise API for Cortex</a>.</li>
+</ul>
+<p>Earlier v0.14 versions. Patches only add dependency and base image updates:</p>
+<ul>
+<li class=""><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.14.0/" target="_blank" rel="noopener noreferrer" class="">v0.14.0</a> (2026-11-26), released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.125.0/" target="_blank" rel="noopener noreferrer" class="">version 0.125.0</a></li>
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v013">v0.13<a href="#v013" class="hash-link" aria-label="Direct link to v0.13" title="Direct link to v0.13" translate="no">​</a></h3>
 <p>Latest version: <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.13.0/" target="_blank" rel="noopener noreferrer" class="">v0.13.0</a> (2026-11-25), released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.123.0/" target="_blank" rel="noopener noreferrer" class="">version 0.123.0</a></p>
@@ -70,7 +74,7 @@
 <ul>
 <li class=""><a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.11.0/" target="_blank" rel="noopener noreferrer" class="">v0.11.0</a> (2026-11-19), released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.117.0/" target="_blank" rel="noopener noreferrer" class="">version 0.117.0</a></li>
 </ul>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v010">v0.10<a href="#v010" class="hash-link" aria-label="Direct link to v0.10" title="Direct link to v0.10" translate="no"> ​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="v010">v0.10<a href="#v010" class="hash-link" aria-label="Direct link to v0.10" title="Direct link to v0.10" translate="no">​</a></h3>
 <p>Latest version: <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-portal-controller/v0.10.8/" target="_blank" rel="noopener noreferrer" class="">v0.10.8</a> (2026-11-18), released via the SKE Operator Helm Chart <a href="http://syntasso-enterprise-releases.s3-website.eu-west-2.amazonaws.com/#ske-operator-helm-chart/0.116.0/" target="_blank" rel="noopener noreferrer" class="">version 0.116.0</a></p>
 <p><strong>Note:</strong> This version of the Portal Controller is only compatible with SKE versions <code>v0.64.0</code> or above. See <a class="" href="/ske/releases/compatibility">Supported versions and compatibility</a>.</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="bug-fixes-1">Bug Fixes<a href="#bug-fixes-1" class="hash-link" aria-label="Direct link to Bug Fixes" title="Direct link to Bug Fixes" translate="no">​</a></h4>
