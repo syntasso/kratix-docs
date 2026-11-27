@@ -36,6 +36,10 @@
     {
       "id": "ske-portal-controller@0.15.0",
       "digestEmailId": "525300101327"
+    },
+    {
+      "id": "ske-portal-controller@0.15.1",
+      "digestEmailId": "525300101327"
     }
   ],
   "digests": {
@@ -47,8 +51,8 @@
     "525300101327": {
       "slackChannel": "C04BZJ7DB09",
       "slackMessageTs": "1795710948.783269",
-      "slackScheduledMessageId": "Q0CMBHPK4UT",
-      "holdEndsAt": "2026-11-30T11:14:55Z"
+      "slackScheduledMessageId": "Q0CMP346CUC",
+      "holdEndsAt": "2026-11-30T11:30:00Z"
     }
   }
 }
