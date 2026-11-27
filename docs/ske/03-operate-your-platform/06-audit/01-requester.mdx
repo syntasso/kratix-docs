@@ -235,7 +235,8 @@ by service account argocd/argocd-application-controller.
 ```
 
 Deletes are not checked, because a GitOps delete removes the file from Git, so
-it cannot carry the annotation.
+it cannot carry the annotation. SKE records the service account that made the
+delete instead: see [the audit annotation](#the-audit-annotation).
 
 SKE checks only that the annotation is set, so a value left from an earlier
 change passes. SKE lets a request through without checking it:
@@ -297,6 +298,11 @@ Its value depends on who made the change:
 |---|---|
 | A user, for example with `kubectl` | The user's identity, read from [`spec.attribution.userInfoField`](#user-info-field) |
 | A GitOps tool listed in [`spec.attribution.requireAnnotationsFrom.serviceAccounts`](#require-last-changed-by) | The `kratix.io/last-changed-by` annotation the portal set on the request |
+| A listed GitOps tool deleting a request | The tool's service account, for example `system:serviceaccount:argocd:argocd-application-controller` |
+
+A listed GitOps tool's delete names the service account, not a person. The
+request's own `kratix.io/last-changed-by` names whoever last changed it, who is
+not necessarily who removed it from Git.
 
 :::note
 
@@ -309,8 +315,12 @@ The same goes for any username starting with `system:` or with one of
 
 ### What is not recorded
 
-- **Deletes through GitOps.** The request's file is removed from Git, so
-  nothing says who removed it.
+- **Who asked for a GitOps delete.** The request's file is removed from Git,
+  so the audit log names only the GitOps tool's service account.
+- **Changes from a listed GitOps tool that change nothing.** GitOps tools apply
+  every file again whenever anything in their repository changes, and dry-run
+  applies to compare Git with the cluster. Neither changes the request, so SKE
+  does not name a user on them.
 - **Changes from a GitOps tool that is not listed** in
   `spec.attribution.requireAnnotationsFrom.serviceAccounts`.
 - **Changes made while the SKE Platform Manager is unreachable.** Kubernetes

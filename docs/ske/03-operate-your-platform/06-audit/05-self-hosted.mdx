@@ -580,8 +580,11 @@ import DashboardDark from "./self-hosted-grafana-dashboard-dark.png"
   `kubectl auth whoami -o yaml` to see which fields your cluster gives you,
   and set [`userInfoField`](/ske/operations/audit/requester#user-info-field)
   to a field that is different for each user.
-- **Some changes have no user.** For example, deletes through GitOps. See
+- **Some changes have no user.** For example, changes made while the SKE
+  Platform Manager is unreachable. See
   [What is not recorded](/ske/operations/audit/requester#what-is-not-recorded).
+- **Deletes through GitOps name the GitOps tool's service account**, not a
+  person, so a count of users includes it.
 
 ## Related material
 
