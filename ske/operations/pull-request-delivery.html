@@ -18,7 +18,7 @@
 
 
 <script src="https://app.termly.io/resource-blocker/6f1bb777-b1e3-40d9-a340-e80f132710f0?autoBlock=on"></script><link rel="stylesheet" href="/assets/css/styles.3828f343.css">
-<script src="/assets/js/runtime~main.a56f86f5.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9a832829.js" defer="defer"></script>
 <script src="/assets/js/main.0fddf40f.js" defer="defer"></script>
 </head>
 <body>
@@ -88,16 +88,17 @@ reference</a>.</p>
 <a class="" href="/ske/reference/pull-request-delivery#check-interval"><code>checkInterval</code></a> (default:
 30 seconds), the request is ready and any later pipelines run.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="review-a-change">Review a change<a href="#review-a-change" class="hash-link" aria-label="Direct link to Review a change" title="Direct link to Review a change" translate="no">​</a></h2>
-<p>Each change to a request gets its own pull request, opened from a
-<code>kratix/&lt;WORKPLACEMENT_NAME&gt;</code> branch into the Destination&#x27;s branch.</p>
+<p>Each change to a request gets its own pull request for each Destination and
+pipeline, opened from a <code>kratix/&lt;WORKPLACEMENT_NAME&gt;</code> branch into the
+Destination&#x27;s branch. Its title starts with <code>Kratix: deliver</code> or <code>Kratix: remove</code>.</p>
 <div class="theme-tabs-container tabs-container tabList__CuJ"><ul role="tablist" aria-orientation="horizontal" class="tabs boxedTabs"><li role="tab" tabindex="0" aria-selected="true" class="tabs__item tabItem_LNqP tabs__item--active">GitHub</li><li role="tab" tabindex="-1" aria-selected="false" class="tabs__item tabItem_LNqP">Azure DevOps</li><li role="tab" tabindex="-1" aria-selected="false" class="tabs__item tabItem_LNqP">GitLab</li></ul><div class="margin-top--md"><div role="tabpanel" class="tabItem_Ymn6"><ul>
 <li class="">
 <p><strong>Merge it</strong> to write the change to the Destination&#x27;s branch.</p>
 </li>
 <li class="">
-<p><strong>Close it without merging</strong> to reject the change. The request fails, and if
-the pull request was closed with <strong>Close with comment</strong>, the comment is quoted
-in the <code>STATUS</code> of the request:</p>
+<p><strong>Close it without merging</strong> to reject the change. SKE marks the request as
+rejected, and if the pull request was closed with <strong>Close with comment</strong>, the
+comment is quoted in the <code>STATUS</code> of the request:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">NAME    MESSAGE              STATUS</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">redis   Redis provisioned    Rejected in https://github.com/acme/platform-state/pull/42: &quot;not during the freeze&quot;</span><br></div></code></pre></div></div>
 </li>
 </ul></div><div role="tabpanel" class="tabItem_Ymn6" hidden=""><ul>
@@ -105,9 +106,9 @@ in the <code>STATUS</code> of the request:</p>
 <p><strong>Complete</strong> it to write the change to the Destination&#x27;s branch.</p>
 </li>
 <li class="">
-<p><strong>Abandon</strong> it to reject the change. The request fails, and if you comment on
-the pull request within a minute of abandoning it, before or after, the
-comment is quoted in the <code>STATUS</code> of the request:</p>
+<p><strong>Abandon</strong> it to reject the change. SKE marks the request as rejected, and if
+you comment on the pull request within a minute of abandoning it, before or
+after, the comment is quoted in the <code>STATUS</code> of the request:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">NAME    MESSAGE              STATUS</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">redis   Redis provisioned    Rejected in https://dev.azure.com/acme/platform/_git/platform-state/pullrequest/42: &quot;not during the freeze&quot;</span><br></div></code></pre></div></div>
 </li>
 </ul></div><div role="tabpanel" class="tabItem_Ymn6" hidden=""><ul>
@@ -115,9 +116,9 @@ comment is quoted in the <code>STATUS</code> of the request:</p>
 <p><strong>Merge</strong> it to write the change to the Destination&#x27;s branch.</p>
 </li>
 <li class="">
-<p><strong>Close merge request</strong> to reject the change. The request fails, and if you
-comment on the merge request within a minute of closing it, before or after,
-the comment is quoted in the <code>STATUS</code> of the request:</p>
+<p><strong>Close merge request</strong> to reject the change. SKE marks the request as
+rejected, and if you comment on the merge request within a minute of closing
+it, before or after, the comment is quoted in the <code>STATUS</code> of the request:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">NAME    MESSAGE              STATUS</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">redis   Redis provisioned    Rejected in https://gitlab.com/acme/platform-state/-/merge_requests/42: &quot;not during the freeze&quot;</span><br></div></code></pre></div></div>
 </li>
 </ul></div></div></div>
@@ -125,16 +126,21 @@ the comment is quoted in the <code>STATUS</code> of the request:</p>
 the request or the Promise produces different files, or when you retry.</p>
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>Don&#x27;t change SKE&#x27;s branches by hand</div><div class="admonitionContent_BuS1"><p>Do not commit to the <code>kratix/&lt;WORKPLACEMENT_NAME&gt;</code> branches or edit SKE&#x27;s files
 on the Destination&#x27;s branch. SKE replaces those commits, or opens a pull request
-to undo them. Change the Promise or the request instead.</p></div></div>
+to undo them the next time it writes the request. Change the Promise or the
+request instead.</p></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="retry-a-rejected-change">Retry a rejected change<a href="#retry-a-rejected-change" class="hash-link" aria-label="Direct link to Retry a rejected change" title="Direct link to Retry a rejected change" translate="no">​</a></h2>
 <p>To force SKE to recreate a pull request, for example when the previous one was
 closed without being merged, label the request&#x27;s Work with
 <code>kratix.io/redeliver=true</code>:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">kubectl label works </span><span class="token parameter variable" style="color:#36acaa">-n</span><span class="token plain"> </span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">NAMESPACE</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">\</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token parameter variable" style="color:#36acaa">-l</span><span class="token plain"> kratix.io/promise-name</span><span class="token operator" style="color:#393A34">=</span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">PROMISE_NAME</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain">,kratix.io/resource-name</span><span class="token operator" style="color:#393A34">=</span><span class="token operator" style="color:#393A34">&lt;</span><span class="token plain">RESOURCE_NAME</span><span class="token operator" style="color:#393A34">&gt;</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">\</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  kratix.io/redeliver</span><span class="token operator" style="color:#393A34">=</span><span class="token plain">true</span><br></div></code></pre></div></div>
+<p>SKE removes the label once it has acted on it. For what SKE does in each case,
+see the <a class="" href="/ske/reference/pull-request-delivery#how-ske-handles-pull-requests">pull request delivery
+reference</a>.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="delete-a-request">Delete a request<a href="#delete-a-request" class="hash-link" aria-label="Direct link to Delete a request" title="Direct link to Delete a request" translate="no">​</a></h2>
 <p>Deleting a request also opens a pull request to remove its files from the State
-Store. The request is only removed when that pull request is merged. The
-request&#x27;s status shows the URL of the pull request:</p>
+Store, after the Promise&#x27;s delete workflow finishes. The request is only removed
+when that pull request is merged. The request&#x27;s status shows the URL of the pull
+request:</p>
 <div class="theme-tabs-container tabs-container tabList__CuJ"><ul role="tablist" aria-orientation="horizontal" class="tabs boxedTabs"><li role="tab" tabindex="0" aria-selected="true" class="tabs__item tabItem_LNqP tabs__item--active">GitHub</li><li role="tab" tabindex="-1" aria-selected="false" class="tabs__item tabItem_LNqP">Azure DevOps</li><li role="tab" tabindex="-1" aria-selected="false" class="tabs__item tabItem_LNqP">GitLab</li></ul><div class="margin-top--md"><div role="tabpanel" class="tabItem_Ymn6"><div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">NAME    MESSAGE              STATUS</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">redis   Redis provisioned    Waiting for approval to remove: https://github.com/acme/platform-state/pull/57</span><br></div></code></pre></div></div></div><div role="tabpanel" class="tabItem_Ymn6" hidden=""><div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">NAME    MESSAGE              STATUS</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">redis   Redis provisioned    Waiting for approval to remove: https://dev.azure.com/acme/platform/_git/platform-state/pullrequest/57</span><br></div></code></pre></div></div></div><div role="tabpanel" class="tabItem_Ymn6" hidden=""><div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">NAME    MESSAGE              STATUS</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">redis   Redis provisioned    Waiting for approval to remove: https://gitlab.com/acme/platform-state/-/merge_requests/57</span><br></div></code></pre></div></div></div></div></div>
 <p>If a reviewer closes the removal pull request without merging it, the workloads
 keep running and the request stays on the platform. To retry by opening a new
